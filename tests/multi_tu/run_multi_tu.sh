@@ -109,6 +109,28 @@ run_case() {
     if ! clang -std=c99 -fblocks -w "${INCS[@]}" \
             "${objs[@]}" "$GALD_INC/gald/runtime.c" \
             -o "$out/$name.bin" > "$out/$name.link.log" 2>&1; then
+        # A negative case may legitimately fail at LINK time. Under rule R2 a
+        # class's metadata is emitted strong by the TU that owns its
+        # @implementation, so two TUs implementing the same class are a
+        # duplicate symbol — a louder, earlier diagnostic than the runtime
+        # __sig abort. Honour EXPECT_FAIL here too, or the case would report a
+        # link failure as a regression.
+        if [[ -f "$dir/EXPECT_FAIL" ]]; then
+            local needle
+            if [[ -f "$dir/EXPECT_FAIL_MATCH" ]]; then
+                needle="$(cat "$dir/EXPECT_FAIL_MATCH")"
+                if grep -qF "$needle" "$out/$name.link.log"; then
+                    echo "PASS  $name (failed as expected at link: $(head -1 "$out/$name.link.log" | cut -c1-60))"
+                    PASS=$((PASS+1)); return
+                fi
+                echo "FAIL  $name (link failed, but without the expected diagnostic)"
+                echo "      expected to find: $needle"
+                sed 's/^/      /' "$out/$name.link.log" | head -12
+                FAIL=$((FAIL+1)); FAILED_CASES+=("$name"); return
+            fi
+            echo "PASS  $name (failed as expected at link)"
+            PASS=$((PASS+1)); return
+        fi
         echo "FAIL  $name (link)"
         sed 's/^/      /' "$out/$name.link.log" | head -12
         FAIL=$((FAIL+1)); FAILED_CASES+=("$name"); return

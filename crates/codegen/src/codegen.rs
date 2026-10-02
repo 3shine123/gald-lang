@@ -386,6 +386,17 @@ pub struct CgUnit {
     /// linker may keep a client's NULL-filled stub and dispatch segfaults.
     /// See `doc/stable_slots_plan.md` §8.
     pub strong_metadata: bool,
+    /// Classes whose `@implementation` sits in **this** TU's main file (not in
+    /// an imported header) — the translation unit that owns them, per rule R2
+    /// of `doc/stable_slots_plan.md`.
+    ///
+    /// An owner's metadata is emitted **strong**, so another TU's weak stub can
+    /// never displace it; and if a second TU also implements the class in its
+    /// own main file, the link fails with a `duplicate symbol` instead of
+    /// silently picking one of two tables. A class whose `@implementation`
+    /// arrives through an `#import` stays weak — that is what keeps the
+    /// self-contained mode (every TU inlines Foundation) merging as before.
+    pub owned_classes: std::collections::HashSet<String>,
 }
 
 #[derive(Debug, Clone)]
@@ -5259,7 +5270,7 @@ method_names: info.method_names,
     // `no_arc` stays false here: this entry point feeds the header/prototype
     // paths, which never emit the ARC dealloc wrappers (that decision belongs
     // to the pipeline, which sets the flag on its own CgUnit).
-    let mut unit = CgUnit { decls, filename: ast.filename.clone(), c_headers: Vec::new(), selectors, classes, global_instance_method_names, struct_eq_tags: Vec::new(), no_arc: false, strong_metadata: false };
+    let mut unit = CgUnit { decls, filename: ast.filename.clone(), c_headers: Vec::new(), selectors, classes, global_instance_method_names, struct_eq_tags: Vec::new(), no_arc: false, strong_metadata: false, owned_classes: std::collections::HashSet::new() };
     // The authoritative record of which method function bodies exist: every
     // `CgDeclData::Function` with a body. This covers paths that do not go
     // through `ClassInfo::method_bodies` — notably @property-synthesised
@@ -7245,7 +7256,9 @@ pub fn emit_unit_with_headers(unit: &CgUnit, c_headers: &[String], search_dirs: 
         if comments {
             let _ = writeln!(out, "/* VTable instance: {} */", cm.class_name);
         }
-        let _ = write!(out, "{}struct gald_vtable {} = {{\n", meta_weak, meta_symbol("VTABLE_", &flat_cn));
+        // R2: the TU that owns the @implementation emits strong metadata.
+        let cw = if unit.strong_metadata || unit.owned_classes.contains(&cm.class_name) { "" } else { "__attribute__((weak)) " };
+        let _ = write!(out, "{}struct gald_vtable {} = {{\n", cw, meta_symbol("VTABLE_", &flat_cn));
         // Stamp the layout signature this instance was built for, so whichever
         // copy of this instance wins the linker's weak merge also carries the
         // layout it was actually initialized against.
@@ -7286,7 +7299,8 @@ pub fn emit_unit_with_headers(unit: &CgUnit, c_headers: &[String], search_dirs: 
         if comments {
             let _ = writeln!(out, "/* Meta vtable instance: {} */", cm.class_name);
         }
-        let _ = write!(out, "{}struct {} {}_inst = {{\n", meta_weak, meta_symbol("META_VTABLE_", &name_flat(&cm.class_name)), meta_symbol("META_VTABLE_", &name_flat(&cm.class_name)));
+        let cw = if unit.strong_metadata || unit.owned_classes.contains(&cm.class_name) { "" } else { "__attribute__((weak)) " };
+        let _ = write!(out, "{}struct {} {}_inst = {{\n", cw, meta_symbol("META_VTABLE_", &name_flat(&cm.class_name)), meta_symbol("META_VTABLE_", &name_flat(&cm.class_name)));
         for (mname, owner) in &class_entries {
             let _ = write!(out, "    .{} = {}_{},\n", mname, owner, mname);
         }
@@ -7302,7 +7316,8 @@ pub fn emit_unit_with_headers(unit: &CgUnit, c_headers: &[String], search_dirs: 
         if comments {
             let _ = writeln!(out, "/* +getClass for {} */", cm.class_name);
         }
-        let _ = write!(out, "{}NFClass * {}(NFClass * self, SEL _cmd) {{\n", meta_weak, meta_symbol("GETCLASS_", &name_flat(&cm.class_name)));
+        let cw = if unit.strong_metadata || unit.owned_classes.contains(&cm.class_name) { "" } else { "__attribute__((weak)) " };
+        let _ = write!(out, "{}NFClass * {}(NFClass * self, SEL _cmd) {{\n", cw, meta_symbol("GETCLASS_", &name_flat(&cm.class_name)));
         out.push_str("    (void)_cmd;\n");
         out.push_str("    return self;\n");
         out.push_str("}\n\n");
@@ -7762,6 +7777,7 @@ mod vtable_sig_tests {
             struct_eq_tags: Vec::new(),
             no_arc: false,
             strong_metadata: false,
+            owned_classes: std::collections::HashSet::new(),
         };
         // The emitter needs METHOD_METADATA populated; seed it once for this
         // test binary. `set` is idempotent from the test's point of view.
@@ -7808,6 +7824,7 @@ mod eh_runtime_include_tests {
             struct_eq_tags: Vec::new(),
             no_arc: false,
             strong_metadata: false,
+            owned_classes: std::collections::HashSet::new(),
         }
     }
 

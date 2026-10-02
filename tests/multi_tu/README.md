@@ -33,6 +33,23 @@ than a wrong-offset call. (`gald_metaInit` is the wrong place for that check: it
 is weak-merged, so only one TU's copy ever runs and would only ever compare its
 own layout against itself.)
 
+### Ownership (rule R2)
+
+Metadata for a class is emitted **strong** by the TU whose **main file** holds
+that class's `@implementation`, and weak in every other TU (a `@implementation`
+reaching a TU through `#import` does not confer ownership — that is the
+self-contained mode, where every TU inlines Foundation and the copies must keep
+merging). Consequences:
+
+* the owner's real table can never be displaced by another TU's stub, and
+* two TUs that both `@implementation` the same class in their own main files
+  are a **duplicate symbol at link time**.
+
+`09_layout_mismatch` is the case that exercises this: it used to be caught by
+the runtime `__sig` abort, and is now rejected earlier, at link. That is a
+louder diagnostic, not a weaker one, so `EXPECT_FAIL_MATCH` looks for
+`duplicate symbol`.
+
 ## Cases
 
 | Case | What it pins down |
@@ -45,7 +62,7 @@ own layout against itself.)
 | `06_protocol` | A class conforming to a protocol gets vtable slots for the protocol's required methods **even when the class does not redeclare them**. This needed a fix: the required methods used to be dropped after binding, so a header-only TU compiled a layout with fewer slots than the implementation TU. |
 | `07_arc` | Compile-time ARC insertion stays correct when the halves were transpiled separately — including a convenience-style `+1`-free return from the lib TU. |
 | `08_class_method` | `+` methods dispatch through `GALD_META_VTABLE_$_X`, a *second* per-class layout that must agree across the link independently of the instance vtable. |
-| `09_layout_mismatch` | **Negative case.** The lib `@implementation` adds a method the shared `.gh` never declares, so the two layouts differ. Must fail loudly and mention the diagnosis — the contract is "fails legibly", not merely "fails", so a case that crashed for an unrelated reason does not pass by accident. Marked with `EXPECT_FAIL` + `EXPECT_FAIL_MATCH`. |
+| `09_layout_mismatch` | **Negative case.** Both TUs `@implementation` the same class, so each owns it and the linker rejects the duplicate metadata (rule R2). Must fail loudly and mention the diagnosis — the contract is "fails legibly", not merely "fails", so a case that crashed for an unrelated reason does not pass by accident. Marked with `EXPECT_FAIL` + `EXPECT_FAIL_MATCH` (checked at link *and* at run). |
 
 ## Writing a case
 

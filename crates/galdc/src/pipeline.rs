@@ -417,6 +417,9 @@ impl Pipeline {
         // so a legal two-TU split does not produce disagreeing layouts.
         // See doc/stable_slots_plan.md (R1).
         let public_methods = collect_public_methods(&ast, filename, &pre.source_map);
+        // R2: the classes this TU owns (its `@implementation`s live in the main
+        // file). Their metadata is emitted strong, everyone else's stays weak.
+        let owned_classes = collect_owned_classes(&ast, filename, &pre.source_map);
         let mut cg = gald_codegen::ast_to_cg_unit_with_slots_ext(
             &ast, self.backend, slots.as_deref(), Some(&public_methods),
         );
@@ -425,6 +428,7 @@ impl Pipeline {
         cg.struct_eq_tags = struct_eq_tags;
         cg.no_arc = self.no_arc;
         cg.strong_metadata = self.strong_metadata;
+        cg.owned_classes = owned_classes;
         let c_code = emit_unit_with_headers(&cg, &pre.c_headers, &self.search_dirs, self.no_libc, self.backend, !self.no_comments, self.eh_checked);
 
         // Step 6.4: Write back the slots manifest (append-only): the compiled
@@ -586,6 +590,60 @@ fn collect_public_methods(
             }
         }
     }
+    set
+}
+
+/// Classes whose `@implementation` lives in **this** TU's main file — the
+/// translation unit that owns the class (`doc/stable_slots_plan.md`, rule R2).
+///
+/// Codegen emits an owner's metadata **strong**, so another TU's weak stub can
+/// never displace the real table; and if a second TU also implements the class
+/// in its own main file, the link fails with `duplicate symbol` instead of
+/// silently choosing one of two tables.
+///
+/// An `@implementation` that arrives through an `#import` is deliberately NOT
+/// owned: that is the self-contained mode, where every TU inlines Foundation
+/// and the repeated copies must keep merging weakly. Namespaced classes are
+/// walked too (their `::` is flattened by codegen, so the raw decl name is the
+/// key here).
+fn collect_owned_classes(
+    ast: &AstUnit,
+    main_file: &str,
+    map: &gald_cst::SourceMap,
+) -> std::collections::HashSet<String> {
+    use std::collections::HashSet;
+    fn walk(
+        decls: &[AstDecl],
+        main_file: &str,
+        map: &gald_cst::SourceMap,
+        set: &mut HashSet<String>,
+    ) {
+        for d in decls {
+            match &d.data {
+                AstDeclData::Namespace(inner) => walk(inner, main_file, map, set),
+                AstDeclData::Class { is_implementation: true, .. } => {
+                    let (file, _) = map.locate(d.line);
+                    // Mirror the "imported" test in collect_public_methods, so
+                    // the two agree on where a decl came from.
+                    let imported = !file.is_empty()
+                        && file != main_file
+                        && !file.ends_with(main_file)
+                        && !main_file.ends_with(&file);
+                    if !file.is_empty() && !imported {
+                        if let Some(name) = &d.name {
+                            set.insert(name.clone());
+                        }
+                    }
+                }
+                _ => {}
+            }
+        }
+    }
+    let mut set: HashSet<String> = HashSet::new();
+    if map.is_empty() || main_file.is_empty() {
+        return set;
+    }
+    walk(&ast.decls, main_file, map, &mut set);
     set
 }
 

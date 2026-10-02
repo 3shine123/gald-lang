@@ -85,12 +85,47 @@ else
     fi
 fi
 
+# ── 4. rule R2: two owners of the same class must not merge silently ──
+# No flag involved: ownership is derived from the main file, so two TUs that
+# both `@implementation` Widget are both owners and the link must reject them.
+cat > "$work/model.gh" <<'EOF'
+@interface Widget
+- (void)show;
+@end
+EOF
+cat > "$work/lib_a.gm" <<'EOF'
+#import "model.gh"
+@implementation Widget
+- (void)show { }
+@end
+EOF
+cat > "$work/lib_b.gm" <<'EOF'
+#import "model.gh"
+@implementation Widget
+- (void)show { }
+@end
+EOF
+cat > "$work/driver.gm" <<'EOF'
+#import "model.gh"
+int main() { Widget *w = 0; if (w) { [w show]; } return 0; }
+EOF
+if "$galdc" -rewrite-gald "$work/lib_a.gm" -I "$work" -I include -o "$work/a.c" > "$work/a.log" 2>&1 \
+   && "$galdc" -rewrite-gald "$work/lib_b.gm" -I "$work" -I include -o "$work/b.c" > "$work/b.log" 2>&1 \
+   && "$galdc" -rewrite-gald "$work/driver.gm" -I "$work" -I include -o "$work/driver.c" >> "$work/a.log" 2>&1; then
+    if clang -std=c99 -w "$work/a.c" "$work/b.c" "$work/driver.c" include/gald/runtime.c \
+            -I include -o "$work/dup_impl" > "$work/dup_impl.log" 2>&1; then
+        bad "4. two TUs owning the same class linked without error (R2 regression)"
+    elif grep -q "duplicate symbol" "$work/dup_impl.log"; then
+        ok "4. two TUs owning the same class are rejected with 'duplicate symbol' (R2)"
+    else
+        bad "4. link failed, but not with a duplicate-symbol diagnostic"
+        sed 's/^/      /' "$work/dup_impl.log" | tail -12
+    fi
+else
+    bad "4. could not transpile the two-owner case"
+    sed 's/^/      /' "$work/a.log" "$work/b.log" | tail -12
+fi
+
 echo "----"
 echo "strong-metadata: $pass passed, $fail failed"
-echo
-echo "note: two WEAK TUs that both '@implementation' the same class still merge"
-echo "      silently (method bodies and metadata are emitted weak by design —"
-echo "      crates/codegen/src/codegen.rs). Making that a loud error is the"
-echo "      deferred per-class-ownership rule (R2), not something this flag"
-echo "      changes; test 3 is the loud failure the flag does give you."
 exit $((fail > 0))

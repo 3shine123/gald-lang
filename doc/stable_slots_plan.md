@@ -35,7 +35,9 @@ gald: fatal: vtable layout mismatch across translation units.
 1. `tests/multi_tu/11_vtable_private_slots/` 正常运行并输出 `run=42`（届时删除该目录的
    `EXPECT_FAIL` 与 `EXPECT_FAIL_MATCH`）；
 2. `tests/multi_tu/09_layout_mismatch/` **继续** `EXPECT_FAIL` —— 两个 TU 各自实现同一个类且
-   方法集不同，那是真正非法的用法，必须继续大声报错；
+   方法集不同，那是真正非法的用法，必须继续大声报错；（R2 落地后该用例改在**链接期**以
+   `duplicate symbol` 大声失败，比运行期 `__sig` 中止更早、更明确，`EXPECT_FAIL_MATCH`
+   已相应更新。）
 3. 全部门槛不回归：`test_all` / `eh_matrix` / `arc_order` / `eh_diff` / trace / `clang_gcc_stress`。
 
 ## 3. 三条规则
@@ -50,13 +52,17 @@ gald: fatal: vtable layout mismatch across translation units.
 私有段在尾部是关键：**公共段内任意方法的 offset 在两侧 TU 中完全一致**。
 （manifest 模式下已有同样的规则：“Methods unknown to the manifest … are appended at the end”。）
 
-### R2 —— 实例归属：谁实现，谁生成
+### R2 —— 实例归属：谁实现，谁生成　✅ 已落地（2026-10-02，详见 §9）
 
-`GALD_VTABLE_$_X`、`GALD_CLASS_$_X` 等元数据只由**本 TU 拥有该类 `@implementation`** 的一方生成，
-其余 TU 只发 `extern` 声明。
+`GALD_VTABLE_$_X`、`GALD_META_VTABLE_$_X_inst`、`GALD_GETCLASS_$_X` 等元数据只由
+**拥有该类 `@implementation` 的 TU** 发**强符号**，其余 TU 发弱桩。
 
 否则：lib 的 `Widget` 实例（41 + `privateHelper`）会被 main 生成的实例（41 个字段）weak 合并覆盖，
 lib 自己的私有方法调用就会越界。
+
+「拥有」的判据最终定为：**该类的 `@implementation` 位于本 TU 的 main 文件**（不是 `#import`
+带进来的）。这样自包含模式下所有 Foundation 实现仍然是弱符号（多个 TU 重复的副本照旧合并），
+而两个 TU 都在各自 main 文件里实现同一个类 → **链接期 duplicate symbol**。
 
 ### R3 —— 签名校验面向公共段
 
@@ -78,7 +84,7 @@ lib 自己的私有方法调用就会越界。
 |---|---|---|
 | **A** | pipeline 收集「公共方法集」（来自导入文件的方法声明，用 `source_map` 判定），传入 codegen | 单元可读：打印集合内容 |
 | **B** | R1：`None` 分支改为「先字母序 sort，再稳定地把私有段排到尾部」 | 对比两个 TU 的 `struct gald_vtable`：公共段 offset 应一致 |
-| **C** | R2：元数据 / vtable 实例只由实现该类的 TU 生成 | `11_vtable_private_slots` 应能跑通（sig 校验此时可能仍需 D） |
+| **C** | R2：元数据 / vtable 实例只由实现该类的 TU 生成 | `11_vtable_private_slots` 应能跑通（sig 校验此时可能仍需 D）—— ✅ 已落地（见 §9） |
 | **D** | R3：sig 校验改为公共段 | 11 用例输出 `run=42`；09 用例仍 EXPECT_FAIL |
 | **E** | 删除 11 用例的 EXPECT_FAIL 标记，跑全套回归 | 全部门槛绿 |
 
@@ -191,9 +197,56 @@ sig：库 TU == 客户 TU（0xbe99f65a63e20021）
 > 工具：`Foundation.decl.gh` 引用的两个脚本已补入库
 > （`tools/make-decl-headers.sh`、`tools/build-foundation-lib.sh`）。建库**统一走脚本**——
 > 它自带 `-fstrong-metadata`，并用 `nm` 校验元数据的确是强符号（弱符号会让守卫直接失败）。
-> 保护测试：`tests/strong_metadata/run_strong_metadata_test.sh`（强符号 / 弱客户端链接 /
-> 双强符号必须 duplicate symbol 三项）。
+> 保护测试：`tests/strong_metadata/run_strong_metadata_test.sh`（四项：强符号 / 弱客户端链接 /
+> 双强符号必须 duplicate symbol / 两个所有者必须 duplicate symbol）。
 >
 > 顺带修掉一个与本计划无关的既有 ARC 缺陷：`full_syntax_test.gm` 的 intern 字符串
 > heap-use-after-free（`test_all` 里那唯一一个 `SUSPECT` 来源）→ 已修复，见
 > `doc/arc_intern_uaf.md`，回归守护 `tests/arc_intern/`。
+
+## 9. R2 落地：按类归属（2026-10-02）
+
+### 判据
+
+「拥有」= 该类的 `@implementation` 位于**本 TU 的 main 文件**（`source_map` 判定，
+`collect_owned_classes`，`crates/galdc/src/pipeline.rs`）。
+
+* `Pipeline::owned_classes` → `CgUnit::owned_classes`；
+* `emit_unit_with_headers` 的 vtable / meta-vtable / getClass 三个循环各自算
+  `cw = if strong_metadata || owned_classes.contains(class) { "" } else { weak }`。
+
+### 为什么判据必须是「main 文件」而不是「本 TU 里有 @implementation」
+
+自包含模式下 `#import <Foundation/Foundation.gh>` 会把 Foundation 的 `.gm` 内联进
+**每一个** TU。若「有 `@implementation` 就算拥有」，则每个 TU 都拥有 `NFString`，两边都发
+强符号 → `duplicate symbol`，现有 01–08 会全部链接失败（**实测如此**）。
+
+限定「main 文件」后：`#import` 带进来的实现不授予归属，自包含模式行为**完全不变**；
+而「两个 TU 各自在 main 文件里实现同一个类」正是真正的非法用法 → 链接期大声失败。
+
+### 实测
+
+* `09_layout_mismatch`：从运行期 `__sig` 中止改为**链接期** `duplicate symbol`。
+  挂具已支持「链接期 EXPECT_FAIL」（`tests/multi_tu/run_multi_tu.sh`），
+  `EXPECT_FAIL_MATCH` 随之更新。
+* 其余 multi_tu 01–08、10、11 行为不变（每个类只有一个 main 文件所有者）。
+* `tests/strong_metadata` 增至 4 项，第 4 项在**不带任何标志**时验证「两个所有者必须
+  duplicate symbol」。
+
+### 仍未做（`-fstrong-metadata` 为何还不能删）
+
+自动判据覆盖不到**库自身**：`tools/build-foundation-lib.sh` 编译的是
+`include/Foundation/Foundation.gh`，其 `@implementation` 全部来自 `#import "*.gm"`，
+按 R2 判据都算弱符号。要让库自动变强，需要「按 `.gm` 分别编译」的构建形态（每个 `.gm`
+作为 main 文件 → 各自拥有自己的类），但该形态目前**不受支持**：
+
+1. **生成 C 自我冲突**：直接编译 `include/Foundation/NFObject.gm` 时，`struct gald_root` /
+   `struct NFObject` 在 Section 4（带 `#ifndef` 的兜底定义）与 Section 5（类布局）各出现一次，
+   Section 5 那份无保护，还与 `gald/runtime.h` 冲突（`c_headers` 派生的 `header_structs`
+   没能把它跳过）。
+2. **`gald_metaInit` 是单个弱符号**：只有一个 TU 的副本会运行，而它只初始化「该 TU 见得到的
+   类」。按 `.gm` 分 TU 后每个 TU 只见到自己 + 依赖，其它类会漏初始化 —— 需要把类初始化改为
+   **按类**（每类一个构造函数或每类一个 init 函数，全部运行）。
+
+因此 `-fstrong-metadata` 目前是库侧的**必要开关**，也是「我在提供这些类」这一意图的唯一显式
+表达。要删掉它，得先解决上面两点。
