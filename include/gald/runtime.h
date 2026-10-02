@@ -2,7 +2,7 @@
 #define GALD_RUNTIME_H
 
 /*
- * Nupa runtime header.
+ * Gald runtime header.
  *
  * Two modes:
  *   default               — host/OS mode: pulls in libc <setjmp.h>/<stdarg.h>,
@@ -110,26 +110,26 @@ struct NFProtocol {
 
 // ─── Internal types (for runtime implementation) ────────────────────────────────
 
-typedef struct np_vtable np_vtable_t;
-typedef struct np_class  np_class_t;
-typedef struct np_object np_object_t;
+typedef struct nf_vtable nf_vtable_t;
+typedef struct nf_class  nf_class_t;
+typedef struct nf_object nf_object_t;
 
-struct np_vtable {
-    np_class_t *isa;
+struct nf_vtable {
+    nf_class_t *isa;
     void      (**methods)(void);
     int        method_count;
 };
 
-struct np_class {
-    np_class_t  *superclass;
+struct nf_class {
+    nf_class_t  *superclass;
     const char  *name;
     size_t       instance_size;
-    np_vtable_t *vtable;
-    void       (*constructor)(np_object_t *self, ...);
+    nf_vtable_t *vtable;
+    void       (*constructor)(nf_object_t *self, ...);
 };
 
-struct np_object {
-    np_class_t *isa;
+struct nf_object {
+    nf_class_t *isa;
 };
 
 // ─── Runtime API ────────────────────────────────────────────────────────────────
@@ -201,45 +201,45 @@ void gald_autoreleasepoolPop(gald_autoreleasepool_t *pool);
  * The generated method body creates a task, pumps gald_task_resume until the
  * state machine finishes (single-threaded cooperative scheduling: pumping
  * always makes progress), and reads the result from the frame. */
-typedef struct NupaTask NupaTask;
+typedef struct NFTask NFTask;
 
 /* State-machine entry written by the desugar pass.
  * Returns 0 = suspended at an await, 1 = finished. */
-typedef int (*gald_task_entry_fn)(NupaTask *task);
+typedef int (*gald_task_entry_fn)(NFTask *task);
 
-struct NupaTask {
+struct NFTask {
     int state;                          /* current state-machine state */
     int finished;                       /* 0 = running/suspended, 1 = done */
     gald_task_entry_fn entry;           /* state machine body */
     NFObject *self_obj;                 /* receiver the method runs on */
     void *frame;                        /* lifted locals (per-method struct) */
     void *result;                       /* return value slot (caller casts) */
-    NupaTask *parent;                   /* awaiting task that created us, if any */
+    NFTask *parent;                   /* awaiting task that created us, if any */
 };
 
 /* Create a task. `frame_size` is the size of the method's lifted-locals
  * struct; the frame is zero-initialized and owned by the task. */
-NupaTask *gald_task_create(gald_task_entry_fn entry, NFObject *self_obj, size_t frame_size);
+NFTask *gald_task_create(gald_task_entry_fn entry, NFObject *self_obj, size_t frame_size);
 
 /* Run the state machine until it suspends (return 0) or finishes (return 1). */
-int gald_task_resume(NupaTask *task);
+int gald_task_resume(NFTask *task);
 
 /* Pump the task to completion (cooperative single-thread scheduling) and
  * free it. Returns the task's result slot value. */
-void *gald_task_join(NupaTask *task);
+void *gald_task_join(NFTask *task);
 
 /* Mark the task finished (called by the state machine's final state). */
-void gald_task_finish(NupaTask *task);
+void gald_task_finish(NFTask *task);
 
 // ─── Internal API (for runtime implementation) ───────────────────────────────────
 
-void np_class_register(np_class_t *cls);
-np_class_t *np_class_create(const char *name, np_class_t *superclass, size_t instance_size);
-void np_class_set_vtable(np_class_t *cls, np_vtable_t *vtable);
-np_vtable_t *np_vtable_alloc(int method_count);
-void np_vtable_set_method(np_vtable_t *vt, int index, void (*method)(void));
-np_object_t *np_object_alloc(np_class_t *cls);
-void np_object_dealloc(np_object_t *obj);
+void nf_class_register(nf_class_t *cls);
+nf_class_t *nf_class_create(const char *name, nf_class_t *superclass, size_t instance_size);
+void nf_class_set_vtable(nf_class_t *cls, nf_vtable_t *vtable);
+nf_vtable_t *nf_vtable_alloc(int method_count);
+void nf_vtable_set_method(nf_vtable_t *vt, int index, void (*method)(void));
+nf_object_t *nf_object_alloc(nf_class_t *cls);
+void nf_object_dealloc(nf_object_t *obj);
 
 // ─── Logging (like NSLog / NSObjCRuntime.h) ───────────────────────────────────
 
@@ -290,7 +290,7 @@ void gald_syncAutoCleanup(void *ptr);   // cleanup attr: long* → unlock
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
 
-#define NF_OBJECT_ISA(obj)        (((np_object_t *)(obj))->isa)
+#define NF_OBJECT_ISA(obj)        (((nf_object_t *)(obj))->isa)
 #define NF_CLASS_NAME(cls)        ((cls)->name)
 #define NF_CLASS_SUPER(cls)       ((cls)->superclass)
 #define NF_VTABLE_LOOKUP(obj, idx)  ((obj)->isa->vtable->methods[(idx)])

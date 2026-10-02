@@ -13,10 +13,10 @@ void kputs(const char *s) { fputs(s, stdout); }
 void kputdec(int v)        { fprintf(stdout, "%d", v); }
 void kputhex(unsigned v)   { fprintf(stdout, "%x", v); }
 
-// ── Instance factories (Nupa calls these via extern) ──
+// ── Instance factories (Gald calls these via extern) ──
 
 extern NFClass GALD_CLASS_$_BareMetal__Calculator;
-extern NFClass GALD_CLASS_$_BareMetal__NupaIoError;
+extern NFClass GALD_CLASS_$_BareMetal__NFIoError;
 
 struct BareMetal__Calculator {
     struct NFClass *isa;
@@ -24,14 +24,14 @@ struct BareMetal__Calculator {
     int total;
 };
 
-struct BareMetal__NupaIoError {
+struct BareMetal__NFIoError {
     struct NFClass *isa;
     uint32_t retain_count;
     int code;
 };
 
 static struct BareMetal__Calculator g_calc;
-static struct BareMetal__NupaIoError g_err;
+static struct BareMetal__NFIoError g_err;
 
 struct BareMetal__Calculator *create_calculator(void) {
     g_calc.isa = &GALD_CLASS_$_BareMetal__Calculator;
@@ -40,8 +40,8 @@ struct BareMetal__Calculator *create_calculator(void) {
     return &g_calc;
 }
 
-struct BareMetal__NupaIoError *create_error(int code) {
-    g_err.isa = &GALD_CLASS_$_BareMetal__NupaIoError;
+struct BareMetal__NFIoError *create_error(int code) {
+    g_err.isa = &GALD_CLASS_$_BareMetal__NFIoError;
     g_err.retain_count = 1;
     g_err.code = code;
     return &g_err;

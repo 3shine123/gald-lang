@@ -4,10 +4,10 @@ Run: `./run_multi_tu.sh` (filter with `./run_multi_tu.sh 05_block`) · `GALDC=pa
 
 ## Why this suite exists
 
-Nupa's uniform vtable is synthesised **per translation unit**: `struct gald_vtable`
+Gald's uniform vtable is synthesised **per translation unit**: `struct gald_vtable`
 gets one member per instance method that TU happens to see. Plain C never hits
 this because every struct is spelled out in the source, so C's type system
-protects you. Nupa synthesises the layout, so nothing does.
+protects you. Gald synthesises the layout, so nothing does.
 
 When two TUs see different method sets they compile different layouts, while the
 linker weak-merges the vtable *instances* into a single allocation. Dispatch
@@ -41,7 +41,7 @@ own layout against itself.)
 | `02_inheritance` | Subclass allocated in the lib TU, driven through a base-class pointer — every send is a real cross-TU vtable dispatch, and the subclass's struct must physically embed the parent's ivars. |
 | `03_generic` | Monomorphised generic. **Requires the lib TU to name the instantiation** (`Stack<int *>`) inside a method body or variable declaration — instantiation is collected by *usage*, so an `@implementation` that never mentions it emits no specialised struct or vtable. |
 | `04_namespace` | `::` → `__` C symbol encoding must round-trip: the client names `Geo::Origin`, the lib defines it. |
-| `05_block` | A Nupa block handed to a lib-TU method, stored, and fired later. The block must be `_Block_copy`d (libui has no unregister API; a stack block would dangle) and any captured-and-mutated variable must be `__block`. |
+| `05_block` | A Gald block handed to a lib-TU method, stored, and fired later. The block must be `_Block_copy`d (libui has no unregister API; a stack block would dangle) and any captured-and-mutated variable must be `__block`. |
 | `06_protocol` | A class conforming to a protocol gets vtable slots for the protocol's required methods **even when the class does not redeclare them**. This needed a fix: the required methods used to be dropped after binding, so a header-only TU compiled a layout with fewer slots than the implementation TU. |
 | `07_arc` | Compile-time ARC insertion stays correct when the halves were transpiled separately — including a convenience-style `+1`-free return from the lib TU. |
 | `08_class_method` | `+` methods dispatch through `GALD_META_VTABLE_$_X`, a *second* per-class layout that must agree across the link independently of the instance vtable. |

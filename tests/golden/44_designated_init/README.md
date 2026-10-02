@@ -1,6 +1,6 @@
 # golden/44 — C99 指定初始化器
 
-**特性**：C99 designated initializer 的六种形态全部可用。此前 Nupa 的 init list 只支持位置式 `{1, 2}`，`.field = ...` 走不通。
+**特性**：C99 designated initializer 的六种形态全部可用。此前 Gald 的 init list 只支持位置式 `{1, 2}`，`.field = ...` 走不通。
 
 **用例**（`designated_init.gm`，6 形态 + 1 链式，全部自带断言 + `ALL OK` 收尾）：
 

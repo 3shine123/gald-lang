@@ -1,4 +1,4 @@
-// toml_editor.gm — Nupa 全特性 TOML 编辑器
+// toml_editor.gm — Gald 全特性 TOML 编辑器
 // 编译: galdc run tests/TOMLEditor/toml_editor.gm -fno-gald-arc
 // 特性覆盖: @namespace, @protocol, @interface, @implementation, @property,
 //           @synthesize, @category, @selector, 继承, 泛型<T>, Block,

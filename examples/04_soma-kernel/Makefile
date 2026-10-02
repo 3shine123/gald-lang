@@ -1,5 +1,5 @@
 # examples/04_soma-kernel/Makefile
-# Build a 32-bit protected-mode kernel from NASM + C + Nupa, bootable floppy image.
+# Build a 32-bit protected-mode kernel from NASM + C + Gald, bootable floppy image.
 
 GALDC   := ../../target/debug/galdc
 CC      := clang
@@ -28,7 +28,7 @@ $(BUILD)/%.o: kernel/%.c kernel/kernel.h
 	@mkdir -p $(BUILD)
 	$(CC) $(CFLAGS) -c -o $@ $<
 
-# ---------- Nupa -> C transpile ----------
+# ---------- Gald -> C transpile ----------
 $(BUILD)/soma_core.c: gald/soma_core.gm
 	@mkdir -p $(BUILD)
 	$(GALDC) -rewrite-gald -ffreestanding -o $@ $<

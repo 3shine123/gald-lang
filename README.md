@@ -3,11 +3,11 @@
 <div align="center">
 <img src="doc/assets/Nupa_avatar.svg" alt="Nupa_avatar" width="210">
 
-# The Nupa Programming Language
+# The Gald Programming Language
 
 [**View Project Examples**](#project-examples)
 
-[Overview](#overview) · [Why Nupa?](#why-gald) · [Project Examples](#project-examples) · [Quick Start](#quick-start) · [Language Features](#language-features) · [New Features](#new-features) · [Compilation & CLI](#compilation--cli) · [Code Examples](#code-examples) · [Design Principles](#design-principles) · [Roadmap](#roadmap) · [FAQ](#faq)
+[Overview](#overview) · [Why Gald?](#why-gald) · [Project Examples](#project-examples) · [Quick Start](#quick-start) · [Language Features](#language-features) · [New Features](#new-features) · [Compilation & CLI](#compilation--cli) · [Code Examples](#code-examples) · [Design Principles](#design-principles) · [Roadmap](#roadmap) · [FAQ](#faq)
 
 </div>
 
@@ -25,15 +25,15 @@
 
 ## **Overview**
 
-Nupa is a **purely static** Objective-C dialect (C superset language). Nupa source is transpiled to C99, then compiled to native machine code by Clang. No runtime message forwarding, no GC pauses, no JIT warm-up — all method dispatch, memory management, and polymorphism are resolved at compile time. It currently works — there are games and tools running in it. If you find it interesting, feel free to give it a try.
+Gald is a **purely static** Objective-C dialect (C superset language). Gald source is transpiled to C99, then compiled to native machine code by Clang. No runtime message forwarding, no GC pauses, no JIT warm-up — all method dispatch, memory management, and polymorphism are resolved at compile time. It currently works — there are games and tools running in it. If you find it interesting, feel free to give it a try.
 
 I don't intend to replace ObjC or Swift. I just miss ObjC's syntax and wanted to let it live again in a statically compiled world. ☺️
 
 ---
 
-## Why Nupa?
+## Why Gald?
 
-I simply like ObjC's message send syntax `[obj message]`. ObjC's runtime (`objc_msgSend`) is heavy, and I wanted to write ObjC-like code that compiles straight to C — so Nupa was born: ObjC syntax compiled statically, no runtime dependency, generating clean C.
+I simply like ObjC's message send syntax `[obj message]`. ObjC's runtime (`objc_msgSend`) is heavy, and I wanted to write ObjC-like code that compiles straight to C — so Gald was born: ObjC syntax compiled statically, no runtime dependency, generating clean C.
 
 This is not a production-ready language. It's a toy, exploring the question: "what happens if you transpile ObjC into plain static C?"
 
@@ -59,8 +59,8 @@ This is not a production-ready language. It's a toy, exploring the question: "wh
 
 | Project               | Description                                                                              | Run                            |
 | --------------------- | ---------------------------------------------------------------------------------------- | ------------------------------ |
-| **`04_soma-kernel/`** | Tiny 32‑bit i386 OS kernel (NASM + C + Nupa), bare‑metal `-ffreestanding` mode                | `./run.sh` or `./run.sh --gui` |
-| **`03_LibUI/`**       | GUI app via [libui-ng](https://github.com/libui-ng/libui-ng), all callbacks in pure Nupa | `./run_libui.sh`               |
+| **`04_soma-kernel/`** | Tiny 32‑bit i386 OS kernel (NASM + C + Gald), bare‑metal `-ffreestanding` mode                | `./run.sh` or `./run.sh --gui` |
+| **`03_LibUI/`**       | GUI app via [libui-ng](https://github.com/libui-ng/libui-ng), all callbacks in pure Gald | `./run_libui.sh`               |
 | **`02_ncurses/`**     | Terminal demos (`ncurses_demo`, `sysmon`) using `Terminal::Ncurses`                      | `make run`                     |
 | **`01_JSONEditor/`**  | Multi‑file JSON editor with split‑screen terminal preview                                | `galdc run json_editor.gm`     |
 
@@ -112,7 +112,7 @@ cd gald-x86_64-unknown-linux-musl
 
 > **Tip:** with `galdc` on your PATH and system headers installed, `<gald/runtime.h>` and `<Foundation/...>` resolve automatically — no `-I include` needed.
 
-### Compile a Nupa Program
+### Compile a Gald Program
 
 ```bash
 # Just output C code (auto-derives .gm → .c)
@@ -299,7 +299,7 @@ SEL sel = @selector(doSomething:);
 
 ### C Attributes (__attribute__)
 
-Nupa supports `__attribute__((...))` pass-through. You can write C `__attribute__` on global declarations and struct fields, and the compiler preserves them verbatim in the generated C output.
+Gald supports `__attribute__((...))` pass-through. You can write C `__attribute__` on global declarations and struct fields, and the compiler preserves them verbatim in the generated C output.
 
 ```gald
 __attribute__((packed))
@@ -324,7 +324,7 @@ Unknown attributes (not in the table) produce a warning and pass through — nev
 
 ### Memory Management
 
-Nupa uses **compile-time static ARC**. The compiler determines each object reference's lifetime through CFG dataflow analysis and inserts retain/release calls automatically. No manual `retain`/`release`/`autorelease` needed.
+Gald uses **compile-time static ARC**. The compiler determines each object reference's lifetime through CFG dataflow analysis and inserts retain/release calls automatically. No manual `retain`/`release`/`autorelease` needed.
 
 In MRC mode (`-fno-gald-arc`):
 
@@ -336,9 +336,9 @@ NFObject *obj = [[NFObject alloc] init];
 
 ### C Bridge (`-emit-bridge-header`)
 
-Nupa transpiles to C, but calling Nupa object methods from C normally requires verbose vtable-index and SEL-constant boilerplate. `-emit-bridge-header` generates a header with `static inline` wrappers for every method, so C code can call Nupa objects like ordinary C functions.
+Gald transpiles to C, but calling Gald object methods from C normally requires verbose vtable-index and SEL-constant boilerplate. `-emit-bridge-header` generates a header with `static inline` wrappers for every method, so C code can call Gald objects like ordinary C functions.
 
-**Usage**: transpile a Nupa library to C, then generate the bridge header:
+**Usage**: transpile a Gald library to C, then generate the bridge header:
 
 ```bash
 galdc -rewrite-gald lib.gm -o lib.c -emit-bridge-header lib.h
@@ -350,7 +350,7 @@ Then include the bridge header from C:
 #include "lib.h"
 
 int main(void) {
-    gald_metaInit();  // required before using any Nupa objects
+    gald_metaInit();  // required before using any Gald objects
 
     // Class method: gald_<Class>_<method>(params...)
     NFString *s = gald_NFString_stringWithUTF8String_("Hello");
@@ -359,12 +359,12 @@ int main(void) {
     size_t len = gald_NFString_length(s);
     const char *cstr = gald_NFString_UTF8String(s);
 
-    // Nested message send (like Nupa's [[s UTF8String] ...])
+    // Nested message send (like Gald's [[s UTF8String] ...])
     const char *nested = gald_NFString_UTF8String(
         gald_NFString_stringWithUTF8String_("nested")
     );
 
-    // Multi-argument message send (like Nupa's [arr replaceObjectAtIndex:0 withObject:obj])
+    // Multi-argument message send (like Gald's [arr replaceObjectAtIndex:0 withObject:obj])
     NFArray *arr = gald_NFArray_arrayWithObject_(s);
     gald_NFArray_replaceObjectAtIndex_withObject_(arr, 0, s);
 
@@ -385,7 +385,7 @@ clang caller.c lib.c include/gald/runtime.c -I include -o app
 
 #### Memory Management from C
 
-Nupa's **ARC is compile-time and applies only to `.gm` source** — it never sees calls coming from C. When C code calls bridge functions, objects are **not** automatically retained or released. Manage them manually, following the ObjC memory-management naming convention:
+Gald's **ARC is compile-time and applies only to `.gm` source** — it never sees calls coming from C. When C code calls bridge functions, objects are **not** automatically retained or released. Manage them manually, following the ObjC memory-management naming convention:
 
 | Method family                                  | Caller owns?       | What C code must do                                                             |
 | ---------------------------------------------- | ------------------ | ------------------------------------------------------------------------------- |
@@ -419,13 +419,13 @@ int main(void) {
 }
 ```
 
-`gald_retain`, `gald_release`, `gald_autorelease`, `gald_autoreleasepoolPush`/`gald_autoreleasepoolPop` are declared in `<gald/runtime.h>` and work on any Nupa object. This is exactly the manual-retain-count (MRC) model — from the C side you can think of Nupa objects as raw pointers you own or don't own by convention.
+`gald_retain`, `gald_release`, `gald_autorelease`, `gald_autoreleasepoolPush`/`gald_autoreleasepoolPop` are declared in `<gald/runtime.h>` and work on any Gald object. This is exactly the manual-retain-count (MRC) model — from the C side you can think of Gald objects as raw pointers you own or don't own by convention.
 
 ---
 
 ## New Features
 
-Nupa adds features on top of Objective-C syntax that ObjC itself doesn't have.
+Gald adds features on top of Objective-C syntax that ObjC itself doesn't have.
 
 **Recent highlights:**
 
@@ -487,7 +487,7 @@ for (id item in items) {
 
 ### Struct `==` / `!=` Value Comparison
 
-C rejects `a == b` on structs outright; Nupa reuses the existing operators and desugars to a generated field-by-field compare function:
+C rejects `a == b` on structs outright; Gald reuses the existing operators and desugars to a generated field-by-field compare function:
 
 ```gald
 struct Point a = {1, 2};
@@ -532,7 +532,7 @@ int main() {
 Design rules:
 
 - **Infection is chain-based** — a method calling `@await` becomes async itself; async methods with a return value may only be awaited from async contexts (compile-time rejected otherwise).
-- **`@await` lowers to a state machine** — the body is split at suspension points into a `switch(task->state)` driver over a heap `NupaTask`; locals that survive a suspension are lifted into a per-method frame struct.
+- **`@await` lowers to a state machine** — the body is split at suspension points into a `switch(task->state)` driver over a heap `NFTask`; locals that survive a suspension are lifted into a per-method frame struct.
 - **`@try` spanning an `@await`** is rejected (a `jmp_buf` cannot survive a suspension point); `@noarc` across awaits is allowed; break/continue across awaits become state jumps.
 - A cooperative single-thread scheduler (`gald_run_all`) and I/O integration are planned as the next milestone.
 
@@ -641,7 +641,7 @@ illegal type 'int' in a dictionary literal — keys and values must be Objective
 
 ### Exception Semantics (`-eh checked` — the default backend)
 
-Nupa's exceptions are **ObjC exceptions by value, without unwinding**. `@try`/`@catch`/`@finally`/`@throw` behave exactly like clang's `-fobjc-arc-exceptions` mode — and a differential test suite (`tests/eh_diff/run_eh_diff.sh`) locks this in by running each case under both galdc and real clang/ObjC, then diffing stderr line by line (7/7 cases pass).
+Gald's exceptions are **ObjC exceptions by value, without unwinding**. `@try`/`@catch`/`@finally`/`@throw` behave exactly like clang's `-fobjc-arc-exceptions` mode — and a differential test suite (`tests/eh_diff/run_eh_diff.sh`) locks this in by running each case under both galdc and real clang/ObjC, then diffing stderr line by line (7/7 cases pass).
 
 ```gald
 @interface Boom : NFObject
@@ -710,7 +710,7 @@ The semantics you get:
 @end
 ```
 
-Apple has occupied exactly this slot — trailing metadata before the `;` — with macros for over a decade (`NS_DESIGNATED_INITIALIZER`, `NS_REQUIRES_NIL_TERMINATION`, `API_AVAILABLE(...)`). Nupa promotes the slot to first-class syntax and lets the checker reconcile it.
+Apple has occupied exactly this slot — trailing metadata before the `;` — with macros for over a decade (`NS_DESIGNATED_INITIALIZER`, `NS_REQUIRES_NIL_TERMINATION`, `API_AVAILABLE(...)`). Gald promotes the slot to first-class syntax and lets the checker reconcile it.
 
 **What the checker enforces**
 
@@ -751,7 +751,7 @@ The type check is deliberately conservative: `@"..."` literals, bare C strings, 
 
 ### Implicit Root Class (`gald_root`)
 
-Nupa now supports user-defined root classes. You no longer need to inherit from `NFObject` — an `@interface` without a superclass automatically gets a compiler-injected implicit root class `gald_root`, while keeping `id` type uniformity and static dispatch.
+Gald now supports user-defined root classes. You no longer need to inherit from `NFObject` — an `@interface` without a superclass automatically gets a compiler-injected implicit root class `gald_root`, while keeping `id` type uniformity and static dispatch.
 
 **Before:**
 
@@ -766,7 +766,7 @@ Nupa now supports user-defined root classes. You no longer need to inherit from 
 @interface Animal : NFObject   // explicit NFObject still works
 ```
 
-Both are valid, and `id` can point to any Nupa object.
+Both are valid, and `id` can point to any Gald object.
 
 #### How It Works
 
@@ -863,7 +863,7 @@ struct Dog {
 
 #### Bare-Metal / Freestanding Support (`-ffreestanding`)
 
-Nupa can compile to **self-contained C with no libc, no Foundation, no TLS**, for kernels, MCUs, and bare-metal embedded development.
+Gald can compile to **self-contained C with no libc, no Foundation, no TLS**, for kernels, MCUs, and bare-metal embedded development.
 
 ```bash
 galdc -rewrite-gald -ffreestanding kernel.gm   # emits self-contained C
@@ -924,7 +924,7 @@ Sample output (soma-kernel under qemu):
 
 #### Method Dispatch
 
-All Nupa objects dispatch through a unified VTable mechanism:
+All Gald objects dispatch through a unified VTable mechanism:
 
 ```c
 // [obj doSomething:arg]
@@ -989,7 +989,7 @@ Reference counting is managed by compile-time static ARC analysis, not stored in
 
 **Encoding rules**: `::` separators are encoded as `__` in C symbols.
 
-| Nupa Symbol                   | Transpiled C Symbol          |
+| Gald Symbol                   | Transpiled C Symbol          |
 | ----------------------------- | ---------------------------- |
 | `Game::Player`                | `Game__Player`               |
 | `Game::Entities::Enemy`       | `Game__Entities__Enemy`      |
@@ -1187,7 +1187,7 @@ container's element type is unchecked; add an explicit cast if the contents are 
 
 Note the cost: specialization is compile-time code, not free type safety. The same program using containers generically instead of bare compiles to ~42 KB / +41% more C — all duplicated method bodies and metadata, byte-identical layout, so zero runtime benefit. Golden: `tests/golden/40_nfarray_generic/`.
 
-### Nupa-Syntax Macros (dual-track `#define`)
+### Gald-Syntax Macros (dual-track `#define`)
 
 `#define` bodies containing **gald syntax** (`[recv msg]`, `@`-literals, `^{}` blocks) used to be passed through verbatim to the C compiler — a syntax error. galdc now parses and expands them at the source level. Plain-C macro bodies pass through unchanged and are expanded by the C compiler as before; behavior is identical there.
 
@@ -1271,7 +1271,7 @@ Options:
   -arch <target>    Build for target architecture (e.g. -arch x86_64)
   -asm <file.s>     Link a real assembly file (repeatable)
   -gen-completions <shell>  Generate shell completion script (zsh|bash|fish)
-  -emit-bridge-header <file.h>  Generate a C bridge header for calling Nupa from C
+  -emit-bridge-header <file.h>  Generate a C bridge header for calling Gald from C
 
 Refcount trace (debug aid):
   -trace-refcount                Print a static reference-count trace of each retained object, in source order
@@ -1304,7 +1304,7 @@ cargo test --workspace
 
 @implementation Greeter
 - (void)greet {
-    printf("Hello, Nupa!\n");
+    printf("Hello, Gald!\n");
 }
 @end
 
@@ -1375,7 +1375,7 @@ int main() {
 
 ### Static Generics
 
-Nupa compiles generics at compile time via **monomorphization** — each `DataPack<QuantumToken *>` becomes a standalone C struct `DataPack_QuantumToken_ptr` with concrete type substitutions. No type erasure, no boxing, no runtime overhead.
+Gald compiles generics at compile time via **monomorphization** — each `DataPack<QuantumToken *>` becomes a standalone C struct `DataPack_QuantumToken_ptr` with concrete type substitutions. No type erasure, no boxing, no runtime overhead.
 
 ```gald
 @interface DataPack<T> : NFObject {
@@ -1438,11 +1438,11 @@ ObjC's runtime is powerful, but I don't want to depend on it. Make all decisions
 
 ### 2. Generate Human-Readable C
 
-Nupa's "backend" is **human-readable C99**, not LLVM IR. This means:
+Gald's "backend" is **human-readable C99**, not LLVM IR. This means:
 
 - Debug with standard Clang/LLDB tools
 - Generated C can be reviewed, modified, embedded in other projects
-- No LLVM backend lock-in — wherever Clang runs, Nupa runs
+- No LLVM backend lock-in — wherever Clang runs, Gald runs
 
 ### 3. Incremental
 
@@ -1541,9 +1541,9 @@ Generated C should be as clear as handwritten C:
 
 Not yet. But it is **real** - it compiles, it runs, and it is designed with growth in mind. If you find syntax appealing and want to contributem, you are welcome.
 
-### What can Nupa do?
+### What can Gald do?
 
-Write small games, tools, toys. The snake game, Flappy Bird, space shooter, tic-tac-toe in this repo are all written in Nupa, running in the terminal.
+Write small games, tools, toys. The snake game, Flappy Bird, space shooter, tic-tac-toe in this repo are all written in Gald, running in the terminal.
 
 ### What's missing compared to ObjC?
 

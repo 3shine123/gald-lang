@@ -1,9 +1,9 @@
 #!/bin/bash
 # examples/03_LibUI/run_libui.sh — transpile, compile, link, run the libui-ng demo.
 #
-# Pure Nupa: the only sources are .gm/.gh files. The demo inlines the wrapper
+# Pure Gald: the only sources are .gm/.gh files. The demo inlines the wrapper
 # (include/LibUI.gm → one .c file), which is compiled and linked with the
-# Nupa runtime — no hand-written .c/.m files anywhere.
+# Gald runtime — no hand-written .c/.m files anywhere.
 #
 # Requires: libui-ng built with meson (set LIBUI_DIR to your checkout)
 #           galdc (built at ../../target/debug/galdc or ../../target/release/galdc)

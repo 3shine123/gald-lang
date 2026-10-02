@@ -1,4 +1,4 @@
-// lib.gm — library TU for three-way interop: Nupa C + plain C + assembly.
+// lib.gm — library TU for three-way interop: Gald C + plain C + assembly.
 // NO main (library-style; linked into a C host program). Build (build.sh):
 //   galdc -rewrite-gald lib.gm -o lib.c -emit-bridge-header lib.h
 // The C caller (caller.c) includes lib.h and links lib.c + helper.c +

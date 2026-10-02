@@ -14,7 +14,7 @@ static int total = 0, passed = 0;
 
 static symbol_t *make_func(const char *name) {
     symbol_t *s = sym_alloc(SYM_FUNCTION, name);
-    s->data.func.return_type = np_type_from_cst(NULL);
+    s->data.func.return_type = nf_type_from_cst(NULL);
     if (!s->data.func.return_type) {
         s->data.func.return_type = calloc(1, sizeof(gald_type_t));
     }

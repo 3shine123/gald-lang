@@ -1,6 +1,6 @@
 # golden/45 — Nullability（`nullable` / `nonnull` / `NF_ASSUME_NONNULL`）
 
-**特性**：ObjC 2015 年最大的语言演进在 Nupa 落地。三态标注 + 区域默认 + 分支内流敏感窄化，**纯编译期、零运行时成本**（codegen 从不读 `nulls` 字段 —— 与 ObjC 的 `NS_ASSUME_NONNULL` 同构）。
+**特性**：ObjC 2015 年最大的语言演进在 Gald 落地。三态标注 + 区域默认 + 分支内流敏感窄化，**纯编译期、零运行时成本**（codegen 从不读 `nulls` 字段 —— 与 ObjC 的 `NS_ASSUME_NONNULL` 同构）。
 
 ## 语法：两种拼写都支持
 

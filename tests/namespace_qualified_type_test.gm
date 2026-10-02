@@ -1,5 +1,5 @@
 // lang-test/namespace_qualified_type_test.gm
-// Nupa 语言限定类型声明 (- (Xxx::Yyy::Zzz *)) 语法与词法极限压测
+// Gald 语言限定类型声明 (- (Xxx::Yyy::Zzz *)) 语法与词法极限压测
 // 🛡️ 绝对安全声明：全过程纯内存/CPU逻辑运算，零磁盘写操作，无系统级破坏性指令。
 
 #include <stdio.h>

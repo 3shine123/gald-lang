@@ -89,7 +89,7 @@ typedef struct {
 int main(int argc, const char* argv[])
 {
     @autoreleasepool {
-        printf("=== x86_64 (Rosetta) 内联+外部 asm x Nupa 高级特性 ===\n");
+        printf("=== x86_64 (Rosetta) 内联+外部 asm x Gald 高级特性 ===\n");
 
         X86_NS* n = [[X86_NS alloc] initWithTag:"x64-fusion"];
 

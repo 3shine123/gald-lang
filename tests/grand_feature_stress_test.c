@@ -2313,7 +2313,7 @@ __attribute__((weak)) int main(void ) {
         Machine * machine = (Machine *)(((struct gald_vtable *)__gald_tmp_20->isa->vtable)->init(__gald_tmp_20, __gald_sel_init));
         ((void (*)(NFObject *, SEL, int, int, int, int, int, int, int, int, int, int))((struct gald_vtable *)(machine->isa->vtable))->computeA_b_c_d_e_f_g_h_i_j_)((NFObject *)(machine), __gald_sel_computeA_b_c_d_e_f_g_h_i_j_, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
         printf("[machine] sum=%d\n", ((int (*)(NFObject *, SEL))((struct gald_vtable *)(machine->isa->vtable))->total)((NFObject *)(machine), __gald_sel_total));
-        NFString * greet = (NFString *)(((NFString * (*)(NFObject *, SEL, NFString *, NFString *))((struct gald_vtable *)(machine->isa->vtable))->greet_withTitle_)((NFObject *)(machine), __gald_sel_greet_withTitle_, (NFString *)(gald_stringFromCstr("Nupa")), (NFString *)(NFString_stringWithUTF8String_(&GALD_CLASS_$_NFString, __gald_sel_stringWithUTF8String_, "Hello"))));
+        NFString * greet = (NFString *)(((NFString * (*)(NFObject *, SEL, NFString *, NFString *))((struct gald_vtable *)(machine->isa->vtable))->greet_withTitle_)((NFObject *)(machine), __gald_sel_greet_withTitle_, (NFString *)(gald_stringFromCstr("Gald")), (NFString *)(NFString_stringWithUTF8String_(&GALD_CLASS_$_NFString, __gald_sel_stringWithUTF8String_, "Hello"))));
         printf("[machine] %s\n", ((const char * (*)(NFObject *, SEL))((struct gald_vtable *)(greet->isa->vtable))->UTF8String)((NFObject *)(greet), __gald_sel_UTF8String));
         int base = 100;
         CompareBlock addBase = ^_Bool(int a, int b) { return ((a + base) < (b + base)); };

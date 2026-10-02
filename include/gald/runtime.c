@@ -310,8 +310,8 @@ NFObject *gald_autorelease(NFObject *obj) {
 // created it (milestone 1). `parent` exists for milestone 2 (task graphs
 // where a suspended task resumes its awaiter).
 
-NupaTask *gald_task_create(gald_task_entry_fn entry, NFObject *self_obj, size_t frame_size) {
-    NupaTask *t = (NupaTask *)calloc(1, sizeof(NupaTask));
+NFTask *gald_task_create(gald_task_entry_fn entry, NFObject *self_obj, size_t frame_size) {
+    NFTask *t = (NFTask *)calloc(1, sizeof(NFTask));
     if (!t) return NULL;
     t->state = 1;   /* state 1 = the entry's first case; 0 means "not started" */
     t->finished = 0;
@@ -323,7 +323,7 @@ NupaTask *gald_task_create(gald_task_entry_fn entry, NFObject *self_obj, size_t 
     return t;
 }
 
-int gald_task_resume(NupaTask *task) {
+int gald_task_resume(NFTask *task) {
     if (!task || task->finished) return 1;
     if (task->entry) {
         if (task->entry(task) != 0) {
@@ -335,11 +335,11 @@ int gald_task_resume(NupaTask *task) {
     return task->finished ? 1 : 0;
 }
 
-void gald_task_finish(NupaTask *task) {
+void gald_task_finish(NFTask *task) {
     if (task) task->finished = 1;
 }
 
-void *gald_task_join(NupaTask *task) {
+void *gald_task_join(NFTask *task) {
     if (!task) return NULL;
     while (!task->finished) {
         (void)gald_task_resume(task);

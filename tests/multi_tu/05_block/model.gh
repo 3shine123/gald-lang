@@ -1,6 +1,6 @@
 #import <Foundation/Foundation.gh>
 
-/* Blocks across a TU boundary: the client passes a Nupa block to a lib-TU
+/* Blocks across a TU boundary: the client passes a Gald block to a lib-TU
    method. The block must be copied (it outlives the call frame) and invoked
    from code the client never compiled. */
 typedef void (^Ticker)(int);

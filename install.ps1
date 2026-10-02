@@ -1,4 +1,4 @@
-# install.ps1 — Nupa installer for Windows (PowerShell)
+# install.ps1 — Gald installer for Windows (PowerShell)
 #
 # Usage (from the extracted bundle directory):
 #   .\install.ps1                     # per-user: %LOCALAPPDATA%\Programs\galdc
@@ -49,7 +49,7 @@ $LibDir  = Join-Path $Prefix "lib"
 $IncDir  = Join-Path $Prefix "include"
 $CompDir = Join-Path $Prefix "share\galdc\completions"
 
-Write-Host "==> $(T 'Nupa 安装包' 'Nupa Installer') (galdc)"
+Write-Host "==> $(T 'Gald 安装包' 'Gald Installer') (galdc)"
 Write-Host "    $(T '安装目录' 'Install directory'): $Prefix"
 Write-Host ""
 

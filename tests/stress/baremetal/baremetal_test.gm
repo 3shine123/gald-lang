@@ -6,7 +6,7 @@
 //   + helpers.c (console) + asm_ext.s (real ARM64 assembly)
 // Exercises every language feature usable without Foundation.
 // NOTE: @await IS exercised (§16 R5) — runtime_freestanding.c provides the
-// NupaTask API. I/O (NFLog etc.) is intentionally absent: bare metal has no
+// NFTask API. I/O (NFLog etc.) is intentionally absent: bare metal has no
 // console contract; use kputs-style externs from helpers.c.
 
 extern void kputs(const char *s);

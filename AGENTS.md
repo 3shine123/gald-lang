@@ -1,10 +1,10 @@
-# AGENTS.md — Nupa Language Project
+# AGENTS.md — Gald Language Project
 
 ## Current Phase: Stage 3 — Codegen + Testing
 
 ## File Extension Convention
-- **`.gh`** — Nupa header (declarations: `@interface`, `@protocol`, typedefs, structs). These are inlined by galdc's preprocessor via `#import`, never passed to the C compiler directly.
-- **`.gm`** — Nupa implementation (definitions: `@implementation`, functions, `int main`). Inlined via `#import` and translated to C.
+- **`.gh`** — Gald header (declarations: `@interface`, `@protocol`, typedefs, structs). These are inlined by galdc's preprocessor via `#import`, never passed to the C compiler directly.
+- **`.gm`** — Gald implementation (definitions: `@implementation`, functions, `int main`). Inlined via `#import` and translated to C.
 - Headers use `.gh` (not `.h`) deliberately: a `.h` extension would collide with ObjC/C system headers (e.g. `Foundation.h` vs `Foundation/Foundation.h`). galdc's preprocessor only treats `#import` of `.gh`/`.gm` as gald imports; `#include` of `.h`/`.c` is passed through verbatim to the C compiler.
 - When a header is meant to be usable directly by a plain C compiler (not just via galdc), guard the objc-style syntax with `#ifdef __GALD__` / `#else`. galdc always defines `__GALD__` (all backends), so it inlines the gald branch; a C compiler sees only the C-compatible `#else` branch.
 
@@ -49,7 +49,7 @@ gald-lang/
 │   │   ├── elaborator.c/h      — Semantic elaboration: @interface/impl matching, protocol merging
 │   │   ├── binder.c/h          — Name binding: symbol creation for typedefs, classes, protocols, @selector
 │   │   ├── checker.c/h         — Type checker
-│   │   ├── gald_type.h         — NP type representation (gald_type_t, TYPE_* enum, type functions)
+│   │   ├── gald_type.h         — NF type representation (gald_type_t, TYPE_* enum, type functions)
 │   │   ├── symbol.c/h          — Symbol table (symtab_*): types, classes, protocols, methods, selectors
 │   │   ├── codegen.c/h         — Code generator (C output)
 │   │   ├── codegen_emit.c/h    — Emit C code from AST
@@ -185,7 +185,7 @@ gald-lang/
   - ✅ typedef 数组 `typedef int Row4[4];` 与**多维数组字段** `int cells[4][4];`
   - ✅ 位域 `unsigned a : 3;` 可解析（宽度按 C 语义被丢弃，降级为普通字段——近似语义）
   - ⚠️ 已知不支持（记录中）：**匿名内联 struct 字段**（`struct { int a; } inl;`，需命名 tag）；**fnptr 数组字段** `(*name[N])(...)` declarator；"Cast 后作函数指针调用"（gald-world 用纯 C 桥 hostcb/modh 绕过）。~~"struct 成员函数指针调用"~~ → **✅ 已支持（Sep 2026 修复）**：`w.cb(3)` / `pw->cb(3)` 直接调用（elaborator 保留 PropRef callee + codegen `render_callee_expr` 渲染 `.`/`->` 成员调用，三个后端全过）
-- ✅ libui demo rewritten in pure Nupa: callbacks (`onGreet`/`onInc`/`onDec`/`onReset`/`counter_ctx_create`) moved from `libui_demo_cb.c` into `examples/03_LibUI/libui_demo.gm`; button-click fn-ptr cast moved from `LibUI_helper.c` into `LibUI.gm`. `include/LibUI.{nh,np}` + `LibUI_mac.c` now live in `examples/03_LibUI/include/`; `run_libui.sh` compiles only `runtime.c` + `LibUI_mac.c` as C helpers.
+- ✅ libui demo rewritten in pure Gald: callbacks (`onGreet`/`onInc`/`onDec`/`onReset`/`counter_ctx_create`) moved from `libui_demo_cb.c` into `examples/03_LibUI/libui_demo.gm`; button-click fn-ptr cast moved from `LibUI_helper.c` into `LibUI.gm`. `include/LibUI.{nh,np}` + `LibUI_mac.c` now live in `examples/03_LibUI/include/`; `run_libui.sh` compiles only `runtime.c` + `LibUI_mac.c` as C helpers.
 
 ### Inline Asm + Real `.s` Linking — Implemented ✅ (Aug 2026)
 - ✅ **`asm` / `__asm__` / `__asm__` keyword** (lexer `KeywordKind::Asm`; also `__volatile`/`__volatile__`).
@@ -282,7 +282,7 @@ gald-lang/
   | 协议组合 `P & Q` | 手写两遍断言 | 复用 `&`（C 有槽位） |
   | `@await` | 巨大：task 结构 + 状态机 + 调度器 | **`@`（2026-09-27 定案）**：前缀运算符位是**开放上下文**，裸 `await` 与标识符歧义（`await * 2`、调用名为 `await` 的 C 函数）；`@` 标记状态机机制且让 `await` 保持 100% 合法 C 标识符，先例是表达式位的 `@selector(...)`/`@42` 装箱 |
 
-- **三个前缀家族**（`@` 直觉部分来自"C 用不到前缀"，但 Nupa 实际已用三套约定）：
+- **三个前缀家族**（`@` 直觉部分来自"C 用不到前缀"，但 Gald 实际已用三套约定）：
   | 前缀 | 用于 | 例 |
   |------|------|-----|
   | `@` | 声明 / 运行时块 / 访问控制 | `@interface` `@try` `@private` |
@@ -295,8 +295,8 @@ gald-lang/
 #### 已否决（勿捡回）
 | 被否决项 | 理由 |
 |----------|------|
-| **`if let`** | **零新能力，纯糖**。ObjC 自己就是这个模式（`id o = [d objectForKey:@"k"]; if (o) { ... }`），Swift 只是给它起了名字。Nupa 的 `id` 就是指针、`nil` 就是 0。相比 `if (x)` 只多两件事且都已被覆盖：(a) 受作用域约束的绑定 → `for (T x in coll)` 已提供该形式；(b) 类型收窄 → Nupa 无 optional 类型，checker 对消息发送本就宽松返回 `id`。且它是最破坏 ObjC 一致性的一项（Swift 味），收益为零。 |
-| **`match`（任何形式，含 `=>` 箭头语法）** | ①**语法必然非 ObjC**：ObjC 对多路分发**没有语法 construct**，答案就是 `[obj isKindOfClass:[X class]]` + 强转的方法链。`match` 无论怎么设计都无 ObjC 先例——像 C `switch` 就不像（switch 是语言 construct，`isKindOfClass:` 是方法），像 `=>` 就是 Rust（全世界只有 Rust 这么写 match arm）。②**新能力其实只剩 struct 解构**（`Point { x, y }` 绑两字段），而 Nupa 的 struct 就是 C struct，写 `p.x` 本来就一行。③**能力大部分本就该由 `isKindOfClass:` 补**（见待做 #1），为一个省一行的糖造新语句家族 + 新词 + 降级机制 + 穷尽性分析，代价过高。 |
+| **`if let`** | **零新能力，纯糖**。ObjC 自己就是这个模式（`id o = [d objectForKey:@"k"]; if (o) { ... }`），Swift 只是给它起了名字。Gald 的 `id` 就是指针、`nil` 就是 0。相比 `if (x)` 只多两件事且都已被覆盖：(a) 受作用域约束的绑定 → `for (T x in coll)` 已提供该形式；(b) 类型收窄 → Gald 无 optional 类型，checker 对消息发送本就宽松返回 `id`。且它是最破坏 ObjC 一致性的一项（Swift 味），收益为零。 |
+| **`match`（任何形式，含 `=>` 箭头语法）** | ①**语法必然非 ObjC**：ObjC 对多路分发**没有语法 construct**，答案就是 `[obj isKindOfClass:[X class]]` + 强转的方法链。`match` 无论怎么设计都无 ObjC 先例——像 C `switch` 就不像（switch 是语言 construct，`isKindOfClass:` 是方法），像 `=>` 就是 Rust（全世界只有 Rust 这么写 match arm）。②**新能力其实只剩 struct 解构**（`Point { x, y }` 绑两字段），而 Gald 的 struct 就是 C struct，写 `p.x` 本来就一行。③**能力大部分本就该由 `isKindOfClass:` 补**（见待做 #1），为一个省一行的糖造新语句家族 + 新词 + 降级机制 + 穷尽性分析，代价过高。 |
 | **`async` 修饰符**（`async - (int)fetch:`） | 抄了 Swift 的词却用了 Swift 根本不用 的位置——Swift 是 `func fetch() async -> Int`（async 在签名内），C++20 **根本没有 async 修饰符**（靠函数体里有 `co_await` 判定协程）。顶在 `-` 前面哪儿都不像。删除，改用函数体内的 `await` 自证。 |
 | **`if (v := expr)` 简写** | 与被否决的 `if let` 同类（Swift 味 + 零新能力），且进一步背离 C 语法。 |
 | **struct 指定初始化器 `.x = 7` 归类为"直接透传"** | 实测不成立（见下方勘误 2）。**2026-09-29 更新**：声明处指定初始化器已支持（6 形态中 5 通，含部分/混合/数组元素/嵌套路径），仅复合字面量组合（形态 4）残留——详见勘误 2 的支持矩阵。 |
@@ -304,9 +304,9 @@ gald-lang/
 #### 待做（严格按此顺序）—— ✅ 2026-09-27 全部落地（#4 至里程碑 1，见下方各节记录）
 
 ##### 1. Foundation 补齐 ObjC 类型分发三件套 —— 最高优先 ✅ 已实现（golden/32）
-**实测发现（`grep` 全部 0 命中）**：Nupa 的 Foundation 缺 ObjC 用于多路分发的几乎全部词汇。
+**实测发现（`grep` 全部 0 命中）**：Gald 的 Foundation 缺 ObjC 用于多路分发的几乎全部词汇。
 
-| ObjC 词汇 | Nupa 现状 |
+| ObjC 词汇 | Gald 现状 |
 |-----------|-----------|
 | `isKindOfClass:` | ✗ 缺失（有个**非标准**的 `- (BOOL)isKindOf:(Class)cls;`，`NFObject.gh:14`——命名就不合 ObjC） |
 | `respondsToSelector:` | ✗ 缺失 |
@@ -315,7 +315,7 @@ gald-lang/
 
 - **为什么最高优先**：这是 **100% ObjC 一致、零新语法**的一步，且它让 `match` 想解决的 90% 场景直接变得可写。正路是"先补齐 ObjC 现有词汇"，而不是"造一个新语句家族"。补完之后类型分发是纯方法链，且天然 nil 安全。
 - **命名纪律**：新方法名一律用 **ObjC 官方拼写**（`isKindOfClass:` 而非 `isKindOf:`）。现有的 `isKindOf:` 属历史遗留非标准命名——可保留作兼容别名，但新代码/文档用官方名。（是否给 `isKindOf:` 加 deprecation 警告待定，勿擅自改签名。）
-- **实现提示**：`isKindOfClass:` 走 isa 链比较（`isa` 是 Nupa 已有的直接字段访问，codegen 对 `[obj class]` 已有特判可参考）；`respondsToSelector:` 查 vtable 槽位（统一 VTable 下可按 selector 名映射下标）；`conformsToProtocol:` 查 checker 刚补的协议闭包（`checker.rs` `check_protocol_conformance` 已有遍历逻辑，但运行时需要 metadata 支持——见待定项）。
+- **实现提示**：`isKindOfClass:` 走 isa 链比较（`isa` 是 Gald 已有的直接字段访问，codegen 对 `[obj class]` 已有特判可参考）；`respondsToSelector:` 查 vtable 槽位（统一 VTable 下可按 selector 名映射下标）；`conformsToProtocol:` 查 checker 刚补的协议闭包（`checker.rs` `check_protocol_conformance` 已有遍历逻辑，但运行时需要 metadata 支持——见待定项）。
 - ⚠️ **待定**：`conformsToProtocol:` 的实现需要类元数据携带 protocol 列表（现在 `CgClassMeta` 有 `method_names` 等，是否已有 protocols 需先核实）；若没有则要先给元数据加字段（涉跨 TU 布局，需谨慎）。建议先做 `isKindOfClass:` + `respondsToSelector:` + `isEqual:` 三个不需要元数据的，`conformsToProtocol:` 单独评估。
 - **测试**：新增 `tests/golden/32_foundation_dispatch/`。
 
@@ -356,7 +356,7 @@ gald-lang/
   ```
   - 无指针字段的 POD 可退化为 `memcmp(&a, &b, sizeof a) == 0`；含指针字段则逐字段（`==` 对指针比地址，是 C 的常规做法）。
   - 发射时机仿 `@synthesize` getter 的生成路径（`codegen.rs` 的 `EMITTED_METHODS` 附近），每个 struct 发射一个 eq 函数；**按需发射**避免 C 里 `static` 未使用告警。
-- **checker 配套**：`check_conversion` / `check_sign_compare` 必须**跳过**结构体比较（它们只看标量，否则会误报）；`types_compatible` 对 `==` 两侧类型不一致时应报错（现状漏到 clang 才报，Nupa 应自己报）。
+- **checker 配套**：`check_conversion` / `check_sign_compare` 必须**跳过**结构体比较（它们只看标量，否则会误报）；`types_compatible` 对 `==` 两侧类型不一致时应报错（现状漏到 clang 才报，Gald 应自己报）。
 - **测试**：新增 `tests/golden/33_struct_eq/`。
 
 ##### 3. 协议组合 `P & Q` —— 复用 C 的 `&`，无新语法 ✅ 已实现（golden/31 扩展）
@@ -371,7 +371,7 @@ gald-lang/
   ```
 - **parser**：三处协议列表循环各加一个分支——`Identifier` 后跟 `Ampersand` 时收 `(Vec, "and", Vec)`。三处分别是：类型限定（`parse_type_full`）、`@interface`、`@protocol <parents>`。数据结构可给 `CstType` 加 `protocol_intersection: Option<(Vec<String>, Vec<String>)>`，或统一成 `ProtocolList` 枚举（`All([P,Q])` / `Intersection{left,right}`）。
   - 顺带：组合协议 `@protocol R <P & Q>` 在 binder 里把 P、Q 的 required 并入 R。
-- **codegen 零改动**：统一 VTable 下 `[recv foo]` 的槽位索引全局唯一，与接收者写 `Shape *` 还是 `id<P & Q>` 无关——**协议类型只是给 checker 用的编译期约束标签**。这正是 Nupa 比 ObjC 简单的地方：ObjC 靠运行时 `objc_msgSend` 兜底，Nupa 里它就是个编译期断言。
+- **codegen 零改动**：统一 VTable 下 `[recv foo]` 的槽位索引全局唯一，与接收者写 `Shape *` 还是 `id<P & Q>` 无关——**协议类型只是给 checker 用的编译期约束标签**。这正是 Gald 比 ObjC 简单的地方：ObjC 靠运行时 `objc_msgSend` 兜底，Gald 里它就是个编译期断言。
 - **checker**：`id<P & Q>` 接收者验证——取声明的静态类，沿 superclass 链 + protocols 闭包，验证 P 和 Q 的 required 方法集都被覆盖。复用 binder 已有的 `protocol_selectors`（递归父协议，已存在）。
   - **前置依赖**：待做 #1 的协议一致性检查（已完成，见上）已经把 `check_protocol_conformance` + `proto_table` 快照写好，本项在其上做增量即可。
 - **多 TU**：P & Q **不改变 vtable 槽位集合**（槽位由方法名决定），无新增布局错配风险。
@@ -403,7 +403,7 @@ int main() {                                // main 保持 int 返回值，await
 }
 ```
 - **`await` 走上下文关键词**（`is_contextual_kw_ident()` 机制），不挂 `@`（理由见通用规则）。`int await = 1;` 必须能编过（C 超集铁律）。
-- **ownership 正交**（已核实）：Nupa 的 ownership 本来就靠**方法名**推断，不依赖声明处标注（`crates/ownership/src/ownership.rs:28-38` 的 `init`/`alloc`/`new`/`copy`/`mutableCopy` 前缀）。故 `await [self alloc]` 的 +1/+0 判定完全不变，**async 不需要任何新的 ownership 规则或标注**。
+- **ownership 正交**（已核实）：Gald 的 ownership 本来就靠**方法名**推断，不依赖声明处标注（`crates/ownership/src/ownership.rs:28-38` 的 `init`/`alloc`/`new`/`copy`/`mutableCopy` 前缀）。故 `await [self alloc]` 的 +1/+0 判定完全不变，**async 不需要任何新的 ownership 规则或标注**。
 - **vtable 布局无影响**（已核实）：槽位由**方法名**决定、派发处统一 cast，故把 async 方法发射成状态机函数（返回 status、收 `task*`）**不改变槽位集合**，不引入跨 TU 布局错配。
 
 - ✅ **已定：同步入口 → 必须报错，不允许静默阻塞**
@@ -411,14 +411,14 @@ int main() {                                // main 保持 int 返回值，await
   理由："静默泵调度器"是单线程协作式调度下最大的实际风险——程序卡住但不报错，极难定位。放行方式只有一个：**入口方法**（async 链顶端，如 `+ (void)runAll`）编译成显式 blocking wrapper，内部 `gald_task_create` + 驱动调度器（`gald_task_join`）直到完成；单线程下泵动即有进展，不会死锁。
   - async 链内部正常传染（方法 `@await` 另一个 → 自己也变 async），无需任何标注，编译器按"函数体是否含 `@await`"逐层判定。
   - ❗因此"进入 async 需靠 `gald_task_start`/`gald_run_all` 手动驱动"的说法**作废**：API 只在入口 wrapper 内部使用，调用方看不见。`main` 保持 `int main()` 不变。
-  - 判据与 C++20 一致（`co_await` 只能出现在协程体内，从普通函数调协程要显式走 `get_return_object`/`resume`）；Nupa 简化为"入口方法自动 blocking"，因为静态派发下无需暴露 task 句柄。
+  - 判据与 C++20 一致（`co_await` 只能出现在协程体内，从普通函数调协程要显式走 `get_return_object`/`resume`）；Gald 简化为"入口方法自动 blocking"，因为静态派发下无需暴露 task 句柄。
 - ⚠️ **落地前必须先定的 4 项**（否则 desugar 形态会返工）：
   1. **入口方法识别规则**：约定"非私有、返回 `void`、且被同步上下文调用的 async 方法"；更严格方案需显式标记（已被"删修饰符"否决），故倾向在错误信息里给出修复提示。
   2. **语句位置的 `await`**：`await f();` 算"求值后丢弃"还是解析成 `(await f)()`？
   3. **跨 await 的 `@throw` / `@noarc` / break-continue**：jmp_buf 不能跨挂起点，需检测并报错（同函数内正常）。
   4. **`-emit-bridge-header`**：它按声明签名生成 wrapper，而 async 方法的发射签名不同（返回 status、收 `task*`），需跳过或特判。
-- ⚠️ **已知软肋（诚实记录）**：①**签名会撒谎**——头文件里看不出 `compute:` 会挂起（相对显式 `async` 标记的真实可读性损失）；②**传染性不可见**——谁在传染只有编译器知道；③**同一把尺子量 `await` 其实不完全干净**——ObjC 的异步答案是 **blocks + GCD**（`dispatch_async(queue, ^{...})`），Nupa 已有 blocks，所以"ObjC 一致"的话异步该长成 blocks 派发。`await` 仍值得做，因为 Nupa 的静态派发让状态机方案比 blocks 续体拆分干净得多——但这是取舍，不是"它更 ObjC"。真要极致一致，可做 `dispatch_async` + blocks（代价是每个挂起点手写续体）。
-- **备选（若日后嫌"签名撒谎"碍眼，本轮不采用）**：用**类型**而非关键字标记——`instancetype`/`id`/`Class`/`SEL` 这些纯 ObjC 概念在 Nupa 里都是**裸类型名**（没挂 `@`），故 `NFAsync<int> r = ...` 同样不破坏约定，且在头文件里可见。**→ 2026-09-29 反转为采用**（用户拍板）：作为**声明侧标记** `NFAsync<T>` 落地（仅返回类型位，变量位禁用），设计见下方"`NFAsync<T>` 声明标记"节。
+- ⚠️ **已知软肋（诚实记录）**：①**签名会撒谎**——头文件里看不出 `compute:` 会挂起（相对显式 `async` 标记的真实可读性损失）；②**传染性不可见**——谁在传染只有编译器知道；③**同一把尺子量 `await` 其实不完全干净**——ObjC 的异步答案是 **blocks + GCD**（`dispatch_async(queue, ^{...})`），Gald 已有 blocks，所以"ObjC 一致"的话异步该长成 blocks 派发。`await` 仍值得做，因为 Gald 的静态派发让状态机方案比 blocks 续体拆分干净得多——但这是取舍，不是"它更 ObjC"。真要极致一致，可做 `dispatch_async` + blocks（代价是每个挂起点手写续体）。
+- **备选（若日后嫌"签名撒谎"碍眼，本轮不采用）**：用**类型**而非关键字标记——`instancetype`/`id`/`Class`/`SEL` 这些纯 ObjC 概念在 Gald 里都是**裸类型名**（没挂 `@`），故 `NFAsync<int> r = ...` 同样不破坏约定，且在头文件里可见。**→ 2026-09-29 反转为采用**（用户拍板）：作为**声明侧标记** `NFAsync<T>` 落地（仅返回类型位，变量位禁用），设计见下方"`NFAsync<T>` 声明标记"节。
 - **实现体量**：状态机 desugar（新 crate `crates/async`，位置与 `crates/arc` 同构——在 elaborator 之后独立 pass）+ 运行时 API（`include/gald/runtime.h` 加约 100 行：`gald_task_create` / `gald_task_resume` / `gald_task_join` / `gald_run_all`）。
   - **局部变量提升**：所有活过 await 点的局部变量提升进 task 结构。（历史先例是 @try 的 TRY_LIFT shadow 机制——已因双重释放删除，见"@try 双重释放 UAF 修复"节；M3 提升进 task frame 的思路相同，但释放结算归 ARC/任务退出汇合点。）
   - **ARC 结算**：任务完成/取消时对提升到 task 结构里的对象局部逐个 `gald_release`（在"任务退出"这个汇合点统一结算，比在每个 await 点插 release 更简单且正确）。
@@ -673,11 +673,11 @@ int main() {                                // main 保持 int 返回值，await
 - **AST**：`CstExprData::Await(Box)` / `AstExprData::Await(Box)`；elaborator 直转；checker 返回内部类型；codegen passthrough 安全网。
 - **检查层**（`gald_async::check_unit`，desugar 前跑原始 AST）：@try 跨 await（try/catch/finally 任一含 await）+ 同步上下文调非 void async。⚠️ 坑：必须同时走 `Class.methods` **和顶层 `Function`（main）**——初版漏了 main，负例自测时抓到。
 - **desugar**（`gald_async::desugar_unit`，Step 4.8 在 ARC/checker 前）：**不改方法签名**（vtable 槽位不动、跨 TU 安全、bridge header 零特判）。`@await e` → `(gald_task_resume(__gald_task), e)`；方法体包 `gald_task_create(0, self, 0)` / `gald_task_join(...)`。M1 entry=NULL → resume 即完成返回 1（纯 API 契约钩子，行为=同步执行）。
-- **runtime**（runtime.{h,c}）：`NupaTask{state,finished,entry,self_obj,frame,result,parent}` + create/resume/finish/join；host 用 calloc/free（⚠️ 不是 `gald_malloc`——那是 freestanding 用户提供符号，链接 libgald.a 会 undefined）。⚠️ 坑：改 runtime.c 后 `touch` 不够，需 `rm target/debug/libgald.a` + touch 才会重编（galdc 优先链静态库）。
+- **runtime**（runtime.{h,c}）：`NFTask{state,finished,entry,self_obj,frame,result,parent}` + create/resume/finish/join；host 用 calloc/free（⚠️ 不是 `gald_malloc`——那是 freestanding 用户提供符号，链接 libgald.a 会 undefined）。⚠️ 坑：改 runtime.c 后 `touch` 不够，需 `rm target/debug/libgald.a` + touch 才会重编（galdc 优先链静态库）。
 - **M2 待做**：真状态机 `switch(t->state)` 拆段、活过挂起点的局部提升进 frame（仿已删除的 TRY_LIFT 思路，见 UAF 修复节——释放结算归任务退出汇合点）、break/continue → 状态跳转、ARC 任务退出汇合点统一结算、`gald_task_step`/bridge wrapper/`gald_run_all`。
 
 #### #4 await 里程碑 2 ✅（2026-09-27，本会话续）—— 真状态机
-- **两函数形态**：每个 async 方法 M 编译为 ①`static`入口 `gald_async_state_<M>(NupaTask *t)`——body 包在 `switch(t->state)` 的 `case 1:` 里，尾部 `case <final>:` 完成；②原 vtable 函数体变 **driver**：`t = gald_task_create(entry, self, sizeof(struct <M>_frame))` → 装填 frame 参数 → `gald_task_join(t)` → 非 void 再 `return (T)__gald_r`。**签名不变**（vtable 槽位/跨 TU/bridge header 零影响）。
+- **两函数形态**：每个 async 方法 M 编译为 ①`static`入口 `gald_async_state_<M>(NFTask *t)`——body 包在 `switch(t->state)` 的 `case 1:` 里，尾部 `case <final>:` 完成；②原 vtable 函数体变 **driver**：`t = gald_task_create(entry, self, sizeof(struct <M>_frame))` → 装填 frame 参数 → `gald_task_join(t)` → 非 void 再 `return (T)__gald_r`。**签名不变**（vtable 槽位/跨 TU/bridge header 零影响）。
 - **frame struct**：`struct <M>_frame` 只装**参数**（M2 同步驱动模型下局部变量在单次 resume 内完成生命周期，留在 C 栈；M3 才提升真正跨 await 的局部）。⚠️ 坑：codegen 的 Struct 分支只认 `AstDeclData::Ivar` 字段（Variable 会被跳过发射成空 struct）；零参数方法 frame 为空 → codegen 跳过发射 → `sizeof` incomplete type，需填充位字段 `char __gald_pad`。
 - **entry 内改写**：参数引用 → `__gald_f->param`、`self` → `t->self_obj`（entry 只收 task）；`return e` → `t->result = (void*)(unsigned long)(e); t->state = -1; return 1;`（完成协议）；`await e` → `(t->state = N, e)`（Comma：推进状态 + 求值）。
 - **runtime 修复**：`gald_task_create` 初始 `state = 1`（原来 0 不匹配任何 case → switch 掉空、行为未定义——用 lldb 断点 + 源码插 printf 定位）。
@@ -696,7 +696,7 @@ int main() {                                // main 保持 int 返回值，await
 |------|------|------|------|
 | 裸机 | `tests/stress/baremetal/build.sh` | `-fno-libc` 转译 + `runtime_freestanding.c`（bump allocator）+ `helpers.c` + ARM64 `asm_ext.s`，clang 链接 | ✅ 47 项检查全过（struct ==/嵌套 eq、enum switch、继承+super、协议 P&Q、id<P>、for-in 自定义集合+typed for-in、typed @catch 链+finally+父链 catch（SubErr）、@selector、blocks+__block、Box<int*>、内联 asm+asm goto、fnptr→asm、@synchronized+提前 return+relock、@noarc/@autoreleasepool、nil 消息、respondsToSelector、typeof/builtin；Sep 2026 新语法批：@defer LIFO+提前 return、switch 模式匹配（标量 range/when + 对象 Bind + 臂序）、成员 fn-ptr 直调、enum 形参（TagKind）、nullability 注解（`_Nonnull`/`_Nullable`）+ `nullable`/`in` 作标识符、宏轨道过滤（BM_MAX 透传 / `@"..."` 宏 C 轨剔除）、__weak 赋值重注册+清零、NFAsync<T> 标记+@await 链） |
 | 标准库 | `tests/stress/hosted/`（`galdc run hosted_test.gm -asm asm_host.s`） | Foundation 全量 + ARC + `@await` | ✅ 33 项全过（上表全部 + NFString/NFArray/NFMutableArray/variadic ctor/@42/@1.5/NFLog %@"、嵌套 for-in、isKindOfClass:/respondsToSelector:/isEqual: 分发链、Renderable=<Drawable&Serializable> 组合协议、双泛型特化、嵌套 @try/finally 顺序、__weak、`@await` 状态机 result=43） |
-| 三方联编 | `tests/stress/interop/build.sh` | Nupa lib.gm → lib.c + **桥接头 lib.h**；C caller.c + helper.c + ARM64 asm_lib.s + runtime.c 四方一个 clang 链接 | ✅ 5 项全对（C→Nupa 自由函数→asm、C→Nupa alloc/init/消息、Nupa 方法→asm、Nupa 方法→C helper、Nupa 方法内 block） |
+| 三方联编 | `tests/stress/interop/build.sh` | Gald lib.gm → lib.c + **桥接头 lib.h**；C caller.c + helper.c + ARM64 asm_lib.s + runtime.c 四方一个 clang 链接 | ✅ 5 项全对（C→Gald 自由函数→asm、C→Gald alloc/init/消息、Gald 方法→asm、Gald 方法→C helper、Gald 方法内 block） |
 
 #### 压测挖出的编译器 bug
 
@@ -1175,7 +1175,7 @@ block 字面量参数表里的**无名 `void`** 不是参数（C 写法；旧实
 - `golden/11_multi_file_union/diamond_impl-F.gm` — FAIL (no main entry, library-style multi-file test，被 `cross_file_test.gm` #import)
 - **Variadic selector 支持状态（待办，用户后续修复）**——语法已支持（`sel:a, b, c, nil`），缺的是库与 codegen：
   - **库缺失**：`NFSet`/`NFMutableSet`/`NFDictionary`/`NFMutableDictionary`/`NFOrderedSet`/`NSPredicate` 这些类根本不存在；`NFString` 的 `stringWithFormat:`/`initWithFormat:`/`stringByAppendingFormat:` 与 `NFMutableString` 的 `appendFormat:` 方法未声明；`NFArray`/`NFMutableArray` 只有 `initWithObjects:count:`（无 variadic `initWithObjects:`）；无 `NSAssert` 宏。
-  - **codegen 缺失**：Nupa 无运行时 `va_list`，真正的 variadic 方法无法用 Nupa 实现，只能按 selector 特判落到运行时 helper。目前只有 `arrayWithObjects:` 一个特判（desugar 成 `@[...]`），且它丢弃 receiver——`[NFMutableArray arrayWithObjects:...]` 会静默得到不可变 `NFArray`。
+  - **codegen 缺失**：Gald 无运行时 `va_list`，真正的 variadic 方法无法用 Gald 实现，只能按 selector 特判落到运行时 helper。目前只有 `arrayWithObjects:` 一个特判（desugar 成 `@[...]`），且它丢弃 receiver——`[NFMutableArray arrayWithObjects:...]` 会静默得到不可变 `NFArray`。
   - **待修**：(a) `[NFMutableArray arrayWithObjects:...]` 保留可变性；(b) 未知 variadic selector 给出清晰 `error` 而非生成坏 C；(c) 视需要为 `stringWithFormat:` 系列复用 `NFLog` 的编译期 `%@` 展开。
 
 ### Header-Only Class Linking — Implemented ✅ (Aug 2026)
@@ -1205,7 +1205,7 @@ block 字面量参数表里的**无名 `void`** 不是参数（C 写法；旧实
   - `alias_shared` — `Item *alias = shared` shares the same object (`retain`→2, two `release`→0).
   - `if_else_branch` — `── if ──`/`── else ──` branch state cloning (both end at 0).
   - `autoreleasepool_nested` — nested pools with manual `autorelease` inside `@noarc`: each `pool pop` frees exactly its own object.
-- ✅ All `.gm` files are valid, runnable Nupa programs (import `gald/runtime.h` + `Foundation/NFObject.{nh,np}` only, keeping trace output free of Foundation noise) — they pass the normal `galdc run` path used by `test_all.py`'s glob.
+- ✅ All `.gm` files are valid, runnable Gald programs (import `gald/runtime.h` + `Foundation/NFObject.{nh,np}` only, keeping trace output free of Foundation noise) — they pass the normal `galdc run` path used by `test_all.py`'s glob.
 - ⚠️ `! gald_release on untracked self` lines at 32:5 / 60:5 come from the inlined `NFObject.gm` `-release`/`-dealloc` bodies (releasing untracked `self`) — expected noise, part of the golden snapshot.
 
 ### Namespace `@class` Forward Decl + `@using` Conflict Detection — Implemented (Aug 2026)
@@ -1230,7 +1230,7 @@ block 字面量参数表里的**无名 `void`** 不是参数（C 写法；旧实
 - **ARC analyzer** (`crates/arc/src/arc.rs`): `@noarc` blocks are skipped entirely — no release injection.
 - **Checker** (`crates/checker/src/lib.rs`): `in_noarc` flag toggled while walking a `NoArc` body; `retain`/`release`/`dealloc`/`autorelease` outside `@noarc` (and outside the implementation of the matching runtime method) error in ARC mode. `Checker.no_arc` is set from pipeline's `-fno-gald-arc`.
 - **Codegen** (`crates/codegen/src/codegen.rs`): emits the body as-is, no ARC injection.
-- **Foundation**: NFString/NFMutableString convenience constructors (`+stringWithUTF8String:`/`+stringWithString:`) wrap their deliberate `autorelease` in `@noarc { }`, since Nupa's ARC does not auto-inject autorelease-on-return.
+- **Foundation**: NFString/NFMutableString convenience constructors (`+stringWithUTF8String:`/`+stringWithString:`) wrap their deliberate `autorelease` in `@noarc { }`, since Gald's ARC does not auto-inject autorelease-on-return.
 - **Test**: `tests/noarc_test.gm`.
 
 ### ARC Rewrite — RefVal State Machine (Aug 2026) ✅
@@ -1257,7 +1257,7 @@ block 字面量参数表里的**无名 `void`** 不是参数（C 写法；旧实
   3. `RefVal` 状态机（`RetainCountChecker.h`）— 路径敏感符号执行追踪每个对象
   4. `__attribute__((ns_returns_retained))` 等注解标记方法所有权
   5. `objc_retainAutoreleasedReturnValue` 配对优化 — 跨函数调用约定打标
-- **Nupa 为什么简单很多**：Nupa 是**静态 vtable 派发**，编译期已知方法签名和调用目标：
+- **Gald 为什么简单很多**：Gald 是**静态 vtable 派发**，编译期已知方法签名和调用目标：
   1. **不需要**摘要表 — `ownership_for_method` 的 alloc/new/copy/init 命名约定 + init 链追踪已足够
   2. **不需要**指令分类 — AST 上直接识别 `MsgSend(selector=="retain")` 等
   3. **不需要**别名分析 — 变量就是名字，没有 `id` 动态类型问题
@@ -1269,11 +1269,11 @@ block 字面量参数表里的**无名 `void`** 不是参数（C 写法；旧实
   - `include/clang/Analysis/RetainSummaryManager.h` — 摘要类型定义（`ArgEffect`/`RetEffect`/`RetainSummary`）
 
 ### 错误检测 + Checker 完善计划（Aug 2026）
-借鉴 clang 的分层设计，全部 Nupa 化（静态 vtable 派发，不依赖 ObjC 运行时）。
+借鉴 clang 的分层设计，全部 Gald 化（静态 vtable 派发，不依赖 ObjC 运行时）。
 
 **总体架构对应：**
 
-| clang | Nupa |
+| clang | Gald |
 |-------|------|
 | `Parse/` 错误恢复（`SkipUntil`） | `crates/parser` — 替换 `panic_mode` |
 | `SemaDeclObjC.cpp` | `checker` — 声明语义检查 |
@@ -1285,7 +1285,7 @@ block 字面量参数表里的**无名 `void`** 不是参数（C 写法；旧实
 **阶段 1：Parser 错误恢复（最影响日常体验）**
 - **现状**：`panic_mode` 遇到第一个错误就停止，一次编译只报一个错
 - **clang 做法**：`Parser::SkipUntil` 跳到分号/大括号等恢复点，继续解析
-- **Nupa 化方案**：
+- **Gald 化方案**：
 
 | 场景 | 恢复 token | 效果 |
 |------|-----------|------|
@@ -1297,7 +1297,7 @@ block 字面量参数表里的**无名 `void`** 不是参数（C 写法；旧实
 
 **阶段 2：结构错误检测**
 - **clang 做法**：`Parser::ParseObjCAtEnd` 检查 `@interface/@implementation/@protocol` 是否匹配
-- **Nupa 化**：增加 `@interface`/`@implementation`/`@protocol`/`@namespace` 的嵌套栈追踪
+- **Gald 化**：增加 `@interface`/`@implementation`/`@protocol`/`@namespace` 的嵌套栈追踪
 
 | 检测 | 实现位置 |
 |------|---------|
@@ -1312,7 +1312,7 @@ block 字面量参数表里的**无名 `void`** 不是参数（C 写法；旧实
 - **现状**：checker 已有类型兼容性、协议一致性、裸串检查
 - **需要新增**（参考 `SemaDeclObjC.cpp` + `SemaObjCProperty.cpp` + `SemaExprObjC.cpp`）：
 
-| 检查项 | clang 文件 | Nupa 位置 |
+| 检查项 | clang 文件 | Gald 位置 |
 |--------|-----------|-----------|
 | 方法签名 `@interface` 与 `@implementation` 匹配 | `SemaDeclObjC.cpp` | `elaborator`（已有部分） |
 | `@property` 属性冲突（同时 assign+retain） | `SemaObjCProperty.cpp` | `checker` |
@@ -1329,7 +1329,7 @@ block 字面量参数表里的**无名 `void`** 不是参数（C 写法；旧实
 
 **阶段 4：语法建议（clang 的 `-W` 诊断 + Typo 修正）**
 - **clang 做法**：`Sema::CorrectTypo` 在未定义名称时查找最接近的已有名称
-- **Nupa 化**：编辑距离 + 符号表查找
+- **Gald 化**：编辑距离 + 符号表查找
 
 | 特性 | 实现 |
 |------|------|
@@ -1340,7 +1340,7 @@ block 字面量参数表里的**无名 `void`** 不是参数（C 写法；旧实
 
 **阶段 5：死代码/未使用变量 warning**
 - **clang 做法**：`-Wunused-variable`、`-Wunused-function`、`-Wunreachable-code`
-- **Nupa 化**：在 checker 中遍历 AST
+- **Gald 化**：在 checker 中遍历 AST
 
 | 检测 | 触发条件 | 状态 |
 |------|---------|------|
@@ -1349,21 +1349,21 @@ block 字面量参数表里的**无名 `void`** 不是参数（C 写法；旧实
 | 空 `@try`/`@catch` 块 | 没有语句的块 | ✅ 已实现（`is_empty_compound`） |
 | 多余的 `@synthesize` | 自动合成的属性不需要手动 @synthesize | ⏳ 待实现 |
 
-**阶段 6：C 语法检测（⚠️ 铁律：Nupa 是 C 超集，绝不能打断 Nupa 语法）**
+**阶段 6：C 语法检测（⚠️ 铁律：Gald 是 C 超集，绝不能打断 Gald 语法）**
 - clang 的 C 检测（`-Wconversion`、`-Wsign-compare`、`-Wincompatible-pointer-types` 等）借鉴时要极其小心：
-  - **Nupa 是 C 超集**：`[obj msg]`、`@interface`、`@property`、`@namespace` 等 Nupa 特有语法在 C 检测中必须被视为合法
-  - **只加不改**：C 检测只能**新增** warning/error，绝不能**更改** Nupa 已有的合法语法解析路径
-  - **白名单**：C 检测应该作用于纯 C 表达式/语句（`int a = b + c;`、指针转换等），跳过高层级 Nupa 构造（消息发送、特性语法）
+  - **Gald 是 C 超集**：`[obj msg]`、`@interface`、`@property`、`@namespace` 等 Gald 特有语法在 C 检测中必须被视为合法
+  - **只加不改**：C 检测只能**新增** warning/error，绝不能**更改** Gald 已有的合法语法解析路径
+  - **白名单**：C 检测应该作用于纯 C 表达式/语句（`int a = b + c;`、指针转换等），跳过高层级 Gald 构造（消息发送、特性语法）
   - **回归守护**：每次加 C 检测后必须跑 `test_all.py`，确认 192/202 基线无回归
-- 候选检测项（参考 clang `-W` 系列，全部 Nupa 化）：
-  | clang 警告 | Nupa 落地 | 状态 |
+- 候选检测项（参考 clang `-W` 系列，全部 Gald 化）：
+  | clang 警告 | Gald 落地 | 状态 |
   |-----------|----------|------|
   | `-Wconversion`（隐式类型转换） | `check_conversion`（`crates/checker`）：浮点→整数精度丢失、整数降精度（long→int）、同宽符号性转换；Int 字面量在目标范围内则豁免（`literal_in_range`，避免 `unsigned int u = 5` 误报） | ✅ |
   | `-Wsign-compare`（符号比较） | `check_sign_compare`：二元比较左右操作数符号性不同则警告（signed vs unsigned）；只作用于纯 C 标量，跳过消息发送 | ✅ |
   | `-Wreturn-type`（缺 return） | `has_return_stmt` + `check_decl`：非 void 函数/方法体无任何 return 则警告（init 方法豁免） | ✅ |
   | `-Wunused-function`（未使用函数） | `declared_functions` + `called_functions`（FuncCall 记录调用）：顶层非 `main` 函数从未被调用则警告 | ✅ |
   | `-Wuninitialized`（未初始化变量） | `var_decls` 扩展 `(line, used, assigned)`：声明带 init 或之前有赋值才 `assigned=true`；VarRef 读取 `assigned=false` 则警告。`x = x + 1` 等 RHS 读取在标记 LHS 之前检查 | ✅ |
-- **Nupa 超集安全护栏**（`check_conversion`/`check_sign_compare` 内部的跳过列表）：
+- **Gald 超集安全护栏**（`check_conversion`/`check_sign_compare` 内部的跳过列表）：
   - 对象/指针类型（Id/Class/Sel/Instancetype/Named-pointer）一律跳过
   - `MsgSend` 表达式（`[obj foo]`）跳过 —— 返回 `id`，不做标量转换判断
   - 泛型类型 receiver（`[LogBuffer<LogEntry*> alloc]`）和命名空间限定名（`A::B`）跳过 —— 它们是类型引用不是变量
@@ -1410,10 +1410,10 @@ block 字面量参数表里的**无名 `void`** 不是参数（C 写法；旧实
 ### Unit Tests
 - `cargo test` — 41/41 pass（lexer / parser / cst_print / cst_visit / symbol / binder / checker / preprocessor 等）；集成由 `test_all.py` 驱动，回归基线见上方 Tests Status。
 
-### Soma Kernel — NASM + C + Nupa 三语 i386 内核 ✅ (Aug 2026)
-- ✅ `examples/04_soma-kernel/` — 32 位保护模式内核，`boot/boot.asm`(引导+读盘+A20+GDT+进 PM) + `kernel/{entry,isr}.asm`(入口/IDT 桩) + `kernel/{kernel,hw}.c`(VGA/串口/kprintf/IDT/PIC/PIT/mem*/str*) + `gald/soma_core.gm`(Nupa 内核模块)。
+### Soma Kernel — NASM + C + Gald 三语 i386 内核 ✅ (Aug 2026)
+- ✅ `examples/04_soma-kernel/` — 32 位保护模式内核，`boot/boot.asm`(引导+读盘+A20+GDT+进 PM) + `kernel/{entry,isr}.asm`(入口/IDT 桩) + `kernel/{kernel,hw}.c`(VGA/串口/kprintf/IDT/PIC/PIT/mem*/str*) + `gald/soma_core.gm`(Gald 内核模块)。
 
-### Nupa 原生裸机支持 — `-fno-libc`（freestanding mode）✅ (Aug 2026)
+### Gald 原生裸机支持 — `-fno-libc`（freestanding mode）✅ (Aug 2026)
 - ✅ **编译器级裸机支持**（不再靠内核侧手写 runtime）：新增 `galdc -fno-libc` 开关（`pipeline.no_libc`）。
   - **codegen** `emit_unit_with_headers(.., freestanding)`：freestanding 时不发 `#include <string.h>`，改发 `#define __GALD_FREESTANDING 1` + `#include <gald/runtime.h>`。
   - **`include/gald/runtime.h`** 加 `__GALD_FREESTANDING` 分支：不 include `<setjmp.h>/<stdarg.h>`；`jmp_buf` 自定 + `setjmp/longjmp` 映射到 `__builtin_setjmp/__builtin_longjmp`（零 libc）；异常全局 `__gald_exception_buf/__gald_exception_value` 由 `__thread` 改为普通全局（单核裸机）；声明 `extern NFClass gald___gald_root_class;` + `void *memcpy(...)`（用户提供定义）。
@@ -1423,7 +1423,7 @@ block 字面量参数表里的**无名 `void`** 不是参数（C 写法；旧实
 - ✅ **soma-kernel 已改用编译器裸机支持**：删掉内核侧手写 `include/gald/runtime.h` 和 `include/setjmp.h`；Makefile 用 `galdc -rewrite-gald -fno-libc` 转译，CFLAGS 加 `-I../../include -D__GALD_FREESTANDING`；kernel.c include 编译器真实 `<gald/runtime.h>` 并定义 `gald___gald_root_class` + 异常全局 + `memcpy`。
 - ✅ **回归**：全量套件 154/161 不变。
 
-### Nupa 裸机分配器 — bump allocator + `[[Class alloc] init]` ✅ (Aug 2026)
+### Gald 裸机分配器 — bump allocator + `[[Class alloc] init]` ✅ (Aug 2026)
 - ✅ **`include/gald/runtime_freestanding.c`**：提供 bump allocator（16KB 静态 arena + 偏移指针）+ `gald_malloc`/`gald_free`/`gald_alloc`/`gald_init`/`gald_retain`/`gald_release`/`gald_autorelease`。`gald_alloc` 用 `memset` 清零后设 `isa`/`retain_count`，`gald_release` 计数归零后调 `gald_free`。
 - ✅ **零样板**：`runtime_freestanding.c` 现在自含 `gald___gald_root_class`、异常全局（`__gald_exception_buf`/`__gald_exception_value`，含 `__GALD_FREESTANDING` 分支：裸机普通全局 / 宿主 `__thread`）、`memcpy`。用户只需链接它，不再手写任何运行时全局。soma-kernel 的 kernel.c 和 golden 的 helpers.c 已移除重复定义。
 - ✅ **`<string.h>` 移除 + 三头契约（Sep 2026）**：`runtime_freestanding.c` 实际只用 `memset`（`gald_alloc` 清零一处），而 `memcpy` 本就是它自带的 weak 定义——字符串函数从未用到，却 include `<string.h>`（不在 C11 freestanding 强制头集合里）。已删该 include，`memset` 照 runtime.h 对 `memcpy` 的同款守卫自声明（`#ifndef memset` + 原型——`-ffreestanding` 下编译器仍可能自行生成 memset/memcpy 调用，最终镜像必须提供符号）；头注释契约同步改为"用户只需提供 freestanding 三头（stdint/stddef/stdbool）"。**before/after 探针**：`-nostdinc -isystem <clang-resource>/include`（libc 头被剥、freestanding 三头可用、无 string.h——模拟"内核不带 string.h"）下 HEAD 版 `fatal error: 'string.h' file not found`、修复版 rc=0。**回归**：golden/25 exit=0、baremetal stress exit=0、soma-kernel 同款旗标（`-nostdinc -ffreestanding -fno-builtin -target i386-none-elf`）单文件编译 rc=0 产出 i386 ELF。⚠️ **关键事实（探针实证）**：clang 21 的 `-nostdinc` 连 **builtin 资源目录也剥掉**（裸 `#include <stddef.h>` 直接 fatal error）——加 `-nostdinc` 的内核必须**自行提供三头**（soma-kernel 的 `include/` 正是如此）；不加时 clang builtin 目录（`clang -print-resource-dir`/include）自带的 9 个 freestanding 头（stddef/stdint/stdbool/stdarg/float/limits/stdalign/stdnoreturn/iso646）兜底。
@@ -1494,7 +1494,7 @@ block 字面量参数表里的**无名 `void`** 不是参数（C 写法；旧实
 - ✅ **回归**：test_all 187/198（4 个既有失败不变）、cargo unit 41/41。
 
 ### C 桥接头 `--emit-bridge-header` — Implemented ✅ (Aug 2026)
-- ✅ **背景**：C 直接调用 Nupa 对象方法要写 vtable 下标 / SEL 常量，很长。codegen 本来已为每个方法生成命名 C 函数（`NFString_UTF8String(NFObject*, SEL, ...)`），但 SEL 常量是 `static const`（跨文件不可见），且每次调用要传 `__gald_sel_xxx`。
+- ✅ **背景**：C 直接调用 Gald 对象方法要写 vtable 下标 / SEL 常量，很长。codegen 本来已为每个方法生成命名 C 函数（`NFString_UTF8String(NFObject*, SEL, ...)`），但 SEL 常量是 `static const`（跨文件不可见），且每次调用要传 `__gald_sel_xxx`。
 - ✅ **新增 `galdc -emit-bridge-header <file.h>`**：生成一个 C 桥接头，为每个类方法/实例方法输出三样东西：(1) 生成函数的 `extern` 声明；(2) 类前向声明（`struct NFString; typedef struct NFString NFString;`）+ `NFRange` 定义；(3) `static inline` 包装函数 `gald_Class_method(...)`，内部用 `sel_registerName("原selector")` 拿 SEL（避开 `static const` SEL 常量跨文件不可见问题），类方法自动带 `&GALD_CLASS_$_Class`。跳过 `gald_root` 内部根类。
 - ✅ **用法**：`galdc -rewrite-gald lib.gm -o lib.c -emit-bridge-header lib.h`，然后 `clang caller.c lib.c include/gald/runtime.c -I include -o app`。C 侧 `#include "lib.h"` 后直接 `NFString *s = gald_NFString_stringWithUTF8String_("hi");`。⚠️ 调用方 `main` 必须先 `gald_metaInit()` 初始化类元数据。
 - ✅ **实现**：`crates/codegen/src/codegen.rs` 新增 `emit_bridge_header(&CgUnit)`；`CgClassMeta`/`ClassInfo` 新增 `method_sel_names`（存原始 selector 带冒号，供 `sel_registerName`）；继承合并逻辑同步处理 `method_sel_names`。pipeline 加 `bridge_header: Option<String>`，Step 6.5 写文件。CLI 加 `-emit-bridge-header`（单/双横杠均可，已加入 `norm_flag`/`galdc_flags`/completions）。
@@ -1517,7 +1517,7 @@ block 字面量参数表里的**无名 `void`** 不是参数（C 写法；旧实
 - ✅ **`xx_t` 类型解析修复**：parser 原本只有硬编码 typedef 名列表（`size_t`/`FILE` 等），`clock_t t0 = clock();` 会被当表达式而失败。修复 `is_declaration_start`：`IDENT IDENT`（如 `clock_t t0`）判为声明，覆盖所有系统头 typedef；并排除复合赋值（`x *= e`、`x <<= e`）。补全常用 POSIX 类型（`clock_t`/`time_t`/`off_t`/`pid_t`/`mode_t` 等）。
 - ✅ **Block 字面量格式修复**：clang 后端 `emit_expr` 的 `CgExprData::BlockLit` 原来用 `emit_stmt` 发射函数体，产生多行 + 尾换行，导致函数调用参数里的块块 `);` 换行错乱。新增 `emit_stmt_inline`（单行语句发射器），块块体改为单行 `{ return (a < b); }`。
 - ✅ **gcc 后端 invoke 函数双大括号修复**：block 展开时 `convert_expr` 预写 `{` 又经 `emit_stmt` 再写 `{`，产生 `{ { ... } }`。现改为不预写 `{`，交给 body 的 Compound 自闭环。
-- ✅ **`tests/timsort_test.gm`**：Nupa 语法版 Timsort（`@interface`/`@implementation`、多段 selector `- (void)lowerBound:lo:hi:key:using:`、Block 比较器、`@autoreleasepool`、`NFLog(@"%@")`、`@public` ivar）。stdin 读数字 → 排序 → 打印 + 耗时。已验证 15/300/500/700/1000 全对、已排序输入自适应加速。
+- ✅ **`tests/timsort_test.gm`**：Gald 语法版 Timsort（`@interface`/`@implementation`、多段 selector `- (void)lowerBound:lo:hi:key:using:`、Block 比较器、`@autoreleasepool`、`NFLog(@"%@")`、`@public` ivar）。stdin 读数字 → 排序 → 打印 + 耗时。已验证 15/300/500/700/1000 全对、已排序输入自适应加速。
 - ✅ **回归**：test_all **191/201**（3 个既有失败不变）、cargo unit 41/41。
 
 ### Generated C 可读性注释 — Implemented ✅ (Aug 2026)
@@ -1553,7 +1553,7 @@ block 字面量参数表里的**无名 `void`** 不是参数（C 写法；旧实
 - ✅ **`@数字字面量`（boxing literal）**：`@123` / `@1.5` / `@1e3` 以前 `@` 被 lex 成 Error token（`@1, @2` 报 `expected ']' after message send`）。现在：
   - **lexer**：`@` 后跟数字 → 新增 `TokenKind::AtNumber`（扫描整数/小数/指数，`.` 仅在后跟数字时消费，避免吞 `@1.foo`）。
   - **parser**：`AtNumber` 在 `parse_primary` 里 desugar 成普通类方法发送 `[NFNumber numberWithInt:N]`（浮点用 `numberWithDouble:`），复用全部消息派发路径，无需新 AST 变体。
-  - **`include/Foundation/NFNumber.{nh,np}`**（**NP 前缀**，非 NS）：`+numberWithInt:/numberWithLongLong:/numberWithDouble:/numberWithBool:`、`-intValue/longLongValue/doubleValue/boolValue`、`-description`（`snprintf` → NFString）、`-isEqualToNumber:`；已并入 `Foundation.gh`。
+  - **`include/Foundation/NFNumber.{nh,np}`**（**NF 前缀**，非 NS）：`+numberWithInt:/numberWithLongLong:/numberWithDouble:/numberWithBool:`、`-intValue/longLongValue/doubleValue/boolValue`、`-description`（`snprintf` → NFString）、`-isEqualToNumber:`；已并入 `Foundation.gh`。
   - 验证：`NFNumber *n = @42; NFLog(@"%@", n)` → `42`；`@[ @1, @2, @3 ]` → `[1, 2, 3]`。
 - ✅ **ObjC variadic 集合构造器已支持**：`[NFArray arrayWithObjects:a, b, c, nil]`（单冒号选择子 + 逗号多参）已可用。
   - **parser**：消息发送的 `sel:` 分支收集逗号分隔的附加实参；当 `args.len() > selector 冒号数` 且 selector 为 `arrayWithObjects:` 时，desugar 成数组字面量 `@[a, b, c]`（丢弃结尾 `nil`），复用既有 `gald_array_create` 路径（parser 里 `parse_primary` 的 message-send 分支）。
@@ -1739,7 +1739,7 @@ vtable 错配的 runtime 诊断原来建议"re-run galdc on ALL .gm files"——
   - `@'c'` → `[NFNumber numberWithChar:'c']`（parser desugar；`NFNumber` 新增 `+numberWithChar:` / `-charValue`，`.gh` + `.gm` 同批）
   - `@(expr)` → **checker 按操作数静态类型改写成对应工厂**：`double`/`float`→`numberWithDouble:`、BOOL→`numberWithBool:`、`char`→`numberWithChar:`、`long`/`long long`→`numberWithLongLong:`、其余整数（含 typedef 整数）→`numberWithInt:`。
 - **为什么落在 checker 而不是 parser**：parser 没有类型；后端是 **C99**，不能依赖 `_Generic`。与既有"对象下标改写""struct `==` 改写"同一先例——复用 `MsgSend` 节点构造，下游静态派发／nil 守卫／SEL 常量零特判。
-- **非算术类型报错（判断点①）**：`@(someObj)` → `illegal type 'NFString *' in a boxed expression — '@(...)' accepts arithmetic and BOOL values only`（对齐 ObjC 的 "illegal type in boxed expression"；Nupa 无字符串装箱，静默把指针当数值发出去会掩盖错误）。负例 `tests/negative/boxed_illegal_type.gm`，报 `file:line:col` 精确。
+- **非算术类型报错（判断点①）**：`@(someObj)` → `illegal type 'NFString *' in a boxed expression — '@(...)' accepts arithmetic and BOOL values only`（对齐 ObjC 的 "illegal type in boxed expression"；Gald 无字符串装箱，静默把指针当数值发出去会掩盖错误）。负例 `tests/negative/boxed_illegal_type.gm`，报 `file:line:col` 精确。
 - **顺带修掉的真 bug（探针实测暴露）**：checker 的 `ArrayLit` 臂只回 `id`、**从不遍历元素** → `@[ @(i + 1) ]` 里那个 `@(expr)` 永远拿不到 `expr_type`、不被改写，生成 C 为 `gald_array_create(3, <NFNumber>, (i + 1), <NFNumber>)`——**裸 int 混进对象数组**；编译通过、运行期才炸（exit=1，且前 5 段输出正常后又静默退出，极具迷惑性）。修法：`ArrayLit` 臂逐元素 `check_expr`（元素同时拿到 `expr_type`）。
 - **改动链**：lexer 零改动（token 已有）；parser（`@YES`/`@NO`/`@'c'` desugar + `@(` 分支 + `mk_nfnumber_send` helper 收敛工厂发射）；CST/AST 新增 `Boxed` 表达式节点（elaborator 直转）；checker `maybe_rewrite_boxed_expr` + `ArrayLit` 遍历修复；codegen 兜底臂（`-fno-checker` 下按内层表达式透传）。
 - **测试**：`tests/boxed_literal_test.gm`（7 段：字面量／表达式／BOOL／char 往返／链式接收者 `[@(i * 2) intValue]`／数组字面量／值相等）exit=0 逐项正确；负例 `tests/negative/boxed_illegal_type.gm`。

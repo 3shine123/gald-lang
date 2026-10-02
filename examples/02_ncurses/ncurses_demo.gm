@@ -12,7 +12,7 @@ int main() {
             initWithRect:2 y:2 w:[scr cols]-4 h:[scr rows]-4];
 
         [win drawBox];
-        [win print:1 x:2 text:@"Nupa + Ncurses Demo"];
+        [win print:1 x:2 text:@"Gald + Ncurses Demo"];
 
         Terminal::Ncurses::Button *b1 = [[Terminal::Ncurses::Button alloc]
             initWithWindow:win x:4 y:4 w:20 text:@"Quit"];
@@ -29,7 +29,7 @@ int main() {
 
         while (running) {
             [win drawBox];
-[win print:1 x:2 text:@"Nupa + Ncurses Demo"];
+[win print:1 x:2 text:@"Gald + Ncurses Demo"];
             [lbl draw];
 
             [b1 setHighlight:(sel == 0)];

@@ -3,7 +3,7 @@
 // than rot unnoticed. Mark intentional exceptions with #[allow(dead_code)]
 // and a comment saying who will use it.
 #![deny(dead_code)]
-//! Static reference-count trace for Nupa.
+//! Static reference-count trace for Gald.
 //!
 //! Runs on the AST *after* ARC analysis has inserted its `gald_release(x)`
 //! calls, so the trace shows exactly where ARC releases objects. For each

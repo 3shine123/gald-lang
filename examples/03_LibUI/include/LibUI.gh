@@ -1,9 +1,9 @@
 /* ─────────────────────────────────────────────────────────────────────────
  * LibUI.gh — ObjC-style declarations for the libui-ng wrapper.
  *
- * Pure Nupa: no `struct uiXxx` ever leaks out of LibUI.gm. Every widget
+ * Pure Gald: no `struct uiXxx` ever leaks out of LibUI.gm. Every widget
  * inherits from `Control`, so `append:`/`setContent:` take a `Control *`
- * and you never touch a handle yourself. Callbacks take Nupa blocks.
+ * and you never touch a handle yourself. Callbacks take Gald blocks.
  * ───────────────────────────────────────────────────────────────────────── */
 
 #ifndef LIBUI_NH

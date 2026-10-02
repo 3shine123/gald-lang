@@ -1,7 +1,7 @@
-// gald/runtime_freestanding.c — Freestanding runtime for bare-metal Nupa.
+// gald/runtime_freestanding.c — Freestanding runtime for bare-metal Gald.
 //
 // Provides EVERYTHING the transpiled code needs on bare metal.
-// Just link this file alongside the transpiled Nupa code — no hand-written
+// Just link this file alongside the transpiled Gald code — no hand-written
 // globals, no runtime boilerplate.  The user only needs to provide the
 // freestanding header set (stdint.h, stddef.h, stdbool.h).  memcpy and
 // memset have weak fallbacks below (the compiler may emit calls to them
@@ -163,8 +163,8 @@ void gald_eh_uncaught(void) {
 // with gald_malloc/gald_free instead of calloc/free. No new overhead: a task
 // costs one struct + its frame, same as hosted.
 
-NupaTask *gald_task_create(gald_task_entry_fn entry, NFObject *self_obj, size_t frame_size) {
-    NupaTask *t = (NupaTask *)gald_malloc(sizeof(NupaTask));
+NFTask *gald_task_create(gald_task_entry_fn entry, NFObject *self_obj, size_t frame_size) {
+    NFTask *t = (NFTask *)gald_malloc(sizeof(NFTask));
     if (!t) return NULL;
     t->state = 1;   /* state 1 = the entry's first case; 0 means "not started" */
     t->finished = 0;
@@ -176,7 +176,7 @@ NupaTask *gald_task_create(gald_task_entry_fn entry, NFObject *self_obj, size_t 
     return t;
 }
 
-int gald_task_resume(NupaTask *task) {
+int gald_task_resume(NFTask *task) {
     if (!task || task->finished) return 1;
     if (task->entry) {
         if (task->entry(task) != 0) {
@@ -188,11 +188,11 @@ int gald_task_resume(NupaTask *task) {
     return task->finished ? 1 : 0;
 }
 
-void gald_task_finish(NupaTask *task) {
+void gald_task_finish(NFTask *task) {
     if (task) task->finished = 1;
 }
 
-void *gald_task_join(NupaTask *task) {
+void *gald_task_join(NFTask *task) {
     if (!task) return NULL;
     while (!task->finished) {
         (void)gald_task_resume(task);

@@ -1,6 +1,6 @@
 #import "model.gh"
 
-/* Nupa monomorphises generics by *usage*: codegen scans for type references
+/* Gald monomorphises generics by *usage*: codegen scans for type references
    carrying type args (`Stack<int *>`) and clones the generic implementation
    under the mangled name. So the lib TU has to actually MENTION the
    instantiation, or no specialised struct/vtable is emitted and the client's

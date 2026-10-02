@@ -3,11 +3,11 @@
 <div align="center">
 <img src="doc/assets/Nupa_avatar.svg" alt="Nupa_avatar" width="210">
 
-# Nupa 编程语言
+# Gald 编程语言
 
 [**查看项目示例**](#项目示例)
 
-[概述](#概述) · [为什么要创造出 Nupa？](#为什么要创造出-gald) · [项目示例](#项目示例) · [快速开始](#快速开始) · [语言特性](#语言特性) · [新特性](#新特性) · [编译与运行](#编译与运行) · [代码示例](#代码示例) · [设计原则](#设计原则) · [路线图](#路线图) · [FAQ](#faq)
+[概述](#概述) · [为什么要创造出 Gald？](#为什么要创造出-gald) · [项目示例](#项目示例) · [快速开始](#快速开始) · [语言特性](#语言特性) · [新特性](#新特性) · [编译与运行](#编译与运行) · [代码示例](#代码示例) · [设计原则](#设计原则) · [路线图](#路线图) · [FAQ](#faq)
 
 </div>
 
@@ -23,15 +23,15 @@
 
 ## **概述**
 
-Nupa 是一门**纯静态**的 Objective-C 方言（C 超集语言）。Nupa 源码被转译为 C99，再由 Clang 编译为原生机器码。没有运行时消息转发，没有 GC 暂停，没有 JIT 预热——所有方法派发、内存管理、多态都在编译期完成。目前能跑，有小游戏和工具在里面跑着。如果你觉得有意思，可以拿来试试。
+Gald 是一门**纯静态**的 Objective-C 方言（C 超集语言）。Gald 源码被转译为 C99，再由 Clang 编译为原生机器码。没有运行时消息转发，没有 GC 暂停，没有 JIT 预热——所有方法派发、内存管理、多态都在编译期完成。目前能跑，有小游戏和工具在里面跑着。如果你觉得有意思，可以拿来试试。
 
 我不是想替代 ObjC 或 Swift，只是单纯怀念 ObjC 的语法，想在静态编译的世界里让它再活一次。☺️
 
 ---
 
-## 为什么要创造出 Nupa？
+## 为什么要创造出 Gald？
 
-我纯粹是喜欢 ObjC 的消息发送语法 `[obj message]`而已。因为 ObjC 的运行时（`objc_msgSend`）太重了，我又想写一段能直接编译成 C 的 ObjC 代码，所以就有了 Nupa ——— 把 ObjC 的语法静态编译掉，不依赖运行时，生成干净的 C。
+我纯粹是喜欢 ObjC 的消息发送语法 `[obj message]`而已。因为 ObjC 的运行时（`objc_msgSend`）太重了，我又想写一段能直接编译成 C 的 ObjC 代码，所以就有了 Gald ——— 把 ObjC 的语法静态编译掉，不依赖运行时，生成干净的 C。
 
 这不是一个为生产而准备的语言。它是一个玩具，用来探索"如果把 ObjC 转译到静态 C，会是什么样子"。
 
@@ -57,8 +57,8 @@ Nupa 是一门**纯静态**的 Objective-C 方言（C 超集语言）。Nupa 源
 
 | 项目                    | 说明                                                                      | 运行                            |
 | --------------------- | ----------------------------------------------------------------------- | ----------------------------- |
-| **`04_soma-kernel/`** | 很小的 32 位 i386 操作系统内核（NASM + C + Nupa），裸机 `-ffreestanding` 模式                 | `./run.sh` 或 `./run.sh --gui` |
-| **`03_LibUI/`**       | 基于 [libui-ng](https://github.com/libui-ng/libui-ng) 的 GUI 应用，全部回调纯 Nupa | `./run_libui.sh`              |
+| **`04_soma-kernel/`** | 很小的 32 位 i386 操作系统内核（NASM + C + Gald），裸机 `-ffreestanding` 模式                 | `./run.sh` 或 `./run.sh --gui` |
+| **`03_LibUI/`**       | 基于 [libui-ng](https://github.com/libui-ng/libui-ng) 的 GUI 应用，全部回调纯 Gald | `./run_libui.sh`              |
 | **`02_ncurses/`**     | 终端示例（`ncurses_demo`、`sysmon`），使用 `Terminal::Ncurses` 绑定                 | `make run`                    |
 | **`01_JSONEditor/`**  | 多文件 JSON 编辑器，分屏终端预览                                                     | `galdc run json_editor.gm`    |
 
@@ -111,7 +111,7 @@ cd gald-x86_64-unknown-linux-musl
 
 > **提示：** 把 `galdc` 加入 PATH 并装好系统头文件后，`<gald/runtime.h>` 和 `<Foundation/...>` 会自动被找到，无需手动加 `-I include`。
 
-### 编译一个 Nupa 程序
+### 编译一个 Gald 程序
 
 ```bash
 # 只输出 C 代码（自动推导 .gm → .c）
@@ -299,7 +299,7 @@ SEL sel = @selector(doSomething:);
 
 ### C 属性（__attribute__）
 
-Nupa 支持 `__attribute__((...))` 透传。你可以在全局声明和 struct 字段上直接写 C 的 `__attribute__`，编译器会把它们原样保留到生成的 C 代码中。
+Gald 支持 `__attribute__((...))` 透传。你可以在全局声明和 struct 字段上直接写 C 的 `__attribute__`，编译器会把它们原样保留到生成的 C 代码中。
 
 ```gald
 __attribute__((packed))
@@ -324,9 +324,9 @@ int my_log(const char *fmt, ...);
 
 ### C 桥接（`-emit-bridge-header`）
 
-Nupa 转译为 C 后，C 代码可以直接调用 Nupa 对象方法。但消息派发需要写 vtable 下标和 SEL 常量，代码冗长且易错。`-emit-bridge-header` 选项为每个方法生成一个 `static inline` 包装函数，让 C 代码像调用普通 C 函数一样调用 Nupa 对象。
+Gald 转译为 C 后，C 代码可以直接调用 Gald 对象方法。但消息派发需要写 vtable 下标和 SEL 常量，代码冗长且易错。`-emit-bridge-header` 选项为每个方法生成一个 `static inline` 包装函数，让 C 代码像调用普通 C 函数一样调用 Gald 对象。
 
-**用法**：先转译 Nupa 库成 C，同时生成桥接头：
+**用法**：先转译 Gald 库成 C，同时生成桥接头：
 
 ```bash
 galdc -rewrite-gald lib.gm -o lib.c -emit-bridge-header lib.h
@@ -338,7 +338,7 @@ galdc -rewrite-gald lib.gm -o lib.c -emit-bridge-header lib.h
 #include "lib.h"
 
 int main(void) {
-    gald_metaInit();  // 必须在使用 Nupa 对象前调用
+    gald_metaInit();  // 必须在使用 Gald 对象前调用
 
     // 类方法：gald_<类名>_<方法名>(参数...)
     NFString *s = gald_NFString_stringWithUTF8String_("Hello");
@@ -347,12 +347,12 @@ int main(void) {
     size_t len = gald_NFString_length(s);
     const char *cstr = gald_NFString_UTF8String(s);
 
-    // 嵌套消息发送（等价于 Nupa 的 [[s UTF8String] ...]）
+    // 嵌套消息发送（等价于 Gald 的 [[s UTF8String] ...]）
     const char *nested = gald_NFString_UTF8String(
         gald_NFString_stringWithUTF8String_("nested")
     );
 
-    // 多参数消息发送（等价于 Nupa 的 [arr replaceObjectAtIndex:0 withObject:obj]）
+    // 多参数消息发送（等价于 Gald 的 [arr replaceObjectAtIndex:0 withObject:obj]）
     NFArray *arr = gald_NFArray_arrayWithObject_(s);
     gald_NFArray_replaceObjectAtIndex_withObject_(arr, 0, s);
 
@@ -373,7 +373,7 @@ clang caller.c lib.c include/gald/runtime.c -I include -o app
 
 #### 从 C 管理内存
 
-Nupa 的 **ARC 是编译期概念，只分析 `.gm` 源码**——C 代码调用桥接函数时，返回值不会自动 retain/release。需要手动管理，遵循 ObjC 的内存管理命名约定：
+Gald 的 **ARC 是编译期概念，只分析 `.gm` 源码**——C 代码调用桥接函数时，返回值不会自动 retain/release。需要手动管理，遵循 ObjC 的内存管理命名约定：
 
 | 方法家族                               | 调用者拥有？         | C 端怎么做                                 |
 | ---------------------------------- | -------------- | -------------------------------------- |
@@ -405,11 +405,11 @@ int main(void) {
 }
 ```
 
-`gald_retain`、`gald_release`、`gald_autorelease`、`gald_autoreleasepoolPush`/`gald_autoreleasepoolPop` 声明在 `<gald/runtime.h>` 中，对任何 Nupa 对象都可用。这就是 MRC（手动引用计数）模型——从 C 侧看，Nupa 对象就是按"我拥有/不拥有"约定管理的裸指针。
+`gald_retain`、`gald_release`、`gald_autorelease`、`gald_autoreleasepoolPush`/`gald_autoreleasepoolPop` 声明在 `<gald/runtime.h>` 中，对任何 Gald 对象都可用。这就是 MRC（手动引用计数）模型——从 C 侧看，Gald 对象就是按"我拥有/不拥有"约定管理的裸指针。
 
 ### 新特性
 
-Nupa 在 Objective-C 语法基础上，加入了一些 ObjC 本身没有的语言特性。
+Gald 在 Objective-C 语法基础上，加入了一些 ObjC 本身没有的语言特性。
 
 **近期亮点：**
 
@@ -471,7 +471,7 @@ for (id item in items) {
 
 ### struct `==` / `!=` 值比较
 
-C 直接拒绝 struct 的 `a == b`；Nupa 复用现有运算符，desugar 为生成的逐字段比较函数：
+C 直接拒绝 struct 的 `a == b`；Gald 复用现有运算符，desugar 为生成的逐字段比较函数：
 
 ```gald
 struct Point a = {1, 2};
@@ -516,7 +516,7 @@ int main() {
 设计规则：
 
 - **链式传染**——方法体里出现 `@await` 它自己就是 async；非 void 的 async 方法只能在 async 上下文中 await 调用（同步调用编译期报错）。
-- **`@await` 降级为状态机**——方法体在挂起点被拆进 `switch(task->state)` 驱动的堆上 `NupaTask`；活过挂起点的局部变量提升进每方法一个的 frame 结构体。
+- **`@await` 降级为状态机**——方法体在挂起点被拆进 `switch(task->state)` 驱动的堆上 `NFTask`；活过挂起点的局部变量提升进每方法一个的 frame 结构体。
 - **`@try` 跨越 `@await`** 会被拒绝（`jmp_buf` 无法活过挂起点）；`@noarc` 跨 await 合法；break/continue 跨 await 变成状态跳转。
 - 协作式单线程调度器（`gald_run_all`）与 I/O 集成是下一个里程碑。
 
@@ -625,7 +625,7 @@ illegal type 'int' in a dictionary literal — keys and values must be Objective
 
 ### 异常语义（`-eh checked` —— 默认后端）
 
-Nupa 的异常是**不用栈展开的 ObjC 异常语义**。`@try`/`@catch`/`@finally`/`@throw` 的行为与 clang `-fobjc-arc-exceptions` 模式完全一致——差分测试套件（`tests/eh_diff/run_eh_diff.sh`）把每个用例同时跑在 galdc 与真 clang/ObjC 下、逐行 diff stderr，锁定这一保证（7/7 通过）。
+Gald 的异常是**不用栈展开的 ObjC 异常语义**。`@try`/`@catch`/`@finally`/`@throw` 的行为与 clang `-fobjc-arc-exceptions` 模式完全一致——差分测试套件（`tests/eh_diff/run_eh_diff.sh`）把每个用例同时跑在 galdc 与真 clang/ObjC 下、逐行 diff stderr，锁定这一保证（7/7 通过）。
 
 ```gald
 @interface Boom : NFObject
@@ -694,7 +694,7 @@ int main() {
 @end
 ```
 
-苹果在**这个槽位**（声明 `;` 前的尾置元数据）已经用宏占了十几年：`NS_DESIGNATED_INITIALIZER`、`NS_REQUIRES_NIL_TERMINATION`、`API_AVAILABLE(...)`。Nupa 把同一槽位扶正为一等语法，并让 checker 直接对账。
+苹果在**这个槽位**（声明 `;` 前的尾置元数据）已经用宏占了十几年：`NS_DESIGNATED_INITIALIZER`、`NS_REQUIRES_NIL_TERMINATION`、`API_AVAILABLE(...)`。Gald 把同一槽位扶正为一等语法，并让 checker 直接对账。
 
 **checker 强制什么**
 
@@ -735,7 +735,7 @@ static void guarded(int n) {                    // 通过 —— 就地捕获
 
 #### 隐式根类（gald_root）
 
-Nupa 现在支持用户自定义根类。你不再需要强制继承 `NFObject`——不写父类的 `@interface` 会自动获得编译器注入的隐式根类 `gald_root`，同时保持 `id` 类型的统一性和静态派发能力。
+Gald 现在支持用户自定义根类。你不再需要强制继承 `NFObject`——不写父类的 `@interface` 会自动获得编译器注入的隐式根类 `gald_root`，同时保持 `id` 类型的统一性和静态派发能力。
 
 **之前：**
 
@@ -750,7 +750,7 @@ Nupa 现在支持用户自定义根类。你不再需要强制继承 `NFObject`�
 @interface Animal : NFObject   // 显式继承 NFObject 仍然合法
 ```
 
-两者都合法，且 `id` 可以指向任何 Nupa 对象。
+两者都合法，且 `id` 可以指向任何 Gald 对象。
 
 #### 核心机制
 
@@ -829,7 +829,7 @@ id obj = a;                    // ✅ 合法，Animal 继承自 gald_root
 
 #### 裸机 / Freestanding 支持（`-ffreestanding`）
 
-Nupa 可以编译为**无 libc、无 Foundation、无 TLS** 的自包含 C，直接用于内核、MCU、嵌入式裸机开发。
+Gald 可以编译为**无 libc、无 Foundation、无 TLS** 的自包含 C，直接用于内核、MCU、嵌入式裸机开发。
 
 ```bash
 galdc -rewrite-gald -ffreestanding kernel.gm   # 生成自包含 C
@@ -890,7 +890,7 @@ void demo(void) {
 
 #### 方法派发
 
-所有 Nupa 对象通过统一的 VTable 机制静态派发：
+所有 Gald 对象通过统一的 VTable 机制静态派发：
 
 ```c
 // [obj doSomething:arg]
@@ -946,7 +946,7 @@ obj->header.vtable[INDEX_doSomething](obj, arg);
 
 **编码规则**：命名空间通过 `::` 分隔，转译为 C 时使用 `__` 编码。
 
-| Nupa 符号                   | 转译后的 C 符号                    |
+| Gald 符号                   | 转译后的 C 符号                    |
 | ------------------------- | ---------------------------- |
 | `Game::Player`            | `Game__Player`               |
 | `Game::Entities::Enemy`   | `Game__Entities__Enemy`      |
@@ -1144,7 +1144,7 @@ container's element type is unchecked; add an explicit cast if the contents are 
 
 代价要说清楚：特化是编译期代码，不是免费的类型安全。同一程序改用泛型拼写而非裸拼写，生成的 C 多约 42 KB / +41%——全是重复的方法体与元数据，布局逐字节相同，故运行期收益为零。Golden：`tests/golden/40_nfarray_generic/`。
 
-### Nupa 语法宏（双轨 `#define`）
+### Gald 语法宏（双轨 `#define`）
 
 含 **gald 语法**（`[recv msg]`、`@` 字面量、`^{}` block）的 `#define` 宏体此前原样透传给 C 编译器——直接语法错误。galdc 现在自行解析并在源级展开。纯 C 宏体照旧透传、由 C 编译器展开，行为零变化。
 
@@ -1228,7 +1228,7 @@ galdc [options] <input.gm>
   -arch <target>    构建目标架构（如 -arch x86_64）
   -asm <file.s>     链接汇编文件（可重复）
   -gen-completions <shell>  生成 shell 补全脚本（zsh|bash|fish）
-  -emit-bridge-header <file.h>  生成 C 桥接头，用于从 C 代码调用 Nupa 对象
+  -emit-bridge-header <file.h>  生成 C 桥接头，用于从 C 代码调用 Gald 对象
 
 引用计数追踪（调试辅助）:
   -trace-refcount              按源代码顺序打印每个存活对象的静态引用计数追踪
@@ -1261,7 +1261,7 @@ cargo test --workspace
 
 @implementation Greeter
 - (void)greet {
-    printf("Hello, Nupa!\n");
+    printf("Hello, Gald!\n");
 }
 @end
 
@@ -1332,7 +1332,7 @@ int main() {
 
 ### 静态泛型（Generics）
 
-Nupa 通过**编译期单态化（monomorphization）**实现泛型——每个 `DataPack<QuantumToken *>` 都会生成独立的 C 结构体 `DataPack_QuantumToken_ptr`，类型参数被具体类型替换。没有类型擦除，没有装箱，没有运行时开销。
+Gald 通过**编译期单态化（monomorphization）**实现泛型——每个 `DataPack<QuantumToken *>` 都会生成独立的 C 结构体 `DataPack_QuantumToken_ptr`，类型参数被具体类型替换。没有类型擦除，没有装箱，没有运行时开销。
 
 ```gald
 @interface DataPack<T> : NFObject {
@@ -1395,11 +1395,11 @@ ObjC 的运行时很强大，但我不想依赖它。把所有决策放在编译
 
 ### 2. 生成人能读的 C
 
-Nupa 的"后端"是**人类可读的 C99**，不是 LLVM IR。这意味着：
+Gald 的"后端"是**人类可读的 C99**，不是 LLVM IR。这意味着：
 
 - 可以用 Clang/LLDB 原生工具调试
 - 生成的 C 可以审查、修改、嵌入到其他项目
-- 没有 LLVM 后端绑定——Clang 能跑的地方 Nupa 就能跑
+- 没有 LLVM 后端绑定——Clang 能跑的地方 Gald 就能跑
 
 ### 3. 渐进式
 
@@ -1497,9 +1497,9 @@ Nupa 的"后端"是**人类可读的 C99**，不是 LLVM IR。这意味着：
 
 还不能。但它是 **真实可用** 的 —— 它能编译、能运行，并且从一开始就是为成长而设计的。如果你觉得它的语法很对味，想给它贡献一下，那么非常欢迎。
 
-### Nupa 能做什么？
+### Gald 能做什么？
 
-写小游戏、写工具、写玩具。项目里的贪吃蛇、Flappy Bird、太空射击、井字棋都是 Nupa 写的，跑在终端里。
+写小游戏、写工具、写玩具。项目里的贪吃蛇、Flappy Bird、太空射击、井字棋都是 Gald 写的，跑在终端里。
 
 ### 和 ObjC 比少了什么？
 

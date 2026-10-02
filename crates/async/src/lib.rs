@@ -7,7 +7,7 @@
 //!
 //! - `await e` splits the body into segments; each segment runs inside one
 //!   `switch (task->state)` arm.
-//! - Locals live in a per-method `NupaTaskFrame` struct so they survive
+//! - Locals live in a per-method `NFTaskFrame` struct so they survive
 //!   suspension (codegen's @try lifting precedent).
 //! - break/continue across awaits become state jumps (no C break/continue
 //!   across switch arms).
@@ -381,7 +381,7 @@ fn check_expr_sync_calls(
 /// Rewrite an async method body into the M1 task-driven form:
 ///
 /// ```text
-///     { NupaTask *__gald_task = gald_task_create(entry_stub, (NFObject *)self, 0);
+///     { NFTask *__gald_task = gald_task_create(entry_stub, (NFObject *)self, 0);
 ///       ...original body with `await e` lowered...
 ///       gald_task_join(__gald_task); }
 /// ```
@@ -531,7 +531,7 @@ pub fn desugar_method_body(body: &mut AstStmt) {
         data: AstDeclData::Variable {
             var_type: Some(Box::new({
                 let mut inner = AstType::new(TypePrim::Named);
-                inner.name = Some("NupaTask".to_string());
+                inner.name = Some("NFTask".to_string());
                 let mut t = AstType::new(TypePrim::Named);
                 t.is_pointer = true;
                 t.subtype = Some(Box::new(inner));
@@ -605,7 +605,7 @@ fn sanitize_symbol(sym: &str) -> String {
 
 /// Build the M2 state-machine form for one async method:
 ///   - a `struct <M>_frame { params + locals }` typedef (top-level decl)
-///   - a `static int <M>_state(NupaTask *t)` entry (top-level decl)
+///   - a `static int <M>_state(NFTask *t)` entry (top-level decl)
 ///   - rewrite the method body to: create + fill params + join + return result
 ///
 /// In M2's synchronous-drive model the entry runs all states in one resume
@@ -685,7 +685,7 @@ pub fn desugar_method_m2(
     let final_state = state_counter;
 
     // 4. Entry function:
-    //   static int gald_async_state_<M>(NupaTask *t) {
+    //   static int gald_async_state_<M>(NFTask *t) {
     //     struct <M>_frame *f = (struct <M>_frame *)t->frame;  // M3 uses f
     //     switch (t->state) {
     //       case 1: ...body with lowered awaits...
@@ -824,8 +824,8 @@ pub fn desugar_method_m2(
         },
     };
 
-    // Entry params: (NupaTask *t)
-    let entry_param = cst_param("NupaTask", "t");
+    // Entry params: (NFTask *t)
+    let entry_param = cst_param("NFTask", "t");
     let entry_decl = AstDecl {
         kind: AstDeclKind::Function,
         name: Some(entry_name.clone()),
@@ -868,7 +868,7 @@ pub fn desugar_method_m2(
     top_decls.push(entry_decl);
 
     // 5. Rewrite the method body: create + join + return cast result.
-    //    NupaTask *t = gald_task_create(gald_async_state_<M>, self, sizeof(struct <M>_frame));
+    //    NFTask *t = gald_task_create(gald_async_state_<M>, self, sizeof(struct <M>_frame));
     //    join → gald_task_join(t) discards; result read needs join to return it:
     //    use (return_type)(long)gald_task_join(t) for non-void, else plain join.
     let create_call = AstExpr {
@@ -1340,14 +1340,14 @@ fn call_stmt(name: &str, args: Vec<AstExpr>, line: usize, col: usize) -> AstStmt
 
 fn gald_task_ptr_type() -> AstType {
     let mut inner = AstType::new(TypePrim::Named);
-    inner.name = Some("NupaTask".to_string());
+    inner.name = Some("NFTask".to_string());
     let mut t = AstType::new(TypePrim::Named);
     t.is_pointer = true;
     t.subtype = Some(Box::new(inner));
     t
 }
 
-/// Build a CstParam for the entry function's `(NupaTask *t)`.
+/// Build a CstParam for the entry function's `(NFTask *t)`.
 fn cst_param(type_name: &str, name: &str) -> gald_cst::CstParam {
     let mut t = gald_cst::CstType::new(TypePrim::Named);
     t.name = Some(type_name.to_string());

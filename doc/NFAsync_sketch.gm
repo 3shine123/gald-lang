@@ -2,7 +2,7 @@
 //
 // 分工（对应 C++ 的两层）：
 //   C++ 核心语言    co_await / co_return           →  @await / return（编译器 desugar，已有）
-//   C++ 标准库 <future>  std::async / std::future  →  NFAsync（Foundation 类，包 runtime 的 NupaTask）
+//   C++ 标准库 <future>  std::async / std::future  →  NFAsync（Foundation 类，包 runtime 的 NFTask）
 //
 // @launch 判据（依据 AGENTS.md 的 @ 三条判据）：
 //   表达式前缀位本就是开放上下文（先例 @selector(...)、@42 装箱）；

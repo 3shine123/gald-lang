@@ -1,7 +1,7 @@
 /* ─────────────────────────────────────────────────────────────────────────
- * Cocoa.gm — pure-Nupa AppKit bridge (Apple-only).
+ * Cocoa.gm — pure-Gald AppKit bridge (Apple-only).
  *
- * Nupa is a C superset: we talk to libobjc directly — no .m file, no
+ * Gald is a C superset: we talk to libobjc directly — no .m file, no
  * framework headers. The whole namespace is guarded by
  * `#if defined(__APPLE__)` (the gald preprocessor knows __APPLE__, so other
  * platforms compile an empty namespace).

@@ -88,7 +88,7 @@ fn select_c_compiler(backend: attrs::Backend) -> Vec<String> {
 fn clap_command() -> ClapCommand {
     ClapCommand::new("galdc")
         .version(env!("GALD_VERSION"))
-        .about("Nupa language compiler")
+        .about("Gald language compiler")
         .disable_help_flag(true)
         .disable_version_flag(true)
         .disable_help_subcommand(true)
@@ -277,7 +277,7 @@ fn compile_to_binary(cc: &[String], c_code: &str, bin_path: &str, include_dirs: 
     for asm_file in asm_files {
         clang_args.push(asm_file.clone());
     }
-    // Apple frameworks to link (e.g. `-framework Cocoa`): lets Nupa programs
+    // Apple frameworks to link (e.g. `-framework Cocoa`): lets Gald programs
     // link against ObjC bridges (or the runtime) via a thin C API.
     for fw in frameworks {
         clang_args.push("-framework".to_string());
@@ -385,7 +385,7 @@ fn compile_to_binary(cc: &[String], c_code: &str, bin_path: &str, include_dirs: 
 fn galdc_flags() -> (Vec<(&'static str, &'static str)>, Vec<(&'static str, &'static str)>) {
     let single = vec![
         ("-Werror",       "promote warnings to errors"),
-        ("-emit-bridge-header", "emit a C bridge header for calling Nupa from C"),
+        ("-emit-bridge-header", "emit a C bridge header for calling Gald from C"),
         ("-rewrite-gald", "transpile to C only (no link)"),
         ("-fgald-arc",    "enable ARC (default)"),
         ("-fno-gald-arc", "disable ARC (MRC)"),
@@ -429,7 +429,7 @@ fn interactive_flag_picker(prefix: &str) -> Option<&'static str> {
         return None;
     }
 
-    println!("=== Nupa {} flags ===", label);
+    println!("=== Gald {} flags ===", label);
     for (i, (flag, desc)) in list.iter().enumerate() {
         println!("  {:>2}) {}  \x1b[2m{}\x1b[0m", i + 1, flag, desc);
     }

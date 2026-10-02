@@ -24,7 +24,7 @@ SYSTEM_INC="${2:-/usr/local/include}"
 
 # ── 文案 ──
 if [ "$I18N" = "zh" ]; then
-    MSG_TITLE="Nupa 安装包"
+    MSG_TITLE="Gald 安装包"
     MSG_INSTALL_DIR="安装目录"
     MSG_LIB="静态库"
     MSG_INC="头文件"
@@ -41,7 +41,7 @@ if [ "$I18N" = "zh" ]; then
     MSG_AUTOCOMP="自动安装 Shell 补全"
     MSG_COMP_SKIP="跳过补全安装"
 else
-    MSG_TITLE="Nupa Installer"
+    MSG_TITLE="Gald Installer"
     MSG_INSTALL_DIR="Install directory"
     MSG_LIB="library"
     MSG_INC="headers"

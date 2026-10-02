@@ -1,5 +1,5 @@
 // lang-test/implicit_root_class_test.gm
-// Nupa 隐式根类 __gald_root 专项压测
+// Gald 隐式根类 __gald_root 专项压测
 // 验证不写父类的 @interface 自动获得隐式根类
 
 #include <stdio.h>

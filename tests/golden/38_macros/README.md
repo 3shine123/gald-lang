@@ -16,7 +16,7 @@
 **用例**：
 - `macros_test.gm` — gald 轨（TAG/BUMP/SAFE_TAG/LOG：对象式、函数式、嵌套实参、@literal 体）+ C 轨（TWICE/CAT/NAME：粘贴、直通），7 行数值输出
 - `undef_test.gm` — `#undef` 后宏不再展开（gald 表与 defined 集同步移除，透传 C）
-- `macro_edges.gm` — `##`/`#` 边界语义端到端，**每行期望值取自 `clang -E -P` oracle**（见 `.gm` 头注释）：`#` 空白折叠与引号转义、`()` 单空实参（§6.10.3p4）、空左操作数 `##` 占位符语义（`MK(, tag)` → `Log tag` 不粘成 `Logtag`）、两段式字符串化 `XSTR(MK(...))`、声明符位粘贴 `int CAT(np_, count)`、GNU `,##__VA_ARGS__` 逗号吞并、`#__VA_ARGS__` 全尾串化
+- `macro_edges.gm` — `##`/`#` 边界语义端到端，**每行期望值取自 `clang -E -P` oracle**（见 `.gm` 头注释）：`#` 空白折叠与引号转义、`()` 单空实参（§6.10.3p4）、空左操作数 `##` 占位符语义（`MK(, tag)` → `Log tag` 不粘成 `Logtag`）、两段式字符串化 `XSTR(MK(...))`、声明符位粘贴 `int CAT(nf_, count)`、GNU `,##__VA_ARGS__` 逗号吞并、`#__VA_ARGS__` 全尾串化
 - `pragma_passthrough.gm` — `_Pragma("...")` 原位透传（宏体内禁用，见负例）
 - `multiline_call.gm` — 跨行调用（`\` 续行拼逻辑行，行号记首行）
 

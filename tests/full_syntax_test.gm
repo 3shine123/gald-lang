@@ -1,4 +1,4 @@
-// full_syntax_test.gm —— Nupa 全部已实现语法汇测（单文件，一测全量）
+// full_syntax_test.gm —— Gald 全部已实现语法汇测（单文件，一测全量）
 //
 // 覆盖：C 超集基础 / 类·继承·协议·命名空间·泛型·容器·variadic / 表达式全家
 //       控制流（for-in·switch 模式） / 运行时块（try·synchronized·pool·defer·noarc·weak）

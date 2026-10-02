@@ -1,6 +1,6 @@
-//! Nupa-side macro expansion.
+//! Gald-side macro expansion.
 //!
-//! Nupa is a C superset: plain C `#define`s are passed through verbatim to the
+//! Gald is a C superset: plain C `#define`s are passed through verbatim to the
 //! C compiler, which expands them as usual. But a macro whose body contains
 //! gald-specific syntax (`[receiver msg]`, `@keyword`, `^{...}`) cannot be
 //! expanded by any C compiler — the body is not C. For those macros galdc

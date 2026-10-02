@@ -1,4 +1,4 @@
-# Nupa → C 代码生成规范（CodeGen Spec）
+# Gald → C 代码生成规范（CodeGen Spec）
 
 > 版本：2026-08-08  
 > 适用范围：`galdc` 编译器后端（`crates/codegen/src/codegen.rs`）
@@ -48,7 +48,7 @@
 
 ### 3.1 基础类型映射
 
-| Nupa 类型 | C 类型 |
+| Gald 类型 | C 类型 |
 |-----------|--------|
 | `int` | `int` |
 | `float` | `float` |

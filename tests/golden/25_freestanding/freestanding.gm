@@ -1,5 +1,5 @@
 // freestanding.gm — bare-metal golden test
-// Demonstrates every Nupa feature usable without Foundation/libc.
+// Demonstrates every Gald feature usable without Foundation/libc.
 // Compile: galdc -rewrite-gald -fno-libc, then clang -U__GALD_FREESTANDING
 // (on the host we use libc's setjmp/longjmp, not builtins).
 
@@ -8,7 +8,7 @@ extern void kputdec(int v);
 extern void kputhex(unsigned v);
 
 extern BareMetal::Calculator   *create_calculator(void);
-extern BareMetal::NupaIoError  *create_error(int code);
+extern BareMetal::NFIoError  *create_error(int code);
 
 @namespace BareMetal
 
@@ -26,13 +26,13 @@ extern BareMetal::NupaIoError  *create_error(int code);
     - (int) value          { return total; }
     @end
 
-    @interface NupaIoError {
+    @interface NFIoError {
         int code;
     }
     - (int) errorCode;
     @end
 
-    @implementation NupaIoError
+    @implementation NFIoError
     - (int) errorCode { return code; }
     @end
 
@@ -89,7 +89,7 @@ int main() {
     kputs("\n");
 
     // ── 3. @try/@catch/@finally ──
-    BareMetal::NupaIoError *err = create_error(42);
+    BareMetal::NFIoError *err = create_error(42);
     kputs("[3] @try/@catch/@finally:\n");
     kputs("    try body, throwing...\n");
     @try {

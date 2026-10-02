@@ -1,4 +1,4 @@
-# Nupa 黄金测试集
+# Gald 黄金测试集
 
 按功能分类的系统化回归测试。每个测试包含 `.gm`（源码）和 `.out`（期望输出）文件。
 
@@ -62,7 +62,7 @@
 > # GALDC=/path/to/galdc ./tests/golden/28_refcount_trace/run_trace_golden.sh
 > ```
 >
-> 用例覆盖：多级 retain/release（1→4→0）、double-release 负计数检测、泄漏检测、ARC 自动注入的 `gald_release`、别名共享、嵌套 `@autoreleasepool`（`@noarc` 内手动 autorelease）、if/else 分支状态克隆、循环迭代产生独立 `Class#N` 身份。`.gm` 本身仍是可编译运行的合法 Nupa 程序，会被 `test_all.py` 的 glob 照常编译+运行。
+> 用例覆盖：多级 retain/release（1→4→0）、double-release 负计数检测、泄漏检测、ARC 自动注入的 `gald_release`、别名共享、嵌套 `@autoreleasepool`（`@noarc` 内手动 autorelease）、if/else 分支状态克隆、循环迭代产生独立 `Class#N` 身份。`.gm` 本身仍是可编译运行的合法 Gald 程序，会被 `test_all.py` 的 glob 照常编译+运行。
 
 > x86_64 汇编是跨架构用例，不放入默认 arm64 测试套件，单独位于 `asm_x64/`（见下文）。
 

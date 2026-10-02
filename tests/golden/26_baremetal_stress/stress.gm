@@ -1,4 +1,4 @@
-// stress.gm — 裸机 Nupa 压测：全方位代码生成质量验证
+// stress.gm — 裸机 Gald 压测：全方位代码生成质量验证
 // 编译：galdc -rewrite-gald -fno-libc；链接 runtime_freestanding.c
 // 运行：qemu-system-i386（或直接 ./build/stress）
 

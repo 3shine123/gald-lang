@@ -64,7 +64,7 @@ parser 识别 `case` 标签形态 → 含任一模式臂时整个 switch 降级�
   `tests/negative/switch_case_msg_send.gm`）。此前会原样透传进生成的 C，
   报错指向生成代码、无法对应源码。
 - **嵌套模式**未做跨层 case 作用域（内层 switch 的 `case` 归内层）——C 与
-  Nupa 语义一致，未验证。
+  Gald 语义一致，未验证。
 - `case <enum const>:` 走普通 C 路径（`is_object_literal` 假），零回归。
 
 ## M2 候补

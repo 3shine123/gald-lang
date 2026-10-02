@@ -1,19 +1,19 @@
 [-> English](README.md)
 
-# Soma Kernel — NASM + C + Nupa 三语 i386 内核
+# Soma Kernel — NASM + C + Gald 三语 i386 内核
 
 一个 32 位保护模式微内核，同时混编三种语言：
 
 - **NASM**  — 引导扇区 (`boot/boot.asm`)、内核入口与 IDT 桩 (`kernel/entry.asm`、`kernel/isr.asm`)
 - **C**     — VGA 文本屏、串口、`kprintf`、freestanding `mem*/str*`、IDT/PIC/PIT (`kernel/kernel.c`、`kernel/hw.c`)
-- **Nupa**  — 内核模块 (`gald/soma_core.gm`)：`galdc -rewrite-gald` 转译成 C 后一起编译
+- **Gald**  — 内核模块 (`gald/soma_core.gm`)：`galdc -rewrite-gald` 转译成 C 后一起编译
 
 关键点：**转译出的 C 不依赖 libc**（无 `printf`/`malloc`，唯一头是 `#include <string.h>` 且不调用任何 libc 函数）。
-Nupa 通过 extern 声明直接调用内核的 `kputs/kputdec/kputhex` 输出，内核反过来直接调用 Nupa 的
-`soma_fib/soma_gcd/soma_rotl/soma_fnv1a/soma_xorshift`，Nupa 的 `soma_io_wait` 用内联 asm
+Gald 通过 extern 声明直接调用内核的 `kputs/kputdec/kputhex` 输出，内核反过来直接调用 Gald 的
+`soma_fib/soma_gcd/soma_rotl/soma_fnv1a/soma_xorshift`，Gald 的 `soma_io_wait` 用内联 asm
 （`outb` 到端口 0x80）在裸机生效。
 
-## Nupa 高级特性（不依赖 Foundation）
+## Gald 高级特性（不依赖 Foundation）
 
 `gald/soma_core.gm` 用上了编译器的类系统，且**在裸机内核里真正跑通**：
 
@@ -27,7 +27,7 @@ Nupa 通过 extern 声明直接调用内核的 `kputs/kputdec/kputhex` 输出，
 为支持类系统，内核提供最小 freestanding runtime 头（`include/gald/runtime.h`），只定义转译代码
 需要的类型（`SEL`/`NFClass`/`NFObject`/`id`）和符号（`gald___gald_root_class`），
 Makefile 用 `-include gald/runtime.h` 注入每个编译单元；`gald_meta_init()`（转译器弱符号生成）
-在 `kmain` 里先调用，然后 C 侧手工构造实例（`isa = &gald_..._class`）交给 Nupa 实例方法使用。
+在 `kmain` 里先调用，然后 C 侧手工构造实例（`isa = &gald_..._class`）交给 Gald 实例方法使用。
 
 ## 构建与运行
 
@@ -50,9 +50,9 @@ built: clang + nasm + galdc transpile, ran under qemu-system-i386
        xorshift: 87985aa5 155b24a3 4820f4c4 81b3ac98 703a0788
 [gald] class method [SomaCore::Calculator compute:21] = 43
 [gald] instance methods on C-created obj: add:7 -> 7, add:35 -> 42, value = 42
-[c] call Nupa: fib(15)=610 gcd(1071,462)=21
-[c] call Nupa: rotl(0x12345678,4)=0x23456781
-[c] call Nupa: fnv1a("gald")=0x944c9dcf
+[c] call Gald: fib(15)=610 gcd(1071,462)=21
+[c] call Gald: rotl(0x12345678,4)=0x23456781
+[c] call Gald: fnv1a("gald")=0x944c9dcf
 [c] interrupts on; waiting for PIT ticks...
 [c] timer reached tick=50 (IRQ0+PIT ok)
 
@@ -63,7 +63,7 @@ SOMA KERNEL OK
 
 | 组件 | 工具 | 说明 |
 |------|------|------|
-| Nupa→C | `../../target/debug/galdc -rewrite-gald` | 输出仅含 `#include <string.h>` |
+| Gald→C | `../../target/debug/galdc -rewrite-gald` | 输出仅含 `#include <string.h>` |
 | C 编译 | `clang -target i386-none-elf -m32 -ffreestanding -fno-builtin -nostdlib -nostdinc -Iinclude` | freestanding，自带头 |
 | 汇编 | `nasm -f elf32` / `-f bin` | 内核对象 / 引导扇区 |
 | 链接 | `i686-elf-ld -m elf_i386 -T linker.ld` | Apple `ld` 无 `elf_i386`，须用 GNU ld |
@@ -77,9 +77,9 @@ examples/04_soma-kernel/
 ├── kernel/
 │   ├── entry.asm      32 位入口: 设栈、清 BSS、call kmain
 │   ├── isr.asm        isr0..isr47 桩 + isr_stubs 表 + 统一 C 回调
-│   ├── kernel.c       VGA/串口/kprintf/mem*/str*/kmain（含 Nupa 互调）
+│   ├── kernel.c       VGA/串口/kprintf/mem*/str*/kmain（含 Gald 互调）
 │   └── hw.c           IDT/PIC 重映射/PIT/ISR handler/tick
-├── gald/soma_core.gm  Nupa 内核模块（@namespace + @interface 隐式根类，无 Foundation）
+├── gald/soma_core.gm  Gald 内核模块（@namespace + @interface 隐式根类，无 Foundation）
 ├── include/           freestanding 头: stdint/stddef/stdarg/stdbool/string + gald/runtime.h 最小版
 ├── linker.ld          链接脚本 (入口 kernel_entry, 起点 0x10000)
 ├── Makefile / run.sh
@@ -88,7 +88,7 @@ examples/04_soma-kernel/
 
 ## 注意
 
-- Nupa 模块不能用闭包；整数字面量不能带 `u` 后缀（解析器限制）。
+- Gald 模块不能用闭包；整数字面量不能带 `u` 后缀（解析器限制）。
 - 内联 asm 模板：只要带操作数 section，字面 `%` 必须写成 `%%`；`outb %b0, $0x80` 用操作数引用。
 - 类系统裸机要点：`gald/runtime.h` 的 include guard 必须与 `crates/codegen` 生成的
   `__GALD_ROOT_DEFINED`/`NFOBJECT_DEFINED` 一致（否则重复定义）；`gald___gald_root_class`

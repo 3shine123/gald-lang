@@ -5,7 +5,7 @@ _galdc() {
         if [[ $PREFIX == -* ]]; then
             _arguments \
                 '-Werror[promote warnings to errors]' \
-                '-emit-bridge-header[emit a C bridge header for calling Nupa from C]' \
+                '-emit-bridge-header[emit a C bridge header for calling Gald from C]' \
                 '-rewrite-gald[transpile to C only (no link)]' \
                 '-v[show verbose transpilation info]' \
                 '--verbose[show verbose transpilation info]' \

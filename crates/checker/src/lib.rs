@@ -26,7 +26,7 @@ enum FormatArgKind {
     Ptr,
 }
 
-/// Type checker for Nupa programs.
+/// Type checker for Gald programs.
 /// Validates types and reports type errors.
 pub struct Checker {
     pub symtab: Option<SymbolTable>,
@@ -1157,7 +1157,7 @@ impl Checker {
     }
 
     /// Warn when a type carries type arguments but names a class that declares
-    /// no type parameters. Nupa's monomorphization is driven by *declaration*,
+    /// no type parameters. Gald's monomorphization is driven by *declaration*,
     /// so `NFArray<NFString *> *` parses and type-checks but never
     /// monomorphizes: the generated C contains no `NFArray_NFString` at all
     /// and `objectAtIndex:` still returns `NFObject *`. That silent erasure is
@@ -1225,7 +1225,7 @@ impl Checker {
     /// static type. The parser cannot make this choice (it has no types) and the
     /// C99 backend has no `_Generic`, so it is made here, where `expr_type` is
     /// known. Non-arithmetic operands are rejected instead of silently boxed:
-    /// ObjC would box an `NSString *`, but Nupa has no string boxing, and
+    /// ObjC would box an `NSString *`, but Gald has no string boxing, and
     /// handing back a number where an object was meant hides the mistake.
     fn maybe_rewrite_boxed_expr(&mut self, e: &mut AstExpr) -> Option<AstType> {
         let inner_ty = {
@@ -1344,7 +1344,7 @@ impl Checker {
     /// Rewrite `recv[i] = v` into `[recv setObject:v atIndex:i]` when the
     /// receiver is a mutable object. The read rewrite alone would emit
     /// `recv[i] = v` verbatim, which C rejects ("assigning to 'NFMutableArray'
-    /// from incompatible type"). Nupa containers spell this
+    /// from incompatible type"). Gald containers spell this
     /// `setObject:atIndex:`, so reuse that; the receiver must declare it,
     /// otherwise an immutable `NFArray` keeps the loud C error.
     fn maybe_rewrite_object_assign(&mut self, e: &mut AstExpr) -> Option<AstType> {
@@ -1597,7 +1597,7 @@ impl Checker {
                 }
                 // Receiver kind vs method kind: a class singleton receives only
                 // `+` class methods, an instance only `-` instance methods.  In
-                // ObjC these are runtime "unrecognized selector" crashes; Nupa
+                // ObjC these are runtime "unrecognized selector" crashes; Gald
                 // (static) rejects them at compile time.
                 if let Some(kinds) = self.method_kinds.get(selector) {
                     // Enforce only when every declaration of this selector

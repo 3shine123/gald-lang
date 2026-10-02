@@ -1,7 +1,7 @@
 #import "model.gh"
 #include <stdio.h>
 
-/* client TU: hands a Nupa block to the lib TU, which stores and later fires
+/* client TU: hands a Gald block to the lib TU, which stores and later fires
    it. If the block were not copied, this would crash or print garbage. The
    captured `total` is mutated inside the block, so it must be __block. */
 int main() {

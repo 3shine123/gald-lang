@@ -44,7 +44,7 @@ GALDC=target/release/galdc ./tests/eh_matrix/gen_quality.sh
 | 07 | ARC | `golden/04_arc/retain_release.gm` | |
 | 08 | MRC | 同上 + `-fno-gald-arc` | 无 `.out` 参照（MRC 不打印 dealloc） |
 | 09 | `@autoreleasepool` | `golden/05_autoreleasepool/nested_pool.gm` | |
-| 10 | 多文件 Nupa | `tests/multi_tu/run_multi_tu.sh`（全部用例） | 跨 TU 布局 + Foundation 内联大 TU |
+| 10 | 多文件 Gald | `tests/multi_tu/run_multi_tu.sh`（全部用例） | 跨 TU 布局 + Foundation 内联大 TU |
 | 11 | Foundation 大文件 | `golden/13_foundation/04_nfstring/nfstring_test.gm` | |
 | 12 | 纯 C 超集 | `golden/22_c_superset/c_superset.gm` | 无 Foundation/无 block 的生成 C 也须含 EH 声明 |
 | 13 | `-ffreestanding` | `golden/25_freestanding/`（golden/25 方法论） | 裸机转译 + host 编译链接运行 |

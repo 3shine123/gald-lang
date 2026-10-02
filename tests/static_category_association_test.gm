@@ -1,5 +1,5 @@
 // lang-test/static_category_association_test.gm
-// Nupa 语言「静态类扩展（Category）与模拟关联属性」全新特性压测
+// Gald 语言「静态类扩展（Category）与模拟关联属性」全新特性压测
 // 聚焦：纯静态编译下的 Category 方法 VTable 注入、Category 属性静态化、扩展 Block 动态捕获
 
 #include <stdio.h>

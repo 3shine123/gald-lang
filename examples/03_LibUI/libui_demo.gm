@@ -52,7 +52,7 @@ int main() {
     @autoreleasepool {
         [App start];
 
-        Window *win = [Window windowWithTitle:"Nupa + libui-ng" width:600 height:400];
+        Window *win = [Window windowWithTitle:"Gald + libui-ng" width:600 height:400];
         [win onClosing:^int {
             [App quit];
             return 1;
@@ -76,7 +76,7 @@ int main() {
             const char *who = [name text];
             if (who && who[0])
                 msg = [msg stringByAppendingString:[NFString stringWithUTF8String:who]];
-            msg = [msg stringByAppendingString:@"! — written in Nupa"];
+            msg = [msg stringByAppendingString:@"! — written in Gald"];
             [greeting setText:[msg UTF8String]];
         }];
         [controls append:greet stretch:0];
@@ -126,10 +126,10 @@ int main() {
         [about setPadded:1];
 
         MultilineEntry *log = [MultilineEntry multilineEntry];
-        [log setText:"Nupa + libui-ng\n\n- Every widget is a class.\n- Every callback is a block.\n- The C never leaves the wrapper."];
+        [log setText:"Gald + libui-ng\n\n- Every widget is a class.\n- Every callback is a block.\n- The C never leaves the wrapper."];
         [about append:log stretch:1];
 
-        Checkbox *like = [Checkbox checkboxWithTitle:"I like Nupa"];
+        Checkbox *like = [Checkbox checkboxWithTitle:"I like Gald"];
         [like onToggled:^{
             [log appendText:[like state] ? "\n+1" : "\n:("];
         }];

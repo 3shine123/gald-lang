@@ -357,7 +357,7 @@ void kprintf(const char *fmt, ...) {
     va_end(ap);
 }
 
-/* ================= Nupa module exports ================= */
+/* ================= Gald module exports ================= */
 
 void soma_core_boot(void);
 void soma_io_wait(void);
@@ -367,7 +367,7 @@ unsigned int soma_xorshift(unsigned int seed);
 unsigned int soma_fnv1a(const char *s);
 unsigned int soma_rotl(unsigned int v, int sh);
 
-/* Nupa @namespace SomaCore + @interface Calculator (implicit root class) */
+/* Gald @namespace SomaCore + @interface Calculator (implicit root class) */
 struct SomaCore__Calculator {
     struct NFClass *isa;
     uint32_t retain_count;
@@ -378,13 +378,13 @@ extern void gald_meta_init(void);
 void soma_class_demo(void);
 void soma_instance_demo(struct SomaCore__Calculator *acc);
 
-/* Nupa @interface NupaIoError — exception object for @try/@catch */
-struct SomaCore__NupaIoError {
+/* Gald @interface NFIoError — exception object for @try/@catch */
+struct SomaCore__NFIoError {
     struct NFClass *isa;
     uint32_t retain_count;
     int code;
 };
-extern NFClass gald_SomaCore__NupaIoError_class;
+extern NFClass gald_SomaCore__NFIoError_class;
 void soma_exc_demo(id err);
 void soma_heap_demo(void);
 void soma_advanced_demo(void);
@@ -404,10 +404,10 @@ void kmain(void) {
     kputs("\n=== SOMA KERNEL (i686, 32-bit protected mode) ===\n");
     kputs("built: clang + nasm + galdc transpile, ran under qemu-system-i386\n");
 
-    /* Nupa -> C : the Nupa module prints via kputs/kputdec/kputhex */
+    /* Gald -> C : the Gald module prints via kputs/kputdec/kputhex */
     soma_core_boot();
 
-    /* Nupa advanced features: @namespace + @interface (implicit root class).
+    /* Gald advanced features: @namespace + @interface (implicit root class).
      * gald_meta_init() (emitted weak by the transpiler) fills in class
      * metadata; the implicit root class metadata is defined above. */
     gald_meta_init();
@@ -418,10 +418,10 @@ void kmain(void) {
     acc.isa = &gald_SomaCore__Calculator_class;   /* hand-built instance */
     soma_instance_demo(&acc);
 
-    /* @try/@catch/@finally on bare metal: throw a hand-built NupaIoError */
-    struct SomaCore__NupaIoError err;
+    /* @try/@catch/@finally on bare metal: throw a hand-built NFIoError */
+    struct SomaCore__NFIoError err;
     memset(&err, 0, sizeof(err));
-    err.isa = &gald_SomaCore__NupaIoError_class;
+    err.isa = &gald_SomaCore__NFIoError_class;
     err.code = 42;
     soma_exc_demo((id)&err);
 
@@ -431,13 +431,13 @@ void kmain(void) {
     /* @protocol + @property + @synthesize + @public ivar access */
     soma_advanced_demo();
 
-    /* C -> Nupa : kernel calls Nupa math functions directly */
-    kprintf("[c] call Nupa: fib(15)=%d gcd(1071,462)=%d\n",
+    /* C -> Gald : kernel calls Gald math functions directly */
+    kprintf("[c] call Gald: fib(15)=%d gcd(1071,462)=%d\n",
             soma_fib(15), soma_gcd(1071, 462));
-    kprintf("[c] call Nupa: rotl(0x12345678,4)=0x%x\n", soma_rotl(0x12345678u, 4));
-    kprintf("[c] call Nupa: fnv1a(\"gald\")=0x%x\n", soma_fnv1a("gald"));
+    kprintf("[c] call Gald: rotl(0x12345678,4)=0x%x\n", soma_rotl(0x12345678u, 4));
+    kprintf("[c] call Gald: fnv1a(\"gald\")=0x%x\n", soma_fnv1a("gald"));
 
-    /* Nupa inline asm io_wait (outb to 0x80) used from C */
+    /* Gald inline asm io_wait (outb to 0x80) used from C */
     for (int i = 0; i < 16; i++) soma_io_wait();
 
     asm volatile("sti");

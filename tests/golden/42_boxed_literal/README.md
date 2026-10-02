@@ -22,7 +22,7 @@
 illegal type 'NFString *' in a boxed expression — '@(...)' accepts arithmetic and BOOL values only
 ```
 
-ObjC 也有这条 "illegal type in boxed expression"；Nupa 无字符串装箱，静默把指针当数值发出去会掩盖错误。
+ObjC 也有这条 "illegal type in boxed expression"；Gald 无字符串装箱，静默把指针当数值发出去会掩盖错误。
 
 **连带修掉的真 bug**：checker 的 `ArrayLit` 臂只返回 `id`、**从不遍历元素** → `@[ @(i + 1) ]` 里那个 `@(expr)` 永远拿不到 `expr_type`、不被改写，生成 C 把**裸 int 混进对象数组**。编译通过、运行期才炸（exit=1，前几段输出正常后静默退出，极具迷惑性）。修法：`ArrayLit` 臂逐元素 `check_expr`。
 

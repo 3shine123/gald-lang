@@ -1579,7 +1579,7 @@ int main(void) {
         NFObject *__gald_tmp_8 = (NFObject_alloc(&gald_Terminal__Ncurses__Window_class, __gald_sel_alloc));
         Terminal__Ncurses__Window * win = (Terminal__Ncurses__Window *)(((struct gald_vtable *)__gald_tmp_8->isa->vtable)->initWithRect_y_w_h_(__gald_tmp_8, __gald_sel_initWithRect_y_w_h_, 2, 2, (((struct gald_vtable *)(scr->isa->vtable))->cols((NFObject *)(scr), __gald_sel_cols) - 4), (((struct gald_vtable *)(scr->isa->vtable))->rows((NFObject *)(scr), __gald_sel_rows) - 4)));
         ((struct gald_vtable *)(win->isa->vtable))->drawBox((NFObject *)(win), __gald_sel_drawBox);
-        ((struct gald_vtable *)(win->isa->vtable))->print_x_text_((NFObject *)(win), __gald_sel_print_x_text_, 1, 2, gald_string_from_cstr("Nupa + Ncurses Demo"));
+        ((struct gald_vtable *)(win->isa->vtable))->print_x_text_((NFObject *)(win), __gald_sel_print_x_text_, 1, 2, gald_string_from_cstr("Gald + Ncurses Demo"));
         NFObject *__gald_tmp_9 = (NFObject_alloc(&gald_Terminal__Ncurses__Button_class, __gald_sel_alloc));
         Terminal__Ncurses__Button * b1 = (Terminal__Ncurses__Button *)(((struct gald_vtable *)__gald_tmp_9->isa->vtable)->initWithWindow_x_y_w_text_(__gald_tmp_9, __gald_sel_initWithWindow_x_y_w_text_, win, 4, 4, 20, gald_string_from_cstr("Quit")));
         NFObject *__gald_tmp_10 = (NFObject_alloc(&gald_Terminal__Ncurses__Button_class, __gald_sel_alloc));
@@ -1592,7 +1592,7 @@ int main(void) {
         int running = 1;
         while (running)         {
             ((struct gald_vtable *)(win->isa->vtable))->drawBox((NFObject *)(win), __gald_sel_drawBox);
-            ((struct gald_vtable *)(win->isa->vtable))->print_x_text_((NFObject *)(win), __gald_sel_print_x_text_, 1, 2, "Nupa + Ncurses Demo");
+            ((struct gald_vtable *)(win->isa->vtable))->print_x_text_((NFObject *)(win), __gald_sel_print_x_text_, 1, 2, "Gald + Ncurses Demo");
             ((struct gald_vtable *)(lbl->isa->vtable))->draw((NFObject *)(lbl), __gald_sel_draw);
             ((struct gald_vtable *)(b1->isa->vtable))->setHighlight_((NFObject *)(b1), __gald_sel_setHighlight_, sel == 0);
             ((struct gald_vtable *)(b2->isa->vtable))->setHighlight_((NFObject *)(b2), __gald_sel_setHighlight_, sel == 1);

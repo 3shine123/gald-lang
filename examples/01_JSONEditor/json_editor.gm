@@ -1,4 +1,4 @@
-// json_editor.gm — Nupa 全特性 JSON 编辑器
+// json_editor.gm — Gald 全特性 JSON 编辑器
 // 编译: galdc run tests/JSONEditor/json_editor.gm -fno-gald-arc
 // 特性覆盖: @protocol, @interface, @implementation, @property, @synthesize,
 //           @namespace, 继承, @category, 泛型<T>, Block, @selector,
@@ -906,7 +906,7 @@ static int read_line(char *buf, int size) {
 // ============================================================================
 int main(int argc, const char *argv[]) {
     @autoreleasepool {
-        printf("═══ Nupa Full Feature Demo ═══\n\n");
+        printf("═══ Gald Full Feature Demo ═══\n\n");
         printf("Features:\n");
         printf("  @namespace JSON { ... } — 7 classes\n");
         printf("  @protocol Value — polymorphic dispatch\n");

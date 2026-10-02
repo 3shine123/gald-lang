@@ -833,7 +833,7 @@ impl Preprocessor {
         let mut defined = HashSet::new();
         for m in extra_macros { defined.insert(m.to_string()); }
         let mut cond_stack: Vec<CondFrame> = Vec::new();
-        // Nupa-syntax macro table (dual-track): bodies a C compiler could not
+        // Gald-syntax macro table (dual-track): bodies a C compiler could not
         // expand are parsed here and expanded at the source level before
         // lexing; plain C defines keep flowing to the C prelude.
         let mut gald_macros: HashMap<String, MacroDef> = HashMap::new();

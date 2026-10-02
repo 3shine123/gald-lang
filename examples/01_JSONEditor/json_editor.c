@@ -2443,7 +2443,7 @@ int main(int argc, const char * argv[]) {
   gald_meta_init();
   {
     gald_autoreleasepool_t * __gald_pool = gald_autoreleasepool_push();
-    printf("═══ Nupa Full Feature Demo ═══\n\n");
+    printf("═══ Gald Full Feature Demo ═══\n\n");
     printf("Features:\n");
     printf("  @namespace JSON { ... } — 7 classes\n");
     printf("  @protocol Value — polymorphic dispatch\n");

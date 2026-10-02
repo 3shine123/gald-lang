@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # tests/stress/interop/build.sh
-# Three-way interop: Nupa (lib.gm → lib.c + bridge lib.h) + plain C
+# Three-way interop: Gald (lib.gm → lib.c + bridge lib.h) + plain C
 # (caller.c, helper.c) + ARM64 assembly (asm_lib.s) + gald runtime.c,
 # all linked into one binary by clang.
 set -euo pipefail

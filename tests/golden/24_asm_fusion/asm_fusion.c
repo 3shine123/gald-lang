@@ -399,7 +399,7 @@ __attribute__((weak)) int main(int argc, const char * argv[]) {
     {
         gald_autoreleasepool_t * __gald_pool = gald_autoreleasepool_push();
         printf("====================================================================\n");
-        printf(">>>    galdc「内联 asm + 外部 .s + Nupa 高级特性」极致融合压测    <<<\n");
+        printf(">>>    galdc「内联 asm + 外部 .s + Gald 高级特性」极致融合压测    <<<\n");
         printf("====================================================================\n\n");
         NFObject *__gald_tmp_1 = (NFObject_alloc(&gald_Kernel__Crypto__BlockHasher_class, __gald_sel_alloc));
         Kernel__Crypto__BlockHasher * hasher = (Kernel__Crypto__BlockHasher *)(((struct gald_vtable *)__gald_tmp_1->isa->vtable)->initWithLabel_(__gald_tmp_1, __gald_sel_initWithLabel_, "Kernel-CRC32"));
@@ -505,7 +505,7 @@ __attribute__((weak)) int main(int argc, const char * argv[]) {
         printf("    与直接调用比对: %s\n", ((struct gald_vtable *)(hasher->isa->vtable))->finalChecksum((NFObject *)(hasher), __gald_sel_finalChecksum) == recomputed ? "MATCH(ok)" : "MISMATCH(bug)");
         ((struct gald_vtable *)(hasher->isa->vtable))->release((NFObject *)(hasher), __gald_sel_release);
         printf("\n====================================================================\n");
-        printf(">>>   完美！内联 asm 与真实汇编在 Nupa 高级特性中无缝融合！   <<<\n");
+        printf(">>>   完美！内联 asm 与真实汇编在 Gald 高级特性中无缝融合！   <<<\n");
         printf("====================================================================\n");
         gald_autoreleasepool_pop(__gald_pool);
     }

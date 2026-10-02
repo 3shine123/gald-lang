@@ -1,5 +1,5 @@
 // lang-test/static_generics_zero_cost_test.gm
-// Nupa 语言「编译期单态化泛型与零开销模板展开」全新功能高压压测
+// Gald 语言「编译期单态化泛型与零开销模板展开」全新功能高压压测
 // 聚焦：泛型类符号隔离、泛型方法精准类型替换、泛型类型别名、三元副作用终极收敛
 
 #include <stdio.h>
@@ -161,7 +161,7 @@ int main(int argc, const char* argv[])
         [redColor release];
 
         // ⚠️【静态类型安全边界校验】：
-        // 如果你的泛型做到了真正的“ObjC语法，C++单态化实现”，那么在 Nupa 代码里尝试调用：
+        // 如果你的泛型做到了真正的“ObjC语法，C++单态化实现”，那么在 Gald 代码里尝试调用：
         // [colorBuffer enqueueElement:p1];
         // 你的 galdc 编译器应当能在前端语义分析阶段精准拦截，并爆出“类型不匹配”错误，而不是通过 id 擦除任由其混过去！
 

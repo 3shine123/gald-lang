@@ -1,5 +1,5 @@
 // lang-test/static_weak_reference_test.gm
-// Nupa 语言「静态弱引用与零污染销毁锚点」全新机制高压测试
+// Gald 语言「静态弱引用与零污染销毁锚点」全新机制高压测试
 // 聚焦：纯静态 ARC 下的 __weak 指针静态置空、多重弱引用绑定、Block 弱捕获打破循环引用
 
 #include <stdio.h>
@@ -64,7 +64,7 @@
     return self;
 }
 
-// 模拟静态析构。在 Nupa 中，当执行 dealloc 或销毁强引用时，
+// 模拟静态析构。在 Gald 中，当执行 dealloc 或销毁强引用时，
 // 编译器的静态 ARC 应该能感知到有哪些弱引用指向了它，并将其置为空
 - (void)dealloc {
     printf("[核心销毁] 空间站「%s」正在静态释放物理资源...\n", _stationName);

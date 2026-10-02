@@ -45,5 +45,5 @@ complete -c galdc -n "__fish_galdc_needs_command" -s S -l asm -d 'link a real as
 complete -c galdc -n "__fish_galdc_needs_command" -l arch -d 'target arch (e.g. -arch x86_64)' -r
 complete -c galdc -n "__fish_galdc_needs_command" -l gen-completions -d 'generate shell completion script (bash|zsh|fish|powershell|elvish)' -r
 complete -c galdc -n "__fish_galdc_needs_command" -l Werror -d 'promote warnings to errors'
-complete -c galdc -n "__fish_galdc_needs_command" -l emit-bridge-header -d 'emit a C bridge header for calling Nupa from C' -r
+complete -c galdc -n "__fish_galdc_needs_command" -l emit-bridge-header -d 'emit a C bridge header for calling Gald from C' -r
 complete -c galdc -n "__fish_galdc_needs_command" -a "run" -d 'compile + run, then delete binary'

@@ -3,13 +3,13 @@
 #
 # WHY THIS EXISTS
 # ---------------
-# Nupa's uniform vtable is built per translation unit from the set of instance
+# Gald's uniform vtable is built per translation unit from the set of instance
 # methods that TU happens to see. Two TUs that see DIFFERENT method sets compile
 # two different `struct gald_vtable` layouts, while the linker weak-merges the
 # vtable *instances* into a single allocation. Dispatch through the losing
 # layout then reads the wrong slot: silent garbage or a segfault at whatever
 # offset the miscalculation lands on. Plain C never hits this because every
-# struct definition is spelled out in the source; Nupa synthesises the layout,
+# struct definition is spelled out in the source; Gald synthesises the layout,
 # so C's type system cannot protect us.
 #
 # This suite pins down, per language feature, whether it survives a cross-TU

@@ -1714,7 +1714,7 @@ else if self.match_keyword(KeywordKind::Typeof) {
 
             // Variadic Foundation collection constructor:
             //   [NFArray arrayWithObjects:a, b, c, nil]  →  @[a, b, c]
-            // ObjC variadic methods don't exist in Nupa; the array literal
+            // ObjC variadic methods don't exist in Gald; the array literal
             // already lowers to the `gald_array_create` runtime helper, so
             // desugar to it (dropping the trailing `nil` terminator).
             let colon_count = selector.matches(':').count();
@@ -5684,7 +5684,7 @@ fn is_object_literal(e: &CstExpr) -> bool {
 
 /// True when the expression provably cannot be a C `case` label: it contains a
 /// message send, a call or an assignment. C requires an integer constant
-/// expression, which none of those can be — but Nupa let them through and
+/// expression, which none of those can be — but Gald let them through and
 /// emitted `case [obj msg]:`, so the error surfaced from the generated C.
 /// Conservative by construction: an unrecognized node shape returns false, so
 /// this can only ever flag what is definitely invalid.
@@ -5734,7 +5734,7 @@ fn expr_is_definitely_object(e: &CstExpr) -> bool {
     }
     match &e.data {
         CstExprData::Cast { target_type, .. } => target_type.is_pointer,
-        // A message send is an object by definition in Nupa, but its *value*
+        // A message send is an object by definition in Gald, but its *value*
         // may be a scalar-returning method, so it is not flagged.
         _ => false,
     }
