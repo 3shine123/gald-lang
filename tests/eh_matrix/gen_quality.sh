@@ -39,6 +39,7 @@ CASES=(
   "c_superset|$GOLD/22_c_superset/c_superset.gm|"
   "freestanding|$GOLD/25_freestanding/freestanding.gm|-ffreestanding"
   "no_throw_plain|tests/eh_matrix/samples/no_throw_plain.gm|"
+  "loops_pure|tests/eh_matrix/samples/loops_pure.gm|"
 )
 
 printf '%-14s %-9s %8s %8s %8s %9s %8s\n' \
@@ -89,5 +90,21 @@ if [[ "$g" -eq 0 ]]; then
     echo "GATE OK   no_throw_plain / -eh checked : 0 guards (nothing to pay)"
 else
     echo "GATE FAIL no_throw_plain / -eh checked : $g guards (expected 0)"
+    exit 1
+fi
+
+# Same gate for loop conditions. while / do / for-with-cond used to wrap the
+# condition in `(flag == 0) && ...` no matter what the body did, so a pure
+# `while (i < 5) i++;` paid a global flag read per iteration.
+loops_c="$WORK/loops_pure.checked.c"
+if [[ ! -f "$loops_c" ]]; then
+    echo "GATE FAIL loops_pure did not transpile under -eh checked"
+    exit 1
+fi
+lg=$(grep -c "__gald_eh_flag" "$loops_c" || true)
+if [[ "$lg" -eq 0 ]]; then
+    echo "GATE OK   loops_pure / -eh checked : 0 guards (pure loop conditions unguarded)"
+else
+    echo "GATE FAIL loops_pure / -eh checked : $lg guards (expected 0)"
     exit 1
 fi

@@ -1131,26 +1131,43 @@ fn rewrite_stmt(s: &mut AstStmt, zero_ret: &AstStmt, fx: &EffectTable) {
             }
         }
         AstStmtData::While { cond, body } => {
+            // Re-testing the flag before every re-entry is only necessary when
+            // something inside the loop can ARM it (a may-throw call, `@throw`,
+            // a guarded call chain, ...). For a pure loop (`while (i < 5) i++;`)
+            // the guard is dead weight on every iteration, so consult the effect
+            // table — the same test the `for (;;)` branch below already used.
+            let arms = fx.expr_may_arm(cond) || fx.stmt_may_arm(body);
             rewrite_expr(cond, fx);
             rewrite_stmt(body, zero_ret, fx);
-            // A body that arms the flag must leave the loop — ObjC unwinds out
-            // of it — so the flag is re-tested before every re-entry.
-            **cond = cond_and_flag_clear((**cond).clone());
+            if arms {
+                **cond = cond_and_flag_clear((**cond).clone());
+            }
         }
         AstStmtData::Do { body, cond } => {
+            let arms = fx.expr_may_arm(cond) || fx.stmt_may_arm(body);
             rewrite_stmt(body, zero_ret, fx);
             rewrite_expr(cond, fx);
-            **cond = cond_and_flag_clear((**cond).clone());
+            if arms {
+                **cond = cond_and_flag_clear((**cond).clone());
+            }
         }
         AstStmtData::For { init, cond, incr, body } => {
+            // Every clause can arm the flag, so the guard is needed if ANY of
+            // them may — including init (it runs before the first condition
+            // evaluation) and incr (it runs right before the next one).
+            let init_arms = init.as_ref().map_or(false, |i| fx.stmt_may_arm(i));
+            let cond_arms = cond.as_ref().map_or(false, |c| fx.expr_may_arm(c));
+            let incr_arms = incr.as_ref().map_or(false, |c| fx.expr_may_arm(c));
+            let arms = init_arms || cond_arms || incr_arms || fx.stmt_may_arm(body);
             if let Some(init_s) = init.as_mut() {
                 rewrite_stmt(init_s, zero_ret, fx);
             }
-            let body_arms = fx.stmt_may_arm(body);
             if let Some(c) = cond.as_mut() {
                 rewrite_expr(c, fx);
-                **c = cond_and_flag_clear((**c).clone());
-            } else if body_arms {
+                if arms {
+                    **c = cond_and_flag_clear((**c).clone());
+                }
+            } else if arms {
                 // `for (;;)` with a throwing body: with no condition at all the
                 // loop would spin forever once the flag is armed.
                 *cond = Some(Box::new(flag_is(0)));
@@ -1818,5 +1835,100 @@ mod tests {
             }
             _ => false,
         })
+    }
+
+    /// Guard density: a loop whose body cannot arm the flag must NOT get its
+    /// condition wrapped in `(flag == 0) && ...`. The `for (;;)` branch always
+    /// consulted `stmt_may_arm`; `while` / `do` / `for`-with-cond armed
+    /// unconditionally, so `while (i < 5) i++;` — no call anywhere — still paid
+    /// a global flag read on every single iteration.
+    #[test]
+    fn pure_loop_condition_is_not_wrapped_in_a_flag_guard() {
+        let mut unit = unit_with_while(None);
+        desugar_unit(&mut unit);
+        let cond = while_cond(&unit).expect("probe must contain a while loop");
+        assert!(
+            !expr_uses_flag(cond),
+            "a loop body with nothing throwable must not pay a flag guard"
+        );
+    }
+
+    /// The mirror image: when the body really can throw, ObjC unwinds out of
+    /// the loop, so the flag must still be re-tested before every re-entry.
+    /// Narrowing the guard must not silently drop this case.
+    #[test]
+    fn throwing_loop_condition_keeps_its_flag_guard() {
+        let throw = AstStmt {
+            kind: gald_ast::AstStmtKind::Throw, line: 0, col: 0,
+            data: AstStmtData::Throw(Some(Box::new(int_expr(1)))),
+        };
+        let mut unit = unit_with_while(Some(throw));
+        desugar_unit(&mut unit);
+        let cond = while_cond(&unit).expect("probe must contain a while loop");
+        assert!(
+            expr_uses_flag(cond),
+            "a body that arms the flag must keep the re-entry guard"
+        );
+    }
+
+    // ── helpers for the two guard-density tests ──────────────────────────────
+
+    fn expr_uses_flag(e: &AstExpr) -> bool {
+        if matches!(&e.data, AstExprData::VarRef { name, .. } if name == "__gald_eh_flag") {
+            return true;
+        }
+        EffectTable::effect_children(e).into_iter().any(expr_uses_flag)
+    }
+
+    fn while_cond(unit: &AstUnit) -> Option<&AstExpr> {
+        fn walk(s: &AstStmt) -> Option<&AstExpr> {
+            match &s.data {
+                AstStmtData::While { cond, .. } => Some(cond),
+                AstStmtData::Compound(v) => v.iter().find_map(walk),
+                _ => None,
+            }
+        }
+        unit.decls.iter().find_map(|d| match &d.data {
+            AstDeclData::Function { body: Some(b), .. }
+            | AstDeclData::Method { body: Some(b), .. } => walk(b),
+            _ => None,
+        })
+    }
+
+    /// `int probe(void) { while (1) { 1; [extra] } }` — the condition is a
+    /// constant and the body is a bare expression, so the *only* thing that can
+    /// put a flag guard on the condition is the effect analysis under test.
+    fn unit_with_while(extra: Option<AstStmt>) -> AstUnit {
+        let mut items = vec![AstStmt {
+            kind: gald_ast::AstStmtKind::Expr, line: 0, col: 0,
+            data: AstStmtData::Expr(int_expr(1)),
+        }];
+        if let Some(x) = extra {
+            items.push(x);
+        }
+        let while_stmt = AstStmt {
+            kind: gald_ast::AstStmtKind::While, line: 0, col: 0,
+            data: AstStmtData::While {
+                cond: Box::new(int_expr(1)),
+                body: Box::new(AstStmt {
+                    kind: gald_ast::AstStmtKind::Compound, line: 0, col: 0,
+                    data: AstStmtData::Compound(items),
+                }),
+            },
+        };
+        let body = AstStmt {
+            kind: gald_ast::AstStmtKind::Compound, line: 0, col: 0,
+            data: AstStmtData::Compound(vec![while_stmt]),
+        };
+        let func = AstDecl {
+            kind: gald_ast::AstDeclKind::Function, name: Some("probe".into()), line: 1, col: 1,
+            data: AstDeclData::Function {
+                func_sym: None, return_type: Some(Box::new(AstType::new(TypePrim::Int))),
+                params: None, body: Some(Box::new(body)),
+                has_variadic: false, throws: None, async_marker: false,
+            },
+            attributes: Vec::new(),
+        };
+        AstUnit { decls: vec![func], filename: "probe.gm".into() }
     }
 }
