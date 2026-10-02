@@ -54,6 +54,11 @@ def _gm_suite_files() -> list[Path]:
         # Deliberate-failure negative tests (checker must reject them); they
         # are validated by hand / in cargo unit tests, not by this runner.
         and "negative" not in p.parts
+        # tests/arc_intern/* is a sanitizer-only regression guard (ASan is
+        # required to observe the defect, and the ARC->MRC retry below would
+        # downgrade the crash to a green PASS_MRC). Driven by its own
+        # run_arc_intern_test.sh.
+        and "arc_intern" not in p.parts
         # tests/eh_diff/* is a differential suite against clang/ObjC baselines:
         # run_eh_diff.sh compiles each case with `-eh checked` AND with clang
         # -fobjc-arc -fobjc-arc-exceptions, then diffs stderr. Standalone here it

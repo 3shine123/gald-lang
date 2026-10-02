@@ -193,3 +193,7 @@ sig：库 TU == 客户 TU（0xbe99f65a63e20021）
 > 它自带 `-fstrong-metadata`，并用 `nm` 校验元数据的确是强符号（弱符号会让守卫直接失败）。
 > 保护测试：`tests/strong_metadata/run_strong_metadata_test.sh`（强符号 / 弱客户端链接 /
 > 双强符号必须 duplicate symbol 三项）。
+>
+> 顺带修掉一个与本计划无关的既有 ARC 缺陷：`full_syntax_test.gm` 的 intern 字符串
+> heap-use-after-free（`test_all` 里那唯一一个 `SUSPECT` 来源）→ 已修复，见
+> `doc/arc_intern_uaf.md`，回归守护 `tests/arc_intern/`。

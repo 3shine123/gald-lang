@@ -7410,10 +7410,11 @@ pub fn emit_unit_with_headers(unit: &CgUnit, c_headers: &[String], search_dirs: 
     // Hosted builds INTERN: identical contents map to ONE shared instance
     // (ObjC constant-`@"..."` semantics), so pointer equality across literal
     // occurrences works (`containsObject:`/`indexOfObject:` with a fresh
-    // `@"key"` now finds the stored element). The table owns its +1 forever —
-    // the result is a shared constant, not a pooled temporary; ARC treats it
-    // as unretained and MRC code must not release it (same rule as ObjC
-    // constant strings). Table cap 256: when full, fall back to a fresh
+    // `@"key"` now finds the stored element). The table retains the object once
+    // (see the `gald_retain` below) so it truly owns its +1 forever — the
+    // result is a shared constant, not a pooled temporary; MRC code must not
+    // release it (same rule as ObjC constant strings). Table cap 256: when full,
+    // fall back to a fresh
     // object (correct, just not interned). Lazy-init table is a plain global
     // — single-threaded assumption, same class as the runtime's weak side
     //     table. Freestanding keeps the old fresh-object body (no <string.h>).
@@ -7449,6 +7450,14 @@ pub fn emit_unit_with_headers(unit: &CgUnit, c_headers: &[String], search_dirs: 
         out.push_str("    str->_length = len;\n");
         out.push_str("    str->_hash = 0;\n");
         out.push_str("    str->_hashIsValid = 0;\n");
+        // The table must hold a reference of its OWN, not alias the object's
+        // initial +1. A literal is commonly stored straight into an object ivar
+        // (`h->_s = @"x";`): ARC does not retain that assignment, but the
+        // synthesised dealloc does release the ivar — which would consume the
+        // table's only reference, free the "immortal" constant, and leave the
+        // table pointing at freed memory (heap-use-after-free in the next
+        // intern lookup's strcmp). See doc/arc_intern_uaf.md.
+        out.push_str("    gald_retain(obj);\n");
         out.push_str("    if (gald_intern_count < 256) {\n");
         out.push_str("        gald_intern_table[gald_intern_count].cstr = str->_cstr;\n");
         out.push_str("        gald_intern_table[gald_intern_count].obj = obj;\n");
