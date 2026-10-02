@@ -48,6 +48,12 @@ pub struct Pipeline {
     /// `--slots <manifest>`: append-only vtable slot manifest for stable
     /// cross-TU layout (None = historical sorted layout).
     pub slots_manifest: Option<String>,
+    /// `-fstrong-metadata`: emit class metadata (vtable / meta-vtable
+    /// instances, getClass functions, `gald_metaInit`) as strong symbols
+    /// instead of weak ones. Set it when building a precompiled library (P3):
+    /// the library's real tables then outrank a client TU's declaration-only
+    /// stubs. See `doc/stable_slots_plan.md` §8.
+    pub strong_metadata: bool,
     /// C compiler + leading args used for the link step (e.g. `["zig", "cc"]`).
     /// Also used by the C type-name probe; empty means "unknown", which skips
     /// the probe.
@@ -83,6 +89,7 @@ impl Pipeline {
             no_comments: false,
             eh_checked: DEFAULT_EH_CHECKED,
             slots_manifest: None,
+            strong_metadata: false,
             c_cc: Vec::new(),
             c_arch: None,
             no_ctype_probe: false,
@@ -417,6 +424,7 @@ impl Pipeline {
         // calls; codegen emits one field-wise `gald_struct_eq_<tag>` per tag.
         cg.struct_eq_tags = struct_eq_tags;
         cg.no_arc = self.no_arc;
+        cg.strong_metadata = self.strong_metadata;
         let c_code = emit_unit_with_headers(&cg, &pre.c_headers, &self.search_dirs, self.no_libc, self.backend, !self.no_comments, self.eh_checked);
 
         // Step 6.4: Write back the slots manifest (append-only): the compiled
@@ -536,9 +544,16 @@ fn translate_lines(msg: &str, sm: &gald_cst::source_map::SourceMap) -> String {
     }).collect::<Vec<_>>().join("\n")
 }
 
-/// Sanitized selectors declared by a file this TU imports — its "public"
-/// surface. Codegen uses this to lay out the public vtable segment identically
-/// in every TU (`doc/stable_slots_plan.md`, rule R1).
+/// Sanitized selectors declared in an `@interface` from a file this TU
+/// imports — its "public" surface. Codegen uses this to lay out the public
+/// vtable segment identically in every TU (`doc/stable_slots_plan.md`, rule R1).
+///
+/// Only `@interface` declarations count (`is_implementation: false`). A
+/// selector that appears solely in an imported `@implementation` is private to
+/// the file that defines it: counting it made the library TU (which imports
+/// `*.gm`) and a client TU (which sees only `*.gh`) disagree on where a
+/// property-synthesised accessor such as `NFError.localizedDescription` sits,
+/// so their layouts split. Restricting to `@interface` makes the two align.
 ///
 /// Where the preprocessor has no source map, the set comes back empty and the
 /// historical alphabetical-only layout is used unchanged.
@@ -563,7 +578,7 @@ fn collect_public_methods(
         if !imported {
             continue;
         }
-        if let AstDeclData::Class { methods, .. } = &d.data {
+        if let AstDeclData::Class { methods, is_implementation: false, .. } = &d.data {
             for m in methods {
                 if let Some(sel) = &m.name {
                     set.insert(sel.replace(':', "_"));
