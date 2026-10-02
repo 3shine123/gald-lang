@@ -403,6 +403,62 @@ pub struct CgClassMeta {
 /// Only pointer-typed, non-weak, non-scalar-pointer, non-function-pointer
 /// ivars qualify: `char *`/`void *` are plain C storage, a function pointer is
 /// not an object, and block layouts are managed by the Blocks runtime.
+/// Build the comma sequence that writes an object slot and keeps the
+/// *referent's* weak list in sync:
+///
+/// ```c
+/// (gald_weakUnregister((NFObject **)&target),
+///  target = value,
+///  gald_weakRegister((NFObject **)&target, (NFObject *)value))
+/// ```
+///
+/// Used for both explicit `self->_weakIvar = v` writes and weak property
+/// assignment written with dot syntax (`self.weakProp = v`). ObjC dot syntax
+/// *is* a setter call, so it has to register exactly like the synthesized
+/// setter does — a raw field write would leave the slot out of the referent's
+/// weak list, so the slot is never nil'd and the program keeps a dangling
+/// pointer where the language guarantees nil.
+fn build_weak_write(
+    target: CgExpr,
+    value: CgExpr,
+    line: usize,
+    col: usize,
+    type_str: Option<String>,
+) -> CgExpr {
+    let addr = CgExpr {
+        kind: CgExprKind::Unary, type_str: None, line, col,
+        data: CgExprData::Unary { op_str: "&".into(), operand: Box::new(target.clone()), is_postfix: false },
+    };
+    let cast_addr = CgExpr {
+        kind: CgExprKind::Cast, type_str: None, line, col,
+        data: CgExprData::Cast { target_type: "NFObject **".into(), expr: Box::new(addr) },
+    };
+    let cast_value = CgExpr {
+        kind: CgExprKind::Cast, type_str: None, line, col,
+        data: CgExprData::Cast { target_type: "NFObject *".into(), expr: Box::new(value.clone()) },
+    };
+    let call = |name: &str, args: Vec<CgExpr>| CgExpr {
+        kind: CgExprKind::Call, type_str: Some("void".into()), line, col,
+        data: CgExprData::Call {
+            name: name.into(), args,
+            vtable_class: None, alt_vtable_classes: vec![],
+            is_class_method: false, is_super: false,
+            sel_const_name: None, method_index: None,
+        },
+    };
+    CgExpr {
+        kind: CgExprKind::Comma, type_str, line, col,
+        data: CgExprData::Comma(vec![
+            call("gald_weakUnregister", vec![cast_addr.clone()]),
+            CgExpr {
+                kind: CgExprKind::Assign, type_str: None, line, col,
+                data: CgExprData::Assign { target: Box::new(target), value: Box::new(value) },
+            },
+            call("gald_weakRegister", vec![cast_addr, cast_value]),
+        ]),
+    }
+}
+
 fn is_owned_object_ivar_type(ty: &str) -> bool {
     let t = ty.trim();
     // `id` (and the runtime's `gald_id_t`) are object pointers spelled without
@@ -1730,25 +1786,44 @@ fn convert_expr(ae: &AstExpr, class_infos: &std::collections::BTreeMap<String, C
             }
         }
         AstExprData::Assign { target, value } => {
-            if let AstExprData::PropRef { obj, name, is_arrow, prop, .. } = &target.data {
+            if let AstExprData::PropRef { obj, name, is_arrow, prop, cls, .. } = &target.data {
                 // Only prepend `_` for ObjC property access (prop is Some). For plain
                 // C struct field access (`struct.field = val`), use the name as-is.
                 let field_name = if prop.is_some() { format!("_{}", name) } else { name.clone() };
                 let obj_cg = convert_expr(obj, &class_infos);
-                let value_cg = convert_expr(value, &class_infos);
                 let target_cg = if *is_arrow || obj.expr_type.as_ref().map_or(false, |t| t.is_pointer) {
                     CgExpr { kind: CgExprKind::Arrow, type_str: None, line, col,
-                             data: CgExprData::Arrow { obj: Box::new(obj_cg), field: field_name } }
+                             data: CgExprData::Arrow { obj: Box::new(obj_cg), field: field_name.clone() } }
                 } else {
                     CgExpr { kind: CgExprKind::Member, type_str: None, line, col,
-                             data: CgExprData::Member { obj: Box::new(obj_cg), field: field_name } }
+                             data: CgExprData::Member { obj: Box::new(obj_cg), field: field_name.clone() } }
                 };
-                CgExpr {
-                    kind: CgExprKind::Assign, type_str, line, col,
-                    data: CgExprData::Assign {
-                        target: Box::new(target_cg),
-                        value: Box::new(value_cg),
-                    },
+                let value_cg = convert_expr(value, &class_infos);
+                // ObjC dot syntax is a setter call, not a raw field write. A weak
+                // property has to be registered against the object it points at,
+                // or the slot is never nil'd when that object dies — leaving a
+                // dangling pointer where the language promises nil. (Reads
+                // already dispatch through the getter; this makes writes
+                // symmetric instead of silently bypassing the setter.)
+                let weak_prop = prop.is_some()
+                    && cls.as_ref()
+                        .and_then(|c| class_infos.get(c))
+                        .map(|info| {
+                            info.ivar_names.iter().position(|n| n == &field_name)
+                                .and_then(|idx| info.ivar_weak.get(idx).copied())
+                                .unwrap_or(false)
+                        })
+                        .unwrap_or(false);
+                if weak_prop {
+                    build_weak_write(target_cg, value_cg, line, col, type_str)
+                } else {
+                    CgExpr {
+                        kind: CgExprKind::Assign, type_str, line, col,
+                        data: CgExprData::Assign {
+                            target: Box::new(target_cg),
+                            value: Box::new(value_cg),
+                        },
+                    }
                 }
             } else if let AstExprData::IvarRef { ivar: ivar_name, cls: ivar_cls, .. } = &target.data {
                 let is_weak = ivar_cls.as_ref().and_then(|c| {
@@ -1762,50 +1837,7 @@ fn convert_expr(ae: &AstExpr, class_infos: &std::collections::BTreeMap<String, C
                 if is_weak {
                     let ivar_cg = convert_expr(target, &class_infos);
                     let value_cg = convert_expr(value, &class_infos);
-                    let addr = CgExpr {
-                        kind: CgExprKind::Unary, type_str: None, line, col,
-                        data: CgExprData::Unary { op_str: "&".into(), operand: Box::new(ivar_cg.clone()), is_postfix: false },
-                    };
-                    let cast_addr = CgExpr {
-                        kind: CgExprKind::Cast, type_str: None, line, col,
-                        data: CgExprData::Cast { target_type: "NFObject **".into(), expr: Box::new(addr) },
-                    };
-                    let cast_value = CgExpr {
-                        kind: CgExprKind::Cast, type_str: None, line, col,
-                        data: CgExprData::Cast { target_type: "NFObject *".into(), expr: Box::new(value_cg.clone()) },
-                    };
-                    CgExpr {
-                        kind: CgExprKind::Comma, type_str, line, col,
-                        data: CgExprData::Comma(vec![
-                            CgExpr {
-                                kind: CgExprKind::Call, type_str: Some("void".into()), line, col,
-                                data: CgExprData::Call {
-                                    name: "gald_weakUnregister".into(),
-                                    args: vec![cast_addr.clone()],
-                                    vtable_class: None, alt_vtable_classes: vec![],
-                                    is_class_method: false, is_super: false,
-                                    sel_const_name: None, method_index: None,
-                                },
-                            },
-                            CgExpr {
-                                kind: CgExprKind::Assign, type_str: None, line, col,
-                                data: CgExprData::Assign {
-                                    target: Box::new(ivar_cg),
-                                    value: Box::new(value_cg),
-                                },
-                            },
-                            CgExpr {
-                                kind: CgExprKind::Call, type_str: Some("void".into()), line, col,
-                                data: CgExprData::Call {
-                                    name: "gald_weakRegister".into(),
-                                    args: vec![cast_addr, cast_value],
-                                    vtable_class: None, alt_vtable_classes: vec![],
-                                    is_class_method: false, is_super: false,
-                                    sel_const_name: None, method_index: None,
-                                },
-                            },
-                        ]),
-                    }
+                    build_weak_write(ivar_cg, value_cg, line, col, type_str)
                 } else {
                     CgExpr { kind: CgExprKind::Assign, type_str, line, col, data: CgExprData::Assign { target: Box::new(convert_expr(target, &class_infos)), value: Box::new(convert_expr(value, &class_infos)) } }
                 }
@@ -4184,6 +4216,10 @@ pub fn ast_to_cg_unit_with_slots(ast: &AstUnit, backend: Backend, slots_manifest
                     if !ivar_names.contains(&ivar_name) {
                         ivar_types.push(it.clone());
                         ivar_names.push(ivar_name.clone());
+                        // Keep the three vectors parallel: the merge pass below
+                        // indexes ivar_weak by position, so a missing entry made
+                        // every subsequently checked ivar look non-weak.
+                        ivar_weak.push(*is_weak);
                     }
 
                     // Skip getter/setter generation for array properties (C cannot return arrays from functions)
@@ -4478,6 +4514,12 @@ pub fn ast_to_cg_unit_with_slots(ast: &AstUnit, backend: Backend, slots_manifest
                 if !info.ivar_names.contains(n) {
                     info.ivar_names.push(n.clone());
                     info.ivar_types.push(ivar_types[idx].clone());
+                    // The weak flags must stay index-parallel with ivar_names.
+                    // Dropping this push left `info.ivar_weak` shorter than
+                    // `info.ivar_names`, so `is_weak` lookups for every
+                    // synthesized property resolved to false — the weak write
+                    // path was never taken and the slot was never nil'd.
+                    info.ivar_weak.push(ivar_weak.get(idx).copied().unwrap_or(false));
                 }
             }
         }
