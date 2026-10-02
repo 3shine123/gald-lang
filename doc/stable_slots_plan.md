@@ -122,3 +122,48 @@ A+B 完成后动手做 C，试了两条路，都只走到一半：
 
 在 C 完成之前，`11_vtable_private_slots` 保持 `EXPECT_FAIL`：它是"尚未完成"的断言，
 任何回退都会让它继续以"预期失败"通过，不会静默变成假绿。
+
+## 8. P3 进展（2026-10-02）
+
+### 已完成
+
+* **`include/Foundation/Foundation.decl.gh`** —— 纯声明头（14 行）。只需剥掉
+  `Foundation.gh` 里的 9 行 `#import "*.gm"`：**其它 `.gh` 本来就是纯声明**，所以这一步是
+  删 9 行，不是重新组织头文件。
+* **库构建已验证**（86K）：
+
+  ```bash
+  galdc -rewrite-gald include/Foundation/Foundation.gh -o Foundation.c -I include   # 3175 行
+  clang -c Foundation.c -o Foundation.o -I include
+  ar rcs libgaldfoundation.a Foundation.o
+  ```
+
+* **实测效果**（`#import <Foundation/Foundation.decl.gh>` + 链接库）：
+
+  | | 自包含模式（现状） | P3 模式 |
+  |---|---|---|
+  | 生成的 C | 含 ~3000 行 Foundation 实现 | **2085 行总计** |
+  | `__attribute__((weak))` | 193 | **36** |
+
+  也就是说：**你要的"生成代码干净"已经达成**，剩下的只是让它也能正确运行。
+
+### 剩余一步（精确，约半小时）
+
+用户 TU 只看到声明，所以它仍然生成 `GALD_VTABLE_$_NFString` 之类的**空桩**；链接器的
+weak 合并可能选中空桩而不是库里的真表，于是 `[s length]` 走空指针 → 段错误（rc=139）。
+
+**解法：让库侧的元数据成为强符号。**
+
+1. 加 CLI 标志 `-fstrong-metadata`；
+2. codegen 里三处元数据 emit 把 `__attribute__((weak))` 改成条件输出
+   （`GALD_VTABLE_$_X`、`GALD_META_VTABLE_$_X_inst`、`GALD_CLASS_$_X`；位置见
+   `emit` 阶段中 `for cm in &unit.classes` 的 vtable / meta-vtable / class 三个循环）；
+3. 编译库时带上该标志 → 强符号胜出，用户 TU 的空桩被丢弃。
+
+**顺带（同一趟做，已验证过方向）**：`collect_public_methods` 的判定应从"是否由导入文件
+带来"改为"**是否在 `@interface` 里声明**"。后者不依赖 `source_map`，而且让库 TU（编译
+实现）与用户 TU（只读声明）的方法集**天然一致**——实测改用它之后 sig 立刻一致，唯一的
+残留问题就是上面那个空桩。
+
+（两个改动都做完后，`Foundation.decl.gh` 这条路径才算完整；在那之前它只保证"生成代码干净"，
+不能保证链接后正确。）
