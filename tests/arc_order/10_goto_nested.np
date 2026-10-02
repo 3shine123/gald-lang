@@ -1,0 +1,31 @@
+#import <Foundation/Foundation.nh>
+
+// ARC order 10: `goto` leaving TWO nested scopes releases both, innermost
+// first (reverse declaration / stack order).
+
+@interface AO10Item : NPObject
+- (int)value;
+@end
+
+@implementation AO10Item
+- (void)dealloc {
+    NPLog(@"ao10 dealloc");
+    [super dealloc];
+}
+- (int)value { return 10; }
+@end
+
+int main() {
+    {
+        AO10Item *outer = [[AO10Item alloc] init];
+        {
+            AO10Item *inner = [[AO10Item alloc] init];
+            goto out;
+        }
+    }
+    NPLog(@"ao10 unreachable");
+
+out:
+    NPLog(@"ao10 done");
+    return 0;
+}

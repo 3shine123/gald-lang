@@ -13,6 +13,18 @@ use nupa_checker::Checker;
 use nupa_trace::{trace_refcounts, TraceOptions};
 use attrs::{Backend, disposition, AttrDisposition};
 
+/// Default exception backend.
+///
+/// `true` = `-eh checked`: the explicit flag + guard lowering in `crates/eh`
+/// (each `@throw` arms `__nupa_eh_flag` and returns; every call site that may
+/// throw is guarded; the function tail propagates). ARC settles every frame on
+/// the way out, so a cross-function throw releases intermediate frames'
+/// owned locals — the sjlj backend's documented limitation.
+///
+/// `-eh legacy` (alias `-eh sjlj`) selects the old setjmp/longjmp backend and
+/// remains a complete, faithful rollback.
+pub const DEFAULT_EH_CHECKED: bool = true;
+
 pub struct Pipeline {
     pub has_error: bool,
     pub error_msg: String,
@@ -29,8 +41,9 @@ pub struct Pipeline {
     pub werror: bool,
     pub bridge_header: Option<String>,
     pub no_comments: bool,
-    /// `-eh checked`: Swift-scheme exception desugar (crates/eh). Default is
-    /// the sjlj backend (zero behavior change).
+    /// `-eh checked` (DEFAULT since the flip): explicit flag + guard exception
+    /// lowering (crates/eh), unwind-safe ARC. `-eh legacy` / `-eh sjlj`
+    /// selects the old setjmp/longjmp backend for rollback.
     pub eh_checked: bool,
     /// `--slots <manifest>`: append-only vtable slot manifest for stable
     /// cross-TU layout (None = historical sorted layout).
@@ -68,7 +81,7 @@ impl Pipeline {
             werror: false,
             bridge_header: None,
             no_comments: false,
-            eh_checked: false,
+            eh_checked: DEFAULT_EH_CHECKED,
             slots_manifest: None,
             c_cc: Vec::new(),
             c_arch: None,
@@ -227,6 +240,19 @@ impl Pipeline {
             }
         }
 
+        // Step 3.92: legacy (sjlj) `@finally` early-return splice.
+        //
+        // The checked backend rewrites `@try` before this point and splices the
+        // finally body in front of every `return` while doing so. The sjlj
+        // backend hands `@try` to codegen unchanged, so without this pass a
+        // `return` inside a `@try` silently skipped its `@finally` (ObjC runs
+        // it). Runs before ARC so the injected cleanup stays after the finally
+        // copy — the finally sees its locals alive.
+        if !self.eh_checked {
+            if self.verbose { eprintln!("[nupac] legacy @finally splice..."); }
+            nupa_eh::splice_finally_exits(&mut ast);
+        }
+
         // Step 3.95: Pattern-switch lowering — AFTER defer splicing (defer
         // sees the original switch; lowered goto/labels are ordinary stmts it
         // must never splice into) and BEFORE ARC (ARC/checker/codegen only
@@ -250,6 +276,10 @@ impl Pipeline {
                             arc_analyze_loops(&cfg, &mut arc_result, msym);
                             arc_insert_actions(b, &arc_result);
                             arc_optimize_pairs(b);
+                            if !arc_result.errors.is_empty() {
+                                return Err(format!("ARC analysis failed:\n{}",
+                                    prefix_lines("[arc]", &arc_result.errors.join("\n"))));
+                            }
                             for w in &arc_result.leak_warnings {
                                 eprintln!("\x1b[1;35m[arc] warning:\x1b[0m {}:{}:{}: {}", filename, decl.line, decl.col, w);
                             }
@@ -263,6 +293,10 @@ impl Pipeline {
                         arc_analyze_loops(&cfg, &mut arc_result, name);
                         arc_insert_actions(b, &arc_result);
                         arc_optimize_pairs(b);
+                        if !arc_result.errors.is_empty() {
+                            return Err(format!("ARC analysis failed:\n{}",
+                                prefix_lines("[arc]", &arc_result.errors.join("\n"))));
+                        }
                         for w in &arc_result.leak_warnings {
                             eprintln!("\x1b[1;35m[arc] warning:\x1b[0m {}:{}:{}: {}", filename, decl.line, decl.col, w);
                         }
@@ -277,6 +311,10 @@ impl Pipeline {
                                 arc_analyze_loops(&cfg, &mut arc_result, name);
                                 arc_insert_actions(b, &arc_result);
                                 arc_optimize_pairs(b);
+                                if !arc_result.errors.is_empty() {
+                                    return Err(format!("ARC analysis failed:\n{}",
+                                        prefix_lines("[arc]", &arc_result.errors.join("\n"))));
+                                }
                                 for w in &arc_result.leak_warnings {
                                     eprintln!("\x1b[1;35m[arc] warning:\x1b[0m {}:{}:{}: {}", filename, m.line, m.col, w);
                                 }
@@ -371,7 +409,8 @@ impl Pipeline {
         // Struct tags whose `==`/`!=` the checker rewrote to value-comparison
         // calls; codegen emits one field-wise `nupa_struct_eq_<tag>` per tag.
         cg.struct_eq_tags = struct_eq_tags;
-        let c_code = emit_unit_with_headers(&cg, &pre.c_headers, &self.search_dirs, self.no_libc, self.backend, !self.no_comments);
+        cg.no_arc = self.no_arc;
+        let c_code = emit_unit_with_headers(&cg, &pre.c_headers, &self.search_dirs, self.no_libc, self.backend, !self.no_comments, self.eh_checked);
 
         // Step 6.4: Write back the slots manifest (append-only): the compiled
         // assignment (previously-assigned slots kept + new methods appended)
@@ -488,6 +527,41 @@ fn translate_lines(msg: &str, sm: &nupa_cst::source_map::SourceMap) -> String {
             _ => l.to_string(),
         }
     }).collect::<Vec<_>>().join("\n")
+}
+
+#[cfg(test)]
+mod eh_default_tests {
+    use super::*;
+
+    /// Regression guard for the default exception backend.
+    ///
+    /// The flip to `-eh checked` was vetted by the acceptance matrix
+    /// (`tests/eh_matrix/run_eh_matrix.sh`: 17 scenarios x 3 modes),
+    /// the clang/ObjC differential suite (`tests/eh_diff/`: 7/7) and
+    /// `test_all`. Reverting this constant — or letting `Pipeline::new()`
+    /// drift away from it — silently changes every build's exception
+    /// semantics, so both are asserted here.
+    #[test]
+    fn default_exception_backend_is_checked() {
+        assert!(
+            DEFAULT_EH_CHECKED,
+            "default EH backend regressed to sjlj; '-eh checked' is the vetted default"
+        );
+        assert!(
+            Pipeline::new().eh_checked,
+            "Pipeline::new() must take its eh_checked value from DEFAULT_EH_CHECKED"
+        );
+    }
+
+    /// `-eh legacy` must still be reachable as a full rollback: the flag is a
+    /// plain bool the CLI sets to false, so a false `Pipeline::new()` default
+    /// would have made `legacy` a no-op rather than a distinct backend.
+    #[test]
+    fn legacy_rollback_is_an_explicit_false() {
+        let mut p = Pipeline::new();
+        p.eh_checked = false;
+        assert!(!p.eh_checked, "-eh legacy must produce the sjlj backend");
+    }
 }
 
 

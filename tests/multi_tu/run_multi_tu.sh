@@ -83,12 +83,21 @@ run_case() {
         slots_args=(--slots "$out/slots.manifest")
     fi
 
+    # Optional EH backend selection for the acceptance matrix:
+    #   NUPA_EH_FLAG="-eh checked" ./run_multi_tu.sh
+    # Unset (the default) = the shipped default backend, zero behavior change.
+    local eh_args=()
+    if [[ -n "${NUPA_EH_FLAG:-}" ]]; then
+        # shellcheck disable=SC2206
+        eh_args=(${NUPA_EH_FLAG})
+    fi
+
     local tsrc objs=() t
     for t in "${sources[@]}"; do
         tsrc="$out/$(basename "${t%.np}").c"
         # NOTE: macOS bash 3.2 under `set -u` rejects "${empty_arr[@]}" —
         # the conditional expansion keeps empty slots_args legal.
-        if ! "$NPAC" -rewrite-nupa "$t" -o "$tsrc" -I "$dir" "${INCS[@]}" ${slots_args[@]+"${slots_args[@]}"} > "$out/$name.transpile.log" 2>&1; then
+        if ! "$NPAC" -rewrite-nupa "$t" -o "$tsrc" -I "$dir" "${INCS[@]}" ${slots_args[@]+"${slots_args[@]}"} ${eh_args[@]+"${eh_args[@]}"} > "$out/$name.transpile.log" 2>&1; then
             echo "FAIL  $name (transpile)"
             sed 's/^/      /' "$out/$name.transpile.log" | head -12
             FAIL=$((FAIL+1)); FAILED_CASES+=("$name"); return

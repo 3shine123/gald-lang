@@ -270,15 +270,19 @@ fn return_zero(ret: &AstType) -> AstStmt {
 /// an aggregate typedef (`NPRange`) from a scalar one (`size_t`) here — and
 /// both take the compound literal: it is the only C99 form valid for the
 /// former, and still perfectly valid for the latter. `Sel` joins them because
-/// nupa's `SEL` is a struct, not an integer. Pointers, `id`, blocks, function
-/// pointers, arrays and unsized/named-less types all keep `0`.
+/// nupa's `SEL` is a struct, not an integer — and a bare `SEL` has NO name
+/// (`TypePrim::Sel` with `name: None`), so it must be matched on the prim
+/// alone or the tail guard emits `return 0;` into a struct-returning function
+/// (json_editor's `static SEL cmdSel`, clang: "returning 'int' from a
+/// function with incompatible result type 'SEL'"). Pointers, `id`, blocks,
+/// function pointers, arrays and unsized/named-less types keep `0`.
 fn aggregate_zero(t: &AstType) -> bool {
     !t.is_pointer
         && !t.is_block
         && !t.is_fn_ptr
         && !t.is_array
-        && t.name.is_some()
-        && matches!(t.prim, TypePrim::Named | TypePrim::Sel)
+        && (matches!(t.prim, TypePrim::Sel)
+            || (t.name.is_some() && matches!(t.prim, TypePrim::Named)))
 }
 
 /// Wrap `s` in `if (!__nupa_eh_flag) { s }`.
@@ -393,6 +397,69 @@ pub fn desugar_unit(unit: &mut AstUnit) {
     let fx = EffectTable::build(unit);
     for decl in &mut unit.decls {
         desugar_decl(decl, &fx);
+    }
+}
+
+/// Legacy (sjlj) backend: make `@finally` run on the early-`return` path.
+///
+/// The checked backend splices a copy of the finally body in front of every
+/// `return` while it rewrites `@try` (see `rewrite_try`). The sjlj backend
+/// leaves `@try` to codegen, so the same splice has to happen as its own pass,
+/// before ARC (so the ARC-injected cleanup lands after the finally copy, i.e.
+/// the finally runs while the locals are still alive).
+pub fn splice_finally_exits(unit: &mut AstUnit) {
+    for decl in &mut unit.decls {
+        splice_finally_decl(decl);
+    }
+}
+
+fn splice_finally_decl(d: &mut AstDecl) {
+    match &mut d.data {
+        AstDeclData::Function { body: Some(b), .. } | AstDeclData::Method { body: Some(b), .. } => {
+            splice_finally_stmt(b);
+        }
+        AstDeclData::Class { methods, .. } => {
+            for m in methods {
+                splice_finally_decl(m);
+            }
+        }
+        AstDeclData::Namespace(members) => {
+            for m in members {
+                splice_finally_decl(m);
+            }
+        }
+        _ => {}
+    }
+}
+
+fn splice_finally_stmt(s: &mut AstStmt) {
+    match &mut s.data {
+        AstStmtData::Compound(v) => for st in v { splice_finally_stmt(st); },
+        AstStmtData::If { then, else_, .. } => {
+            splice_finally_stmt(then);
+            if let Some(e) = else_ { splice_finally_stmt(e); }
+        }
+        AstStmtData::While { body, .. } | AstStmtData::Do { body, .. }
+        | AstStmtData::For { body, .. } | AstStmtData::ForIn { body, .. } => {
+            splice_finally_stmt(body);
+        }
+        AstStmtData::Switch { body, .. } | AstStmtData::Case { body, .. }
+        | AstStmtData::Default(body) => splice_finally_stmt(body),
+        AstStmtData::Synchronized { body, .. } | AstStmtData::Autoreleasepool(body)
+        | AstStmtData::NoArc(body) => splice_finally_stmt(body),
+        AstStmtData::Catch { body, .. } => splice_finally_stmt(body),
+        AstStmtData::Finally(b) => splice_finally_stmt(b),
+        AstStmtData::Try { try_block, catches, finally_block } => {
+            // Inner @try first, so an outer splice lands after the inner copy.
+            splice_finally_stmt(try_block);
+            for c in catches { splice_finally_stmt(c); }
+            if let Some(f) = finally_block {
+                splice_finally_stmt(f);
+                let fin = (**f).clone();
+                splice_finally_before_exits(try_block, &fin);
+            }
+        }
+        _ => {}
     }
 }
 
@@ -1215,6 +1282,8 @@ fn rewrite_try(
     // Try body: rewrite; also guard trailing statements after any flag-arming
     // statement (rewrite_stmts handles statement lists; if the body is a
     // single non-compound statement there is no tail to guard).
+    // Remember where it landed: the finally pass below splices into it.
+    let try_body_idx = out.len();
     if let AstStmtData::Compound(inner) = &mut try_block.data {
         rewrite_stmts(inner, zero_ret, fx);
         out.push(AstStmt {
@@ -1318,6 +1387,17 @@ fn rewrite_try(
     // *inside* the finally is OR-ed back, so that exception propagates too.
     if let Some(f) = finally_block {
         rewrite_stmt(f, zero_ret, fx);
+        // A `@finally` must also run when the try body leaves through `return`
+        // (ObjC semantics). The body is emitted as plain statements above, so a
+        // `return` inside it would jump straight past the finally block. Splice
+        // a copy of the finally body immediately before every `return` in the
+        // try body. Nesting works out because an outer @try splices into the
+        // already-spliced inner sequence: its copy lands directly in front of
+        // the `return`, i.e. AFTER the inner copy — which is the required order
+        // (inner finally first, then outer finally).
+        if let Some(tb) = out.get_mut(try_body_idx) {
+            splice_finally_before_exits(tb, f);
+        }
         out.push(isolated_block(f.clone(), line, col));
     }
 
@@ -1327,6 +1407,52 @@ fn rewrite_try(
     AstStmt {
         kind: nupa_ast::AstStmtKind::Compound, line, col,
         data: AstStmtData::Compound(out),
+    }
+}
+
+/// Insert a copy of `fin` immediately before every `return` in `s`.
+///
+/// Used to give `@finally` its ObjC meaning on the early-return path: the
+/// try body is a plain statement list by the time this runs, so without the
+/// splice a `return` inside the try would skip the finally entirely. The copy
+/// is placed directly in front of the `return`, so when nested @try blocks
+/// splice in turn the innermost finally stays closest to the `return` and the
+/// order is inner → outer, which is what ObjC specifies.
+fn splice_finally_before_exits(s: &mut AstStmt, fin: &AstStmt) {
+    match &mut s.data {
+        AstStmtData::Compound(v) => {
+            let mut rewritten: Vec<AstStmt> = Vec::with_capacity(v.len() + 1);
+            for mut st in std::mem::take(v) {
+                if matches!(st.data, AstStmtData::Return(_)) {
+                    rewritten.push(fin.clone());
+                    rewritten.push(st);
+                } else {
+                    splice_finally_before_exits(&mut st, fin);
+                    rewritten.push(st);
+                }
+            }
+            *v = rewritten;
+        }
+        AstStmtData::If { then, else_, .. } => {
+            splice_finally_before_exits(then, fin);
+            if let Some(e) = else_ { splice_finally_before_exits(e, fin); }
+        }
+        AstStmtData::While { body, .. } | AstStmtData::Do { body, .. }
+        | AstStmtData::For { body, .. } | AstStmtData::ForIn { body, .. } => {
+            splice_finally_before_exits(body, fin);
+        }
+        AstStmtData::Switch { body, .. } | AstStmtData::Case { body, .. }
+        | AstStmtData::Default(body) => splice_finally_before_exits(body, fin),
+        AstStmtData::Synchronized { body, .. } | AstStmtData::Autoreleasepool(body)
+        | AstStmtData::NoArc(body) => splice_finally_before_exits(body, fin),
+        AstStmtData::Try { try_block, catches, finally_block } => {
+            splice_finally_before_exits(try_block, fin);
+            for c in catches { splice_finally_before_exits(c, fin); }
+            if let Some(f) = finally_block { splice_finally_before_exits(f, fin); }
+        }
+        AstStmtData::Catch { body, .. } => splice_finally_before_exits(body, fin),
+        AstStmtData::Finally(b) => splice_finally_before_exits(b, fin),
+        _ => {}
     }
 }
 
@@ -1516,5 +1642,181 @@ fn decl_refs_name(d: &AstDecl, name: &str) -> bool {
                 || next.as_ref().map_or(false, |n| decl_refs_name(n, name))
         }
         _ => false,
+    }
+}
+
+// ─── Regression tests (referendum #3 prerequisites) ──────────────────────────
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use nupa_ast::AstType;
+    use nupa_cst::{CstParam, TypePrim};
+
+    /// ③ A bare `SEL` (`TypePrim::Sel` with no name) is a *struct* in nupa's
+    /// runtime, so its tail guard must emit `(SEL){0}`, never `0`. Regression
+    /// for json_editor's `static SEL cmdSel` — clang rejected the emitted
+    /// `return 0;` ("returning 'int' from a function with incompatible result
+    /// type 'SEL'").
+    #[test]
+    fn bare_sel_takes_compound_literal_zero() {
+        assert!(
+            aggregate_zero(&AstType::new(TypePrim::Sel)),
+            "bare SEL must take (SEL){{0}} — its prim alone is decisive, no name required"
+        );
+    }
+
+    #[test]
+    fn named_types_take_compound_literal_but_scalars_do_not() {
+        let mut sel_named = AstType::new(TypePrim::Sel);
+        sel_named.name = Some("SEL".into());
+        assert!(aggregate_zero(&sel_named), "named SEL still takes (T){{0}}");
+
+        let mut range = AstType::new(TypePrim::Named);
+        range.name = Some("NPRange".into());
+        assert!(aggregate_zero(&range), "named non-pointer (typedef) takes (T){{0}}");
+
+        assert!(!aggregate_zero(&AstType::new(TypePrim::Int)), "int keeps return 0;");
+        assert!(!aggregate_zero(&AstType::new(TypePrim::Void)), "void keeps plain form");
+
+        let mut p = AstType::new(TypePrim::Sel);
+        p.is_pointer = true;
+        assert!(!aggregate_zero(&p), "pointer to SEL keeps 0");
+    }
+
+    /// ⑤ The checked desugar must produce ordinary control flow — no `@try`
+    /// node may survive, because setjmp/longjmp is emitted *only* by the
+    /// codegen `Try` arm (the sjlj backend). If a `Try` survived here, the
+    /// checked path would silently depend on the hosted-only setjmp ABI.
+    #[test]
+    fn checked_desugar_leaves_no_try_node() {
+        let throw = AstStmt {
+            kind: nupa_ast::AstStmtKind::Throw, line: 0, col: 0,
+            data: AstStmtData::Throw(Some(Box::new(int_expr(1)))),
+        };
+        let try_block = AstStmt {
+            kind: nupa_ast::AstStmtKind::Compound, line: 0, col: 0,
+            data: AstStmtData::Compound(vec![throw]),
+        };
+        let catch = AstStmt {
+            kind: nupa_ast::AstStmtKind::Catch, line: 0, col: 0,
+            data: AstStmtData::Catch {
+                param: CstParam {
+                    par_type: None, name: Some("e".into()), external_name: None,
+                    next: None, attributes: Vec::new(),
+                },
+                body: Box::new(AstStmt {
+                    kind: nupa_ast::AstStmtKind::Compound, line: 0, col: 0,
+                    data: AstStmtData::Compound(vec![]),
+                }),
+            },
+        };
+        let finally = AstStmt {
+            kind: nupa_ast::AstStmtKind::Finally, line: 0, col: 0,
+            data: AstStmtData::Finally(Box::new(AstStmt {
+                kind: nupa_ast::AstStmtKind::Compound, line: 0, col: 0,
+                data: AstStmtData::Compound(vec![]),
+            })),
+        };
+        let try_stmt = AstStmt {
+            kind: nupa_ast::AstStmtKind::Try, line: 0, col: 0,
+            data: AstStmtData::Try {
+                try_block: Box::new(try_block),
+                catches: vec![catch],
+                finally_block: Some(Box::new(finally)),
+            },
+        };
+        let body = AstStmt {
+            kind: nupa_ast::AstStmtKind::Compound, line: 0, col: 0,
+            data: AstStmtData::Compound(vec![try_stmt]),
+        };
+        let func = AstDecl {
+            kind: nupa_ast::AstDeclKind::Function, name: Some("probe".into()), line: 1, col: 1,
+            data: AstDeclData::Function {
+                func_sym: None, return_type: Some(Box::new(AstType::new(TypePrim::Int))),
+                params: None, body: Some(Box::new(body)),
+                has_variadic: false, throws: None, async_marker: false,
+            },
+            attributes: Vec::new(),
+        };
+        let mut unit = AstUnit { decls: vec![func], filename: "probe.np".into() };
+        desugar_unit(&mut unit);
+
+        assert!(
+            !unit_has_try(&unit),
+            "checked desugar must rewrite every @try away (else codegen's setjmp arm runs)"
+        );
+        assert!(unit_uses_eh_flag(&unit), "checked desugar must arm the __nupa_eh_flag protocol");
+    }
+
+    fn unit_has_try(unit: &AstUnit) -> bool {
+        fn stmt_has_try(s: &AstStmt) -> bool {
+            match &s.data {
+                AstStmtData::Try { .. } => true,
+                AstStmtData::Compound(v) => v.iter().any(stmt_has_try),
+                AstStmtData::If { then, else_, .. } => {
+                    stmt_has_try(then) || else_.as_ref().map_or(false, |e| stmt_has_try(e))
+                }
+                _ => false,
+            }
+        }
+        unit.decls.iter().any(|d| match &d.data {
+            AstDeclData::Function { body, .. } | AstDeclData::Method { body, .. } => {
+                body.as_ref().map_or(false, |b| stmt_has_try(b))
+            }
+            _ => false,
+        })
+    }
+
+    fn unit_uses_eh_flag(unit: &AstUnit) -> bool {
+        // Recursive: the guard condition desugar emits is
+        // `__nupa_eh_flag == 1 && __nupa_eh_done_N == 0` — a Binary, not a bare
+        // VarRef. A top-level-only match silently read every real guard as
+        // "no flag" (this test's own bug, not the product's).
+        fn expr_uses(e: &AstExpr) -> bool {
+            if matches!(&e.data, AstExprData::VarRef { name, .. } if name == "__nupa_eh_flag") {
+                return true;
+            }
+            EffectTable::effect_children(e).into_iter().any(expr_uses)
+        }
+        fn stmt_uses(s: &AstStmt) -> bool {
+            match &s.data {
+                AstStmtData::If { cond, then, else_ } => {
+                    expr_uses(cond) || stmt_uses(then)
+                        || else_.as_ref().map_or(false, |e| stmt_uses(e))
+                }
+                AstStmtData::Compound(v) => v.iter().any(stmt_uses),
+                AstStmtData::While { cond, body } | AstStmtData::Do { cond, body } => {
+                    expr_uses(cond) || stmt_uses(body)
+                }
+                AstStmtData::For { init, cond, incr, body } => {
+                    init.as_ref().map_or(false, |i| stmt_uses(i))
+                        || cond.as_ref().map_or(false, |c| expr_uses(c))
+                        || incr.as_ref().map_or(false, |c| expr_uses(c))
+                        || stmt_uses(body)
+                }
+                AstStmtData::Try { try_block, catches, finally_block } => {
+                    stmt_uses(try_block) || catches.iter().any(stmt_uses)
+                        || finally_block.as_ref().map_or(false, |f| stmt_uses(f))
+                }
+                AstStmtData::Catch { body, .. } => stmt_uses(body),
+                AstStmtData::Finally(b) => stmt_uses(b),
+                AstStmtData::Synchronized { body, .. }
+                | AstStmtData::Autoreleasepool(body)
+                | AstStmtData::NoArc(body) => stmt_uses(body),
+                AstStmtData::Switch { expr, body } => expr_uses(expr) || stmt_uses(body),
+                AstStmtData::Case { value, body } => expr_uses(value) || stmt_uses(body),
+                AstStmtData::Default(body) => stmt_uses(body),
+                AstStmtData::Expr(e) => expr_uses(e),
+                AstStmtData::Return(Some(e)) | AstStmtData::Throw(Some(e)) => expr_uses(e),
+                _ => false,
+            }
+        }
+        unit.decls.iter().any(|d| match &d.data {
+            AstDeclData::Function { body, .. } | AstDeclData::Method { body, .. } => {
+                body.as_ref().map_or(false, |b| stmt_uses(b))
+            }
+            _ => false,
+        })
     }
 }

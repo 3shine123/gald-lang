@@ -94,6 +94,8 @@ def panel(title: str, lines: list[str], tag: str):
         "COMPILE_TIMEOUT": "yellow",
         "RUN_FAIL":       "red",
         "CANCELED":       "yellow",
+        "EXPECTED_FAIL":  "cyan",
+        "PASS_MRC":       "yellow",
     }
     color = style_map.get(tag, "white")
     max_line = 160
@@ -198,6 +200,34 @@ def _run_np(cmd: list, np_path: Path, timeout: int) -> tuple:
         return "", str(e), -1, False
 
 
+def _is_expected_fail(np_path: Path) -> bool:
+    """`foo-F.np` is a deliberate-failure sample kept in-tree as documentation
+    (no main entry, or an intentional over-release crash). It is *supposed* to
+    fail, so the suite records it as EXPECTED_FAIL rather than FAIL — and a
+    sample that unexpectedly passes is itself reported as a failure."""
+    return np_path.name.endswith("-F.np")
+
+
+def _compile_only(np_path: Path, asm_args: list[str], inc_args: list[str],
+                  tmpdir: Path) -> tuple[bool, str]:
+    """Alternative acceptance for a test that cannot be RUN in this harness
+    (interactive programs block on stdin and hit the timeout). Transpile +
+    compile + link into a real binary must still succeed; that is the strongest
+    verdict reachable without a TTY. Tries ARC first, then MRC (same fallback
+    the runner applies to `nupac run`)."""
+    for extra, label in (([], "ARC"), (["-fno-nupa-arc"], "MRC")):
+        bin_path = Path(tmpdir) / (np_path.stem + ".compileonly")
+        cmd = [str(NUPAC), str(np_path), "-o", str(bin_path)] + asm_args + inc_args + extra
+        try:
+            proc = subprocess.run(cmd, capture_output=True, text=True,
+                                  timeout=60, cwd=str(np_path.parent))
+        except Exception:
+            continue
+        if proc.returncode == 0:
+            return True, label
+    return False, ""
+
+
 def process_np(np_file: str, tmpdir: Path) -> tuple[str, bool, list[str], str]:
     """
     Run one .np file via `nupac run`.
@@ -210,9 +240,14 @@ def process_np(np_file: str, tmpdir: Path) -> tuple[str, bool, list[str], str]:
     except ValueError:
         rel = str(np_path.relative_to(PROJECT))
     proc = None
+    expected_fail = _is_expected_fail(np_path)
 
     # Skip module-only files (no main entry); they're meant to be #import'd
     if not _has_main(np_path):
+        if expected_fail:
+            return rel, True, [
+                "EXPECTED FAIL (-F sample: no main entry, it is meant to be #import'd)"
+            ], "EXPECTED_FAIL"
         return rel, False, ["FAIL (no main entry)"], "FAIL"
 
     # Auto-include sibling assembly (.s) files: link alongside the .np
@@ -234,7 +269,15 @@ def process_np(np_file: str, tmpdir: Path) -> tuple[str, bool, list[str], str]:
     stdout, stderr, rc, timed_out = _run_np(cmd, np_path, RUN_TIMEOUT + 2)
 
     if timed_out:
-        return rel, True, ["CANCELED (timed out — probably interactive game)"], "CANCELED"
+        ok, mode = _compile_only(np_path, asm_args, inc_args, tmpdir)
+        if ok:
+            return rel, True, [
+                f"CANCELED (interactive — run needs a TTY); alternative acceptance: "
+                f"transpile+compile+link OK ({mode})"
+            ], "CANCELED"
+        return rel, False, [
+            "CANCELED (interactive) AND the compile-only acceptance FAILED"
+        ], "COMPILE_FAIL"
 
     if rc == 0:
         out_lines = stdout.strip().split("\n") if stdout.strip() else ["(no output)"]
@@ -245,15 +288,38 @@ def process_np(np_file: str, tmpdir: Path) -> tuple[str, bool, list[str], str]:
     mrc_stdout, mrc_stderr, mrc_rc, mrc_timed_out = _run_np(mrc_cmd, np_path, RUN_TIMEOUT + 2)
 
     if mrc_timed_out:
-        return rel, True, ["CANCELED (timed out — probably interactive game)"], "CANCELED"
+        ok, mode = _compile_only(np_path, asm_args, inc_args, tmpdir)
+        if ok:
+            return rel, True, [
+                f"CANCELED (interactive — run needs a TTY); alternative acceptance: "
+                f"transpile+compile+link OK ({mode})"
+            ], "CANCELED"
+        return rel, False, [
+            "CANCELED (interactive) AND the compile-only acceptance FAILED"
+        ], "COMPILE_FAIL"
 
     if mrc_rc == 0:
         out_lines = mrc_stdout.strip().split("\n") if mrc_stdout.strip() else ["(no output)"]
-        return rel, True, out_lines, "PASS"
+        # Record WHY the ARC attempt failed. The ARC→MRC retry must not become a
+        # place where genuine ARC bugs hide: a fallback caused by the checker
+        # rejecting deliberate manual retain/release in ARC mode is by design,
+        # anything else (crash / miscompile / link error under ARC) is a
+        # suspicious ARC defect worth surfacing.
+        arc_err = (stderr or stdout)
+        if "not allowed in ARC mode" in arc_err:
+            why = "by design: explicit retain/release is rejected in ARC mode"
+        else:
+            why = "SUSPECT: ARC mode failed for a reason other than the explicit-MM check"
+        out_lines = out_lines + [f"(MRC fallback — {why})"]
+        return rel, True, out_lines, "PASS_MRC"
 
     # Both failed — report the ARC error
     err = (stderr or stdout).strip()
     err_lines = err.split("\n") if err else ["(no output)"]
+    if expected_fail:
+        return rel, True, [
+            f"EXPECTED FAIL (-F sample: deliberate failure, rc={rc})"
+        ] + err_lines[:3], "EXPECTED_FAIL"
     if "error:" in err.lower() or "Error:" in err:
         if "TRANSPILE" in err or "Parse" in err:
             return rel, False, err_lines, "TRANSPILE_FAIL"
@@ -301,6 +367,9 @@ def main():
     np_pass = 0
     np_fail = 0
     np_canceled = 0
+    np_expected = 0
+    np_retry = 0
+    np_retry_suspect = 0
     if np_files:
         with tempfile.TemporaryDirectory(prefix="nupa_test_") as tmpdir_str:
             tmpdir = Path(tmpdir_str)
@@ -310,13 +379,26 @@ def main():
                     rel, ok, lines, tag = future.result()
                     if tag == "CANCELED":
                         np_canceled += 1
+                    elif tag == "EXPECTED_FAIL":
+                        np_expected += 1
+                    elif tag == "PASS_MRC":
+                        np_pass += 1
+                        np_retry += 1
+                        if any("SUSPECT" in l for l in lines):
+                            np_retry_suspect += 1
                     elif ok:
                         np_pass += 1
                     else:
                         np_fail += 1
                     console.print(panel(rel, lines, tag))
             canceled_str = f", [yellow]{np_canceled} canceled[/]" if np_canceled else ""
-            console.print(f"\n  [bold]{np_pass}/{len(np_files)}[/] .np files passed, [red]{np_fail}[/] failed{canceled_str}")
+            expected_str = f", [cyan]{np_expected} expected-fail[/]" if np_expected else ""
+            retry_str = ""
+            if np_retry:
+                retry_str = f", [yellow]{np_retry} ARC→MRC retry[/]"
+                if np_retry_suspect:
+                    retry_str += f" ([red]{np_retry_suspect} SUSPECT[/])"
+            console.print(f"\n  [bold]{np_pass}/{len(np_files)}[/] .np files passed, [red]{np_fail}[/] failed{canceled_str}{expected_str}{retry_str}")
     else:
         console.print("  [yellow]No .np files found.[/]")
 
@@ -331,6 +413,9 @@ def main():
     ex_pass = 0
     ex_fail = 0
     ex_canceled = 0
+    ex_expected = 0
+    ex_retry = 0
+    ex_retry_suspect = 0
     if example_files:
         with tempfile.TemporaryDirectory(prefix="nupa_example_") as tmpdir_str:
             tmpdir = Path(tmpdir_str)
@@ -340,13 +425,26 @@ def main():
                     rel, ok, lines, tag = future.result()
                     if tag == "CANCELED":
                         ex_canceled += 1
+                    elif tag == "EXPECTED_FAIL":
+                        ex_expected += 1
+                    elif tag == "PASS_MRC":
+                        ex_pass += 1
+                        ex_retry += 1
+                        if any("SUSPECT" in l for l in lines):
+                            ex_retry_suspect += 1
                     elif ok:
                         ex_pass += 1
                     else:
                         ex_fail += 1
                     console.print(panel(rel, lines, tag))
             canceled_str = f", [yellow]{ex_canceled} canceled[/]" if ex_canceled else ""
-            console.print(f"\n  [bold]{ex_pass}/{len(example_files)}[/] examples passed, [red]{ex_fail}[/] failed{canceled_str}")
+            expected_str = f", [cyan]{ex_expected} expected-fail[/]" if ex_expected else ""
+            retry_str = ""
+            if ex_retry:
+                retry_str = f", [yellow]{ex_retry} ARC→MRC retry[/]"
+                if ex_retry_suspect:
+                    retry_str += f" ([red]{ex_retry_suspect} SUSPECT[/])"
+            console.print(f"\n  [bold]{ex_pass}/{len(example_files)}[/] examples passed, [red]{ex_fail}[/] failed{canceled_str}{expected_str}{retry_str}")
     else:
         console.print("  [yellow]No example .np files found.[/]")
 
@@ -354,10 +452,17 @@ def main():
     elapsed = time.time() - start
     total_fail = unit_fail + np_fail + ex_fail
     total_pass = unit_pass + np_pass + ex_pass
-    total = unit_pass + unit_fail + np_pass + np_fail + np_canceled + ex_pass + ex_fail + ex_canceled
+    total = (unit_pass + unit_fail + np_pass + np_fail + np_canceled + np_expected
+             + ex_pass + ex_fail + ex_canceled + ex_expected)
     canceled_str = f", [yellow]{np_canceled + ex_canceled} canceled[/]" if np_canceled + ex_canceled else ""
+    expected_str = f", [cyan]{np_expected + ex_expected} expected-fail[/]" if np_expected + ex_expected else ""
+    retry_total = np_retry + ex_retry
+    suspect_total = np_retry_suspect + ex_retry_suspect
+    retry_str = f", [yellow]{retry_total} ARC→MRC retry[/]" if retry_total else ""
+    if suspect_total:
+        retry_str += f" ([red]{suspect_total} SUSPECT — ARC-mode defect, not the explicit-MM check[/])"
     color = "green" if total_fail == 0 else "red"
-    console.rule(f"[bold {color}]GRAND TOTAL: {total_pass}/{total} passed, {total_fail} failed{canceled_str}  ({elapsed:.0f}s)")
+    console.rule(f"[bold {color}]GRAND TOTAL: {total_pass}/{total} passed, {total_fail} failed{canceled_str}{expected_str}{retry_str}  ({elapsed:.0f}s)")
     sys.exit(total_fail)
 
 

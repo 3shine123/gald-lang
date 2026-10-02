@@ -1,0 +1,41 @@
+#import <Foundation/Foundation.nh>
+
+// ARC order 07: `@finally` runs on the way out of a `@try` whose body returns.
+// The return expression must be evaluated (and the local's cleanup ordered
+// against it) before the finally body runs.
+
+@interface AO07Holder : NPObject {
+@public
+    NPString *_s;
+}
+- (NPString *)text;
+@end
+
+@implementation AO07Holder
+- (instancetype)init {
+    self = [super init];
+    if (self) { _s = [[NPString alloc] initWithUTF8String:"hello"]; }
+    return self;
+}
+- (void)dealloc {
+    _s = nil;
+    NPLog(@"ao07 dealloc");
+    [super dealloc];
+}
+- (NPString *)text { return _s; }
+@end
+
+int ao07_probe(void) {
+    AO07Holder *h = [[AO07Holder alloc] init];
+    @try {
+        return [[h text] length] - 5;
+    }
+    @finally {
+        NPLog(@"ao07 finally");
+    }
+}
+
+int main() {
+    NPLog(@"ao07 r=%d", ao07_probe());
+    return 0;
+}

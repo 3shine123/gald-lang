@@ -1,0 +1,41 @@
+#import <Foundation/Foundation.nh>
+
+// `^T(void)` and `^T()` must both mean "no parameters" — the first is the C
+// spelling, the second the ObjC one.
+//
+// Regression: `(void)` used to be parsed as a parameter of type `void` with no
+// name, so the emitted C became `^int(void _arg)`, which is both wrong and a
+// hard error under `-Werror` (and it broke C-API compatibility for callbacks).
+
+typedef int (^IntBlock)(void);
+
+@interface BVDemo : NPObject
+- (int)callIntBlock:(IntBlock)b;
+@end
+
+@implementation BVDemo
+- (int)callIntBlock:(IntBlock)b { return b(); }
+@end
+
+int main() {
+    // Empty parameter list (ObjC spelling).
+    int (^paren)(void) = ^int() {
+        return 7;
+    };
+    // C spelling of "no parameters".
+    int (^voidKw)(void) = ^int(void) {
+        return 35;
+    };
+    // Still a REAL parameter: `void *` must not be swallowed.
+    int (^takesVoidPtr)(void *) = ^int(void *p) {
+        return p == 0 ? 100 : 200;
+    };
+
+    BVDemo *d = [[BVDemo alloc] init];
+    int viaMsg = [d callIntBlock:^int(void) {
+        return 1;
+    }];
+
+    NPLog(@"a=%d b=%d c=%d d=%d", paren(), voidKw(), takesVoidPtr(0), viaMsg);
+    return (paren() == 7 && voidKw() == 35 && takesVoidPtr(0) == 100 && viaMsg == 1) ? 0 : 1;
+}

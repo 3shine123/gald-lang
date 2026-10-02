@@ -5,7 +5,7 @@ use std::path::Path;
 use std::process::{Command, Stdio};
 use clap::{Command as ClapCommand, Arg};
 use clap_complete::{Shell, generate};
-use nupac::pipeline::Pipeline;
+use nupac::pipeline::{Pipeline, DEFAULT_EH_CHECKED};
 use attrs;
 
 /// Locate the installed nupac bundle root (the directory containing `include/`).
@@ -624,6 +624,12 @@ fn main() {
         println!("                                     Default: clang");
         println!("                                     portable: only gcc+clang common attributes");
         println!("                                     gcc:   allow gcc-specific __attribute__");
+        println!("  -eh <mode>                           Exception backend:");
+        println!("                                     checked (default): flag + guard lowering,");
+        println!("                                       unwind-safe ARC, no setjmp/longjmp —");
+        println!("                                       works on bare metal");
+        println!("                                     legacy (alias: sjlj): old setjmp/longjmp");
+        println!("                                       backend, kept as a full rollback");
         println!();
         println!("Type Checking Options:");
         println!("  -fno-checker                         Skip type checking");
@@ -663,7 +669,9 @@ fn main() {
     let mut trace_max_iters = 2;
     let mut trace_no_color = false;
     let mut bridge_header: Option<String> = None;
-    let mut eh_checked = false; // -eh checked (default: -eh sjlj, zero behavior change)
+    // DEFAULT is the checked backend (pipeline::DEFAULT_EH_CHECKED). `-eh
+    // legacy` / `-eh sjlj` select the old setjmp/longjmp backend for rollback.
+    let mut eh_checked = DEFAULT_EH_CHECKED;
     let mut slots_manifest: Option<String> = None; // --slots <file> (stable cross-TU vtable layout)
 
     // Check for "run" subcommand: look for `run` that is not preceded by a flag
@@ -720,10 +728,10 @@ fn main() {
                     .unwrap_or_default();
                 match v.as_str() {
                     "checked" => eh_checked = true,
-                    // 'legacy' names the sjlj backend for the pending default
-                    // flip (stage 6): scripts written against the new spelling
-                    // keep working after checked becomes the default.
-                    "sjlj" | "legacy" | "" => {}
+                    // 'legacy' is the sjlj backend's official alias: the escape
+                    // hatch for the checked-by-default flip. Explicitly sets the
+                    // flag to false (the default is now true).
+                    "sjlj" | "legacy" | "" => eh_checked = false,
                     other => {
                         eprintln!("error: -eh expects 'checked', 'sjlj' or 'legacy' (got '{}')", other);
                         std::process::exit(1);
@@ -788,8 +796,8 @@ fn main() {
             };
             match val.as_deref() {
                 Some("checked") => { eh_checked = true; i += adv; }
-                // 'legacy' = sjlj alias for the pending default flip (stage 6).
-                Some("sjlj") | Some("legacy") => { i += adv; }
+                // 'legacy' = sjlj alias — the rollback for the checked default.
+                Some("sjlj") | Some("legacy") => { eh_checked = false; i += adv; }
                 other => {
                     eprintln!("error: -eh expects 'checked', 'sjlj' or 'legacy' (got '{}')",
                         other.unwrap_or("(missing)"));

@@ -1,0 +1,35 @@
+#import <Foundation/Foundation.nh>
+
+// ARC order 06: `@throw <expr>` — the thrown expression must be fully
+// evaluated before the enclosing locals are released. The old analyzer only
+// recognized a bare VarRef / VarRef-receiver as "the exception expression
+// uses this local", so a nested send (`[[h reason] description]`) let it
+// release `h` first: use-after-free on the throwing path.
+
+@interface AO06Holder : NPObject
+- (NPString *)reason;
+@end
+
+@implementation AO06Holder
+- (void)dealloc {
+    NPLog(@"ao06 holder dealloc");
+    [super dealloc];
+}
+- (NPString *)reason { return [NPString stringWithUTF8String:"bad"]; }
+@end
+
+void ao06_boom(void) @throws(NPString *) {
+    AO06Holder *h = [[AO06Holder alloc] init];
+    @throw [[h reason] description];
+}
+
+int main() {
+    @try {
+        ao06_boom();
+    }
+    @catch (NPString *e) {
+        NPLog(@"ao06 caught: %@", e);
+    }
+    NPLog(@"ao06 done");
+    return 0;
+}

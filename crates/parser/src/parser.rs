@@ -1934,11 +1934,16 @@ else if self.match_keyword(KeywordKind::Typeof) {
         self.annotating = saved_annotating;
 
         if self.match_token(TokenKind::LParen) {
+            // `(void)` (C's spelling of "no parameters") is handled INSIDE the
+            // loop below, because this parser's `peek_next()` is a stub that
+            // returns the current token — lookahead is not available here.
             // parse params: ^int(int x, float y) or ^(int x, float y)
             let mut head: Option<Box<CstParam>> = None;
             let mut tail: &mut Option<Box<CstParam>> = &mut head;
             while !self.check(TokenKind::RParen) && !self.check(TokenKind::Eof) {
                 if let Some(ptype) = self.parse_type_annotated() {
+                    // Decided before `ptype` is moved into the parameter below.
+                    let void_ty = ptype.prim == TypePrim::Void && !ptype.is_pointer;
                     let mut p = CstParam {
                         par_type: Some(Box::new(ptype)),
                         name: None,
@@ -1953,8 +1958,16 @@ else if self.match_keyword(KeywordKind::Typeof) {
                         p.name = Some(self.current_text().to_string());
                         self.advance();
                     }
-                    param_count += 1;
-                    tail = &mut tail.insert(Box::new(p)).next;
+                    // `(void)` is C's spelling of "no parameters": a `void`
+                    // parameter type that carries no name is not a parameter at
+                    // all. Keeping it produced `^int(void _arg) { ... }` in the
+                    // generated C — wrong, and a hard error under -Werror.
+                    // A genuine `void *p` has `is_pointer` set and is kept.
+                    let bare_void = p.name.is_none() && void_ty;
+                    if !bare_void {
+                        param_count += 1;
+                        tail = &mut tail.insert(Box::new(p)).next;
+                    }
                 } else {
                     self.advance();
                 }

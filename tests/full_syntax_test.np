@@ -248,8 +248,7 @@ static void sec1_c_superset(void) {
 @using FsEngine;
 
 // 跨命名空间继承（Engine::Renderable 形态）
-@interface FsSprite : FsEngine::FsRenderable <FsColored>
-{
+@interface FsSprite : FsEngine::FsRenderable <FsColored> {
 @public
     int _id;
 }

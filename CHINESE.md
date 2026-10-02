@@ -413,7 +413,7 @@ Nupa 在 Objective-C 语法基础上，加入了一些 ObjC 本身没有的语�
 
 **近期亮点：**
 
-- **原生裸机支持（`-ffreestanding`）** — 编译为自包含 C，无 libc、无 Foundation、无 TLS；`@try/@catch` 用 `__builtin_setjmp/longjmp`，零样板的 `runtime_freestanding.c` 提供 bump allocator、`NUPA_CLASS_$_nupa_root`、异常状态和 `memcpy`。
+- **原生裸机支持（`-ffreestanding`）** — 编译为自包含 C，无 libc、无 Foundation、无 TLS；`@try/@catch` 走默认的 `-eh checked` 后端（纯旗标 + 守卫，**完全不用 `setjmp/longjmp`**，这正是裸机可用的前提；`-eh legacy` 才回退到 `__builtin_setjmp/longjmp`），零样板的 `runtime_freestanding.c` 提供 bump allocator、`NUPA_CLASS_$_nupa_root`、异常状态和 `memcpy`。
 - **C 超集** — `@protocol` + 一致性检查、`@property` + `@synthesize`、`instancetype`、`@public` ivar、点语法、struct + 函数指针、内联汇编、C 风格类型转换。
 - **类型化 `@catch`** — 每个 catch 块现在检查 `isa == &NUPA_CLASS_$_Class`，只有匹配的类才进入该处理器；多个 catch 正确隔离。
 - **ARC 修复** — 作用域栈模型不再在嵌套作用域结束时释放父作用域变量；`for` 初始化对象提升修复了泄漏和非法 `for` 头。
@@ -623,7 +623,7 @@ NPDictionary *empty = @{};       // `@{}` 是空字典（数组是 `@[]`）
 illegal type 'int' in a dictionary literal — keys and values must be Objective-C objects
 ```
 
-### 异常语义（`-eh checked`）
+### 异常语义（`-eh checked` —— 默认后端）
 
 Nupa 的异常是**不用栈展开的 ObjC 异常语义**。`@try`/`@catch`/`@finally`/`@throw` 的行为与 clang `-fobjc-arc-exceptions` 模式完全一致——差分测试套件（`tests/eh_diff/run_eh_diff.sh`）把每个用例同时跑在 nupac 与真 clang/ObjC 下、逐行 diff stderr，锁定这一保证（7/7 通过）。
 
@@ -664,7 +664,7 @@ int main() {
 - **未捕获异常 abort** —— 输出 ObjC 措辞 `*** Terminating app due to uncaught exception of class 'NPString'`，退出码 1。
 - **C 调用方不会错过异常** —— 桥接头 wrapper 检查错误旗标并 abort，而不是静默返回零值。
 
-用 `-eh checked` 启用；默认 `nupac run` 使用零开销的 setjmp 后端，它有经典限制：跨函数抛出会跳过中间帧的清理（见下方已知限制）。
+**`-eh checked` 已是默认后端**——直接 `nupac run` 就用它。`-eh legacy`（别名 `-eh sjlj`）切回旧的零开销 setjmp 后端，是一条完整的回退路径；该后端有经典限制：跨函数抛出会跳过中间帧的清理（见下方已知限制）。
 
 ### `@throws` —— 声明式异常
 
@@ -838,7 +838,7 @@ nupac -rewrite-nupa -ffreestanding kernel.np   # 生成自包含 C
 `-ffreestanding` 模式下转译出的 C：
 
 - 不 `#include <string.h>`，改 `#include <nupa/runtime.h>`（freestanding 分支）
-- `@try/@catch/@finally` 用 `__builtin_setjmp/longjmp`（零 libc），异常状态用普通全局而非 `__thread`
+- `@try/@catch/@finally` 走默认 `-eh checked` 后端：纯旗标 + 守卫，零 `setjmp/longjmp`、零 `jmp_buf`（`-eh legacy` 才用 `__builtin_setjmp/longjmp` + 普通全局而非 `__thread`）
 - 类型（`SEL`/`NPClass`/`NPObject`/`id`）自含
 - **不捆绑 Clang Blocks 运行时** —— block 字面量引用 `__NSConcreteStackBlock`/`_Block_copy`/`_Block_release`；真裸机上要么链接一个 Blocks runtime 移植，要么用 `-backend portable`/`-backend gcc`（block 展开为普通 C 函数，无 ABI 符号）
 
@@ -1222,6 +1222,7 @@ nupac [options] <input.np>
   -fnupa-arc        启用 ARC（默认）
   -fno-nupa-arc     禁用 ARC（手动 MRC 模式）
   -fno-checker      跳过类型检查
+  -eh <mode>        异常后端：checked（默认）或 legacy（别名 sjlj）
   -ffreestanding    裸机/freestanding 输出（无 libc、无 TLS）
   -backend <mode>   C 编译器后端：clang（默认）、portable、gcc
   -arch <target>    构建目标架构（如 -arch x86_64）
@@ -1408,8 +1409,8 @@ Nupa 的"后端"是**人类可读的 C99**，不是 LLVM IR。这意味着：
 - ✅ Block / @autoreleasepool
 - ✅ 静态 ARC
 - ✅ @selector / VTable 多态
-- ✅ 异常处理（`@try`/`@catch`/`@finally`/`@throw`，`setjmp`/`longjmp`）
-  - ⚠️ 已知限制：跨函数抛出时，**跨越作用域仍存活的对象会泄漏**（`longjmp` 跳过其作用域末尾的 `nupa_release`）；同一函数内的 `@throw` 已正确处理。ARC 感知的 unwind 释放待实现。
+- ✅ 异常处理（`@try`/`@catch`/`@finally`/`@throw`）——**默认后端是 `-eh checked`**（旗标 + 守卫降级，unwind-safe ARC：跨函数抛出会释放每一帧的 owned 局部；不用 `setjmp/longjmp`，故裸机同样可用）
+  - `-eh legacy`（别名 `-eh sjlj`）切回旧的 `setjmp`/`longjmp` 后端。⚠️ 它的已知限制：跨函数抛出时**跨越作用域仍存活的对象会泄漏**（`longjmp` 跳过作用域末尾的 `nupa_release`）。该限制**不适用于默认后端**。
 - ⏳ Foundation 标准库
 - ⏳ 编译器自举
 

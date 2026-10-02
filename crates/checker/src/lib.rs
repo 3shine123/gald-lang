@@ -1525,6 +1525,21 @@ impl Checker {
             AstExprData::Char(_) => Some(AstType::new(TypePrim::Char)),
             AstExprData::Bool(_) => Some(AstType::new(TypePrim::Bool)),
             AstExprData::VarRef { name, .. } => {
+                // Real declarations win first: the -eh desugar declares its
+                // `__nupa_eh_tmp_N` hoist temporaries in scope_vars (their
+                // `__auto_type` init derives the true type). The `__` builtin
+                // fallback below must not shadow them — it made the generic
+                // argument check see `int` for an `NPMutableString *` temp
+                // (0:0, "does not match the container's declared element
+                // type"). Builtin macros (__FILE__/__LINE__) are never in
+                // scope, so this reordering cannot change their result.
+                for scope in self.scope_vars.iter().rev() {
+                    for (vname, vtype) in scope.iter() {
+                        if vname == name {
+                            return Some(vtype.clone());
+                        }
+                    }
+                }
                 if name.starts_with("__") {
                     return Some(AstType::new(TypePrim::Int));
                 }
@@ -2833,6 +2848,44 @@ mod tests {
     fn instance_method_ivar_access_is_ok() {
         assert_eq!(check_method(false), 0,
             "instance method ('-') may access instance ivars");
+    }
+
+    /// Regression (referendum #3, gap 2): the -eh desugar hoists call-bearing
+    /// subexpressions into `__auto_type __nupa_eh_tmp_N` declarations. Looking
+    /// those names up must return the type the initializer produced — the
+    /// `__`-prefix builtin fallback (`__FILE__`/`__LINE__` → int) used to run
+    /// FIRST and shadow the real binding, so the generic-argument check read
+    /// `int` for an `NPMutableString *` temp and rejected valid code.
+    #[test]
+    fn eh_hoist_temp_resolves_to_declared_type_not_the_int_fallback() {
+        let mut c = Checker::new(None);
+        let mut npstring_ptr = AstType::new(TypePrim::Named);
+        npstring_ptr.name = Some("NPString".into());
+        npstring_ptr.is_pointer = true;
+        c.scope_vars.push(vec![("__nupa_eh_tmp_0".to_string(), npstring_ptr)]);
+        let mut e = AstExpr {
+            kind: AstExprKind::VarRef, expr_type: None, line: 1, col: 1,
+            data: AstExprData::VarRef { sym: None, name: "__nupa_eh_tmp_0".into() },
+        };
+        let got = c.check_expr(&mut e).expect("hoisted temp must have a type");
+        assert_eq!(got.name.as_deref(), Some("NPString"),
+            "the `__` builtin fallback must not shadow the hoisted temp's real type");
+        assert!(got.is_pointer, "hoisted object temp stays a pointer");
+    }
+
+    /// The reordering must not break the fallback it guards: genuine builtin
+    /// macros are never registered in `scope_vars`, so they still resolve to
+    /// int (and C string-literal builtins like `__FILE__` keep working).
+    #[test]
+    fn builtin_prefix_fallback_still_applies_when_not_in_scope() {
+        let mut c = Checker::new(None);
+        let mut e = AstExpr {
+            kind: AstExprKind::VarRef, expr_type: None, line: 1, col: 1,
+            data: AstExprData::VarRef { sym: None, name: "__LINE__".into() },
+        };
+        let got = c.check_expr(&mut e).expect("builtin must resolve");
+        assert_eq!(got.prim, TypePrim::Int,
+            "__LINE__ outside scope still takes the int fallback");
     }
 
     /// Check `NPLog(fmt, …args)` as a one-statement method body.

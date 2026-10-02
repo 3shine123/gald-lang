@@ -969,6 +969,159 @@ int main() {                                // main 保持 int 返回值，await
 - **验证**：`-eh legacy` transpile rc=0 且守卫数 0（sjlj 语义实证）；run 前扫描路径（`-eh legacy run …`）rc=0；`-eh bogus` 两处路径均清晰报错；`-eh checked` 行为不变。cargo build 0 warning。
 - **翻默认时序（红线）**：cargo test 137/137 放行且全绿 → 独立提交改默认（`-eh legacy` 兼容旧模式）→ 翻转后按旧拼写写的脚本零迁移。
 
+### `-eh checked` 默认化工程 — 阶段 6：第二次公投否决，回退复原 (2026-10-01, 本会话)
+
+> 前置提交 `d80aca4`（三债清偿 + cargo **137/137** 放行全绿 + `-eh legacy` 别名）之后执行翻转（`eh_checked = true` + 3 处文案/completions 同步），全量回归公投裁决。
+
+- **公投 #2 结果**：test_all **305/317（7 failed / 5 canceled，基线 2 failed / 6 canceled）→ 否决**；trace golden **8/8** ✅、eh_diff **7/7** ✅（上次翻红的两处雷区本次通过——守卫收窄与合成符号修复实效）。
+- **失败归因（显式 `-eh checked` 逐个探针复现）**：
+  - **3 处同根因——生成 C 缺 EH 全局声明**：`c_header_typedefs_test` / `golden/22_c_superset` / `golden/39_complex` → `<stdin>:35:10: use of undeclared identifier '__nupa_eh_flag'`。这些纯 C 超集程序既不 import Foundation 也无 block 字面量，生成 C **不含 runtime.h**，而 `__nupa_eh_flag/__nupa_eh_val` 的声明只存在于 runtime.h——凡"没把 runtime.h 拉进 include 集"的程序 + checked = clang 硬错。**修法（待做，公投 #3 前置）**：codegen include 发射区（`codegen.rs` ~:6551 hosted 区）在 eh_checked 时无条件补发 EH 全局声明（extern 或 `#include <nupa/runtime.h>`），不依赖 Foundation/blocks 启发式。
+  - **2 处 checker 失败待归因**：`arc_extreme_test` / `full_syntax_test` → `error: Type checking failed:`（完整报错待取）。
+  - 另有 `examples/01_JSONEditor/json_editor.np` 失败与 1 个 canceled→failed 转化，未逐一归因。
+- **验收矩阵的覆盖缺口（教训）**：阶段 5 矩阵样本全部 import Foundation（trace goldens 更是直接 `#import nupa/runtime.h`），**纯 C 超集文件不在矩阵里**——矩阵全绿但公投翻红，正是公投机制存在的意义；公投 #3 的矩阵须补纯 C 超集样本。
+- **回退**：4 处翻转编辑还原（`eh_checked = false` + 文案复原），**`-eh legacy` 别名保留**（零行为变更的前置成果不丢弃）；复验 test_all **309/317（2 failed / 6 canceled）与基线精确一致**。
+- **重试前置（公投 #3）**：修复 EH 全局声明发射缺口 + 归因 2 处 checker 失败 + 矩阵补纯 C 超集样本，全绿后再次独立提交翻转。
+
+### 公投 #3 前置修复：EH 全局声明缺口 + `__` 前缀遮蔽 (2026-10-01, 本会话)
+
+> 公投 #2 的 7 个 failed 逐个归因完毕，3 个真缺口全修，1 个是幻影。默认仍是 sjlj——**本节是公投 #3 的前置成果，不等于翻转获批**。
+
+- **✅ 缺口 1：生成 C 缺 EH 全局声明（公投 #2 的 3 处同根因失败）**。`__nupa_eh_flag`/`__nupa_eh_val` 只声明在 `include/nupa/runtime.h`，而纯 C 超集文件（无 Foundation import、无 block 字面量）走不进 include 启发式 → clang `use of undeclared identifier '__nupa_eh_flag'`（`c_header_typedefs_test` / `golden/22_c_superset` / `golden/39_complex`）。修法：`emit_unit_with_headers` 新增 `eh_checked` 参数，hosted include 区在 eh_checked 时**无条件**补发 `#include <nupa/runtime.h>`（带去重，与 `<stdlib.h>` 同款纪律），不依赖 Foundation/blocks 启发式；`pipeline` 穿参 + 另两个调用点（`emit_unit`、vtable_sig 测试）同步。**默认 sjlj 路径行为零变化**（eh_checked=false 时不发射）。守护测试 `codegen::eh_runtime_include_tests` 3 例（纯 C 超集必含 / legacy 必不含 / 已含不重复）。
+- **✅ 缺口 2：checker 的 `__` 前缀短路遮蔽 desugar 合成临时类型**（`full_syntax_test` 的 `0:0: argument of type 'int' does not match ...`）。根因：`check_expr` 的 VarRef 臂对任何 `__` 前缀名字**无条件**返回 `Int`（为 `__FILE__`/`__LINE__` 内置宏设计），而 eh hoist 临时 `__nupa_eh_tmp_N` 同样以 `__` 开头、其真实类型**已由 `__auto_type` 推导并注册进 `scope_vars`**——短路发生在查表之前，泛型实参检查因此读到 `int`。修法：把 `scope_vars` 查询**提到 `__`/`&` 短路之前**（真实声明优先；内置宏从不进 scope，零误伤）。⚠️ 该改动影响**所有模式**（不只 checked），故回归必须跑全量 test_all。
+- **✅ 缺口 3：eh 的 `aggregate_zero` 对裸 `SEL` 漏判**（`json_editor` checked）。`return_zero` 对 `TypePrim::Sel` 要求 `name.is_some()` 才发 `(T){0}`，但裸 `SEL`（`prim=Sel`、`name=None`，如 `static SEL cmdSel`）落回 `int_expr(0)` → clang `returning 'int' from a function with incompatible result type 'SEL'`。修法：`Sel` 按 prim 单独匹配，不再要求 name。
+- **幻影（不是 checked 回归）**：`arc_extreme_test` 在 **legacy+ARC 下同样 rc=1**（7 处显式 `release` 与 ARC 冲突），一直是靠 test_all 的 ARC→MRC retry 兜住的既有限制；`examples/01_JSONEditor` 同理（交互式 + 显式 release）。**教训**：用 `grep -B6` 从 test_all 输出里扒失败清单不可靠（邻近行会带出无关文件名），必须逐个显式 `-eh checked` 复现才可定性。
+- **验证**：3 个纯 C 超集 +checked 全 rc=0；`full_syntax_test -eh checked -asm …s` 端到端 rc=0；`json_editor` 转译 rc=0；cargo 全绿（codegen 6 passed，含 3 新例）；**test_all 309/317（2 failed / 6 canceled）与基线精确一致**。
+- **⚠️ 仍未做**：阶段 5 验收矩阵本体（10 场景表）尚未把纯 C 超集样本正式纳入；`-eh checked` 仍为显式 opt-in，翻默认需第三次公投。
+
+### ARC 补齐：`goto` 清理 + owned ivar 自动释放 + block 空参数 ✅ (2026-10-02, 本会话)
+
+> 承接"退出表达式求值顺序"修复，清掉报告里列出的两个 ARC 缺口，外加一个 parser 缺陷。
+
+**1. `goto` 跨作用域清理（`crates/arc`）**
+
+C 的 label 是函数级的，`goto` 跳出嵌套块时，被跳过的那些作用域的 owned 局部无人释放（pattern-switch lowering 正是这个形状：arm body 在嵌套 compound，`goto __nupa_swN_end` 跳出去）。
+
+- 用**作用域路径**（从函数体到该语句列表的语句索引序列）判定，而不是单纯深度——同深度的兄弟块必须区分开。
+- 关系三分：label 路径是 goto 路径**前缀** → 跳出，按逆序释放离开的作用域；label 是其列表**首条**语句 → 跳入块首（不跳过初始化器，pattern-switch 形状）放行并按最近公共祖先释放；其它 → **拒绝编译**。
+- 释放的变量**不**从作用域登记移除：未走该 goto 的路径仍在作用域末尾释放，每条路径恰好一次。
+- `@try` 的 `throw_floor` 与 goto 分析相互作用已核对（用例 13）。
+- 负例 `tests/negative/arc_goto_into_scope.np`（`goto '...' jumps into a nested or sibling scope past its first statement`）。
+
+踩坑：`walk_labels_gotos` 对 `@autoreleasepool`/`@synchronized` 传了**包装语句本身**（非 Compound）→ `walk_labels_gotos_stmt` 克隆后无限自递归 → **转译期栈溢出**（修：传 body）。
+
+**2. owned ivar 自动释放（`crates/codegen`）**
+
+- 语义（比 ObjC 窄，刻意）：**没有**自定义 `dealloc` 的类 → ARC 合成 dealloc wrapper（先链父类入口，再逆序释放本类 owned ivar）；**有**自定义 `dealloc` → ARC 不介入。
+- 判定 owned ivar：仅**单级**对象指针；排除 `T **`（C 数组）、weak、函数指针、block、C 标量指针；`id` 计入。`nupa_release` nil 安全，部分初始化安全，逆序释放。
+- 判定「自定义 dealloc」必须 `method_owners == 本类`：`method_names` 含**继承**条目，否则任何 `NPObject` 子类都被当作"写了 dealloc"而失去合成。
+- **MRC（`-fno-nupa-arc`）下不生成**（`CgUnit.no_arc` 门控）。
+- 用例 14（无 dealloc → 合成释放）与 15（有 dealloc 且手动 `NPObject_release(_x)` → 各释放一次）。
+
+踩坑链条：① 先按"所有类都合成"实现 → `tests/space_dodge.np` 的 `dealloc` 已用 `NPObject_release(_obs1..3)` 手动释放 → **double free**（ARC 稳定 rc=1，回归）；② 改为"有 dealloc 就跳过"后，`method_names` 里的**继承** `NPObject_dealloc` 让所有子类都被跳过 → ivar 又不释放；③ 用 `method_owners` 区分后才正确。另：`NPObject **`（`NPArray._items`）曾被当作单对象释放，导致 `eh_diff`/`eh_matrix` 崩溃。
+
+**3. `^int(void)` ≡ `^int()`（`crates/parser`）**
+
+block 字面量参数表里的**无名 `void`** 不是参数（C 写法；旧实现会生成名为 `_arg` 的参数 → `^int(void _arg)`，`-Werror` 硬错）。`void *p` 有 `is_pointer`，仍按真参数解析。注意 `peek_next()` 在本 parser 里是**桩**（返回当前 token），不能用做 lookahead——判定放在参数循环内。回归：`tests/block_void_params_test.np`。
+
+**4. `@finally` 的独立用例（16/17）**：finally 内再次 throw（向外传播、不重入本层 catch）、finally 内 return（覆盖 try 的返回值）。checked 与 legacy **输出一致**。
+
+**门槛（本会话末）**：`cargo test` **147/147**；`arc_order` **96/96**（16 用例 × 6 组合）；`test_all` **336/344, 0 failed, 0 SUSPECT**；`eh_matrix` **18 场景 0 失败**；`eh_diff` **7/7**；`trace golden` **8/8**；`clang_gcc_stress` **23/23**；`multi_tu` **10/10**；ASan **13/13 clean**（ARC 套件 + legacy full_syntax）。
+
+**清理**：删除工作区三个未跟踪的调试产物 `chk.txt` / `docsurvey.txt` / `aud.plist`。
+
+### ARC 退出表达式求值顺序缺陷 — 已修复 ✅ (2026-10-02, 本会话)
+
+> 症状：`return [[h text] length] - 5;` 在返回表达式求值**之前**释放 `h` → use-after-free（默认 checked 下因 EH 线性化**偶然**掩盖，legacy 下必现）。核心原则：**所有表达式必须先完成求值，再执行离开作用域所需的 ARC release**。
+
+**根因（`crates/arc/src/arc.rs`，三处同族）**
+
+| # | 缺陷 | 表现 |
+|---|---|---|
+| 1 | `insert_releases_before` 把 release 一律插在退出语句**之前**；`extract_returned_var` 只对顶层 `VarRef` / `MsgSend(VarRef)` 做"转移"判断 → 顶层是 `Binary`（`[[h text] length] - 5`）时不跳过 → 提前释放 | UAF（legacy/default 复现；checked 偶然正确） |
+| 2 | 同一个 `MsgSend(VarRef)` 判断**过度**跳过 → `return [w text];` 中 `w` 永不释放 | 泄漏（dealloc 不出现） |
+| 3 | return/throw 都 `collect_vars(stack, 0)` + `clear_all`：`@throw` 释放了**函数级**局部，而 handler 在同一函数内、外层局部仍然有效；随后函数尾再次释放 | 双释放（`full_syntax_test` legacy 段 SIGSEGV，ASan 指到 `sec4_control_runtime`） |
+
+**修复规则**（`tests/arc_order/README.md` 有完整表）
+
+1. 退出表达式**读取**待释放局部 → 先求值到临时变量、再 release、最后退出：`__auto_type __nupa_arc_ret_N = <expr>; nupa_release(...); return __nupa_arc_ret_N;`。只在必要时生成临时变量（表达式不读任何待释放局部时直接插 release）。
+2. 所有权转移只认两类：裸局部 `return h;`、显式 `return nupa_autorelease(h);` / `return [h autorelease];`（Foundation `NPArray +arrayWithObjects:count:` 依赖后者）。
+3. `@throw` 只释放**最近 `@try` 边界以内**的局部（新增 `throw_floor`，随 `@try` 递归下移）。
+
+**配套**：block 捕获感知（`collect_captures_*`，`return blk() - 7;` 中 `h` 被 `blk` 捕获也算"读"）；移除 `clear_all`（它吞掉后续路径的释放 → 泄漏），改用"作用域以无条件退出结尾则不做 scope-end 插入"；退出点之后的语句不可达 → 停止分析（消死代码）。release 顺序保持**逆序**（与 `28_refcount_trace` 既有 golden 一致）。
+
+**同时修掉的 EH 缺陷（`@finally` 早退不执行）**：`@try { return X; } @finally { F; }` 里 finally 被整体跳过（checked 与 legacy 都有）。checked 侧在 `rewrite_try` 用新的 `splice_finally_before_exits` 把 finally 体副本插到 try 体内每个 `return` 之前（嵌套时外层副本落在内层之后 → 顺序 inner→outer ✓）；legacy 侧由 `pub fn splice_finally_exits` 作为独立 pass（pipeline Step 3.92，ARC 之前，使 finally 在 release 之前运行）。
+
+**新增回归套件**：`tests/arc_order/`（8 用例 × 6 组合 = 48，`run_arc_order.sh`）
+- 覆盖：顶层 Binary / 返回消息发送 / 复杂二元 / 多局部 / early return / `@throw` 表达式 / `@finally` / block 捕获
+- 组合：`{default, checked, legacy} × {ARC, MRC}`
+- **48/48 PASS**；**ASan 8/8 clean**（修复前 legacy 下 7 个用例报 UAF、08 全模式报 UAF）
+
+**`test_all.py` 增强**：ARC→MRC retry 现在带**归因**（`PASS_MRC` + 原因）。当前 40 个 retry **全部**为 "by design"（用例显式写 retain/release，ARC 下被 checker 正确拒绝），**0 个 SUSPECT**（即没有因 ARC 注入缺陷而回退的）。另修正 `tests/noarc_test.np` 自身不平衡的手动 MM（`retain` ×1 / `release` ×2 → 平衡），它在 ARC 下原本靠 MRC 回退掩盖了测试自身的 over-release。
+
+**门槛（修复后）**：`cargo test --workspace` **147/147**；`test_all` **330/338 passed, 0 failed, 6 canceled, 2 expected-fail, 40 ARC→MRC(by design), 0 SUSPECT**；`eh_matrix` **18 场景 ×3 模式 0 失败**；`trace golden` **8/8**；`eh_diff` **7/7**；`clang_gcc_stress` **23/23**；`multi_tu` **10/10**；ASan **9/9 clean**（8 用例 + `full_syntax_test` legacy）。
+
+**发现的其它缺口（未修，独立议题）**
+1. **owned ivar 的自动释放**：`dealloc` 不释放对象类型 ivar（ObjC ARC 会生成）。
+2. `^int(void) { }` 生成名为 `void` 的参数（既有 parser 缺陷）；空参 block 写 `^int()`。
+3. `goto`（pattern-switch lowering 产生）跨作用域跳出时不触发 ARC 清理 → 潜在**泄漏**（非 UAF）。未列入本次范围。
+
+### `-eh checked` 默认化工程 — 阶段 7：**默认翻转完成** ✅ (2026-10-02, 本会话)
+
+> 三债清偿 + 公投 #3 前置修复之后，本会话完成最后验收并执行翻转。**默认 EH 后端现为 `-eh checked`**；`-eh legacy`（别名 `-eh sjlj`）是完整回退。
+
+**前置修复核实（五项，均确认/补齐了回归测试）**
+
+| # | 修复 | 守护测试 |
+|---|---|---|
+| 1 | checked 生成 C 无条件拉 `nupa/runtime.h`（纯 C 超集也不缺 `__nupa_eh_flag`/`__nupa_eh_val` 声明） | `codegen` 的 `eh_*` 3 例 + 纯 C 超集探针 rc=0 |
+| 2 | checker：`scope_vars` 查询提到 `__` 内置宏短路**之前**（`__nupa_eh_tmp_N` 不再被误判为 `int`） | 新增 `checker::eh_hoist_temp_resolves_to_declared_type_not_the_int_fallback` + `builtin_prefix_fallback_still_applies_when_not_in_scope` |
+| 3 | 裸 `SEL` 的零值发射 `(SEL){0}` | `eh::bare_sel_takes_compound_literal_zero` + 端到端探针 |
+| 4 | 默认/legacy 行为 = 旧 sjlj | `default_backend_gate`（生成 C 特征：legacy 含 setjmp、不含 flag） |
+| 5 | checked 不依赖 hosted-only `setjmp/longjmp` | `eh::checked_desugar_leaves_no_try_node` + 质量统计（checked 恒 0 个 setjmp） |
+
+**修掉一个坏测试（测试缺陷，非产品 bug）**：`eh::checked_desugar_leaves_no_try_node` 的 `expr_uses` 只看表达式顶层，而 desugar 的守卫条件是 `flag == 1 && done == 0`（Binary 节点）→ 断言恒假、单测恒失败。已改为递归遍历（复用 `EffectTable::effect_children`）。
+
+**验收矩阵（新增）**：`tests/eh_matrix/`（`run_eh_matrix.sh` + `gen_quality.sh` + `README.md`）
+
+- **18 场景 × 3 模式**（default / checked / legacy）全 PASS，0 失败场景
+- 两道门：`default` 与显式 `-eh checked` **逐字节一致**（翻转保真）；三模式 stdout 无漂移
+- **默认值回归测试**：`default_backend_gate` —— 不传 `-eh` 时生成 C 必须是 checked 特征（flag>0、setjmp=0），`-eh legacy` 必须是 sjlj 特征（flag=0、setjmp>0）
+- 场景：普通程序 / 单层 @try / 嵌套 @try / @finally 顺序 / rethrow / 跨函数 / ARC / MRC / @autoreleasepool / 多文件（multi_tu **全量**，全部 import Foundation）/ Foundation 大文件 / 纯 C 超集 / `-ffreestanding` / ARM64 裸机（真 `asm_ext.s` + helpers）/ `@await`+异常 / Blocks+异常 / 零异常程序 / 全语法总检（`full_syntax_test` + `-asm`）
+- `tests/multi_tu/run_multi_tu.sh` 新增 `NUPA_EH_FLAG` 环境变量（默认空 = 零行为变更）
+
+**生成码质量（`gen_quality.sh`）**
+
+- checked **恒 0 个 `setjmp/longjmp`**；`-eh legacy` 的生成 C 与翻转前的 default **逐字节相同**（行数/体积/守卫全同）
+- 编译时间 +11~25 ms（最大用例 0.108s→0.134s ≈ +20%）；体积：小文件 +2.7~3.1%，`json_editor` +11.3%
+- **守卫密度硬门**：`no_throw_plain.np`（无 @try、无 @throw、不内联 Foundation）checked = **0 守卫**（GATE OK）
+- ⚠️ **统计口径勘误**：必须 `grep -c '__nupa_eh_flag'`；`grep -c 'if (__nupa_eh_flag'` 因 codegen 生成双括号（`if ((__nupa_eh_flag == 0))`）**恒为 0**。阶段 5 表格"零 @try → 0 守卫"的结论即受此口径影响。修正后的真实情况：**含 Foundation 内联的零 @try 程序有 45 处旗标引用**，它们落在真正会 `@throw` 的 Foundation 方法及其传递闭包调用者上（不是无意义守卫）；零守卫只在"无 @try + 无 @throw + 不内联抛异常方法"时成立。
+
+**失败/取消项归因（切换前 `test_all` 3 failed / 6 canceled → 现 0 failed）**
+
+| 项 | 归因 | 处理 |
+|---|---|---|
+| `nupa-eh` 单测 `checked_desugar_leaves_no_try_node` | 测试自身遍历缺陷（见上） | 修复测试 |
+| `golden/11_multi_file_union/diamond_impl-F.np`（no main entry） | `-F` 故意失败样本 | `test_all.py` 新增 `EXPECTED_FAIL` 分类（不计入失败；若意外通过则报失败） |
+| `golden/28_refcount_trace/double_release-F.np`（故意 over-release） | 同上 | 同上 |
+| 6 个 canceled（interactive_game / micrit_rogue / snake_game / tic_tac_toe / tricalc / json_editor） | 交互式程序，无 TTY → 超时 | `test_all.py` 新增**编译替代验收**：超时后自动 transpile+compile+link，成功即记 `CANCELED (… compile+link OK (ARC/MRC))`；6/6 通过 |
+
+**翻转落地**：`crates/nupac/src/pipeline.rs` 新增 `pub const DEFAULT_EH_CHECKED: bool = true;`（`Pipeline::new()` 引用它 + 2 个单测钉死）；`main.rs` 两处 `-eh` 解析改为 `sjlj`/`legacy` **显式置 false**（默认已为 true）；CLI help、`completions/_nupac`、`completions/nupac.fish`、README/CHINESE 的异常语义与裸机小节同步。
+
+**门槛（切换后实测）**：`cargo test --workspace` **147/147**；`test_all` **322/330 passed, 0 failed, 6 canceled, 2 expected-fail**；`eh_diff` **7/7**；trace golden **8/8**；`eh_matrix` **17/17 + gate OK**；`clang_gcc_stress` **23/23**。
+
+**已知限制（不阻塞切换）**
+
+1. `06_cross_frame`：sjlj（legacy）失败、checked 通过 —— 即 README 记录的 sjlj 跨帧限制，外加 `@throws` 逃逸检查只在 sjlj 侧执行。default 与 checked 一致。
+2. Foundation 内联会带来守卫（45 处，见上，均落在真实抛异常路径上）。
+3. **既有 ARC 顺序缺陷（与 EH 无关，本次未修）**：`return <表达式使用 owned 局部对象>;` 会在表达式求值**之前**插入 `nupa_release` → use-after-free。最小复现（`Holder` 持有 `NPString *_s`、`- (NPString *)text { return _s; }`）：
+
+   ```nupa
+   Holder *h = [[Holder alloc] init];
+   return [[h text] length] - 5;   // default/legacy: rc=1；checked: rc=0
+   ```
+
+   checked 正确是**偶然**——EH 的表达式线性化把调用提到 `nupa_release` 之前，并非修复。属 ARC 范畴，另案处理（详见 `tests/eh_matrix/README.md`）。
+
 ### `-eh checked` 差分测试（tests/eh_diff/）— 01–05 全 PASS ✅ (Sep 2026, 本会话)
 
 - **差分 runner**：`./tests/eh_diff/run_eh_diff.sh`——每个用例同时用 nupac `-eh checked` 与 **clang `-fobjc-arc -fobjc-arc-exceptions -framework Foundation`** 编译运行，**stderr 逐行 diff**（基准钉死为 `-fobjc-arc-exceptions`：异常安全 ARC 是语义正确的参照，默认 `-fobjc-arc` 是缺陷参照）。`NPAC=` 环境变量可指定 nupac 二进制。**该目录已在 test_all.py glob 排除**（07 uncaught 故意非 0 退出，standalone 跑是幻影失败）。

@@ -30,7 +30,7 @@ complete -c nupac -n "__fish_nupac_needs_command" -l version -d 'print version a
 complete -c nupac -n "__fish_nupac_needs_command" -l fnupa-arc -d 'enable ARC (default)' -r
 complete -c nupac -n "__fish_nupac_needs_command" -l fno-nupa-arc -d 'disable ARC (MRC)' -r
 complete -c nupac -n "__fish_nupac_needs_command" -l fno-checker -d 'skip type checking' -r
-complete -c nupac -n "__fish_nupac_needs_command" -l eh -d 'exception backend: checked or sjlj (default sjlj)' -r
+complete -c nupac -n "__fish_nupac_needs_command" -l eh -d 'exception backend: checked (default) or legacy/sjlj' -r
 complete -c nupac -n "__fish_nupac_needs_command" -l ffreestanding -d 'bare-metal/freestanding output' -r
 complete -c nupac -n "__fish_nupac_needs_command" -l nostdinc -d 'pass -nostdinc to the C compiler (headers come from your -I dirs)' -r
 complete -c nupac -n "__fish_nupac_needs_command" -l no-comments -d 'omit readability comments in generated C (default: on)' -r

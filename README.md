@@ -639,7 +639,7 @@ Keys compare with `isEqual:`, so `NPString`/`NPNumber` keys have **value** seman
 illegal type 'int' in a dictionary literal — keys and values must be Objective-C objects
 ```
 
-### Exception Semantics (`-eh checked`)
+### Exception Semantics (`-eh checked` — the default backend)
 
 Nupa's exceptions are **ObjC exceptions by value, without unwinding**. `@try`/`@catch`/`@finally`/`@throw` behave exactly like clang's `-fobjc-arc-exceptions` mode — and a differential test suite (`tests/eh_diff/run_eh_diff.sh`) locks this in by running each case under both nupac and real clang/ObjC, then diffing stderr line by line (7/7 cases pass).
 
@@ -680,7 +680,7 @@ The semantics you get:
 - **Uncaught exceptions abort** with ObjC's wording: `*** Terminating app due to uncaught exception of class 'NPString'`, exit code 1.
 - **C callers can't miss an exception** — bridge-header wrappers check the error flag and abort rather than silently returning a zero value.
 
-Enable it with `-eh checked`; plain `nupac run` uses the zero-overhead setjmp backend, which has the classic limitation: a cross-frame throw skips intermediate frames' cleanup (documented below).
+**`-eh checked` is the default backend** — a plain `nupac run` compiles with it. `-eh legacy` (alias `-eh sjlj`) selects the old zero-overhead setjmp backend and remains a complete rollback; that backend has the classic limitation: a cross-frame throw skips intermediate frames' cleanup (documented below).
 
 ### `@throws` — Declared Exceptions
 
@@ -872,7 +872,7 @@ nupac -rewrite-nupa -ffreestanding kernel.np   # emits self-contained C
 In `-ffreestanding` mode the transpiled C:
 
 - does **not** `#include <string.h>`; instead `#include <nupa/runtime.h>` (freestanding branch)
-- implements `@try/@catch/@finally` with `__builtin_setjmp/longjmp` (zero libc), with plain (non-`__thread`) exception globals
+- implements `@try/@catch/@finally` with the default `-eh checked` backend — plain flag + guard control flow, **no `setjmp`/`longjmp` and no `jmp_buf` at all**, which is what makes the bare-metal target work. (`-eh legacy` falls back to `__builtin_setjmp/longjmp`, with plain non-`__thread` exception globals.)
 - is self-contained for `SEL`/`NPClass`/`NPObject`/`id`
 - does **not** bundle the Clang Blocks runtime — block literals reference `__NSConcreteStackBlock`/`_Block_copy`/`_Block_release`; on real bare metal, either link a Blocks runtime port or use `-backend portable`/`-backend gcc` (blocks lower to plain C functions, no ABI symbols)
 
@@ -1265,6 +1265,7 @@ Options:
   -fnupa-arc        Enable ARC (default)
   -fno-nupa-arc     Disable ARC (manual MRC mode)
   -fno-checker      Skip type checking
+  -eh <mode>        Exception backend: checked (default) or legacy (alias sjlj)
   -ffreestanding    Bare-metal/freestanding output (no libc, no TLS)
   -backend <mode>   C compiler backend: clang (default), portable, or gcc
   -arch <target>    Build for target architecture (e.g. -arch x86_64)
@@ -1452,8 +1453,8 @@ Start from a class system, add things gradually:
 - ✅ Static ARC
 - ✅ @selector / VTable polymorphism
 - ✅ @namespace
-- ✅ Exception handling (`@try`/`@catch`/`@finally`/`@throw` via `setjmp`/`longjmp`)
-  - ⚠️ Known limit (verified with ASan): an object owned by an **intermediate frame** leaks on a **cross-function throw** — `longjmp` skips its scope-end `nupa_release` (no stack unwinding). Within the throwing frame itself, ARC releases owned locals before `@throw`, so same-function throws are clean (an earlier shadow-lift mechanism here double-released — removed; see AGENTS.md). ARC-aware unwind (e.g. ARM64 EHABI) is planned for the cross-function case.
+- ✅ Exception handling (`@try`/`@catch`/`@finally`/`@throw`) — **default backend is `-eh checked`** (flag + guard lowering, unwind-safe ARC: a cross-function throw releases every frame's owned locals; no `setjmp`/`longjmp`, so it works on bare metal)
+  - `-eh legacy` (alias `-eh sjlj`) selects the old `setjmp`/`longjmp` backend. ⚠️ Its documented limit (verified with ASan): an object owned by an **intermediate frame** leaks on a **cross-function throw** — `longjmp` skips its scope-end `nupa_release`. That limit does not apply to the default backend.
 - ⏳ Foundation standard library
 - ⏳ Compiler self-hosting
 

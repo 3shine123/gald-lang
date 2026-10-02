@@ -372,6 +372,9 @@ pub struct CgUnit {
     /// Struct tags whose `==`/`!=` the checker rewrote to `nupa_struct_eq_<tag>`
     /// calls. One field-wise comparison function is emitted per tag, on demand.
     pub struct_eq_tags: Vec<String>,
+    /// `-fno-nupa-arc`: manual retain/release. Object ivars are then the
+    /// programmer's to release, so no ARC dealloc wrapper is generated.
+    pub no_arc: bool,
 }
 
 #[derive(Debug, Clone)]
@@ -394,6 +397,130 @@ pub struct CgClassMeta {
 }
 
 // ─── AST Type → C string ─────────────────────────────────────────────────────
+
+/// Does this ivar type denote an object ARC owns?
+///
+/// Only pointer-typed, non-weak, non-scalar-pointer, non-function-pointer
+/// ivars qualify: `char *`/`void *` are plain C storage, a function pointer is
+/// not an object, and block layouts are managed by the Blocks runtime.
+fn is_owned_object_ivar_type(ty: &str) -> bool {
+    let t = ty.trim();
+    // `id` (and the runtime's `nupa_id_t`) are object pointers spelled without
+    // a `*`, so they never reach the pointer checks below.
+    if t == "id" || t == "nupa_id_t" { return true; }
+    if t.contains("(*") { return false; }                  // function pointer
+    if t.contains("struct __nupa_block") { return false; }  // block layout
+    if !t.ends_with('*') { return false; }
+    // Exactly ONE level of indirection. `NPObject **` is a C array of objects
+    // (Foundation's NPArray/NPDictionary back `_items`/`_keys`/`_values` with
+    // one) — releasing it would free the array, not an element.
+    if t.matches('*').count() != 1 { return false; }
+    let base = t.trim_end_matches('*').trim();
+    !matches!(base,
+        "char" | "signed char" | "unsigned char" | "short" | "unsigned short"
+        | "int" | "unsigned int" | "unsigned" | "long" | "unsigned long"
+        | "long long" | "unsigned long long" | "float" | "double" | "long double"
+        | "bool" | "_Bool" | "void")
+}
+
+fn owned_ivars_of(cm: &CgClassMeta) -> Vec<String> {
+    cm.ivar_names
+        .iter()
+        .zip(cm.ivar_types.iter())
+        .zip(cm.ivar_weak.iter())
+        .filter(|((_, ty), weak)| !**weak && is_owned_object_ivar_type(ty))
+        .map(|((n, _), _)| n.clone())
+        .collect()
+}
+
+/// Synthesize ivar release for classes that do NOT declare their own `dealloc`.
+///
+/// OWNERSHIP RULE (deliberate, and narrower than ObjC's):
+///   * NO user `dealloc` → ARC releases the class's owned object ivars. This is
+///     the leak this pass exists to close: such a class previously destroyed
+///     its instance without ever releasing the objects it owned.
+///   * a user `dealloc` EXISTS → ARC stays out of the way. The body commonly
+///     releases ivars itself (handwritten `NPObject_release(_x)`, `[_x release]`,
+///     or an OO cascade), and a synthesized release on top of that is a double
+///     free. A class that declares `dealloc` has declared its ivar policy.
+///
+/// Releasing only `nupa_release`-style is nil-safe, so a half-initialized
+/// object is safe to destroy, and order is REVERSE declaration (stack order).
+/// The wrapper never rewrites the user's body; it *is* the class's `dealloc`
+/// entry in the metadata table.
+fn emit_arc_dealloc_wrappers(classes: &[CgClassMeta]) -> (std::collections::HashMap<String, String>, String) {
+    use std::collections::HashMap;
+    // Only a dealloc the class DEFINED ITSELF counts. `method_names` also
+    // carries inherited entries (with their real owner recorded in
+    // `method_owners`), and treating an inherited NPObject_dealloc as "the user
+    // wrote one" would switch the synthesis off for every subclass.
+    let has_user_dealloc = |c: &CgClassMeta| {
+        let flat = name_flat(&c.class_name);
+        c.method_names.iter().enumerate().any(|(p, n)| {
+            n == "dealloc"
+                && !c.is_class_methods[p]
+                && c.method_owners.get(p).map_or(false, |o| name_flat(o) == flat)
+        })
+    };
+    let owned: HashMap<String, Vec<String>> = classes
+        .iter()
+        .map(|c| (name_flat(&c.class_name), owned_ivars_of(c)))
+        .collect();
+    let mut names: HashMap<String, String> = HashMap::new();
+    for c in classes {
+        let flat = name_flat(&c.class_name);
+        if owned.get(&flat).map_or(true, |v| v.is_empty()) { continue; }
+        if has_user_dealloc(c) { continue; }
+        names.insert(flat.clone(), format!("{}__nupa_arc_dealloc", flat));
+    }
+
+    let mut defs = String::new();
+    for c in classes {
+        let flat = name_flat(&c.class_name);
+        let ivars = match owned.get(&flat) { Some(v) if !v.is_empty() => v, _ => continue };
+        if has_user_dealloc(c) { continue; }
+
+        // Chain to whatever the superclass's dealloc entry is, so inherited
+        // ivars are released too.
+        let entry = match c.super_name.as_deref().map(name_flat) {
+            Some(sup) => {
+                if names.contains_key(&sup) {
+                    format!("    {}__nupa_arc_dealloc(self, _cmd);\n", sup)
+                } else {
+                    let sup_user = classes
+                        .iter()
+                        .find(|x| name_flat(&x.class_name) == sup)
+                        .and_then(|x| {
+                            x.method_names.iter().position(|n| n == "dealloc")
+                                .filter(|&p| !x.is_class_methods[p])
+                                .map(|p| x.method_owners.get(p).cloned().unwrap_or_else(|| sup.clone()))
+                        });
+                    match sup_user {
+                        Some(o) => format!("    {}_dealloc(self, _cmd);\n", o),
+                        None => String::new(),
+                    }
+                }
+            }
+            None => String::new(),
+        };
+
+        let releases: String = ivars
+            .iter()
+            .rev()
+            .map(|n| format!("    nupa_release(((struct {} *)self)->{});\n", flat, n))
+            .collect();
+
+        defs.push_str(&format!(
+            "/* ARC: release '{}'s owned ivars (no user dealloc) */\n\
+             static void {}__nupa_arc_dealloc(NPObject * self, SEL _cmd) {{\n{}{}}}\n\n",
+            c.class_name,
+            flat,
+            entry,
+            releases,
+        ));
+    }
+    (names, defs)
+}
 
 fn name_flat(fqn: &str) -> String {
     // First mangle generic type arguments: `Name<T1, T2*>` → `Name_T1_T2_ptr`
@@ -5047,7 +5174,10 @@ method_names: info.method_names,
     }
     CLASS_METHOD_METADATA.set(class_method_meta).unwrap();
 
-    let mut unit = CgUnit { decls, filename: ast.filename.clone(), c_headers: Vec::new(), selectors, classes, global_instance_method_names, struct_eq_tags: Vec::new() };
+    // `no_arc` stays false here: this entry point feeds the header/prototype
+    // paths, which never emit the ARC dealloc wrappers (that decision belongs
+    // to the pipeline, which sets the flag on its own CgUnit).
+    let mut unit = CgUnit { decls, filename: ast.filename.clone(), c_headers: Vec::new(), selectors, classes, global_instance_method_names, struct_eq_tags: Vec::new(), no_arc: false };
     // The authoritative record of which method function bodies exist: every
     // `CgDeclData::Function` with a body. This covers paths that do not go
     // through `ClassInfo::method_bodies` — notably @property-synthesised
@@ -6534,7 +6664,7 @@ fn normalize_t_sentinels_text(c: &str) -> String {
     out
 }
 
-pub fn emit_unit_with_headers(unit: &CgUnit, c_headers: &[String], search_dirs: &[String], freestanding: bool, backend: Backend, comments: bool) -> String {
+pub fn emit_unit_with_headers(unit: &CgUnit, c_headers: &[String], search_dirs: &[String], freestanding: bool, backend: Backend, comments: bool, eh_checked: bool) -> String {
     CURRENT_BACKEND.store(backend as u8, Ordering::Relaxed);
     let mut out = String::new();
     if comments {
@@ -6566,6 +6696,15 @@ pub fn emit_unit_with_headers(unit: &CgUnit, c_headers: &[String], search_dirs: 
         let has_stdlib_h = c_headers.iter().any(|h| h.contains("stdlib.h"));
         if !has_stdlib_h {
             out.push_str("#include <stdlib.h>\n");
+        }
+        // -eh checked emits reads/writes of the EH globals (__nupa_eh_flag/
+        // __nupa_eh_val) and calls __nupa_eh_isa in EVERY function with a
+        // throwing callee. Their declarations live only in runtime.h; a pure
+        // C-superset file (no Foundation import, no block literal) otherwise
+        // generates C with undeclared identifiers (second-referendum root
+        // cause). runtime.h is a plain C header — harmless to include.
+        if eh_checked && !c_headers.iter().any(|h| h.contains("nupa/runtime.h")) {
+            out.push_str("#include <nupa/runtime.h>\n");
         }
     }
     for h in c_headers {
@@ -7109,6 +7248,16 @@ pub fn emit_unit_with_headers(unit: &CgUnit, c_headers: &[String], search_dirs: 
         let _ = write!(out, "}}\n\n");
     }
 
+    // ARC dealloc wrappers — emitted BEFORE the metadata instances that point
+    // at them, so no forward declaration is needed. Skipped entirely under
+    // `-fno-nupa-arc`: MRC means the programmer owns the ivars.
+    let (arc_dealloc_names, arc_dealloc_defs) = if unit.no_arc {
+        (std::collections::HashMap::new(), String::new())
+    } else {
+        emit_arc_dealloc_wrappers(&unit.classes)
+    };
+    out.push_str(&arc_dealloc_defs);
+
     // nupa_metaInit() — always emitted (weak, empty when the unit has no
     // classes): hand-written `main` naturally calls nupa_meta_init(), and a
     // class-less TU must still link.
@@ -7141,7 +7290,13 @@ pub fn emit_unit_with_headers(unit: &CgUnit, c_headers: &[String], search_dirs: 
             }
             out.push_str("        .protocol_count = 0,\n");
             // .dealloc — populate from the vtable so nupa_release() can call it.
-            if let Some(pos) = cm.method_names.iter().position(|n| n == "dealloc") {
+            // A class with owned object ivars points at a generated wrapper
+            // (see emit_arc_dealloc_wrappers): it runs the class's normal
+            // dealloc chain and then releases the ivars ARC owns.
+            let flat_here = name_flat(&cm.class_name);
+            if let Some(wrapper) = arc_dealloc_names.get(&flat_here) {
+                out.push_str(&format!("        .dealloc = (void (*)(NPObject *, SEL)){},\n", wrapper));
+            } else if let Some(pos) = cm.method_names.iter().position(|n| n == "dealloc") {
                 if !cm.is_class_methods[pos] {
                     let owner = cm.method_owners.get(pos).cloned().unwrap_or_else(|| name_flat(&cm.class_name));
                     out.push_str(&format!("        .dealloc = (void (*)(NPObject *, SEL)){}_{},\n", owner, "dealloc"));
@@ -7336,7 +7491,7 @@ pub fn emit_unit_with_headers(unit: &CgUnit, c_headers: &[String], search_dirs: 
 }
 
 pub fn emit_unit(unit: &CgUnit) -> String {
-    emit_unit_with_headers(unit, &[], &[], false, Backend::Portable, false)
+    emit_unit_with_headers(unit, &[], &[], false, Backend::Portable, false, false)
 }
 
 /// Generate a C bridge header so plain C code can call Nupa methods without
@@ -7505,6 +7660,7 @@ mod vtable_sig_tests {
                 "dealloc".into(), "init".into(), "ping".into(), "release".into(), "retain".into(),
             ],
             struct_eq_tags: Vec::new(),
+            no_arc: false,
         };
         // The emitter needs METHOD_METADATA populated; seed it once for this
         // test binary. `set` is idempotent from the test's point of view.
@@ -7516,7 +7672,7 @@ mod vtable_sig_tests {
             ("retain".to_string(), (0usize, "NPObject * (*)(NPObject *, SEL)".to_string())),
         ]));
         let headers = unit.c_headers.clone();
-        let c = emit_unit_with_headers(&unit, &headers, &[], false, Backend::Clang, false);
+        let c = emit_unit_with_headers(&unit, &headers, &[], false, Backend::Clang, false, false);
         assert!(
             c.contains("unsigned long long __sig;"),
             "vtable struct must carry a __sig member so it merges with the instance"
@@ -7526,5 +7682,68 @@ mod vtable_sig_tests {
             "the layout check must live in a per-TU constructor, not in weak-merged nupa_metaInit"
         );
         assert!(c.contains("nupa_verify_vtable_sig"), "the verifier must be emitted");
+    }
+}
+
+/// Regression guard for the second-referendum root cause: `-eh checked`
+/// writes `__nupa_eh_flag` / `__nupa_eh_val` in every function with a
+/// throwing callee, but their declarations live only in `nupa/runtime.h`.
+/// A pure C-superset file (no Foundation import, no block literal) generates
+/// C that never pulled runtime.h in, so clang rejected the whole unit with
+/// `use of undeclared identifier '__nupa_eh_flag'`. The include must not
+/// depend on the Foundation/blocks heuristic.
+#[cfg(test)]
+mod eh_runtime_include_tests {
+    use super::*;
+
+    fn unit_with_c_headers(c_headers: Vec<String>) -> CgUnit {
+        CgUnit {
+            decls: Vec::new(),
+            filename: "c_superset.np".to_string(),
+            c_headers,
+            selectors: Vec::new(),
+            classes: Vec::new(),
+            global_instance_method_names: Vec::new(),
+            struct_eq_tags: Vec::new(),
+            no_arc: false,
+        }
+    }
+
+    #[test]
+    fn eh_checked_pulls_runtime_h_into_a_pure_c_superset_unit() {
+        let unit = unit_with_c_headers(vec!["#include <stdio.h>".to_string()]);
+        let c = emit_unit_with_headers(&unit, &unit.c_headers, &[], false, Backend::Clang, false, true);
+        assert!(
+            c.contains("#include <nupa/runtime.h>"),
+            "a pure C-superset unit compiled with -eh checked must include runtime.h — \
+             __nupa_eh_flag/__nupa_eh_val are otherwise undeclared (referendum #2)"
+        );
+    }
+
+    #[test]
+    fn legacy_backend_does_not_pull_runtime_h() {
+        let unit = unit_with_c_headers(vec!["#include <stdio.h>".to_string()]);
+        let c = emit_unit_with_headers(&unit, &unit.c_headers, &[], false, Backend::Clang, false, false);
+        assert!(
+            !c.contains("#include <nupa/runtime.h>"),
+            "the default sjlj backend emits no EH global access — runtime.h must not \
+             be dragged in (zero behavior change for the default path)"
+        );
+    }
+
+    /// No duplicate include when the file already pulls runtime.h itself
+    /// (the trace goldens do `#import nupa/runtime.h` directly).
+    #[test]
+    fn eh_checked_does_not_duplicate_an_existing_runtime_h_include() {
+        let unit = unit_with_c_headers(vec![
+            "#include <stdio.h>".to_string(),
+            "#include <nupa/runtime.h>".to_string(),
+        ]);
+        let c = emit_unit_with_headers(&unit, &unit.c_headers, &[], false, Backend::Clang, false, true);
+        assert_eq!(
+            c.matches("#include <nupa/runtime.h>").count(),
+            1,
+            "runtime.h must not be included twice"
+        );
     }
 }

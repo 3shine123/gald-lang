@@ -13,7 +13,7 @@ _nupac() {
                 '-fnupa-arc[enable ARC (default)]' \
                 '-fno-nupa-arc[disable ARC (MRC)]' \
                 '-fno-checker[skip type checking]' \
-                '-eh[exception backend: checked or sjlj (default sjlj; legacy is an alias)]' \
+                '-eh[exception backend: checked (default) or legacy/sjlj (setjmp/longjmp rollback)]' \
                 '-ffreestanding[bare-metal/freestanding output]' \
                 '-nostdinc[pass -nostdinc to the C compiler (headers come from your -I dirs)]' \
                 '-no-comments[omit readability comments in generated C (default: on)]' \

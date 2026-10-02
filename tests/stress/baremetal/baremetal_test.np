@@ -142,7 +142,7 @@ static unsigned loopsum(int n) {
     + (id) alloc { return nupa_alloc(self); }
     - (id) init  { return self; }
     - (int) errorCode { return code; }
-@end
+    @end
 
     // subclass for typed-@catch isa-chain coverage: the PARENT type (Err)
     // must catch a SubErr instance via the isKindOf chain (__nupa_eh_isa)
