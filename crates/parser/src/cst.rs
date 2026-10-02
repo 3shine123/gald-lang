@@ -261,6 +261,11 @@ pub enum CstDeclData {
         params: Option<Box<CstParam>>,
         has_variadic: bool,
         body: Option<Box<CstStmt>>,
+        /// Trailing `@throws` / `@throws(T)` annotation (declaration position).
+        /// `None` = not annotated; `Some(T)` = `@throws(T)`; `Some(void)` = bare
+        /// `@throws` ("declared to throw, type unstated"). Compile-time only —
+        /// never emitted to C.
+        throws: Option<Box<CstType>>,
     },
     Variable {
         var_type: Option<Box<CstType>>,
@@ -319,7 +324,14 @@ pub enum CstDeclData {
         is_class_method: bool,
         return_type: Option<Box<CstType>>,
         params: Option<Box<CstParam>>,
+        has_variadic: bool,
         body: Option<Box<CstStmt>>,
+        /// Trailing `@throws` / `@throws(T)` annotation (declaration position,
+        /// before `;` or `{`). `None` = not annotated; `Some(T)` = `@throws(T)`;
+        /// `Some(void)` = bare `@throws` ("declared to throw, type unstated").
+        /// Compile-time only — never emitted to C. Distinct from the `@throw`
+        /// statement.
+        throws: Option<Box<CstType>>,
     },
     Namespace(Vec<CstDecl>),
     Using {

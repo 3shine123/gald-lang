@@ -32,8 +32,10 @@ ObjC 的 `NS`/`CF`/`CG` 前缀 → Nupa 用 `NP`。
 | `NPMutableString` | ✅ | `NSMutableString` |
 | `NPArray` | ✅ | `NSArray` |
 | `NPMutableArray` | ✅ | `NSMutableArray` |
+| `NPDictionary` | ✅ | `NSDictionary` |
+| `NPMutableDictionary` | ✅ | `NSMutableDictionary` |
 
-> 类名用 `NP`（Nupa）前缀，与 ObjC 的 `NS` 一一对应；后续新增容器（`NPDictionary`/`NPSet` 等）沿用。
+> 类名用 `NP`（Nupa）前缀，与 ObjC 的 `NS` 一一对应；后续新增容器（`NPSet`/`NPOrderedSet` 等）沿用。
 
 ---
 
@@ -60,6 +62,7 @@ ObjC 用 `objc_` 前缀 → Nupa 用 `nupa_`。
 | `nupa_stringFromCstr` | C 串 → `NPString`（codegen 弱发射） |
 | `nupa_isKindOf` | 类型判断（保留 CamelCase，不转 snake） |
 | `nupa_array_create` | `@[...]` 字面量的运行时构造 |
+| `nupa_dictionary_create` | `@{...}` 字面量的运行时构造（交替 key/value varargs） |
 | `nupa_weakRegister` / `nupa_weakUnregister` / `nupa_weakClearAll` | 弱引用 |
 
 > **关于 snake 与 Camel 混用**：基础内存/RC 函数沿用早期 snake_case（`nupa_alloc`…）；后加的、直接对应某条 ObjC 方法语义的函数按 ObjC 方法名 CamelCase（`nupa_metaInit`、`nupa_autoreleasepoolPush`）。两者都以 `nupa_` 前缀开头，不冲突。

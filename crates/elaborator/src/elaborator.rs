@@ -123,7 +123,9 @@ impl Elaborator {
         at.is_pointer = ct.is_pointer; at.is_const = ct.is_const; at.is_block = ct.is_block;
         at.is_fn_ptr = ct.is_fn_ptr;
         at.is_unsigned = ct.is_unsigned;
+        at.is_complex = ct.is_complex;
         at.is_array = ct.is_array; at.is_struct = ct.is_struct; at.array_size = ct.array_size;
+        at.tag = ct.tag;
         at.array_size_name = ct.array_size_name.clone();
         at.name = ct.name.clone();
         at.block_name = ct.block_name.clone();
@@ -132,6 +134,9 @@ impl Elaborator {
         at.block_params = ct.block_params.as_ref().and_then(|b| self.convert_type(b)).map(Box::new);
         at.protocol_refs = ct.protocols.clone();
         at.type_args = ct.type_args.iter().filter_map(|a| self.convert_type(a)).collect();
+        // Nullability annotation, carried purely for the checker. Codegen
+        // never reads it, so this costs nothing at runtime.
+        at.nulls = ct.nulls;
         // Resolve class/protocol refs from symbol table (like C's convert_type_node)
         if let Some(ref st) = self.symtab {
             if let Some(ref name) = at.name {
@@ -170,8 +175,17 @@ impl Elaborator {
     fn convert_expr(&mut self, ce: &CstExpr) -> Option<AstExpr> {
         let line = ce.line; let col = ce.col;
         let ae = match &ce.data {
+            CstExprData::Await(inner) => AstExpr {
+                kind: AstExprKind::Await, expr_type: None, line, col,
+                data: AstExprData::Await(Box::new(self.convert_expr(inner).unwrap_or_else(make_int_expr))),
+            },
+            CstExprData::Boxed(inner) => AstExpr {
+                kind: AstExprKind::Boxed, expr_type: None, line, col,
+                data: AstExprData::Boxed(Box::new(self.convert_expr(inner).unwrap_or_else(make_int_expr))),
+            },
             CstExprData::Integer(val) => AstExpr { kind: AstExprKind::Int, expr_type: None, line, col, data: AstExprData::Int(*val) },
             CstExprData::Float(val) => AstExpr { kind: AstExprKind::Float, expr_type: None, line, col, data: AstExprData::Float(*val) },
+            CstExprData::FloatRaw(raw) => AstExpr { kind: AstExprKind::Float, expr_type: None, line, col, data: AstExprData::FloatRaw(raw.clone()) },
             CstExprData::String(s) => AstExpr { kind: AstExprKind::String, expr_type: None, line, col, data: AstExprData::String(s.clone()) },
             CstExprData::AtString(s) => AstExpr { kind: AstExprKind::AtString, expr_type: None, line, col, data: AstExprData::AtString(s.clone()) },
             CstExprData::Char(val) => AstExpr { kind: AstExprKind::Char, expr_type: None, line, col, data: AstExprData::Char(*val) },
@@ -211,7 +225,18 @@ impl Elaborator {
                 kind: AstExprKind::TypeLiteral, expr_type: None, line, col,
                 data: AstExprData::TypeLiteral(self.convert_type(ty).unwrap_or_else(|| AstType::new(TypePrim::Void))),
             },
-            CstExprData::Paren(e) => self.convert_expr(e).unwrap_or_else(make_int_expr),
+            CstExprData::Paren(e) => {
+                // Keep the grouping: AST `Paren` is re-emitted with parentheses
+                // by codegen. Unwrapping here (the old behavior) dropped the
+                // user's explicit grouping — `(a = b) != c` miscompiled as
+                // `a = b != c`.
+                let inner = self.convert_expr(e).unwrap_or_else(make_int_expr);
+                AstExpr {
+                    kind: nupa_ast::AstExprKind::Paren, expr_type: inner.expr_type.clone(),
+                    line: e.line, col: e.col,
+                    data: AstExprData::Paren(Box::new(inner)),
+                }
+            }
             CstExprData::NumberLit(e) => self.convert_expr(e).unwrap_or_else(make_int_expr),
             CstExprData::Message { receiver, selector, args } => {
                 let mut is_class_method = false;
@@ -316,7 +341,12 @@ impl Elaborator {
                 };
                 let converted_callee = self.convert_expr(callee);
                 if let Some(ref ce) = converted_callee {
-                    if matches!(ce.data, AstExprData::IvarRef { .. }) {
+                    // Member expressions are renderable call targets: ivar
+                    // access (block invocation) and struct fields via dot/arrow
+                    // (`w.cb(3)` where cb is a fn-ptr — C-superset member call).
+                    // Keep the callee so codegen emits the member call instead
+                    // of dropping it.
+                    if matches!(ce.data, AstExprData::IvarRef { .. } | AstExprData::PropRef { .. }) {
                         // Block invocation on ivar — store callee expression
                         AstExpr { kind: AstExprKind::FuncCall, expr_type: None, line, col,
                             data: AstExprData::FuncCall { func: None, name, callee: Some(Box::new(ce.clone())), args: args_list } }
@@ -358,6 +388,15 @@ impl Elaborator {
             }
             CstExprData::InitList(exprs) => {
                 AstExpr { kind: AstExprKind::InitList, expr_type: None, line, col, data: AstExprData::InitList(exprs.iter().filter_map(|e| self.convert_expr(e)).collect()) }
+            }
+            CstExprData::DesignatedInit { designators, expr } => {
+                let conv_d = |d: &CstDesignator| -> AstDesignator {
+                    match d {
+                        CstDesignator::Member(n) => AstDesignator::Member(n.clone()),
+                        CstDesignator::Index(ix) => AstDesignator::Index(Box::new(self.convert_expr(ix).unwrap_or_else(make_int_expr))),
+                    }
+                };
+                AstExpr { kind: AstExprKind::DesignatedInit, expr_type: None, line, col, data: AstExprData::DesignatedInit { designators: designators.iter().map(conv_d).collect(), expr: Box::new(self.convert_expr(expr).unwrap_or_else(make_int_expr)) } }
             }
         };
         Some(ae)
@@ -596,6 +635,65 @@ impl Elaborator {
             CstStmtData::Switch { expr, body } => {
                 AstStmt { kind: AstStmtKind::Switch, line, col, data: AstStmtData::Switch { expr: Box::new(self.convert_expr(expr).unwrap_or_else(make_int_expr)), body: Box::new(self.convert_stmt(body).unwrap_or_else(make_compound_stmt)) } }
             }
+            CstStmtData::SwitchPat { expr, arms, has_default, default_body } => {
+                // Each arm gets its own scope, entered BEFORE its guard and body
+                // are converted. A type binding (`case NPNumber *n:`) is
+                // referenced by both — `when n.intValue > 3` and the body — and
+                // neither could resolve it: `lookup_local_type` missed, so
+                // `n.intValue` fell through to an untyped PropRef and codegen
+                // emitted `n->intValue` against an unresolved struct
+                // ("no member named 'intValue' in 'struct NPNumber'").
+                //
+                // Register the *CST* type (that's what `register_local_type`
+                // keys on, and what dot resolution reads back to find the
+                // class), marked as a pointer because a bound instance is
+                // `T *`. Sequential loop, not `.map()`: the scope push/pop must
+                // bracket each arm so an arm never sees a *sibling's* binding.
+                let mut conv_arms = Vec::with_capacity(arms.len());
+                for a in arms {
+                    let bind_cst: Option<(String, CstType)> = match &a.pattern {
+                        CstPattern::Bind { ty, name } => {
+                            let mut rt = (**ty).clone();
+                            Self::resolve_cst_type_name(&mut rt, &self.ns_prefix, &self.symtab);
+                            let mut pt = rt;
+                            pt.is_pointer = true;
+                            Some((name.clone(), pt))
+                        }
+                        _ => None,
+                    };
+                    self.push_local_scope();
+                    if let Some((n, t)) = &bind_cst {
+                        self.register_local_type(n, t);
+                    }
+                    let pattern = match &a.pattern {
+                        CstPattern::Const(e) => AstPattern::Const(Box::new(self.convert_expr(e).unwrap_or_else(make_int_expr))),
+                        CstPattern::Cond(e) => AstPattern::Cond(Box::new(self.convert_expr(e).unwrap_or_else(make_int_expr))),
+                        CstPattern::Bind { ty, name } => {
+                            let mut rt = ty.clone();
+                            Self::resolve_cst_type_name(&mut rt, &self.ns_prefix, &self.symtab);
+                            let at = self.convert_type(&rt)
+                                .unwrap_or_else(|| AstType::new(TypePrim::Id));
+                            AstPattern::Bind { ty: Box::new(at), name: name.clone() }
+                        }
+                    };
+                    let guard = a.guard.as_ref().map(|g| Box::new(self.convert_expr(g).unwrap_or_else(make_int_expr)));
+                    let body = self.convert_stmt(&a.body).unwrap_or_else(make_compound_stmt);
+                    self.pop_local_scope();
+                    conv_arms.push(AstArm {
+                        pattern,
+                        guard,
+                        body: Box::new(body),
+                        line: a.line, col: a.column,
+                    });
+                }
+                AstStmt { kind: AstStmtKind::SwitchPat, line, col, data: AstStmtData::SwitchPat {
+                    expr: Box::new(self.convert_expr(expr).unwrap_or_else(make_int_expr)),
+                    arms: conv_arms,
+                    has_default: *has_default,
+                    default_body: default_body.as_ref()
+                        .map(|b| Box::new(self.convert_stmt(b).unwrap_or_else(make_compound_stmt))),
+                } }
+            }
             CstStmtData::Case { value, body } => {
                 AstStmt { kind: AstStmtKind::Case, line, col, data: AstStmtData::Case { value: Box::new(self.convert_expr(value).unwrap_or_else(make_int_expr)), body: Box::new(self.convert_stmt(body).unwrap_or_else(make_compound_stmt)) } }
             }
@@ -634,6 +732,9 @@ impl Elaborator {
             }
             CstStmtData::NoArc(body) => {
                 AstStmt { kind: AstStmtKind::NoArc, line, col, data: AstStmtData::NoArc(Box::new(self.convert_stmt(body).unwrap_or_else(make_compound_stmt))) }
+            }
+            CstStmtData::Defer(body) => {
+                AstStmt { kind: AstStmtKind::Defer, line, col, data: AstStmtData::Defer(Box::new(self.convert_stmt(body).unwrap_or_else(make_compound_stmt))) }
             }
             CstStmtData::Asm { is_volatile, is_goto, template, outputs, inputs, clobbers, labels } => {
                 let mut conv = |ops: &Vec<CstAsmOperand>| -> Vec<AstAsmOperand> {
@@ -700,7 +801,7 @@ impl Elaborator {
                 }
                 base_ad
             }
-            CstDeclData::Function { return_type, params, has_variadic, body, .. } => {
+            CstDeclData::Function { return_type, params, has_variadic, body, throws, async_marker, .. } => {
                 let func_sym = cd.name.as_ref().and_then(|n| self.symtab.as_ref()?.lookup(n)).map(|s| s.name.clone());
                 let converted_body = body.as_ref().map(|b| {
                     self.push_local_scope();
@@ -719,9 +820,9 @@ impl Elaborator {
                     self.pop_local_scope();
                     ast
                 });
-                AstDecl { kind: AstDeclKind::Function, line, col, name: cd.name.clone(), data: AstDeclData::Function { func_sym, return_type: return_type.as_ref().and_then(|t| self.convert_type(t)).map(Box::new), params: params.clone(), body: converted_body.and_then(|b| b.map(Box::new)), has_variadic: *has_variadic }, attributes: cd.attributes.clone() }
+                AstDecl { kind: AstDeclKind::Function, line, col, name: cd.name.clone(), data: AstDeclData::Function { func_sym, return_type: return_type.as_ref().and_then(|t| self.convert_type(t)).map(Box::new), params: params.clone(), body: converted_body.and_then(|b| b.map(Box::new)), has_variadic: *has_variadic, throws: throws.as_ref().and_then(|t| self.convert_type(t)).map(Box::new), async_marker: *async_marker }, attributes: cd.attributes.clone() }
             }
-            CstDeclData::Class { superclass, ivars, properties, methods, impl_vars, .. } => {
+            CstDeclData::Class { superclass, ivars, properties, methods, impl_vars, protocols, type_params, .. } => {
                 let fqn = self.ns_fqn(cd.name.as_deref().unwrap_or(""));
                 let cls_sym = self.symtab.as_ref().and_then(|st| st.find_class(&fqn)).map(|s| s.name.clone());
                 let cls_sym_clone = cls_sym.clone();
@@ -748,7 +849,7 @@ impl Elaborator {
                         cur = np.next.as_ref().map(|n| n.as_ref());
                     }
                 }
-                let mut ad = AstDecl { kind: AstDeclKind::Class, line, col, name: Some(self.ns_fqn(cd.name.as_deref().unwrap_or(""))), data: AstDeclData::Class { cls_sym: cls_sym_clone, super_name: sup_name, methods: methods.iter().filter_map(|m| self.convert_decl(m)).collect(), ivars: ivars.iter().filter_map(|iv| self.convert_decl(iv)).collect(), properties: all_properties.iter().filter_map(|p| self.convert_decl(p)).collect(), impl_vars: impl_vars.iter().filter_map(|v| self.convert_decl(v)).collect(), is_implementation: cd.kind == CstDeclKind::ClassImplementation || cd.kind == CstDeclKind::CategoryImplementation }, attributes: cd.attributes.clone() };
+                let mut ad = AstDecl { kind: AstDeclKind::Class, line, col, name: Some(self.ns_fqn(cd.name.as_deref().unwrap_or(""))), data: AstDeclData::Class { cls_sym: cls_sym_clone, super_name: sup_name, protocols: protocols.clone(), type_params: type_params.clone(), methods: methods.iter().filter_map(|m| self.convert_decl(m)).collect(), ivars: ivars.iter().filter_map(|iv| self.convert_decl(iv)).collect(), properties: all_properties.iter().filter_map(|p| self.convert_decl(p)).collect(), impl_vars: impl_vars.iter().filter_map(|v| self.convert_decl(v)).collect(), is_implementation: cd.kind == CstDeclKind::ClassImplementation || cd.kind == CstDeclKind::CategoryImplementation }, attributes: cd.attributes.clone() };
                 if let AstDeclData::Class { ref mut methods, .. } = ad.data {
                     if let Some(ref st) = self.symtab {
                         if let Some(ref cls_name) = cls_sym {
@@ -774,7 +875,7 @@ impl Elaborator {
                 self.current_class_sym = None;
                 ad
             }
-            CstDeclData::Method { is_class_method, return_type, params, body } => {
+            CstDeclData::Method { is_class_method, return_type, params, has_variadic, body, throws, async_marker } => {
                 // Resolve param type names to FQN for types known in the current namespace
                 let mut resolved_params = params.clone();
                 if !self.ns_prefix.is_empty() {
@@ -784,6 +885,14 @@ impl Elaborator {
                             Self::resolve_cst_type_name(pt, &self.ns_prefix, &self.symtab);
                         }
                         p = param.next.as_mut().map(|n| &mut **n);
+                    }
+                }
+                // Same FQN resolution for the @throws type (e.g. NPError inside
+                // a namespace must resolve to its FQN like any named type).
+                let mut resolved_throws = throws.clone();
+                if !self.ns_prefix.is_empty() {
+                    if let Some(ref mut pt) = resolved_throws {
+                        Self::resolve_cst_type_name(pt, &self.ns_prefix, &self.symtab);
                     }
                 }
                 let converted_body = body.as_ref().map(|b| {
@@ -801,7 +910,7 @@ impl Elaborator {
                     self.pop_local_scope();
                     ast
                 });
-                AstDecl { kind: AstDeclKind::Method, line, col, name: cd.name.clone(), data: AstDeclData::Method { method_sym: None, is_class_method: *is_class_method, return_type: return_type.as_ref().and_then(|t| self.convert_type(t)).map(Box::new), params: resolved_params, body: converted_body.and_then(|b| b.map(Box::new)) }, attributes: cd.attributes.clone() }
+                AstDecl { kind: AstDeclKind::Method, line, col, name: cd.name.clone(), data: AstDeclData::Method { method_sym: None, is_class_method: *is_class_method, return_type: return_type.as_ref().and_then(|t| self.convert_type(t)).map(Box::new), params: resolved_params, has_variadic: *has_variadic, body: converted_body.and_then(|b| b.map(Box::new)), throws: resolved_throws.as_ref().and_then(|t| self.convert_type(t)).map(Box::new), async_marker: *async_marker }, attributes: cd.attributes.clone() }
             }
             CstDeclData::Ivar { ivar_type, is_weak, .. } => {
                 let ivar_sym = cd.name.as_ref().and_then(|n| self.symtab.as_ref()?.lookup(n)).map(|s| s.name.clone());
@@ -830,8 +939,9 @@ impl Elaborator {
                 }
                 AstDecl { kind: AstDeclKind::Typedef, line, col, name: Some(ty_fqn.clone()).filter(|s| !s.is_empty()).or_else(|| cd.name.clone()), data: AstDeclData::Typedef { aliased_type: alias_type.as_ref().and_then(|t| self.convert_type(t)).map(Box::new), struct_fields: struct_fields.iter().filter_map(|f| self.convert_decl(f)).collect() }, attributes: cd.attributes.clone() }
             }
-            CstDeclData::Aggregate { fields, .. } => {
-                AstDecl { kind: AstDeclKind::Struct, line, col, name: cd.name.clone(), data: AstDeclData::Aggregate { fields: fields.iter().filter_map(|f| self.convert_decl(f)).collect() }, attributes: cd.attributes.clone() }
+            CstDeclData::Aggregate { fields, is_union } => {
+                let is_union = *is_union;
+                AstDecl { kind: AstDeclKind::Struct, line, col, name: cd.name.clone(), data: AstDeclData::Aggregate { fields: fields.iter().filter_map(|f| self.convert_decl(f)).collect(), is_union }, attributes: cd.attributes.clone() }
             }
             CstDeclData::Enum { members, values } => {
                 AstDecl { kind: AstDeclKind::Enum, line, col, name: cd.name.clone(), data: AstDeclData::Enum { members: members.clone(), values: values.iter().filter_map(|v| self.convert_expr(v)).collect() }, attributes: cd.attributes.clone() }

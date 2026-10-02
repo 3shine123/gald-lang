@@ -3,7 +3,11 @@
 
 #import <Foundation/NPObject.nh>
 
-@interface NPArray : NPObject {
+// Generic since the modernization pass: `NPArray<T>` specializes via
+// monomorphization (objectAtIndex: returns T, addObject-style params take T).
+// The BARE spelling `NPArray` (no type args) keeps its pre-existing erased
+// behavior and symbols — existing code needs zero migration.
+@interface NPArray<T> : NPObject {
 @public
     NPObject **_items;
     size_t _count;
@@ -11,15 +15,15 @@
 }
 
 + (id)arrayWithObjects:(id *)objs count:(size_t)n;
-+ (id)arrayWithObject:(id)obj;
++ (id)arrayWithObject:(T)obj;
 + (id)array;
 
 - (size_t)count;
-- (id)objectAtIndex:(size_t)index;
-- (id)firstObject;
-- (id)lastObject;
-- (BOOL)containsObject:(id)obj;
-- (size_t)indexOfObject:(id)obj;
+- (T)objectAtIndex:(size_t)index;
+- (T)firstObject;
+- (T)lastObject;
+- (BOOL)containsObject:(T)obj;
+- (size_t)indexOfObject:(T)obj;
 - (id)copy;
 - (NPString *)description;
 

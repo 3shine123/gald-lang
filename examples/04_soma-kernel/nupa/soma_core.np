@@ -100,7 +100,7 @@ unsigned soma_rotl(unsigned x, unsigned n) {
 
     @end
 
-    // alloc+init via bump allocator (nupa_alloc from runtime_baremetal.c)
+    // alloc+init via bump allocator (nupa_alloc from runtime_freestanding.c)
     @interface HeapCounter {
         int total;
     }

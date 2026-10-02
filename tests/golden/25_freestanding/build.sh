@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # tests/golden/25_freestanding/build.sh
 # Transpile + compile + run the bare-metal golden test on the HOST.
-# The transpiled code uses -fno-libc for codegen, but we compile it on
+# The transpiled code uses -ffreestanding for codegen, but we compile it on
 # the host with -include nupa/runtime.h (pre-loads non-freestanding
 # branch, so the file's own #include is guarded away) and
 # -D_FORTIFY_SOURCE=0 to prevent macOS's fortified memcpy macro from
@@ -13,8 +13,8 @@ NUPAC=../../../target/debug/nupac
 BUILD=build
 mkdir -p "$BUILD"
 
-echo "== transpiling with -fno-libc =="
-"$NUPAC" -rewrite-nupa -fno-libc -o "$BUILD/freestanding.c" freestanding.np
+echo "== transpiling with -ffreestanding =="
+"$NUPAC" -rewrite-nupa -ffreestanding -o "$BUILD/freestanding.c" freestanding.np
 
 echo "== compiling transpiled C (host, using libc setjmp) =="
 clang -I../../../include -include nupa/runtime.h \
@@ -29,10 +29,10 @@ clang -I../../../include -U__NUPA_FREESTANDING \
 echo "== compiling bare-metal runtime (bump allocator) =="
 clang -I../../../include -U__NUPA_FREESTANDING \
     -D_FORTIFY_SOURCE=0 \
-    -c ../../../include/nupa/runtime_baremetal.c -o "$BUILD/runtime_baremetal.o"
+    -c ../../../include/nupa/runtime_freestanding.c -o "$BUILD/runtime_freestanding.o"
 
 echo "== linking =="
-clang "$BUILD/freestanding.o" "$BUILD/helpers.o" "$BUILD/runtime_baremetal.o" -o "$BUILD/freestanding"
+clang "$BUILD/freestanding.o" "$BUILD/helpers.o" "$BUILD/runtime_freestanding.o" -o "$BUILD/freestanding"
 
 echo "== running =="
 "$BUILD/freestanding"

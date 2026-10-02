@@ -138,6 +138,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "nupa-async"
+version = "0.1.0"
+dependencies = [
+ "nupa-ast",
+ "nupa-cst",
+]
+
+[[package]]
 name = "nupa-binder"
 version = "0.1.0"
 dependencies = [
@@ -177,6 +185,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "nupa-cpp"
+version = "0.1.0"
+
+[[package]]
 name = "nupa-cst"
 version = "0.1.0"
 
@@ -184,6 +196,22 @@ version = "0.1.0"
 name = "nupa-cst-visit"
 version = "0.1.0"
 dependencies = [
+ "nupa-cst",
+]
+
+[[package]]
+name = "nupa-defer"
+version = "0.1.0"
+dependencies = [
+ "nupa-ast",
+ "nupa-cst",
+]
+
+[[package]]
+name = "nupa-eh"
+version = "0.1.0"
+dependencies = [
+ "nupa-ast",
  "nupa-cst",
 ]
 
@@ -222,9 +250,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "nupa-pattern"
+version = "0.1.0"
+dependencies = [
+ "nupa-ast",
+ "nupa-cst",
+]
+
+[[package]]
 name = "nupa-preprocessor"
 version = "0.1.0"
 dependencies = [
+ "nupa-cpp",
  "nupa-cst",
 ]
 
@@ -254,13 +291,17 @@ dependencies = [
  "clap_complete",
  "nupa-arc",
  "nupa-ast",
+ "nupa-async",
  "nupa-binder",
  "nupa-cfg",
  "nupa-checker",
  "nupa-codegen",
  "nupa-cst",
+ "nupa-defer",
+ "nupa-eh",
  "nupa-elaborator",
  "nupa-parser",
+ "nupa-pattern",
  "nupa-preprocessor",
  "nupa-symbol",
  "nupa-trace",

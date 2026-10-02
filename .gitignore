@@ -18,6 +18,8 @@
 .reasonix/
 .mimocode/
 .opencode/
+.freebuff/
+.atomcode/
 .cache/
 __pycache__/
 *.swp

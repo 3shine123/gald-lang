@@ -1,4 +1,4 @@
-use nupa_cst::{CstParam, CstType, TypePrim};
+use nupa_cst::{CstParam, CstType, Nullability, TagKind, TypePrim};
 
 // ─── Type node ───────────────────────────────────────────────────────────────
 
@@ -11,7 +11,14 @@ pub struct AstType {
     pub is_fn_ptr: bool,
     pub is_array: bool,
     pub is_struct: bool,
+    /// Which C keyword introduced this tag (`struct` / `union` / `enum`).
+    /// Codegen must echo it verbatim — `enum Mode` rendered as `struct Mode`
+    /// is an incompatible-type error in C.
+    pub tag: TagKind,
     pub is_unsigned: bool,
+    /// C99 `_Complex` (§6.2.5p13) — codegen echoes the keyword after the base
+    /// type (`float _Complex`).
+    pub is_complex: bool,
     pub array_size: i32,
     /// Symbolic array size identifier when the source used a macro/enum
     /// constant (e.g. `FSNode *_children[MAX_CHILDREN];`). When Some, codegen
@@ -27,17 +34,21 @@ pub struct AstType {
     pub class_ref: Option<String>,
     pub protocol_ref: Option<String>,
     pub protocol_refs: Vec<String>,
+    /// Nullability annotation, carried through from `CstType` for the checker.
+    /// Codegen never reads it (zero runtime cost, same contract as ObjC).
+    pub nulls: Nullability,
 }
 
 impl AstType {
     pub fn new(prim: TypePrim) -> Self {
         AstType {
             prim, is_pointer: false, is_const: false, is_block: false,
-            is_fn_ptr: false, is_array: false, is_struct: false, is_unsigned: false, array_size: 0,
+            is_fn_ptr: false, is_array: false, is_struct: false, tag: TagKind::None, is_unsigned: false, is_complex: false, array_size: 0,
             subtype: None, block_params: None, block_name: None, next: None,
             type_args: Vec::new(), name: None,
             class_ref: None, protocol_ref: None, protocol_refs: Vec::new(),
             array_size_name: None,
+            nulls: Nullability::Unspecified,
         }
     }
 
@@ -48,9 +59,12 @@ impl AstType {
         t.is_pointer = ct.is_pointer;
         t.is_const = ct.is_const;
         t.is_unsigned = ct.is_unsigned;
+        t.is_complex = ct.is_complex;
         t.is_struct = ct.is_struct;
+        t.tag = ct.tag;
         t.is_block = ct.is_block;
         t.is_fn_ptr = ct.is_fn_ptr;
+        t.nulls = ct.nulls;
         t.block_name = ct.block_name.clone();
         t.block_params = ct.block_params.as_ref().map(|bp| Box::new(AstType::from_cst_type(bp)));
         if let Some(ref name) = ct.name {
@@ -80,6 +94,14 @@ impl AstType {
 
 // ─── Expression kinds ────────────────────────────────────────────────────────
 
+/// One link of a C99 designated-initializer designator chain:
+/// `.field` or `[index]`. A full designator is a chain, e.g. `[2].y`.
+#[derive(Debug, Clone)]
+pub enum AstDesignator {
+    Member(String),
+    Index(Box<AstExpr>),
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum AstExprKind {
     Int, Float, Char, String, AtString, Bool,
@@ -87,8 +109,15 @@ pub enum AstExprKind {
     VarRef, IvarRef, PropRef,
     MsgSend, FuncCall,
     Unary, Binary, Assign, Cast,
-    BlockLit, ArrayLit, InitList, DictLit,
-    Subscript, Comma, Sizeof, Alignof, Ternary, TypeLiteral,
+    BlockLit, ArrayLit, InitList, DictLit, DesignatedInit,
+    Subscript, Comma, Paren, Sizeof, Alignof, Ternary, TypeLiteral,
+    /// `await <expr>` — suspension point (async methods only). The async
+    /// desugar pass splits the enclosing body at these nodes.
+    Await,
+    /// `@(expr)` — boxed-expression literal. The checker rewrites it into the
+    /// `NPNumber` factory matching the expression's static type; a codegen
+    /// fallback arm keeps `-fno-checker` from emitting bad C.
+    Boxed,
 }
 
 #[derive(Debug, Clone)]
@@ -104,6 +133,8 @@ pub struct AstExpr {
 pub enum AstExprData {
     Int(i64),
     Float(f64),
+    /// Imaginary-suffixed float literal (`2.0i`) preserved verbatim.
+    FloatRaw(String),
     Char(u8),
     String(String),
     AtString(String),
@@ -133,8 +164,20 @@ pub enum AstExprData {
     Cast { target_type: AstType, expr: Box<AstExpr> },
     ArrayLit(Vec<AstExpr>),
     InitList(Vec<AstExpr>),
+    /// A single C99 designated-initializer entry inside an `InitList`:
+    /// `.field = expr` / `[index] = expr` / a chain like `[2].y = 6`.
+    DesignatedInit {
+        designators: Vec<AstDesignator>,
+        expr: Box<AstExpr>,
+    },
     DictLit { keys: Vec<AstExpr>, values: Vec<AstExpr> },
     Comma(Vec<AstExpr>),
+    /// `(expr)` — a grouping the user wrote explicitly. The elaborator used to
+    /// unwrap these transparently, which dropped the grouping: `(a = b) != c`
+    /// was emitted as `a = b != c` (assignment swallowed the comparison —
+    /// `while ((v = va_arg(ap, int)) != 0)` miscompiled). Keeping the node lets
+    /// codegen re-emit the parentheses.
+    Paren(Box<AstExpr>),
     Subscript { object: Box<AstExpr>, key: Box<AstExpr> },
     Sizeof { type_expr: AstType, expr: Option<Box<AstExpr>> },
     Alignof(AstType),
@@ -142,6 +185,11 @@ pub enum AstExprData {
     Ternary { cond: Box<AstExpr>, then: Box<AstExpr>, else_: Box<AstExpr> },
     Selector(String),
     TypeLiteral(AstType),
+    /// `await <expr>` — the awaited expression (message send / call).
+    Await(Box<AstExpr>),
+    /// `@(expr)` — the boxed expression, before the checker rewrites it into
+    /// the `NPNumber` factory matching its static type.
+    Boxed(Box<AstExpr>),
 }
 
 // ─── Statement kinds ─────────────────────────────────────────────────────────
@@ -152,7 +200,10 @@ pub enum AstStmtKind {
     While, Do, For, ForIn,
     Break, Continue, Return, Goto, Label,
     Throw, Try, Catch, Finally,
-    Synchronized, Autoreleasepool, NoArc, Decl, Asm,
+    Synchronized, Autoreleasepool, NoArc, Decl, Asm, Defer,
+    /// `switch` containing at least one pattern arm — lowered to goto/if
+    /// dispatch by the pattern crate (Step 3.95), before ARC sees it.
+    SwitchPat,
 }
 
 #[derive(Debug, Clone)]
@@ -163,12 +214,42 @@ pub struct AstStmt {
     pub data: AstStmtData,
 }
 
+/// One pattern arm of a `SwitchPat` (`case <pattern> when <guard>: body`).
+#[derive(Debug, Clone)]
+pub struct AstArm {
+    pub pattern: AstPattern,
+    /// `when` guard, checked after the pattern matches (and after any type
+    /// binding is in scope). `None` = unconditional.
+    pub guard: Option<Box<AstExpr>>,
+    pub body: Box<AstStmt>,
+    pub line: usize,
+    pub col: usize,
+}
+
+/// Case pattern kinds (M1). `Const` covers plain constants AND ObjC object
+/// literals (`@1`, `@"x"`, `@YES`) — value-vs-identity equality is decided at
+/// lowering (pattern crate), not in the grammar.
+#[derive(Debug, Clone)]
+pub enum AstPattern {
+    /// Compile-time constant or ObjC object literal.
+    Const(Box<AstExpr>),
+    /// Dangling comparison against the switch subject (`case > 10:`,
+    /// `case > 0 && < 100:`). Binary nodes carry an empty-Ident left operand
+    /// as the subject placeholder; spliced at lowering.
+    Cond(Box<AstExpr>),
+    /// Type test + binding — `case NSString *s:`.
+    Bind { ty: Box<AstType>, name: String },
+}
+
 #[derive(Debug, Clone)]
 pub enum AstStmtData {
     Expr(AstExpr),
     Compound(Vec<AstStmt>),
     If { cond: Box<AstExpr>, then: Box<AstStmt>, else_: Option<Box<AstStmt>> },
     Switch { expr: Box<AstExpr>, body: Box<AstStmt> },
+    /// Pattern-dispatch switch (see AstStmtKind::SwitchPat). Flat arm list;
+    /// lowered by the pattern crate before ARC.
+    SwitchPat { expr: Box<AstExpr>, arms: Vec<AstArm>, has_default: bool, default_body: Option<Box<AstStmt>> },
     Case { value: Box<AstExpr>, body: Box<AstStmt> },
     Default(Box<AstStmt>),
     While { cond: Box<AstExpr>, body: Box<AstStmt> },
@@ -185,6 +266,9 @@ pub enum AstStmtData {
     Synchronized { lock: Box<AstExpr>, body: Box<AstStmt> },
     Autoreleasepool(Box<AstStmt>),
     NoArc(Box<AstStmt>),
+    /// `@defer { ... }` — consumed by the defer pass (pipeline Step 3.9),
+    /// which splices the body into every exit of the enclosing block.
+    Defer(Box<AstStmt>),
     Asm {
         is_volatile: bool,
         is_goto: bool,
@@ -230,6 +314,15 @@ pub struct AstDecl {
      Class {
          cls_sym: Option<String>,
          super_name: Option<String>,
+         /// Protocol names this class conforms to (`@interface X <P> ...`),
+         /// resolved to FQN by the elaborator. Used by the checker's protocol
+         /// conformance check (required methods must be implemented).
+         protocols: Vec<String>,
+         /// Declared generic type parameters in order (`@interface X<K, V>`
+         /// → ["K", "V"]). Codegen uses them to pair each instantiation's
+         /// type_args with the right Param sentinel (`/*K*/`, `/*V*/`) during
+         /// monomorphization; the checker reads them from the symbol table.
+         type_params: Vec<String>,
          methods: Vec<AstDecl>,
          ivars: Vec<AstDecl>,
          properties: Vec<AstDecl>,
@@ -241,9 +334,17 @@ pub struct AstDecl {
          is_class_method: bool,
          return_type: Option<Box<AstType>>,
          params: Option<Box<CstParam>>,
+         has_variadic: bool,
          body: Option<Box<AstStmt>>,
+         /// Trailing `@throws` / `@throws(T)` annotation from the declaration.
+         /// `None` = not annotated; `Some(T)` = `@throws(T)`; `Some(void)` = bare
+         /// `@throws` ("declared to throw, type unstated"). Compile-time only
+         /// (checker reconciles it against `@throw` stmts) — never emitted to C.
+         throws: Option<Box<AstType>>,
+         /// `NPAsync<T>` return-type marker (see Function).
+         async_marker: bool,
      },
-Ivar {
+ Ivar {
           ivar_sym: Option<String>,
           ivar_type: Option<Box<AstType>>,
           is_weak: bool,
@@ -267,6 +368,15 @@ Ivar {
         params: Option<Box<CstParam>>,
         body: Option<Box<AstStmt>>,
         has_variadic: bool,
+        /// Trailing `@throws` / `@throws(T)` annotation from the declaration.
+        /// `None` = not annotated; `Some(T)` = `@throws(T)`; `Some(void)` = bare
+        /// `@throws` ("declared to throw, type unstated"). Compile-time only —
+        /// never emitted to C.
+        throws: Option<Box<AstType>>,
+        /// `NPAsync<T>` return-type marker: parser unwrapped it to `T` and set
+        /// this flag. Compile-time metadata only — the emitted C signature is
+        /// just `T` (the async M2 driver already returns `T`).
+        async_marker: bool,
     },
     Variable {
         var_type: Option<Box<AstType>>,
@@ -284,6 +394,11 @@ Ivar {
     },
     Aggregate {
         fields: Vec<AstDecl>,
+        /// `union U { ... }` vs `struct U { ... }`. The CST carries this,
+        /// but the AST used to drop it, so codegen emitted every aggregate as
+        /// `struct` — and a `union U2 u;` *use* then mismatched its own
+        /// definition. Must survive to codegen.
+        is_union: bool,
     },
     Enum {
         members: Vec<String>,

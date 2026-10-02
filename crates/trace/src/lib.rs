@@ -813,6 +813,8 @@ mod tests {
                     data: AstStmtData::Compound(body),
                 })),
                 has_variadic: false,
+                throws: None,
+                async_marker: false,
             },
             attributes: vec![],
         }

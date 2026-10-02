@@ -2,6 +2,14 @@
 """
 nupa test runner — parallel transpile + compile + run with timeout.
 Usage: python3 test_all.py [-j JOBS]
+
+Environment overrides (useful for cross-platform testing, e.g. a musl nupac
+inside a Linux VM against the repo mounted at /mnt/mac):
+  NUPAC=/path/to/nupac   binary under test (default: target/debug/nupac;
+                         same convention as run_trace_golden.sh's NPAC=)
+  NUPA_CC="clang ..."    C compiler + flags nupac passes through to the backend
+                         (e.g. extra -I/-L/-l). Leave unset to use nupac's
+                         built-in selection (clang; zig cc on Windows).
 """
 
 import argparse, atexit, os, signal, subprocess, sys, tempfile, time
@@ -18,7 +26,9 @@ PROJECT = Path(__file__).resolve().parent
 BUILDDIR = PROJECT / "builddir"
 INCLUDE = PROJECT / "include"
 
-NUPAC = PROJECT / "target" / "debug" / "nupac"
+# Binary override: NUPAC=/path/to/nupac python3 test_all.py  (e.g. cross-platform
+# testing with a musl binary on Linux VMs; same convention as run_trace_golden.sh's NPAC=)
+NUPAC = Path(os.environ.get("NUPAC", str(PROJECT / "target" / "debug" / "nupac")))
 RUN_TIMEOUT = 3
 
 # ── Collect test binary names from .np files ──
@@ -36,6 +46,20 @@ def _np_suite_files() -> list[Path]:
         and "25_freestanding" not in p.parts
         and "26_baremetal_stress" not in p.parts
         and "multi_tu" not in p.parts
+        # tests/stress/* are driven by their own build.sh runners, each with
+        # bespoke flags and no standalone main: baremetal needs -ffreestanding,
+        # hosted needs -asm asm_host.s, interop's lib.np is a library file
+        # linked against a C caller. Same rationale as multi_tu above.
+        and "stress" not in p.parts
+        # Deliberate-failure negative tests (checker must reject them); they
+        # are validated by hand / in cargo unit tests, not by this runner.
+        and "negative" not in p.parts
+        # tests/eh_diff/* is a differential suite against clang/ObjC baselines:
+        # run_eh_diff.sh compiles each case with `-eh checked` AND with clang
+        # -fobjc-arc -fobjc-arc-exceptions, then diffs stderr. Standalone here it
+        # would be run in the default sjlj mode, where the uncaught-exception
+        # case (07) exits non-zero on purpose — a phantom failure.
+        and "eh_diff" not in p.parts
     )
 
 NP_FILES = _np_suite_files()

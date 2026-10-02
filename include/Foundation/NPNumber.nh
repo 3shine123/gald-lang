@@ -15,6 +15,7 @@
 + (NPNumber *)numberWithLongLong:(long long)value;
 + (NPNumber *)numberWithDouble:(double)value;
 + (NPNumber *)numberWithBool:(int)value;
++ (NPNumber *)numberWithChar:(char)value;
 
 - (NPNumber *)initWithLongLong:(long long)value;
 - (NPNumber *)initWithDouble:(double)value;
@@ -23,8 +24,13 @@
 - (long long)longLongValue;
 - (double)doubleValue;
 - (int)boolValue;
+- (char)charValue;
 
 - (NPString *)description;
+// Value equality, as in ObjC's NSNumber: `isEqual:` against another NPNumber
+// compares numeric values, so `@1` equals a distinct `@(i + 1)` that also
+// holds 1. Needed for value-semantics dictionary keys.
+- (BOOL)isEqual:(id)object;
 - (int)isEqualToNumber:(NPNumber *)other;
 
 @end

@@ -121,6 +121,6 @@ fn main() {
         emit_rerun_for_dir(&completions_src);
     }
     println!("cargo:rerun-if-changed=../../include/nupa/runtime.h");
-    println!("cargo:rerun-if-changed=../../include/nupa/runtime_baremetal.c");
+    println!("cargo:rerun-if-changed=../../include/nupa/runtime_freestanding.c");
     println!("cargo:rerun-if-changed=../../completions/_nupac");
 }

@@ -15,11 +15,45 @@
 08_categories/      分类（命名分类、扩展）
 09_blocks/          Block 语法（字面量、变量捕获）
 10_edge_cases/      边界情况（nil、instancetype、@class、@selector 等）
-22_c_superset/       C 超集语法（struct、C 风格 cast、函数指针）
- 23_asm/              Inline asm（extended asm、命名操作数、asm goto）
- 24_asm_fusion/       asm 融合压测（内联+外部 asm × 类/协议/Block/异常/struct/fn-ptr）
- 28_refcount_trace/   引用计数追踪器（-trace-refcount）输出快照
+11_multi_file_union/多文件 #import 联合（故意失败样本用 -F 后缀标记）
+12_namespace/       @namespace / @using
+13_foundation/      Foundation 容器（NPString / NPArray / NPMutableArray / NPLog / description）
+14_generics/        泛型单态化
+15_exceptions/      @try / @catch / @finally / @throw
+16_control_flow/    控制流（if / while / for / switch）
+17_operators/       运算符
+18_types/           类型系统
+19_weak_ivar/       __weak 引用
+20_blocks_advanced/ Block 进阶（__block 捕获、嵌套）
+22_c_superset/      C 超集语法（struct、C 风格 cast、函数指针）
+23_asm/             Inline asm（extended asm、命名操作数、asm goto）
+24_asm_fusion/      asm 融合压测（内联+外部 asm × 类/协议/Block/异常/struct/fn-ptr）
+25_freestanding/    裸机模式（-freestanding，需自带 build.sh，不在默认套件）
+26_baremetal_stress/裸机压力测试（同上，需 build.sh）
+28_refcount_trace/  引用计数追踪器（-trace-refcount）输出快照
+29_block_array/     Block + 数组组合
+30_for_in/          for (T x in coll) 遍历
+31_proto_conformance/ 协议一致性检查 + 协议组合 P & Q
+32_foundation_dispatch/ isKindOfClass: / respondsToSelector: / isEqual:
+33_struct_eq/       struct == / != 值比较
+34_async/           @await 状态机（里程碑 1+2）
+35_variadic_method/ 真 variadic 方法（va_list）
+36_defer/           @defer 作用域退出执行
+37_async_marker/    NPAsync<T> 声明式 async 标记
+38_macros/          nupa 语法宏展开（双轨 #define）
+39_complex/         C99 _Complex 透传
+40_nparray_generic/ NPArray<T> / NPDictionary<K,V> 真单态化 + 元素类型检查
+41_switch_pat/      switch 模式匹配（case T *x / case > 10 / when 守卫）
+42_boxed_literal/   装箱字面量 @(expr) / @YES / @NO / @'c'
+43_dict_literal/    字典字面量 @{ key: value }
+44_designated_init/ C99 指定初始化器六形态
 ```
+
+> 每个目录的 `README.md` 记录该特性的**实现要点、判据表、M1 限制与踩过的坑**——排查问题时先看它，比读 `.np` 快得多。
+>
+> 故意失败的样本**不放在 golden 目录**（否则被当普通 FAIL 计数），统一在 `tests/negative/`，已在 `test_all.py` 的 glob 排除；需要"必须编译失败且报错清晰"的用例（如协议缺必需方法、`@(obj)` 非法装箱、`@throws` 撒谎）都在那里。
+>
+> `25_freestanding/` 与 `26_baremetal_stress/` 各有专属 `build.sh`（需要 `-freestanding` 与裸机 assembler），**不在默认测试套件**，用它们自己的 runner 跑。
 
 > `28_refcount_trace/` 与其他 golden 目录不同：每个 `.np` 的 `.out` 不是程序运行输出，而是 `nupac -trace-refcount -trace-no-color -trace-max-iters 2` 的追踪快照。运行方式：
 >

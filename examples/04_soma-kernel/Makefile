@@ -15,7 +15,7 @@ NASMFLAGS := -f elf32
 LDFLAGS  := -m elf_i386 -T linker.ld -nostdlib
 
 BUILD := build
-OBJS    := $(BUILD)/entry.o $(BUILD)/isr.o $(BUILD)/hw.o $(BUILD)/kernel.o $(BUILD)/soma_core.o $(BUILD)/runtime_baremetal.o
+OBJS    := $(BUILD)/entry.o $(BUILD)/isr.o $(BUILD)/hw.o $(BUILD)/kernel.o $(BUILD)/soma_core.o $(BUILD)/runtime_freestanding.o
 
 all: $(BUILD)/floppy.img
 
@@ -31,13 +31,13 @@ $(BUILD)/%.o: kernel/%.c kernel/kernel.h
 # ---------- Nupa -> C transpile ----------
 $(BUILD)/soma_core.c: nupa/soma_core.np
 	@mkdir -p $(BUILD)
-	$(NUPAC) -rewrite-nupa -fno-libc -o $@ $<
+	$(NUPAC) -rewrite-nupa -ffreestanding -o $@ $<
 
 $(BUILD)/soma_core.o: $(BUILD)/soma_core.c
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 # ---------- bare-metal runtime (bump allocator: nupa_alloc/nupa_release) ----------
-$(BUILD)/runtime_baremetal.o: ../../include/nupa/runtime_baremetal.c
+$(BUILD)/runtime_freestanding.o: ../../include/nupa/runtime_freestanding.c
 	@mkdir -p $(BUILD)
 	$(CC) $(CFLAGS) -c -o $@ $<
 

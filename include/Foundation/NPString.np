@@ -73,11 +73,21 @@
     return '\0';
 }
 
+- (BOOL)isEqual:(id)object {
+    if (self == (NPObject *)object) return YES;
+    if (!object) return NO;
+    if ([object isKindOfClass:[NPString class]]) {
+        return [self isEqualToString:(NPString *)object];
+    }
+    return [super isEqual:object];
+}
+
 - (int)isEqualToString:(NPString *)other {
     if (self == (NPObject *)other) return YES;
-    if (!other) return NO;
+    if (!self || !other) return NO;
     const char *s1 = [self UTF8String];
     const char *s2 = [other UTF8String];
+    if (!s1 || !s2) return s1 == s2;
     return strcmp(s1, s2) == 0;
 }
 
@@ -85,21 +95,25 @@
     if (!other) return 1;
     const char *s1 = [self UTF8String];
     const char *s2 = [other UTF8String];
+    if (!s1) return s2 ? -1 : 0;
+    if (!s2) return 1;
     return strcmp(s1, s2);
 }
 
 - (int)hasPrefix:(NPString *)prefix {
-    if (!prefix) return NO;
+    if (!self || !prefix) return NO;
     const char *pre = [prefix UTF8String];
     const char *str = [self UTF8String];
+    if (!pre || !str) return NO;
     size_t preLen = strlen(pre);
     return strncmp(str, pre, preLen) == 0;
 }
 
 - (int)hasSuffix:(NPString *)suffix {
-    if (!suffix) return NO;
+    if (!self || !suffix) return NO;
     const char *suf = [suffix UTF8String];
     const char *str = [self UTF8String];
+    if (!suf || !str) return NO;
     size_t sufLen = strlen(suf);
     size_t strLen = strlen(str);
     if (sufLen > strLen) return NO;
@@ -110,6 +124,7 @@
     NPRange range = {0, 0};
     if (!substring || !_cstr) return range;
     const char *sub = [substring UTF8String];
+    if (!sub) return range;
     const char *found = strstr(_cstr, sub);
     if (found) {
         range.location = (size_t)(found - _cstr);
@@ -151,9 +166,11 @@
 }
 
 - (NPString *)stringByAppendingString:(NPString *)other {
+    if (!self) return [NPString stringWithString:other];
     if (!other) return [NPString stringWithString:self];
     const char *s1 = [self UTF8String];
     const char *s2 = [other UTF8String];
+    if (!s1 || !s2) return [NPString stringWithString:s1 ? self : other];
     size_t len1 = strlen(s1);
     size_t len2 = strlen(s2);
     char *buf = (char *)malloc(len1 + len2 + 1);
@@ -165,8 +182,9 @@
 }
 
 - (NPString *)stringByAppendingUTF8String:(const char *)cstr {
-    if (!cstr) return [NPString stringWithString:self];
+    if (!self || !cstr) return [NPString stringWithString:self];
     const char *s1 = [self UTF8String];
+    if (!s1) return [NPString stringWithString:self];
     size_t len1 = strlen(s1);
     size_t len2 = strlen(cstr);
     char *buf = (char *)malloc(len1 + len2 + 1);

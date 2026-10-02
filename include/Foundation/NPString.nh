@@ -33,6 +33,11 @@ typedef struct {
 - (const char *)UTF8String;
 - (char)characterAtIndex:(size_t)index;
 
+// Content equality, as in ObjC's NSString: `isEqual:` against another
+// NPString compares characters, so an equal-but-distinct object (a fresh
+// `@"key"` literal, a dictionary key looked up again) compares equal.
+// Non-string operands fall back to NSObject's identity comparison.
+- (BOOL)isEqual:(id)object;
 - (int)isEqualToString:(NPString *)other;
 - (int)compare:(NPString *)other;
 - (int)hasPrefix:(NPString *)prefix;

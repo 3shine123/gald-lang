@@ -6,14 +6,17 @@
 // Mutable counterpart of NPArray. Inherits NPArray's storage ivars
 // (_items / _count / _capacity) and the immutable querying API
 // (count / objectAtIndex: / firstObject / lastObject / containsObject: / ...).
-@interface NPMutableArray : NPArray {
+// Generic since the modernization pass: `NPMutableArray<T> : NPArray<T>` —
+// addObject:/insertObject: take T in the specialization. Bare `NPMutableArray`
+// keeps its erased behavior (zero migration for existing code).
+@interface NPMutableArray<T> : NPArray<T> {
 @public
     // ivars inherited from NPArray
 }
 
 + (NPMutableArray *)arrayWithCapacity:(size_t)capacity;
 + (NPMutableArray *)array;
-+ (NPMutableArray *)arrayWithObject:(id)obj;
++ (NPMutableArray *)arrayWithObject:(T)obj;
 + (NPMutableArray *)arrayWithObjects:(id *)objs count:(size_t)n;
 
 - (NPMutableArray *)init;
@@ -21,16 +24,16 @@
 - (NPMutableArray *)initWithArray:(NPArray *)other;
 - (NPMutableArray *)initWithObjects:(id *)objs count:(size_t)n;
 
-- (void)addObject:(id)obj;
+- (void)addObject:(T)obj;
 - (void)addObjectsFromArray:(NPArray *)other;
-- (void)insertObject:(id)obj atIndex:(size_t)index;
+- (void)insertObject:(T)obj atIndex:(size_t)index;
 - (void)removeObjectAtIndex:(size_t)index;
 - (void)removeLastObject;
-- (void)removeObject:(id)obj;
+- (void)removeObject:(T)obj;
 - (void)removeAllObjects;
-- (void)replaceObjectAtIndex:(size_t)index withObject:(id)obj;
+- (void)replaceObjectAtIndex:(size_t)index withObject:(T)obj;
 - (void)exchangeObjectAtIndex:(size_t)a withObjectAtIndex:(size_t)b;
-- (void)setObject:(id)obj atIndex:(size_t)index;
+- (void)setObject:(T)obj atIndex:(size_t)index;
 
 @end
 

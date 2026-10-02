@@ -12,6 +12,7 @@
     { "include": "#objc-at-implementation" },
     { "include": "#objc-at-end" },
     { "include": "#objc-at-property" },
+    { "include": "#nupa-at-await" },
     { "include": "#objc-at-selector" },
     { "include": "#objc-at-class-protocol" },
     { "include": "#objc-at-access-control" },
@@ -160,6 +161,7 @@
           "patterns": [
             { "include": "#comments" },
             { "include": "#objc-at-property" },
+            { "include": "#nupa-at-await" },
             { "include": "#objc-at-selector" },
             { "include": "#objc-at-access-control" },
             { "include": "#method-signature" },
@@ -193,6 +195,7 @@
             { "include": "#character" },
             { "include": "#numbers" },
             { "include": "#objc-at-property" },
+            { "include": "#nupa-at-await" },
             { "include": "#objc-at-selector" },
             { "include": "#objc-at-access-control" },
             { "include": "#objc-at-dynamic-synthesize" },
@@ -244,6 +247,14 @@
             { "include": "#namespace-access" },
             { "include": "#punctuation" }
           ]
+        }
+      ]
+    },
+    "nupa-at-await": {
+      "patterns": [
+        {
+          "name": "keyword.control.await",
+          "match": "@await\\b"
         }
       ]
     },

@@ -7,6 +7,52 @@ pub enum TypePrim {
     Named, Param,
 }
 
+// Aggregate tag keyword. The parser records which of the three C keywords
+// introduced a tag; codegen must echo the same one back (`enum Mode m;` may
+// NOT be rendered `struct Mode m;` — the tags are incompatible types in C).
+// `None` means "no keyword recorded": paired with `is_struct` it renders as
+// `struct`, which is what every struct-tagged type has always done.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum TagKind {
+    None,
+    Struct,
+    Union,
+    Enum,
+}
+
+impl TagKind {
+    /// The C keyword to emit before a tag name. `None` renders as `struct`:
+    /// types constructed before this field existed (and every type that is
+    /// genuinely a struct) are tagged `None`, so their output is unchanged.
+    pub fn keyword(self) -> &'static str {
+        match self {
+            TagKind::Union => "union",
+            TagKind::Enum => "enum",
+            TagKind::None | TagKind::Struct => "struct",
+        }
+    }
+}
+
+/// Nullability of a pointer type — ObjC's `nullable` / `nonnull` / unspecified
+/// triple (PEP, see `doc/nullability_plan.md`).
+///
+/// Deliberately a THREE-state enum, not a bool. The third state is what makes
+/// the whole design work: `Unspecified` ("nobody said") and `NullUnspecified`
+/// ("I explicitly decline to say") must be distinguishable, otherwise adding
+/// an annotation retroactively changes the meaning of untouched declarations.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum Nullability {
+    /// No annotation. In an `NS_ASSUME_NONNULL` region this is coerced to
+    /// `Nonnull` by the parser.
+    #[default]
+    Unspecified,
+    Nonnull,
+    Nullable,
+    /// `_Null_unspecified` — explicit "I don't care", an opt-out from the
+    /// region's default. Distinct from `Unspecified` by design.
+    NullUnspecified,
+}
+
 #[derive(Debug, Clone)]
 pub struct CstType {
     pub prim: TypePrim,
@@ -16,7 +62,11 @@ pub struct CstType {
     pub is_block: bool,
     pub is_array: bool,
     pub is_struct: bool,
+    pub tag: TagKind,
     pub is_fn_ptr: bool,
+    /// C99 `_Complex` (§6.2.5p13): `float _Complex x`. Pure passthrough — the
+    /// base type renders unchanged and `_Complex` is appended when emitting C.
+    pub is_complex: bool,
     pub is_block_qual: bool,
     pub is_weak_qual: bool,
     pub is_unsigned: bool,
@@ -32,6 +82,10 @@ pub struct CstType {
     pub next: Option<Box<CstType>>,
     pub protocols: Vec<String>,
     pub type_args: Vec<CstType>,
+    /// Nullability annotation (`nullable` / `nonnull` / unspecified). Purely a
+    /// compile-time checker input — codegen never reads it, so the annotation
+    /// costs zero at runtime (same contract as ObjC's).
+    pub nulls: Nullability,
 }
 
 impl CstType {
@@ -40,30 +94,50 @@ impl CstType {
             prim,
             is_pointer: false, is_const: false, is_volatile: false,
             is_block: false, is_array: false, is_struct: false,
+            tag: TagKind::None,
             is_fn_ptr: false,
+            is_complex: false,
             is_block_qual: false, is_weak_qual: false, is_unsigned: false,
             array_size: 0,
             subtype: None, name: None, block_name: None,
             block_params: None, next: None,
             protocols: Vec::new(), type_args: Vec::new(),
             array_size_name: None,
+            nulls: Nullability::Unspecified,
         }
     }
 }
 
 // Expression kinds
+/// One link of a C99 designated-initializer designator chain:
+/// `.field` or `[index]`. A full designator is a chain, e.g. `[2].y`.
+#[derive(Debug, Clone)]
+pub enum CstDesignator {
+    Member(String),
+    Index(Box<CstExpr>),
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum CstExprKind {
     Ident, Integer, Float, String, AtString, Char, Bool,
     Nil, Null, Self_, Super, Cmd,
     Selector, Encode, Protocol,
     ArrayLit, DictLit, NumberLit,
+    DesignatedInit,
     Block, InitList,
     Unary, Binary, Ternary, Assign,
     Conditional, Cast, Sizeof, Typeof, Alignof,
     TypeLiteral,
     MessageSend, DotAccess, Arrow, Subscript,
     Call, Comma, Paren,
+    /// `await <expr>` — suspension point inside an async method. The parser
+    /// accepts `await` as a contextual keyword (it stays a legal C
+    /// identifier elsewhere, e.g. `int await = 1;`).
+    Await,
+    /// `@(expr)` — boxed-expression literal. The parser cannot pick the
+    /// `NPNumber` factory (it has no types), so the node is carried through
+    /// to the checker, which rewrites it by the expression's static type.
+    Boxed,
 }
 
 // Statement kinds
@@ -73,7 +147,7 @@ pub enum CstStmtKind {
     While, Do, For, ForIn,
     Break, Continue, Return, Goto, Label,
     Try, Catch, Finally, Throw,
-    Synchronized, Autoreleasepool, NoArc, Decl, Asm,
+    Synchronized, Autoreleasepool, NoArc, Decl, Asm, Defer,
 }
 
 // Declaration kinds
@@ -113,6 +187,10 @@ pub enum CstExprData {
     Ident(String),
     Integer(i64),
     Float(f64),
+    /// Float literal preserved verbatim (`2.0i`, `1e3j`) — imaginary suffixes
+    /// (§6.4.4.2) carry semantics the f64 path would drop, so these pass
+    /// through to C as raw text.
+    FloatRaw(String),
     String(String),
     AtString(String),
     Char(u8),
@@ -179,6 +257,14 @@ pub enum CstExprData {
         body: Option<Box<CstStmt>>,
     },
     InitList(Vec<CstExpr>),
+    /// A single C99 designated initializer entry inside an `InitList`:
+    /// `.field = expr`, `[index] = expr`, or a chain like `[2].y = 6`.
+    /// The value expression is stored in `expr`; `designators` is the chain
+    /// written before `=` (at least one entry).
+    DesignatedInit {
+        designators: Vec<CstDesignator>,
+        expr: Box<CstExpr>,
+    },
     Sizeof {
         type_expr: CstType,
         expr: Option<Box<CstExpr>>,
@@ -186,6 +272,11 @@ pub enum CstExprData {
     Alignof(CstType),
     Typeof(CstType),
     Paren(Box<CstExpr>),
+    /// `await <expr>` — the awaited value (a message send / call that may
+    /// suspend this method).
+    Await(Box<CstExpr>),
+    /// `@(expr)` — the boxed expression, before type-directed desugaring.
+    Boxed(Box<CstExpr>),
 }
 
 // Statement node
@@ -195,6 +286,33 @@ pub struct CstStmt {
     pub line: usize,
     pub column: usize,
     pub data: CstStmtData,
+}
+
+/// One pattern arm of a `SwitchPat` (`case <pattern> when <guard>: body`).
+#[derive(Debug, Clone)]
+pub struct CstArm {
+    pub pattern: CstPattern,
+    /// `when` guard expression, applied after the pattern matches (and after
+    /// any type binding is in scope). `None` = unconditional.
+    pub guard: Option<Box<CstExpr>>,
+    pub body: Box<CstStmt>,
+    pub line: usize,
+    pub column: usize,
+}
+
+/// Case pattern kinds (M1). `Const` covers plain constants AND ObjC object
+/// literals (`@1`, `@"x"`, `@YES`) — value-vs-identity equality is decided at
+/// lowering (M1-f), not in the grammar.
+#[derive(Debug, Clone)]
+pub enum CstPattern {
+    /// Compile-time constant (or ObjC object literal) — `case 1:` / `case @1:`
+    Const(Box<CstExpr>),
+    /// Dangling comparison against the switch subject — `case > 10:`,
+    /// `case > 0 && < 100:`. Parser pre-binds nothing; the pattern crate
+    /// splices the subject into the dangling operand slots.
+    Cond(Box<CstExpr>),
+    /// Type test + binding — `case NSString *s:` (declaration-shaped).
+    Bind { ty: Box<CstType>, name: String },
 }
 
 #[derive(Debug, Clone)]
@@ -209,6 +327,21 @@ pub enum CstStmtData {
     Switch {
         expr: Box<CstExpr>,
         body: Box<CstStmt>,
+    },
+    /// `switch` whose body contains at least one pattern arm (condition,
+    /// type binding, or ObjC literal) — lowered to goto/if dispatch by the
+    /// pattern crate (Step 3.95). Plain-constant switches stay on `Switch`.
+    SwitchPat {
+        expr: Box<CstExpr>,
+        /// Flat arm list; the brace structure of the C switch body is not
+        /// preserved (arms are labels, never nested scopes in nupa).
+        arms: Vec<CstArm>,
+        has_default: bool,
+        /// Body of the `default:` arm, grouped with its fallthrough siblings
+        /// by the flat-arm collector. The pattern crate emits it as a
+        /// `__nupa_case_d` labeled block; `None` = no default (or the default
+        /// body was not captured, e.g. the single-arm wrapper nodes).
+        default_body: Option<Box<CstStmt>>,
     },
     Case {
         value: Box<CstExpr>,
@@ -254,6 +387,9 @@ pub enum CstStmtData {
     },
     Autoreleasepool(Box<CstStmt>),
     NoArc(Box<CstStmt>),
+    /// `@defer { ... }` — opaque wrapper until the defer pass splices the body
+    /// into every exit of the enclosing block (crates/defer, pipeline Step 3.9).
+    Defer(Box<CstStmt>),
     Asm {
         is_volatile: bool,
         is_goto: bool,
@@ -293,6 +429,12 @@ pub enum CstDeclData {
         params: Option<Box<CstParam>>,
         has_variadic: bool,
         body: Option<Box<CstStmt>>,
+        /// Trailing `@throws` / `@throws(T)` annotation (declaration position).
+        /// `None` = not annotated. Compile-time only — never emitted to C.
+        throws: Option<Box<CstType>>,
+        /// `NPAsync<T>` return-type marker: the parser unwraps it to `T` and
+        /// sets this flag (pure compile-time metadata, never emitted to C).
+        async_marker: bool,
     },
     Variable {
         var_type: Option<Box<CstType>>,
@@ -352,7 +494,14 @@ pub enum CstDeclData {
         is_class_method: bool,
         return_type: Option<Box<CstType>>,
         params: Option<Box<CstParam>>,
+        has_variadic: bool,
         body: Option<Box<CstStmt>>,
+        /// Trailing `@throws` / `@throws(T)` annotation (declaration position,
+        /// before `;` or `{`). `None` = not annotated. Compile-time only —
+        /// never emitted to C. Distinct from the `@throw` statement.
+        throws: Option<Box<CstType>>,
+        /// `NPAsync<T>` return-type marker (see Function).
+        async_marker: bool,
     },
     Namespace(Vec<CstDecl>),
     Using {

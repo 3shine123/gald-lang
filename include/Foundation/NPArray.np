@@ -35,7 +35,7 @@
     return nupa_autorelease(arr);
 }
 
-+ (id)arrayWithObject:(id)obj {
++ (id)arrayWithObject:(T)obj {
     return [self arrayWithObjects:&obj count:1];
 }
 
@@ -47,27 +47,27 @@
     return _count;
 }
 
-- (id)objectAtIndex:(size_t)index {
+- (T)objectAtIndex:(size_t)index {
     if (index >= _count) return NULL;
     return _items[index];
 }
 
-- (id)firstObject {
+- (T)firstObject {
     return _count > 0 ? _items[0] : NULL;
 }
 
-- (id)lastObject {
+- (T)lastObject {
     return _count > 0 ? _items[_count - 1] : NULL;
 }
 
-- (BOOL)containsObject:(id)obj {
+- (BOOL)containsObject:(T)obj {
     for (size_t i = 0; i < _count; i++) {
         if (_items[i] == obj) return YES;
     }
     return NO;
 }
 
-- (size_t)indexOfObject:(id)obj {
+- (size_t)indexOfObject:(T)obj {
     for (size_t i = 0; i < _count; i++) {
         if (_items[i] == obj) return i;
     }

@@ -12,6 +12,13 @@ pub enum TokenKind {
     String,
     AtString,
     AtNumber,
+    /// `@(expr)` — boxed-expression literal. The checker rewrites it to the
+    /// `NPNumber` factory matching the expression's static type.
+    AtLParen,
+    /// `@'c'` — boxed character literal (`NPNumber`).
+    AtChar,
+    /// `@YES` / `@NO` / `@true` / `@false` — boxed BOOL literal.
+    AtBool,
     Char,
     Bool,
 
@@ -94,9 +101,21 @@ pub enum KeywordKind {
     AtRequired,
     AtClass,
     AtTry,
+    /// `@await` — suspension-point operator (async/await, route map #4).
+    /// `@` because the task-state-machine is a compiler/runtime mechanism
+    /// with no C syntax slot; `await` alone stays a plain C identifier.
+    AtAwait,
+    /// `@defer` — scope-exit execution block (Go-style defer). `@` because C
+    /// has no syntax slot for "run this at every exit of my enclosing block";
+    /// without it the programmer hand-writes cleanup at every return/break/
+    /// throw. See AGENTS.md `@defer` section.
+    AtDefer,
     AtCatch,
     AtFinally,
     AtThrow,
+    /// `@throws` — trailing declaration annotation ("this method may throw"),
+    /// distinct from the `@throw` statement. See AGENTS.md `@throws` section.
+    AtThrows,
     AtSynchronized,
     AtAutoreleasepool,
     AtPublic,
@@ -169,6 +188,8 @@ pub enum KeywordKind {
     Long,
     Float,
     Double,
+    /// C99 `_Complex` — always follows `float`/`double` in a type specifier.
+    Complex,
     Signed,
     Unsigned,
     Const,
@@ -280,6 +301,9 @@ impl fmt::Display for TokenKind {
             TokenKind::PpHash => write!(f, "'#'"),
             TokenKind::PpDoubleHash => write!(f, "'##'"),
             TokenKind::Newline => write!(f, "newline"),
+            TokenKind::AtLParen => write!(f, "'@('"),
+            TokenKind::AtChar => write!(f, "boxed character literal"),
+            TokenKind::AtBool => write!(f, "boxed boolean literal"),
             TokenKind::Eof => write!(f, "EOF"),
             TokenKind::Error => write!(f, "error"),
         }

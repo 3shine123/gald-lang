@@ -8,7 +8,7 @@
 
 /* ================= freestanding libc bits ================= */
 
-// memcpy is provided by runtime_baremetal.c (used by @try and the allocator).
+// memcpy is provided by runtime_freestanding.c (used by @try and the allocator).
 
 void *memmove(void *dst, const void *src, size_t n) {
     unsigned char *d = dst;
@@ -391,7 +391,7 @@ void soma_advanced_demo(void);
 void soma_kbd_demo(void);
 
 /* Runtime globals (nupa___nupa_root_class, __nupa_exception_buf,
- * __nupa_exception_value, memcpy) are provided by runtime_baremetal.c. */
+ * __nupa_exception_value, memcpy) are provided by runtime_freestanding.c. */
 void kmain(void) {
     extern volatile uint32_t tick;
 

@@ -227,6 +227,18 @@ impl Binder {
                 self.bind_expr(expr);
                 self.bind_stmt(body);
             }
+            CstStmtData::SwitchPat { expr, arms, default_body, .. } => {
+                self.bind_expr(expr);
+                for arm in arms {
+                    match &mut arm.pattern {
+                        CstPattern::Const(e) | CstPattern::Cond(e) => self.bind_expr(e),
+                        CstPattern::Bind { .. } => {}
+                    }
+                    if let Some(ref mut g) = arm.guard { self.bind_expr(g); }
+                    self.bind_stmt(&mut arm.body);
+                }
+                if let Some(b) = default_body { self.bind_stmt(b); }
+            }
             CstStmtData::Case { value, body } => {
                 self.bind_expr(value);
                 self.bind_stmt(body);
@@ -272,6 +284,11 @@ impl Binder {
             }
             CstStmtData::Autoreleasepool(body) => { self.bind_stmt(body); }
             CstStmtData::NoArc(body) => { self.bind_stmt(body); }
+            // Defer bodies must bind normally: the defer pass (pipeline
+            // Step 3.9) runs AFTER binding and splices the body verbatim into
+            // exit points, so declarations inside it need their symtab
+            // entries now.
+            CstStmtData::Defer(body) => { self.bind_stmt(body); }
             CstStmtData::Decl(ref mut d) => { self.bind_decl(d); }
             _ => {}
         }
@@ -307,6 +324,13 @@ impl Binder {
                 let superclass_from_cst = match &d.data {
                     CstDeclData::Class { ref superclass, .. } => superclass.clone(),
                     _ => None,
+                };
+                // Generic classes must record their type parameters, or the
+                // checker cannot tell `Box<T>` (which monomorphizes) from a
+                // non-generic class (whose `<...>` is silently erased).
+                let type_params_from_cst = match &d.data {
+                    CstDeclData::Class { ref type_params, .. } => type_params.clone(),
+                    _ => Vec::new(),
                 };
                 if self.symtab.find_class(&cls_name).is_none() {
                     self.symtab.declare(Symbol::new(SymbolKind::Class, &cls_name));
@@ -365,10 +389,17 @@ impl Binder {
                 // Update class symbol data with ivar/property/method names
                 for sym in self.symtab.global.symbols.iter_mut() {
                     if sym.name == cls_name && sym.kind == SymbolKind::Class {
-                        if let SymbolData::Class { ref mut ivars, ref mut properties, ref mut methods, .. } = sym.data {
+                        if let SymbolData::Class { ref mut ivars, ref mut properties, ref mut methods, ref mut type_params, .. } = sym.data {
                             ivars.extend(ivar_names);
                             properties.extend(prop_names);
                             methods.extend(method_names);
+                            // Overwrite (not extend): a class may be bound more
+                            // than once in a TU (e.g. re-bound after a `@class`
+                            // forward declaration), and a re-binding without type
+                            // params must not leave stale ones behind.
+                            if !type_params_from_cst.is_empty() {
+                                *type_params = type_params_from_cst;
+                            }
                         }
                         break;
                     }

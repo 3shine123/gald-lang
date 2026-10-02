@@ -1,6 +1,6 @@
 # Print an optspec for argparse to handle cmd's options that are independent of any subcommand.
 function __fish_nupac_global_optspecs
-    string join \n rewrite-nupa= v/verbose= version= fnupa-arc= fno-nupa-arc= fno-checker= fno-libc= no-comments= trace-refcount= trace-max-iters= trace-no-color= backend= o= I= L= S/asm= arch= gen-completions= Werror emit-bridge-header=
+    string join \n rewrite-nupa= v/verbose= version= fnupa-arc= fno-nupa-arc= fno-checker= eh= fno-libc= no-comments= trace-refcount= trace-max-iters= trace-no-color= backend= o= I= L= S/asm= arch= gen-completions= Werror emit-bridge-header=
 end
 
 function __fish_nupac_needs_command
@@ -30,7 +30,9 @@ complete -c nupac -n "__fish_nupac_needs_command" -l version -d 'print version a
 complete -c nupac -n "__fish_nupac_needs_command" -l fnupa-arc -d 'enable ARC (default)' -r
 complete -c nupac -n "__fish_nupac_needs_command" -l fno-nupa-arc -d 'disable ARC (MRC)' -r
 complete -c nupac -n "__fish_nupac_needs_command" -l fno-checker -d 'skip type checking' -r
-complete -c nupac -n "__fish_nupac_needs_command" -l fno-libc -d 'bare-metal/freestanding output' -r
+complete -c nupac -n "__fish_nupac_needs_command" -l eh -d 'exception backend: checked or sjlj (default sjlj)' -r
+complete -c nupac -n "__fish_nupac_needs_command" -l ffreestanding -d 'bare-metal/freestanding output' -r
+complete -c nupac -n "__fish_nupac_needs_command" -l nostdinc -d 'pass -nostdinc to the C compiler (headers come from your -I dirs)' -r
 complete -c nupac -n "__fish_nupac_needs_command" -l no-comments -d 'omit readability comments in generated C (default: on)' -r
 complete -c nupac -n "__fish_nupac_needs_command" -l trace-refcount -d 'print a static reference-count trace (no codegen)' -r
 complete -c nupac -n "__fish_nupac_needs_command" -l trace-max-iters -d 'loop iterations simulated in the refcount trace (default 2)' -r

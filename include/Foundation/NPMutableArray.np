@@ -59,7 +59,7 @@
     }
 }
 
-+ (NPMutableArray *)arrayWithObject:(id)obj {
++ (NPMutableArray *)arrayWithObject:(T)obj {
     @noarc {
         NPMutableArray *arr = [self arrayWithCapacity:1];
         if (arr && obj) {
@@ -83,7 +83,7 @@
     }
 }
 
-- (void)addObject:(id)obj {
+- (void)addObject:(T)obj {
     if (!obj) return;
     if (_count >= _capacity) {
         size_t newcap = _capacity == 0 ? 4 : _capacity * 2;
@@ -104,7 +104,7 @@
     }
 }
 
-- (void)insertObject:(id)obj atIndex:(size_t)index {
+- (void)insertObject:(T)obj atIndex:(size_t)index {
     if (!obj) return;
     if (index > _count) index = _count;
     if (_count >= _capacity) {
@@ -134,7 +134,7 @@
     [self removeObjectAtIndex:_count - 1];
 }
 
-- (void)removeObject:(id)obj {
+- (void)removeObject:(T)obj {
     if (!obj) return;
     for (size_t i = 0; i < _count; i++) {
         if (_items[i] == obj) {
@@ -153,7 +153,7 @@
     _count = 0;
 }
 
-- (void)replaceObjectAtIndex:(size_t)index withObject:(id)obj {
+- (void)replaceObjectAtIndex:(size_t)index withObject:(T)obj {
     if (!obj || index >= _count) return;
     NPObject *old = _items[index];
     _items[index] = nupa_retain(obj);
@@ -169,7 +169,7 @@
     _items[b] = tmp;
 }
 
-- (void)setObject:(id)obj atIndex:(size_t)index {
+- (void)setObject:(T)obj atIndex:(size_t)index {
     if (!obj || index >= _count) return;
     [self replaceObjectAtIndex:index withObject:obj];
 }

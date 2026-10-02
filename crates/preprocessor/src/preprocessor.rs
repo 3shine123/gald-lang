@@ -1,8 +1,10 @@
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 use std::fs;
 use std::path::Path;
 
 use nupa_cst::SourceMap;
+
+use nupa_cpp::{self as cpp, MacroDef};
 
 pub struct Preprocessor {
     pub resolved_nupa: String,
@@ -95,6 +97,9 @@ struct CondFrame {
     pending_define: Option<String>,
     /// Set once the block contains anything other than the guarded define —
     /// disables preservation (behaves like a condition that is flattened away).
+    /// True once `#else` was seen: a later `#elif`/`#else` is ill-formed
+    /// (§6.10.1p6 allows `#else` only as the last branch).
+    else_seen: bool,
     dirty: bool,
 }
 
@@ -113,6 +118,19 @@ fn poison_top_guard(cond_stack: &mut Vec<CondFrame>, c_out: &mut Vec<String>) {
     }
 }
 
+/// Split an `#if` directive head from its controlling expression. `#if 1`,
+/// `#if(1)` and `#if!defined(X)` are all valid C (§6.10.1), so only an
+/// identifier character may *not* follow `if` — that case (`#iffy`) is not a
+/// conditional directive at all. `#ifdef`/`#ifndef` are matched first.
+fn strip_if_directive(after: &str) -> Option<&str> {
+    let rest = after.strip_prefix("if")?;
+    match rest.chars().next() {
+        None => Some(rest),
+        Some(c) if !(c.is_ascii_alphanumeric() || c == '_') => Some(rest),
+        _ => None,
+    }
+}
+
 /// Recursively resolve #import and collect #include from a single file's content.
 fn resolve_source(
     content: &str,
@@ -122,16 +140,57 @@ fn resolve_source(
     nupa_out: &mut String,
     c_out: &mut Vec<String>,
     defined: &mut HashSet<String>,
+    nupa_macros: &mut HashMap<String, MacroDef>,
     cond_stack: &mut Vec<CondFrame>,
     line_map: &mut Vec<(String, u32)>,
 ) -> Result<(), String> {
+    // Conditional depth this file starts at: an `#import` splices a file into
+    // the middle of the including file's stream, so only the conditionals the
+    // file itself opens may be closed by it.
+    let entry_depth = cond_stack.len();
     let dir = Path::new(file_path).parent()
         .and_then(|p| p.to_str())
         .unwrap_or(".")
         .to_string();
 
-    for (line_idx, line) in content.lines().enumerate() {
-        let src_line = (line_idx + 1) as u32;
+    // Join backslash continuations into logical lines first: each logical
+    // line keeps the (file, line) of its FIRST physical line. A trailing `\`
+    // splices the next line's text (stripped) onto this one.
+    let mut logical: Vec<(String, u32)> = Vec::new();
+    {
+        let mut pending: Option<(String, u32)> = None;
+        for (line_idx, raw) in content.lines().enumerate() {
+            let src_line = (line_idx + 1) as u32;
+            match pending.take() {
+                Some((mut acc, first)) => {
+                    let raw = raw.trim();
+                    if raw.ends_with('\\') {
+                        acc.push_str(raw.trim_end_matches('\\').trim_end());
+                        pending = Some((acc, first));
+                    } else {
+                        acc.push_str(raw);
+                        logical.push((acc, first));
+                    }
+                }
+                None => {
+                    let t = raw.trim_end();
+                    if t.ends_with('\\') {
+                        pending = Some((t.trim_end_matches('\\').trim_end().to_string(), src_line));
+                    } else {
+                        logical.push((raw.to_string(), src_line));
+                    }
+                }
+            }
+        }
+        // Unterminated continuation: flush what we have.
+        if let Some((acc, first)) = pending {
+            logical.push((acc, first));
+        }
+    }
+
+    for (line, src_line) in &logical {
+        let line = line.as_str();
+        let src_line = *src_line;
         let trimmed = line.trim();
         // `active` = all blocks (including current) are emitting code.
         let active = cond_stack.iter().all(|f| f.active);
@@ -148,7 +207,7 @@ fn resolve_source(
                 let name = rest.trim().split(|c: char| c.is_whitespace() || c == '(' || c == ')')
                     .next().unwrap_or("").to_string();
                 let truthy = parent_active && (defined.contains(&name) || predefined_macro(&name));
-                cond_stack.push(CondFrame { active: truthy, any_met: truthy, guard_name: None, pending_define: None, dirty: false });
+                cond_stack.push(CondFrame { active: truthy, any_met: truthy, guard_name: None, pending_define: None, else_seen: false, dirty: false });
                 continue;
             } else if let Some(rest) = after.strip_prefix("ifndef") {
                 let name = rest.trim().split(|c: char| c.is_whitespace() || c == '(' || c == ')')
@@ -158,39 +217,50 @@ fn resolve_source(
                     active: truthy, any_met: truthy,
                     // Only an active singleton `#ifndef` can be preserved.
                     guard_name: if truthy { Some(name) } else { None },
-                    pending_define: None, dirty: false,
+                    pending_define: None, else_seen: false, dirty: false,
                 });
                 continue;
-            } else if after.starts_with("if ") || after.starts_with("if\t") {
-                let expr = after[2..].trim();
-                let truthy = parent_active && eval_if_expr(expr, defined);
-                cond_stack.push(CondFrame { active: truthy, any_met: truthy, guard_name: None, pending_define: None, dirty: false });
+            } else if let Some(rest) = strip_if_directive(after) {
+                let expr = rest.trim();
+                let truthy = parent_active && eval_if_expr(expr, defined, nupa_macros);
+                cond_stack.push(CondFrame { active: truthy, any_met: truthy, guard_name: None, pending_define: None, else_seen: false, dirty: false });
                 continue;
             } else if after.starts_with("elif") {
                 // An `#elif` inside a self-guard candidate forces flattening.
                 poison_top_guard(cond_stack, c_out);
-                if let Some(frame) = cond_stack.last_mut() {
-                    frame.dirty = true;
-                    frame.guard_name = None;
-                    if frame.any_met {
-                        frame.active = false;
-                    } else {
-                        let rest = after["elif".len()..].trim();
-                        let expr = rest.strip_prefix("if ").or_else(|| rest.strip_prefix("if\t")).unwrap_or(rest);
-                        let result = parent_active && eval_if_expr(expr.trim(), defined);
-                        frame.active = result;
-                        frame.any_met = result;
-                    }
+                let frame = match cond_stack.last_mut() {
+                    None => return Err(format!("{}:{}: #elif without matching #if", file_path, src_line)),
+                    Some(frame) => frame,
+                };
+                if frame.else_seen {
+                    return Err(format!("{}:{}: #elif after #else", file_path, src_line));
+                }
+                frame.dirty = true;
+                frame.guard_name = None;
+                if frame.any_met {
+                    frame.active = false;
+                } else {
+                    let rest = after["elif".len()..].trim();
+                    let expr = rest.strip_prefix("if ").or_else(|| rest.strip_prefix("if\t")).unwrap_or(rest);
+                    let result = parent_active && eval_if_expr(expr.trim(), defined, nupa_macros);
+                    frame.active = result;
+                    frame.any_met = result;
                 }
                 continue;
             } else if after.starts_with("else") {
                 // An `#else` inside a self-guard candidate forces flattening.
                 poison_top_guard(cond_stack, c_out);
-                if let Some(frame) = cond_stack.last_mut() {
-                    frame.dirty = true;
-                    frame.guard_name = None;
-                    frame.active = !frame.any_met;
+                let frame = match cond_stack.last_mut() {
+                    None => return Err(format!("{}:{}: #else without matching #if", file_path, src_line)),
+                    Some(frame) => frame,
+                };
+                if frame.else_seen {
+                    return Err(format!("{}:{}: #else after #else", file_path, src_line));
                 }
+                frame.else_seen = true;
+                frame.dirty = true;
+                frame.guard_name = None;
+                frame.active = !frame.any_met;
                 continue;
             } else if after.starts_with("endif") {
                 if let Some(frame) = cond_stack.pop() {
@@ -210,18 +280,18 @@ fn resolve_source(
                     } else if let Some(def) = frame.pending_define {
                         c_out.push(def.trim().to_string());
                     }
+                } else {
+                    return Err(format!("{}:{}: #endif without matching #if", file_path, src_line));
                 }
                 continue;
             }
         }
 
-        // Only process non-directive and active sections past this point.
+        // Only process non-directive and active sections past this point. A
+        // skipped group (§6.10.1p6) is not processed at all: conditionals it
+        // opens were handled above, and every other line — including a
+        // `#define`, which must therefore not take effect — is dropped.
         if !active {
-            // Register #define even in inactive regions so macros resolve later.
-            if let Some(rest) = trimmed.strip_prefix("#define") {
-                let name = rest.trim().split_whitespace().next().unwrap_or("");
-                if !name.is_empty() { defined.insert(name.to_string()); }
-            }
             continue;
         }
 
@@ -236,7 +306,7 @@ fn resolve_source(
                 if !search.contains(&dir) {
                     search.insert(0, dir.clone());
                 }
-                resolve_imports(&name, &search, resolved, nupa_out, c_out, defined, cond_stack, line_map)?;
+                resolve_imports(&name, &search, resolved, nupa_out, c_out, defined, nupa_macros, cond_stack, line_map)?;
             } else {
                 poison_top_guard(cond_stack, c_out);
                 // #include → collect for C output (verbatim)
@@ -247,28 +317,31 @@ fn resolve_source(
             }
         } else if line.trim_start().starts_with('#') {
             // Preprocessor directives: #define, #pragma, etc.
-            // Check if #define contains nupa message send syntax [receiver msg]
-            // If so, keep it in Nupa source so the parser and codegen can process it.
-            let is_define_with_nupa = if line.trim_start().starts_with("#define") {
-                let line_body = line.trim_start();
-                let line_body = &line_body["#define".len()..].trim();
-                let value_start = line_body.find(char::is_whitespace)
-                    .map(|i| line_body[i..].trim_start())
-                    .unwrap_or("");
-                value_start.contains('[') && value_start.contains(']')
-            } else {
-                false
-            };
-            if is_define_with_nupa {
-                // #define with message send: NOT supported. The C compiler
-                // doesn't understand [receiver msg] syntax, and the Nupa
-                // compiler can't expand macros. Users should use inline code.
-                poison_top_guard(cond_stack, c_out);
-                let orig = line.to_string();
-                c_out.push(orig.trim().to_string());
-            } else if let Some(rest) = trimmed.strip_prefix("#define") {
+            if let Some(rest) = trimmed.strip_prefix("#define") {
+                // Continuation lines (\) have already been joined below, so
+                // `line` here may span several source lines.
                 let name = rest.trim().split_whitespace().next().unwrap_or("").to_string();
                 if !name.is_empty() { defined.insert(name.clone()); }
+                // Record EVERY well-formed define in the nupa macro table:
+                // nupac expands all invocations itself (ISO 9899 §6.10.3
+                // replacement). A single expander for plain-C and nupa-syntax
+                // bodies avoids track-classification hazards (a C-track call
+                // whose argument contains a nupa macro, forward references
+                // between macros, ...). The definition line still passes to C
+                // below, so externally linked C code sees it too — harmless,
+                // because expanded text contains no macro names, making
+                // clang's own expansion a no-op.
+                let parsed = cpp::parse_define(rest);
+                if let Some(def) = parsed.clone() {
+                    nupa_macros.insert(def.name.clone(), def);
+                }
+                // Except: a body with nupa syntax (`@"..."` boxed string,
+                // message send, block literal) must NOT reach the C prelude —
+                // `#define X @"..."` is not plain C, so an expansion in
+                // hand-written C would be a hard clang error. nupac expands
+                // every invocation on the nupa track, so the C track dropping
+                // the line loses nothing. Plain-C bodies still pass through.
+                let c_track_ok = parsed.as_ref().map_or(true, |d| !cpp::body_has_nupa_syntax(&d.body));
                 // Singleton self-guard candidate: `#ifndef NAME` guarding
                 // exactly `#define NAME …` — stash the define so the guard can
                 // be preserved in the C output (avoids macro redefinition when
@@ -279,14 +352,33 @@ fn resolve_source(
                         && !f.dirty
                 });
                 if is_guarded_define {
-                    if let Some(frame) = cond_stack.last_mut() {
-                        frame.pending_define = Some(line.to_string());
+                    if c_track_ok {
+                        if let Some(frame) = cond_stack.last_mut() {
+                            frame.pending_define = Some(line.to_string());
+                        }
                     }
+                    // nupa-syntax body: not stashed — the whole singleton
+                    // guard vanishes from the C output (the guard wraps
+                    // nothing else, so there is nothing left to preserve).
                 } else {
                     poison_top_guard(cond_stack, c_out);
-                    let orig = line.to_string();
-                    c_out.push(orig.trim().to_string());
+                    if c_track_ok {
+                        let orig = line.to_string();
+                        c_out.push(orig.trim().to_string());
+                    }
                 }
+            } else if let Some(rest) = trimmed.strip_prefix("#undef") {
+                // #undef removes the name from both tracks: the nupa macro
+                // table (so later invocations no longer expand) and the
+                // defined set (so #ifdef flips), then passes through to C
+                // in case a same-named C macro exists (§6.10.3.5).
+                let name = rest.trim().split_whitespace().next().unwrap_or("").to_string();
+                if !name.is_empty() {
+                    defined.remove(&name);
+                    nupa_macros.remove(&name);
+                }
+                poison_top_guard(cond_stack, c_out);
+                c_out.push(trimmed.to_string());
             } else if trimmed.starts_with("#pragma mark") {
                 // `#pragma mark ...` is a purely cosmetic IDE marker (Xcode
                 // navigator). Keep it inline in the nupa stream so the parser
@@ -317,6 +409,14 @@ fn resolve_source(
             line_map.push((file_path.to_string(), src_line));
         }
     }
+
+    // §6.10.1p6: every `#if` needs its `#endif`. An unclosed one would silently
+    // swallow the rest of the file — the guard directives never reach clang, so
+    // nothing downstream could notice — hence the explicit error.
+    if cond_stack.len() > entry_depth {
+        return Err(format!("{}: unterminated conditional directive — {} #if without #endif",
+            file_path, cond_stack.len() - entry_depth));
+    }
     Ok(())
 }
 
@@ -327,91 +427,360 @@ fn predefined_macro(name: &str) -> bool {
         "__APPLE__" | "__MACH__" | "__LP64__" | "__x86_64__" | "__aarch64__" | "__amd64__")
 }
 
-/// Evaluate a simplified `#if` expression: supports `defined(X)`, `!defined(X)`,
-/// `X`, `!X`, integer comparisons `==`/`!=`/`<`/`>` and `&&`/`||`/`!`.
-fn eval_if_expr(expr: &str, defined: &HashSet<String>) -> bool {
-    let e = expr.trim();
-    if e.is_empty() { return false; }
-    // Strip outer parens
-    let e = strip_outer_parens(e);
-    // defined(X)
-    if let Some(inner) = e.strip_prefix("defined(") {
-        if let Some(name) = inner.strip_suffix(')') {
-            return defined.contains(name.trim()) || predefined_macro(name.trim());
-        }
-    }
-    if let Some(inner) = e.strip_prefix("!defined(") {
-        if let Some(name) = inner.strip_suffix(')') {
-            return !(defined.contains(name.trim()) || predefined_macro(name.trim()));
-        }
-    }
-    // Logical NOT
-    if let Some(rest) = e.strip_prefix('!') {
-        return !eval_if_expr(rest, defined);
-    }
-    // Logical OR / AND (left-to-right, no precedence — good enough for simple macros)
-    if let Some(idx) = rfind_token(e, "||") {
-        return eval_if_expr(&e[..idx], defined) || eval_if_expr(&e[idx + 2..], defined);
-    }
-    if let Some(idx) = rfind_token(e, "&&") {
-        return eval_if_expr(&e[..idx], defined) && eval_if_expr(&e[idx + 2..], defined);
-    }
-    // Integer comparison
-    for (op, is_cmp) in [("==", true), ("!=", true), ("<", true), (">", true), ("<=", true), (">=", true)] {
-        if let Some(idx) = find_op(e, op) {
-            let l = eval_if_expr(&e[..idx], defined);
-            let r = eval_if_expr(&e[idx + op.len()..], defined);
-            let _ = is_cmp;
-            return l == r;
-        }
-    }
-    // Bare identifier or integer
-    if e.parse::<i64>().is_ok() {
-        return e.parse::<i64>().unwrap_or(0) != 0;
-    }
-    let name = e.split(|c: char| c.is_whitespace()).next().unwrap_or("").to_string();
-    defined.contains(&name) || predefined_macro(&name)
+/// Evaluate a `#if`/`#elif` expression. Per the standard (ISO 9899 §6.10.1p4)
+/// the expression is fully macro-expanded first, except that operands of
+/// `defined` are exempt. Implementation: resolve every `defined(X)` /
+/// `defined X` to a literal 1/0 *before* expansion (so expansion cannot touch
+/// them), then expand remaining macros, then evaluate the arithmetic.
+fn eval_if_expr(expr: &str, defined: &HashSet<String>, macros: &HashMap<String, MacroDef>) -> bool {
+    let shielded = resolve_defined(expr, defined);
+    let expanded = cpp::expand(&shielded, macros).unwrap_or_else(|_| shielded.clone());
+    eval_if_expr_inner(&expanded, defined)
 }
 
-fn strip_outer_parens(s: &str) -> &str {
-    let mut t = s.trim();
-    while t.starts_with('(') && t.ends_with(')') {
-        let inner = &t[1..t.len() - 1];
-        if inner.find('(').map_or(true, |_| true) {
-            // Only strip if the parens are balanced around the whole string
-            let mut depth = 0;
-            for (i, ch) in t.char_indices() {
-                match ch {
-                    '(' => depth += 1,
-                    ')' => { depth -= 1; if depth == 0 && i != t.len() - 1 { return s; } }
-                    _ => {}
-                }
+/// Replace `defined(X)` / `defined X` with `1` or `0`. Doing this before
+/// macro expansion both exempts the operands from expansion (§6.10.1) and
+/// keeps the evaluator free of placeholder plumbing.
+fn resolve_defined(expr: &str, defined: &HashSet<String>) -> String {
+    let mut out = String::with_capacity(expr.len());
+    let b = expr.as_bytes();
+    let mut i = 0;
+    while i < b.len() {
+        if b[i..].starts_with(b"defined") {
+            let before_ok = i == 0 || !(b[i - 1].is_ascii_alphanumeric() || b[i - 1] == b'_');
+            let mut j = i + 7;
+            while j < b.len() && (b[j] == b' ' || b[j] == b'\t') { j += 1; }
+            if before_ok && j < b.len() && (b[j] == b'(' || b[j].is_ascii_alphabetic() || b[j] == b'_') {
+                let (name, next) = if b[j] == b'(' {
+                    let close = match expr[j..].find(')') { Some(k) => j + k, None => break };
+                    (expr[j + 1..close].trim().to_string(), close + 1)
+                } else {
+                    let s = j;
+                    while j < b.len() && (b[j].is_ascii_alphanumeric() || b[j] == b'_') { j += 1; }
+                    (expr[s..j].to_string(), j)
+                };
+                let truthy = defined.contains(&name) || predefined_macro(&name);
+                out.push_str(if truthy { "1" } else { "0" });
+                i = next;
+                continue;
             }
-            t = inner;
-        } else { break; }
-    }
-    t
-}
-
-fn rfind_token(s: &str, tok: &str) -> Option<usize> {
-    let bytes = s.as_bytes();
-    let tl = tok.len();
-    let mut i = s.len();
-    while i >= tl {
-        i -= 1;
-        if &s[i..i + tl] == tok {
-            // ensure it's not part of a larger token (e.g. != contains =)
-            return Some(i);
         }
-        let _ = bytes;
+        out.push(b[i] as char);
+        i += 1;
     }
-    None
+    out
 }
 
-fn find_op(s: &str, op: &str) -> Option<usize> {
-    let idx = s.find(op)?;
-    Some(idx)
+/// Evaluate the already-expanded `#if` expression (`defined` operands were
+/// resolved to 1/0 and macros expanded by `eval_if_expr`). Tokenizes and
+/// evaluates with full C operator precedence; a malformed condition evaluates
+/// to false instead of panicking (the old char-slicing evaluator panicked on
+/// `3 > 2` and mis-evaluated every comparison as `l == r` on bools).
+fn eval_if_expr_inner(expr: &str, defined: &HashSet<String>) -> bool {
+    eval_const_expr(expr, defined).map(|v| v != 0).unwrap_or(false)
 }
+
+#[derive(Debug, Clone, PartialEq)]
+enum IfTok {
+    Num(i64),
+    Ident(String),
+    Punct(&'static str),
+    End,
+}
+
+/// Tokenize a `#if` constant expression: integer literals (decimal / hex /
+/// octal / binary, uUlL suffixes, ` digit separators), character constants,
+/// identifiers, and operators.
+fn if_tokenize(s: &str) -> Result<Vec<IfTok>, String> {
+    let b = s.as_bytes();
+    let mut toks = Vec::new();
+    let mut i = 0;
+    while i < b.len() {
+        let c = b[i];
+        if c.is_ascii_whitespace() {
+            i += 1;
+            continue;
+        }
+        if c.is_ascii_digit() {
+            let (radix, dig_start) = if c == b'0' && i + 1 < b.len() && (b[i + 1] | 32) == b'x' {
+                (16u32, i + 2)
+            } else if c == b'0' && i + 1 < b.len() && (b[i + 1] | 32) == b'b' {
+                (2, i + 2)
+            } else if c == b'0' {
+                (8, i + 1)
+            } else {
+                (10, i)
+            };
+            let mut j = dig_start;
+            while j < b.len() && (b[j].is_ascii_alphanumeric() || b[j] == b'_') {
+                j += 1;
+            }
+            let digits: String = s[dig_start..j].chars().filter(|ch| *ch != '_').collect();
+            let digits = digits.trim_end_matches(|ch| matches!(ch, 'u' | 'U' | 'l' | 'L'));
+            let val = if digits.is_empty() {
+                0
+            } else {
+                i64::from_str_radix(digits, radix)
+                    .map_err(|_| format!("invalid integer literal `{}` in #if", &s[i..j]))?
+            };
+            toks.push(IfTok::Num(val));
+            i = j;
+            continue;
+        }
+        if c == b'\'' {
+            // Character constant: 'a', '\n', ...
+            let mut j = i + 1;
+            let mut val: i64 = 0;
+            while j < b.len() && b[j] != b'\'' {
+                val = if b[j] == b'\\' && j + 1 < b.len() {
+                    j += 1;
+                    match b[j] {
+                        b'n' => 10,
+                        b't' => 9,
+                        b'r' => 13,
+                        b'0' => 0,
+                        b'\\' => 92,
+                        b'\'' => 39,
+                        b'"' => 34,
+                        other => other as i64,
+                    }
+                } else {
+                    b[j] as i64
+                };
+                j += 1;
+            }
+            if j >= b.len() {
+                return Err("unterminated character constant in #if".into());
+            }
+            toks.push(IfTok::Num(val));
+            i = j + 1;
+            continue;
+        }
+        if c.is_ascii_alphabetic() || c == b'_' {
+            let start = i;
+            while i < b.len() && (b[i].is_ascii_alphanumeric() || b[i] == b'_') {
+                i += 1;
+            }
+            toks.push(IfTok::Ident(s[start..i].to_string()));
+            continue;
+        }
+        // Two-char operators first, then single-char.
+        let two: Option<&'static str> = if i + 1 < b.len() {
+            match &s[i..i + 2] {
+                "||" => Some("||"),
+                "&&" => Some("&&"),
+                "==" => Some("=="),
+                "!=" => Some("!="),
+                "<=" => Some("<="),
+                ">=" => Some(">="),
+                "<<" => Some("<<"),
+                ">>" => Some(">>"),
+                _ => None,
+            }
+        } else {
+            None
+        };
+        if let Some(p) = two {
+            toks.push(IfTok::Punct(p));
+            i += 2;
+            continue;
+        }
+        let one: Option<&'static str> = match c {
+            b'(' => Some("("),
+            b')' => Some(")"),
+            b'?' => Some("?"),
+            b':' => Some(":"),
+            b'|' => Some("|"),
+            b'^' => Some("^"),
+            b'&' => Some("&"),
+            b'<' => Some("<"),
+            b'>' => Some(">"),
+            b'+' => Some("+"),
+            b'-' => Some("-"),
+            b'*' => Some("*"),
+            b'/' => Some("/"),
+            b'%' => Some("%"),
+            b'!' => Some("!"),
+            b'~' => Some("~"),
+            _ => None,
+        };
+        match one {
+            Some(p) => {
+                toks.push(IfTok::Punct(p));
+                i += 1;
+            }
+            None => return Err(format!("unexpected character `{}` in #if", c as char)),
+        }
+    }
+    Ok(toks)
+}
+
+struct IfParser<'a> {
+    toks: &'a [IfTok],
+    pos: usize,
+    defined: &'a HashSet<String>,
+}
+
+impl<'a> IfParser<'a> {
+    fn peek(&self) -> &'a IfTok {
+        self.toks.get(self.pos).unwrap_or(&IfTok::End)
+    }
+
+    fn eat_punct(&mut self, p: &str) -> bool {
+        if let IfTok::Punct(q) = self.peek() {
+            if *q == p {
+                self.pos += 1;
+                return true;
+            }
+        }
+        false
+    }
+
+    fn expect_punct(&mut self, p: &str) -> Result<(), String> {
+        if self.eat_punct(p) {
+            Ok(())
+        } else {
+            Err(format!("expected `{}` in #if expression", p))
+        }
+    }
+
+    /// conditional-expression (ternary, right-assoc) — lowest precedence
+    fn parse_cond(&mut self) -> Result<i64, String> {
+        let cond = self.parse_binary(1)?;
+        if self.eat_punct("?") {
+            let then_v = self.parse_cond()?;
+            self.expect_punct(":")?;
+            let else_v = self.parse_cond()?;
+            return Ok(if cond != 0 { then_v } else { else_v });
+        }
+        Ok(cond)
+    }
+
+    /// precedence-climbing binary parser following the C precedence table
+    fn parse_binary(&mut self, min_prec: u8) -> Result<i64, String> {
+        let mut lhs = self.parse_unary()?;
+        loop {
+            let (op, prec) = match self.peek() {
+                IfTok::Punct(p) => match *p {
+                    "||" => ("||", 1u8),
+                    "&&" => ("&&", 2),
+                    "|" => ("|", 3),
+                    "^" => ("^", 4),
+                    "&" => ("&", 5),
+                    "==" => ("==", 6),
+                    "!=" => ("!=", 6),
+                    "<" => ("<", 7),
+                    ">" => (">", 7),
+                    "<=" => ("<=", 7),
+                    ">=" => (">=", 7),
+                    "<<" => ("<<", 8),
+                    ">>" => (">>", 8),
+                    "+" => ("+", 9),
+                    "-" => ("-", 9),
+                    "*" => ("*", 10),
+                    "/" => ("/", 10),
+                    "%" => ("%", 10),
+                    _ => break,
+                },
+                _ => break,
+            };
+            if prec < min_prec {
+                break;
+            }
+            self.pos += 1;
+            let rhs = self.parse_binary(prec + 1)?;
+            lhs = apply_if_binop(op, lhs, rhs)?;
+        }
+        Ok(lhs)
+    }
+
+    fn parse_unary(&mut self) -> Result<i64, String> {
+        match self.peek().clone() {
+            IfTok::Punct("!") => {
+                self.pos += 1;
+                let v = self.parse_unary()?;
+                Ok((v == 0) as i64)
+            }
+            IfTok::Punct("~") => {
+                self.pos += 1;
+                Ok(!self.parse_unary()?)
+            }
+            IfTok::Punct("-") => {
+                self.pos += 1;
+                Ok(self.parse_unary()?.wrapping_neg())
+            }
+            IfTok::Punct("+") => {
+                self.pos += 1;
+                self.parse_unary()
+            }
+            IfTok::Punct("(") => {
+                self.pos += 1;
+                let v = self.parse_cond()?;
+                self.expect_punct(")")?;
+                Ok(v)
+            }
+            IfTok::Num(n) => {
+                self.pos += 1;
+                Ok(n)
+            }
+            IfTok::Ident(name) => {
+                self.pos += 1;
+                // Remaining identifiers: declared/predefined macro names count
+                // as 1 (platform probes like `#if __APPLE__` — nupa records
+                // their names but not values); anything else is 0 per the
+                // standard's "replaced by 0" rule.
+                Ok((self.defined.contains(&name) || predefined_macro(&name)) as i64)
+            }
+            other => Err(format!("unexpected {:?} in #if expression", other)),
+        }
+    }
+}
+
+fn apply_if_binop(op: &str, l: i64, r: i64) -> Result<i64, String> {
+    Ok(match op {
+        "||" => ((l != 0) || (r != 0)) as i64,
+        "&&" => ((l != 0) && (r != 0)) as i64,
+        "|" => l | r,
+        "^" => l ^ r,
+        "&" => l & r,
+        "==" => (l == r) as i64,
+        "!=" => (l != r) as i64,
+        "<" => (l < r) as i64,
+        ">" => (l > r) as i64,
+        "<=" => (l <= r) as i64,
+        ">=" => (l >= r) as i64,
+        "<<" => l.wrapping_shl(r as u32),
+        ">>" => l.wrapping_shr(r as u32),
+        "+" => l.wrapping_add(r),
+        "-" => l.wrapping_sub(r),
+        "*" => l.wrapping_mul(r),
+        "/" => {
+            if r == 0 {
+                return Err("division by zero in #if".into());
+            }
+            l.wrapping_div(r)
+        }
+        "%" => {
+            if r == 0 {
+                return Err("modulo by zero in #if".into());
+            }
+            l.wrapping_rem(r)
+        }
+        _ => return Err(format!("unknown #if operator `{}`", op)),
+    })
+}
+
+fn eval_const_expr(expr: &str, defined: &HashSet<String>) -> Result<i64, String> {
+    let toks = if_tokenize(expr)?;
+    let mut p = IfParser { toks: &toks, pos: 0, defined };
+    let v = p.parse_cond()?;
+    if p.pos != toks.len() {
+        return Err("trailing tokens in #if expression".into());
+    }
+    Ok(v)
+}
+
+
 
 /// Open a file and resolve its imports.
 fn resolve_imports(
@@ -421,6 +790,7 @@ fn resolve_imports(
     nupa_out: &mut String,
     c_out: &mut Vec<String>,
     defined: &mut HashSet<String>,
+    nupa_macros: &mut HashMap<String, MacroDef>,
     cond_stack: &mut Vec<CondFrame>,
     line_map: &mut Vec<(String, u32)>,
 ) -> Result<(), String> {
@@ -440,7 +810,7 @@ fn resolve_imports(
     }
     resolved.insert(full_path.clone());
 
-    resolve_source(&content, &full_path, search_dirs, resolved, nupa_out, c_out, defined, cond_stack, line_map)
+    resolve_source(&content, &full_path, search_dirs, resolved, nupa_out, c_out, defined, nupa_macros, cond_stack, line_map)
 }
 
 impl Preprocessor {
@@ -463,17 +833,198 @@ impl Preprocessor {
         let mut defined = HashSet::new();
         for m in extra_macros { defined.insert(m.to_string()); }
         let mut cond_stack: Vec<CondFrame> = Vec::new();
+        // Nupa-syntax macro table (dual-track): bodies a C compiler could not
+        // expand are parsed here and expanded at the source level before
+        // lexing; plain C defines keep flowing to the C prelude.
+        let mut nupa_macros: HashMap<String, MacroDef> = HashMap::new();
         // Line map: for each emitted inline line, the (file, source line) it
         // came from. Lets parser/binder/checker errors point at real source
         // positions instead of the flattened inlined buffer.
         let mut line_map: Vec<(String, u32)> = Vec::new();
 
-        resolve_source(content, file_path, search_dirs, &mut resolved, &mut nupa_out, &mut c_out, &mut defined, &mut cond_stack, &mut line_map)?;
+        resolve_source(content, file_path, search_dirs, &mut resolved, &mut nupa_out, &mut c_out, &mut defined, &mut nupa_macros, &mut cond_stack, &mut line_map)?;
+
+        // Expand nupa-syntax macros across the whole resolved stream
+        // (ISO 9899 §6.10.3 replacement, implemented in nupa-cpp).
+        //
+        // A call may span source lines: the expansion then collapses them, so
+        // the line map is rebuilt from what the expander reports — one entry per
+        // emitted line, each pointing at the line its call *starts* on (the
+        // invocation site). Collapsing is therefore invisible to every later
+        // diagnostic: positions still name the line the author wrote.
+        let (nupa_out, line_map) = if nupa_macros.is_empty() {
+            (nupa_out, line_map)
+        } else {
+            let (text, src_lines) = cpp::expand_mapped(&nupa_out, &nupa_macros)
+                .map_err(|e| format!("Macro expansion failed:\n[cpp] {}", e))?;
+            let mapped: Vec<(String, u32)> = src_lines
+                .iter()
+                .filter_map(|&l| l.checked_sub(1).and_then(|k| line_map.get(k as usize)).cloned())
+                .collect();
+            (text, mapped)
+        };
 
         Ok(Preprocessor {
             resolved_nupa: nupa_out,
             c_headers: c_out,
             source_map: SourceMap::new(line_map),
         })
+    }
+}
+#[cfg(test)]
+mod if_eval_tests {
+    use super::*;
+
+    fn obj(name: &str, body: &str) -> (String, MacroDef) {
+        (
+            name.to_string(),
+            MacroDef { name: name.to_string(), params: None, variadic: false, body: body.to_string() },
+        )
+    }
+
+    fn eval(expr: &str, table: &[(&str, &str)], defined: &[&str]) -> bool {
+        let macros: HashMap<String, MacroDef> = table.iter().map(|(n, b)| obj(n, b)).collect();
+        let def: HashSet<String> = defined.iter().map(|s| s.to_string()).collect();
+        eval_if_expr(expr, &def, &macros)
+    }
+
+    #[test]
+    fn if_expands_macros_before_eval() {
+        // `LEVEL > THRESHOLD` must expand to `3 > 2` (was: panic in rfind_token
+        // slicing a 5-byte string with a 2-byte token).
+        assert!(eval("LEVEL > THRESHOLD", &[("LEVEL", "3"), ("THRESHOLD", "2")], &[]));
+        assert!(!eval("LEVEL < THRESHOLD", &[("LEVEL", "3"), ("THRESHOLD", "2")], &[]));
+    }
+
+    #[test]
+    fn if_defined_operands_are_exempt_from_expansion() {
+        // defined(X) must check definedness, not expand X's body.
+        assert!(eval("defined(FEATURE) && LEVEL == 3",
+                     &[("FEATURE", "1"), ("LEVEL", "3")],
+                     &["FEATURE"]));
+        // defined of an unregistered name is false even though expansion would 0 it.
+        assert!(eval("!defined(NOPE)", &[("NOPE", "1")], &[]));
+        // bare `defined NAME` form
+        assert!(eval("defined FEATURE", &[], &["FEATURE"]));
+    }
+
+    #[test]
+    fn if_precedence_and_arithmetic() {
+        assert!(eval("2 + 3 * 4 == 14", &[], &[]));
+        assert!(!eval("(2 + 3) * 4 == 14", &[], &[]));
+        assert!(eval("1 << 4 == 16", &[], &[]));
+        assert!(eval("0x10 == 16", &[], &[]));
+        assert!(eval("17 / 5 + 17 % 5 == 5", &[], &[]));
+        assert!(eval("-3 < 0", &[], &[]));
+    }
+
+    #[test]
+    fn if_comparisons_and_logic() {
+        // The old evaluator returned `l == r` on bools for every comparison:
+        // `0 > 5` was true. These pin the fix.
+        assert!(!eval("0 > 5", &[], &[]));
+        assert!(eval("5 >= 5", &[], &[]));
+        assert!(eval("4 <= 4", &[], &[]));
+        assert!(eval("1 && !0", &[], &[]));
+        assert!(eval("0 || 2", &[], &[]));
+        assert!(eval("1 ? 10 : 20 == 10", &[], &[]));
+    }
+
+    #[test]
+    fn if_undefined_identifier_is_zero() {
+        assert!(!eval("UNREGISTERED_NAME", &[], &[]));
+        assert!(eval("SOME_FLAG", &[], &["SOME_FLAG"]));
+    }
+
+    #[test]
+    fn if_malformed_evaluates_false_not_panic() {
+        assert!(!eval("3 >", &[], &[]));
+        assert!(!eval("(1", &[], &[]));
+        assert!(!eval("1 / 0", &[], &[]));
+    }
+}
+
+#[cfg(test)]
+mod directive_tests {
+    use super::*;
+
+    /// Resolve a snippet the way the pipeline does (no search dirs, no extra
+    /// platform macros), returning the nupa stream or the error message.
+    fn run(src: &str) -> Result<String, String> {
+        Preprocessor::process(src, "t.np", &[], &[]).map(|p| p.resolved_nupa)
+    }
+
+    fn body(src: &str) -> String {
+        run(src).expect("snippet should resolve").trim().to_string()
+    }
+
+    #[test]
+    fn unterminated_if_is_reported() {
+        // Without this, the rest of the file is silently swallowed: the guard
+        // directives never reach clang, so nothing downstream would notice.
+        let e = run("#if 0\nA\n").unwrap_err();
+        assert!(e.contains("unterminated conditional"), "got: {e}");
+        assert_eq!(body("#if 1\nA\n#endif\n"), "A");
+    }
+
+    #[test]
+    fn stray_endif_elif_else_are_reported() {
+        assert!(run("A\n#endif\n").unwrap_err().contains("#endif without matching #if"));
+        assert!(run("#elif 1\nA\n").unwrap_err().contains("#elif without matching #if"));
+        assert!(run("#else\nA\n").unwrap_err().contains("#else without matching #if"));
+    }
+
+    #[test]
+    fn branch_after_else_is_reported() {
+        let src = "#if 0\nA\n#else\nB\n#elif 1\nC\n#endif\n";
+        assert!(run(src).unwrap_err().contains("#elif after #else"));
+        let src = "#if 0\nA\n#else\nB\n#else\nC\n#endif\n";
+        assert!(run(src).unwrap_err().contains("#else after #else"));
+    }
+
+    #[test]
+    fn elif_chain_takes_the_first_true_branch() {
+        let src = "#if 0\nA\n#elif 1\nB\n#elif 1\nC\n#else\nD\n#endif\nE\n";
+        assert_eq!(body(src), "B\nE");
+    }
+
+    #[test]
+    fn inactive_branch_skips_nested_conditionals() {
+        let src = "#if 0\n#if 1\nA\n#endif\nB\n#endif\nC\n";
+        assert_eq!(body(src), "C");
+    }
+
+    #[test]
+    fn if_accepts_forms_without_a_space() {
+        assert_eq!(body("#if(1)\nA\n#endif\n"), "A");
+        assert_eq!(body("#if !defined(NOPE)\nA\n#endif\n"), "A");
+        // `#iffy` is not a conditional directive — it must neither open a block
+        // (which would then be unterminated) nor swallow the lines after it.
+        assert_eq!(body("A\n#iffy\nB\n"), "A\nB");
+    }
+
+    #[test]
+    fn undef_flips_ifdef() {
+        let src = "#define X 1\n#ifdef X\nA\n#endif\n#undef X\n#ifdef X\nB\n#endif\n";
+        assert_eq!(body(src), "A");
+    }
+
+    #[test]
+    fn if_expands_function_like_macro_calls() {
+        let src = "#define ADD(a, b) a + b\n#if ADD(1, 2) == 3\nA\n#endif\n";
+        assert_eq!(body(src), "A");
+    }
+
+    #[test]
+    fn skipped_group_does_not_define_macros() {
+        // §6.10.1p6: a skipped group is not processed, so its `#define` takes no
+        // effect — `X` stays undefined for the later `#ifdef`.
+        let src = "#if 0\n#define X 1\n#endif\n#ifdef X\nA\n#else\nB\n#endif\n";
+        assert_eq!(body(src), "B");
+    }
+
+    #[test]
+    fn leading_whitespace_before_directives_is_allowed() {
+        assert_eq!(body("  #if 1\nA\n\t#endif\n"), "A");
     }
 }

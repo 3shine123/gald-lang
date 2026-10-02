@@ -1,4 +1,4 @@
-// lang-test/diamond_impl.np
+// lang-test/diamond_impl-F.np
 // 混合实现文件
 
 #import "diamond_base.nh"

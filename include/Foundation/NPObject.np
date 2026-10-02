@@ -16,6 +16,13 @@
 - (BOOL)isKindOf:(Class)cls {
     return nupa_isKindOf(self, cls);
 }
+- (BOOL)isKindOfClass:(Class)cls {
+    return nupa_isKindOfClass(self, cls);
+}
+- (BOOL)isEqual:(id)object {
+    /* Default: identity (pointer equality), matching NSObject. */
+    return self == object;
+}
 - (id)description {
     return nil;
 }

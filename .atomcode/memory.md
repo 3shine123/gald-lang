@@ -1,2 +1,11 @@
 - nupa-lang 多 TU 铁律：每个类的方法必须对所有链接的 TU 可见（写在共享 .nh 里）；方法集不同的 TU 链接会 vtable 错配——codegen 已发 __sig 签名 + per-TU constructor 启动期 abort（不能放 nupa_metaInit，它被 weak 合并）。测试套件 tests/multi_tu/run_multi_tu.sh 9 场景。
 - nupa-lang parser 教训：(1) consume() 失败不能 advance()——会吃掉下一声明的首 token 造成隔行吞错误（已修，error_recovery.rs 4 测试守护）；(2) 批量删代码别用行号定位（会踩过期行号切坏文件），用内容匹配或 git diff 对照；调试 parser 循环用临时 eprintln hook 而非猜测。
+- nupa 派发铁律：没有 msgSend，全部走静态 vtable；语义与 ObjC 一致但底层实现不同。variadic 方法的 vtable fn-ptr cast 必须带 `...`（如 `objc_msgSend` cast 先例）。
+- nupa-lang tests/eh_diff/run_eh_diff.sh 内部会切换工作目录——NPAC= 必须给绝对路径，相对路径会让 7 个用例全部变成 nupa_rc=127 "No such file or directory" 的假失败。
+- nupa codegen 位置铁律：文件级 RawLine（`_Pragma(...)`/`#pragma mark`）必须与 struct 定义按源码顺序交错发射——现在由 emit_aggregate_definitions(Section 5) 承担（源码序行走 + 依赖按需前拉，返回 bool），主声明流在 aggregates_emitted 时跳过 RawLine；否则 `_Pragma("pack(push,1)")` 会落在 struct 定义之后，pack 静默失效（实测 Packed=8 而非 5）。
+- nupa 符号表存 selector 时抹掉全部冒号（`setObject:atIndex:`→`setObjectatIndex`），任何按 selector 查类方法的判据必须去掉每一个冒号，只 trim 尾冒号会让多段 selector 静默匹配失败。
+- nupac 生成的 C 里 case/goto 标签（`label:`）故意不缩进、顶左格，这是 C 常规写法，不是格式错乱，别当 bug "修"。
+- nupa typed @catch 已改为 isKindOf 链（sjlj codegen 发 __nupa_eh_isa，走 superclass 链；eh checked/裸机原本就对）——抛子类、catch 父类命中，与 ObjC 一致；臂序消费防双捕已探针实证。旧"精确 isa 匹配偏差"记载作废。
+- nupa checker 的 method_params 按 selector 全局键控是 last-writer-wins——两个类声明同名 selector 不同形参（如 tt.np 的 objectForKey:(const char*) vs NPDictionary 的 (K)）会互相覆盖产生误报；已加 method_param_decls 全声明表，字符串类检查走"全声明共识门"（全一致才报，method_kinds 同款纪律）。
+- nupa @synchronized 已是真互斥（runtime.c C11 atomic_flag 256 桶自旋 + cleanup(nupa_syncAutoCleanup) 解锁，return/break 均释放；@throw 越块 longjmp 绕过 cleanup → checker 对锁块内 @throw 发 warning；裸机同签名 no-op）；__weak 赋值由 rewrite_weak_assigns 重注册（unregister→assign→register）——zeroing 验证必须用 owned 源（alloc+init），便利构造器 autoreleased 不销毁、会假阴性。
+- nupa preprocessor 过滤含 nupa 语法（@"..."/消息发送/block）的 #define 不进 C 透传（判据 cpp::body_has_nupa_syntax）——#define X @"..." 是非法 C；nupa 宏表照常注册，nupac 自己展开调用点，C 轨丢行零损失。

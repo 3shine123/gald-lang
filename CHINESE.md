@@ -57,7 +57,7 @@ Nupa 是一门**纯静态**的 Objective-C 方言（C 超集语言）。Nupa 源
 
 | 项目                    | 说明                                                                      | 运行                            |
 | --------------------- | ----------------------------------------------------------------------- | ----------------------------- |
-| **`04_soma-kernel/`** | 很小的 32 位 i386 操作系统内核（NASM + C + Nupa），裸机 `-fno-libc` 模式                 | `./run.sh` 或 `./run.sh --gui` |
+| **`04_soma-kernel/`** | 很小的 32 位 i386 操作系统内核（NASM + C + Nupa），裸机 `-ffreestanding` 模式                 | `./run.sh` 或 `./run.sh --gui` |
 | **`03_LibUI/`**       | 基于 [libui-ng](https://github.com/libui-ng/libui-ng) 的 GUI 应用，全部回调纯 Nupa | `./run_libui.sh`              |
 | **`02_ncurses/`**     | 终端示例（`ncurses_demo`、`sysmon`），使用 `Terminal::Ncurses` 绑定                 | `make run`                    |
 | **`01_JSONEditor/`**  | 多文件 JSON 编辑器，分屏终端预览                                                     | `nupac run json_editor.np`    |
@@ -413,12 +413,325 @@ Nupa 在 Objective-C 语法基础上，加入了一些 ObjC 本身没有的语�
 
 **近期亮点：**
 
-- **原生裸机支持（`-fno-libc`）** — 编译为自包含 C，无 libc、无 Foundation、无 TLS；`@try/@catch` 用 `__builtin_setjmp/longjmp`，零样板的 `runtime_baremetal.c` 提供 bump allocator、`NUPA_CLASS_$_nupa_root`、异常状态和 `memcpy`。
+- **原生裸机支持（`-ffreestanding`）** — 编译为自包含 C，无 libc、无 Foundation、无 TLS；`@try/@catch` 用 `__builtin_setjmp/longjmp`，零样板的 `runtime_freestanding.c` 提供 bump allocator、`NUPA_CLASS_$_nupa_root`、异常状态和 `memcpy`。
 - **C 超集** — `@protocol` + 一致性检查、`@property` + `@synthesize`、`instancetype`、`@public` ivar、点语法、struct + 函数指针、内联汇编、C 风格类型转换。
 - **类型化 `@catch`** — 每个 catch 块现在检查 `isa == &NUPA_CLASS_$_Class`，只有匹配的类才进入该处理器；多个 catch 正确隔离。
 - **ARC 修复** — 作用域栈模型不再在嵌套作用域结束时释放父作用域变量；`for` 初始化对象提升修复了泄漏和非法 `for` 头。
 - **`@noarc` 块** — 块级 MRC：在 ARC 模式下，`@noarc { }` 块内允许手动 `retain`/`release`/`dealloc`/`autorelease`；是 `-fno-nupa-arc` 和 clang `-fno-objc-arc` 的块级等价物。
 - **`__attribute__` 透传 + `-backend`** — 完整支持 C 的 `__attribute__((...))` 和所有 `__` 前缀的 C 预定义标识符（`__FILE__`、`__LINE__`、`__builtin_*`、`__extension__`、`__typeof__`、`__alignof__` 等）；`-backend` 选项控制哪些编译器专属属性允许使用。
+
+### for-in 遍历
+
+```nupa
+for (NPString *s in arr) {
+    printf("%s\n", [s UTF8String]);
+}
+```
+
+在 parser 层 desugar 为对 `[coll count]` / `[coll objectAtIndex:]` 的下标循环——集合表达式只求值一次，nil 安全（`[nil count]` 为 0），元素是借用语义（不 retain/release）。普通 C 数组和 `NPArray` 都能用。
+
+### 协议一致性检查
+
+checker 现在会验证声明了 `<Proto>` 的类实现了协议的全部必需方法（递归遍历父协议；`@optional` 方法豁免）：
+
+```
+class 'Circle' does not implement required method 'draw' from protocol 'Drawable'
+```
+
+### 协议组合（`P & Q`）
+
+复用 C 的 `&` 运算符同时要求多个协议——零新语法：
+
+```nupa
+// ① 交集类型：接收者必须同时实现两个协议
+void render(id<Drawable & Serializable> item);
+
+// ② 组合协议声明
+@protocol Renderable <Drawable & Serializable>
+@end
+```
+
+协议类型只是编译期约束标签——不影响 vtable 槽位，跨编译单元布局不变。
+
+### Foundation 类型分发（`isKindOfClass:` / `respondsToSelector:` / `isEqual:`）
+
+根类现在实现了 ObjC 官方拼写的类型分发三件套，不需要任何新语言结构就能写惯用的多路分发：
+
+```nupa
+for (id item in items) {
+    if ([item isKindOfClass:[Dog class]]) {
+        [(Dog *)item bark];
+    } else if ([item respondsToSelector:@selector(draw)]) {
+        [(id<Drawable>)item draw];
+    }
+}
+```
+
+`isKindOfClass:` 沿 isa 链查找，`respondsToSelector:` 查统一 vtable，`isEqual:` 在根类上默认指针相等（与 `NSObject` 一致）——而 `NPString` 与 `NPNumber` 各自重写为**值相等**，这正是字典键能用的前提。旧拼写 `isKindOf:` 保留作兼容别名。
+
+### struct `==` / `!=` 值比较
+
+C 直接拒绝 struct 的 `a == b`；Nupa 复用现有运算符，desugar 为生成的逐字段比较函数：
+
+```nupa
+struct Point a = {1, 2};
+struct Point b = {1, 2};
+
+if (a == b) { ... }   // 逐字段比较
+if (a != b) { ... }
+
+p == &a               // 指针比较语义不变
+```
+
+### async/await（`@await`）
+
+方法体里含 `@await` 即为 async——无需任何标注，与 C++20 用 `co_await` 判定协程的风格一致（声明端与普通 ObjC 方法一字不差，vtable 布局不变）：
+
+```nupa
+@interface Fetcher : NPObject
+- (int)compute:(int)n;
+- (void)runAll;
+@end
+
+@implementation Fetcher
+- (int)compute:(int)n {
+    int raw = @await n;               // 挂起点
+    return raw * 2;
+}
+
+// async void = 入口方法（阻塞泵到完成）
+- (void)runAll {
+    int x = @await [self compute:21]; // await 一个调用会把本方法也传染成 async
+    NPLog(@"result=%d", x);
+}
+@end
+
+int main() {
+    Fetcher *f = [[Fetcher alloc] init];
+    [f runAll];                       // async void 可从同步上下文调用
+    return 0;
+}
+```
+
+设计规则：
+
+- **链式传染**——方法体里出现 `@await` 它自己就是 async；非 void 的 async 方法只能在 async 上下文中 await 调用（同步调用编译期报错）。
+- **`@await` 降级为状态机**——方法体在挂起点被拆进 `switch(task->state)` 驱动的堆上 `NupaTask`；活过挂起点的局部变量提升进每方法一个的 frame 结构体。
+- **`@try` 跨越 `@await`** 会被拒绝（`jmp_buf` 无法活过挂起点）；`@noarc` 跨 await 合法；break/continue 跨 await 变成状态跳转。
+- 协作式单线程调度器（`nupa_run_all`）与 I/O 集成是下一个里程碑。
+
+### `switch` 模式匹配（`case` 模式）
+
+`case` 标签可以写**模式**，不只是整型常量。类型分发的内核仍是方法链——模式 desugar 成 `isKindOfClass:` / `isEqual:` / 比较——但你写成声明式的样子：
+
+```nupa
+// 对象模式可以在同一个 switch 里自由混用：
+switch (subject) {
+    case NPString *s:                          // 类型绑定 → isKindOfClass:
+        NPLog(@"string: %s", [s UTF8String]);
+        break;
+    case NPNumber *n when [n intValue] > 3:    // 类型绑定 + `when` 守卫
+        NPLog(@"number: %d", [n intValue]);
+        break;
+    case @"literal":                           // 对象字面量 → isEqual:（值语义）
+        NPLog(@"matched a literal");
+        break;
+    default:
+        break;
+}
+
+// 比较模式用在**标量** subject 上：
+switch (n) {
+    case > 100:
+        NPLog(@"big");
+        break;
+    case > 0 && < 100:                         // 区间
+        NPLog(@"small");
+        break;
+    default:
+        break;
+}
+
+// 普通多值常量仍是纯 C：
+switch (n) {
+    case 1, 2, 3:
+        NPLog(@"one of 1-3");
+        break;
+    default:
+        break;
+}
+```
+
+| 模式 | 降级为 |
+|------|--------|
+| `T *name` | `nupa_isKindOfClass(subject, &NUPA_CLASS_$_T)`；臂内 `name` 已绑定为 `(T *)subject` |
+| `> 10` / `< 10` / `>= 0` / `<= 9` | `subject > 10`（subject 填进悬空的操作数位） |
+| `> 0 && < 100` | `subject > 0 && subject < 100` |
+| `@"lit"` / `@42` / `@YES` / `@'c'` / `@(expr)` | `[subject isEqual:<字面量>]`——值语义，`@"lit"` 能匹配**另一个**内容相同的 NPString |
+| `T *x when <expr>` | 类型测试再 `&&` 上守卫 |
+| 其余 | 普通 C 常量，用 `==` 比较 |
+
+`when` 是**上下文关键词**——`int when = 1;` 照常编译。臂自上而下逐个测试、首个命中即生效；`break`（或走到臂尾）离开 switch。**fallthrough 遵循 C 语义**：没有 `break` 的臂会落入下一臂的臂体。
+
+永远不可能是 C 常量的 `case` 标签——`case [obj msg]:`、`case f():`、`case a = b:`——会报 `case label is not a constant expression`，而不是漏进生成的 C、再在那里报一个无法对应源码的错误。
+
+M1 限制，全部**报错而非静默编译错**：
+
+- **常量臂不能与模式臂混用**——C 路径需要原始 body，模式路径会丢弃它。拆成两个 switch。
+- **悬空比较臂不能与类型绑定／对象字面量臂混用**，也**不能用在语法上就是对象的 subject 上**（`switch (@7) { case > 100: ... }`）。两种情况都会让 subject 变成对象，于是 `subject > 100` 变成**指针**比较——恒真，且毫无提示。改对标量 switch（`switch ([o intValue])`）。
+- 残留 M1 缺口：持有对象的**变量** subject（`id o = @7; switch (o) { case > 100: ... }`）仍会退化——要判对它需要 parser 拿不到的类型信息。
+- 嵌套模式没有跨层 `case` 作用域（内层 `case` 归内层 switch，与 C 一致）。
+
+实现：parser 判定每个标签的形态并把整个 switch 摊平成一张臂表；一个新的降级 pass 在 checker 之前把它改写成 `goto`/`if` 链 + C 标签——所以生成的 C 仍是纯 C99，且不引入新 IR。Golden：`tests/golden/42_switch_pat/`。
+
+### 装箱字面量（`@(expr)` / `@YES` / `@NO` / `@'c'`）
+
+```nupa
+NPNumber *a = @123;          // int
+NPNumber *b = @1.5;          // double
+NPNumber *c = @YES;          // BOOL → 1
+NPNumber *d = @'c';          // char
+NPNumber *e = @(i + 1);      // 工厂由操作数的静态类型决定
+```
+
+每个形态都产出真正的 `NPNumber`：字面量自身的类型选定工厂（`numberWithInt:` / `numberWithDouble:` / `numberWithChar:`），`@(expr)` 则按**操作数的静态类型**选——`double`/`float` → `numberWithDouble:`、`BOOL` → `numberWithBool:`、`char` → `numberWithChar:`、`long`/`long long` → `numberWithLongLong:`、其余整数 → `numberWithInt:`。装箱结果就是普通对象，照常派发：`[@(i * 2) intValue]`。
+
+`@(expr)` 的改写落在 **checker** 而不是 parser：parser 没有类型，后端是 C99 更没有 `_Generic` 可用。改写复用普通消息发送节点，静态派发与 nil 守卫因此零特判——与对象下标、struct `==` 同一套机制。非算术类型不会被默默装箱，而是报错：
+
+```
+illegal type 'NPString *' in a boxed expression — '@(...)' accepts arithmetic and BOOL values only
+```
+
+### 字典字面量（`@{ key: value }`）
+
+```nupa
+NPDictionary *d = @{ @"a": @1, @"b": @2, @"c": @3 };
+NPLog(@"%d", [[d objectForKey:@"b"] intValue]);   // 2
+printf("%lu\n", (unsigned long)[d count]);        // 3
+
+NPMutableDictionary *m = [NPMutableDictionary dictionary];
+[m setObject:@10 forKey:@"x"];
+[m setObject:@11 forKey:@"x"];   // 相等的键是替换，不追加
+[m removeObjectForKey:@"x"];
+
+NPDictionary *empty = @{};       // `@{}` 是空字典（数组是 `@[]`）
+```
+
+键用 `isEqual:` 比较，因此 `NPString`/`NPNumber` 键是**值语义**。字符串字面量已 **interning**（同内容 → 同一对象，ObjC 常量串语义），且值相等仍是语义保证——用新写的 `@"b"` 查询照样能找到条目。存储照搬 `NPArray`——两个平行对象数组 + 线性扫描；`count` / `objectForKey:` / `allKeys` / `allValues` / `copy` / `description` / 按内容的 `isEqual:` 补全了 API。条目必须是对象（与 ObjC 一致）：
+
+```
+illegal type 'int' in a dictionary literal — keys and values must be Objective-C objects
+```
+
+### 异常语义（`-eh checked`）
+
+Nupa 的异常是**不用栈展开的 ObjC 异常语义**。`@try`/`@catch`/`@finally`/`@throw` 的行为与 clang `-fobjc-arc-exceptions` 模式完全一致——差分测试套件（`tests/eh_diff/run_eh_diff.sh`）把每个用例同时跑在 nupac 与真 clang/ObjC 下、逐行 diff stderr，锁定这一保证（7/7 通过）。
+
+```nupa
+@interface Boom : NPObject
+- (void)fire;
+@end
+
+@implementation Boom
+- (void)fire {
+    @throw @"negative input";
+}
+@end
+
+int main() {
+    @try {
+        Boom *b = [[Boom alloc] init];
+        [b fire];                       // 执行到此为止
+        NPLog(@"never runs");
+    }
+    @catch (NPString *e) {
+        NPLog(@"caught: %@", e);
+    }
+    @finally {
+        NPLog(@"finally always runs");
+    }
+    return 0;
+}
+```
+
+你得到的语义：
+
+- **ARC 结算每一帧** —— 异常穿透中间帧时，每帧拥有的局部对象照常释放。没有 `longjmp`，没有跳过的清理，没有泄漏。
+- **throw 立即中断** —— 同一语句的剩余部分不再求值：`x = [a risky] + [b sideEffect];` 不会执行 `sideEffect`。
+- **typed catch 链按 isa 匹配** —— 不匹配的 `@catch` 放行给外层 `@try`；catch 内重抛传播到外层处理器，不会重入本层。
+- **`@finally` 顺序** —— 内层 finally 在外层 catch 之前执行；外层 finally 在外层 catch 之后执行。
+- **block 字面量内的 `@throw`** —— 像普通调用点一样传播到外层 `@try`。
+- **未捕获异常 abort** —— 输出 ObjC 措辞 `*** Terminating app due to uncaught exception of class 'NPString'`，退出码 1。
+- **C 调用方不会错过异常** —— 桥接头 wrapper 检查错误旗标并 abort，而不是静默返回零值。
+
+用 `-eh checked` 启用；默认 `nupac run` 使用零开销的 setjmp 后端，它有经典限制：跨函数抛出会跳过中间帧的清理（见下方已知限制）。
+
+### `@throws` —— 声明式异常
+
+`@throw` 与 `@throws` 只差一个字母，语义却完全不同——对应 Java 里 `throw`（语句）与 `throws`（声明子句）的分工。
+
+| | `@throw` | `@throws` |
+|--|----------|-----------|
+| 是什么 | **语句** —— 运行时抛出异常 | **声明标注** —— 编译期元数据 |
+| 写在哪 | 函数/方法体内 | 声明尾部，`;` 或 `{` 之前 |
+| 形态 | `@throw expr;` | `@throws(T *)` 或裸 `@throws` |
+| 进生成的 C 吗 | 进（setjmp/旗标机制） | **永不** —— 无代码、不占 vtable 槽位 |
+
+```nupa
+@interface Repo : NPObject
+- (NPString *)fetch:(const char *)url @throws(NPError *);   // 会抛 NPError *
+- (int)parse:(const char *)s @throws;                       // 会抛，类型不注明
+- (int)count;                                              // 从不抛
+@end
+
+@implementation Repo
+- (NPString *)fetch:(const char *)url @throws(NPError *) {
+    if (!url) {
+        @throw [[NPError alloc] init];   // 语句：抛出
+    }
+    return @"ok";
+}
+@end
+```
+
+苹果在**这个槽位**（声明 `;` 前的尾置元数据）已经用宏占了十几年：`NS_DESIGNATED_INITIALIZER`、`NS_REQUIRES_NIL_TERMINATION`、`API_AVAILABLE(...)`。Nupa 把同一槽位扶正为一等语法，并让 checker 直接对账。
+
+**checker 强制什么**
+
+- `@throws(T *)` —— 逃逸出本声明的每个 `@throw`，其静态类型必须与 `T` 相容（允许子类）：
+  `error: '@throw' of type 'AppError *' does not match the declared '@throws(NPString *)'`
+- 裸 `@throws` —— 体内必须确有逃逸的 `@throw`：
+  `error: 'liar' is marked '@throws' but its body never executes '@throw'`
+- 不写 —— 逃逸的 `@throw` 报 error：
+  `error: '@throw' escapes 'bad' without a '@throws' annotation; declare it with '@throws(<type>)' or handle it with a local '@try'`
+
+被**同一体内** `@try` 捕获的 `@throw` 不算逃逸，因此 `main`、以及自己就地兜住的 helper 都不需要标注：
+
+```nupa
+static void bad(int n) {                        // error：逃逸出 'bad'
+    if (n < 0) {
+        @throw [[AppError alloc] init];
+    }
+}
+
+static void good(int n) @throws(AppError *) {   // 已声明 —— 通过
+    if (n < 0) {
+        @throw [[AppError alloc] init];
+    }
+}
+
+static void guarded(int n) {                    // 通过 —— 就地捕获
+    @try {
+        if (n < 0) {
+            @throw [[AppError alloc] init];
+        }
+    }
+    @catch (AppError *e) {
+    }
+}
+```
+
+类型判定刻意保守：`@"..."` 字面量、裸 C 字符串、Cast 目标类型、已知类型的变量会被判定；**消息发送不判**（只有 selector 的注册表无从得知其类），因此它对任意声明类型都放行。标注纯编译期——增删 `@throws` 不改变生成的 C、程序输出与 ARC 行为。两个关键词互相写错位置本身也是 error：体内写 `@throws`、声明上写 `@throw(...)`，各会收到一条指明正确关键词的诊断。
 
 #### 隐式根类（nupa_root）
 
@@ -510,27 +823,28 @@ id obj = a;                    // ✅ 合法，Animal 继承自 nupa_root
 
 // 使用 NPObject：完整功能，自动内存管理
 @interface UserModel : NPObject
-@property NSString *name;
+@property NPString *name;
 @end
 ```
 
-#### 裸机 / Freestanding 支持（`-fno-libc`）
+#### 裸机 / Freestanding 支持（`-ffreestanding`）
 
 Nupa 可以编译为**无 libc、无 Foundation、无 TLS** 的自包含 C，直接用于内核、MCU、嵌入式裸机开发。
 
 ```bash
-nupac -rewrite-nupa -fno-libc kernel.np   # 生成自包含 C
+nupac -rewrite-nupa -ffreestanding kernel.np   # 生成自包含 C
 ```
 
-`-fno-libc` 模式下转译出的 C：
+`-ffreestanding` 模式下转译出的 C：
 
 - 不 `#include <string.h>`，改 `#include <nupa/runtime.h>`（freestanding 分支）
 - `@try/@catch/@finally` 用 `__builtin_setjmp/longjmp`（零 libc），异常状态用普通全局而非 `__thread`
 - 类型（`SEL`/`NPClass`/`NPObject`/`id`）自含
+- **不捆绑 Clang Blocks 运行时** —— block 字面量引用 `__NSConcreteStackBlock`/`_Block_copy`/`_Block_release`；真裸机上要么链接一个 Blocks runtime 移植，要么用 `-backend portable`/`-backend gcc`（block 展开为普通 C 函数，无 ABI 符号）
 
 用户只需提供：`nupa_nupa_root_class`、异常全局（如用 `@try`）、`memcpy`（如用 `@try`）、freestanding 头（`stdint.h`/`stddef.h`/`stdbool.h`）。
 
-**裸机分配器 + `[[Class alloc] init]`**（`include/nupa/runtime_baremetal.c`）：
+**裸机分配器 + `[[Class alloc] init]`**（`include/nupa/runtime_freestanding.c`）：
 
 ```nupa
 @interface HeapCounter {
@@ -730,6 +1044,161 @@ nupac -trace-refcount -trace-no-color -trace-max-iters 2 app.np
 - 对象身份 = 分配位置（每个类一个 `Class#N` 计数器）；创建源是 `alloc`/`new`/`copy`/`mutableCopy` 前缀、`init` 链回其接收者，以及 `@"..."`/`@[...]` 字面量。
 - 离开被追踪作用域的对象不计入泄漏 Summary：`return`/`@throw` 的结果、`static` 单例、`@"..."`/`@[...]` 字面量和方法参数。收尾的 `== Summary ==` 报告存活（`possible leak`）、过度释放（计数为负）和已释放对象，并带分配位置。
 
+### `@defer` —— 作用域退出执行
+
+Go 风格的延迟清理：`@defer { ... }` 把自己的 body 注册到**最内层复合语句块**上，body 在该块的**每一处出口**执行——块尾自然出口、任意深度的 `return`、跳出该块的 `break`/`continue`、同函数 `@throw`——最内层优先（LIFO）。
+
+```nupa
+- (void)work {
+    FILE *f = fopen("cfg.txt", "r");
+    @defer { fclose(f); }            // 下面每处出口都会执行
+    if (!ready) { return; }          // return 前先执行 defer
+    @defer { printf("second\n"); }   // 多个 defer：LIFO
+    ...
+}                                    // 块尾：先 second 后 fclose
+```
+
+语义：
+
+- **循环体块**里的 defer **每轮迭代结束**执行——`continue`/`break` 时同样执行。
+- `break`/`continue` 只触发"跳转处与最内层 loop/switch 之间"注册的 defer；注册在循环**外层**的 defer 不会被误触发（不双发）。
+- 变量直接读写——**无捕获、无拷贝**（普通 C 作用域，刻意与 block 的捕获语义不同）。
+- **ARC 顺序**：用户 defer 先于 ARC 注入的作用域末 release 执行，defer 里对象还活着（`dealloc` 最后打印）。
+- `-eh checked` 零特判：defer pass 运行时 checked 的 throw 已是普通 `return`，自动被覆盖。
+
+M1 限制（编译期强制）：`@defer` 必须直接位于块内；defer 体内不得出现 `return`/`break`/`continue`/`@throw`（`error: 'return' inside an '@defer' body is not supported (M1)`）。跨函数 `@throw`（sjlj longjmp 掠过中间帧）会跳过中间帧的 defer——与 ARC scope-end release 的既有已知限制相同，`-eh checked` 下无此问题。
+
+实现：纯 desugar（`crates/defer`，pipeline Step 3.9——`-eh checked` 改写之后、ARC 之前）。codegen/checker/运行时看到的都是普通语句——下游零改动。Golden：`tests/golden/36_defer/`。
+
+### `NPAsync<T>` —— 声明式 async 标记
+
+`@await` M1/M2 有个软肋：头文件里看不出方法会挂起。`NPAsync<T>` 把 async-ness 扶正为**返回类型位可见的标记**——parser 把它解包为 `T`，纯编译期元数据：生成 C 中 `NPAsync` 出现 **0 次**，vtable 布局、跨 TU 链接、桥接头全部不受影响。
+
+```nupa
+@interface Fetcher : NPObject
+- (NPAsync<int>)compute:(int)n;   // 会挂起，完成后给 int
++ (NPAsync<void>)runAll;          // 入口方法
+- (int)plain:(int)n;              // 不标 = 承诺不挂起
+@end
+```
+
+体内的 `@await` 决定事实，checker 双向对账：
+
+| 声明 | 体内 | 判定 |
+|------|------|------|
+| `NPAsync<T>` | 有 `@await` | ✅ |
+| `NPAsync<T>` | 无 `@await` | **error** —— `'compute:' is marked 'NPAsync<T>' but its body never suspends — remove the marker or add an '@await'` |
+| 裸 `T` | 有 `@await` | **warning** —— `'compute:' contains '@await' but its return type is not marked 'NPAsync<T>' — mark it so callers can see it suspends`（`-Werror` 升级拦截） |
+| 裸 `T` | 无 `@await` | ✅ |
+
+- 标记是签名的一部分：`@interface` 与 `@implementation` 必须一致——`'NPAsync' marker mismatch on 'compute:': the @interface and @implementation disagree` 报 error。仅头文件声明的 `@interface` 方法豁免（跨 TU 安全）。
+- 值位一律拒绝——变量/参数/ivar/属性：`'NPAsync<T>' is a declaration marker, not a value type (variable) — '@await' the async call instead`。
+- `NPAsync` 是保留类名。
+
+Golden：`tests/golden/37_async_marker/`；负例在 `tests/negative/async_marker_*.np`。
+
+### 对象下标订阅（容器对象的 `a[0]`）
+
+容器对象的 `recv[i]` 与 `recv[i] = v` 现在是语法糖。由 checker 改写——**类型感知**，判据是**符号表实证**（该类或其父类是否真声明了对应方法），不是"看起来像对象"：
+
+| 源码 | 改写为 | 条件 |
+|------|--------|------|
+| `recv[i]` | `[recv objectAtIndex:i]` | 接收者的类声明了 `objectAtIndex:` |
+| `recv[i] = v` | `[recv setObject:v atIndex:i]` | 类还声明了 `setObject:atIndex:` |
+
+```nupa
+NPArray *a = @[ @"x", @"y", @"z" ];
+NPLog(@"%@", a[0]);            // → [a objectAtIndex:0]
+NPMutableArray *m = [NPMutableArray array];
+[m addObject:@"first"];
+m[0] = @"hello";               // → [m setObject:@"hello" atIndex:0] —— 替换语义，不是追加
+```
+
+普通 C 零误伤：`int c[3]; c[1]`、`char *p; p[0]`、`const char *s; s[2]` 全部原样透传为 C 下标（探针验证，零误报）。改写落在 checker（parser 层拿不到变量类型，emit 阶段没有 vtable 元数据），下游 vtable 派发、nil 守卫、SEL 常量零特判。
+
+字典下标（`d[@"k"]`）**有意不纳入**本改写：改写只映射到 `objectAtIndex:`，所以 `NPDictionary` 不声明 `objectForKeyedSubscript:`——声明它等于宣传一个会被发到错 selector 的写法。用 `[d objectForKey:@"k"]`。
+
+### 泛型真检查（单态化 + 元素类型）
+
+泛型容器**真单态化并做类型检查**。`NPArray<NPString *>` 与 `NPDictionary<NPString *, NPNumber *>` 会生成真正的特化 C（struct、vtable、类元数据、类型已代入的方法副本），checker 再把元素类型代入方法签名——所以元素类型是被强制的，不是被擦除的：
+
+```nupa
+NPMutableArray<NPString *> *m = [NPMutableArray array];
+[m addObject:@"a"];
+NPString *s = [m objectAtIndex:0];      // NPString *，不是 id
+
+[m addObject:@42];                      // ✗ 报错：NPNumber* 放进 NPString* 容器
+int bad = [m objectAtIndex:0];          // ✗ 报错：指针赋给标量
+```
+
+`@[...]` 与 `@{...}` 字面量在**所有元素同型**时会**推断**元素类型，所以 `NPArray<NPString *> *a = @[ @"x", @"y" ];` 无需标注；混合类型数组回退成裸 `NPArray`。
+
+两种拼写并存：裸 `NPArray` 依然完整支持（零迁移），只是擦除成 `id`。把裸容器赋给特化变量是允许的，但会告警——此时元素类型未经验证：
+
+```text
+warning: assigning a bare 'NPArray *' to a specialization of it — the bare
+container's element type is unchecked; add an explicit cast if the contents are known to match
+```
+
+`-Werror` 可升级拦截。`NPArray<A>` 与 `NPArray<B>` 之间互相赋值则不告警——与 ObjC lightweight generics 同样的宽松（你要回了 `id`，就给你 `id`）。
+
+代价要说清楚：特化是编译期代码，不是免费的类型安全。同一程序改用泛型拼写而非裸拼写，生成的 C 多约 42 KB / +41%——全是重复的方法体与元数据，布局逐字节相同，故运行期收益为零。Golden：`tests/golden/40_nparray_generic/`。
+
+### Nupa 语法宏（双轨 `#define`）
+
+含 **nupa 语法**（`[recv msg]`、`@` 字面量、`^{}` block）的 `#define` 宏体此前原样透传给 C 编译器——直接语法错误。nupac 现在自行解析并在源级展开。纯 C 宏体照旧透传、由 C 编译器展开，行为零变化。
+
+```nupa
+#define TAG(o)      [o tag]                    // nupa 轨：nupac 展开
+#define BUMP(o, n)  [o addTo:n times:1]
+#define LOG(x)      NPLog(@"tag=%d", x)        // 宏体含 @literal
+#define TWICE(x)    ((x) + (x))                // C 轨：clang 展开
+
+int t = TAG(w);                                    // → [w tag]
+BUMP(w, 3);
+LOG(TAG(w));
+```
+
+展开语义遵循 ISO C §6.10.3（`crates/cpp` 独立实现，逐行对照 `clang -E` 交叉验证）：实参先完整展开再代入（`#`/`##` 操作数用 raw 文本）、`#param` 字符串化、`a ## b` 粘贴、`__VA_ARGS__` 逗号拼接、自递归冻结（蓝漆规则）、函数式宏裸名不展开、`\` 续行拼逻辑行。条件指令（`#if`/`#ifdef`/`#ifndef`/`#elif`/`#else`/`#endif`）也由 nupac 求值——`defined(X)` 操作数豁免展开、跳过的分组不定义宏、畸形条件指令报错而非静默吞文件。
+
+限制（报清晰错误，不静默）：宏调用必须单行闭合（跨行用 `\` 续行）；宏体内不得出现 `_Pragma`。Golden：`tests/golden/38_macros/`。
+
+### C99 指定初始化器
+
+C99 指定初始化器的六种形态全部可用，包括 ObjC 的 C 子集从来不需要的那些：
+
+```nupa
+struct Point { int x; int y; };
+struct Point p1 = { .x = 1, .y = 2 };      // 1. 完整指定
+struct Point p2 = { .y = 5 };               // 2. 部分指定——未指定字段零填充
+struct Point p3 = { .x = 1, 7 };           // 3. 指定与位置式混合
+
+NPRange r = (NPRange){ .location = 3,      // 4. 复合字面量 + 指定
+                        .length = 9 };
+
+CGPoint pts[3] = { [0].wx = 1, [2].wy = 6 };  // 5. 数组元素
+
+struct Outer o = { .in.a = 3, .tag = 9 }; // 6. 嵌套成员路径
+```
+
+位置式条目从最后一个被指定字段之后继续（形态 3 的 `7` 落在 `.y`），未指定字段零填充，`[1].wx` 这样的链式指定同样可用。它们按普通 C 初始化器原样透传——不引入新 IR。
+
+### C99 `_Complex` 透传
+
+`float _Complex` / `double _Complex` 的声明、typedef、形参全程原样透传，虚数后缀字面量（`2.0i`、`1e3j`）按 **raw 文本**发射——此前虚部被静默丢弃（`2.0i` → `2.0f`）。
+
+```nupa
+#include <complex.h>
+typedef float _Complex cfloat;
+
+double _Complex z = 1.0 + 2.0i;   // 实部 + 虚部混合
+double _Complex w = 2.0i;         // 纯虚数字面量
+cfloat f = 1.5;
+printf("A=%.1f+%.1fi\n", creal(z), cimag(z));
+```
+
+已知限制：nupa checker 无复数类型推导（复数宽度窄化不告警，语义由生成的 C 交 C 编译器保证）。Golden：`tests/golden/39_complex/`。
+
 ---
 
 ## 编译与运行
@@ -753,7 +1222,7 @@ nupac [options] <input.np>
   -fnupa-arc        启用 ARC（默认）
   -fno-nupa-arc     禁用 ARC（手动 MRC 模式）
   -fno-checker      跳过类型检查
-  -fno-libc         裸机/freestanding 输出（无 libc、无 TLS）
+  -ffreestanding    裸机/freestanding 输出（无 libc、无 TLS）
   -backend <mode>   C 编译器后端：clang（默认）、portable、gcc
   -arch <target>    构建目标架构（如 -arch x86_64）
   -asm <file.s>     链接汇编文件（可重复）

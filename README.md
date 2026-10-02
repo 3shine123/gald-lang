@@ -59,7 +59,7 @@ This is not a production-ready language. It's a toy, exploring the question: "wh
 
 | Project               | Description                                                                              | Run                            |
 | --------------------- | ---------------------------------------------------------------------------------------- | ------------------------------ |
-| **`04_soma-kernel/`** | Tiny 32‑bit i386 OS kernel (NASM + C + Nupa), bare‑metal `-fno-libc` mode                | `./run.sh` or `./run.sh --gui` |
+| **`04_soma-kernel/`** | Tiny 32‑bit i386 OS kernel (NASM + C + Nupa), bare‑metal `-ffreestanding` mode                | `./run.sh` or `./run.sh --gui` |
 | **`03_LibUI/`**       | GUI app via [libui-ng](https://github.com/libui-ng/libui-ng), all callbacks in pure Nupa | `./run_libui.sh`               |
 | **`02_ncurses/`**     | Terminal demos (`ncurses_demo`, `sysmon`) using `Terminal::Ncurses`                      | `make run`                     |
 | **`01_JSONEditor/`**  | Multi‑file JSON editor with split‑screen terminal preview                                | `nupac run json_editor.np`     |
@@ -429,12 +429,325 @@ Nupa adds features on top of Objective-C syntax that ObjC itself doesn't have.
 
 **Recent highlights:**
 
-- **Native bare-metal support (`-fno-libc`)** — compiles to self-contained C with no libc, no Foundation, no TLS; `@try/@catch` uses `__builtin_setjmp/longjmp`, and a zero-boilerplate `runtime_baremetal.c` provides the bump allocator, `NUPA_CLASS_$_nupa_root`, exception state, and `memcpy`.
+- **Native bare-metal support (`-ffreestanding`)** — compiles to self-contained C with no libc, no Foundation, no TLS; `@try/@catch` uses `__builtin_setjmp/longjmp`, and a zero-boilerplate `runtime_freestanding.c` provides the bump allocator, `NUPA_CLASS_$_nupa_root`, exception state, and `memcpy`.
 - **C superset** — `@protocol` + conformance, `@property` + `@synthesize`, `instancetype`, `@public` ivars, dot syntax, structs + function pointers, inline asm, C-style casts.
-- **Typed `@catch`** — each catch block now checks `isa == &NUPA_CLASS_$_Class`, so only the matching class enters the handler; multiple catches are properly isolated.
+- **Typed `@catch`** — catch arms match via `__nupa_eh_isa` (isKindOf: superclass-chain semantics, like ObjC): a parent-class arm catches subclass instances, and the first matching arm consumes the exception so later arms never double-catch.
 - **ARC fixes** — scope-stack model no longer releases parent-scope variables at nested scope end; `for`-init object hoisting stops leaks and invalid `for` headers.
 - **`@noarc` block** — block-level MRC: in ARC mode, manual `retain`/`release`/`dealloc`/`autorelease` inside `@noarc { }` is allowed; the block-level analogue of `-fno-nupa-arc` and clang's `-fno-objc-arc`.
 - **`__attribute__` pass-through + `-backend`** — full support for C `__attribute__((...))` and all `__`-prefixed C predefined identifiers (`__FILE__`, `__LINE__`, `__builtin_*`, `__extension__`, `__typeof__`, `__alignof__`, ...); the `-backend` flag controls which compiler-specific attributes are allowed.
+
+### for-in Enumeration
+
+```nupa
+for (NPString *s in arr) {
+    printf("%s\n", [s UTF8String]);
+}
+```
+
+Desugared at parse time into an index loop over `[coll count]` / `[coll objectAtIndex:]` — the collection expression is evaluated once, nil-safe (`[nil count]` is 0), and elements are borrowed (no retain/release). Plain C arrays and `NPArray` both work.
+
+### Protocol Conformance Checking
+
+The checker now verifies that a class declaring `<Proto>` implements every required method (recursively through parent protocols; `@optional` methods are exempt):
+
+```
+class 'Circle' does not implement required method 'draw' from protocol 'Drawable'
+```
+
+### Protocol Composition (`P & Q`)
+
+Reuse C's `&` operator to require several protocols at once — no new syntax:
+
+```nupa
+// ① Intersection type: the receiver must implement both
+void render(id<Drawable & Serializable> item);
+
+// ② Composed protocol declaration
+@protocol Renderable <Drawable & Serializable>
+@end
+```
+
+Protocol types stay compile-time constraint labels only — vtable slots are unaffected, so multi-TU layout is unchanged.
+
+### Foundation Type Dispatch (`isKindOfClass:` / `respondsToSelector:` / `isEqual:`)
+
+The official ObjC spellings are now implemented on the root class, enabling idiomatic multi-way dispatch without any new language construct:
+
+```nupa
+for (id item in items) {
+    if ([item isKindOfClass:[Dog class]]) {
+        [(Dog *)item bark];
+    } else if ([item respondsToSelector:@selector(draw)]) {
+        [(id<Drawable>)item draw];
+    }
+}
+```
+
+`isKindOfClass:` walks the isa chain, `respondsToSelector:` queries the unified vtable, and `isEqual:` defaults to pointer identity on the root class (matching `NSObject`) — while `NPString` and `NPNumber` override it with **value** equality, which is what makes dictionary keys work. The legacy `isKindOf:` remains as a compatibility alias.
+
+### Struct `==` / `!=` Value Comparison
+
+C rejects `a == b` on structs outright; Nupa reuses the existing operators and desugars to a generated field-by-field compare function:
+
+```nupa
+struct Point a = {1, 2};
+struct Point b = {1, 2};
+
+if (a == b) { ... }   // field-wise compare
+if (a != b) { ... }
+
+p == &a               // pointer comparison semantics unchanged
+```
+
+### async/await (`@await`)
+
+A method whose body contains `@await` is async — no annotation needed, mirroring C++20's `co_await`-based coroutines (the declaration looks like a perfectly ordinary ObjC method, so vtable layout is unchanged):
+
+```nupa
+@interface Fetcher : NPObject
+- (int)compute:(int)n;
+- (void)runAll;
+@end
+
+@implementation Fetcher
+- (int)compute:(int)n {
+    int raw = @await n;               // suspension point
+    return raw * 2;
+}
+
+// async void = the entry method (blocks and pumps to completion)
+- (void)runAll {
+    int x = @await [self compute:21]; // awaiting a call infects this method too
+    NPLog(@"result=%d", x);
+}
+@end
+
+int main() {
+    Fetcher *f = [[Fetcher alloc] init];
+    [f runAll];                       // async void is callable from sync context
+    return 0;
+}
+```
+
+Design rules:
+
+- **Infection is chain-based** — a method calling `@await` becomes async itself; async methods with a return value may only be awaited from async contexts (compile-time rejected otherwise).
+- **`@await` lowers to a state machine** — the body is split at suspension points into a `switch(task->state)` driver over a heap `NupaTask`; locals that survive a suspension are lifted into a per-method frame struct.
+- **`@try` spanning an `@await`** is rejected (a `jmp_buf` cannot survive a suspension point); `@noarc` across awaits is allowed; break/continue across awaits become state jumps.
+- A cooperative single-thread scheduler (`nupa_run_all`) and I/O integration are planned as the next milestone.
+
+### Switch Pattern Matching (`case` patterns)
+
+`case` labels accept **patterns**, not just integer constants. Type dispatch stays a method chain in spirit — the patterns desugar to `isKindOfClass:` / `isEqual:` / comparisons — but you write them declaratively:
+
+```nupa
+// Object patterns mix freely in one switch:
+switch (subject) {
+    case NPString *s:                      // type binding → isKindOfClass:
+        NPLog(@"string: %s", [s UTF8String]);
+        break;
+    case NPNumber *n when [n intValue] > 3:  // type binding + `when` guard
+        NPLog(@"number: %d", [n intValue]);
+        break;
+    case @"literal":                       // object literal → isEqual: (value semantics)
+        NPLog(@"matched a literal");
+        break;
+    default:
+        break;
+}
+
+// Comparison patterns, on a SCALAR subject:
+switch (n) {
+    case > 100:
+        NPLog(@"big");
+        break;
+    case > 0 && < 100:                     // range
+        NPLog(@"small");
+        break;
+    default:
+        break;
+}
+
+// Plain multi-value constants stay plain C:
+switch (n) {
+    case 1, 2, 3:
+        NPLog(@"one of 1-3");
+        break;
+    default:
+        break;
+}
+```
+
+| pattern | lowers to |
+|---------|-----------|
+| `T *name` | `nupa_isKindOfClass(subject, &NUPA_CLASS_$_T)`; inside the arm, `name` is already bound to `(T *)subject` |
+| `> 10`, `< 10`, `>= 0`, `<= 9` | `subject > 10` (the subject is spliced into the dangling operand) |
+| `> 0 && < 100` | `subject > 0 && subject < 100` |
+| `@"lit"`, `@42`, `@YES`, `@'c'`, `@(expr)` | `[subject isEqual:<literal>]` — value semantics, so `@"lit"` matches a *different* NPString with the same contents |
+| `T *x when <expr>` | the type test, `&&`-ed with the guard |
+| anything else | plain C constant, compared with `==` |
+
+`when` is a **contextual keyword** — `int when = 1;` still compiles. Arms are tested top to bottom and the first match wins; `break` (or falling off the end) leaves the switch. **Fallthrough follows C**: an arm without `break` runs into the next arm's body.
+
+`case` labels that could never be a C constant — `case [obj msg]:`, `case f():`, `case a = b:` — are rejected with `case label is not a constant expression` instead of leaking into the generated C, where the error used to point at generated code with no source correspondence.
+
+M1 limits, all diagnosed rather than silently miscompiled:
+
+- **Constant arms can't mix with pattern arms** — the C path needs the original body, the pattern path discards it. Split them into separate switches.
+- **A dangling comparison can't mix with a type-binding / object-literal arm**, and **can't be used on a syntactically-object subject** (`switch (@7) { case > 100: ... }`). Both would make the subject an object, so `subject > 100` becomes a *pointer* compare — always true, silently. Switch on a scalar instead (`switch ([o intValue])`).
+- Residual M1 gap: a *variable* subject holding an object (`id o = @7; switch (o) { case > 100: ... }`) still degenerates — deciding it needs type information the parser does not have.
+- Nested patterns get no cross-level `case` scoping (an inner `case` belongs to the inner switch, same as C).
+
+Implementation: the parser classifies each label and flattens the whole switch into a single arm list; a new lowering pass rewrites that into a `goto`/`if` chain with C labels before the checker runs — so the generated C stays plain C99 and there is no new IR. Golden: `tests/golden/42_switch_pat/`.
+
+### Boxed Literals (`@(expr)` / `@YES` / `@NO` / `@'c'`)
+
+```nupa
+NPNumber *a = @123;          // int
+NPNumber *b = @1.5;          // double
+NPNumber *c = @YES;          // BOOL → 1
+NPNumber *d = @'c';          // char
+NPNumber *e = @(i + 1);      // factory chosen by the operand's STATIC type
+```
+
+Every form yields a real `NPNumber`: the literal's own type picks the factory (`numberWithInt:` / `numberWithDouble:` / `numberWithChar:`), and `@(expr)` picks by the operand's static type — `double`/`float` → `numberWithDouble:`, `BOOL` → `numberWithBool:`, `char` → `numberWithChar:`, `long`/`long long` → `numberWithLongLong:`, any other integer → `numberWithInt:`. Boxed results are ordinary objects, so they dispatch like anything else: `[@(i * 2) intValue]`.
+
+`@(expr)` is rewritten in the **checker**, not the parser: the parser has no types, and the C99 backend has no `_Generic` to fall back on. The rewrite reuses ordinary message-send nodes, so static dispatch and the nil guard come for free — the same mechanism as object subscripts and struct `==`. Non-arithmetic operands are rejected rather than silently boxed:
+
+```
+illegal type 'NPString *' in a boxed expression — '@(...)' accepts arithmetic and BOOL values only
+```
+
+### Dictionary Literals (`@{ key: value }`)
+
+```nupa
+NPDictionary *d = @{ @"a": @1, @"b": @2, @"c": @3 };
+NPLog(@"%d", [[d objectForKey:@"b"] intValue]);   // 2
+printf("%lu\n", (unsigned long)[d count]);        // 3
+
+NPMutableDictionary *m = [NPMutableDictionary dictionary];
+[m setObject:@10 forKey:@"x"];
+[m setObject:@11 forKey:@"x"];   // equal key → replaced, not appended
+[m removeObjectForKey:@"x"];
+
+NPDictionary *empty = @{};       // `@{}` is an empty dictionary (`@[]` is the array)
+```
+
+Keys compare with `isEqual:`, so `NPString`/`NPNumber` keys have **value** semantics. String literals are **interned** (same contents → the same object, like ObjC constant strings), and value equality remains the semantic guarantee — a lookup with a fresh `@"b"` finds the entry either way. Storage mirrors `NPArray` — two parallel object arrays with a linear scan — and `count` / `objectForKey:` / `allKeys` / `allValues` / `copy` / `description` / content-based `isEqual:` round out the API. Entries must be objects, as in ObjC:
+
+```
+illegal type 'int' in a dictionary literal — keys and values must be Objective-C objects
+```
+
+### Exception Semantics (`-eh checked`)
+
+Nupa's exceptions are **ObjC exceptions by value, without unwinding**. `@try`/`@catch`/`@finally`/`@throw` behave exactly like clang's `-fobjc-arc-exceptions` mode — and a differential test suite (`tests/eh_diff/run_eh_diff.sh`) locks this in by running each case under both nupac and real clang/ObjC, then diffing stderr line by line (7/7 cases pass).
+
+```nupa
+@interface Boom : NPObject
+- (void)fire;
+@end
+
+@implementation Boom
+- (void)fire {
+    @throw @"negative input";
+}
+@end
+
+int main() {
+    @try {
+        Boom *b = [[Boom alloc] init];
+        [b fire];                       // execution stops HERE
+        NPLog(@"never runs");
+    }
+    @catch (NPString *e) {
+        NPLog(@"caught: %@", e);
+    }
+    @finally {
+        NPLog(@"finally always runs");
+    }
+    return 0;
+}
+```
+
+The semantics you get:
+
+- **ARC settles every frame** — an exception that crosses frames releases each frame's owned locals on the way out. There is no `longjmp`, so nothing is skipped and nothing leaks.
+- **A throw interrupts immediately** — the rest of the statement never evaluates: `x = [a risky] + [b sideEffect];` never runs `sideEffect`.
+- **Typed catch chains match by isa** — an unmatched `@catch` lets the exception continue to the enclosing `@try`; a rethrow inside `@catch` propagates to the outer handler, never re-enters the same one.
+- **`@finally` ordering** — inner finally runs before the outer catch; the outer finally runs after the outer catch.
+- **Throws inside block literals** propagate to the enclosing `@try` like any other call.
+- **Uncaught exceptions abort** with ObjC's wording: `*** Terminating app due to uncaught exception of class 'NPString'`, exit code 1.
+- **C callers can't miss an exception** — bridge-header wrappers check the error flag and abort rather than silently returning a zero value.
+
+Enable it with `-eh checked`; plain `nupac run` uses the zero-overhead setjmp backend, which has the classic limitation: a cross-frame throw skips intermediate frames' cleanup (documented below).
+
+### `@throws` — Declared Exceptions
+
+`@throw` and `@throws` differ by one letter and mean completely different things — the split Java draws between `throw` (a statement) and `throws` (a declaration clause).
+
+| | `@throw` | `@throws` |
+|--|----------|-----------|
+| What | **statement** — raises an exception at runtime | **declaration annotation** — compile-time metadata |
+| Where | inside a body | trailing, before the `;` or `{` of a declaration |
+| Shape | `@throw expr;` | `@throws(T *)` or bare `@throws` |
+| In generated C | yes (the setjmp/flag machinery) | **never** — no code, no vtable slot |
+
+```nupa
+@interface Repo : NPObject
+- (NPString *)fetch:(const char *)url @throws(NPError *);   // throws NPError *
+- (int)parse:(const char *)s @throws;                       // throws; type unstated
+- (int)count;                                              // never throws
+@end
+
+@implementation Repo
+- (NPString *)fetch:(const char *)url @throws(NPError *) {
+    if (!url) {
+        @throw [[NPError alloc] init];   // the statement
+    }
+    return @"ok";
+}
+@end
+```
+
+Apple has occupied exactly this slot — trailing metadata before the `;` — with macros for over a decade (`NS_DESIGNATED_INITIALIZER`, `NS_REQUIRES_NIL_TERMINATION`, `API_AVAILABLE(...)`). Nupa promotes the slot to first-class syntax and lets the checker reconcile it.
+
+**What the checker enforces**
+
+- `@throws(T *)` — every `@throw` that escapes the declaration must have a static type compatible with `T` (subclasses allowed):
+  `error: '@throw' of type 'AppError *' does not match the declared '@throws(NPString *)'`
+- Bare `@throws` — the body must really contain an escaping `@throw`:
+  `error: 'liar' is marked '@throws' but its body never executes '@throw'`
+- No annotation — an escaping `@throw` is an error:
+  `error: '@throw' escapes 'bad' without a '@throws' annotation; declare it with '@throws(<type>)' or handle it with a local '@try'`
+
+A `@throw` caught by a `@try` **in the same body** is never an escape, so `main` and locally-guarded helpers need no annotation:
+
+```nupa
+static void bad(int n) {                        // error: escapes 'bad'
+    if (n < 0) {
+        @throw [[AppError alloc] init];
+    }
+}
+
+static void good(int n) @throws(AppError *) {   // declared — fine
+    if (n < 0) {
+        @throw [[AppError alloc] init];
+    }
+}
+
+static void guarded(int n) {                    // fine — caught locally
+    @try {
+        if (n < 0) {
+            @throw [[AppError alloc] init];
+        }
+    }
+    @catch (AppError *e) {
+    }
+}
+```
+
+The type check is deliberately conservative: `@"..."` literals, bare C strings, casts, and variables of known type are judged; a message send is not (its class is not knowable from a selector-only registry), so it satisfies any declared type. Annotations are compile-time only — adding or removing `@throws` never changes generated C, program output, or ARC behaviour. Misusing the pair is itself an error: `@throws` inside a body, or `@throw(...)` on a declaration, each gets a diagnostic naming the other keyword.
 
 ### Implicit Root Class (`nupa_root`)
 
@@ -512,7 +825,7 @@ id obj = a;                    // valid: Animal inherits from nupa_root
 
 ```nupa
 @interface Dog : Animal {
-    NSString *breed;
+    NPString *breed;
 }
 @end
 ```
@@ -522,7 +835,7 @@ Generated C:
 ```c
 struct Dog {
     struct Animal __super;     // contains nupa_root → header
-    struct NSString *breed;
+    struct NPString *breed;
 };
 ```
 
@@ -544,27 +857,28 @@ struct Dog {
 
 // Full NPObject with automatic memory management
 @interface UserModel : NPObject
-@property NSString *name;
+@property NPString *name;
 @end
 ```
 
-#### Bare-Metal / Freestanding Support (`-fno-libc`)
+#### Bare-Metal / Freestanding Support (`-ffreestanding`)
 
 Nupa can compile to **self-contained C with no libc, no Foundation, no TLS**, for kernels, MCUs, and bare-metal embedded development.
 
 ```bash
-nupac -rewrite-nupa -fno-libc kernel.np   # emits self-contained C
+nupac -rewrite-nupa -ffreestanding kernel.np   # emits self-contained C
 ```
 
-In `-fno-libc` mode the transpiled C:
+In `-ffreestanding` mode the transpiled C:
 
 - does **not** `#include <string.h>`; instead `#include <nupa/runtime.h>` (freestanding branch)
 - implements `@try/@catch/@finally` with `__builtin_setjmp/longjmp` (zero libc), with plain (non-`__thread`) exception globals
 - is self-contained for `SEL`/`NPClass`/`NPObject`/`id`
+- does **not** bundle the Clang Blocks runtime — block literals reference `__NSConcreteStackBlock`/`_Block_copy`/`_Block_release`; on real bare metal, either link a Blocks runtime port or use `-backend portable`/`-backend gcc` (blocks lower to plain C functions, no ABI symbols)
 
 The user only provides: `NUPA_CLASS_$_nupa_root`, the exception globals (if using `@try`), `memcpy` (if using `@try`), and freestanding headers (`stdint.h`/`stddef.h`/`stdbool.h`).
 
-**Bare-metal allocator + `[[Class alloc] init]`** (`include/nupa/runtime_baremetal.c`):
+**Bare-metal allocator + `[[Class alloc] init]`** (`include/nupa/runtime_freestanding.c`):
 
 ```nupa
 @interface HeapCounter {
@@ -773,6 +1087,161 @@ Options:
 - Object identity = allocation site (`Class#N` per class); creations are `alloc`/`new`/`copy`/`mutableCopy`-prefixed, `init` chains to its receiver, and `@"..."`/`@[...]` literals.
 - Objects that leave the traced scope are excluded from the leak summary: `return`/`@throw` results, `static` singletons, `@"..."`/`@[...]` literals, and method parameters. A final `== Summary ==` reports live (`possible leak`), over-released (negative count), and freed objects with their allocation positions.
 
+### `@defer` — Scope-Exit Execution
+
+Go-style deferred cleanup: `@defer { ... }` registers its body with the innermost enclosing block, and the body runs at **every exit** of that block — the natural end, a `return` at any depth, a `break`/`continue` that jumps out of it, and a same-function `@throw` — innermost first (LIFO).
+
+```nupa
+- (void)work {
+    FILE *f = fopen("cfg.txt", "r");
+    @defer { fclose(f); }            // runs at every exit below
+    if (!ready) { return; }          // defer runs before returning
+    @defer { printf("second\n"); }   // multiple defers: LIFO
+    ...
+}                                    // block end: "second" first, then fclose
+```
+
+Semantics:
+
+- **Loop bodies** re-run their defers **every iteration** — and on `continue`/`break`.
+- `break`/`continue` fire only the defers registered between the jump and the innermost loop/switch; defers registered **outside** the loop are not double-fired.
+- Variables are read directly — no capture, no copy (plain C scoping, deliberately unlike blocks).
+- **ARC order**: user defers run *before* the ARC-injected scope-end release, so objects are still alive inside your defer (`dealloc` prints last).
+- `-eh checked` needs no special case: its throws are ordinary returns by the time the defer pass runs.
+
+M1 limits (compile-time enforced): `@defer` must sit directly inside a block; the body must not contain `return`/`break`/`continue`/`@throw` (`error: 'return' inside an '@defer' body is not supported (M1)`). A cross-function `@throw` (sjlj longjmp past intermediate frames) skips those frames' defers — the same documented limitation as ARC's scope-end releases, gone under `-eh checked`.
+
+Implementation: pure desugar (`crates/defer`, pipeline step 3.9 — after the `-eh checked` rewrite, before ARC). Codegen, checker, and the runtime see ordinary statements — zero changes downstream. Golden: `tests/golden/36_defer/`.
+
+### `NPAsync<T>` — Declared Async Marker
+
+`@await` M1/M2 left one soft spot: a header cannot tell you whether a method suspends. `NPAsync<T>` promotes async-ness to a **return-type marker** that is visible in the declaration — the parser unwraps it to `T`, so it is pure compile-time metadata: `NPAsync` appears **zero times** in the generated C, and vtable layout, cross-TU linking, and the bridge header are untouched.
+
+```nupa
+@interface Fetcher : NPObject
+- (NPAsync<int>)compute:(int)n;   // suspends, yields an int
++ (NPAsync<void>)runAll;          // entry point
+- (int)plain:(int)n;              // unmarked = promises never to suspend
+@end
+```
+
+The body's awaits decide the truth, and the checker reconciles both directions:
+
+| declaration | body | verdict |
+|-------------|------|---------|
+| `NPAsync<T>` | has `@await` | ✅ |
+| `NPAsync<T>` | no `@await` | **error** — `'compute:' is marked 'NPAsync<T>' but its body never suspends — remove the marker or add an '@await'` |
+| bare `T` | has `@await` | **warning** — `'compute:' contains '@await' but its return type is not marked 'NPAsync<T>' — mark it so callers can see it suspends` (`-Werror` escalates) |
+| bare `T` | no `@await` | ✅ |
+
+- The marker is part of the signature: `@interface` and `@implementation` must agree — `'NPAsync' marker mismatch on 'compute:': the @interface and @implementation disagree` is an error. Header-only `@interface` methods are exempt (cross-TU safety).
+- Value positions are rejected — variables, parameters, ivars, properties: `'NPAsync<T>' is a declaration marker, not a value type (variable) — '@await' the async call instead`.
+- `NPAsync` is a reserved class name.
+
+Golden: `tests/golden/37_async_marker/`; negatives under `tests/negative/async_marker_*.np`.
+
+### Object Subscripting (`a[0]` on NPArray)
+
+`recv[i]` and `recv[i] = v` on container objects now work as sugar. The checker rewrites them — type-aware, judged by the **symbol table** (does the class, or a superclass, actually declare the methods?), not by "looks like an object":
+
+| source | rewritten to | condition |
+|--------|--------------|-----------|
+| `recv[i]` | `[recv objectAtIndex:i]` | receiver's class declares `objectAtIndex:` |
+| `recv[i] = v` | `[recv setObject:v atIndex:i]` | class also declares `setObject:atIndex:` |
+
+```nupa
+NPArray *a = @[ @"x", @"y", @"z" ];
+NPLog(@"%@", a[0]);            // → [a objectAtIndex:0]
+NPMutableArray *m = [NPMutableArray array];
+[m addObject:@"first"];
+m[0] = @"hello";               // → [m setObject:@"hello" atIndex:0] — replaces, not appends
+```
+
+Plain C is never touched: `int c[3]; c[1]`, `char *p; p[0]`, and `const char *s; s[2]` all pass through as raw C subscripts (probe-verified, zero false positives). The rewrite lands in the checker (not the parser — the parser has no variable types, and the emit stage has no vtable metadata), so downstream vtable dispatch, nil guards, and SEL constants work with zero special cases.
+
+Dictionary subscripting (`d[@"k"]`) is deliberately **not** part of this rewrite: the mapping is `objectAtIndex:`-only, so `NPDictionary` does not declare `objectForKeyedSubscript:` — that would advertise a spelling which the rewrite would send to the wrong selector. Use `[d objectForKey:@"k"]`.
+
+### Real Generic Checking (monomorphization + element types)
+
+Generic containers **monomorphize and are type-checked**. `NPArray<NPString *>` and `NPDictionary<NPString *, NPNumber *>` generate real specialized C (struct, vtable, class metadata, method copies with substituted types), and the checker substitutes the element types into method signatures — so the element type is enforced, not erased:
+
+```nupa
+NPMutableArray<NPString *> *m = [NPMutableArray array];
+[m addObject:@"a"];
+NPString *s = [m objectAtIndex:0];      // NPString *, not id
+
+[m addObject:@42];                      // ✗ error: NPNumber* into an NPString* container
+int bad = [m objectAtIndex:0];          // ✗ error: pointer into scalar
+```
+
+`@[...]` and `@{...}` literals **infer** their element types when every element agrees, so `NPArray<NPString *> *a = @[ @"x", @"y" ];` needs no annotation; a mixed array falls back to bare `NPArray`.
+
+Both spellings coexist: bare `NPArray` stays fully supported (zero migration) and simply erases to `id`. Assigning a bare container into a specialized variable is allowed but warns, because the element type is then unverified:
+
+```text
+warning: assigning a bare 'NPArray *' to a specialization of it — the bare
+container's element type is unchecked; add an explicit cast if the contents are known to match
+```
+
+`-Werror` escalates it. `NPArray<A>` and `NPArray<B>` remain mutually assignable without complaint — the same permissiveness as ObjC lightweight generics (you asked for `id` back, you get `id` back).
+
+Note the cost: specialization is compile-time code, not free type safety. The same program using containers generically instead of bare compiles to ~42 KB / +41% more C — all duplicated method bodies and metadata, byte-identical layout, so zero runtime benefit. Golden: `tests/golden/40_nparray_generic/`.
+
+### Nupa-Syntax Macros (dual-track `#define`)
+
+`#define` bodies containing **nupa syntax** (`[recv msg]`, `@`-literals, `^{}` blocks) used to be passed through verbatim to the C compiler — a syntax error. nupac now parses and expands them at the source level. Plain-C macro bodies pass through unchanged and are expanded by the C compiler as before; behavior is identical there.
+
+```nupa
+#define TAG(o)      [o tag]                    // nupa track: expanded by nupac
+#define BUMP(o, n)  [o addTo:n times:1]
+#define LOG(x)      NPLog(@"tag=%d", x)        // body contains an @literal
+#define TWICE(x)    ((x) + (x))                // C track: expanded by clang
+
+int t = TAG(w);                                    // → [w tag]
+BUMP(w, 3);
+LOG(TAG(w));
+```
+
+Expansion rules follow ISO C §6.10.3 (implemented independently in `crates/cpp`, cross-checked line-by-line against `clang -E`): arguments are fully expanded before substitution (`#`/`##` operands use raw text), `#param` stringifies, `a ## b` pastes, `__VA_ARGS__` joins with commas, self-recursive macros freeze (blue-paint), a function-like macro's bare name outside a call does not expand, and `\` continuations join logical lines. Conditional directives (`#if`/`#ifdef`/`#ifndef`/`#elif`/`#else`/`#endif`) are evaluated by nupac too — `defined(X)` operands are exempt from expansion, skipped groups don't define macros, and malformed conditionals error instead of silently swallowing the file.
+
+Limits (clear errors, not silent): a macro invocation must close on one line (use `\` to continue), and macro bodies may not contain `_Pragma`. Golden: `tests/golden/38_macros/`.
+
+### C99 Designated Initializers
+
+All six C99 designated-initializer forms work, including the ones ObjC's C subset never needed:
+
+```nupa
+struct Point { int x; int y; };
+struct Point p1 = { .x = 1, .y = 2 };      // 1. full designated
+struct Point p2 = { .y = 5 };               // 2. partial — omitted fields zero-filled
+struct Point p3 = { .x = 1, 7 };           // 3. designated mixed with positional
+
+NPRange r = (NPRange){ .location = 3,      // 4. compound literal + designators
+                        .length = 9 };
+
+CGPoint pts[3] = { [0].wx = 1, [2].wy = 6 };  // 5. array elements
+
+struct Outer o = { .in.a = 3, .tag = 9 }; // 6. nested member chains
+```
+
+Positional entries continue from the last designated field (form 3 puts `7` in `.y`), unspecified fields are zero-filled, and designator chains like `[1].wx` work too. They pass through as ordinary C initializers — no new IR.
+
+### C99 `_Complex` Passthrough
+
+`float _Complex` / `double _Complex` declarations, typedefs, and parameters pass through untouched, and imaginary literals (`2.0i`, `1e3j`) are emitted **raw** — the imaginary part used to be silently dropped (`2.0i` → `2.0f`).
+
+```nupa
+#include <complex.h>
+typedef float _Complex cfloat;
+
+double _Complex z = 1.0 + 2.0i;   // mixed real + imaginary
+double _Complex w = 2.0i;         // bare imaginary
+cfloat f = 1.5;
+printf("A=%.1f+%.1fi\n", creal(z), cimag(z));
+```
+
+Known limit: the nupa checker has no complex type inference (narrowing between complex widths isn't warned; semantics are enforced by the C compiler). Golden: `tests/golden/39_complex/`.
+
 ---
 
 ## Compilation & CLI
@@ -796,7 +1265,7 @@ Options:
   -fnupa-arc        Enable ARC (default)
   -fno-nupa-arc     Disable ARC (manual MRC mode)
   -fno-checker      Skip type checking
-  -fno-libc         Bare-metal/freestanding output (no libc, no TLS)
+  -ffreestanding    Bare-metal/freestanding output (no libc, no TLS)
   -backend <mode>   C compiler backend: clang (default), portable, or gcc
   -arch <target>    Build for target architecture (e.g. -arch x86_64)
   -asm <file.s>     Link a real assembly file (repeatable)
@@ -984,7 +1453,7 @@ Start from a class system, add things gradually:
 - ✅ @selector / VTable polymorphism
 - ✅ @namespace
 - ✅ Exception handling (`@try`/`@catch`/`@finally`/`@throw` via `setjmp`/`longjmp`)
-  - ⚠️ Known limit: an object that lives across a **cross-function throw** leaks (the `longjmp` skips its scope-end `nupa_release`); same-function `@throw` is handled. ARC-aware unwind is planned.
+  - ⚠️ Known limit (verified with ASan): an object owned by an **intermediate frame** leaks on a **cross-function throw** — `longjmp` skips its scope-end `nupa_release` (no stack unwinding). Within the throwing frame itself, ARC releases owned locals before `@throw`, so same-function throws are clean (an earlier shadow-lift mechanism here double-released — removed; see AGENTS.md). ARC-aware unwind (e.g. ARM64 EHABI) is planned for the cross-function case.
 - ⏳ Foundation standard library
 - ⏳ Compiler self-hosting
 
@@ -1057,7 +1526,7 @@ Generated C should be as clear as handwritten C:
 
 - [✅] Generics (monomorphization)
 
-- [ ] Exception handling
+- [x] Exception handling (`@try`/`@catch`/`@finally`/`@throw`; `-eh checked` for full unwind-safe ARC)
 
 - [ ] Debug information
 

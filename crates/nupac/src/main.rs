@@ -104,8 +104,12 @@ fn clap_command() -> ClapCommand {
             .help("disable ARC (MRC)"))
         .arg(Arg::new("no-checker").long("fno-checker")
             .help("skip type checking"))
-        .arg(Arg::new("no-libc").long("fno-libc")
+        .arg(Arg::new("eh").long("eh").value_name("CHECKED|SJLJ")
+            .help("exception backend: checked (Swift-scheme, no cross-frame leak) or sjlj (setjmp/longjmp, default)"))
+        .arg(Arg::new("ffreestanding").long("ffreestanding")
             .help("bare-metal/freestanding output"))
+        .arg(Arg::new("nostdinc").long("nostdinc")
+            .help("pass -nostdinc to the C compiler (orthogonal; -ffreestanding does NOT imply it)"))
         .arg(Arg::new("no-comments").long("no-comments")
             .help("omit readability comments in generated C (default: on)"))
         .arg(Arg::new("trace-refcount").long("trace-refcount")
@@ -143,7 +147,9 @@ const DOUBLE_TO_SINGLE: &[(&str, &str)] = &[
     ("--fnupa-arc", "-fnupa-arc"),
     ("--fno-nupa-arc", "-fno-nupa-arc"),
     ("--fno-checker", "-fno-checker"),
-    ("--fno-libc", "-fno-libc"),
+    ("--eh", "-eh"),
+    ("--ffreestanding", "-ffreestanding"),
+    ("--nostdinc", "-nostdinc"),
     ("--no-comments", "-no-comments"),
     ("--trace-refcount", "-trace-refcount"),
     ("--trace-max-iters", "-trace-max-iters"),
@@ -210,7 +216,7 @@ fn find_libnupa(custom_libs: &[String]) -> Option<String> {
     None
 }
 
-fn compile_to_binary(cc: &[String], c_code: &str, bin_path: &str, include_dirs: &[String], lib_dirs: &[String], asm_files: &[String], frameworks: &[String], arch: Option<&str>, verbose: bool, no_libc: bool, shared: bool) {
+fn compile_to_binary(cc: &[String], c_code: &str, bin_path: &str, include_dirs: &[String], lib_dirs: &[String], libs: &[String], asm_files: &[String], frameworks: &[String], arch: Option<&str>, verbose: bool, no_libc: bool, nostdinc: bool, shared: bool) {
     // Compiler may be multi-word (e.g. `zig cc`): program + leading args.
     let program = cc.first().map(|s| s.as_str()).unwrap_or("clang");
     let cc_extra: Vec<String> = cc.get(1..).unwrap_or(&[]).to_vec();
@@ -247,7 +253,6 @@ fn compile_to_binary(cc: &[String], c_code: &str, bin_path: &str, include_dirs: 
         clang_args.push("-fno-pie".to_string());
         clang_args.push("-fno-asynchronous-unwind-tables".to_string());
         clang_args.push("-nostdlib".to_string());
-        clang_args.push("-nostdinc".to_string());
         if let Some(a) = arch {
             if a.contains("86") || a.contains("x86_64") {
                 clang_args.push("-mno-sse".to_string());
@@ -255,6 +260,13 @@ fn compile_to_binary(cc: &[String], c_code: &str, bin_path: &str, include_dirs: 
                 clang_args.push("-mno-red-zone".to_string());
             }
         }
+    }
+    if nostdinc {
+        // Orthogonal include-path control: strip the system include search
+        // path only (no other bare-metal flags). Headers must come from the
+        // user's -I dirs — note -nostdinc also removes the compiler's builtin
+        // freestanding set, so stdint.h/stddef.h/stdbool.h must be supplied.
+        clang_args.push("-nostdinc".to_string());
     }
     // Cross-target ARCH selection (e.g. `-arch x86_64` to build via Rosetta).
     if let Some(a) = arch {
@@ -301,6 +313,33 @@ fn compile_to_binary(cc: &[String], c_code: &str, bin_path: &str, include_dirs: 
         } else {
             clang_args.push(runtime_c.to_string_lossy().to_string());
         }
+    }
+    // Platform link conveniences (host mode only). Detected from the GENERATED
+    // code, so the portable (gcc) backend — which expands blocks away — is
+    // automatically exempt.
+    if !no_libc && c_code.contains("(^") {
+        // Blocks: Apple's clang enables them by default, upstream clang (Linux)
+        // does not — and needs the separate BlocksRuntime at link time
+        // (apt install libblocksruntime-dev).
+        clang_args.push("-fblocks".to_string());
+        if std::env::consts::OS == "linux" && !shared {
+            clang_args.push("-lBlocksRuntime".to_string());
+        }
+    }
+    if !no_libc && !shared && std::env::consts::OS == "linux" {
+        // macOS folds libm into libSystem (sin/cos link implicitly); Linux
+        // needs an explicit -lm. The linker drops it when unused (--as-needed).
+        clang_args.push("-lm".to_string());
+    }
+    // User link flags: -L dirs then -l libs, right before the implicit-libs
+    // tail — linker resolution order matters (libs must follow the objects,
+    // which are streamed via stdin at the end of clang_args).
+    for d in lib_dirs {
+        clang_args.push("-L".to_string());
+        clang_args.push(d.clone());
+    }
+    for l in libs {
+        clang_args.push(format!("-l{}", l));
     }
     clang_args.push("-w".to_string());
 
@@ -351,7 +390,9 @@ fn nupac_flags() -> (Vec<(&'static str, &'static str)>, Vec<(&'static str, &'sta
         ("-fnupa-arc",    "enable ARC (default)"),
         ("-fno-nupa-arc", "disable ARC (MRC)"),
         ("-fno-checker",  "skip type checking"),
-        ("-fno-libc",     "bare-metal/freestanding output"),
+        ("-eh",           "exception backend: checked or sjlj (default sjlj)"),
+        ("-ffreestanding", "bare-metal/freestanding output"),
+        ("-nostdinc",     "pass -nostdinc to the C compiler (headers come from your -I dirs)"),
         ("-no-comments",  "omit readability comments in generated C (default: on)"),
         ("-trace-refcount", "print a static reference-count trace (no codegen)"),
         ("-trace-max-iters", "loop iterations in the refcount trace (default 2)"),
@@ -361,6 +402,7 @@ fn nupac_flags() -> (Vec<(&'static str, &'static str)>, Vec<(&'static str, &'sta
         ("-o",            "output path (binary or .c)"),
         ("-I",            "add include dir"),
         ("-L",            "add lib dir"),
+        ("-l",            "link a library (e.g. -l gmp; -I/-L/-l also accept joined form)"),
         ("-asm",          "link a real assembly file (repeatable)"),
         ("-S",            "link a real assembly file (repeatable)"),
         ("-arch",         "target arch (e.g. -arch x86_64)"),
@@ -432,7 +474,9 @@ fn norm_flag(s: &str) -> &str {
             "--fnupa-arc" => "-fnupa-arc",
             "--fno-nupa-arc" => "-fno-nupa-arc",
             "--fno-checker" => "-fno-checker",
-            "--fno-libc" => "-fno-libc",
+            "--eh" => "-eh",
+            "--ffreestanding" => "-ffreestanding",
+            "--nostdinc" => "-nostdinc",
             "--no-comments" => "-no-comments",
             "--trace-refcount" => "-trace-refcount",
             "--trace-max-iters" => "-trace-max-iters",
@@ -555,6 +599,8 @@ fn main() {
         println!("  -o <path>                            Output path (binary or .c)");
         println!("  -I <dir>                             Add include directory");
         println!("  -L <dir>                             Add lib directory");
+        println!("  -l <lib>                             Link a library (e.g. -l gmp)");
+        println!("                                       (-I/-L/-l also accept joined -I<path> form)");
         println!("  -asm <file.s>                        Link a real assembly file (repeatable)");
         println!("  -arch <target>                       Build for target arch (e.g. -arch x86_64)");
         println!("  -v, --verbose                        Show verbose transpilation info");
@@ -563,9 +609,14 @@ fn main() {
         println!("Runtime Options:");
         println!("  -fnupa-arc                           Enable ARC (default)");
         println!("  -fno-nupa-arc                        Disable ARC (MRC)");
-        println!("  -fno-libc                            Bare-metal/freestanding output");
-        println!("                                     No libc headers, no TLS, no bundled runtime.");
-        println!("                                     Clang gets -ffreestanding -nostdinc.");
+        println!("  -ffreestanding                       Bare-metal/freestanding output");
+        println!("                                     (no libc headers, no TLS, no bundled");
+        println!("                                     runtime. The C compiler gets");
+        println!("                                     -ffreestanding -fno-builtin ... (NOT");
+        println!("                                     -nostdinc; see below).");
+        println!("  -nostdinc                            Pass -nostdinc to the C compiler:");
+        println!("                                     strip system include paths — all");
+        println!("                                     headers must come from -I dirs.");
         println!("  -no-comments                         Omit the readability comments in the");
         println!("                                     generated C code (comments are on by");
         println!("                                     default).");
@@ -594,11 +645,13 @@ fn main() {
     let mut output = None;
     let mut include_dirs = Vec::new();
     let mut lib_dirs = Vec::new();
+    let mut libs = Vec::new(); // -l <name> → clang -l<name>
     let mut asm_files = Vec::new();
     let mut frameworks = Vec::new();
     let mut no_arc = false;
     let mut no_checker = false;  // ARC mode by default
     let mut no_libc = false;     // bare-metal / freestanding mode
+    let mut nostdinc = false;    // strip system include paths (orthogonal flag)
     let mut no_comments = false; // readability comments in generated C (on by default)
     let mut shared = false;      // dynamic library output (-shared/-dynamiclib)
     let mut werror = false;
@@ -606,10 +659,12 @@ fn main() {
     let mut program_args = Vec::new();
     let mut arch: Option<String> = None;
     let mut backend: Option<String> = None;
-let mut trace_refcount = false;
+    let mut trace_refcount = false;
     let mut trace_max_iters = 2;
     let mut trace_no_color = false;
     let mut bridge_header: Option<String> = None;
+    let mut eh_checked = false; // -eh checked (default: -eh sjlj, zero behavior change)
+    let mut slots_manifest: Option<String> = None; // --slots <file> (stable cross-TU vtable layout)
 
     // Check for "run" subcommand: look for `run` that is not preceded by a flag
     // (i.e. not `-o run` or `-I run`)
@@ -637,8 +692,10 @@ let mut trace_refcount = false;
                 no_arc = false;
             } else if nj == "-fno-checker" {
                 no_checker = true;
-            } else if nj == "-fno-libc" {
+            } else if nj == "-ffreestanding" {
                 no_libc = true;
+            } else if nj == "-nostdinc" {
+                nostdinc = true;
             } else if nj == "-no-comments" {
                 no_comments = true;
             } else if nj == "-Werror" {
@@ -657,6 +714,25 @@ let mut trace_refcount = false;
                 trace_no_color = true;
             } else if nj == "-emit-bridge-header" && j + 1 < pos {
                 bridge_header = Some(args[j + 1].clone());
+            } else if nj == "-eh" {
+                let v = inline_val.map(|s| s.to_string())
+                    .or_else(|| if j + 1 < pos { Some(args[j + 1].clone()) } else { None })
+                    .unwrap_or_default();
+                match v.as_str() {
+                    "checked" => eh_checked = true,
+                    "sjlj" | "" => {}
+                    other => {
+                        eprintln!("error: -eh expects 'checked' or 'sjlj' (got '{}')", other);
+                        std::process::exit(1);
+                    }
+                }
+            } else if nj == "--slots" {
+                slots_manifest = inline_val.map(|s| s.to_string())
+                    .or_else(|| if j + 1 < pos { Some(args[j + 1].clone()) } else { None });
+                if slots_manifest.is_none() {
+                    eprintln!("error: --slots expects a manifest file path");
+                    std::process::exit(1);
+                }
             }
         }
     }
@@ -675,8 +751,11 @@ let mut trace_refcount = false;
         } else if normalized == "-fno-checker" {
             no_checker = true;
             i += 1;
-        } else if normalized == "-fno-libc" {
+        } else if normalized == "-ffreestanding" {
             no_libc = true;
+            i += 1;
+        } else if normalized == "-nostdinc" {
+            nostdinc = true;
             i += 1;
         } else if normalized == "-no-comments" {
             no_comments = true;
@@ -696,6 +775,38 @@ let mut trace_refcount = false;
         } else if normalized == "-trace-no-color" {
             trace_no_color = true;
             i += 1;
+        } else if normalized == "-eh" {
+            let (val, adv) = if let Some(iv) = inline_val {
+                (Some(iv.to_string()), 1)
+            } else if i + 1 < args.len() {
+                (Some(args[i + 1].clone()), 2)
+            } else {
+                (None, 1)
+            };
+            match val.as_deref() {
+                Some("checked") => { eh_checked = true; i += adv; }
+                Some("sjlj") => { i += adv; }
+                other => {
+                    eprintln!("error: -eh expects 'checked' or 'sjlj' (got '{}')",
+                        other.unwrap_or("(missing)"));
+                    std::process::exit(1);
+                }
+            }
+        } else if normalized == "--slots" {
+            let (val, adv) = if let Some(iv) = inline_val {
+                (Some(iv.to_string()), 1)
+            } else if i + 1 < args.len() {
+                (Some(args[i + 1].clone()), 2)
+            } else {
+                (None, 1)
+            };
+            match val {
+                Some(v) => { slots_manifest = Some(v); i += adv; }
+                None => {
+                    eprintln!("error: --slots expects a manifest file path");
+                    std::process::exit(1);
+                }
+            }
         } else if normalized == "-arch" && i + 1 < args.len() {
             arch = Some(args[i + 1].clone());
             i += 2;
@@ -723,6 +834,22 @@ let mut trace_refcount = false;
         } else if normalized == "-I" && i + 1 < args.len() {
             include_dirs.push(args[i + 1].clone());
             i += 2;
+        } else if normalized.starts_with("-I") && normalized.len() > 2 {
+            // Joined form `-I/path` (clang/GCC convention)
+            include_dirs.push(normalized[2..].to_string());
+            i += 1;
+        } else if normalized == "-l" && i + 1 < args.len() {
+            libs.push(args[i + 1].clone());
+            i += 2;
+        } else if normalized.starts_with("-l") && normalized.len() > 2
+            && normalized[2..].chars().next().map_or(false, |c| c.is_ascii_alphanumeric())
+        {
+            // Joined form `-lgmp`. Must come AFTER `-lgmp`-shaped unknown-flag
+            // handling would reject it — accepted here so link libraries follow
+            // the usual clang spelling. (Plain identifiers only: `-last`-style
+            // ambiguity is the user's to resolve with the spaced form.)
+            libs.push(normalized[2..].to_string());
+            i += 1;
         } else if (normalized == "-asm" || normalized == "-S") && i + 1 < args.len() {
             asm_files.push(args[i + 1].clone());
             i += 2;
@@ -732,6 +859,10 @@ let mut trace_refcount = false;
         } else if normalized == "-L" && i + 1 < args.len() {
             lib_dirs.push(args[i + 1].clone());
             i += 2;
+        } else if normalized.starts_with("-L") && normalized.len() > 2 {
+            // Joined form `-L/path` (clang/GCC convention)
+            lib_dirs.push(normalized[2..].to_string());
+            i += 1;
         } else if normalized == "-emit-bridge-header" && i + 1 < args.len() {
             bridge_header = Some(args[i + 1].clone());
             i += 2;
@@ -773,6 +904,7 @@ let mut trace_refcount = false;
     pipeline.no_arc = no_arc;
     pipeline.no_checker = no_checker;
     pipeline.no_libc = no_libc;
+    pipeline.nostdinc = nostdinc;
     pipeline.no_comments = no_comments;
     pipeline.werror = werror;
     pipeline.bridge_header = bridge_header;
@@ -780,6 +912,8 @@ let mut trace_refcount = false;
     pipeline.trace_refcount = trace_refcount;
     pipeline.trace_max_iters = trace_max_iters;
     pipeline.trace_color = !trace_no_color;
+    pipeline.eh_checked = eh_checked;
+    pipeline.slots_manifest = slots_manifest;
     if let Some(ref b) = backend {
         match attrs::Backend::parse(b) {
             Some(be) => pipeline.backend = be,
@@ -793,6 +927,14 @@ let mut trace_refcount = false;
     // C compiler for the link step: default `clang`; `-backend gcc` → `gcc`;
     // `$NUPA_CC` overrides. (Windows default is also clang.)
     let cc = select_c_compiler(pipeline.backend);
+    // The C type-name probe (see `ctype_probe`) runs the same compiler's
+    // preprocessor, so it needs the same program and target arch.
+    pipeline.c_cc = cc.clone();
+    pipeline.c_arch = arch.clone();
+    // Escape hatch, same spirit as `$NUPA_CC`: skip the probe entirely (no
+    // compiler is spawned, no header is read). The parser then falls back to
+    // the builtin type list and its shape heuristics.
+    pipeline.no_ctype_probe = std::env::var_os("NUPA_NO_CTYPE_PROBE").is_some();
 
     let c_code = match pipeline.transpile(&source, &input_path) {
         Ok(code) => code,
@@ -841,7 +983,7 @@ let mut trace_refcount = false;
                 p.to_string_lossy().to_string()
             });
 
-            compile_to_binary(&cc, &c_code, &bin_path, &include_dirs, &lib_dirs, &asm_files, &frameworks, arch.as_deref(), verbose, no_libc, false);
+            compile_to_binary(&cc, &c_code, &bin_path, &include_dirs, &lib_dirs, &libs, &asm_files, &frameworks, arch.as_deref(), verbose, no_libc, nostdinc, false);
 
             let run_status = Command::new(&bin_path)
                 .args(&program_args)
@@ -865,7 +1007,7 @@ let mut trace_refcount = false;
                 || bin_path.ends_with(".so")
                 || bin_path.ends_with(".dll");
 
-            compile_to_binary(&cc, &c_code, &bin_path, &include_dirs, &lib_dirs, &asm_files, &frameworks, arch.as_deref(), verbose, no_libc, shared);
+            compile_to_binary(&cc, &c_code, &bin_path, &include_dirs, &lib_dirs, &libs, &asm_files, &frameworks, arch.as_deref(), verbose, no_libc, nostdinc, shared);
         }
     }
 }

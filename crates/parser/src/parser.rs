@@ -11,8 +11,36 @@ pub struct Parser<'a> {
     err_msg: String,
     panic_mode: bool,
     type_names: Vec<String>,
+    /// True when `type_names` is known to be *complete* — i.e. it came from the
+    /// C preprocessor's own view of this TU's `#include`d headers (nupac's
+    /// `ctype_probe`). Only then may the parser let the symbol table decide the
+    /// cases C decides by the symbol table: whether `(X *)p` is a cast, and
+    /// whether `x * y;` is a declaration. When the table is not authoritative
+    /// the historical shape fallbacks stay in force, so a missing table can
+    /// never turn working code into a parse error.
+    type_table_complete: bool,
     type_params: Vec<String>,
     generic_class_names: Vec<String>,
+    /// True while parsing a type in a position that may carry a nullability
+    /// annotation (method return type, method/function parameter, ivar).
+    /// Those positions unambiguously expect a type, so `nullable` / `nonnull`
+    /// can be read as annotations with **no lookahead** — which is what keeps
+    /// `int nullable = 5;` compiling, per the C-superset rule. Gated by a flag
+    /// rather than guessed, so a declaration whose *name* is `nullable` is
+    /// never misread.
+    annotating: bool,
+    /// Inside an `NP_ASSUME_NONNULL_BEGIN` … `_END` region: an unannotated
+    /// pointer type defaults to `Nonnull` (ObjC's audit-cost-O(1) trick).
+    /// Toggled by the two marker identifiers in `parse_declaration`.
+    nonnull_region: bool,
+    /// File the open region was opened in. The parser reads one inlined buffer,
+    /// so it has no `#include` boundary of its own; without this an open region
+    /// would silently mark every pointer in every `#import`ed header nonnull.
+    /// `None` = no region open.
+    region_file: Option<String>,
+    /// Maps inlined-buffer lines back to (file, source line), so the region can
+    /// be scoped to one file. Injected by the pipeline (`pre.source_map`).
+    source_map: Option<nupa_cst::SourceMap>,
 }
 
 impl<'a> Parser<'a> {
@@ -51,10 +79,73 @@ impl<'a> Parser<'a> {
                 "key_t".into(), "fsblkcnt_t".into(), "fsfilcnt_t".into(), "blkcnt_t".into(),
                 "blksize_t".into(), "dev_t".into(), "id_t".into(), "ino_t".into(),
                 "nlink_t".into(), "uid_t".into(), "gid_t".into(),
+                // `NPAsync<T>` — reserved return-type marker (not a real class).
+                // Registered so `NPAsync<int>` parses as a type with type args;
+                // parse_function_decl_or_definition / parse_method unwrap it to
+                // `T` + an async_marker flag. See AGENTS.md `NPAsync<T>` section.
+                "NPAsync".into(),
             ],
+            type_table_complete: false,
             type_params: Vec::new(),
-            generic_class_names: Vec::new(),
+            generic_class_names: vec!["NPAsync".into()],
+            annotating: false,
+            nonnull_region: false,
+            region_file: None,
+            source_map: None,
         }
+    }
+
+    /// Give the parser the pipeline's line→file map so an `NP_ASSUME_NONNULL`
+    /// region can be scoped to the file that opened it.
+    pub fn set_source_map(&mut self, sm: nupa_cst::SourceMap) {
+        self.source_map = Some(sm);
+    }
+
+    /// The file the given inlined-buffer line came from, or `""` when unknown.
+    fn file_of_line(&self, line: usize) -> String {
+        match &self.source_map {
+            Some(sm) => sm.locate(line).0,
+            None => String::new(),
+        }
+    }
+
+    /// True when an open nonnull region applies at `line`. A region belongs to
+    /// the file that opened it: crossing into an `#import`ed file ends it, so
+    /// an unclosed region can never silently mark a whole library's parameters
+    /// nonnull. (Conservative — a region that resumed after the include would be
+    /// a nicety, but the failure mode here is "wrong types", not "missed
+    /// warning".)
+    fn region_applies_at(&mut self, line: usize) -> bool {
+        if !self.nonnull_region {
+            return false;
+        }
+        if self.source_map.is_none() {
+            // No map: single-file parse, the region plainly applies.
+            return true;
+        }
+        let here = self.file_of_line(line);
+        match &self.region_file {
+            Some(f) => *f == here,
+            None => false,
+        }
+    }
+
+    /// Parser whose type-name table is seeded with the names declared by the C
+    /// headers this TU includes (see `type_table_complete`). `complete` must
+    /// only be `true` when those names came from the real C preprocessor.
+    pub fn with_c_type_names(source: &'a str, names: &[String], complete: bool) -> Self {
+        let mut p = Self::new(source);
+        for n in names {
+            p.add_type_name(n);
+        }
+        p.type_table_complete = complete;
+        p
+    }
+
+    /// Is the type-name table the C preprocessor's own (so an unknown name here
+    /// is unknown to C as well)?
+    fn type_table_is_authoritative(&self) -> bool {
+        self.type_table_complete
     }
 
     fn current_text(&self) -> &'a str {
@@ -225,8 +316,297 @@ impl<'a> Parser<'a> {
         after.starts_with("::")
     }
 
+    /// Lookahead for `for (Type var in collection)`: scan the source after the
+    /// current token for a depth-0 `in` keyword before the matching `)` (and
+    /// before any depth-0 `;`, which means a plain for header). Non-advancing:
+    /// the caller parses the header normally after this returns true. `in` is
+    /// a hard keyword, so a source-slice word match is unambiguous.
+    fn scan_for_in_header(&self) -> bool {
+        let bytes = self.source.as_bytes();
+        let mut i = self.current.start;
+        let mut depth: i32 = 0;
+        while i < bytes.len() {
+            let c = bytes[i] as char;
+            match c {
+                '(' => { depth += 1; i += 1; }
+                ')' => {
+                    if depth == 0 { return false; } // end of for header
+                    depth -= 1;
+                    i += 1;
+                }
+                ';' if depth == 0 => return false, // plain for header
+                '"' => { // skip string literal
+                    i += 1;
+                    while i < bytes.len() && bytes[i] != b'"' {
+                        if bytes[i] == b'\\' { i += 1; }
+                        i += 1;
+                    }
+                    i += 1;
+                }
+                '\'' => { // skip char literal
+                    i += 1;
+                    while i < bytes.len() && bytes[i] != b'\'' {
+                        if bytes[i] == b'\\' { i += 1; }
+                        i += 1;
+                    }
+                    i += 1;
+                }
+                c if c.is_alphabetic() || c == '_' => {
+                    let word_start = i;
+                    while i < bytes.len() {
+                        let w = bytes[i] as char;
+                        if w.is_alphanumeric() || w == '_' { i += 1; } else { break; }
+                    }
+                    // Contextual `in`: only a standalone word at depth 0
+                    // counts. A `.` or `->` immediately before the word means
+                    // member access (`for (i = p.in; ...)`), not a for-in
+                    // connector — scan backwards over the just-read word.
+                    let is_member = word_start > 0
+                        && matches!(bytes[word_start - 1], b'.' | b'>');
+                    if depth == 0 && !is_member && &self.source[word_start..i] == "in" {
+                        return true;
+                    }
+                }
+                _ => { i += 1; }
+            }
+        }
+        false
+    }
+
     fn is_type_name(&self, name: &str) -> bool {
         self.type_names.iter().any(|n| n == name)
+    }
+
+    /// Textual lookahead for the case-binding shape `Type [*] name :` —
+    /// or `Type [*] name when <guard> :` — starting at the current token (an
+    /// already-checked type-name identifier). Consumes nothing. Returns true
+    /// only when the shape is confirmed, so the caller may commit to the Bind
+    /// branch.
+    fn scan_case_bind_shape(&self) -> bool {
+        // Re-tokenize from the current token's offset: the parser has no
+        // cheap multi-token peek (current/previous only), so scan a fresh
+        // lexer over the remaining source. Bounded by the enclosing line's
+        // worth of tokens — a `:` or `;` terminates.
+        let rest = &self.source[self.current.start..];
+        let mut lex = Lexer::new(rest);
+        // tok[0] == type name (already known)
+        lex.next_token();
+        let mut tok = lex.next_token();
+        if tok.kind == TokenKind::Star {
+            tok = lex.next_token();
+        }
+        if tok.kind != TokenKind::Identifier {
+            return false;
+        }
+        // Binding name parsed. A `when` guard (contextual keyword — a plain
+        // identifier in the lexer) sits between the name and the arm's `:`;
+        // skip the guard textually so the shape still confirms as a Bind.
+        // Without this, `case T *x when <expr>:` fell through to the plain
+        // constant path — and a switch mixing that with real Bind arms was
+        // then rejected by the collector.
+        let mut next = lex.next_token();
+        if next.kind == TokenKind::Identifier && next.text(rest) == "when" {
+            next = self.scan_past_guard(&mut lex);
+        }
+        next.kind == TokenKind::Colon
+    }
+
+    /// Drive `lex` past a `when` guard's tokens up to (and returning) the
+    /// token that ends it: the arm's `:` at bracket depth 0, or a
+    /// `;`/closing brace at depth 0. Depth-aware over (), [], {} so a
+    /// bracketed subexpression may contain `:`. A ternary's `:` at depth 0
+    /// ends the scan early — harmless, since `parse_case_pattern` re-parses
+    /// the whole guard properly after the Bind branch is committed.
+    fn scan_past_guard(&self, lex: &mut Lexer) -> Token {
+        let mut depth: i32 = 0;
+        loop {
+            let t = lex.next_token();
+            match t.kind {
+                TokenKind::Eof => return t,
+                TokenKind::LParen | TokenKind::LBracket | TokenKind::LBrace
+                | TokenKind::AtArray | TokenKind::AtDict | TokenKind::AtLParen => depth += 1,
+                TokenKind::RParen | TokenKind::RBracket | TokenKind::RBrace => {
+                    if depth == 0 {
+                        return t;
+                    }
+                    depth -= 1;
+                }
+                TokenKind::Colon | TokenKind::Semicolon if depth == 0 => return t,
+                _ => {}
+            }
+        }
+    }
+
+    /// Parse one case pattern after the `case` keyword:
+    ///   - dangling comparison (`> 10`, `<= 5`, `> 0 && < 100`) → Cond
+    ///   - declaration shape (`NSString *s`, `int x`) → Bind
+    ///   - ObjC object literal (`@"x"`, `@1`, `@YES`, `@'c'`, `@(expr)`) → Const
+    ///   - anything else → Const (plain constant; comma multi-value is
+    ///     handled by the caller)
+    /// Optionally followed by a `when <expr>` guard.
+    fn parse_case_pattern(&mut self) -> (CstPattern, Option<Box<CstExpr>>) {
+        let pattern = self.parse_case_pattern_head();
+        // `when` guard — contextual keyword: only special right after a
+        // pattern head; `when` stays a legal C identifier everywhere else.
+        let guard = if self.current.kind == TokenKind::Identifier
+            && self.current_text() == "when"
+        {
+            self.advance();
+            self.parse_expression().map(Box::new)
+        } else {
+            None
+        };
+        (pattern, guard)
+    }
+
+    fn parse_case_pattern_head(&mut self) -> CstPattern {
+        // ObjC object literals keep Const (value-equality decided at
+        // lowering): @"..." / @1 / @YES / @'c' / @(expr).
+        match self.current.kind {
+            TokenKind::AtString | TokenKind::AtNumber | TokenKind::AtBool | TokenKind::AtChar | TokenKind::AtLParen => {
+                if let Some(e) = self.parse_unary() {
+                    return CstPattern::Const(Box::new(e));
+                }
+                return CstPattern::Const(Box::new(CstExpr {
+                    kind: CstExprKind::Integer, expr_type: None, line: 0, col: 0,
+                    data: CstExprData::Integer(0),
+                }));
+            }
+            // Dangling comparison: operator token starts the pattern; the
+            // missing left operand is the switch subject (spliced at lowering).
+            TokenKind::Greater | TokenKind::Less | TokenKind::Geq | TokenKind::Leq | TokenKind::Eq | TokenKind::Neq => {
+                if let Some(e) = self.parse_case_cond() {
+                    return CstPattern::Cond(Box::new(e));
+                }
+            }
+            // Declaration shape `Type *name` (pointer) or `Type name`
+            // (scalar) — C/ObjC-style binding. Committed only after a
+            // textual lookahead confirms the `Type [*] name :` shape (same
+            // textual-lookahead discipline as scan_cast_star_paren; the
+            // lexer has no snapshot/restore, so we must not consume on a
+            // failed guess — otherwise `case enumVal:` (plain constant)
+            // would be half-consumed).
+            TokenKind::Identifier => {
+                let name = self.current_text().to_string();
+                if self.is_type_name(&name) && self.scan_case_bind_shape() {
+                    if let Some(ty) = self.parse_type_full() {
+                        let is_ptr = self.match_token(TokenKind::Star);
+                        if self.current.kind == TokenKind::Identifier {
+                            let id = self.current_text().to_string();
+                            self.advance();
+                            return CstPattern::Bind { ty: Box::new(ty), name: id };
+                        }
+                        let _ = is_ptr;
+                    }
+                }
+            }
+            _ => {}
+        }
+        // Plain constant (default path).
+        match self.parse_assignment() {
+            Some(e) => CstPattern::Const(Box::new(e)),
+            None => CstPattern::Const(Box::new(CstExpr {
+                kind: CstExprKind::Integer, expr_type: None, line: 0, col: 0,
+                data: CstExprData::Integer(0),
+            })),
+        }
+    }
+
+    /// Parse a dangling comparison chain: `> 10`, `> 0 && < 100`,
+    /// `>= 5`, `== 3`. The subject appears as the missing left operand of
+    /// each comparison; represented as a Binary with an empty Ident left
+    /// side (spliced by the pattern crate).
+    fn parse_case_cond(&mut self) -> Option<CstExpr> {
+        let mut expr = self.parse_case_cond_atom()?;
+        while self.current.kind == TokenKind::LogicalAnd {
+            self.advance();
+            let right = self.parse_case_cond_atom()?;
+            expr = CstExpr {
+                kind: CstExprKind::Binary, expr_type: None,
+                line: expr.line, col: expr.col,
+                data: CstExprData::Binary { op: 17, left: Box::new(expr), right: Box::new(right) },
+            };
+        }
+        Some(expr)
+    }
+
+    /// One comparison arm: `<op> <rhs>`. Emits Binary { op, left: subject
+    /// placeholder (empty Ident), right }.
+    fn parse_case_cond_atom(&mut self) -> Option<CstExpr> {
+        let op = match self.current.kind {
+            TokenKind::Greater => 9,
+            TokenKind::Less => 8,
+            TokenKind::Geq => 11,
+            TokenKind::Leq => 10,
+            TokenKind::Eq => 12,
+            TokenKind::Neq => 13,
+            _ => return None,
+        };
+        let line = self.current.line;
+        let col = self.current.column;
+        self.advance();
+        // rhs must NOT go through parse_assignment: its precedence chain
+        // includes `&&`, and a failed sub-parse after match_token consumes
+        // the operator irrecoverably (`0 && < 100` swallows the `&&`, then
+        // dies on `<`). A dangling comparison's rhs is a shift-level
+        // expression; the `&&` chaining between comparisons belongs to
+        // parse_case_cond's loop.
+        let rhs = self.parse_shift()?;
+        Some(CstExpr {
+            kind: CstExprKind::Binary, expr_type: None, line, col,
+            data: CstExprData::Binary {
+                op,
+                left: Box::new(CstExpr {
+                    kind: CstExprKind::Ident, expr_type: None, line, col,
+                    data: CstExprData::Ident(String::new()),
+                }),
+                right: Box::new(rhs),
+            },
+        })
+    }
+
+    /// Lookahead for the unambiguously-cast shape `( X * ... )`: from the
+    /// source offset just past the identifier `X`, skip whitespace and
+    /// qualifiers, require at least one `*`, and then require `)`.
+    ///
+    /// The `*` is *inside* the parentheses, which is what removes the ambiguity:
+    /// the multiplication reading `(X) * y` needs the `*` after the closing
+    /// paren, and a `*` cannot take `)` as its operand. Purely textual, so it
+    /// also works for type names the parser has never heard of.
+    fn scan_cast_star_paren(&self, from: usize) -> bool {
+        let bytes = self.source.as_bytes();
+        let mut i = from;
+        let mut stars = 0usize;
+        loop {
+            if i >= bytes.len() {
+                return false;
+            }
+            let c = bytes[i];
+            if c.is_ascii_whitespace() {
+                i += 1;
+                continue;
+            }
+            if c == b'*' {
+                stars += 1;
+                i += 1;
+                continue;
+            }
+            if (c as char).is_ascii_alphabetic() {
+                // `(char * const)` — qualifiers may sit between the stars and `)`.
+                let start = i;
+                while i < bytes.len() && (bytes[i] as char).is_ascii_alphanumeric() {
+                    i += 1;
+                }
+                let word = &self.source[start..i];
+                if stars > 0
+                    && matches!(word, "const" | "volatile" | "restrict" | "__restrict" | "__restrict__")
+                {
+                    continue;
+                }
+                return false;
+            }
+            return stars > 0 && c == b')';
+        }
     }
 
     fn add_type_param(&mut self, name: &str) {
@@ -245,6 +625,116 @@ impl<'a> Parser<'a> {
 
     // ─── Type parsing ─────────────────────────────────────────────────────
 
+    /// Parse a type in a position that may carry a nullability annotation
+    /// (method return type, method/function parameter, ivar).
+    ///
+    /// Sets `annotating` for the duration so `parse_type_name`'s qualifier loop
+    /// recognizes `nullable` / `nonnull` as annotations. The flag is restored
+    /// even on the early-return path, so a variable declaration nested inside
+    /// (impossible today, but cheap to keep true) cannot leak the mode.
+    ///
+    /// Also applies the `NP_ASSUME_NONNULL` region default: inside the region an
+    /// *unannotated pointer* becomes `Nonnull`. Applied here rather than in
+    /// `parse_type_name` so the region can never annotate a non-pointer, and so
+    /// an explicit `_Null_unspecified` opt-out survives the default.
+    fn parse_type_annotated(&mut self) -> Option<CstType> {
+        let saved = self.annotating;
+        self.annotating = true;
+        let at_line = self.current.line;
+        let mut t = self.parse_type_full();
+        self.annotating = saved;
+        if self.region_applies_at(at_line) {
+            if let Some(tt) = t.as_mut() {
+                let pointerish = tt.is_pointer
+                    || matches!(tt.prim, TypePrim::Id | TypePrim::Instancetype);
+                if pointerish && tt.nulls == Nullability::Unspecified {
+                    tt.nulls = Nullability::Nonnull;
+                }
+            }
+        }
+        t
+    }
+
+    /// The nullability annotation the current token spells, if any. Does NOT
+    /// consume the token.
+    ///
+    /// Recognizes both spellings ObjC accepts, on purpose: the bare
+    /// `nullable` / `nonnull` (which ObjC gets from macros expanding to
+    /// `_Nullable` / `_Nonnull`) and the underscore forms. They mean the same
+    /// thing, so accepting both costs nothing and lets C headers written for
+    /// clang be used verbatim.
+    ///
+    /// Deliberately NOT in `KW_TABLE` — a hard keyword would make
+    /// `int nullable = 5;` a parse error, breaking the C-superset rule
+    /// (AGENTS.md). Identifiers keep working everywhere else; only the
+    /// `annotating` positions consult this.
+    fn nullability_prefix(&mut self) -> Option<Nullability> {
+        if self.current.kind != TokenKind::Identifier {
+            return None;
+        }
+        let n = match self.current_text() {
+            "nullable" => Nullability::Nullable,
+            "nonnull" => Nullability::Nonnull,
+            "_Nullable" => Nullability::Nullable,
+            "_Nonnull" => Nullability::Nonnull,
+            "_Null_unspecified" => Nullability::NullUnspecified,
+            _ => return None,
+        };
+        // The underscore spellings are clang RESERVED WORDS — they can never be a
+        // declarator name, so they skip the ambiguity guard entirely. Without
+        // this exemption the guard sees `_Nullable s)` (postfix annotation in a
+        // block/function parameter list) and misreads it as "type named
+        // `_Nullable`, declarator `s`", silently dropping the annotation.
+        if matches!(
+            self.current_text(),
+            "_Nullable" | "_Nonnull" | "_Null_unspecified"
+        ) {
+            return Some(n);
+        }
+        // Guard: `nullable` / `nonnull` are ordinary identifiers, so the word is a
+        // NAME — not an annotation — in either of the two positions a C
+        // declarator can put one:
+        //   1. declarator position:  `int nullable = 5;`   (word then `=`)
+        //   2. type position:         `nullable foo = 5;`   (word, name, then `=`)
+        // Both are legal C and must keep working (the C-superset rule).
+        //
+        // Shape only — deliberately NOT consulting the type table, because a
+        // type may be declared LATER in the file (forward reference) and
+        // requiring `is_type_name` would silently drop annotations for those.
+        //
+        // `)` is intentionally NOT a "name follows" signal by itself: the
+        // property attribute form `@property (nullable) T *x` needs the word
+        // followed by `)` to still read as an annotation, and that position has
+        // no ambiguity (nothing can be declared inside the parens). It IS used
+        // in the two-token form 2 check below, where a name really did precede.
+        //
+        // `previous` is saved and restored as well — `advance()` overwrites it,
+        // and leaving it clobbered corrupts every later `previous_text()`
+        // caller (declarator names, `@selector`, …).
+        let saved_lex = self.lexer.save_pos();
+        let saved_cur = self.current.clone();
+        let saved_prev = self.previous.clone();
+        self.advance();
+        let decl_pos = matches!(
+            self.current.kind,
+            TokenKind::Assign | TokenKind::Semicolon | TokenKind::Comma
+        );
+        // Form 2 needs one more token of lookahead: `nullable foo = 5;`.
+        let type_then_name = !decl_pos
+            && matches!(self.current.kind, TokenKind::Identifier | TokenKind::Keyword)
+            && {
+                self.advance();
+                matches!(
+                    self.current.kind,
+                    TokenKind::Assign | TokenKind::Semicolon | TokenKind::Comma | TokenKind::RParen
+                )
+            };
+        self.lexer.restore_pos(saved_lex);
+        self.current = saved_cur;
+        self.previous = saved_prev;
+        if decl_pos || type_then_name { None } else { Some(n) }
+    }
+
     fn parse_type_name(&mut self) -> Option<CstType> {
         let mut t = CstType::new(TypePrim::Void);
 
@@ -255,6 +745,20 @@ impl<'a> Parser<'a> {
             else if self.match_keyword(KeywordKind::Extern) { true }
             else if self.match_keyword(KeywordKind::Weak) { t.is_weak_qual = true; true }
             else if self.match_keyword(KeywordKind::Block) { t.is_block_qual = true; true }
+            else if self.annotating {
+                // Only in an annotation position (method return type, method or
+                // function parameter, ivar) — see `parse_type_annotated`. Those
+                // positions unambiguously expect a type, so no lookahead is
+                // needed, which is exactly what keeps `int nullable = 5;`
+                // (a variable NAMED nullable) compiling. See the C-superset
+                // rule in AGENTS.md; the same reasoning retires ObjC's
+                // macro-based spelling without giving up its syntax.
+                if let Some(n) = self.nullability_prefix() {
+                    self.advance();
+                    t.nulls = n;
+                    true
+                } else { false }
+            }
             else { false }
         } {}
 
@@ -301,9 +805,20 @@ impl<'a> Parser<'a> {
             else if self.match_keyword(KeywordKind::Instancetype) { t.prim = TypePrim::Instancetype; }
             else if self.match_keyword(KeywordKind::Struct) || self.match_keyword(KeywordKind::Union) || self.match_keyword(KeywordKind::Enum) {
                 if self.current.kind == TokenKind::Identifier {
+                    // match_keyword already consumed the tag keyword, so it is
+                    // `self.previous` now (not `self.current`, which is the tag
+                    // identifier). Read it before advancing over the name.
+                    let tag = match self.previous.keyword {
+                        KeywordKind::Union => TagKind::Union,
+                        KeywordKind::Enum => TagKind::Enum,
+                        _ => TagKind::Struct,
+                    };
                     self.advance();
                     t.prim = TypePrim::Named;
                     t.is_struct = true;
+                    // `enum Mode` and `struct Mode` are distinct, incompatible C
+                    // types, so codegen must echo back the keyword the source used.
+                    t.tag = tag;
                     t.name = Some(self.previous_text().to_string());
                 }
             }
@@ -344,6 +859,14 @@ else if self.match_keyword(KeywordKind::Typeof) {
             }
         }
 
+        // C99 `_Complex` (§6.2.5p13): `float _Complex x`, `double _Complex y`,
+        // `float _Complex`. Sits after the base type specifier, so it is
+        // consumed here — outside the base-type branch above (prim is already
+        // Float/Double by then). Pure passthrough flag; codegen echoes it.
+        if self.match_keyword(KeywordKind::Complex) {
+            t.is_complex = true;
+        }
+
         Some(t)
     }
 
@@ -365,7 +888,19 @@ else if self.match_keyword(KeywordKind::Typeof) {
                             || name.rsplit("::").next().map_or(false, |s| self.is_generic_class(s));
                     }
                     if !is_generic {
-                        // Protocols path: <Proto1, Proto2>
+                        // Protocols path: <Proto1, Proto2> and intersection
+                        // <P & Q> — `&` separates protocols that must ALL be
+                        // conformed to, landing in the same flat list
+                        // (conjunction semantics; checker requires every one).
+                        //
+                        // Speculative, so it MUST rewind on failure: the
+                        // generic-args path below re-reads the same tokens.
+                        // `NPArray<NPString *> *a` is not a protocol list (the
+                        // `*` fails the `>` lookahead); without a rewind the
+                        // args path would start at `*`, produce no args, and
+                        // silently erase `<NPString *>`.
+                        let saved_lex = self.lexer.save_pos();
+                        let saved_tok = self.current.clone();
                         let mut protocols = Vec::new();
                         let mut protocol_ok = true;
                         loop {
@@ -375,7 +910,7 @@ else if self.match_keyword(KeywordKind::Typeof) {
                             }
                             protocols.push(self.current_text().to_string());
                             self.advance();
-                            if !self.match_token(TokenKind::Comma) { break; }
+                            if !(self.match_token(TokenKind::Comma) || self.match_token(TokenKind::Ampersand)) { break; }
                         }
                         if protocol_ok && self.current.kind == TokenKind::Greater {
                             self.advance();
@@ -384,6 +919,9 @@ else if self.match_keyword(KeywordKind::Typeof) {
                                 t.protocols = protocols;
                                 is_protocol = true;
                             }
+                        } else {
+                            self.lexer.restore_pos(saved_lex);
+                            self.current = saved_tok;
                         }
                     }
                 }
@@ -417,8 +955,16 @@ else if self.match_keyword(KeywordKind::Typeof) {
             }
         }
 
+        // A prefix annotation (`nullable NPString *s`) parsed onto the base by
+        // the qualifier loop is lifted off here and re-applied after the star
+        // loop. Leaving it on the base would mark the INNER pointer level.
+        let prefix_nulls = t.nulls;
+        t.nulls = Nullability::Unspecified;
+        let mut star_count = 0usize;
+
         // Pointer *
         while self.match_token(TokenKind::Star) {
+            star_count += 1;
             let mut ptr = CstType::new(t.prim);
             ptr.is_pointer = true;
             ptr.name = t.name.clone();
@@ -427,6 +973,38 @@ else if self.match_keyword(KeywordKind::Typeof) {
             ptr.type_args = std::mem::take(&mut t.type_args);
             ptr.subtype = Some(Box::new(t));
             t = ptr;
+            // Postfix annotation directly after this star annotates THIS level:
+            // `NPError * _Nullable *` marks the middle pointer, while `NPError *
+            // * _Nullable` and the plain one-star `NPString * _Nonnull` mark the
+            // outermost (the last star has just been wrapped). That is C's
+            // declarator reading order. The check must live INSIDE the loop —
+            // after it, the interleaved `* _Nullable *` form would leave the
+            // second star unconsumed. The `_`-spelled words are clang reserved
+            // words so the ambiguity guard always accepts them here; a bare
+            // `nullable` before a declarator name is rejected by the same guard.
+            if self.annotating {
+                if let Some(n) = self.nullability_prefix() {
+                    self.advance();
+                    t.nulls = n;
+                }
+            }
+        }
+
+        // A prefix annotation with a SINGLE star lands on that (outermost)
+        // pointer. With multiple stars clang REJECTS the form outright —
+        // verified: `void g(_Nonnull Widget * * out)` → "nullability specifier
+        // '_Nonnull' cannot be applied to non-pointer type 'Widget'" — because
+        // it refuses to guess which level was meant. Match that, and point at
+        // the postfix spelling that annotates a chosen level.
+        if prefix_nulls != Nullability::Unspecified {
+            if star_count > 1 {
+                let tn = t.name.clone().unwrap_or_else(|| "id".into());
+                self.error(&format!(
+                    "nullability specifier cannot be applied to non-pointer type '{}' — for a multi-level pointer, annotate the level you mean with the postfix spelling (NPError * _Nullable *)",
+                    tn));
+            } else if t.nulls == Nullability::Unspecified {
+                t.nulls = prefix_nulls;
+            }
         }
 
         // Block type: T (^)(params) or T (^name)(params)
@@ -434,6 +1012,7 @@ else if self.match_keyword(KeywordKind::Typeof) {
             if self.match_token(TokenKind::Caret) {
                 let mut bt = CstType::new(t.prim);
                 bt.is_block = true;
+                bt.nulls = t.nulls;   // same carry-up as the pointer case above
                 bt.subtype = Some(Box::new(t));
                 if self.current.kind == TokenKind::Identifier {
                     bt.block_name = Some(self.current_text().to_string());
@@ -443,7 +1022,7 @@ else if self.match_keyword(KeywordKind::Typeof) {
                 if self.match_token(TokenKind::LParen) {
                     let mut params: Vec<CstType> = Vec::new();
                     while !self.check(TokenKind::RParen) && !self.check(TokenKind::Eof) {
-                        if let Some(ptype) = self.parse_type_full() {
+                        if let Some(ptype) = self.parse_type_annotated() {
                             if self.current.kind == TokenKind::Identifier
                                 || (self.current.kind == TokenKind::Keyword
                                     && (self.current.keyword == KeywordKind::Self_
@@ -623,6 +1202,24 @@ else if self.match_keyword(KeywordKind::Typeof) {
 
     // ─── Expression parsing ──────────────────────────────────────────────
 
+    /// Desugar a boxing literal (`@123`, `@YES`, `@'c'`) into a normal
+    /// `[NPNumber <selector> <arg>]` class-method send, so the whole
+    /// downstream chain (binder resolution, checker, vtable dispatch) is the
+    /// same one a hand-written message send goes through.
+    fn mk_npnumber_send(&self, selector: &str, arg: CstExpr, line: usize, col: usize) -> CstExpr {
+        CstExpr {
+            kind: CstExprKind::MessageSend, expr_type: None, line, col,
+            data: CstExprData::Message {
+                receiver: Box::new(CstExpr {
+                    kind: CstExprKind::Ident, expr_type: None, line, col,
+                    data: CstExprData::Ident("NPNumber".into()),
+                }),
+                selector: selector.to_string(),
+                args: vec![arg],
+            },
+        }
+    }
+
     fn parse_primary(&mut self) -> Option<CstExpr> {
         if self.match_keyword(KeywordKind::Extension) {
             // __extension__ is a prefix that suppresses pedantic warnings.
@@ -729,7 +1326,17 @@ else if self.match_keyword(KeywordKind::Typeof) {
             });
         }
         if self.match_token(TokenKind::Float) {
-            let text = self.previous_text().trim_end_matches(|c: char| c == 'f' || c == 'F');
+            let raw = self.previous_text().to_string();
+            // Imaginary suffix (§6.4.4.2): preserve the literal verbatim — an
+            // f64 parse would silently drop the imaginary part (`2.0i` -> 2.0).
+            if raw.ends_with(|c: char| c == 'i' || c == 'I' || c == 'j' || c == 'J') {
+                return Some(CstExpr {
+                    kind: CstExprKind::Float, expr_type: None,
+                    line: self.previous.line, col: self.previous.column,
+                    data: CstExprData::FloatRaw(raw),
+                });
+            }
+            let text = raw.trim_end_matches(|c: char| c == 'f' || c == 'F');
             let val = text.parse::<f64>().unwrap_or(0.0);
             return Some(CstExpr {
                 kind: CstExprKind::Float, expr_type: None,
@@ -778,16 +1385,43 @@ else if self.match_keyword(KeywordKind::Typeof) {
                     data: CstExprData::Integer(text.trim_end_matches(|c: char| c == 'u' || c == 'U' || c == 'l' || c == 'L').parse::<i64>().unwrap_or(0)),
                 }
             };
-            return Some(CstExpr {
-                kind: CstExprKind::MessageSend, expr_type: None, line, col,
-                data: CstExprData::Message {
-                    receiver: Box::new(CstExpr {
-                        kind: CstExprKind::Ident, expr_type: None, line, col,
-                        data: CstExprData::Ident("NPNumber".into()),
-                    }),
-                    selector: if is_float { "numberWithDouble:".into() } else { "numberWithInt:".into() },
-                    args: vec![number_expr],
-                },
+            return Some(self.mk_npnumber_send(
+                if is_float { "numberWithDouble:" } else { "numberWithInt:" },
+                number_expr, line, col));
+        }
+        // `@YES` / `@NO` (`@true` / `@false`) — boxed BOOL literal.
+        if self.match_token(TokenKind::AtBool) {
+            let val = self.previous.char_val as i64;
+            let line = self.previous.line;
+            let col = self.previous.column;
+            let arg = CstExpr {
+                kind: CstExprKind::Integer, expr_type: None, line, col,
+                data: CstExprData::Integer(val),
+            };
+            return Some(self.mk_npnumber_send("numberWithBool:", arg, line, col));
+        }
+        // `@'c'` — boxed character literal.
+        if self.match_token(TokenKind::AtChar) {
+            let val = self.previous.char_val;
+            let line = self.previous.line;
+            let col = self.previous.column;
+            let arg = CstExpr {
+                kind: CstExprKind::Char, expr_type: None, line, col,
+                data: CstExprData::Char(val),
+            };
+            return Some(self.mk_npnumber_send("numberWithChar:", arg, line, col));
+        }
+        // `@(expr)` — boxed expression. The parser has no types, so the
+        // NPNumber factory is picked by the checker from the expression's
+        // static type; carry the node through as `Boxed`.
+        if self.match_token(TokenKind::AtLParen) {
+            let line = self.previous.line;
+            let col = self.previous.column;
+            let inner = self.parse_expression();
+            self.consume(TokenKind::RParen, "expected ')' after boxed expression");
+            return inner.map(|e| CstExpr {
+                kind: CstExprKind::Boxed, expr_type: None, line, col,
+                data: CstExprData::Boxed(Box::new(e)),
             });
         }
         if self.match_token(TokenKind::Char) {
@@ -809,7 +1443,7 @@ else if self.match_keyword(KeywordKind::Typeof) {
                       KeywordKind::AtSelector | KeywordKind::AtEncode | KeywordKind::AtProtocol |
                       KeywordKind::AtOptional | KeywordKind::AtRequired | KeywordKind::AtClass |
                       KeywordKind::AtTry | KeywordKind::AtCatch | KeywordKind::AtFinally |
-                      KeywordKind::AtThrow | KeywordKind::AtSynchronized | KeywordKind::AtAutoreleasepool |
+                      KeywordKind::AtThrow | KeywordKind::AtThrows | KeywordKind::AtSynchronized | KeywordKind::AtAutoreleasepool | KeywordKind::AtDefer |
                        KeywordKind::AtNoArc |
                       KeywordKind::AtPublic | KeywordKind::AtPackage | KeywordKind::AtProtected |
                       KeywordKind::AtPrivate | KeywordKind::AtDefs | KeywordKind::AtNamespace |
@@ -894,6 +1528,31 @@ else if self.match_keyword(KeywordKind::Typeof) {
                     false
                 }
             };
+            // `(X *)`: the `*` sits INSIDE the parentheses, so the expression
+            // reading is impossible — a `*` cannot take `)` as its operand.
+            // clang agrees: for `(Foo *)p` with `Foo` an ordinary variable it
+            // reports "expected expression" at that `)`, never a multiplication.
+            // So an unknown name here is unknown to C too, and the cascade
+            // ("expected ')' after expression") can be replaced by the real
+            // reason — but only when the type table is the C preprocessor's own
+            // view, because otherwise a name may simply be a typedef we were
+            // never told about (a `#include`d header nupac passes through).
+            if !is_cast
+                && self.current.kind == TokenKind::Identifier
+                && self.type_table_is_authoritative()
+            {
+                let tname = self.current_text().to_string();
+                if self.scan_cast_star_paren(self.current.start + self.current.length)
+                    && !self.is_type_name(&tname)
+                    && !self.is_type_param(&tname)
+                {
+                    self.advance(); // put the identifier in `previous` for error()
+                    self.error(&format!(
+                        "unknown type name '{}' — declare it (@class / @interface / typedef) or include the header that declares it",
+                        tname));
+                    return None;
+                }
+            }
             if is_cast {
                 if let Some(ct) = self.parse_type_full() {
                     if self.match_token(TokenKind::RParen) {
@@ -995,7 +1654,7 @@ else if self.match_keyword(KeywordKind::Typeof) {
                       KeywordKind::AtSelector | KeywordKind::AtEncode | KeywordKind::AtProtocol |
                       KeywordKind::AtOptional | KeywordKind::AtRequired | KeywordKind::AtClass |
                       KeywordKind::AtTry | KeywordKind::AtCatch | KeywordKind::AtFinally |
-                      KeywordKind::AtThrow | KeywordKind::AtSynchronized | KeywordKind::AtAutoreleasepool |
+                      KeywordKind::AtThrow | KeywordKind::AtThrows | KeywordKind::AtSynchronized | KeywordKind::AtAutoreleasepool | KeywordKind::AtDefer |
                        KeywordKind::AtNoArc |
                       KeywordKind::AtPublic | KeywordKind::AtPackage | KeywordKind::AtProtected |
                       KeywordKind::AtPrivate | KeywordKind::AtDefs | KeywordKind::AtNamespace |
@@ -1137,7 +1796,14 @@ else if self.match_keyword(KeywordKind::Typeof) {
                 if let Some(k) = self.parse_assignment() {
                     if self.match_token(TokenKind::Colon) {
                         is_dict = true;
-                        if let Some(v) = self.parse_expression() {
+                        // The value MUST be parsed one level below the comma
+                        // operator. `parse_expression()` swallows the `,` that
+                        // separates entries (`@1, @"b"` became a single Comma
+                        // expression), so only the LAST pair of a multi-entry
+                        // literal survived and the next key's `:` collided with
+                        // "expected '}'". Array literals already use
+                        // `parse_assignment()` for exactly this reason.
+                        if let Some(v) = self.parse_assignment() {
                             keys.push(k);
                             values.push(v);
                         }
@@ -1150,7 +1816,10 @@ else if self.match_keyword(KeywordKind::Typeof) {
                 if !self.match_token(TokenKind::Comma) { break; }
             }
             self.consume(TokenKind::RBrace, "expected '}' after literal");
-            if is_dict {
+            // `@{}` is an empty *dictionary* (ObjC: `@{}` and `@[]` are
+            // different literals); only a colon-less non-empty body keeps the
+            // tolerant array fallback.
+            if is_dict || keys.is_empty() {
                 return Some(CstExpr {
                     kind: CstExprKind::DictLit, expr_type: None,
                     line: self.previous.line, col: self.previous.column,
@@ -1174,6 +1843,14 @@ else if self.match_keyword(KeywordKind::Typeof) {
     fn parse_init_list_or_dict(&mut self) -> Option<CstExpr> {
         let mut elements = Vec::new();
         while !self.check(TokenKind::RBrace) && !self.check(TokenKind::Eof) {
+            // C99 designated initializer: `.field = e` / `[i] = e` / `[2].y = e`.
+            if self.check(TokenKind::Dot) || self.check(TokenKind::LBracket) {
+                if let Some(e) = self.parse_designated_init() {
+                    elements.push(e);
+                }
+                if !self.match_token(TokenKind::Comma) { break; }
+                continue;
+            }
             if let Some(e) = self.parse_assignment() {
                 elements.push(e);
             }
@@ -1187,13 +1864,63 @@ else if self.match_keyword(KeywordKind::Typeof) {
         })
     }
 
+    /// Parse one C99 designated initializer entry: a chain of `.field` /
+    /// `[index]` designators followed by `= expr`. Returns a
+    /// `DesignatedInit` expression node.
+    fn parse_designated_init(&mut self) -> Option<CstExpr> {
+        let line = self.current.line;
+        let col = self.current.column;
+        let mut designators: Vec<CstDesignator> = Vec::new();
+        loop {
+            if self.match_token(TokenKind::Dot) {
+                let name = if self.current.kind == TokenKind::Identifier || self.is_contextual_kw_ident() {
+                    let t = self.current_text().to_string();
+                    self.advance();
+                    t
+                } else {
+                    self.error("expected field name after '.' in designated initializer");
+                    return None;
+                };
+                designators.push(CstDesignator::Member(name));
+            } else if self.match_token(TokenKind::LBracket) {
+                let idx = self.parse_expression()?;
+                self.consume(TokenKind::RBracket, "expected ']' after designator index");
+                designators.push(CstDesignator::Index(Box::new(idx)));
+            } else {
+                break;
+            }
+        }
+        if designators.is_empty() {
+            self.error("expected designator ('.field' or '[index]') in designated initializer");
+            return None;
+        }
+        self.consume(TokenKind::Assign, "expected '=' after designator");
+        let expr = self.parse_assignment()?;
+        Some(CstExpr {
+            kind: CstExprKind::DesignatedInit, expr_type: None,
+            line, col,
+            data: CstExprData::DesignatedInit {
+                designators,
+                expr: Box::new(expr),
+            },
+        })
+    }
+
     fn parse_block_literal(&mut self) -> Option<CstExpr> {
         let mut params: Option<Box<CstParam>> = None;
         let mut param_count = 0;
         let mut return_type: Option<Box<CstType>> = None;
 
         // Optional return type: ^returnType(params) { body }
-        // Use parse_type_name (not parse_type_full) to avoid consuming ( as block/function type
+        // Use parse_type_name (not parse_type_full) to avoid consuming ( as block/function type.
+        //
+        // `annotating` is set by hand rather than going through
+        // `parse_type_annotated`, because that helper calls `parse_type_full`,
+        // which would eat the `(` that starts the parameter list — the exact
+        // hazard the comment above warns about. The flag is what lets the
+        // qualifier loop recognize a leading `nullable` / `nonnull`.
+        let saved_annotating = self.annotating;
+        self.annotating = true;
         if self.current.kind == TokenKind::Keyword &&
             matches!(self.current.keyword, KeywordKind::Void | KeywordKind::Int |
                 KeywordKind::Char | KeywordKind::Short | KeywordKind::Long |
@@ -1204,13 +1931,14 @@ else if self.match_keyword(KeywordKind::Typeof) {
         } else if self.current.kind == TokenKind::Identifier {
             return_type = self.parse_type_full().map(Box::new);
         }
+        self.annotating = saved_annotating;
 
         if self.match_token(TokenKind::LParen) {
             // parse params: ^int(int x, float y) or ^(int x, float y)
             let mut head: Option<Box<CstParam>> = None;
             let mut tail: &mut Option<Box<CstParam>> = &mut head;
             while !self.check(TokenKind::RParen) && !self.check(TokenKind::Eof) {
-                if let Some(ptype) = self.parse_type_full() {
+                if let Some(ptype) = self.parse_type_annotated() {
                     let mut p = CstParam {
                         par_type: Some(Box::new(ptype)),
                         name: None,
@@ -1404,6 +2132,25 @@ else if self.match_keyword(KeywordKind::Typeof) {
     }
 
     fn parse_unary(&mut self) -> Option<CstExpr> {
+        // `@await <unary-expr>` — suspension point (async/await).
+        // Design (2026-09-27 定案): `@` prefix, not a bare contextual
+        // keyword. Rationale: a bare `await` in the prefix-operator position
+        // is an OPEN context (any expression can start with it) and has real
+        // ambiguity with an identifier named `await` (`await * 2`, calling a
+        // C function `await(x)`). The `@` marks the task-state-machine
+        // mechanism (same criterion as @try) and keeps `await` a 100%-legal
+        // C identifier with zero ambiguity — the ObjC precedent is
+        // expression-position `@` machinery like `@selector(...)` and the
+        // `@42` boxing literal. Unlike C#/Swift, nupa is a C superset and
+        // cannot afford to appropriate the identifier.
+        if self.match_keyword(KeywordKind::AtAwait) {
+            let inner = self.parse_unary()?;
+            return Some(CstExpr {
+                kind: CstExprKind::Await, expr_type: None,
+                line: self.previous.line, col: self.previous.column,
+                data: CstExprData::Await(Box::new(inner)),
+            });
+        }
         if self.match_token(TokenKind::Incr) {
             let operand = self.parse_unary()?;
             return Some(CstExpr {
@@ -1471,8 +2218,25 @@ else if self.match_keyword(KeywordKind::Typeof) {
         // sizeof / sizeof(type)
         if self.match_keyword(KeywordKind::Sizeof) {
             if self.match_token(TokenKind::LParen) {
-                // Could be sizeof(type) or sizeof(expr)
                 let saved = self.current.clone();
+                // Only attempt a type when the next token can actually start one
+                // (builtin type keyword, or a registered type name). Otherwise
+                // `sizeof(a[0])` would let parse_type_full chew `a` and a `]`
+                // would be left over for the expression path.
+                let looks_like_type = match &self.current.kind {
+                    TokenKind::Identifier => self.is_type_name(&self.current_text()),
+                    TokenKind::Keyword => matches!(self.current_text(),
+                        "struct" | "union" | "enum" | "void" | "char" | "short" |
+                        "int" | "long" | "float" | "double" | "signed" | "unsigned" |
+                        "bool" | "const" | "volatile" | "id" | "Class" | "SEL" |
+                        "instancetype"),
+                    _ => false,
+                };
+                if looks_like_type {
+                // Could be sizeof(type) or sizeof(expr). If this turns out not
+                // to be a real type, fall through to the expression path below
+                // (which restores the outer `saved` — same position, nothing
+                // was consumed before the attempt).
                 if let Some(ty) = self.parse_type_full() {
                     if self.match_token(TokenKind::RParen) {
                         // Only accept as sizeof(type) if it's a real type (struct, or known type name)
@@ -1490,25 +2254,18 @@ else if self.match_keyword(KeywordKind::Typeof) {
                                 data: CstExprData::Sizeof { type_expr: ty, expr: None },
                             });
                         }
-                        // Simple identifier that is not a known type — treat as sizeof(expr)
-                        // Convert the parsed type name back to an identifier expression
-                        if let Some(name) = ty.name {
-                            let expr = CstExpr {
-                                kind: CstExprKind::Ident, expr_type: None,
-                                line: self.previous.line, col: self.previous.column,
-                                data: CstExprData::Ident(name),
-                            };
-                            return Some(CstExpr {
-                                kind: CstExprKind::Sizeof, expr_type: None,
-                                line: self.previous.line, col: self.previous.column,
-                                data: CstExprData::Sizeof { type_expr: CstType::new(TypePrim::Void), expr: Some(Box::new(expr)) },
-                            });
-                        }
+                        // Simple identifier that is not a known type, or a
+                        // compound operand like `a[0]` / `s.field` — parse_type_full
+                        // already consumed part of it, so reset to just after the
+                        // `(` and parse the whole thing as an expression.
                     }
                 }
-                // Not a type, parse as expression
+                }
+                // Not a type (or the operand can't start one), parse as
+                // expression. `saved` was taken *after* the `(` was consumed, so
+                // the cursor already sits on the first token of the operand —
+                // advancing here would skip it.
                 self.current = saved;
-                self.advance(); // re-consume the ( we peeked at
                 let expr = self.parse_expression();
                 self.consume(TokenKind::RParen, "expected ')' after sizeof");
                 return expr.map(|e| CstExpr {
@@ -1517,6 +2274,14 @@ else if self.match_keyword(KeywordKind::Typeof) {
                     data: CstExprData::Sizeof { type_expr: CstType::new(TypePrim::Void), expr: Some(Box::new(e)) },
                 });
             }
+            // Paren-less form: `sizeof expr` (C99 §6.5.3). The paren path above
+            // already returned; here the operand is a unary expression.
+            let operand = self.parse_unary();
+            return operand.map(|e| CstExpr {
+                kind: CstExprKind::Sizeof, expr_type: None,
+                line: self.previous.line, col: self.previous.column,
+                data: CstExprData::Sizeof { type_expr: CstType::new(TypePrim::Void), expr: Some(Box::new(e)) },
+            });
         }
         // __alignof__ / __alignof(type)
         if self.match_keyword(KeywordKind::Alignof) {
@@ -2027,6 +2792,18 @@ else if self.match_keyword(KeywordKind::Typeof) {
                 data: CstStmtData::Throw(expr.map(Box::new)),
             });
         }
+        // `@throws` in statement position is a misuse — it is a declaration
+        // annotation (`- (void)f @throws(...);`), not a statement. Point the
+        // user at `@throw` for raising. (See AGENTS.md @throw/@throws section.)
+        if self.match_keyword(KeywordKind::AtThrows) {
+            self.error("@throws is a declaration annotation (write it before ';' or '{' in a method/function declaration), not a statement; use '@throw <expr>' to raise an exception");
+            // Consume the annotation for error recovery.
+            if self.match_token(TokenKind::LParen) {
+                let _ = self.parse_type_full();
+                self.consume(TokenKind::RParen, "expected ')' after @throws(...)");
+            }
+            return None;
+        }
 
         // Compound statement
         if self.check(TokenKind::LBrace) {
@@ -2089,9 +2866,183 @@ else if self.match_keyword(KeywordKind::Typeof) {
             });
         }
 
-        // For
+        // For / For-in
         if self.match_keyword(KeywordKind::For) {
             self.consume(TokenKind::LParen, "expected '(' after for");
+            // For-in: `for (Type var in collection)` — desugared here (like
+            // `@42` → `[NPNumber numberWithInt:]`) into a plain C for loop so
+            // downstream (checker/ARC/codegen) only ever sees For+Decl+MsgSend.
+            // Detection is a token scan (no parser rewind): if a depth-0 `in`
+            // keyword appears before the matching `)` (and no depth-0 `;`),
+            // this is a for-in header. `parse_declaration` consumes the `;`
+            // and would record an error at `in`, so a speculative full parse
+            // with rewind is not viable here.
+            if self.scan_for_in_header() {
+                let var_type = self.parse_type_full().unwrap_or_else(|| {
+                    let mut t = CstType::new(TypePrim::Named);
+                    t.name = Some("id".into());
+                    t
+                });
+                let var_name = if self.is_name_token() {
+                    let n = self.current_text().to_string();
+                    self.advance();
+                    n
+                } else {
+                    self.error("expected loop variable name in for-in");
+                    String::new()
+                };
+                // `in` is a contextual keyword (see scan_for_in_header): the
+                // scan already matched the token text `in` at depth 0, so
+                // consume it as a plain identifier token.
+                if self.current_text() == "in" { self.advance(); }
+                let coll_line = self.previous.line;
+                let coll_col = self.previous.column;
+                let collection = self.parse_expression().unwrap_or_else(|| {
+                    CstExpr { kind: CstExprKind::Integer, expr_type: None, line: 0, col: 0, data: CstExprData::Integer(0) }
+                });
+                self.consume(TokenKind::RParen, "expected ')' after for-in collection");
+                let body = self.parse_statement().map(Box::new).unwrap_or_else(||
+                    Box::new(CstStmt { kind: CstStmtKind::Compound, line: 0, column: 0, data: CstStmtData::Compound(Vec::new()) })
+                );
+                // Desugar:
+                // { T *__nupa_fi = <coll> (borrowed, not owned);
+                //   for (size_t __nupa_fi_i = 0; __nupa_fi_i < [__nupa_fi count]; __nupa_fi_i++) {
+                //       T var = [__nupa_fi objectAtIndex:__nupa_fi_i]; body } }
+                // The collection is an alias (never retained/released), the
+                // element variable is a borrowed element alias — ARC needs
+                // no injection and sees only plain For+Decl+MsgSend.
+                let fi = "__nupa_fi";
+                let mk_ident = |name: &str, line: usize, col: usize| CstExpr {
+                    kind: CstExprKind::Ident, expr_type: None, line, col,
+                    data: CstExprData::Ident(name.to_string()),
+                };
+                let mk_msg = |recv: CstExpr, sel: &str, arg: Option<CstExpr>, line: usize, col: usize| CstExpr {
+                    kind: CstExprKind::MessageSend, expr_type: None, line, col,
+                    data: CstExprData::Message {
+                        receiver: Box::new(recv),
+                        selector: sel.to_string(),
+                        args: arg.into_iter().collect(),
+                    },
+                };
+                let coll_ident = || mk_ident(fi, coll_line, coll_col);
+                // { id __nupa_fi = <collection>;    (borrowed alias — no ARC;
+                //   `id` already renders as `NPObject *` — do NOT set
+                //   is_pointer here, that emitted `NPObject * * __nupa_fi`)
+                // The alias is typed `id`, NOT the element type: the collection
+                // is whatever object the user passed (NPArray, or any type
+                // providing `count`/`objectAtIndex:`), which is unrelated to the
+                // loop variable's declared type. Using the element type here
+                // emitted `NPString * __nupa_fi = arr;` — the checker then
+                // rejected every for-in whose element type was more specific
+                // than the collection's (e.g. `for (NPString *item in npArray)`).
+                let coll_decl = CstStmt {
+                    kind: CstStmtKind::Decl, line: coll_line, column: coll_col,
+                    data: CstStmtData::Decl(CstDecl {
+                        kind: CstDeclKind::Variable,
+                        line: coll_line, column: coll_col,
+                        name: Some(fi.to_string()),
+                        next: None,
+                        data: CstDeclData::Variable {
+                            var_type: Some(Box::new(CstType::new(TypePrim::Id))),
+                            initializer: Some(Box::new(collection.clone())),
+                            is_static: false, is_extern: false,
+                            is_const: false, is_block_qual: false, is_weak: false,
+                        },
+                        attributes: Vec::new(),
+                    }),
+                };
+                // __nupa_fi_i < [__nupa_fi count]
+                let cond = CstExpr {
+                    kind: CstExprKind::Binary, expr_type: None, line: coll_line, col: coll_col,
+                    data: CstExprData::Binary {
+                        op: 8, // <
+                        left: Box::new(mk_ident("__nupa_fi_i", coll_line, coll_col)),
+                        right: Box::new(mk_msg(coll_ident(), "count", None, coll_line, coll_col)),
+                    },
+                };
+                // __nupa_fi_i++
+                let incr = CstExpr {
+                    kind: CstExprKind::Unary, expr_type: None, line: coll_line, col: coll_col,
+                    data: CstExprData::Unary {
+                        op: 1, // ++
+                        operand: Box::new(mk_ident("__nupa_fi_i", coll_line, coll_col)),
+                        is_postfix: true,
+                    },
+                };
+                // T var = [__nupa_fi objectAtIndex:__nupa_fi_i]
+                let elem_decl = CstStmt {
+                    kind: CstStmtKind::Decl, line: coll_line, column: coll_col,
+                    data: CstStmtData::Decl(CstDecl {
+                        kind: CstDeclKind::Variable,
+                        line: coll_line, column: coll_col,
+                        name: Some(var_name),
+                        next: None,
+                        data: CstDeclData::Variable {
+                            var_type: Some(Box::new(var_type.clone())),
+                            initializer: Some(Box::new(mk_msg(
+                                coll_ident(), "objectAtIndex:",
+                                Some(mk_ident("__nupa_fi_i", coll_line, coll_col)),
+                                coll_line, coll_col,
+                            ))),
+                            is_static: false, is_extern: false,
+                            is_const: false, is_block_qual: false, is_weak: false,
+                        },
+                        attributes: Vec::new(),
+                    }),
+                };
+                // elem_decl + body → loop body (elem decl first, then user body)
+                let loop_body_stmts = match body.data {
+                    CstStmtData::Compound(stmts) => {
+                        let mut v = Vec::with_capacity(stmts.len() + 1);
+                        v.push(elem_decl);
+                        v.extend(stmts);
+                        v
+                    }
+                    _ => vec![elem_decl, *body],
+                };
+                let loop_body = Box::new(CstStmt {
+                    kind: CstStmtKind::Compound, line: coll_line, column: coll_col,
+                    data: CstStmtData::Compound(loop_body_stmts),
+                });
+                // size_t __nupa_fi_i = 0  (for-init counter declaration)
+                let counter_init = CstStmt {
+                    kind: CstStmtKind::Decl, line: coll_line, column: coll_col,
+                    data: CstStmtData::Decl(CstDecl {
+                        kind: CstDeclKind::Variable,
+                        line: coll_line, column: coll_col,
+                        name: Some("__nupa_fi_i".to_string()),
+                        next: None,
+                        data: CstDeclData::Variable {
+                            var_type: Some(Box::new({
+                                let mut t = CstType::new(TypePrim::Long);
+                                t.is_unsigned = true; // size_t
+                                t
+                            })),
+                            initializer: Some(Box::new(CstExpr {
+                                kind: CstExprKind::Integer, expr_type: None,
+                                line: coll_line, col: coll_col,
+                                data: CstExprData::Integer(0),
+                            })),
+                            is_static: false, is_extern: false,
+                            is_const: false, is_block_qual: false, is_weak: false,
+                        },
+                        attributes: Vec::new(),
+                    }),
+                };
+                let for_stmt = CstStmt {
+                    kind: CstStmtKind::For, line: coll_line, column: coll_col,
+                    data: CstStmtData::For {
+                        init: Some(Box::new(counter_init)),
+                        cond: Some(Box::new(cond)),
+                        incr: Some(Box::new(incr)),
+                        body: loop_body,
+                    },
+                };
+                return Some(CstStmt {
+                    kind: CstStmtKind::Compound, line: coll_line, column: coll_col,
+                    data: CstStmtData::Compound(vec![coll_decl, for_stmt]),
+                });
+            }
             let init = if !self.check(TokenKind::Semicolon) {
                 // Check for decl: type name = expr;  (uses the same declaration-start
                 // detection as regular statements, so class-name types like
@@ -2141,12 +3092,8 @@ else if self.match_keyword(KeywordKind::Typeof) {
             });
         }
 
-        // For-in
-        if self.match_keyword(KeywordKind::For) {
-            // Already handled above, but for-in pattern: for (Type var in collection)
-            // This is handled by detecting the 'in' keyword after the expression
-            // Not fully implemented yet
-        }
+        // For-in dead stub removed: `for (T x in coll)` is desugared directly
+        // inside the For branch above (parser-level desugar, like `@42`).
 
         // Switch
         if self.match_keyword(KeywordKind::Switch) {
@@ -2158,6 +3105,48 @@ else if self.match_keyword(KeywordKind::Typeof) {
             let body = self.parse_statement().map(Box::new).unwrap_or_else(||
                 Box::new(CstStmt { kind: CstStmtKind::Compound, line: 0, column: 0, data: CstStmtData::Compound(Vec::new()) })
             );
+            // Pattern routing: if the body contains any pattern arm
+            // (condition / type binding / boxed-literal / when guard), the
+            // whole switch becomes a SwitchPat with a flat arm list and is
+            // lowered to goto/if dispatch by the pattern crate (Step 3.95).
+            // An all-constant switch stays on the plain C path, unchanged.
+            let mut collected = PatternArms::default();
+            collect_pattern_arms(&body, &mut collected);
+            if !collected.arms.is_empty() {
+                if collected.has_const_arm {
+                    self.error("switch mixes plain constant 'case' arms with pattern arms — M1 cannot lower both in one switch; split them into separate switches");
+                }
+                // A dangling-comparison arm (`case > 10:`) is lowered to
+                // `subject > 10`. When another arm needs the subject as an
+                // object (type binding or object literal) the subject is
+                // materialized as `NPObject *` instead of `__auto_type`, so the
+                // comparison degenerates to a *pointer* vs integer compare —
+                // always true, silently, with no diagnostic anywhere. Reject the
+                // combination instead of emitting the always-true test.
+                if collected.has_cond_arm && collected.has_object_arm {
+                    self.error("switch mixes a dangling comparison 'case' arm (e.g. 'case > 10:') with a type-binding or object-literal arm — the subject would be compared as a pointer; use separate switches, or compare with a method like 'case [s intValue] > 10:'");
+                }
+                // Same degeneration with a cond arm ALONE, when the subject is
+                // syntactically an object: no object arm forces `__auto_type`,
+                // but `__auto_type` of a pointer is still a pointer, so
+                // `__auto_type __nupa_sw = @7; __nupa_sw > 100` is an always-true
+                // pointer compare. A variable subject (`id o; switch (o)`) needs
+                // real type information, which M1 does not have — that residual
+                // case is documented as a known limit.
+                if collected.has_cond_arm && expr_is_definitely_object(&expr) {
+                    self.error("switch subject is an object but a dangling comparison 'case' arm (e.g. 'case > 10:') is present — the comparison would be a pointer compare, always true; switch on a scalar value instead (e.g. 'switch ([o intValue])')");
+                }
+                return Some(CstStmt {
+                    kind: CstStmtKind::Switch,
+                    line: self.previous.line, column: self.previous.column,
+                    data: CstStmtData::SwitchPat {
+                        expr,
+                        arms: collected.arms,
+                        has_default: collected.has_default,
+                        default_body: collected.default_body,
+                    },
+                });
+            }
             return Some(CstStmt {
                 kind: CstStmtKind::Switch,
                 line: self.previous.line, column: self.previous.column,
@@ -2167,17 +3156,77 @@ else if self.match_keyword(KeywordKind::Typeof) {
 
         // Case
         if self.match_keyword(KeywordKind::Case) {
-            let value = self.parse_expression().map(Box::new).unwrap_or_else(||
-                Box::new(CstExpr { kind: CstExprKind::Integer, expr_type: None, line: 0, col: 0, data: CstExprData::Integer(0) })
-            );
-            self.consume(TokenKind::Colon, "expected ':' after case value");
+            let (pattern, guard) = self.parse_case_pattern();
+            // A case label must be a C constant expression or a pattern. A
+            // message send / call / assignment can never be either, and letting
+            // it through emitted invalid C (`case [obj msg]:`) whose error
+            // pointed into generated code — report it at the source instead.
+            // Object literals are exempt: they are patterns (compared with
+            // `isEqual:`), not C case labels.
+            if let CstPattern::Const(v) = &pattern {
+                if !is_object_literal(v) && expr_is_non_constant(v) {
+                    self.error(CASE_NON_CONSTANT_MSG);
+                }
+            }
+            // Multi-value constants: `case 1, 2, 3:` desugars to stacked C
+            // labels — collected BEFORE the ':' (the comma list is part of
+            // the label, not the body). Values parse at assignment level
+            // (NOT parse_expression) so the comma separator isn't swallowed
+            // into one comma-expression — the old path silently emitted
+            // invalid C `case (1, 2, 3):`.
+            let mut extra: Vec<Box<CstExpr>> = Vec::new();
+            if matches!(pattern, CstPattern::Const(_)) && guard.is_none() {
+                while self.match_token(TokenKind::Comma) {
+                    match self.parse_assignment() {
+                        Some(v) => {
+                            if !is_object_literal(&v) && expr_is_non_constant(&v) {
+                                self.error(CASE_NON_CONSTANT_MSG);
+                            }
+                            extra.push(Box::new(v));
+                        }
+                        None => break,
+                    }
+                }
+            }
+            self.consume(TokenKind::Colon, "expected ':' after case pattern");
             let body = self.parse_statement().map(Box::new).unwrap_or_else(||
                 Box::new(CstStmt { kind: CstStmtKind::Compound, line: 0, column: 0, data: CstStmtData::Compound(Vec::new()) })
             );
-            return Some(CstStmt {
-                kind: CstStmtKind::Case,
+            if let CstPattern::Const(first) = pattern {
+                let mut node = CstStmt {
+                    kind: CstStmtKind::Case,
+                    line: self.previous.line, column: self.previous.column,
+                    data: CstStmtData::Case { value: first, body },
+                };
+                while let Some(v) = extra.pop() {
+                    node = CstStmt {
+                        kind: CstStmtKind::Case,
+                        line: node.line, column: node.column,
+                        data: CstStmtData::Case { value: v, body: Box::new(node) },
+                    };
+                }
+                return Some(node);
+            }
+            // Pattern arm (condition / type binding / object literal / when
+            // guard): wrap as a single-arm SwitchPat node. The enclosing
+            // switch's collector (collect_pattern_arms) merges it into the
+            // parent SwitchPat; the case branch cannot know at parse time
+            // whether it sits inside a switch body, so no error here.
+            let arm = CstArm {
+                pattern,
+                guard,
+                body,
                 line: self.previous.line, column: self.previous.column,
-                data: CstStmtData::Case { value, body },
+            };
+            return Some(CstStmt {
+                kind: CstStmtKind::Switch,
+                line: arm.line, column: arm.column,
+                data: CstStmtData::SwitchPat {
+                    expr: Box::new(CstExpr { kind: CstExprKind::Integer, expr_type: None, line: 0, col: 0, data: CstExprData::Integer(0) }),
+                    arms: vec![arm],
+                    has_default: false,
+                    default_body: None,
+                },
             });
         }
 
@@ -2257,6 +3306,20 @@ else if self.match_keyword(KeywordKind::Typeof) {
                 kind: CstStmtKind::Autoreleasepool,
                 line: self.previous.line, column: self.previous.column,
                 data: CstStmtData::Autoreleasepool(body),
+            });
+        }
+
+        // @defer — scope-exit execution. Opaque wrapper here; crates/defer
+        // (pipeline Step 3.9) splices the body into every exit of the
+        // enclosing block before ARC runs. See AGENTS.md `@defer` section.
+        if self.match_keyword(KeywordKind::AtDefer) {
+            let body = self.parse_statement().map(Box::new).unwrap_or_else(||
+                Box::new(CstStmt { kind: CstStmtKind::Compound, line: 0, column: 0, data: CstStmtData::Compound(Vec::new()) })
+            );
+            return Some(CstStmt {
+                kind: CstStmtKind::Defer,
+                line: self.previous.line, column: self.previous.column,
+                data: CstStmtData::Defer(body),
             });
         }
         if self.match_keyword(KeywordKind::AtNoArc) {
@@ -2368,9 +3431,20 @@ else if self.match_keyword(KeywordKind::Typeof) {
                 || trimmed.starts_with("-=") || trimmed.starts_with("<<=")
                 || trimmed.starts_with(">>=") || trimmed.starts_with("&=")
                 || trimmed.starts_with("|=") || trimmed.starts_with("^=");
+            // `IDENT IDENT` (`clock_t t0 = ...`) cannot be an expression in C —
+            // juxtaposing two primary expressions is not a production — so the
+            // shape alone settles it. `IDENT *` cannot: `x * y;` is a
+            // multiplication when `x` is a variable and a declaration when `x`
+            // is a typedef (`FILE *fp;`), and C picks by the symbol table. Do
+            // the same whenever the type table is authoritative; otherwise fall
+            // back to the shape guess, which misreads `x * y;` but never turns
+            // working code into a parse error.
+            let shape_decl = !is_compound_assign
+                && (matches!(next, '_' | 'a'..='z' | 'A'..='Z')
+                    || (next == '*' && !self.type_table_is_authoritative()));
             self.is_type_name(&tname) || self.is_type_param(&tname)
                 || trimmed.starts_with("::")
-                || (!is_compound_assign && matches!(next, '*' | '_' | 'a'..='z' | 'A'..='Z'))
+                || shape_decl
         } else {
             false
         }
@@ -2433,7 +3507,26 @@ else if self.match_keyword(KeywordKind::Typeof) {
         Some(name)
     }
 
+    /// `NPAsync<T>` return-type marker (AGENTS.md `NPAsync<T>` section):
+    /// unwrap the marker type to its single type argument and report the
+    /// marker flag. Misuses (zero / multiple type args) error out and keep
+    /// the raw type so parsing can continue.
+    fn unwrap_async_marker(&mut self, rt: CstType) -> (CstType, bool) {
+        if rt.name.as_deref() != Some("NPAsync") {
+            return (rt, false);
+        }
+        if rt.type_args.len() != 1 {
+            self.error("'NPAsync' marker requires exactly one type argument: 'NPAsync<T>' — it is a return-type marker, not a value type");
+            return (rt, false);
+        }
+        let inner = rt.type_args.into_iter().next().unwrap();
+        (inner, true)
+    }
+
     fn parse_function_decl_or_definition(&mut self, return_type: CstType, name: String, prefix_attrs: Vec<String>) -> Option<CstDecl> {
+        // `NPAsync<T>` marker → unwrap to `T` + flag (compile-time metadata;
+        // the emitted C signature is just `T`).
+        let (return_type, async_marker) = self.unwrap_async_marker(return_type);
         let mut params = Vec::new();
         let mut has_variadic = false;
 
@@ -2443,7 +3536,7 @@ else if self.match_keyword(KeywordKind::Typeof) {
                 has_variadic = true;
                 break;
             }
-            let ptype = self.parse_type_full();
+            let ptype = self.parse_type_annotated();
             if let Some(mut pt) = ptype {
                 let pname = if self.is_name_token() {
                     let n = self.current_text().to_string();
@@ -2485,6 +3578,29 @@ else if self.match_keyword(KeywordKind::Typeof) {
         let mut trailing_attrs = self.parse_attributes();
         trailing_attrs.splice(0..0, prefix_attrs);
 
+        // Trailing declaration annotation: `@throws` / `@throws(T)` before
+        // `;` or `{`. Compile-time only — carried in CST, never emitted to C.
+        // `@throw` here is a misuse (it is a statement) — point the user at
+        // `@throws` instead.
+        let mut throws: Option<Box<CstType>> = None;
+        if self.match_keyword(KeywordKind::AtThrows) {
+            if self.match_token(TokenKind::LParen) {
+                throws = self.parse_type_full().map(Box::new);
+                self.consume(TokenKind::RParen, "expected ')' after @throws(...)");
+            } else {
+                // Bare `@throws` — "declared to throw, type unstated". Encoded
+                // as a void-typed annotation so it stays distinguishable from
+                // "not annotated" (`None`); the checker then only requires the
+                // body to really contain a `@throw` and does not check types.
+                throws = Some(Box::new(CstType::new(TypePrim::Void)));
+            }
+            if !self.check(TokenKind::LBrace) && !self.check(TokenKind::Semicolon) {
+                self.error("expected '('type')' or ';' after @throws");
+            }
+        } else if self.match_keyword(KeywordKind::AtThrow) {
+            self.error("@throw is a statement (it raises an exception inside a body); use '@throws' or '@throws(<type>)' to annotate this declaration");
+        }
+
         let body = if self.check(TokenKind::LBrace) {
             self.parse_compound_statement().map(Box::new)
         } else {
@@ -2509,14 +3625,18 @@ else if self.match_keyword(KeywordKind::Typeof) {
                 params: head,
                 has_variadic,
                 body,
+                throws,
+                async_marker,
             },
                     attributes: trailing_attrs,
 })
     }
 
-    /// Parse a `#pragma mark ...` directive line as a raw pass-through
-    /// declaration. Consumes every token on the same source line and returns
-    /// the raw text so codegen can re-emit it at its original position.
+    /// Parse a raw pass-through line — `#pragma mark ...`, or the C99 operator
+    /// spelling `_Pragma("...")` — as a raw declaration. Consumes every token on
+    /// the same source line and returns the raw text so codegen can re-emit it
+    /// at its original position (both spellings are consumed by the C compiler
+    /// there, and position decides what a diagnostic push/pop or `pack` covers).
     fn parse_raw_pragma_decl(&mut self) -> Option<CstDecl> {
         let line = self.current.line;
         let column = self.current.column;
@@ -2538,6 +3658,55 @@ else if self.match_keyword(KeywordKind::Typeof) {
     }
 
     fn parse_declaration(&mut self) -> Option<CstDecl> {
+        // `NP_ASSUME_NONNULL_BEGIN` / `NP_ASSUME_NONNULL_END` — true syntax,
+        // NOT macros. ObjC's spelling is a macro wrapping
+        // `_Pragma("clang assume_nonnull begin")`, which nupac cannot use: it
+        // refuses `_Pragma` inside a macro body (crates/cpp — a source-level
+        // expander has no invocation-site position to place it).
+        //
+        // So the region is applied here, in nupac's own parser
+        // (`parse_type_annotated` coerces unannotated pointers to Nonnull), and
+        // the marker is rewritten to the clang pragma the macro would have
+        // expanded to — emitted via the existing RawLine channel so BOTH sides
+        // agree. Passing the bare identifier through instead would leave clang
+        // with an undeclared identifier.
+        if self.current.kind == TokenKind::Identifier {
+            let marker = self.current_text();
+            if marker == "NP_ASSUME_NONNULL_BEGIN" || marker == "NP_ASSUME_NONNULL_END" {
+                let line = self.current.line;
+                let column = self.current.column;
+                let opening = marker == "NP_ASSUME_NONNULL_BEGIN";
+                if self.nonnull_region == opening {
+                    // BEGIN inside BEGIN, or END with no BEGIN. Both mean the
+                    // author's intent is not what they think it is, so say so
+                    // rather than silently flipping the flag.
+                    self.error(if opening {
+                        "NP_ASSUME_NONNULL_BEGIN inside an existing nonnull region"
+                    } else {
+                        "NP_ASSUME_NONNULL_END without a matching NP_ASSUME_NONNULL_BEGIN"
+                    });
+                }
+                self.nonnull_region = opening;
+                self.region_file = if opening { Some(self.file_of_line(line)) } else { None };
+                while !self.check(TokenKind::Eof) && self.current.line == line {
+                    self.advance();
+                }
+                return Some(CstDecl {
+                    kind: CstDeclKind::RawLine,
+                    line, column,
+                    name: None,
+                    next: None,
+                    data: CstDeclData::RawLine(
+                        if opening {
+                            "_Pragma(\"clang assume_nonnull begin\")".to_string()
+                        } else {
+                            "_Pragma(\"clang assume_nonnull end\")".to_string()
+                        }
+                    ),
+                    attributes: Vec::new(),
+                });
+            }
+        }
         // Capture leading `__attribute__((...))` spellings before parsing the
         // declaration itself, so they travel through CST/AST to the C output.
         let attrs = self.parse_attributes();
@@ -2699,12 +3868,14 @@ else if self.match_keyword(KeywordKind::Typeof) {
                 // By reconstructing the type from what we've consumed
                 let struct_type = CstType {
                     prim: TypePrim::Named, is_pointer: false, is_struct: true,
+                    tag: if is_union { TagKind::Union } else { TagKind::Struct },
                     name: Some(name.clone()), subtype: None, next: None,
                     block_params: None, is_const: false, is_block: false,
                     is_array: false, array_size: 0, is_volatile: false,
                     is_block_qual: false, is_weak_qual: false, is_unsigned: false,
                     block_name: None, protocols: Vec::new(), type_args: Vec::new(),
-                    array_size_name: None, is_fn_ptr: false,
+                    array_size_name: None, is_fn_ptr: false, is_complex: false,
+                    nulls: Nullability::Unspecified,
                 };
                 // `struct Name *p`, `struct Name **p`, `struct Name *arr[]` —
                 // consume the pointer suffix(es) so the declared variable gets
@@ -2830,7 +4001,11 @@ else if self.match_keyword(KeywordKind::Typeof) {
 
         // Regular declaration: type name = ...; or type name(params) { ... }
         let qualifiers = self.parse_decl_qualifiers();
-        let return_type = match self.parse_type_full() {
+        // Annotated: a top-level function's return type is a nullability
+        // position (`nullable NPString *f(void)` / `NPString * _Nullable f(void)`).
+        // Without this the annotation landed nowhere and the return direction of
+        // the diagnostic could never fire.
+        let return_type = match self.parse_type_annotated() {
             Some(t) => t,
             None => {
                 // Fallback: treat unknown identifier as type name (like C parser)
@@ -2907,9 +4082,32 @@ else if self.match_keyword(KeywordKind::Typeof) {
             // Comma-separated declarations
             if self.match_token(TokenKind::Comma) {
                 let mut head = Box::new(var);
+                // Base type (without per-declarator pointer/array decorations)
+                // cloned from the head so each subsequent declarator gets its
+                // own `*`/`[]` applied on top — `T *a = x, *b = y;` and
+                // `T a[N], b[M];` must work like C.
+                let base_type: Option<CstType> = match &head.data {
+                    CstDeclData::Variable { var_type, .. } => var_type.as_deref().cloned(),
+                    _ => None,
+                };
                 let mut tail = &mut head;
                 loop {
-                    if self.current.kind != TokenKind::Identifier { break; }
+                    // Optional per-declarator pointer stars: `T *b`, `T **b`
+                    let mut decl_type = base_type.clone();
+                    let mut stars = 0usize;
+                    while self.match_token(TokenKind::Star) { stars += 1; }
+                    for _ in 0..stars {
+                        let mut ptr = CstType::new(TypePrim::Named);
+                        ptr.is_pointer = true;
+                        ptr.subtype = Some(Box::new(decl_type.take().unwrap_or_else(|| CstType::new(TypePrim::Int))));
+                        decl_type = Some(ptr);
+                    }
+                    if self.current.kind != TokenKind::Identifier {
+                        // Not another declarator — restore position is not
+                        // possible, so treat as a syntax error like C would.
+                        self.consume(TokenKind::Identifier, "expected identifier in declaration list");
+                        break;
+                    }
                     let n = self.current_text().to_string();
                     self.advance();
                     let mut next_var = CstDecl {
@@ -2918,7 +4116,7 @@ else if self.match_keyword(KeywordKind::Typeof) {
                         name: Some(n),
                         next: None,
                         data: CstDeclData::Variable {
-                            var_type: None, // inherits type from first
+                            var_type: decl_type.map(Box::new), // None inherits type from first
                             initializer: None,
                             is_static: qualifiers.0,
                             is_extern: qualifiers.1,
@@ -2928,6 +4126,29 @@ else if self.match_keyword(KeywordKind::Typeof) {
                         },
                                             attributes: Vec::new(),
 };
+                    // Array suffix on this declarator: `T a[2], b[3];`
+                    if self.match_token(TokenKind::LBracket) {
+                        let mut array_type = CstType::new(TypePrim::Named);
+                        array_type.is_array = true;
+                        if self.current.kind == TokenKind::Integer {
+                            array_type.array_size = self.current_text().parse().unwrap_or(0);
+                            self.advance();
+                        } else if self.current.kind == TokenKind::Identifier {
+                            array_type.array_size_name = Some(self.current_text().to_string());
+                            self.advance();
+                        }
+                        let inner = match &mut next_var.data {
+                            CstDeclData::Variable { var_type, .. } => {
+                                var_type.take().map(|t| *t).unwrap_or_else(|| CstType::new(TypePrim::Int))
+                            }
+                            _ => CstType::new(TypePrim::Int),
+                        };
+                        array_type.subtype = Some(Box::new(inner));
+                        if let CstDeclData::Variable { ref mut var_type, .. } = next_var.data {
+                            *var_type = Some(Box::new(array_type));
+                        }
+                        self.consume(TokenKind::RBracket, "expected ']' after array size");
+                    }
                     if self.match_token(TokenKind::Assign) {
                         if let CstDeclData::Variable { ref mut initializer, .. } = next_var.data {
                             *initializer = self.parse_assignment().map(Box::new);
@@ -3129,7 +4350,11 @@ if self.current.kind == TokenKind::Identifier {
         }
 
         // typedef type name;
-        let alias_type = self.parse_type_full();
+        // Annotated: a block typedef's result type is a nullability position —
+        // `typedef nullable NPString * (^Getter)(void);` is the block equivalent
+        // of a nullable return type. Without this the leading annotation landed
+        // nowhere and the typedef failed to parse.
+        let alias_type = self.parse_type_annotated();
         // Check if the type has a block_name (e.g. typedef int (^name)(params) → name is the alias)
         if let Some(ref at) = alias_type {
             if let Some(ref block_name) = at.block_name {
@@ -3409,20 +4634,45 @@ if self.current.kind == TokenKind::Identifier {
             category_name = if cat.is_empty() { None } else { Some(cat) };
         }
 
-        // Generic type params: <T>
+        // Generic type params: <T> — OR protocol list: <Proto1, Proto2>.
+        // ObjC has no generics; a `<...>` block whose names are already
+        // declared types (e.g. an earlier `@protocol Drawable`) is a protocol
+        // conformance list, not type params. `@protocol` registers its name
+        // via add_type_name, so is_type_name disambiguates. Unknown names
+        // (e.g. `Box<T>`) stay generic type params.
         let mut type_params = Vec::new();
+        let mut protocols = Vec::new();
         if self.match_token(TokenKind::Less) {
+            let mut names: Vec<String> = Vec::new();
             while self.current.kind == TokenKind::Identifier ||
                   (self.current.kind == TokenKind::Keyword &&
                    matches!(self.current.keyword, KeywordKind::Id | KeywordKind::Class |
                     KeywordKind::Sel | KeywordKind::Instancetype)) {
                 let tp = self.current_text().to_string();
                 self.advance();
-                self.add_type_param(&tp);
-                type_params.push(tp);
-                if !self.match_token(TokenKind::Comma) { break; }
+                names.push(tp);
+                // `<P & Q>` protocol intersection: `&` joins protocol names
+                // into one conjunction list (same semantics as `,`).
+                if !(self.match_token(TokenKind::Comma) || self.match_token(TokenKind::Ampersand)) { break; }
             }
             self.consume(TokenKind::Greater, "expected '>' after type params");
+            // Protocol names come from `@protocol` (add_type_name); type-param
+            // names ALSO end up in type_names once their class finishes parsing
+            // (below), so `@interface B<T>` after `@interface A<T>` would see
+            // `T` as a "declared type" and misroute it to protocols — leaving
+            // B's type_params empty even though its `B<int>` uses still
+            // monomorphize. A current type-param name therefore wins over the
+            // protocol reading.
+            let all_protos = !names.is_empty()
+                && names.iter().all(|n| self.is_type_name(n) && !self.is_type_param(n));
+            if all_protos {
+                protocols = names;
+            } else {
+                for tp in &names {
+                    self.add_type_param(tp);
+                }
+                type_params = names;
+            }
         }
 
         // Register class as generic if it has type params
@@ -3438,14 +4688,15 @@ if self.current.kind == TokenKind::Identifier {
             }
         }
 
-        // Protocols: <Proto1, Proto2>
-        let mut protocols = Vec::new();
+        // Protocols after superclass: `@interface X : Super <Proto1, Proto2>`
+        // (merged with any protocol list parsed before the colon).
         if self.match_token(TokenKind::Less) {
             while self.current.kind == TokenKind::Identifier {
                 let p = self.current_text().to_string();
                 self.advance();
                 protocols.push(p);
-                if !self.match_token(TokenKind::Comma) { break; }
+                // `<P & Q>` intersection joins into the same conjunction list.
+                if !(self.match_token(TokenKind::Comma) || self.match_token(TokenKind::Ampersand)) { break; }
             }
             // Check for > or >> (>> is parsed as two > tokens)
             if self.current.kind == TokenKind::Greater {
@@ -3483,7 +4734,7 @@ if self.current.kind == TokenKind::Identifier {
                 }
                 // IBOutlet qualifier
                 let iboutlet = false;
-                if let Some(ivar_type) = self.parse_type_full() {
+                if let Some(ivar_type) = self.parse_type_annotated() {
                     while self.match_name() {
                         let ivar_name = self.previous_text().to_string();
                         let mut final_type = ivar_type.clone();
@@ -3554,7 +4805,7 @@ if self.current.kind == TokenKind::Identifier {
                       KeywordKind::AtSelector | KeywordKind::AtEncode | KeywordKind::AtProtocol |
                       KeywordKind::AtOptional | KeywordKind::AtRequired | KeywordKind::AtClass |
                       KeywordKind::AtTry | KeywordKind::AtCatch | KeywordKind::AtFinally |
-                      KeywordKind::AtThrow | KeywordKind::AtSynchronized | KeywordKind::AtAutoreleasepool |
+                      KeywordKind::AtThrow | KeywordKind::AtThrows | KeywordKind::AtSynchronized | KeywordKind::AtAutoreleasepool | KeywordKind::AtDefer |
                        KeywordKind::AtNoArc |
                       KeywordKind::AtPublic | KeywordKind::AtPackage | KeywordKind::AtProtected |
                       KeywordKind::AtPrivate | KeywordKind::AtDefs | KeywordKind::AtNamespace |
@@ -3769,6 +5020,11 @@ if self.current.kind == TokenKind::Identifier {
         let mut is_nonatomic = false;
         let mut getter = None;
         let mut setter = None;
+        // Nullability written as a property attribute: `@property (nullable) T *x`.
+        // Kept separate from the type's own annotation until the type is parsed,
+        // then merged onto it — so the annotation lives in exactly one place
+        // (`prop_type.nulls`) for the elaborator and checker to read.
+        let mut attr_nulls = None;
 
         if self.match_token(TokenKind::LParen) {
             while !self.check(TokenKind::RParen) && !self.check(TokenKind::Eof) {
@@ -3778,6 +5034,15 @@ if self.current.kind == TokenKind::Identifier {
                 else if self.match_keyword(KeywordKind::AtRetain) { is_retain = true; }
                 else if self.match_keyword(KeywordKind::AtCopy) { is_copy = true; }
                 else if self.match_keyword(KeywordKind::AtNonatomic) { is_nonatomic = true; }
+                // `nullable` / `nonnull` as property attributes. They arrive as
+                // plain identifiers (never KW_TABLE entries — see
+                // `nullability_prefix`), so read by text and consume by hand.
+                // `nullable_t x;` is impossible here: this loop only ever sees
+                // comma-separated attributes inside `(...)`.
+                else if self.nullability_prefix().is_some() {
+                    attr_nulls = self.nullability_prefix();
+                    self.advance();
+                }
                 else if self.match_keyword(KeywordKind::AtGetter) {
                     self.consume(TokenKind::Assign, "expected '=' after getter");
                     if self.current.kind == TokenKind::Identifier {
@@ -3805,6 +5070,16 @@ if self.current.kind == TokenKind::Identifier {
         }
 
         let mut prop_type = self.parse_type_full();
+        // Merge a `(nullable)` / `(nonnull)` attribute onto the parsed type.
+        // Done here — after the type is parsed, before any array wrapping or
+        // Property construction — so every one of the three construction sites
+        // below inherits it with no per-site plumbing. An explicit annotation in
+        // the type itself (`@property (nullable) nullable NPString *x`) would be
+        // contradictory; the attribute wins because it is written later and is
+        // the more specific of the two.
+        if let (Some(n), Some(t)) = (attr_nulls, prop_type.as_mut()) {
+            t.nulls = n;
+        }
         // Check for array suffix: name[size]
         if self.match_name() {
             let name = self.previous_text().to_string();
@@ -3904,17 +5179,24 @@ if self.current.kind == TokenKind::Identifier {
 
         // Parse return type: (type) or plain type
         let return_type = if self.match_token(TokenKind::LParen) {
-            let rt = self.parse_type_full();
+            let rt = self.parse_type_annotated();
             self.consume(TokenKind::RParen, "expected ')' after method return type");
             rt
         } else {
-            self.parse_type_full()
+            self.parse_type_annotated()
+        };
+        // `NPAsync<T>` marker → unwrap to `T` + flag (interface/impl/protocol
+        // declarations all flow through here).
+        let (return_type, async_marker) = match return_type {
+            Some(rt) => { let (u, m) = self.unwrap_async_marker(rt); (Some(u), m) }
+            None => (None, false),
         };
 
         // Parse method selector and params
         let mut params: Option<Box<CstParam>> = None;
         let mut tail: &mut Option<Box<CstParam>> = &mut params;
         let mut has_keyword = false;
+        let mut has_variadic = false;
         let mut method_name = String::new();
 
         // First keyword/param
@@ -3933,7 +5215,8 @@ if self.current.kind == TokenKind::Identifier {
                 KeywordKind::Unsigned | KeywordKind::Id | KeywordKind::Class |
                 KeywordKind::Sel | KeywordKind::Instancetype |
                 KeywordKind::Block | KeywordKind::Weak | KeywordKind::Strong |
-                KeywordKind::Autoreleasing | KeywordKind::UnsafeUnretained)) {
+                KeywordKind::Autoreleasing | KeywordKind::UnsafeUnretained |
+                KeywordKind::AtThrow | KeywordKind::AtThrows)) {
             let sel_part = self.current_text().to_string();
             self.advance();
 
@@ -3950,10 +5233,10 @@ if self.current.kind == TokenKind::Identifier {
                 };
                 // Type name (optional)
                 if self.match_token(TokenKind::LParen) {
-                    p.par_type = self.parse_type_full().map(Box::new);
+                    p.par_type = self.parse_type_annotated().map(Box::new);
                     self.consume(TokenKind::RParen, "expected ')' after param type");
                 } else {
-                    p.par_type = self.parse_type_full().map(Box::new);
+                    p.par_type = self.parse_type_annotated().map(Box::new);
                 }
                 if self.is_name_token() &&
                    !self.check(TokenKind::Colon) && !self.check(TokenKind::Semicolon) &&
@@ -3965,6 +5248,13 @@ if self.current.kind == TokenKind::Identifier {
 
                 // More keyword:param pairs
                 loop {
+                    // ObjC 2.0 variadic methods: `- (void)log:(const char *)fmt, ...;`
+                    if self.match_token(TokenKind::Comma) {
+                        if self.match_token(TokenKind::Ellipsis) {
+                            has_variadic = true;
+                        }
+                        break;
+                    }
                     if self.current.kind == TokenKind::Identifier ||
                        (self.current.kind == TokenKind::Keyword &&
                         !matches!(self.current.keyword, KeywordKind::Return | KeywordKind::If |
@@ -3978,7 +5268,8 @@ if self.current.kind == TokenKind::Identifier {
                             KeywordKind::Double | KeywordKind::Bool | KeywordKind::Signed |
                             KeywordKind::Unsigned | KeywordKind::Id | KeywordKind::Class |
                             KeywordKind::Sel | KeywordKind::Instancetype |
-                            KeywordKind::Block | KeywordKind::Weak | KeywordKind::Strong)) {
+                            KeywordKind::Block | KeywordKind::Weak | KeywordKind::Strong |
+                            KeywordKind::AtThrow | KeywordKind::AtThrows)) {
                         let next_part = self.current_text().to_string();
                         self.advance();
                         if self.match_token(TokenKind::Colon) {
@@ -3993,10 +5284,10 @@ if self.current.kind == TokenKind::Identifier {
                                 next: None,
                             };
                             if self.match_token(TokenKind::LParen) {
-                                next_p.par_type = self.parse_type_full().map(Box::new);
+                                next_p.par_type = self.parse_type_annotated().map(Box::new);
                                 self.consume(TokenKind::RParen, "expected ')' after param type");
                             } else {
-                                next_p.par_type = self.parse_type_full().map(Box::new);
+                                next_p.par_type = self.parse_type_annotated().map(Box::new);
                             }
                              if self.is_name_token() &&
                                 !self.check(TokenKind::Colon) && !self.check(TokenKind::Semicolon) &&
@@ -4020,7 +5311,11 @@ if self.current.kind == TokenKind::Identifier {
         // If no keyword params, check for C-style params: (type name, ...)
         if !has_keyword && self.match_token(TokenKind::LParen) {
             while !self.check(TokenKind::RParen) && !self.check(TokenKind::Eof) {
-                if let Some(ptype) = self.parse_type_full() {
+                if self.match_token(TokenKind::Ellipsis) {
+                    has_variadic = true;
+                    break;
+                }
+                if let Some(ptype) = self.parse_type_annotated() {
                     let pname = if self.is_name_token() {
                         let n = self.current_text().to_string();
                         self.advance();
@@ -4038,6 +5333,29 @@ if self.current.kind == TokenKind::Identifier {
                 if !self.match_token(TokenKind::Comma) { break; }
             }
             self.consume(TokenKind::RParen, "expected ')' after params");
+        }
+
+        // Trailing declaration annotation: `@throws` / `@throws(T)` before
+        // `;` or `{`. Compile-time only — carried in CST, never emitted to C.
+        // `@throw` here is a misuse (it is a statement) — point the user at
+        // `@throws` instead.
+        let mut throws: Option<Box<CstType>> = None;
+        if self.match_keyword(KeywordKind::AtThrows) {
+            if self.match_token(TokenKind::LParen) {
+                throws = self.parse_type_full().map(Box::new);
+                self.consume(TokenKind::RParen, "expected ')' after @throws(...)");
+            } else {
+                // Bare `@throws` — "declared to throw, type unstated". Encoded
+                // as a void-typed annotation so it stays distinguishable from
+                // "not annotated" (`None`); the checker then only requires the
+                // body to really contain a `@throw` and does not check types.
+                throws = Some(Box::new(CstType::new(TypePrim::Void)));
+            }
+            if !self.check(TokenKind::LBrace) && !self.check(TokenKind::Semicolon) {
+                self.error("expected '('type')' or ';' after @throws");
+            }
+        } else if self.match_keyword(KeywordKind::AtThrow) {
+            self.error("@throw is a statement (it raises an exception inside a body); use '@throws' or '@throws(<type>)' to annotate this declaration");
         }
 
         // Body
@@ -4060,7 +5378,10 @@ if self.current.kind == TokenKind::Identifier {
                 is_class_method,
                 return_type: return_type.map(Box::new),
                 params,
+                has_variadic,
                 body,
+                throws,
+                async_marker,
             },
                     attributes: Vec::new(),
 })
@@ -4071,14 +5392,15 @@ if self.current.kind == TokenKind::Identifier {
         if !self.match_name() { self.error("expected protocol name"); return None; }
         let name = self.previous_text().to_string();
 
-        // Protocol inheritance: <Proto1, Proto2>
+        // Protocol inheritance: <Proto1, Proto2> or composition <P & Q> —
+        // binder merges P's and Q's required methods into this protocol.
         let mut protocols = Vec::new();
         if self.match_token(TokenKind::Less) {
             while self.current.kind == TokenKind::Identifier {
                 let p = self.current_text().to_string();
                 self.advance();
                 protocols.push(p);
-                if !self.match_token(TokenKind::Comma) { break; }
+                if !(self.match_token(TokenKind::Comma) || self.match_token(TokenKind::Ampersand)) { break; }
             }
             if self.current.kind == TokenKind::Greater { self.advance(); }
             else if self.current.kind == TokenKind::RShift { self.advance(); }
@@ -4116,9 +5438,15 @@ if self.current.kind == TokenKind::Identifier {
     fn parse_forward_class(&mut self) -> Option<CstDecl> {
         self.advance(); // consume @class
         let mut names = Vec::new();
-        while self.current.kind == TokenKind::Identifier {
-            names.push(self.current_text().to_string());
-            self.advance();
+        // Names may be namespace-qualified — `@class Net::Remote;` declares
+        // `Remote` in namespace `Net`, exactly like a bare `@class Remote;`
+        // written inside `@namespace Net … @endnamespace`.
+        while self.current.kind == TokenKind::Identifier ||
+              self.current.kind == TokenKind::Keyword {
+            match self.parse_qualified_name() {
+                Some(n) => names.push(n),
+                None => break,
+            }
             if !self.match_token(TokenKind::Comma) { break; }
         }
         self.consume(TokenKind::Semicolon, "expected ';' after @class");
@@ -4279,6 +5607,14 @@ if self.current.kind == TokenKind::Identifier {
                 }
             }
         }
+        // A region left open at EOF means every subsequent declaration silently
+        // inherited `nonnull`, including ones the author never looked at. That
+        // is exactly the silent-wrong direction, so report it rather than
+        // letting it ride. (ObjC's macro form catches this too — clang warns on
+        // an unterminated `assume_nonnull` region.)
+        if self.nonnull_region {
+            self.error("NP_ASSUME_NONNULL_BEGIN without a matching NP_ASSUME_NONNULL_END — every later pointer in this file would be treated as nonnull");
+        }
         Some(TranslationUnit {
             decls,
             filename: String::new(),
@@ -4300,8 +5636,238 @@ if self.current.kind == TokenKind::Identifier {
     }
 }
 
-#[cfg(test)]
+/// Error text for a `case` label that is neither a C constant expression nor a
+/// pattern. Shared by the single-value and comma-list paths so the wording
+/// cannot drift.
+const CASE_NON_CONSTANT_MSG: &str = "case label is not a constant expression — a message send, call or assignment cannot label a C `case`; use a pattern (`case T *x`, `case > 10`, `case @\"lit\"`) or an integer constant";
+
+/// True when the expression is an ObjC object literal — a *pattern* compared
+/// with `isEqual:`, never a valid C case label: `@"..."` (AtString kind),
+/// `@(expr)` (the Boxed marker the checker rewrites by type), `@N`/`@YES`/
+/// `@'c'` (desugared by `mk_npnumber_send` into a message send on NPNumber),
+/// or an explicit call to one of those factories.
+///
+/// The boxed-scalar clauses matter: without them `case @42:` was classified as
+/// a plain constant arm, so an all-literal switch stayed on the C path and
+/// emitted `case [NPNumber numberWithInt:42]:` — invalid C, reported against
+/// the generated code with no source correspondence.
+fn is_object_literal(e: &CstExpr) -> bool {
+    if matches!(
+        e.kind,
+        CstExprKind::AtString | CstExprKind::Boxed | CstExprKind::NumberLit
+    ) {
+        return true;
+    }
+    if matches!(&e.data, CstExprData::Message { receiver, .. }
+        if matches!(receiver.kind, CstExprKind::AtString))
+    {
+        return true;
+    }
+    matches!(&e.data, CstExprData::Message { selector, .. }
+        if matches!(selector.as_str(),
+            "numberWithInt:" | "numberWithDouble:" | "numberWithBool:"
+            | "numberWithChar:" | "numberWithLongLong:"))
+}
+
+/// True when the expression provably cannot be a C `case` label: it contains a
+/// message send, a call or an assignment. C requires an integer constant
+/// expression, which none of those can be — but Nupa let them through and
+/// emitted `case [obj msg]:`, so the error surfaced from the generated C.
+/// Conservative by construction: an unrecognized node shape returns false, so
+/// this can only ever flag what is definitely invalid.
+fn expr_is_non_constant(e: &CstExpr) -> bool {
+    match &e.data {
+        // A message send / call is non-constant in itself — it can never be an
+        // integer constant expression, whatever its operands are.
+        CstExprData::Message { .. } | CstExprData::Call { .. } => true,
+        CstExprData::Assign { .. } => true,
+        CstExprData::Binary { left, right, .. } => {
+            expr_is_non_constant(left) || expr_is_non_constant(right)
+        }
+        CstExprData::Unary { operand, .. } => expr_is_non_constant(operand),
+        CstExprData::Ternary {
+            cond,
+            true_expr,
+            false_expr,
+        } => {
+            expr_is_non_constant(cond)
+                || expr_is_non_constant(true_expr)
+                || expr_is_non_constant(false_expr)
+        }
+        CstExprData::Cast { expr, .. } => expr_is_non_constant(expr),
+        CstExprData::Comma(items) => items.iter().any(expr_is_non_constant),
+        CstExprData::NumberLit(inner) => expr_is_non_constant(inner),
+        _ => false,
+    }
+}
+
+/// True when a `switch` subject is *syntactically* an object, so a dangling
+/// comparison arm against it would compile to a pointer-vs-integer compare
+/// (always true) instead of the intended numeric compare.
+///
+/// Deliberately narrow — only shapes that are objects by construction:
+/// object literals (`@"..."`, `@N`, `@YES`, `@'c'`, `@(expr)`), a cast to a
+/// pointer type, `nil`, and an explicit `NPObject *`/`id` cast. A bare
+/// identifier is **not** flagged: `switch (o)` where `o` holds an `int` is
+/// perfectly valid, and M1 has no type information to tell the two apart. That
+/// residual case is a documented M1 limit, not silent-wrong by construction.
+fn expr_is_definitely_object(e: &CstExpr) -> bool {
+    if is_object_literal(e) {
+        return true;
+    }
+    // `nil` / `NULL` live on the *kind*, not the data payload.
+    if matches!(e.kind, CstExprKind::Nil | CstExprKind::Null) {
+        return true;
+    }
+    match &e.data {
+        CstExprData::Cast { target_type, .. } => target_type.is_pointer,
+        // A message send is an object by definition in Nupa, but its *value*
+        // may be a scalar-returning method, so it is not flagged.
+        _ => false,
+    }
+}
+
+/// Flat pattern-arm collection state for one `switch` body.
+#[derive(Default)]
+struct PatternArms {
+    arms: Vec<CstArm>,
+    has_default: bool,
+    /// `default:` body, grouped with its fallthrough siblings; the pattern
+    /// crate emits it as the `__nupa_case_d` labeled block.
+    default_body: Option<Box<CstStmt>>,
+    /// A plain constant `case N:` arm appeared alongside pattern arms. The two
+    /// families cannot share one lowered switch (M1): the C path needs the
+    /// original body, the pattern path discards it. The caller reports an error
+    /// instead of silently dropping the constant arm.
+    has_const_arm: bool,
+    /// At least one dangling-comparison arm (`case > 10:`). Lowered to
+    /// `subject > 10` — only sound when the subject stays a scalar.
+    has_cond_arm: bool,
+    /// At least one arm that needs the subject as an *object* (type binding or
+    /// object literal). Its presence is what forces the subject to be
+    /// materialized as `NPObject *`, which is what makes a coexisting
+    /// `has_cond_arm` arm degenerate into a pointer comparison.
+    has_object_arm: bool,
+}
+
+/// True for statements that START an arm group: a `case`/`default` label, or
+/// the single-arm `SwitchPat` wrapper the Case branch builds for a pattern.
+fn is_arm_node(s: &CstStmt) -> bool {
+    matches!(s.data,
+        CstStmtData::Case { .. } | CstStmtData::Default(_) | CstStmtData::SwitchPat { .. })
+}
+
+/// Walk a plain switch body (as parsed by parse_statement) and pull out every
+/// pattern arm (Cond / Bind / boxed literal / when guard) plus `default`.
+///
+/// Grouping follows C fallthrough: after a `case`/`default` label, every
+/// following sibling belongs to that arm until the next label, so an arm body
+/// is re-wrapped as a compound of its own statement plus those siblings.
+///
+/// Plain constant arms (`case 1:`) stay untouched on the C path — the collected
+/// list only decides whether the switch needs pattern lowering at all. When any
+/// pattern arm is found the caller converts the WHOLE switch to SwitchPat and
+/// discards the original body, so a constant arm seen along the way is flagged
+/// via `has_const_arm` for the caller to reject.
+fn collect_pattern_arms(body: &CstStmt, st: &mut PatternArms) {
+    let CstStmtData::Compound(inner) = &body.data else { return; };
+    let mut i = 0;
+    while i < inner.len() {
+        if !is_arm_node(&inner[i]) {
+            i += 1;
+            continue;
+        }
+        // This arm owns every sibling up to the next arm node.
+        let mut j = i + 1;
+        while j < inner.len() && !is_arm_node(&inner[j]) {
+            j += 1;
+        }
+        collect_arm_node(&inner[i], &inner[i + 1..j], st);
+        i = j;
+    }
+}
+
+/// Fold one arm label node (plus its fallthrough siblings) into the flat list.
+fn collect_arm_node(node: &CstStmt, rest: &[CstStmt], st: &mut PatternArms) {
+    let (line, column) = (node.line, node.column);
+    // The arm body: the label's own statement, then every fallthrough sibling.
+    let grouped = |own: &CstStmt| -> Box<CstStmt> {
+        if rest.is_empty() {
+            return Box::new(own.clone());
+        }
+        let mut group = Vec::with_capacity(rest.len() + 1);
+        group.push(own.clone());
+        group.extend(rest.iter().cloned());
+        Box::new(CstStmt { kind: CstStmtKind::Compound, line, column, data: CstStmtData::Compound(group) })
+    };
+
+    // `case a, b:` stacks Case nodes — walk to the innermost body, then
+    // register every value of the chain with that shared body.
+    let mut values: Vec<&CstExpr> = Vec::new();
+    let mut cur = node;
+    let innermost: &CstStmt;
+    loop {
+        match &cur.data {
+            CstStmtData::Case { value, body } => {
+                values.push(value);
+                cur = body;
+            }
+            _ => {
+                innermost = cur;
+                break;
+            }
+        }
+    }
+    if !values.is_empty() {
+        for v in values {
+            if is_object_literal(v) {
+                st.has_object_arm = true;
+                st.arms.push(CstArm {
+                    pattern: CstPattern::Const(Box::new(v.clone())),
+                    guard: None,
+                    body: grouped(innermost),
+                    line, column,
+                });
+            } else {
+                st.has_const_arm = true;
+            }
+        }
+        return;
+    }
+    match &node.data {
+        // Single-arm wrapper built by the Case branch for a pattern arm: merge
+        // it (with its fallthrough siblings) into the enclosing flat list.
+        CstStmtData::SwitchPat { arms, has_default, .. } => {
+            for a in arms {
+                match &a.pattern {
+                    // A type binding is an object arm for sure. A `Const` arm
+                    // reaches here already filtered to object literals by the
+                    // branch above, so it counts too.
+                    CstPattern::Bind { .. } | CstPattern::Const(_) => st.has_object_arm = true,
+                    CstPattern::Cond(_) => st.has_cond_arm = true,
+                }
+                let mut a = a.clone();
+                a.body = grouped(&a.body);
+                st.arms.push(a);
+            }
+            st.has_default |= *has_default;
+        }
+        CstStmtData::Default(own) => {
+            st.has_default = true;
+            if st.default_body.is_none() {
+                st.default_body = Some(grouped(own));
+            }
+        }
+        _ => {}
+    }
+}
+
 mod tests {
+    // `#[test]` bodies are stripped from a non-test build, so an ungated
+    // `use super::*` here warns as unused in `cargo build` while being
+    // required by `cargo test` (CstDeclKind/CstDeclData reach this module only
+    // through the file-level `use nupa_cst::*` in the parent). Gate it.
+    #[cfg(test)]
     use super::*;
 
     #[test]

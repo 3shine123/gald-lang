@@ -184,7 +184,7 @@ nupa-lang/
   - ✅ **函数指针字段** `int (*cb)(int);` 正确发射（此前 fnptr 字段丢失 body）
   - ✅ typedef 数组 `typedef int Row4[4];` 与**多维数组字段** `int cells[4][4];`
   - ✅ 位域 `unsigned a : 3;` 可解析（宽度按 C 语义被丢弃，降级为普通字段——近似语义）
-  - ⚠️ 已知不支持（记录中）：**匿名内联 struct 字段**（`struct { int a; } inl;`，需命名 tag）；**fnptr 数组字段** `(*name[N])(...)` declarator；以及"Cast 后作函数指针调用"与"struct 成员函数指针调用"（nupa-world 用纯 C 桥 hostcb/modh 绕过）
+  - ⚠️ 已知不支持（记录中）：**匿名内联 struct 字段**（`struct { int a; } inl;`，需命名 tag）；**fnptr 数组字段** `(*name[N])(...)` declarator；"Cast 后作函数指针调用"（nupa-world 用纯 C 桥 hostcb/modh 绕过）。~~"struct 成员函数指针调用"~~ → **✅ 已支持（Sep 2026 修复）**：`w.cb(3)` / `pw->cb(3)` 直接调用（elaborator 保留 PropRef callee + codegen `render_callee_expr` 渲染 `.`/`->` 成员调用，三个后端全过）
 - ✅ libui demo rewritten in pure Nupa: callbacks (`onGreet`/`onInc`/`onDec`/`onReset`/`counter_ctx_create`) moved from `libui_demo_cb.c` into `examples/03_LibUI/libui_demo.np`; button-click fn-ptr cast moved from `LibUI_helper.c` into `LibUI.np`. `include/LibUI.{nh,np}` + `LibUI_mac.c` now live in `examples/03_LibUI/include/`; `run_libui.sh` compiles only `runtime.c` + `LibUI_mac.c` as C helpers.
 
 ### Inline Asm + Real `.s` Linking — Implemented ✅ (Aug 2026)
@@ -206,8 +206,721 @@ nupa-lang/
 - ✅ **Tests**: `tests/asm_inline_test.np` (extended/volatile/named/`+r`/asm goto), `tests/asm_link_test.np`+`.s`, golden `tests/golden/23_asm/asm_inline.np`+`.out`.
 - ⚠️ Operands reuse `parse_expression()` — message-send operands parse but are not recommended (use plain C-ish expressions in asm operands).
 
-### Remaining Known Issues
-- `golden/11_multi_file_union/diamond_impl.np` — FAIL (no main entry, pre-existing library-style multi-file test)
+### In Progress — for-in 语法落地（desugar 方案，本会话规划）(Sep 2026)
+- **目标**：打通 `for (T x in coll)` 遍历 `NPArray`。现状：`in` 已是 lexer 硬关键词（`lexer.rs:69` `KeywordKind::In`）；CST/AST/Cg 的 `ForIn` 变体存在但 parser 无规则（stub 不可达，parser.rs ~2144）、codegen AST→Cg 臂是 no-op（codegen.rs ~2045）、emitter 是坏 stub（codegen.rs ~5445：用不存在的 `nupa_array_count` + C 数组 `typeof(c)[0]` 索引，但集合是 `NPArray*` 对象）；checker/ARC/trace 已有 ForIn 臂。
+- **已定方案（关键决策）**：**parser 层直接 desugar**，不把 ForIn 传给下游——emit 阶段拿不到 vtable 元数据无法手写 `[coll count]` 消息派发（nil 守卫等），违背"desugar、不引入新 IR"铁律。先例：`@42`→`[NPNumber numberWithInt:]`、`arrayWithObjects:`→`@[...]`。desugar 形态：
+  ```c
+  { NPObject *__nupa_fi_coll = <coll>;            /* 只求值一次；[nil count]==0 nil 安全 */
+    for (size_t __nupa_fi_i = 0; __nupa_fi_i < [__nupa_fi_coll count]; __nupa_fi_i++) {
+        T x = [__nupa_fi_coll objectAtIndex: __nupa_fi_i];
+        ...body...
+    } }
+  ```
+  下游（checker/ARC/codegen）全部看到普通 `For`+`Decl`+`MsgSend`，**零改动**；ARC 元素借用语义（不 retain/不 release）天然正确。
+- **配套清理**：删除不再被构造的 ForIn 变体及各阶段手臂（`#![deny(dead_code)]` 会报 never constructed）——`CstStmtData::ForIn`/`AstStmtData::ForIn`/`CgStmtData::ForIn` + elaborator/checker/arc/trace/codegen 各处 match 臂 + `trace_loop` 的 for-in 标记。
+- **Binary op 编码表**（codegen `op_to_str`，codeGen.rs:738）：非赋值 4=+ 8=< 9=> 10=<= 11=>= 12=== 13=!= 17=&&；赋值 0==。
+- **测试计划**：`tests/for_in_test.np` 已建（遍历 NPArray/嵌套/空数组）；`cargo build`（debug）→ `nupac run` 端到端 → `test_all.py` 回归。
+- **语法形态**：`for (T x in coll)`（ObjC 规范形，`id` 可用；var 是元素别名不拥有，不做 typed bare-name 形式）。
+
+### for-in 语法落地 ✅ (Sep 2026, 本会话)
+- ✅ **`for (T x in coll)` 遍历 NPArray 可用**。采用 **parser 层 desugar**（先例：`@42`→`[NPNumber numberWithInt:]`、`arrayWithObjects:`→`@[...]`），不把 ForIn 传给下游——emit 阶段拿不到 vtable 元数据，无法手写 `[coll count]` 消息派发（nil 守卫等），违背"desugar、不引入新 IR"铁律。
+- ✅ **desugar 形态**（parser.rs For 分支内，见 `scan_for_in_header` + For-in desugar 块）：
+  ```c
+  { T *__nupa_fi = <coll>;            /* 只求值一次；借用别名，ARC 零注入 */
+    for (size_t __nupa_fi_i = 0; __nupa_fi_i < [__nupa_fi count]; __nupa_fi_i++) {
+        T x = [__nupa_fi objectAtIndex:__nupa_fi_i];
+        ...body...
+    } }
+  ```
+  下游（checker/ARC/codegen）只看到普通 `For`+`Decl`+`MsgSend`——nil 安全（`[nil count]==0`）、元素借用语义（不 retain/release）天然正确，**零下游改动**。
+- ✅ **检测**：`scan_for_in_header()`——source-slice token 扫描（深度计数 + 字符串/char 字面量跳过），depth-0 `in` 在匹配 `)` 前且无 depth-0 `;` 即 for-in 头。不能用投机 parse+回溯：`parse_declaration` 会在 `in` 处 `consume(';')` 记 error 污染状态。
+- ✅ **清理**：删除死 stub（parser For-in 占位块、`CstStmtData::ForIn`/`AstStmtData::ForIn`/`CgStmtData::ForIn` 未删——变体仍被 elaborator/checker/arc/trace/codegen 手臂引用，`deny(dead_code)` 因仍有构造路径？实际：ForIn 变体现在**无人构造**，但因 enum 变体不构造不触发 dead_code lint，手臂仍在，留待后续清理或保留兼容）。
+- ✅ **测试**：`tests/for_in_test.np`（NPArray 遍历/嵌套 for-in/空数组 3 场景）端到端通过；test_all **212/223**（基线 211/222 +1，3 既有失败不变）、cargo test 55/55。
+- ⚠️ **ForIn 变体残留**：CST/AST/Cg 的 `ForIn` 变体与 elaborator/checker/arc/trace/codegen 的 match 臂仍在（现不可达）。enum 变体不构造不报 dead_code，故编译安静；后续可整体删除（连带 trace 的 "for-in" loop 标记）。
+
+### Checker 协议一致性检查 — Implemented ✅ (Sep 2026, 本会话)
+- ✅ **P0 缺口补齐**：此前 checker 完全不做协议一致性检查（`protocol` 在 checker 内零匹配），类的 `<Proto>` 声明形同虚设。现在缺失必需方法会报错：`class 'X' does not implement required method 'sel' from protocol 'P'`（`file:line:col: error:` 格式）。
+- ✅ **AST 带协议列表**：`AstDeclData::Class` 新增 `protocols: Vec<String>` 字段（此前 elaborator 用 `..` 把 CST 的 `protocols` 丢弃了）。elaborator 构造点填 `protocols.clone()`；其余 match 点全用 `..`，不受影响。
+- ✅ **检查逻辑**（`checker.rs` `check_protocol_conformance`，在 `check()` 全部 decl 检查后跑，仅无既有错误时执行）：
+  - 从符号表快照 `fqn → (required_methods, parents)`（clone 后再报错，避免借用冲突）
+  - `class_methods` 只收**带 body** 的方法——binder 的 `propagate_protocol_methods` 会把协议方法**声明**（无 body）克隆进 `@interface` 以稳定跨 TU vtable 布局，那些不能算"已实现"
+  - 按类名聚合：协议通常挂在 `@interface` 而非 `@implementation` 上，故用 `has_impl`（该类在 TU 内有 impl）判定，而非当前 decl 的 `is_implementation`
+  - 协议名解析：先查原名，再查 `ns::proto` 形式（命名空间内协议）
+  - 递归走父协议（`parents`，带 `seen` 去重防环）；`@optional` 方法天然豁免（不进 `required_methods`）
+  - 跨 TU 安全：无 `@implementation` 的类（header-only，实现链接自别处）整体跳过
+- ✅ **parser 修复（关键前置）**：`@interface X <Proto>` 的 `<Proto>` 此前被**泛型 type-params 块**吃掉（L3627 `match_token(Less)` 先执行），协议列表永远是空的。修法：`<...>` 块内名字若**全部**是已声明类型（`@protocol` 会 `add_type_name`）→ 归 protocols，否则归 type_params（`Box<T>` 不受影响）。`@interface X : Super <Proto>` 的第二个 `<...>` 块（superclass 之后）与前者合并到同一列表。
+- ✅ **selector 归一化**：binder 存多段 selector 带尾冒号（`deployShield:`），AST 方法名可能不带，比较时 `trim_end_matches(':')`。不归一化会让 `ultimate_megafusion_test.np` 等 15 个测试误报。
+- ⚠️ **负例测试目录**：`tests/negative/` 存放"checker 必须拒绝"的故意失败用例（`proto_missing_method.np`、`protocol_fail.np`——后者原在 `golden/07_protocols/`，是历史遗留的故意失败样本，无 `.out` 快照）。已在 `test_all.py` 的 glob 排除（`"negative" not in p.parts`），否则会被当普通 FAIL。
+- ✅ **测试**：`tests/proto_conformance_test.np`（必需方法全实现 + `@optional` + 父协议继承链 `Colored <Drawable>`）通过；负例正确报错。回归：test_all **212/223**、cargo test **55/55**、trace golden 7/8（`arc_inject` 既有失败）。
+
+### Golden 目录：两个新特性各自独立 (Sep 2026, 本会话)
+- ✅ `tests/golden/30_for_in/` — for-in 遍历语法
+  - `for_in_test.np` + `.out`（单层遍历 / 嵌套 for-in / 空数组 3 场景）
+  - `README.md` — desugar 方案与理由、检测方式、已知残留
+- ✅ `tests/golden/31_proto_conformance/` — checker 协议一致性检查
+  - `proto_conformance_test.np` + `.out`（父协议继承链 + `@optional` 豁免）
+  - `README.md` — 报错格式、实现要点、配套 parser 修复
+- ✅ 两个 `.out` 已验证**确定性**（重跑一致，且 ARC/MRC 输出相同——两特性都与内存管理模式无关）。
+- ⚠️ **故意失败用例统一在 `tests/negative/`**（不在 golden 目录）：`proto_missing_method.np`（`Circle <Drawable>` 缺 `draw`）+ `protocol_fail.np`（原在 `golden/07_protocols/`，历史遗留的无快照失败样本）。已在 `test_all.py` glob 排除（`"negative" not in p.parts`），验证方式是"编译必须失败且报错清晰"。
+
+### 语言特性路线图（Sep 2026, 本会话定案）
+用户已拍板。**换会话后直接按下面"待做"四节的顺序执行，勿再重新论证已否决项。**
+
+#### 通用规则：新关键字的 `@` 前缀判据
+> **`@` 标记的是"C 的语法里根本没有这个槽位、且需要编译器/运行时机制"的构造。**
+
+- **词表核对**（`crates/lexer/src/lexer.rs` KW_TABLE 实证）：27 个 `@` 关键字 **100%** 落在三组、无一例外——①命名声明（`@interface`/`@implementation`/`@end`/`@protocol`/`@class`/`@property`/`@synthesize`/`@dynamic`/`@optional`/`@required`/`@defs`/`@namespace`/`@endnamespace`/`@using`）②运行时控制块（`@try`/`@catch`/`@finally`/`@throw`/`@synchronized`/`@autoreleasepool`/`@noarc`）③访问控制（`@public`/`@package`/`@protected`/`@private`）。**C 里全部没有对应物。**
+- **`@` 缺席处正是 C 有槽位处**：60 个裸的非 C 词——`nil`/`YES`/`NO`/`self`/`super`（值）、`id`/`Class`/`SEL`/`BOOL`/`instancetype`（**类型名**）、`in`（语句内连接词）、`copy`/`retain`/`nonatomic`（`@property(...)` 括号内）、`__block`/`__weak`（`__` 前缀）。
+- **决定性反例：ObjC 自己的 `in` 就是裸的。** `for (id x in collection)` 是 ObjC 2.0 新增的**语句级**特性，前缀是——没有。
+- **机制代价表**（判据的量化形式："不用这个特性要手写多少样板"）：
+  | 特性 | 手写代价 | 判决 |
+  |------|----------|------|
+  | `@try/@catch` | 巨大：setjmp/longjmp + 错误 TLS 槽 + 清理顺序 | `@` 合理 |
+  | `@synchronized` | 巨大：mutex 创建/加解锁，裸机上根本没有 | `@` 合理 |
+  | `@autoreleasepool` | 巨大：pool 栈 push/pop | `@` 合理 |
+  | 结构体值比较 | 手写 15 行逐字段循环 | 复用 `==`（C 有槽位） |
+  | 协议组合 `P & Q` | 手写两遍断言 | 复用 `&`（C 有槽位） |
+  | `@await` | 巨大：task 结构 + 状态机 + 调度器 | **`@`（2026-09-27 定案）**：前缀运算符位是**开放上下文**，裸 `await` 与标识符歧义（`await * 2`、调用名为 `await` 的 C 函数）；`@` 标记状态机机制且让 `await` 保持 100% 合法 C 标识符，先例是表达式位的 `@selector(...)`/`@42` 装箱 |
+
+- **三个前缀家族**（`@` 直觉部分来自"C 用不到前缀"，但 Nupa 实际已用三套约定）：
+  | 前缀 | 用于 | 例 |
+  |------|------|-----|
+  | `@` | 声明 / 运行时块 / 访问控制 | `@interface` `@try` `@private` |
+  | `__` | GNU C 风格扩展 | `__block` `__weak` `__typeof__` `__asm__` `__extension__` |
+  | `#` | 预处理器指令 | `#import` `#include` `#define` |
+
+  真要给编译器/运行时相关的东西加前缀，`__xxx` 比 `@xxx` 更贴既有约定（GCC 的 `__thread` 就是这么干的）。
+- ⚠️ **反面论证存档**（若日后改用另一判据）：`match` 确实是"新语句形式"（ObjC 从没在语句位置用过裸的新关键字，`in` 只是既有 for 的连接词），而 `@try` 也是新语句形式——"新语句 → `@`"确有先例。`@match` 是可辩护的选择，但已被本轮否决（理由见下），勿轻易捡回。
+
+#### 已否决（勿捡回）
+| 被否决项 | 理由 |
+|----------|------|
+| **`if let`** | **零新能力，纯糖**。ObjC 自己就是这个模式（`id o = [d objectForKey:@"k"]; if (o) { ... }`），Swift 只是给它起了名字。Nupa 的 `id` 就是指针、`nil` 就是 0。相比 `if (x)` 只多两件事且都已被覆盖：(a) 受作用域约束的绑定 → `for (T x in coll)` 已提供该形式；(b) 类型收窄 → Nupa 无 optional 类型，checker 对消息发送本就宽松返回 `id`。且它是最破坏 ObjC 一致性的一项（Swift 味），收益为零。 |
+| **`match`（任何形式，含 `=>` 箭头语法）** | ①**语法必然非 ObjC**：ObjC 对多路分发**没有语法 construct**，答案就是 `[obj isKindOfClass:[X class]]` + 强转的方法链。`match` 无论怎么设计都无 ObjC 先例——像 C `switch` 就不像（switch 是语言 construct，`isKindOfClass:` 是方法），像 `=>` 就是 Rust（全世界只有 Rust 这么写 match arm）。②**新能力其实只剩 struct 解构**（`Point { x, y }` 绑两字段），而 Nupa 的 struct 就是 C struct，写 `p.x` 本来就一行。③**能力大部分本就该由 `isKindOfClass:` 补**（见待做 #1），为一个省一行的糖造新语句家族 + 新词 + 降级机制 + 穷尽性分析，代价过高。 |
+| **`async` 修饰符**（`async - (int)fetch:`） | 抄了 Swift 的词却用了 Swift 根本不用 的位置——Swift 是 `func fetch() async -> Int`（async 在签名内），C++20 **根本没有 async 修饰符**（靠函数体里有 `co_await` 判定协程）。顶在 `-` 前面哪儿都不像。删除，改用函数体内的 `await` 自证。 |
+| **`if (v := expr)` 简写** | 与被否决的 `if let` 同类（Swift 味 + 零新能力），且进一步背离 C 语法。 |
+| **struct 指定初始化器 `.x = 7` 归类为"直接透传"** | 实测不成立（见下方勘误 2）。**2026-09-29 更新**：声明处指定初始化器已支持（6 形态中 5 通，含部分/混合/数组元素/嵌套路径），仅复合字面量组合（形态 4）残留——详见勘误 2 的支持矩阵。 |
+
+#### 待做（严格按此顺序）—— ✅ 2026-09-27 全部落地（#4 至里程碑 1，见下方各节记录）
+
+##### 1. Foundation 补齐 ObjC 类型分发三件套 —— 最高优先 ✅ 已实现（golden/32）
+**实测发现（`grep` 全部 0 命中）**：Nupa 的 Foundation 缺 ObjC 用于多路分发的几乎全部词汇。
+
+| ObjC 词汇 | Nupa 现状 |
+|-----------|-----------|
+| `isKindOfClass:` | ✗ 缺失（有个**非标准**的 `- (BOOL)isKindOf:(Class)cls;`，`NPObject.nh:14`——命名就不合 ObjC） |
+| `respondsToSelector:` | ✗ 缺失 |
+| `conformsToProtocol:` | ✗ 缺失 |
+| `isEqual:` | ✗ 缺失 |
+
+- **为什么最高优先**：这是 **100% ObjC 一致、零新语法**的一步，且它让 `match` 想解决的 90% 场景直接变得可写。正路是"先补齐 ObjC 现有词汇"，而不是"造一个新语句家族"。补完之后类型分发是纯方法链，且天然 nil 安全。
+- **命名纪律**：新方法名一律用 **ObjC 官方拼写**（`isKindOfClass:` 而非 `isKindOf:`）。现有的 `isKindOf:` 属历史遗留非标准命名——可保留作兼容别名，但新代码/文档用官方名。（是否给 `isKindOf:` 加 deprecation 警告待定，勿擅自改签名。）
+- **实现提示**：`isKindOfClass:` 走 isa 链比较（`isa` 是 Nupa 已有的直接字段访问，codegen 对 `[obj class]` 已有特判可参考）；`respondsToSelector:` 查 vtable 槽位（统一 VTable 下可按 selector 名映射下标）；`conformsToProtocol:` 查 checker 刚补的协议闭包（`checker.rs` `check_protocol_conformance` 已有遍历逻辑，但运行时需要 metadata 支持——见待定项）。
+- ⚠️ **待定**：`conformsToProtocol:` 的实现需要类元数据携带 protocol 列表（现在 `CgClassMeta` 有 `method_names` 等，是否已有 protocols 需先核实）；若没有则要先给元数据加字段（涉跨 TU 布局，需谨慎）。建议先做 `isKindOfClass:` + `respondsToSelector:` + `isEqual:` 三个不需要元数据的，`conformsToProtocol:` 单独评估。
+- **测试**：新增 `tests/golden/32_foundation_dispatch/`。
+
+##### 2. struct `==` / `!=` 值比较 —— 复用 C 运算符，无新语法 ✅ 已实现（golden/33）
+
+**先读勘误**：这不是"修静默 bug"（实测是 clang 硬报错），是**补可用性缺口**。
+
+⚠️ **实测结论（旧规划已推翻，勿再引用旧说法）**：`struct Point a,b; a == b` → 生成 C 原样输出 `a == b` → clang `error: invalid operands to binary expression ('struct Point' and 'struct Point')`。所以它**不是静默内存/逻辑错误**，"比 C 还危险""修现存静默 bug"的定级**不成立**。它是响亮的可用性缺口：要做值比较得手写 15 行逐字段循环。
+⚠️ **指定初始化器支持矩阵（2026-09-29 实测，取代旧的"不支持"结论；形态 4 当日二次实测修正为 ✅）**：parser 已接指定初始化分支（`parse_designated_init` → `CstExprData::DesignatedInit`，elaborator/checker/codegen 全链透传），**6/6 形态全部可用**：
+
+| 形态 | 例子 | 状态 |
+|------|------|------|
+| 1 完整指定 | `struct Point p1 = { .x = 1, .y = 2 };` | ✅ |
+| 2 部分+零填充 | `struct Point p2 = { .y = 5 };` | ✅（未指定字段零初始化） |
+| 3 位置+指定混合 | `struct Point p3 = { .x = 1, 7 };` | ✅ |
+| 4 复合字面量+指定 | `NPRange r = (NPRange){ .location = 3, .length = 9 };` | ✅ **（当日二次实测修正）**——"cast 后跟 `{`"路径本就接通：`parse_init_list_or_dict` 已接 designator 分支。首轮探针判其为"未支持"是**误判**，真因是测试文件自身缺陷（引用未定义的 `NPRange` → `is_type_name` 为 false → 不走 cast 分支；另有 `CGPoint` 字段名写成 `x/y` 而非 `wx/wy`）。两处笔误已修，6 形态端到端 exit=0 |
+| 5 数组元素指定 | `CGPoint pts[3] = { [0].wx = 1.0f, [2].wy = 6.0f };` | ✅ |
+| 6 嵌套成员路径 | `struct Outer o = { .in.a = 3, .tag = 9 };` | ✅ |
+
+位置式 `{1, 2}` 一直可用。测试：`tests/designated_init_test.np`（6 形态全过）。
+⚠️ **教训（可复用的方法论）**：判定"某语法未实现"必须先跑**最小探针**，不能只看既有测试文件的失败信息。本轮"形态 4 未实现"与上一轮"类型参数被静默擦除"两个判定都被探针推翻/修正过；前者是测试文件自身笔误，后者是探针只量到现象（`NPArray_NPString` 零次出现）却没定位机制。
+
+- **语法**（无新关键字，复用 C 运算符）：
+  ```objc
+  struct Point { int x; int y; };
+  struct Point a = {1, 2};
+  struct Point b = {1, 2};
+
+  a == b          // 新：值比较（逐字段）
+  a != b          // 新：值不等
+  p == &a         // 既有：指针比较语义不变（两侧是指针就不走 struct 路径）
+  ```
+- **降级**：elaborator（或 parser，`AstExpr`/`CstExpr` 上标一个结构体比较标志）识别两侧**都是 struct 类型**时，降级为调用生成的比较函数：
+  ```c
+  static bool nupa_struct_eq_Point(struct Point a, struct Point b) {
+      return a.x == b.x && a.y == b.y;      // 逐字段
+  }
+  ```
+  - 无指针字段的 POD 可退化为 `memcmp(&a, &b, sizeof a) == 0`；含指针字段则逐字段（`==` 对指针比地址，是 C 的常规做法）。
+  - 发射时机仿 `@synthesize` getter 的生成路径（`codegen.rs` 的 `EMITTED_METHODS` 附近），每个 struct 发射一个 eq 函数；**按需发射**避免 C 里 `static` 未使用告警。
+- **checker 配套**：`check_conversion` / `check_sign_compare` 必须**跳过**结构体比较（它们只看标量，否则会误报）；`types_compatible` 对 `==` 两侧类型不一致时应报错（现状漏到 clang 才报，Nupa 应自己报）。
+- **测试**：新增 `tests/golden/33_struct_eq/`。
+
+##### 3. 协议组合 `P & Q` —— 复用 C 的 `&`，无新语法 ✅ 已实现（golden/31 扩展）
+- **语法**：
+  ```objc
+  // ① 交集类型：接收者必须同时实现 P 和 Q
+  void render(id<Drawable & Serializable> item);   // '&' token 已存在，lexer 不用动
+
+  // ② 组合协议声明
+  @protocol Renderable <Drawable & Serializable>
+  @end
+  ```
+- **parser**：三处协议列表循环各加一个分支——`Identifier` 后跟 `Ampersand` 时收 `(Vec, "and", Vec)`。三处分别是：类型限定（`parse_type_full`）、`@interface`、`@protocol <parents>`。数据结构可给 `CstType` 加 `protocol_intersection: Option<(Vec<String>, Vec<String>)>`，或统一成 `ProtocolList` 枚举（`All([P,Q])` / `Intersection{left,right}`）。
+  - 顺带：组合协议 `@protocol R <P & Q>` 在 binder 里把 P、Q 的 required 并入 R。
+- **codegen 零改动**：统一 VTable 下 `[recv foo]` 的槽位索引全局唯一，与接收者写 `Shape *` 还是 `id<P & Q>` 无关——**协议类型只是给 checker 用的编译期约束标签**。这正是 Nupa 比 ObjC 简单的地方：ObjC 靠运行时 `objc_msgSend` 兜底，Nupa 里它就是个编译期断言。
+- **checker**：`id<P & Q>` 接收者验证——取声明的静态类，沿 superclass 链 + protocols 闭包，验证 P 和 Q 的 required 方法集都被覆盖。复用 binder 已有的 `protocol_selectors`（递归父协议，已存在）。
+  - **前置依赖**：待做 #1 的协议一致性检查（已完成，见上）已经把 `check_protocol_conformance` + `proto_table` 快照写好，本项在其上做增量即可。
+- **多 TU**：P & Q **不改变 vtable 槽位集合**（槽位由方法名决定），无新增布局错配风险。
+- **测试**：扩 `tests/golden/31_proto_conformance/`（加交集类型正例 + 负例放 `tests/negative/`）。
+
+##### 4. `@await`（async/await）—— `@` 前缀表达式，**无修饰符** ✅ 里程碑 1+2 已实现（golden/34；M3 调度器/I/O 待做）
+**已定形态**（删掉 `async - (int)fetch:` 修饰符；声明端与普通 ObjC 方法一字不差，只有函数体里的 `@await` 表明这是 async 方法，即 C++20 `co_await` 的判定风格）：
+```objc
+@interface Fetcher : NPObject
+- (int)compute:(int)n;      // 声明端与普通 ObjC 方法一字不差
++ (void)runAll;              // 入口方法：async 链顶端，编译成 blocking wrapper
+@end
+
+@implementation Fetcher
+- (int)compute:(int)n {
+    int a = @await nupa_io_read();          // 挂起点
+    return a * 2;
+}
+
++ (void)runAll {
+    int x = @await [self compute:21];        // 调用方也 await → 自己也是 async（链式传染）
+    NPLog(@"done %d", x);
+}
+@end
+
+int main() {                                // main 保持 int 返回值，await 永不直接出现在这里
+    [Fetcher runAll];                       // 正常同步 ObjC 调用 → blocking wrapper 内部泵调度器
+    return 0;
+}
+```
+- **`await` 走上下文关键词**（`is_contextual_kw_ident()` 机制），不挂 `@`（理由见通用规则）。`int await = 1;` 必须能编过（C 超集铁律）。
+- **ownership 正交**（已核实）：Nupa 的 ownership 本来就靠**方法名**推断，不依赖声明处标注（`crates/ownership/src/ownership.rs:28-38` 的 `init`/`alloc`/`new`/`copy`/`mutableCopy` 前缀）。故 `await [self alloc]` 的 +1/+0 判定完全不变，**async 不需要任何新的 ownership 规则或标注**。
+- **vtable 布局无影响**（已核实）：槽位由**方法名**决定、派发处统一 cast，故把 async 方法发射成状态机函数（返回 status、收 `task*`）**不改变槽位集合**，不引入跨 TU 布局错配。
+
+- ✅ **已定：同步入口 → 必须报错，不允许静默阻塞**
+  `error: cannot call suspending method 'X' from non-async context`
+  理由："静默泵调度器"是单线程协作式调度下最大的实际风险——程序卡住但不报错，极难定位。放行方式只有一个：**入口方法**（async 链顶端，如 `+ (void)runAll`）编译成显式 blocking wrapper，内部 `nupa_task_create` + 驱动调度器（`nupa_task_join`）直到完成；单线程下泵动即有进展，不会死锁。
+  - async 链内部正常传染（方法 `@await` 另一个 → 自己也变 async），无需任何标注，编译器按"函数体是否含 `@await`"逐层判定。
+  - ❗因此"进入 async 需靠 `nupa_task_start`/`nupa_run_all` 手动驱动"的说法**作废**：API 只在入口 wrapper 内部使用，调用方看不见。`main` 保持 `int main()` 不变。
+  - 判据与 C++20 一致（`co_await` 只能出现在协程体内，从普通函数调协程要显式走 `get_return_object`/`resume`）；Nupa 简化为"入口方法自动 blocking"，因为静态派发下无需暴露 task 句柄。
+- ⚠️ **落地前必须先定的 4 项**（否则 desugar 形态会返工）：
+  1. **入口方法识别规则**：约定"非私有、返回 `void`、且被同步上下文调用的 async 方法"；更严格方案需显式标记（已被"删修饰符"否决），故倾向在错误信息里给出修复提示。
+  2. **语句位置的 `await`**：`await f();` 算"求值后丢弃"还是解析成 `(await f)()`？
+  3. **跨 await 的 `@throw` / `@noarc` / break-continue**：jmp_buf 不能跨挂起点，需检测并报错（同函数内正常）。
+  4. **`-emit-bridge-header`**：它按声明签名生成 wrapper，而 async 方法的发射签名不同（返回 status、收 `task*`），需跳过或特判。
+- ⚠️ **已知软肋（诚实记录）**：①**签名会撒谎**——头文件里看不出 `compute:` 会挂起（相对显式 `async` 标记的真实可读性损失）；②**传染性不可见**——谁在传染只有编译器知道；③**同一把尺子量 `await` 其实不完全干净**——ObjC 的异步答案是 **blocks + GCD**（`dispatch_async(queue, ^{...})`），Nupa 已有 blocks，所以"ObjC 一致"的话异步该长成 blocks 派发。`await` 仍值得做，因为 Nupa 的静态派发让状态机方案比 blocks 续体拆分干净得多——但这是取舍，不是"它更 ObjC"。真要极致一致，可做 `dispatch_async` + blocks（代价是每个挂起点手写续体）。
+- **备选（若日后嫌"签名撒谎"碍眼，本轮不采用）**：用**类型**而非关键字标记——`instancetype`/`id`/`Class`/`SEL` 这些纯 ObjC 概念在 Nupa 里都是**裸类型名**（没挂 `@`），故 `NPAsync<int> r = ...` 同样不破坏约定，且在头文件里可见。**→ 2026-09-29 反转为采用**（用户拍板）：作为**声明侧标记** `NPAsync<T>` 落地（仅返回类型位，变量位禁用），设计见下方"`NPAsync<T>` 声明标记"节。
+- **实现体量**：状态机 desugar（新 crate `crates/async`，位置与 `crates/arc` 同构——在 elaborator 之后独立 pass）+ 运行时 API（`include/nupa/runtime.h` 加约 100 行：`nupa_task_create` / `nupa_task_resume` / `nupa_task_join` / `nupa_run_all`）。
+  - **局部变量提升**：所有活过 await 点的局部变量提升进 task 结构。（历史先例是 @try 的 TRY_LIFT shadow 机制——已因双重释放删除，见"@try 双重释放 UAF 修复"节；M3 提升进 task frame 的思路相同，但释放结算归 ARC/任务退出汇合点。）
+  - **ARC 结算**：任务完成/取消时对提升到 task 结构里的对象局部逐个 `nupa_release`（在"任务退出"这个汇合点统一结算，比在每个 await 点插 release 更简单且正确）。
+  - 生成的 C 读起来就是一个大 switch 状态机（与 C `switch` 同构，守住"人能读"原则），portable 后端要求 `clang -pedantic -Werror` 与 `gcc -pedantic -Werror` 双通过。
+- **分阶段**：里程碑 1（无 I/O 的 async + 手动 create/resume，先证明 desugar + ARC 结算正确）→ 里程碑 2（`nupa_run_all` 轮询调度器 + 任务间 yield）→ 里程碑 3（线程池/事件循环/I/O，纯运行时的事）。
+- **测试**：新增 `tests/golden/34_async/`，含负例（同步调 async 不报错应失败 → 放 `tests/negative/`）。
+
+### `@defer` 作用域退出执行 —— 已实现 ✅ (Sep 2026, 本会话)
+
+> 状态：**已实现**（落地记录见节尾；设计保留作存档依据，勿重新论证）。动机：资源清理现在全靠手记（`@try/@finally` 或逐出口 `fclose`），defer 是"编译器替你记出口"的机制化。
+
+**语法**（`@` 判据自洽：C 里没有 defer 的语法槽位，不用它就得在**每一处出口**手写清理——判据表"巨大"档；块形式与 `@autoreleasepool` 同属②运行时控制块组）：
+
+```objc
+- (void)work {
+    FILE *f = fopen("x.txt", "r");
+    @defer { fclose(f); }          // 作用域退出时执行
+    if (!ready) { return; }         // 提前 return 也会执行 defer
+    @defer { printf("second\n"); }  // 多个 defer：LIFO
+    ...
+}                                    // 函数体出口：先 second 后 fclose
+```
+
+**语义（Go/Swift 惯例，ObjC 化命名）**：
+
+| 规则 | 内容 |
+|------|------|
+| 触发点 | defer 所属**最内层复合语句块**的每一处退出：块尾自然出口、块内任意深度的 `return`、**跳出该块**的 `break`/`continue`、块内 `@throw` |
+| 顺序 | 同一出口点，从**最内层** defer 所属块到最外层依次执行（即同块多 defer 为 LIFO） |
+| 逐次执行 | 循环体块里的 defer **每轮迭代结束**执行（作用域 = 循环体块，块每轮退出一次） |
+| 变量可见性 | defer 体按普通嵌套块语义直接读写外层局部变量——**无捕获、无拷贝**（C 栈变量天然可见，与 blocks 的捕获语义刻意不同） |
+
+**desugar 形态（铁律：不引入新 IR，codegen 零改动）**——`@defer` 不对应任何新 CgStmt/CgDecl。新增独立 pass（新 crate `crates/defer`，位置与 `crates/arc` 同构；pipeline **Step 3.9**，即 eh desugar(3.85) 之后、ARC(Step 4) 之前），把 defer 体作为普通语句**复制插入**到所属块的每个出口点：
+
+- 块尾自然出口：插在块内末尾（该块全部 defer 按 LIFO 展开）。
+- 块内任意深度的 `return` 前：沿"该 return 所在块 → defer 所属块"的链逐层展开（内层 defer 先执行）。
+- 跳出 defer 所属块的 `break`/`continue` 前：同上（不跳出该块的内层 break/continue **不触发**）。
+- `@throw` 前：同上（语句在 longjmp 之前，同函数 throw 时 defer 会执行）。
+- **实现要点**：插桩以"defer 所属块"为单位——块 A 的 defer 挂在 A 的每个出口上，与 return 写在哪层嵌套无关。
+
+**与 ARC 的顺序保证（分工对齐）**：defer pass 先跑、ARC 后跑 → ARC 的 scope-end release 注入点在 defer 插入语句**之后**（两者挂在同一批位置：块尾/return/throw）→ 实际执行序 = 用户 defer（对象还活着）→ ARC release。**defer 本质是"用户可编程版"的 ARC scope-end 插桩，复用同一插桩点，语义天然对齐**——这也是它必须排在 ARC 之前的原因。
+
+**与 `-eh checked` 的顺序**：eh desugar 把 `@throw` 改写成旗标+early return；defer 排在它**之后**（3.85 → 3.9），checked 模式的 throw 路径已变成普通 `return`，自动被 defer 插桩覆盖，零特判。
+
+**checker 配套**：
+- defer 体按普通 compound 做类型检查（复用既有路径，零新检查逻辑）。
+- M1 禁止 defer 体内的 `return`/`break`/`continue` **逃出 defer 块**（报 error 并指向正确写法；Go 语义的 return-in-defer 留 M2）。
+- defer 体自身的对象局部由 ARC 正常结算（插入的块就是普通块，ARC 看得见）。
+
+**M1 限制（如实）**：
+- 块形式 only（`@defer { ... }`）；单表达式糖 `@defer fclose(f);` 留 M2。
+- defer 体内不允许 `return`/`break`/`continue`（M2 再议 Go 语义）。
+- 跨函数 `@throw`（sjlj longjmp 掠过中间帧）会跳过中间帧的 defer——**与 ARC release 注入同一已知限制**（README 异常章节既有记载），非 defer 新增缺陷；`-eh checked` 下无此问题（checked 不跳帧）。
+
+**实现触点清单**：lexer（`AtDefer` + KW_TABLE）；parser（语句位 `@defer` → `CstStmtKind::Defer(body)`；函数体/方法体/任意块内可写）；CST/AST（`CstStmtData::Defer(Box<CstStmt>)`，elaborator 直转；checker/trace/async/arc 的 match 臂补透传或处理）；`crates/defer` 新 crate（插桩 pass + 单测）；pipeline（Step 3.9 挂载）；**codegen 零改动**；golden `tests/golden/36_defer/`（LIFO 顺序 / 提前 return / 循环逐轮 / 同函数 throw / defer-then-ARC-release 顺序 / 嵌套 defer / 与 -eh checked 组合），负例 `tests/negative/defer_return.np`。
+
+#### 落地记录 ✅ (Sep 2026, 本会话) — 全链打通，golden/36
+
+五触点全部落地（**codegen 零改动**——defer 在 codegen 看到时已 splice 成普通语句）：
+
+- **lexer**：`KeywordKind::AtDefer` + KW_TABLE 表项 + 三处关键字排除列表。
+- **parser/elaborator**：语句位 `@defer { ... }`（仿 `@autoreleasepool`）→ `CstStmtData::Defer(Box)` → `AstStmtData::Defer(Box)` 直转。
+- **新 crate `crates/defer`**（`nupa_defer::desugar_unit`，pipeline **Step 3.9**：eh desugar(3.85) 之后、ARC(4) 之前）：两套跟踪集——
+  - `pending`（最内层优先）：全部已注册 defer，在 `return`/同函数 `@throw`（函数级出口）触发；
+  - `jump`：`break`/`continue` 触发的子集——**仅"此处与最内层 loop/switch 之间"注册的 defer**。进入 loop/switch 体时 `jump` 清空，普通块累加（实测：循环内 break 不触发外层 defer，outer 仅打印一次）。
+  - defer 体**克隆**插入各出口；块尾自然出口 LIFO 展开；defer 体内 block literal 以全新作用域重跑 desugar（独立函数）。
+- **上下游适配（实测偏离设计清单，如实记录）**：checker/trace/async/arc 全部运行在 Step 3.9 **之后**、永远见不到 Defer 节点（catch-all 已覆盖，零改动）；真正需要适配的是 **binder**（先于 defer 运行，补绑定臂）与 **eh**（defer 体内 `@throw` 由 `validate_defer_body` M1 拒绝——eh desugar 在 defer 之前，checked 模式的 defer 体 throw 永不会被改写、会漏进裸 sjlj 混后端）。
+- **实现期修掉的两个真 bug（探针实证后修，勿重蹈）**：
+  1. **break 误触发外层 defer**：首版单一 `pending` + `escapes` 布尔——循环内 break 会把函数级外层 defer 也触发（outer 打印两次）。修法：`pending`/`jump` 双集拆分。
+  2. **`@namespace` 内函数漏 splice**：`desugar_decl` 初版只递归 Function/Method/Class，namespace 函数的 defer 直达 codegen `_ => {}` 被**静默丢弃**（清理永不执行）。补 `Namespace(members)` 递归臂。（对照探针确认 `NS::fn(7)` 调用形态报 parse 错是既有 parser 限制，与 defer 无关。）
+- **M1 限制（强制执行）**：defer 体内禁 `return`/`break`/`continue`/`@throw`（负例 `tests/negative/defer_return.np`，文案 `'return' inside an '@defer' body is not supported (M1)`）；`@defer` 必须直接位于块内（如 `if` 的唯一 body 会报错提示包 `{ }`）。
+- **诊断**：defer errors 走 `translate_lines`（SourceMap）行号翻译（负例验证：报第 7 行即真实文件行）。
+- **测试**：`tests/golden/36_defer/`（7 场景：LIFO+提前 return / 循环体 defer 每轮+continue/break 触发 / 外层 defer 仅触发一次 / 嵌套块 / 同函数 `@throw` / ARC 顺序（defer 先于 scope-end release，`tracker dealloc` 最后打印）/ block literal 独立作用域）——`.out` 验证确定性（重跑一致 + ARC/MRC 一致，MRC 下仅 dealloc 行消失属设计）；`-eh checked` 下输出逐字节一致。README 记语义与实现要点。
+- **回归**：test_all **259/267**（基线 257/265 + golden/36 + golden/37 各新增 1 项，2 个 `-F` 既有失败不变）、cargo test 102/102。
+
+### `NPAsync<T>` 声明标记 —— 已实现 ✅ (Sep 2026, 本会话)
+
+> 状态：**已实现**（落地记录见节尾）。动机：`@await` M1/M2 的"签名会撒谎"软肋——头文件里看不出方法会挂起；`NPAsync<T>` 把 async-ness 扶正为**头文件可见的标记**（用户原话："标记防止忘记"）。这是把路线图否决过的"备选"反转为采用：否决理由（备选不如 `@await` 灵活）依然成立，但两者**不互斥**——`@await` 是语言机制，`NPAsync<T>` 是它的声明侧标签。
+
+**语法**（标记挂在**返回类型位**，`<...>` 复用既有泛型 type_args 解析——`NPAsync` 不是真泛型类，是保留标记名）：
+
+```objc
+@interface Fetcher : NPObject
+- (NPAsync<int>)compute:(int)n;     // 标记：会挂起，完成后给 int
++ (NPAsync<void>)runAll;            // void 也标（入口方法）
+- (int)synchronousWork;              // 不标 = 承诺不挂起
+@end
+```
+
+**语义**：
+
+| 规则 | 内容 |
+|------|------|
+| 标记即解包 | parser 在方法/函数**返回类型位**遇到 `NPAsync<T>`（恰好 1 个 type_arg）：解包为 `T` + 方法置 `async_marker` 标志。AST/CST 记 flag，**下游（vtable/driver/return 类型检查）只见 `T`** |
+| 纯编译期 | **codegen/runtime/ARC 零改动**：生成 C 签名就是 `T`（M2 driver 本就返回 `T`）。跨 TU：`.nh` 与 `.np` 两侧都擦成 `T`，vtable/链接零影响 |
+| 非值类型 | `NPAsync<T>` 出现在**变量/参数/ivar 位** → checker error：`'NPAsync<T>' is a declaration marker, not a value type — '@await' the call instead`（调用方看到的返回类型就是 `T`，标记不参与调用点类型） |
+| 保留名 | 用户声明名为 `NPAsync` 的类 → error（`'NPAsync' is reserved for the async marker`） |
+| interface/impl 一致 | 标记是签名的一部分：`@interface` 标了而 `@implementation` 没标（或反之）→ error（对齐既有"签名匹配"检查哲学） |
+
+**一致性对账（挂 `nupa_async::check_unit`——它独占"体内是否含 @await"的分析，且跑在 desugar 之前能见到原始 AST；checker 在 Step 4.8 desugar 之后已看不到 @await）**：
+
+| 声明 | 体内 | 判定 |
+|------|------|------|
+| `NPAsync<T>` | 有 `@await` | ✅ |
+| `NPAsync<T>` | 无 `@await` | error：`'X' is marked 'NPAsync<T>' but its body never suspends` — 去标记或补 `@await`（防标记撒谎，与裸 `@throws` 的"必须真抛"同一哲学） |
+| 裸 `T` | 有 `@await` | **warning**：`'X' contains '@await' but its return type is not marked 'NPAsync<T>' — mark it so callers can see it suspends`（**"防止忘记"的本体**；`-Werror` 可升级拦截） |
+| 裸 `T` | 无 `@await` | ✅ 现状 |
+
+- `check_unit` 需新增 **warnings 出口**（现在只产 errors），pipeline 照 checker warnings 的紫色样式打印。
+- **入口规则不变**：`+ (NPAsync<void>)` 是否 blocking wrapper 仍由 M1 既有判据（void + 体内 await + 被同步上下文调用）决定，标记不参与派发决策——标记只对**人**和**对账**说话，不改变任何运行时行为。
+
+**实现触点清单**：parser（`is_type_name`/内置类型名表加保留名 `NPAsync`——照 `size_t` 系先例，否则返回类型位解析不认；方法/函数返回类型位识别 `NPAsync<单type_arg>` → 解包 + 置 flag，零/多 type_arg 报 error；interface 与 implementation 两处方法声明 + 顶层函数声明共用一个 helper）；CST/AST（`CstDeclData::Method`/`Function` 加 `async_marker: bool`——照 `has_variadic`/`throws` 先例，elaborator 透传，`crates/async` 的 `entry_decl` 等既有构造点补 `false`，cargo test 构造点同步）；`nupa_async::check_unit`（对账表 4 行 + interface/impl 匹配 + warnings 出口）；checker（变量/参数位拒绝 NPAsync + 保留名类声明检查）；**codegen/runtime/ARC 零改动**；无新 CLI flag。
+
+**M1 限制（如实）**：
+- 标记只活在 nupa 源头：生成 C、桥接头不出现 NPAsync（擦除设计）。桥接头"非 void async 跳过"的现状不变——未来可用标记静态可知签名发 wrapper，列 M3 候选。
+- 协议 required 方法的标记一致性不做（`propagate_protocol_methods` 克隆会带上 flag，但对账只覆盖 class 的 interface/impl，协议侧留待需要时）。
+- `NPAsync<NPAsync<int>>` 不禁止（解包一层得 `NPAsync<int>`，落到变量位仍会被拒绝；语义怪但无害）。
+
+**测试计划**：golden `tests/golden/37_async_marker/`（标记+await 正常跑通 / `NPAsync<void>` 入口 / 体内 `return` 按 `T` 检查 / 跨 TU `.nh` 标记 + `.np` 实现两侧一致）；负例 `tests/negative/`：`async_marker_no_await.np`（标记无 await）、`async_marker_var.np`（变量位用 NPAsync）、`async_marker_mismatch.np`（interface/impl 不一致）；warning 用例（await 无标记默认编译过、`-Werror` 拦截）端到端探针验证。
+
+#### 落地记录 ✅ (Sep 2026, 本会话) — 全链打通，golden/37
+
+- **parser**：保留名 `NPAsync` 双注册——内置类型名表（照 `size_t` 系先例）+ **`generic_class_names`**（`<...>` 直接路由 type_args 路径，免走协议试探回滚）。`unwrap_async_marker` helper：恰好 1 个 type_arg → 解包为 `T` + flag；零/多 type_arg 报 error（`'NPAsync' marker requires exactly one type argument`）。挂 `parse_function_decl_or_definition` 与 `parse_method` 两个返回类型位——interface/impl/protocol/顶层函数全走这两处，零第三挂载点。
+- **CST/AST**：`CstDeclData::{Function,Method}` + `AstDeclData::{Function,Method}` 加 `async_marker: bool`（照 `throws` 先例）；elaborator 透传；4 处既有构造点补 `false`（trace 1 + checker 2 + async `entry_decl` 1）。
+- **`nupa_async::check_unit`**：对账表 4 行（`reconcile_marker`：标记+await ✅ / 标记无 await error / await 无标记 warning / 都无 ✅）+ interface/impl 标记一致性（`iface_markers` HashMap，键 `cls_sym::sel`，双向都报）。⚠️ **只对有 body 的实现对账**——初版用 `method_is_async`（对无 body 方法恒 false）会把每个带标记的接口方法误报"标记撒谎"；改为 header-only interface 豁免（跨 TU 安全，与协议一致性检查同规则）。
+- **pipeline**：`AsyncDiagnostics` 加 `warnings` 出口；紫色 `[async] warning:` 打印 + `-Werror` 升级（`Async check failed (-Werror):`）。
+- **checker（设计触点清单内）**：`reject_npasync_type` helper 拒绝全部值位——变量（含逗号链后续声明符）/参数（`add_params_to_scope`；CstParam 无位置信息，报声明行）/ivar/property；保留类名 `NPAsync` 报 error（interface+impl 各报一次，可接受）。文案统一 `'NPAsync<T>' is a declaration marker, not a value type (<ctx>) — '@await' the async call instead`。
+- **诊断统一出口（连带修复）**：async/defer/eh 三处诊断全部接 `translate_lines`（SourceMap）——探针暴露 async warning 打内联缓冲区行号 `911:1`（文件仅 15 行）；修后报真实文件行。连带修掉 filename 双前缀（`m3.np: m3.np:9` → `m3.np:9`）。
+- **擦除实证**：生成 C 中 `NPAsync` 出现 **0 次**（`grep -c` 实证），签名 `int F_compute_(NPObject *, SEL, int)` 干净——vtable/跨 TU/桥接头零影响，codegen/runtime/ARC 零改动达成。
+- **测试**：golden/37 正例（`NPAsync<int>` compute + `NPAsync<void>` 类方法入口 + 跨链 `@await` + 未标记 `plain:`；`.out` 重跑一致 + ARC/MRC 一致）；负例 4 个文件全部实测 exit=1（`async_marker_mismatch` 双向 / `async_marker_no_await` / `async_marker_value_pos` / `async_marker_reserved`）；warning 四态探针全过（含 `-Werror` 升级 exit=1）。
+- **回归**：test_all **259/267**（基线 257/265 + golden/36 + golden/37 各新增 1 项，2 个 `-F` 既有失败不变）、cargo test **102/102**。
+
+### `@throws` 声明标注（已实现 ✅ Sep 2026, 本会话）+ `@throw` / `@throws` 用法区分 (Sep 2026)
+
+> **为什么单独立一节**：`@throw` 与 `@throws` 一字之差、语义完全不同——这是使用者（包括项目作者本人）最容易搞混的一对词。本节把区别钉死，实现与用户文档一律以此为准。
+
+#### 一句话区分
+
+- **`@throw`（已实现）**：**语句**——函数/方法体内**运行时抛出异常**的动作。`@throw @"boom";`
+- **`@throws`（已实现）**：**声明标注**——挂在方法/函数声明的 `;` 前，**编译期**声明"本函数会抛"及异常类型，不执行任何动作。
+
+| | `@throw` | `@throws` |
+|--|----------|-----------|
+| 词性 | 语句（动作） | 声明标注（元数据） |
+| 位置 | 体内，语句位 | 声明尾部，`;` 前（尾置） |
+| 时机 | 运行时 | 编译期（checker 对账） |
+| 形态 | `@throw expr;`（带表达式） | `@throws(T *)` 或裸 `@throws`（不带运行时值） |
+| ObjC 先例 | 有（`@throw` 关键字） | 无关键字（苹果用尾置宏占位，见下） |
+| Java 同构 | `throw`（语句） | `throws`（声明子句）——**一词之差同款约定** |
+
+#### 正确用法
+
+```objc
+@interface Repo : NPObject
+- (NSData *)fetch:(NPURL *)url @throws(NPError *);  // 声明：会抛 NPError*
+- (int)parse:(const char *)s @throws;               // 声明：会抛，类型不注明
+- (int)count;                                       // 声明：不抛
+@end
+
+- (NSData *)fetch:(NPURL *)url {
+    if (!url) {
+        @throw [[NPError alloc] initWithCode:404];   // 语句：抛出
+    }
+    ...
+}
+```
+
+#### 用错的两种方向（实现后 checker 必须报清楚）
+
+| 写错 | 应报 |
+|------|------|
+| 在体内写 `@throws @"x";` | `'@throws' is a declaration annotation, not a statement; use '@throw' inside a method body` |
+| 在声明的 `;` 前写 `@throw(...)` | `'@throw' is a statement, not a declaration annotation; use '@throws(...)' on the declaration` |
+
+#### 苹果头文件出处（尾置元数据的正统性依据）
+
+实测摘自本机 SDK（`xcrun --show-sdk-path`，Foundation 头文件）——苹果自己就在**声明的 `;` 前这个槽位**挂元数据，裸/带括号两形态都有十几年先例：
+
+| nupa 形态 | Apple 同位先例（SDK 原文） |
+|-----------|---------------------------|
+| 裸 `@throws` | `NS_DESIGNATED_INITIALIZER`（NSXMLDTDNode.h:81）、`NS_REQUIRES_NIL_TERMINATION`（NSArray.h:760） |
+| `@throws(NPError *)` | `API_AVAILABLE(macos(10.9), ios(3.0))`（NSPredicate.h:50/58）——尾置 + 括号参数 |
+
+差别只在强制力：苹果的宏展开成 `__attribute__((sentinel))`/availability 交给 clang；nupa 把同一槽位扶正为一等语法、checker 直接对账——正统性继承自 ObjC 生态惯例，强制力是其升级。
+
+#### checker 行为契约（实现时照此）
+
+| 声明形态 | checker 对账规则 |
+|----------|------------------|
+| `@throws(NPError *)` | 体内每个 `@throw` 的静态类型必须与声明一致（含子类），不符报 error |
+| 裸 `@throws` | 体内必须确有 `@throw`（别报假料），不查类型 |
+| 不写 | 体内不得有直接 `@throw`（报 error） |
+
+裸形态定位：**渐进采用**——先标事实、日后补类型收紧（对应 C++ `noexcept` 只标事实能活下来的教训）。
+
+#### 实现注记（勿返工）
+
+- 纯 checker 侧特性，**无 desugar、无运行时**：标注信息挂在 CST/AST 的方法/函数声明节点上，checker 读它对账，codegen 不发射任何东西。
+- 解析点：`parse_class_interface` / `parse_class_implementation` 方法声明的 `;` 消费处 + 顶层函数声明同位置；lexer 加 `@throws` 关键字（`@` 判据自洽：声明位已有 `@property` 等先例，属①命名声明组）。
+- 跨 TU：`@throws` 不影响 vtable 布局（槽位由方法名决定），无多 TU 错配风险。
+- README/CHINESE 等用户文档**等实现落地后**再写（文档先行会让使用者对着没实现的语法踩空）；本节是唯一权威出处。
+
+#### 落地记录 ✅ (Sep 2026, 本会话)
+
+五触点全部打通（lexer / parser / CST+AST / elaborator / checker）——**无 desugar、无 codegen 改动、无运行时**：
+
+- **lexer**：`KeywordKind::AtThrows` + KW_TABLE `@throws` 表项。
+- **parser**：`Function` / `Method` 声明尾部（`;` 或 `{` 之前）消费 `@throws` / `@throws(T)`（`parser.rs:2755-2776`，方法同款块）；语句位 `@throws`、声明位 `@throw(...)` 双向报错并指向正确关键词；三处关键字排除列表补 `AtThrows`。
+- **CST/AST**：`CstDeclData::{Function,Method}.throws: Option<Box<CstType>>` → `AstDeclData::{Function,Method}.throws: Option<Box<AstType>>`，elaborator 透传；`crates/async` 的 `entry_decl` 补 `None`。
+- **裸 vs 未标注编码**：`None` = 未标注；`Some(Void 非指针)` = 裸 `@throws`；`Some(T)` = 带类型。checker 侧 `throws_state()` 归一为 `Option<Option<AstType>>`（`Some(None)` 即裸形态）。
+- **checker**（`reconcile_throws()`，声明体检查完毕后调用）：
+  - `@throws(T *)`：逃逸的 `@throw` 静态类型须与 `T` 相容（子类可）→ 否则 `'@throw' of type 'X' does not match the declared '@throws(Y)'`
+  - 裸 `@throws`：体内必须确有 `@throw` → 否则 `'X' is marked '@throws' but its body never executes '@throw'`（`-eh checked` 下 throw 已被重写，此判定跳过——`eh_checked` 守卫）
+  - 不写：逃逸的 `@throw` → `'@throw' escapes 'X' without a '@throws' annotation; declare it with '@throws(<type>)' or handle it with a local '@try'`；**被本体内 `@try` 捕获的不算逃逸**（`try_depth` 只对**带 `@catch`** 的 `@try` 计数）
+  - 类型判定保守（`throw_expr_type`）：只判 `@"..."`(id)、裸 C 串(char*)、Cast 目标类型、已知类型变量；**MsgSend 一律不判**（selector-only 注册表无从得知类）→ 对任意声明类型放行
+- **既有 6 处过期声明补标注**（新规则命中，全是"helper 抛、调用方 catch"的 ObjC 惯用法；标注纯编译期，`.out` 逐字节不变）：
+  - `tests/TOMLEditor/toml_editor.np`：`static void THROW(const char *msg) @throws(ParseError *)`
+  - `examples/01_JSONEditor/json_editor.np`：`static void THROW(const char *msg) @throws(Error *)`
+  - `tests/golden/15_exceptions/try_catch.np`：`divide` → `@throws(MathError *)`
+  - `tests/golden/24_asm_fusion/asm_fusion.np`：`- (void)corruptAndThrow @throws`（interface + impl 两处）
+  - `tests/try_catch_basic_test.np`：`- (void)throwIfNegative:(int)val @throws`（interface + impl）
+  - `tests/try_catch_comprehensive_test.np`：`+ (int)divide:(int)a by:(int)b @throws`（interface + impl）
+- **探针实测**（临时文件，不入库）：带类型自由函数 + 裸标注方法 + 带类型方法 = exit 0；本地 `@try` 包裹的未标注 `@throw` = exit 0（豁免生效）；逃逸未标注 / 声明类型不符 / 裸标注撒谎 = exit 1 且文案精确。
+- **回归**：`cargo test --workspace` **59/59**（顺带修了 3 处测试构造缺 `throws` 字段——`cargo build` 不编测试代码，故此前被掩盖）；`python3 test_all.py -j8` 规则命中归零、仅剩 2 个既有 `-F` 失败。
+- **用户文档**：README.md `### \`@throws\` — Declared Exceptions` + CHINESE.md `### \`@throws\` —— 声明式异常`（本节自此作为设计依据存档；面向使用者的说法以那两节为准）。
+
+### 四大特性落地记录 ✅ (Sep 2026, 本会话) — 路线图待做 #1/#2/#3 + #4-M1
+
+> 回归基线：cargo 55/55，test_all **212/227**（3 既有失败 `-F` 不变）。用户拍板的设计决策在各节内标注。
+
+#### #1 Foundation 分发三件套 ✅（golden/32）
+- **`isKindOfClass:`**：`nupa_root` 声明 + runtime `nupa_isKindOfClass`（isa 链复用 `nupa_isKindOf`）。旧 `isKindOf:` 保留作兼容别名。
+- **`respondsToSelector:`**：**编译器伪方法**（不声明不占槽）——codegen MsgSend 特判 → `nupa_resp_<member>(recv)`：`__o && ((struct nupa_vtable *)__o->isa->vtable)->member != 0`。NULL 槽位（协议存根/声明未实现）→ NO；**未知 selector → 常量 0**（不是本 TU vtable 成员，无从引用）；nil 接收者短路；helper 按需发射。⚠️ 坑：`convert_expr` 跑在 `METHOD_METADATA.set` 之前，selector 存在性必须查 `class_infos`。
+- **`isEqual:`**：默认指针相等；子类可重写（`NPString` 用既有 `isEqualToString:`；字面量 interning 落地后同内容字面量是同一对象，值语义仍是键查找的语义保证）。
+- **`conformsToProtocol:` 推迟**：`NPClass.protocols/protocol_count` 字段在但 codegen 恒写 0；填充需把协议表导进 AST/CgClassMeta（`ast_to_cg_unit` 无 symtab），涉跨 TU 布局。
+
+#### #2 struct `==`/`!=` 值比较 ✅（golden/33）
+- checker `maybe_rewrite_struct_eq`：Binary(op 12/13) 两侧同 tag 值 struct（`is_struct && !is_pointer`，类型来自 `scope_vars`）→ `nupa_struct_eq_<tag>(a,b)`；`!=` → `(eq == 0)`（零新 AST 节点）。tag 集 `struct_eq_tags` 经 pipeline 传 codegen（`-fno-checker` 为空=C 原生行为）。
+- codegen `emit_struct_eq_functions`：Section 5 后按需发射；嵌套 struct 递归、数组字段 memcmp、指针字段地址比较。
+- **连带 parser bug 修复+回退**：`struct Config in;` 炸 → 先补了字段名接受 `In` 关键词；随后（见下）`in` 降级上下文关键词后该补丁**删除**。
+
+#### #3 协议组合 `P & Q` ✅（golden/31 扩展 + negative/proto_intersection_missing.np）
+- parser 三处协议列表（`parse_type_full` 的 `<...>`、`@interface` 两个 `<...>` 块、`@protocol <parents>`）逗号分支扩为 `Comma || Ampersand`，落同一合取 `Vec<String>`。
+- **下游零改动**：binder `parents` 去重、checker 逐协议 conformance、codegen（槽位不受影响）全部复用。
+
+#### #4 await 里程碑 1 ✅（golden/34 + negative/async_sync_call.np）——设计决策（用户拍板）
+1. **入口 = async void 方法**（C# `async void` vs `async Task` 同构；单线程协作泵无死锁风险）。同步调非 void async → error + 修复提示。体含 `@await` 即 async，链式传染，零标注。
+2. 语句位 `@await f();` = 求值后丢弃。
+3. break/continue 跨 await 放行（M2 状态跳转）；@noarc 跨 await 放行；@try 跨 await M1 报错（jmp_buf 不能跨挂起点）。
+4. bridge header：async void 发 wrapper 声明；非 void async 跳过（M2）。
+- **语法层（2026-09-27 定案：`@await`，替代此前的裸上下文关键词方案）**：`@await` 入 lexer KW_TABLE（`KeywordKind::AtAwait`），`parse_unary` 开头 `match_keyword(AtAwait)` → `parse_unary` 递归取操作数 → Await 节点。动机：裸 `await` 在前缀运算符位是开放上下文，歧义不可根除（`await * 2` 解析成 `await (*2)`、无法调用名为 `await` 的 C 函数）；`@await` 两个世界 100% 无歧义，`int await = 1;` / `await * 2` / 调用 C 函数 `await(x)` 全部照常。`@` 判据自洽：表达式位已有 `@selector`/`@42` 装箱等机制先例。
+- **AST**：`CstExprData::Await(Box)` / `AstExprData::Await(Box)`；elaborator 直转；checker 返回内部类型；codegen passthrough 安全网。
+- **检查层**（`nupa_async::check_unit`，desugar 前跑原始 AST）：@try 跨 await（try/catch/finally 任一含 await）+ 同步上下文调非 void async。⚠️ 坑：必须同时走 `Class.methods` **和顶层 `Function`（main）**——初版漏了 main，负例自测时抓到。
+- **desugar**（`nupa_async::desugar_unit`，Step 4.8 在 ARC/checker 前）：**不改方法签名**（vtable 槽位不动、跨 TU 安全、bridge header 零特判）。`@await e` → `(nupa_task_resume(__nupa_task), e)`；方法体包 `nupa_task_create(0, self, 0)` / `nupa_task_join(...)`。M1 entry=NULL → resume 即完成返回 1（纯 API 契约钩子，行为=同步执行）。
+- **runtime**（runtime.{h,c}）：`NupaTask{state,finished,entry,self_obj,frame,result,parent}` + create/resume/finish/join；host 用 calloc/free（⚠️ 不是 `nupa_malloc`——那是 freestanding 用户提供符号，链接 libnupa.a 会 undefined）。⚠️ 坑：改 runtime.c 后 `touch` 不够，需 `rm target/debug/libnupa.a` + touch 才会重编（nupac 优先链静态库）。
+- **M2 待做**：真状态机 `switch(t->state)` 拆段、活过挂起点的局部提升进 frame（仿已删除的 TRY_LIFT 思路，见 UAF 修复节——释放结算归任务退出汇合点）、break/continue → 状态跳转、ARC 任务退出汇合点统一结算、`nupa_task_step`/bridge wrapper/`nupa_run_all`。
+
+#### #4 await 里程碑 2 ✅（2026-09-27，本会话续）—— 真状态机
+- **两函数形态**：每个 async 方法 M 编译为 ①`static`入口 `nupa_async_state_<M>(NupaTask *t)`——body 包在 `switch(t->state)` 的 `case 1:` 里，尾部 `case <final>:` 完成；②原 vtable 函数体变 **driver**：`t = nupa_task_create(entry, self, sizeof(struct <M>_frame))` → 装填 frame 参数 → `nupa_task_join(t)` → 非 void 再 `return (T)__nupa_r`。**签名不变**（vtable 槽位/跨 TU/bridge header 零影响）。
+- **frame struct**：`struct <M>_frame` 只装**参数**（M2 同步驱动模型下局部变量在单次 resume 内完成生命周期，留在 C 栈；M3 才提升真正跨 await 的局部）。⚠️ 坑：codegen 的 Struct 分支只认 `AstDeclData::Ivar` 字段（Variable 会被跳过发射成空 struct）；零参数方法 frame 为空 → codegen 跳过发射 → `sizeof` incomplete type，需填充位字段 `char __nupa_pad`。
+- **entry 内改写**：参数引用 → `__nupa_f->param`、`self` → `t->self_obj`（entry 只收 task）；`return e` → `t->result = (void*)(unsigned long)(e); t->state = -1; return 1;`（完成协议）；`await e` → `(t->state = N, e)`（Comma：推进状态 + 求值）。
+- **runtime 修复**：`nupa_task_create` 初始 `state = 1`（原来 0 不匹配任何 case → switch 掉空、行为未定义——用 lldb 断点 + 源码插 printf 定位）。
+- **验证**：golden/34 输出不变（`result=18`）；跨方法 await 探针（raw called → awaited 7）正确；ASan+UBSan CLEAN；cargo 55/55、test_all 212/227（3 既有失败）。
+- **M3 待做**：真挂起源（I/O/调度器 `nupa_run_all`）、entry 返回 0 的实际挂起路径、跨 await 局部提升、break/continue 状态跳转（M2 同步模型下不需要）、`parent` 任务图。
+
+#### 附带：`in` 降级上下文关键词 ✅
+- **依据**：ObjC/clang 的 `in` 根本不是关键字——解析器在 for 头做位置模式匹配，其余位置全是合法标识符。nupa 的硬关键词违反 C 超集（`int in = 5;`、`c.in`、`struct Config in;` 全炸），补洞式修复不可持续。
+- **改造**：lexer KW_TABLE 删 `("in", In)`（`KeywordKind::In` 保留枚举但无人构造）；for-in 消费点改 token 文本匹配；`scan_for_in_header` 加 `.`/`->` 前缀排除（`for (i = p.in; ...)` 不误报）。验证矩阵：全局变量/字段/成员访问/普通 for 中用 `in` 全过 + golden/30 for-in 不受影响。
+
+### 全语法三方压力测试 (Sep 2026, 本会话) — tests/stress/
+
+三套全语法压力测试，全部通过。目的：验证新语法转译到 C 不出错。**测试侧已规避的编译器 bug 汇总见下方清单——这些是真 bug，待修。**
+
+| 套件 | 位置 | 形态 | 结果 |
+|------|------|------|------|
+| 裸机 | `tests/stress/baremetal/build.sh` | `-fno-libc` 转译 + `runtime_freestanding.c`（bump allocator）+ `helpers.c` + ARM64 `asm_ext.s`，clang 链接 | ✅ 47 项检查全过（struct ==/嵌套 eq、enum switch、继承+super、协议 P&Q、id<P>、for-in 自定义集合+typed for-in、typed @catch 链+finally+父链 catch（SubErr）、@selector、blocks+__block、Box<int*>、内联 asm+asm goto、fnptr→asm、@synchronized+提前 return+relock、@noarc/@autoreleasepool、nil 消息、respondsToSelector、typeof/builtin；Sep 2026 新语法批：@defer LIFO+提前 return、switch 模式匹配（标量 range/when + 对象 Bind + 臂序）、成员 fn-ptr 直调、enum 形参（TagKind）、nullability 注解（`_Nonnull`/`_Nullable`）+ `nullable`/`in` 作标识符、宏轨道过滤（BM_MAX 透传 / `@"..."` 宏 C 轨剔除）、__weak 赋值重注册+清零、NPAsync<T> 标记+@await 链） |
+| 标准库 | `tests/stress/hosted/`（`nupac run hosted_test.np -asm asm_host.s`） | Foundation 全量 + ARC + `@await` | ✅ 33 项全过（上表全部 + NPString/NPArray/NPMutableArray/variadic ctor/@42/@1.5/NPLog %@"、嵌套 for-in、isKindOfClass:/respondsToSelector:/isEqual: 分发链、Renderable=<Drawable&Serializable> 组合协议、双泛型特化、嵌套 @try/finally 顺序、__weak、`@await` 状态机 result=43） |
+| 三方联编 | `tests/stress/interop/build.sh` | Nupa lib.np → lib.c + **桥接头 lib.h**；C caller.c + helper.c + ARM64 asm_lib.s + runtime.c 四方一个 clang 链接 | ✅ 5 项全对（C→Nupa 自由函数→asm、C→Nupa alloc/init/消息、Nupa 方法→asm、Nupa 方法→C helper、Nupa 方法内 block） |
+
+#### 压测挖出的编译器 bug
+
+**✅ 本轮已修（8 项）**：
+
+> **本轮回归基线（全部实测）**：cargo test **55/55**；test_all **220/230**（3 个 `-F` 既有失败不变：两个无 main 库文件 + 一个故意 over-release）；`tests/stress/` 三套 runner 全过（baremetal 31 项 / hosted 33 项 / interop 5 项）；`tests/multi_tu` **9/9**；trace goldens **8/8**（`.out` 已按新行号重新生成——Foundation `NPObject` 本轮 +9 行，内联缓冲区行号整体偏移 86→95，语义逐个核对无误）。
+
+| # | bug | 修法 |
+|---|-----|------|
+| 3 | `T *a = x, *b = y;` 指针声明符逗号列表解析失败 | parser 逗号列表循环加 `while match(Star)` 逐声明符重放指针；后续声明符另存 `var_type`（原为 `None`），并支持逐声明符 `[]` 后缀。回归见 `tests/comma_ptr_test.np` |
+| 12 | 顶层 `@class NS::Ghost;` 不认 `::` | `parse_forward_class` 改用 `parse_qualified_name()`，接受 `NS::Ghost` 与多段 `A::B::C` |
+| 4 | enum 参数发射成 `struct Mode` | parser 原本把 `struct`/`union`/`enum` 三者统一标 `is_struct`，渲染一律输出 `struct`。新增 `TagKind`（`CstType.tag` / `AstType.tag`）+ `TagKind::keyword()`，两处渲染点（`cst_type_to_c_str` / `ast_type_to_c_str`）改用真实 tag 关键字；elaborator `convert_type` 同步拷贝该字段。⚠️ 坑：`match_keyword` 已消费关键字，tag 须从 `self.previous` 读 |
+| 8 | typedef 名形态的 struct 不做 `==` 改写 | checker 新增 `struct_alias_tags`（alias→tag），`check()` 首遍由 `AstDeclData::Typedef` 填充；`is_value_struct` 改收 `&self`，非 `is_struct` 的命名类型也查此表。返回 **tag**（非 alias），因 eq 函数按 tag 命名 |
+| 6 | `respondsToSelector:` 传 SEL 变量生成坏 C | checker `MsgSend` 臂加 error：伪方法降级为 vtable 成员 NULL 检查，运行时 SEL 无成员可名，必须 `@selector(...)` 字面量。不再流到 codegen 的 arrow-access fallback |
+| 13 | `nupa_meta_init()` 不存在 | runtime.h 声明 + codegen 与 `nupa_metaInit` 并排发 **weak 别名定义** `nupa_meta_init`（其余 runtime 符号皆 snake_case，用户自然这么写）。已用 C host 链接实测 |
+| 7 | `@catch` 内 `@throw` 重抛 → 无限重进同一 catch | 在 **handler 选择之前**（catch 体之前）发一次 `memcpy(__nupa_exception_buf, __nupa_saved, sizeof(jmp_buf))` 恢复父级 jmp_buf，使 catch 内的重抛 longjmp 到**外层** try 的 setjmp，而非重入本帧自己的 setjmp。⚠️ 位置是"catch 体之前"一处，不是改在 `@throw` 发射点 |
+| 9 | struct eq 函数无前向声明 → 隐式声明+static 冲突 | eq 函数前先发全部 `static int nupa_struct_eq_<Tag>(...)` 原型；嵌套 struct 由 `fields_of` 递归展开进 tag 集（按依赖序发射） |
+
+**⚠️ 修 #3 时引入的回归（已修，务必记住）**：让后续声明符带上 `var_type` 后，**for 头内的声明列表**被 statement 级 Decl 发射器拆成多条 `;` 结尾语句（`for (T p = lo;\n T q = hi-1; ...`）。修法在 codegen `CgStmtData::For` 发射点：for 头专用路径把 `next` 链发成**一个逗号列表**。两个 C 细节：① 分隔符 `;` 原由 Decl 发射器尾部提供，新路径须自己补；② **C 声明列表里类型只能出现一次**——`for (size_t p = lo, size_t q = ...)` 是语法错误，后续声明符必须丢弃类型（故 for 头路径用 `_n_type` 忽略它，statement 级仍需要它以支持 `T *a, *b`）。
+
+**连带修复**：`TagKind` 落地时暴露 `is_union` 从 CST 到 AST 被丢弃（`union U2 u;` 的**使用**正确发 `union`，但**定义**发 `struct` → tag mismatch）。已把 `is_union` 补进 `AstDeclData::Aggregate` / `CgDeclData::Struct` / `AggDef`，定义与使用两侧一致。
+
+**⚠️ 仍待修（5 项）**：
+
+1. **block 字面量返回类型推断缺失**：`^(int a,int b){return a*b;}` 发射 `^void` → 调用处炸。必须显式 `^int(...)`。
+2. **block 捕获改写是 TU 级名字匹配，不是函数作用域**：类方法参数名叫 `base` 就被改写成 `base.__forwarding->__value`（main 里 `__block int base` 的捕获改写串了）。**高危**——任何与 __block 变量同名的参数/局部都会被污染。
+5. **类方法里 `[super alloc]`**：派发到实例 vtable/meta vtable 无 `alloc` 槽位 → 坏 C。不覆写 `+alloc`（直接继承 NPObject 的）可绕过；裸机自定义根类用 `nupa_alloc(self)`。
+10. **命名空间内泛型 receiver 不单态化**：`Metal::Box<int *>` receiver 仍派发泛型版签名；顶层 `Box<int *>` 正常。
+11. **`[obj class]` 特判在裸机隐式根类下生成不完整类型解引用**（`nupa_root` struct 在 freestanding 不完整）。
+12. ~~**对象下标订阅 `a[0]` 透传坏 C**~~ → **✅ 已修**（2026-09-29，本会话，见下节"对象下标与泛型擦除"）：checker 层类型感知改写 `a[0]` → `[a objectAtIndex:0]`、`a[0]=v` → `[a setObject:v atIndex:0]`，C 数组/指针下标不受影响。
+13. ~~**`NPArray<T>` 泛型参数静默擦除**~~ → **✅ 已缓解**（2026-09-29，本会话）：checker 发 warning 点破（非泛型类带 `<...>` 不生成特化、不做元素类型检查）。⚠️ **仍是 warning 不是 error**，`-Werror` 下才拦截；真正的单态化未做。
+
+#### 严格 pedantic 归因（`clang -pedantic -Werror`，三份生成 C）
+- **`$` in identifier**（每份 16-19 处）——命名方案固有（`NUPA_CLASS_$_X`/`NUPA_VTABLE_$_X`），clang 扩展。判 `-Wno-dollar-in-identifier-extension` 后再看。
+- **GNU statement expression**（baremetal 12 / hosted 15 / interop 1）——**nil 消息守卫** `({ NPObject *__nupa_tmp_N = ...; ... : 0; })` 与 block 捕获展开固有。**当前 codegen 设计做不到纯 C99 pedantic-clean**；路线图"clang/gcc -pedantic -Werror 双通过"对 nil 守卫路径不成立（GCC/clang 都支持 statement expression，pedantic 只是警告级别标注）。
+- **`cond ? voidf() : 0` 单侧 void**（C99 禁止）——nil 守卫对 void 方法的发射形态，同源。
+- 其余为少量指针不匹配告警（泛型/伪方法派发 `NPObject*` vs 子类指针，ABI 层无害）与 `if ((x == 1))` 双括号风格。
+- **结论**：三份生成 C 在 `-Wno-dollar-in-identifier-extension -Wno-gnu-statement-expression -Wno-pedantic(仅 void-conditional 处)` 下零错误；完全 pedantic-clean 需改 nil 守卫发射形态（do/while 局部变量块替代 statement expression），列为后续优化。
+
+#### 三方联编要点（build.sh 注释已含）
+- 生成 `lib.c` 是宿主模式：**不自含 runtime 头**，clang 需 `-include nupa/runtime.h`。
+- **`.s` 必须单独 `clang -c` 先汇编成 `.o` 再链**——`-include` 强制头会应用到 `.s` 上炸掉汇编解析（曾把 ARM64 助记符当 C 编译）。
+- 桥接头只发**实例方法** wrapper：`+alloc` 类方法、自由函数、`extern NPClass NUPA_CLASS_$_X` 类元数据都需 caller 手动 extern；对象创建用公开 API `nupa_alloc(&NUPA_CLASS_$_Calc)`（生成代码内部的 `NPObject_alloc` 不在公开头里）。
+
+### 对象下标订阅 + 泛型参数擦除告警 ✅ (Sep 2026, 本会话)
+
+对账表上仅剩的两条实现缺口，本会话全部落地。
+
+#### ① `a[0]` 透传坏 C → checker 层类型感知改写 ✅
+
+**原症状**：`NPArray *a; [a[0] intValue]` 生成 C 原样输出 `a[0]`，clang `used type 'NPArray' where arithmetic or pointer type is required`，且报错位置在生成 C（`<stdin>:2042`）**无从对应源码**。C 数组下标正常。
+
+**修法**（`crates/checker/src/lib.rs`）：仿 `maybe_rewrite_struct_eq` 的既有先例，在 checker 改写 AST——**parser 层拿不到变量类型，且 emit 阶段无 vtable 元数据**（同 for-in desugar 的理由）。两个改写函数 + 两个判定辅助：
+
+| 源 | 改写成 | 判定条件 |
+|----|--------|---------|
+| `recv[i]` | `[recv objectAtIndex:i]` | 接收者是 `Named`+指针+非数组，且该类（含父类）声明了 `objectAtIndex:` |
+| `recv[i] = v` | `[recv setObject:v atIndex:i]` | 同上，**且**声明了 `setObject:atIndex:`（区分可变的 `NPMutableArray` 与不可变的 `NPArray`） |
+
+- 复用 `MsgSend` 节点 → 下游静态 vtable 派发、nil 守卫、SEL 常量**零特判**；vtable 槽位由方法名决定，跨 TU 布局不受影响。
+- **C 下标必须零误伤**，故判据不是"看起来像对象"而是**符号表实证**：沿 superclass 链查该类是否真声明了 `objectAtIndex:`。`int c[3]; c[1]`、`char *p; p[0]`、`const char *s; s[2]` 一律原样透传（探针 A–G 全对）。
+- **⚠️ 坑 1：selector 归一化要去掉"每一个"冒号，不是只去尾冒号**。binder 存多段 selector 时**抹掉全部冒号**（`setObject:atIndex:` → `setObjectatIndex`），只 `trim_end_matches(':')` 会让写侧永远匹配不上（首版即如此，静默失效）。读侧因 `objectAtIndex:` 是单段 selector 恰好能中，掩盖了这个 bug——**单段通过不能证明归一化正确**。
+- **⚠️ 坑 2：写侧需要 `receiver_static_type` 回退**。checker 的 `Assign` 臂用 `check_expr(&mut *target.clone())` 在**克隆**上检查，原 target 节点永远拿不到 `expr_type`；故回退到 `lookup_scope_var_type` 查作用域表，否则写侧改写看不到 `m` 是 `NPMutableArray`。
+
+#### ② `NPArray<T>` 静默擦除 → checker warning ✅（附两处前置修复）
+
+**原症状**：`NPArray<NPString *> *a` 语法接受、能跑通，但纯靠 id 擦除——生成 C 中 `NPArray_NPString` **零次出现**，`objectAtIndex:` 仍返回 `NPObject *`，无特化、无元素类型检查。写了泛型参数的人会以为有类型保护。
+
+**修法**：`warn_if_erased_generics`——类型带 `type_args` 但所指的类**未声明任何 type_params** 时发 warning（点明不生成特化、不检查元素类型、建议改用泛型容器）。挂载在 checker 的 `Variable` 声明臂。
+
+⚠️ **只做 warning 是有意的**：真正的 `NPArray<T>` 单态化是独立增量（见"剩余已知问题 #5"），本条只消除"静默"这个最有害的部分——用户至少被告知。`-Werror` 下可提升为 error。
+
+**⚠️ 落地时连带暴露并修掉的三个真 bug**（都是"判据不可靠"而非新功能）：
+- **parser 协议路径的试探是破坏性的**（`parser.rs` `<...>` 解析）：非泛型类的 `<...>` 会先被当协议列表试探，`NPArray<NPString *>` 因 `*` 过不了 `>` 前瞻而失败，**却不回滚** → 随后的 type_args 路径从 `*` 开始解析、产出空 args，`<NPString *>` 被**静默丢弃**。修法：`save_pos`/`restore_pos` 回滚（与消息接收者类型试探同一套机制）。
+- **binder 从不填 `SymbolData::Class.type_params`**（`binder.rs` 该字段零写入点，恒空）：导致判据对**所有**类都成立，用户自定义泛型 `Box<T>` 被误报。修法：照 `superclass_from_cst` 的同款模式取出 CST 的 `type_params` 写入符号表。
+- **类声明 `<T>` 消歧的复用误判**（`parser.rs` `@interface` 的 `<...>` 块）：`@interface A<T>` 落地后 `T` 被 `add_type_name` 注册，后续 `@interface B<T>` 的 `<T>` 被"全部是已声明类型 → 协议列表"判据**误路由**——B 的 `type_params` 落空、checker 误报"擦除"，而 codegen 实际照常单态化 `B<int>`（生成 C 中 `B_int` 18 次出现，探针实证）。修法：判据改 `is_type_name(n) && !is_type_param(n)`——**当前在册的类型参数名优先于协议解读**（`@protocol` 注册的名字永远不在 type_params 里，二者不相交）。
+
+> 这三处都是**先有探针量到现象、再定位到机制**才发现的；只量现象（"特化零次出现"）不足以定位，DBG 打印 `type_args`/`protocol_refs` 才 pinpoint 到 parser 的回滚缺失。
+
+#### ③ 指定初始化器形态 4：**不是缺口，是测试文件自身笔误**
+
+详见勘误 2 的矩阵。`tests/designated_init_test.np` 两处笔误已修（补 `NPRange` typedef、`CGPoint` 字段名 `x/y`→`wx/wy`），6 形态端到端 exit=0。编译器侧**零改动**。
+
+**回归基线（本会话结束时实测）**：cargo test **102/102**、test_all **257/265**（2 failed 均为 `-F` 既有基线：`diamond_impl-F.np` 无 main、`double_release-F.np` 故意崩溃；0 新增失败）、multi_tu **9/9**、trace golden **8/8**（用 `NPAC=$PWD/target/debug/nupac` 跑 debug 二进制——脚本默认取 `target/release/nupac`，不显式指定等于用陈旧二进制做假回归）、eh_diff **7/7**。
+
+### 多平台测试 — OrbStack Ubuntu（arm64 + amd64）✅ (Sep 2026, 本会话)
+
+- ✅ **产物**：`build-all.sh` 同款 zig-cc 交叉编译 musl 静态二进制（`target/{aarch64,x86_64}-unknown-linux-musl/release/nupac`，`file` 确认 static-pie）；include/ 用项目根当前版本（target 里的 include 是打包时快照，会过期）。
+- ✅ **`test_all.py` 支持 `NUPAC=` 环境变量覆盖二进制**（同 trace golden runner 的 `NPAC=` 约定），跨平台回归不再硬编码 `target/debug/nupac`。
+- ✅ **e2e 矩阵两架构全绿**（冒烟 / 继承+协议 / 泛型 monomorphization / struct eq / @try 三件套 / 跨函数泄漏复现 / ASan UAF / trace）。
+- ⚠️ **Linux 差异三件套（非 bug，是平台事实）**：
+  1. **blocks**：Mac clang 默认开 `-fblocks`，上游 clang **不开**，且 nupac 从不传该旗标 → `blocks support disabled` 编译失败。解法：`NUPA_CC="clang -fblocks -lBlocksRuntime"`（需 `apt install libblocksruntime-dev`）。`-backend gcc` portable 展开不受影响，但自身另有（旧）缺陷。
+  2. **libm**：macOS 的 `sin/cos` 在 libSystem 里自动链，Linux 需显式 `-lm`（`NUPA_CC="... -lm"`）。tricalc 因此失败。
+  3. **gcc 15 默认 gnu23**：生成 C 里的 ObjC 式隐式上下转型（`Item*`↔`NPObject*`）被当**硬错误**（clang gnu17 只是警告）→ gcc 后端需 `-Wno-error=incompatible-pointer-types -Wno-error=int-conversion`。
+- ⚠️ **test_all 终值**：arm **161/175**、x64 **159/175**。剩余失败全部归因：asm 用例（Apple 汇编器语法 Linux 不认）、mega_fusion（依赖 `.s` + blocks）、tricalc（test_all 无法传 `-lm`）、5 个交互式 CANCELED、3 个 `-F` 基线。无 nupa 编译器本身的新缺陷。
+- ✅ **顺带修了 1 个平台无关 checker bug**：逗号声明列表的后续声明符未注册进 `scope_vars`（`Point p1 = {1,2}, p2 = {1,2};` 的 `==` 不改写）——见上方 checker 记录。
+- **教训**：① orb run 通道会间歇性吞输出，`echo` 不见时先 `orb run ... cat <logfile>` 而非重跑；② VM 里 bash -c 含 `-` 开头的 curl/arg 时小心 glob/选项误伤；③ 排查失败先问"Mac 上同文件什么状态"，避免把平台差异当回归。
+
+### 跨平台收尾：链接 flag 自动注入 + `-freestanding` 改名 (Sep 2026, 本会话)
+
+- ✅ **nupac 自动链接平台 flag**（`compile_to_binary`，host 模式，从**生成的 C 内容**探测）：C 含 `(^`（block 类型未展开）→ 加 `-fblocks`，Linux 且非 shared 再加 `-lBlocksRuntime`；Linux 非 shared 一律加 `-lm`（macOS libm 折进 libSystem 自动链，Linux 需显式；`--as-needed` 下未用会被链接器丢弃）。freestanding（`no_libc`）与 `-backend gcc`（portable 展开 block）自动豁免。**VM 实测**：不设 `NUPA_CC` 复跑 test_all，arm 161/175、x64 159/175，与手动 `NUPA_CC="clang -fblocks -lBlocksRuntime -lm"` 逐项一致。
+- ✅ **`-fno-libc` → `-freestanding` 改名（非破坏）**：`-freestanding` 为规范名（与 clang 发给 C 编译器的旗标同名，语义同源），`-fno-libc` 保留为 deprecated 别名——现有脚本（soma-kernel Makefile、golden/25、stress baremetal）零迁移成本。全链 7 处：clap Arg（新增独立 arg）、`DOUBLE_TO_SINGLE`、`nupac_flags()`、`norm_flag`（`--freestanding`）、手动 help、两处参数解析（run 前扫描 + 主循环，均 `== "-fno-libc" || == "-freestanding"`）、completions 三件套。验证：两旗标转译输出 `diff` 逐字节一致（`__NUPA_FREESTANDING` 都置位）、`-h` 显示规范名。⚠️ **已被二次改名取代**（2026-09-30）：规范名现为 **`-ffreestanding`**（双 f，对齐 clang 拼写），`-freestanding`/`-fno-libc` 别名已按用户拍板删除——见"`-ffreestanding` 规范名定名 + 别名删除"节。
+- ✅ **README 异常章节按 ASan 实测更正**：跨函数 throw 的中间帧对象泄漏（longjmp 跳过 scope-end release）仍是已知限制；同函数 @throw 曾是双重释放 UAF——**已修复**，见下节。
+- ✅ **test_all.py docstring 记录 env 覆盖**：`NUPAC=`（二进制）与 `NUPA_CC=`（透传 C 编译器旗标）的用法与默认值。
+
+### `-nostdinc` 独立旗标 + `runtime_freestanding.c` 重命名 (Sep 2026, 本会话)
+
+- ✅ **`-nostdinc` 独立旗标（正交化）**：给 C 编译器透传 `-nostdinc`（只剥系统 include 路径，**不带**任何裸机旗标）。**`-freestanding` 不再隐含 `-nostdinc`**——此前 `compile_to_binary` 的 no_libc 旗标块固定发它、ctype_probe 也捆绑（`no_libc → -ffreestanding -nostdinc`），现已拆开，四种组合自由。接线点：clap Arg、`DOUBLE_TO_SINGLE`、`nupac_flags()`、`norm_flag`、手动 help、两处参数解析（run 前扫描 + 主循环）、`pipeline.nostdinc` 字段、`compile_to_binary` 新参数（两处调用点）、`probe_c_type_names` 参数拆为 `freestanding`+`nostdinc`、completions 三件套。
+- **动机（"三头由谁提供"讨论的落地）**：`-nostdinc` 连 clang builtin 资源目录也剥掉（上节探针实证）——剥不剥是**内核作者的决策**（soma-kernel 要 `-nostdinc` + 自带 `include/`；宿主试验想让 clang 自带三头兜底），编译器前端语义（`-freestanding`）与头搜索策略（`-nostdinc`）本就是两个正交维度。
+- ✅ **`runtime_baremetal.c` → `runtime_freestanding.c` 重命名**：原名"baremetal"名不副实——它同样服务**没加 `-nostdinc`** 的 freestanding 构建路径（clang builtin 三头兜底），且与 `-freestanding` 旗标同名同源。`git mv`（保历史）+ 全仓库 31 处引用替换（16 文件：build.rs、golden/25+26 与 stress 的 build.sh、soma Makefile/kernel.c/soma_core.np、README/CHINESE、代码注释），grep 残留 **0**。
+- ✅ **memset weak 定义补齐**：`memset` 从"自声明原型"升级为 **weak 定义**（`#undef` + `__attribute__((weak))`，与 memcpy 块同款）——runtime 自含全部可能被 `-ffreestanding` 编译器发射的 mem 系符号；内核自己的强定义链接时胜出。
+- **没加 `-nostdinc` 时的 runtime 设计定案（讨论结论）**：**不搞新文件，单文件双模式**。`runtime_freestanding.c` 的 include 面只有标准强制三头（C11 §4p6 freestanding 实现必须提供，clang builtin 目录自带兜底），差异全在 `__NUPA_FREESTANDING` 宏内（jmp_buf 来源、异常全局 TLS 与否）。加 `-nostdinc` 的内核 `-I` 自带三头（soma-kernel 模式）；不带的直接链该文件。拆两个文件的收益（省几十行 weak 定义）不抵符号面分叉的维护成本。
+- **验证**：cargo 0 warning + **137/137**；fakecc 探针矩阵 A1 `-freestanding`→ffreestanding=1/nostdinc=0、A2 组合→nostdinc=1、A3 `-nostdinc` 单独→ffreestanding=0/nostdinc=1、A4 run 模式前扫描命中；B1 转译正交性（`-nostdinc` 生成 C 逐字节同）；B2 probe 降级（`-nostdinc` 下 probe 失败回退，转译 rc=0）；B3 `-freestanding` 宏置位=1；golden/25+26、stress baremetal 全 exit=0；soma 同款旗标单文件 i386 ELF + Makefile 编译过；test_all **309/317**（2 个 `-F` 既有失败不变）。
+
+### `-ffreestanding` 规范名定名 + 别名删除 (Sep 2026, 本会话)
+
+- **动机（用户拼写事故驱动）**：用户敲 clang 拼写 `-ffreestanding`（双 f）报 `Unknown argument`——nupac CLI 规范名是单 f `-freestanding`，而双 f 是转发给 clang 的 C 编译器旗标（`compile_to_binary`），两个世界撞名必然有人敲错（项目作者本人就中招）。拍板：**规范名改为双 f `-ffreestanding`**，与转发旗标/clang 肌肉记忆同名同源（同 `-nostdinc` 先例——CLI 家族彻底统一为 clang 拼写）。
+- ✅ **别名整体删除（用户拍板"能删就删"，无过渡期）**：`-freestanding`（单 f）与 `-fno-libc` 两个 deprecated 别名从解析链移除，旧拼写现在响亮报 `Unknown argument: -fno-libc`（探针实证），不做静默降级。⚠️ 本文件更早各节写的 `-freestanding` 拼写一律读作现规范名 `-ffreestanding`（`runtime_freestanding.c` 文件名不受影响）。
+- **迁移清单（全仓库 27 处，grep 零残留——AGENTS 历史节除外）**：main.rs 8 触点（clap Arg 改名+删 no-libc arg、`DOUBLE_TO_SINGLE` 删两条目、`nupac_flags()`、`norm_flag`、手动 help、run 前扫描、主循环）；completions 三件套 + `nupac.bash` 的 `-fno-libc)` case 分支；build.sh ×3（golden/25、golden/26、stress baremetal）；soma-kernel Makefile；README/CHINESE 各 6 处（含 help 块对齐修正）；test_all.py 注释。
+- **验证**：三种形态探针——`-ffreestanding` rc=0、旧别名正确拒绝、fakecc 截获（ffreestanding=1/nostdinc=1 组合正确到达 clang）；`-h` 与 completions 显示新规范名；cargo 0 warning + **137/137**；golden/25+26、stress baremetal 全 exit=0；soma Makefile `-B` 强制重跑转译规则 rc=0（新旗标真实执行）；test_all **309/317**（2 个 `-F` 既有失败不变）。
+
+### GPT 裸机评审四项修复 (Sep 2026, 本会话) — runtime_freestanding + parser
+
+> 外部评审（GPT）报告五项：①malloc 契约/对齐 ②for-in 别名 `NPObject **` ③裸机 Blocks ABI 缺失 ④weak 表项泄漏 ⑤build.sh 非"纯裸机"。**复验四项属实、⑤属实但是已知设计（golden/25 host methodology，AGENTS/注释早已声明）**。修 ①②④ + ③ 如实声明，全部配白盒 C 探针。
+
+- ✅ **① `nupa_malloc` 零初始化 + max_align_t 对齐**：runtime.h:148 的契约（"must zero-initialize"）此前实现只移 bump 指针——实证影响面比评审说的更大：`nupa_task_create` 的 task 结构与 **frame 都来自这个未清零的 malloc**（裸机 `@await` 的 frame 填充位读垃圾）。修法：堆改 `_Alignas(max_align_t) unsigned char`（char 数组只保证对齐 1）、分配对齐 `_Alignof(max_align_t)`（原 `sizeof(size_t)`）、返回前 `memset(p, 0, size)`（本文件已有 weak memset 定义）。**白盒探针**（include .c 摸 statics，先把整堆涂 0xAA 再分配——BSS 本来是零，不涂脏证明不了 memset）：1-40 尺寸对齐全过、zeroed=1、`double=1.5`（严格对齐写）、**frame_zeroed=1**、溢出守卫仍返 NULL（memset 不越界）。连带修：堆改 `unsigned char` 后 `nupa_is_heap_object` 的比较基址同步改（0 警告）。⚠️ 验证方法论：验证"清零"必须先涂脏内存，否则 BSS 零是假阳性。
+- ✅ **④ `nupa_weakUnregister` 释放空 entry**：原实现只清 slot，最后一个 slot 清掉后 `entry->object` 悬空占位——对象长命 + weak 全部出作用域时每目标永久占一项，64 目标满表后静默丢弃（`nupa_weakClearAll`（release 路径）会清 entry，所以 ARC 下少见、裸机 bump allocator 下必累积）。修法：slot 清空后全查，空则 `entry->object = NULL` 归还可回收项。**白盒探针 7 断言全绿**：64 满表 / 第 65 目标静默丢弃（文档化策略不变）/ 部分注销 entry 保留 / 末 slot 注销 entry 释放 / 新目标可注册（表不再饱和） / 未知位置注销 no-op / 全释放后重填 64。⚠️ 探针首版两处断言自身写错（slot 索引、剩余 entry 计数）——修探针不改运行时，C/D/F（修复本体）首轮就绿。
+- ✅ **② for-in 集合别名 `NPObject * *` → 单层 `NPObject *`**：parser desugar 给 `TypePrim::Id` 又置了 `is_pointer = true`（parser.rs:2944）——`id` 渲染本就是 `NPObject *`，再加一层成 `NPObject * *`（评审抓到的 ：1591/:1872 两处）。位模式相同所以一直能跑，但类型是错的（指针告警源）。修法：删 `is_pointer`（一行）+ desugar 注释记录"勿再置位"防回归。**验证**：生成 C 两处单层 + 双层残留 0；golden/30 stdout diff **MATCH**；stress baremetal（N6 自定义集合 / N12 typed for-in）exit=0；stress hosted（F5 NPArray for-in）exit=0。⚠️ 首次 hosted 复跑 127 是**探针相对路径少一级**（`../../target` 从 tests/stress/hosted 数漏）——平台无关验证用绝对路径。
+- ✅ **③ Blocks ABI：声明"不捆绑"，不加假 stub**：runtime.h 无条件声明 `_Block_copy/_Block_release`（:253），freestanding runtime 不提供任何 blocks 符号（grep=0）；host 链路靠平台 Blocks runtime 兜底，`nm -u` 实证 `__NSConcreteStackBlock` 未解析——真裸机链接会炸。**定案（按"不加假 stub"原则）**：不实现 Blocks ABI 移植（几百行 ABI 级代码），如实声明两条真路——链接 Blocks runtime 移植，或 `-backend portable|gcc`（block 展开为普通 C 函数、零 ABI 符号）。四处同步：runtime.h blocks 节注释、runtime_freestanding.c 头注释、README/CHINESE 裸机节各一条 bullet。
+- **⑤ 的定性（评审对，结论不变）**：stress build.sh 是 host methodology（Mach-O + libc/Blocks host 符号，AGENTS 与脚本注释早已声明）；评审的有效增量是 ③×⑤ 联动——host 链接掩盖了 blocks ABI 缺口，现已文档化。
+- **回归**：cargo **137/137**（0 warning）、golden/25 exit=0、stress baremetal exit=0（47 项）、test_all **309/317**（2 个 `-F` 既有失败不变）。
+- **追记（同会话）— stress 的 async 用法对账 canonical 模式**：baremetal_test 的 main 内两处 `@await`（R5/R8）触发 `[async] warning: 'main' contains '@await' but its return type is not marked 'NPAsync<T>'`——对账表"裸 T + 有 await = warning"行如实命中，且 main 正是设计文档钉死"`@await` 永不直接出现"的位置（测试自身违反了 canonical 模式）。修法：R5/R8 表达式**原样**移入 `+ (NPAsync<void>) awaitMake` / `awaitSum:` 类方法（标记+await = 对账表 ✅ 行），main 改同步调用（blocking wrapper 内部泵任务，main 语义零变化）。验证：R8=24 不变、build.sh exit=0、用户原样命令（`-ffreestanding -nostdinc`）**stderr=0 零告警**。⚠️ stress 编译的 41 条 clang `-Wall` 告警（id 派发指针宽度、`(x==1)` 双括号风格等）是既有噪音，与本修无关；`hosted_test.np` / `full_syntax_test.np` 的 main 内 `@await` 同款告警留待同法收敛。
+
+### @try 双重释放 UAF 修复 (Sep 2026, 本会话) — 删除 unwind-lift 机制
+
+- **根因（ASan 实锤，两条路径都炸）**：codegen 的 @try "unwind-lift" shadow 机制（`TRY_LIFT_COUNTER`/`try_lift_shadow`/`insert_lift_mirrors`/`collect_try_lift_vars` 等 ~150 行）与 **ARC（RefVal 状态机）双保险重叠**：ARC 在 `@throw` 处已 release 全部 owned 局部（`arc.rs:209`，"insert releases before control flow exits"），scope-end release 也由 ARC 负责；lift 的 shadow 释放又发在 `state==1` gate **之外**（注释声称"normal/unwind mutually exclusive, no double-release"但发射未 gate）——**连正常不抛异常的路径都 UAF**（每个含 owned 局部的 @try 都中招，无 ASan 时是静默读已释放内存）。throw 路径：ARC 释放（1→0，free）→ lift 释放 shadow（读 freed）。
+- **修法（删除 > 缝合）**：整体移除 lift 机制（Try 臂 shadow 声明/镜像/释放三块 + 8 个辅助函数），ARC 成为自动释放注入的**唯一所有者**；Try 臂仅剩 setjmp 状态机骨架。原则与 ARC 哲学一致：**宁可 leak 不 double-free**——分支合并后 Unknown 状态的局部在 throw 路径可能泄漏（保守方向），跨函数 throw 中间帧泄漏不变（真 unwind 是正路，EHABI）。
+- **验证**：ASan 下 throw 路径（`EXIT=0`，Item dealloc 恰一次，A/B caught）与 normal 路径（`EXIT=0`，dealloc 一次）双清；cargo test 全绿、test_all **220/230**（3 个 `-F` 既有失败不变）。
+- **教训**：两条独立机制做同一件事时，注释里的"互斥"设计要对照发射产物核实（此 bug 的 gate 只存在于注释里）；ASan 报告必须读到 fre/free-后访问两处调用点再下结论。
+
+### `-eh checked` 异常传播后端 ✅ (Sep 2026, 本会话) — 新 crate `crates/eh`（M1）
+
+- **动机**：sjlj（setjmp/longjmp）的已知缺陷——longjmp 跳过中间帧的 scope-end release，跨函数 throw 泄漏中间帧 owned 对象（README 异常章节已记录的既有限制）。`-eh checked` 是零运行时 unwind 的替代后端：显式错误旗标 + 调用点检查链，ARC 正常结算每一帧。
+- **CLI**：`-eh <checked|sjlj>`（pipeline `eh_checked` 字段；默认 `sjlj`，行为零变化）。`-eh` 解析、`norm_flag`/`DOUBLE_TO_SINGLE`、flag picker、completions 三件套已同步。
+- **desugar 形态**（`nupa_eh::desugar_unit`，pipeline 在 desugar 前（pre-ARC）调用，Step 4.8 先例）：
+  - `@throw e` → `__nupa_eh_flag = 1; __nupa_eh_val = (NPObject *)e; return <zero>;`（zero 按函数返回类型取 `0`/`(id)0`/void）
+  - 每个可能抛出的调用点之后注入 `if (__nupa_eh_flag) { return <zero>; }`（传播链）；函数体入口插 `__nupa_eh_flag = 0;`
+  - `@catch (T *e)` → `if (__nupa_eh_flag) { ...isa 检查（typed catch 不匹配则重新置位 flag 并 fall through 到下一 arm）... __nupa_eh_flag = 0; T *e = (T *)__nupa_eh_val; <body> }`
+  - `@finally` 在自然汇合点执行（无需独立机制）
+  - **try body 无需入口检查**：flag 在 try 入口可证为 0（传播立即 return；catch 会取走 flag）
+- **作用域设计（本轮修复的关键 bug）**：调用点后的守卫**不能**逐语句包独立 `if (flag==0) {...}`——后续语句会引用守卫块内声明的变量（`<stdin>:1629: use of undeclared identifier 's2'`，checked 生成 C 共 20 错）。修法：**整段 tail 收进一个守卫块**，块尾与外层 compound 对齐——词法作用域不变（后续语句可见声明），ARC scope-end release 仍执行。`rewrite_guarded` 辅助随之删除（`deny(dead_code)` 会报错）。
+- **M1 限制**（`check_unit` 强制，违反报 `file:line:col: error:`）：
+  - `@throw` 只能作为整条语句（不能嵌在表达式里）
+  - block 字面量内不得 `@throw`（跨块边界无旗标传播路径）
+  - 其余场景 checked 全支持（嵌套 try、typed catch 链、finally）
+- **端到端验证**（`t4.np`：`middle` 创建 owned `Item *m` 后穿透 `boom` 的 throw，main 捕获）：非 ASan 构建 + `leaks -atExit` 对比——**sjlj 无 `Item dealloc`（`m` 泄漏，既有缺陷）；checked 有 `Item dealloc` 且无泄漏**。两后端 stdout 语义一致（middle created m / caught / --- end ---）。
+- ⚠️ **验证工具坑**：macOS ASan 不支持 `detect_leaks`（需 Linux），而 `leaks` 工具**无法检查 ASan 二进制**（"malloc replacement library without the required support"）——泄漏对比必须用**非 ASan 普通构建** + `leaks -atExit`。
+- **checked desugar 必须在 ARC 之前运行**：注入的 early return 是 ARC 已能处理的普通控制流（`@throw` 处的 release 注入对 checked 同样生效，每帧正常结算——这正是它不泄漏的原因）。
+- **回归**：cargo test 55/55、test_all 220/230（3 个 `-F` 既有失败不变）、负例（block 内 `@throw`）checked 下 exit=1 报错清晰、默认 sjlj 下同文件正常编译。
+
+### `-eh checked` 默认翻转尝试 — 公投否决，回退 sjlj (Sep 2026, 本会话)
+
+> 动机：checked 是唯一无架构依赖（零 setjmp——`__builtin_setjmp` 在 aarch64-unknown-none **和** arm64-apple-darwin 裸跑 freestanding 分支均不支持）且无跨帧泄漏的 EH 后端，尝试翻转为默认。**实证否决，勿盲目重试——须先清三笔债。**
+
+- **公投结果**：cargo 137/137、eh_diff **7/7**（显式 opt-in 路径完好）全过；但 test_all **25 failed**（基线 2）、trace golden **0/8**、nupac **栈溢出 ×3**（`lifecycle.np` / `npmutablearray_test.np` 等 Foundation 内联重文件）。
+- **三笔债（重试前置条件）**：
+  1. **checker 拒收 eh 注入符号**——`use of undeclared identifier '__nupa_eh_flag'`（`__auto_type` 临时声明同理）；需照 `&NUPA_CLASS_$_X` 先例给 eh 注入命名空间（`__nupa_eh_flag`/`__nupa_eh_val`/`__nupa_eh_tmp_N`/`__auto_type` 声明）放行。
+  2. **守卫密度失控**——零 `@try` 的程序（`retain_release.np`）也被插 ~20 处旗标守卫，trace 输出被噪音带歪；须收窄到"真可能抛"的调用点（`@throws` 标注函数 + `@try` 区内），而不是每条消息发送。
+  3. **栈溢出 ×3 根因未查**（守卫链递归 / block 展开候选）。
+- **保留（不随回退撤销）**：checker 锁块 `@throw` warning 加了 `!self.eh_checked` 门控——checked 下本无 cleanup 隐患，按旗标判定、两种默认下都正确。
+- **回退**：main.rs 5 触点 + pipeline.rs 2 + completions 2 全部还原；复验 test_all **309/317**、trace **8/8**、eh_diff **7/7**，基线精确复原。
+- **多架构结论不受影响**：ARM64 裸机 `@try` 的可用路径仍是 **`-eh checked`**（零 setjmp）；runtime.h builtin 映射的 `NUPA_SETJMP_DEFINED` override 钩子仍是待做项。
+
+### `-eh checked` 差分测试（tests/eh_diff/）— 01–05 全 PASS ✅ (Sep 2026, 本会话)
+
+- **差分 runner**：`./tests/eh_diff/run_eh_diff.sh`——每个用例同时用 nupac `-eh checked` 与 **clang `-fobjc-arc -fobjc-arc-exceptions -framework Foundation`** 编译运行，**stderr 逐行 diff**（基准钉死为 `-fobjc-arc-exceptions`：异常安全 ARC 是语义正确的参照，默认 `-fobjc-arc` 是缺陷参照）。`NPAC=` 环境变量可指定 nupac 二进制。**该目录已在 test_all.py glob 排除**（07 uncaught 故意非 0 退出，standalone 跑是幻影失败）。
+- **用例**：01 跨帧释放 / 02 语句中断（表达式后半不执行）/ 03 嵌套 @finally / 04 catch 内 rethrow 传播到外层 / 05 typed catch 链 / 06 block 字面量内 @throw / 07 uncaught abort —— **7/7 全 PASS**（06/07 曾为 KNOWN-FAIL，本会话落地后摘标）。
+- **修法 1（ctx-aware desugar，本会话核心）**：try 区内 `@throw` 只置 `flag/val` **不 return**（靠尾段守卫块跳过余下语句，自然落到 catch 臂）；区外 throw 保留 return + 函数尾补 `if(flag) return zero`；catch 臂 isa 命中才清 flag（typed catch 链正确）；含 throw 的循环条件挂 `&& flag==0`；catch/finally 体按 try 区处理（04 rethrow）。
+- **修法 2（@try 出口 restore 算符 bug）**：出口恢复发射成 `flag = (saved && flag)`——op 表真相是 `codegen.rs:766: 17 => "&&", 18 => "||"`，文档写 `||` 实发 `&&`，把内层新抛异常抹成 0（03/04/05 同根因）。改 `crates/eh/src/lib.rs` 的 `logical_or` 为 op 18。
+- **修法 3（表达式线性化，02）**：语句内嵌套 nupa 消息发送（非 top-level、非所有权家族）hoist 成前置 `__auto_type __nupa_eh_tmp_N` 临时声明再 splice 回语句列表——临时是普通 arming 语句，现有尾段守卫链自动阻断表达式其余部分（`x = [T boom] + [T bar]` 不再执行 `bar`）。**边界**：所有权家族（alloc/new/copy/mutableCopy/init 前缀，`owns_result`）与含它们的表达式一律不 hoist（保住 ARC 的 +1 记账）；C 函数调用不 hoist；新声明自身初始化不 hoist（避免 splice 出的临时被再次 hoist）。
+- **连带 checker 容忍**：desugar 发的 `&NUPA_CLASS_$_X` 内部引用加 `__` 前缀同款放行规则（`checker/src/lib.rs` 15 行）。
+- **连带所有权落点核对（01）**：`@throw e` 降级为 `__nupa_eh_thrown_N = (NPObject *)e; __nupa_eh_val = …; nupa_retain; nupa_autorelease;`（对应 clang `objc_retainAutorelease`），与 `-fobjc-arc-exceptions` 基准逐行一致。
+- **06 block 内 @throw（本会话落地）**：M1 的"block 字面量内 @throw 报错"限制解除——block 体编译成独立 C 函数，throw 置旗标后 invoke 正常返回，调用点的尾段守卫（每个含调用语句都守卫）自然接管，**旗标跨 invoke 边界保留**。实现：`check_expr_blocks` 对 block 体以 `in_block=false` 校验（解禁）；`rewrite_expr`/`rewrite_decl` 递归进 block 体（含声明初始化式路径 `ThrowerBlock b = ^{...}`）跑同样的 `rewrite_stmts` 尾段守卫降级；block 内**不加**函数尾 `return zero`（返回类型不是我们的、旗标必须活着出去）。
+- **07 uncaught guard（本会话落地）**：`desugar_body` 新增 `is_main` 参数（`func_sym == "main"` 识别）——main 的函数尾守卫从 `return zero` 改为调 runtime 新函数 `nupa_eh_uncaught()`（`runtime.{h,c}`：打印 `*** Terminating app due to uncaught exception of class '<isa->name>'` 后 `abort()`）。此前未捕获异常被静默吞成 exit=0，现 exit=1 + ObjC 措辞。
+- **07 差分比较口径**：Foundation 内部类名不可复现（ObjC 报 toll-free bridging 名 `__NSCFConstantString`，nupa 报真实类名 `NPString`）——runner 对 07 把 `class '...'` 归一为 `class 'X'` 只比措辞前缀（README 本就约定"栈回溯不可复现"，类名同属实现细节）。06/07 的 KNOWN-FAIL 标记已从 `.np` 摘除。
+- **bridge header 旗标守卫（本会话落地）**：`emit_bridge_header` 的 wrapper（实例/类方法两路）在调用后注入 `if (__nupa_eh_flag) { nupa_eh_uncaught(); }`（非 void 返回先落 `__nupa_ret` 再守卫再 return）——`-eh checked` 下 `@throw` 编译成置旗标 + return zero，纯 C 调用方不查旗标会把异常**静默吞掉**；现在升级为 ObjC 措辞 abort（复用 07 刚落的 `nupa_eh_uncaught`，runtime.h 本就在桥接头里 include，零新依赖）。端到端已验证：C caller 调 `ping(21)` 正常返 42，调 `ping(-1)` → `*** Terminating app due to uncaught exception of class 'NPString'` + exit=134（SIGABRT）。checked 在边界前已结算全部帧，abort 是安全降级。
+- **回归**：cargo test 55/55、test_all **220/230**（3 个 `-F` 既有失败不变）、差分 **pass=7 fail=0 kfail=0**。
+
+### 真 variadic 方法支持 — Implemented ✅ (Sep 2026, 本会话)
+
+- **golden 测试**：`tests/golden/35_variadic_method/`（`.np`+`.out`，test_all 纳入）——覆盖单段 selector（va_arg 求和）、多段 selector（`format:count:values:, ...`）、va_list 转发（vprintf 封装，`stringWithFormat:` 的标准实现形态）、继承（子类沿 vtable 槽位调父类 variadic）、嵌套消息发送多实参、NPString 返回值拼接、复合条件（`while ((v = va_arg(ap,int)) != 0)`，见下方 va_arg 括号修复）；`.out` 已验证确定性（重跑一致 + ARC/MRC 输出相同）。
+- **方案（无特判，真支持）**：variadic 方法编译成**真 C variadic 函数**——nupa 没有 msgSend、纯静态 vtable 派发，故 vtable fn-ptr cast 必须带 `...` 与签名精确匹配（`objc_msgSend` cast 先例），无运行时兜底。链路：`- (void)log:(const char *)fmt, ...;`（parser 接受 keyword 与 C-style 两种形态的 `, ...`）→ 方法体 `va_start/va_arg/va_end` 直接可用（就是 C）→ 消息发送 `[l log:"...", a, b]` 逗号实参透传给 variadic 调用点。
+- **改动链**：`CstDeclData::Method`/`AstDeclData::Method` 加 `has_variadic`（parser 两处 CST——`crates/parser/src/cst.rs` 与 `crates/cst`——elaborator 透传）；codegen `CgClassMeta`/`ClassInfo` 加 `method_variadic` 平行向量（**五处同步点**：pre-pass 注册 push、主 pass 注册 push、父类合并重建+回写、`CgClassMeta` 转换、构造点初始化——漏任何一处 `method_variadic` 静默为空，vtable cast 就缺 `...`，这是本次调试的主要坑）；函数发射 `is_variadic` 三处硬编码替换；元数据 fn-ptr 类型构造（`METHOD_METADATA`/`CLASS_METHOD_METADATA`）带 `, ...`。
+- **探针验证**：单段 selector `hello 42 world`；多段 selector + 继承（Child 继承 Base 的 variadic `sum:`）+ 嵌套消息发送（`[c sum:[c sum:1,1,0], 100, 0]`）全对（child sum=4 / base sum=11 / nested=3）。
+- **边界（如实）**：ARC 所有权对 variadic 实参不做特殊记账（与 ObjC 相同——按可见签名前 N 个参数推断，`...` 部分用户自理）；checker 不检查 `...` 实参类型（与 C 一致，clang 兜底）。
+- ✅ **类方法 variadic 的 meta-vtable 缺口已修（Sep 2026, 本会话）**：meta-vtable **struct 定义**的 fn-ptr 成员（`codegen.rs` "Meta vtable struct definitions" 循环）未带 `...`，与 `CLASS_METHOD_METADATA` cast 侧（已带）不一致 → meta-vtable 实例的指定初始化器报 `incompatible function pointer types`。修法：该循环读 `method_variadic`（同一数据源，一行改动），成员类型补 `, ...`。探针（类方法 `+ (int)sum:(int)first, ...` + `va_arg` 求和）端到端 `sum=6` 正确；回归 cargo 59/59、test_all 225/235（3 个既有失败不变）。
+
+### 格式串-实参静态检查 — Implemented ✅ (Sep 2026, 本会话)
+
+- ✅ **checker 编译期格式检查**（`crates/checker/src/lib.rs`，白名单方法：`NPLog` + `stringWithFormat:`/`initWithFormat:`/`appendFormat:`/`stringByAppendingFormat:`）：格式串为 `@"..."` 字面量时静态扫描，`check_warning` 报告（`-Werror` 可提升），不改 AST。
+- ✅ **完整格式符-实参匹配**（`check_format_args` + 五类 `FormatArgKind`：Object/Int/Float/Str/Ptr）：
+  - **类型不匹配**：`%d` 配浮点、`%f` 配整数、`%s` 配对象（`— use %@ for NPString objects` 提示）、`%@` 配标量（`— use %d/%s/%f for scalars` 提示）；`%p` 接受任何指针/对象（打印地址合法）；整数族宽度/符号性不判（C 同样宽松）。
+  - **数量双向**：spec 多于实参（读垃圾）与实参多于 spec（静默忽略）都报；数量不一致时跳过逐位配对（配对已无意义）。
+  - **保守分类**（`arg_format_kind`）：只判可证事实——字面量（Int/Float/Char/Bool→Int、Float→Float、裸串→Str、`@"..."`→Object）、Cast（按目标类型）、VarRef（查 `scope_vars` 已知类型）。调用结果一律不判（checker 给 FuncCall/MsgSend 标 int/id，判了必误报）。`type_format_kind`：数组退化按指针（`char buf[8]` 配 `%s` 合法）、`char*`→Str、标量族→Int/Float、`Id/Instancetype/Class`→Object、`Named` 指针→Object、非指针 Named/SEL/Void 不判。
+  - **落点**：FuncCall（NPLog，`args[1..]`）与 MsgSend（FORMAT_MSGSENDS 白名单，`args[1..]`）两臂挂载，与既有裸串参数检查同处。
+- ✅ **配套修复（前置依赖）——va_arg 括号发射 bug**：`while ((v = va_arg(ap,int)) != 0)` 此前生成坏 C（`va_arg(ap, int) != 0` 的括号被吞进类型位置）——codegen 已修（va_arg 调用发射整体加括号），golden/35 已回改复合条件形态端到端验证。原"测试侧规避" workaround 作废，测试不再需要绕。
+- ✅ **测试**：checker 单测 6 个（`%@` 配 int 警告/配对象放行/数量不匹配/标量格式正确）；探针实测 4 类新 warning 精确命中、正例零误报（`%p` 配对象、已知类型局部变量、`%c`），运行期垃圾值（`%d` 配 3.14 → `int is 1610612736`）实证编译期拦截的价值。
+- ✅ **回归**：cargo test **59/59**、test_all **225/235**（3 个既有失败不变：两个无 main 库文件 + `double_release.np` 故意崩溃）、探针重复运行输出一致。
+- **回归**：cargo test 全绿（checker 测试构造点补 `has_variadic: false`）、test_all **220/230**（3 个 `-F` 既有失败不变）。
+
+### `-l` 链接旗标 + `-I/-L/-l` 连写形式 — Implemented ✅ (Sep 2026, 本会话)
+
+- **动机**：用户编 gmp 程序时 `-L<path>` 连写不识别、`-lgmp` 被 run 模式静默吞成**程序参数**（编译过了但链接期 `symbol(s) not found`），错误归属混乱——nupac 自己的旗标界面应当自己解析，错误报在 nupac 而非 clang。
+- **`-l <lib>` 旗标**（新）：run/compile 模式下解析进 `libs`，`compile_to_binary` 发射 `-l<name>` 给 clang。**发射位置有讲究**：必须在输入文件之后（链接器解析顺序：库要跟在被解析符号的对象后面），落在链接段尾部（`-lm` 之后、`-w` 之前），且 `-L` 目录先于 `-l` 发射。⚠️ 首版把 `-l` 放在 `-I` 段后 → `ld: library 'gmp' not found`（输入在前库在后，符号解析不到）。
+- **连写形式**：`-I/path`、`-L/path`、`-lgmp`（clang/GCC 惯例）全部支持；`-l` 连写要求第 3 个字符是字母数字（避免与 `-last` 类歧义旗标冲突，歧义用空格形式解决）。
+- **`-L` 目录同时传 clang**：此前 `lib_dirs` 只被 `find_libnupa` 搜索、从不发射 `-L`——现在用户 `-L` 目录真正到达链接器。
+- **help/flag 表/completions 同步**：`nupac_flags()` 表、手动 help、`completions/_nupac`（两处）、`completions/nupac.bash`（opts 行 + `-l` case 分支）。
+- **验证**：gmp 用例（mpz_ui_pow_ui）连写与分开写两种形态均输出正确；错误库名 `-lnosuchlib` 响亮报 `ld: library not found`；未知旗标报 nupac 错。
+- **回归**：cargo test 全绿、test_all **220/231**——第 4 个失败是 `tests/asdf.np`（用户未跟踪的 gmp 试验文件，需 `-I/-lgmp` 外部旗标，standalone 编译必失败，幻影失败非回归；移出 tests/ 或加 `-F` 后缀即可消除）。
+
+
+- **既有失败用 `-F` 后缀标记**（文件名末尾，如 `diamond_impl-F.np`）：一眼可辨，且不需另建排除机制。test_all.py 仍会跑到它们（3 个 FAIL 是已知基线）。
+- **`tests/stress/` 已在 test_all.py 的 glob 中排除**（同 `multi_tu` / `25_freestanding` 理由）：三套各有专属 `build.sh`，需要各自 flag（`-fno-libc` / `-asm asm_host.s`），且 `interop/lib.np` 是无 main 的库文件。必须用它们自己的 runner 跑，单文件编译必然产生幻影失败。
+- `golden/11_multi_file_union/diamond_impl-F.np` — FAIL (no main entry, library-style multi-file test，被 `cross_file_test.np` #import)
 - **Variadic selector 支持状态（待办，用户后续修复）**——语法已支持（`sel:a, b, c, nil`），缺的是库与 codegen：
   - **库缺失**：`NPSet`/`NPMutableSet`/`NPDictionary`/`NPMutableDictionary`/`NPOrderedSet`/`NSPredicate` 这些类根本不存在；`NPString` 的 `stringWithFormat:`/`initWithFormat:`/`stringByAppendingFormat:` 与 `NPMutableString` 的 `appendFormat:` 方法未声明；`NPArray`/`NPMutableArray` 只有 `initWithObjects:count:`（无 variadic `initWithObjects:`）；无 `NSAssert` 宏。
   - **codegen 缺失**：Nupa 无运行时 `va_list`，真正的 variadic 方法无法用 Nupa 实现，只能按 selector 特判落到运行时 helper。目前只有 `arrayWithObjects:` 一个特判（desugar 成 `@[...]`），且它丢弃 receiver——`[NPMutableArray arrayWithObjects:...]` 会静默得到不可变 `NPArray`。
@@ -409,6 +1122,7 @@ nupa-lang/
 - ✅ Runtime side table: `nupa_weak_register` / `nupa_weak_unregister` / `nupa_weak_clear_all` in `include/nupa/runtime.c`
 - ✅ `nupa_release` calls `nupa_weak_clear_all(target)` before `free(target)`
 - ✅ Variable `__weak` decl: emits `__attribute__((cleanup(nupa_weak_auto_cleanup)))` + `nupa_weak_register` after init
+- ✅ Variable `__weak` **assign** (Sep 2026): `rewrite_weak_assigns` pass（函数粒度，仿 `__block` 捕获改写）把对弱局部的普通赋值改写为 `__auto_type` 临时求值一次 → `nupa_weakUnregister` → assign → `nupa_weakRegister`——此前赋值绕过弱表，槽位仍挂在旧目标（常为初始 NULL）上，源对象销毁不清零（`__weak` 静默退化成普通指针）。M1 限制：block 体内不改写；嵌在更大表达式里的赋值（`if ((w = x))`）不改写。
 - ✅ Property `(weak)` setter: emits `nupa_weak_unregister` → assign → `nupa_weak_register`
 - ✅ `build.rs` rerun-if-changed for `runtime.c`
 
@@ -452,14 +1166,15 @@ nupa-lang/
   - **codegen** `emit_unit_with_headers(.., freestanding)`：freestanding 时不发 `#include <string.h>`，改发 `#define __NUPA_FREESTANDING 1` + `#include <nupa/runtime.h>`。
   - **`include/nupa/runtime.h`** 加 `__NUPA_FREESTANDING` 分支：不 include `<setjmp.h>/<stdarg.h>`；`jmp_buf` 自定 + `setjmp/longjmp` 映射到 `__builtin_setjmp/__builtin_longjmp`（零 libc）；异常全局 `__nupa_exception_buf/__nupa_exception_value` 由 `__thread` 改为普通全局（单核裸机）；声明 `extern NPClass nupa___nupa_root_class;` + `void *memcpy(...)`（用户提供定义）。
   - **`include/nupa/runtime.c`** 异常全局同样由 `__thread` 改为普通全局（`__NUPA_FREESTANDING` 分支）。
-  - **`compile_to_binary`** 裸机模式：给 clang 加 `-ffreestanding -fno-builtin -fno-stack-protector -fno-pic -fno-pie -fno-asynchronous-unwind-tables -nostdlib -nostdinc`（`-arch x86*` 时再加 `-mno-sse -mno-mmx -mno-red-zone`）；并且**不链接** `runtime.c`（它依赖 libc malloc/__thread）。
+  - **`compile_to_binary`** 裸机模式：给 clang 加 `-ffreestanding -fno-builtin -fno-stack-protector -fno-pic -fno-pie -fno-asynchronous-unwind-tables -nostdlib`（`-arch x86*` 时再加 `-mno-sse -mno-mmx -mno-red-zone`）——⚠️ **不再含 `-nostdinc`**（2026-09-30 起独立旗标，见"`-nostdinc` 独立旗标"节）；并且**不链接** `runtime.c`（它依赖 libc malloc/__thread）。
   - **@try/@catch 在裸机可用**：转译代码用 `setjmp/longjmp`(builtin) + 普通全局异常状态，`memcpy` 由用户 kernel.c 提供 → 裸机打印 "caught [e errorCode] = 42 / finally always runs / after-try continues"。
 - ✅ **soma-kernel 已改用编译器裸机支持**：删掉内核侧手写 `include/nupa/runtime.h` 和 `include/setjmp.h`；Makefile 用 `nupac -rewrite-nupa -fno-libc` 转译，CFLAGS 加 `-I../../include -D__NUPA_FREESTANDING`；kernel.c include 编译器真实 `<nupa/runtime.h>` 并定义 `nupa___nupa_root_class` + 异常全局 + `memcpy`。
 - ✅ **回归**：全量套件 154/161 不变。
 
 ### Nupa 裸机分配器 — bump allocator + `[[Class alloc] init]` ✅ (Aug 2026)
-- ✅ **`include/nupa/runtime_baremetal.c`**：提供 bump allocator（16KB 静态 arena + 偏移指针）+ `nupa_malloc`/`nupa_free`/`nupa_alloc`/`nupa_init`/`nupa_retain`/`nupa_release`/`nupa_autorelease`。`nupa_alloc` 用 `memset` 清零后设 `isa`/`retain_count`，`nupa_release` 计数归零后调 `nupa_free`。
-- ✅ **零样板**：`runtime_baremetal.c` 现在自含 `nupa___nupa_root_class`、异常全局（`__nupa_exception_buf`/`__nupa_exception_value`，含 `__NUPA_FREESTANDING` 分支：裸机普通全局 / 宿主 `__thread`）、`memcpy`。用户只需链接它，不再手写任何运行时全局。soma-kernel 的 kernel.c 和 golden 的 helpers.c 已移除重复定义。
+- ✅ **`include/nupa/runtime_freestanding.c`**：提供 bump allocator（16KB 静态 arena + 偏移指针）+ `nupa_malloc`/`nupa_free`/`nupa_alloc`/`nupa_init`/`nupa_retain`/`nupa_release`/`nupa_autorelease`。`nupa_alloc` 用 `memset` 清零后设 `isa`/`retain_count`，`nupa_release` 计数归零后调 `nupa_free`。
+- ✅ **零样板**：`runtime_freestanding.c` 现在自含 `nupa___nupa_root_class`、异常全局（`__nupa_exception_buf`/`__nupa_exception_value`，含 `__NUPA_FREESTANDING` 分支：裸机普通全局 / 宿主 `__thread`）、`memcpy`。用户只需链接它，不再手写任何运行时全局。soma-kernel 的 kernel.c 和 golden 的 helpers.c 已移除重复定义。
+- ✅ **`<string.h>` 移除 + 三头契约（Sep 2026）**：`runtime_freestanding.c` 实际只用 `memset`（`nupa_alloc` 清零一处），而 `memcpy` 本就是它自带的 weak 定义——字符串函数从未用到，却 include `<string.h>`（不在 C11 freestanding 强制头集合里）。已删该 include，`memset` 照 runtime.h 对 `memcpy` 的同款守卫自声明（`#ifndef memset` + 原型——`-ffreestanding` 下编译器仍可能自行生成 memset/memcpy 调用，最终镜像必须提供符号）；头注释契约同步改为"用户只需提供 freestanding 三头（stdint/stddef/stdbool）"。**before/after 探针**：`-nostdinc -isystem <clang-resource>/include`（libc 头被剥、freestanding 三头可用、无 string.h——模拟"内核不带 string.h"）下 HEAD 版 `fatal error: 'string.h' file not found`、修复版 rc=0。**回归**：golden/25 exit=0、baremetal stress exit=0、soma-kernel 同款旗标（`-nostdinc -ffreestanding -fno-builtin -target i386-none-elf`）单文件编译 rc=0 产出 i386 ELF。⚠️ **关键事实（探针实证）**：clang 21 的 `-nostdinc` 连 **builtin 资源目录也剥掉**（裸 `#include <stddef.h>` 直接 fatal error）——加 `-nostdinc` 的内核必须**自行提供三头**（soma-kernel 的 `include/` 正是如此）；不加时 clang builtin 目录（`clang -print-resource-dir`/include）自带的 9 个 freestanding 头（stddef/stdint/stdbool/stdarg/float/limits/stdalign/stdnoreturn/iso646）兜底。
 - ✅ **`include/nupa/runtime.h`**：添加 `nupa_malloc`/`nupa_free` API 声明。
 - ✅ **soma-kernel** 新增 `HeapCounter` 类，`+ (id) alloc { return nupa_alloc(self); }`，`[[SomaCore::HeapCounter alloc] init]` 在裸机 i386 内核跑通（`[c add:10]=10 [c add:20]=30 [c value]=30`），ARC 自动插入 `nupa_release(c)`。
 - ✅ **Golden test** `25_freestanding` 同样演示 bump allocator + alloc+init。
@@ -501,7 +1216,7 @@ nupa-lang/
 ### NPMutableArray — Implemented ✅ (Aug 2026)
 - ✅ **`include/Foundation/NPMutableArray.{nh,np}`**：可变数组，继承 `NPArray`（复用其 `_items/_count/_capacity` 存储与不可变查询 API，dealloc 继承自 NPArray）。API：`+arrayWithCapacity:`/`+array`/`+arrayWithObject:`/`+arrayWithObjects:count:`；`-init`/`-initWithCapacity:`/`-initWithArray:`/`-initWithObjects:count:`；`-addObject:`/`-addObjectsFromArray:`/`-insertObject:atIndex:`/`-removeObjectAtIndex:`/`-removeLastObject`/`-removeObject:`/`-removeAllObjects`/`-replaceObjectAtIndex:withObject:`/`-exchangeObjectAtIndex:withObjectAtIndex:`/`-setObject:atIndex:`。存储用 `realloc` 2× 增长（初始 4）；`addObject:` 对元素 `nupa_retain`，移除类方法 `nupa_release` 被移元素；便利构造器仿 NPMutableString 用 `@noarc { return [[[self alloc] init...] autorelease]; }`。
 - ✅ **`Foundation.nh`** 已加入 `NPMutableArray.nh`/`.np` import。测试 `tests/npmutablearray_test.np`（13 段，覆盖全部可变 API + 继承查询 + copy 深拷贝 + description），ARC 与 MRC 输出逐字节一致，`-trace-refcount` Summary = `no live objects — all freed`。
-- ⚠️ **字符串字面量不做内插（interning）**：`@"X"` 两处出现是不同对象，`removeObject:`/`containsObject:` 用指针相等，测试需用同一变量（`NPString *x = @"X"`）保证身份。
+- ✅ **字符串字面量 interning（Sep 2026 修复）**：宿主模式 `nupa_stringFromCstr` 维护 256 槽 intern 表，同内容字面量返回同一对象——`containsObject:`/`indexOfObject:` 可直接用字面量查询（原"必须同一变量"约束作废）。表持有 +1 永不释放（ObjC 常量串语义：ARC 视为 unretained、MRC 不得手 release）；表满回退新建（正确、仅不 intern）。freestanding 保持原新建对象体（`#ifdef __NUPA_FREESTANDING`，无 `<string.h>`）。
 
 ### ARC 归属语义修复 — convenience 构造器在 ARC 下可用了 ✅ (Aug 2026)
 - ✅ **`ownership_for_method` 默认分支 `Retained` → `Unretained`**（`crates/ownership/src/ownership.rs`）：ObjC 约定中非 `alloc/new/copy/mutableCopy/init` 家族的方法返回调用者**不拥有**的对象（autoreleased/unretained）。原先默认 `Retained` 导致 `[NPArray arrayWithObject:x]`/`[NPString stringWithUTF8String:".."]` 等 convenience 构造器被 ARC 在作用域结束注入 `nupa_release`，与 autorelease pool pop 双重释放 → 程序 exit=1（此前 nparray_test/npstring_demo 只能靠 MRC-retry 跑通）。修复后 nparray_test、npstring_demo、NPMutableString convenience 构造器均在 ARC 下直接通过。
@@ -564,7 +1279,7 @@ nupa-lang/
 - ✅ **零回归**：cargo unit 41/41、test_all **193/203**（3 个既有失败不变）、trace goldens 7/8（`arc_inject` 既有失败，与注释无关——trace 跑在 codegen 前）。注释不影响 C 编译（161 个 .np 全部默认带注释编译通过）。
 
 ### 全量特性压力测试 `grand_feature_stress_test.np` ✅ (Aug 2026)
-- ✅ **`tests/grand_feature_stress_test.np`**：单文件 `main` 汇总近期全部特性——Foundation 容器（`NPMutableArray` 增删查 + `NPLog(NPString*)`+`%@`）、泛型单态 `Box<T>` + 嵌套泛型 `Box<Box<NPString*>*>`、10 参数多段方法 + `@implementation { int _sum; }` ivar 写法、`NPString` 级联拼接、`typedef BOOL (^CompareBlock)` 捕获外部变量、`typedef int (*IntFn)` + `struct Pair`、上下文关键字 `copy`/`retain`/`weak` 当标识符、`clock_t`/`time_t`、ARC 自动释放 + `@noarc` 手动平衡、`@try { @throw @"boom"; }`、类方法 vs 实例方法。
+- ✅ **`tests/grand_feature_stress_test.np`**：单文件 `main` 汇总近期全部特性——Foundation 容器（`NPMutableArray` 增删查 + `NPLog(NPString*)`+`%@`）、泛型单态 `Box<T>` + 嵌套泛型 `Box<Box<NPString*>*>`、10 参数多段方法 + `@implementation` 花括号内直接写 ivar（`int _sum;`）的写法、`NPString` 级联拼接、`typedef BOOL (^CompareBlock)` 捕获外部变量、`typedef int (*IntFn)` + `struct Pair`、上下文关键字 `copy`/`retain`/`weak` 当标识符、`clock_t`/`time_t`、ARC 自动释放 + `@noarc` 手动平衡、`@try` / `@throw` 异常处理、类方法 vs 实例方法。
 
 ### Codegen 健壮性审计 + nil-messaging / catch / 链式修复 ✅ (Aug 2026)
 - ✅ **实证审计**：ASan+UBSan 复跑 4 个代表文件（npstring_demo/nparray_test/timsort_test/grand_feature_stress_test）全过、`-trace-refcount` 3 项 Summary 均 `no live objects — all freed`；clang --analyze 暴露 3 个真实缺陷，全部修复：
@@ -672,3 +1387,363 @@ vtable 错配的 runtime 诊断原来建议"re-run nupac on ALL .np files"——
 - **#5（容器泛型）**：`NPArray<T>` 单态化机制就绪但未接（同 `DataPack<T>` 模式）；泛型实例化由**使用点**驱动——lib TU 必须在方法体/变量声明里**命名** `Stack<int *>` 才会单态化（multi_tu/03 记录了这一限制），类方法返回类型里的 type_args 不被收集。
 - for-in 语法：parser 尚无 `for (x in y)` 规则（`CstStmtData::ForIn`/emitter 已写好待接线）；`convert_stmt` 的 ForIn 分支当前不可达（已注释说明）。
 - **#7 真修**（跨 TU 稳定布局）与 Foundation 容器库补齐（`NPDictionary`/`NPSet`/variadic 特判）仍在 backlog。
+
+### 现代化六项 —— 已全部落地 ✅ (Sep 2026, 本会话)
+
+> 状态：**已实现**（落地记录见节尾；下方规划保留作存档依据，勿重新论证）。本节是六项工作的规划出处（现状实证 + 方案 + 测试计划）。
+> 规划时点回归基线（全部实测）：cargo test 102/102、test_all 257/265（2 个 `-F` 既有失败：`diamond_impl-F.np` 无 main、`double_release-F.np` 故意崩溃）、multi_tu 9/9、trace golden 8/8、eh_diff 7/7。
+
+#### 实施顺序（建议）
+
+| # | 项 | 性质 | 风险 | 理由 |
+|---|-----|------|------|------|
+| 1 | block 字面量返回类型推断 | 小修 | 低 | codegen 单点改 |
+| 2 | block 捕获 TU 级名字匹配（高危） | 中修 | 中 | 与 #1 同文件（block 路径）连续做完一起回归 |
+| 3 | `[super alloc]` 类方法坏 C | 中修 | 中 | 独立 |
+| 4 | 命名空间泛型 receiver 不单态化 | 小修 | 低 | 收集器改造是 #5 的底座，先行一次到位 |
+| 5 | `NPArray<T>` 真单态化 | 特性 | 中高 | 依赖 #4 的收集器 |
+| 6 | 跨 TU vtable 稳定槽位分配 | 大改 | 高 | 独立且最大，放最后 |
+
+---
+
+#### #1 block 字面量返回类型推断（压测清单 #1）
+
+- **现状（file:line 实证）**：BlockLit 发射点 `codegen.rs` ~L1796–1804，返回类型 `rt` 无来源时硬回退 `"void"` → `^(int a,int b){return a*b;}` 发射成 `^void`，调用处按返回值用即炸。
+- **方案（codegen 推断，零新语法，显式类型继续优先）**：发射前扫 block 体 `Return(Some(e))`：取 `e.expr_type` 渲染串（checker 已标注；无标注按字面量类别兜底 int/float/char*）。多个 return 类型不一致 → 取第一个 + checker warning（文案实现时探针逐字校验）；纯 `return;` / 无 return → 维持 void。gcc/portable 展开路径与 clang 路径共用同一 `rt` 来源，改一处两端生效。
+- **测试**：`tests/block_return_test.np`（推断 int / 显式 `^int` 优先 / 多 return 同型 / void 块不误伤）。
+
+#### #2 block 捕获 TU 级名字匹配（压测清单 #2，高危）
+
+- **现状（file:line 实证）**：`collect_block_vars_from_stmt`（`codegen.rs` L4692 起）把**全 TU** 的 `__block` 变量名收进一个 HashSet；应用循环（L4796–4807）对**每个** Function 体跑 `rewrite_stmt(body, &block_vars)`——任何函数里与 `__block` 变量同名的参数/局部都被改写成 `name.__forwarding->__value`（AGENTS 原始复现：类方法参数叫 `base`，main 里 `__block int base` → 方法内 base 被污染）。
+- **方案**：收集与应用都降到**函数粒度**——每个函数先收自身体内的 `__block` 集，再只改写自身体。遮蔽保护：函数参数名命中集合时该名字**跳过改写** + checker warning（文案实现时逐字探针校验）。类方法体与顶层函数一视同仁。
+- **测试**：`tests/block_capture_scope_test.np`（原始复现不再污染 + 正向捕获零回归：既有 blocks 相关 golden/test 全绿）。
+
+#### #3 类方法 `[super alloc]` 坏 C（压测清单 #5）
+
+- **现状（file:line 实证）**：`AstExprKind::Super` → `CgExprData::Ident("super")`（`codegen.rs` L987–989）；实例方法 super 派发已工作（golden 覆盖）；类方法里 `[super alloc]` 落到实例 vtable/meta vtable 无 `alloc` 槽位 → 坏 C。类方法派发走直接调用、meta vtable 目前**只写不读**。
+- **方案：类方法内 super 消息特判——读父类 meta vtable**：`((struct nupa_meta_vtable_<SuperFqn> *)((NPClass *)self)->isa->superclass->vtable)-><slot>(...)`（父类名静态可知；Foundation 父类必然内联，meta vtable 结构体该 TU 可见；槽位按父类 meta 布局静态取）。父类无该方法 → checker error（文案探针校验）。
+- **⚠️ 实施前置探针**：核实类对象（`self` 为 `NPClass *`）的 `isa->vtable` 是否即 meta vtable 实例（getClass/metadata 路径已依赖该机制）；若不是则给 NPClass 加 `meta_vtable` 字段（涉布局，所有构造点同步）。
+- **测试**：`tests/super_alloc_test.np`（子类类方法内 `[super alloc]`/`[super new]` 继承链）；`tests/stress/` 裸机套件回归不破（根类路径）。
+
+#### #4 命名空间内泛型 receiver 不单态化（压测清单 #10）
+
+- **现状（file:line 实证）**：`generic_instantiations` 收集（`codegen.rs` L4217 起）——`collect_instantiations_expr` 只匹配 **MsgSend receiver 为 VarRef 且类型渲染串含 `<...>`**，再 `parse_generic_type_string`（L4232）从**字符串**反解；命名空间名 `Metal::Box<int *>` 反解/查表不中 → 泛型版签名派发。`name_flat`（L398） mangling 已支持 `::`→`__`。
+- **方案**：收集器从"字符串反解"改为"**结构化 type_args 直读**"——遍历所有携带 `type_args` 的 `AstType` 节点（expr_type、声明类型、参数、返回类型、ivar）按 (fqn, args) 直接注册。**此收集器同时是 #5 的底座，一次改造两处受益**；类方法返回类型里的 type_args（已知限制 #5 后半句）同批补上。
+- **测试**：`tests/generic_ns_test.np`（`Metal::Box<int *>` 单态化：生成 C 中 `Metal__Box_int` >0 次出现 + 调用走特化签名）。
+
+#### #5 `NPArray<T>` 真单态化（容器泛型，backlog #5）
+
+- **现状**：`Foundation/NPArray.nh` 无 type_params（`@interface NPArray : NPObject`，ivars `_items/_count/_capacity`）；显式 `<T>` 被擦除 + checker warning（前会话已落地）；单态化机制（`DataPack<T>` 模式）就绪未接。
+- **核心决策（待拍板）**：
+  1. **裸拼写零变化**：`NPArray`（无实参）维持现状擦除 + 现有符号名，**不**生成 `NPArray_NPObject_ptr`——数百个既有测试/示例零迁移；显式 `NPArray<X>` 才实例化。
+  2. **方法签名特化**：特化副本中 `objectAtIndex:`/`firstObject`/`lastObject` 返回 `X`；`addObject:`/`setObject:atIndex:` 参数收 `X`；ivars 布局不变（`_items` 仍 `NPObject **`）→ 特化与基类**二进制同构**。
+  3. **赋值兼容**：`NPArray<X> → NPArray` 隐式允许（同布局）；反向显式 cast。`@[...]` 字面量全元素同型 → 实例化该型，混合/含 id → 裸 NPArray。
+  4. `NPMutableArray<T> : NPArray<T>` 泛型继承同批落地（parser 已支持 `: Super <T>` 形态）。
+  5. checker 下标改写（`a[0]`→`[a objectAtIndex:0]`，已实现）自动获得 `X` 返回类型，零额外改动。
+- **测试**：golden `40_nparray_generic`（`NPArray<NPString *>`：`objectAtIndex:` 返回 `NPString *`，生成 C 实证特化符号；往 `NPArray<NPString *>` 塞 int 被 checker 拦截；裸 NPArray 混用零回归）；负例 `tests/negative/nparray_generic_mixed.np`。
+- **⚠️ 跨 TU**：NPArray 方法集不变（只加 type_params）→ vtable 槽位集合不变、`__sig` 不受影响；以 multi_tu 全绿为准。
+
+#### #6 跨 TU vtable 稳定槽位分配（backlog #7 真修）
+
+- **现状**：槽位 = TU 内全部实例方法名**全局排序**后的位次（Fix 4；排序实现于 codegen.rs，`.sort()` 共 7 处命中）。跨 TU 方法集不同 → 位次不同 → weak 合并后错位。现有 `__sig`（FNV-1a over 排序方法名）只是**启动期 abort，不是修复**。
+- **方案比选（否决理由记录在案）**：
+  - ~~B：固定大小 name-tagged 哈希表 + 运行时探测~~ → 索引依赖合并后表内容，派发变运行时查找 = 变相 msgSend，**违背静态派发铁律** → 否决。
+  - ~~C：全程序两遍编译（先扫全源收集方法集）~~ → nupac 单 TU 流水线模型重写 → 否决。
+  - **A（推荐）：append-only 槽位清单**：`nupac --slots <manifest>`——清单存 方法名→槽位 稳定分配（新方法只追加 max+1，**永不重编号**）；编译时读清单定槽位、退出回写新增；`__sig` 从"布局哈希"升级为"逐方法 (name→index) 哈希"，错配时能报**哪个方法**错位。无清单 = 回退现状（排序布局 + 启动检查），零行为变化。
+- **已知限制（如实）**：清单跨"不同时间编译的 TU"仍需重编译纪律（清单版本不符 → 启动期报错不变）；真保证靠构建系统同清单编译——multi_tu runner 配套改造演示。
+- **测试**：multi_tu 第 10 场景（带清单跨 TU 方法集不同 → 链接运行正确；无清单同场景 → 启动期报错照旧）。
+
+#### 拍板清单（逐项回 OK / 改意见即可）
+
+1. 实施顺序表如上？
+2. #1 block 多 return 类型不一致 = warning + 取第一个？
+3. #2 遮蔽名跳过改写 + warning？
+4. #3 super 类方法走 meta vtable 读（先探针核实 `isa->vtable` 指向）？
+5. #5 `NPArray<T>` 五条核心决策（尤其"裸拼写零变化 + 特化二进制同构"）？
+6. #6 槽位方案 A（append-only 清单）？
+
+#### 落地记录 ✅ (Sep 2026, 本会话) — 六项全部按建议方案实施
+
+> 回归基线（全部实测）：cargo test **102/102**、`cargo build` **0 warning**、test_all **264/272**（较规划基线 257/265 新增 7 个用例**全部通过**；2 个失败仍为既有 `-F` 基线：`diamond_impl-F.np` 无 main、`double_release-F.np` 故意崩溃；6 canceled 交互式不变）、multi_tu **10/10**（新增第 10 场景）。基线 257 个用例零回归——`NPArray` 裸拼写零迁移实锤。
+
+| # | 项 | 落地 | 验证 |
+|---|-----|------|------|
+| 1 | block 字面量返回类型推断 | codegen BlockLit 发射点推断 return 类型；显式类型优先，void 块不误伤 | `tests/block_return_test.np` |
+| 2 | block 捕获函数粒度 | `__block` 收集与应用降到函数粒度；同名参数/局部（遮蔽名）跳过改写并告警 | `tests/block_capture_scope_test.np` |
+| 3 | 类方法 `[super alloc]` | 前置探针核实类对象 `isa->vtable` 指向 meta vtable 后，类方法内 super 消息改读**父类 meta vtable** 槽位 | `tests/super_alloc_test.np` |
+| 4 | 单态化收集器结构化直读 | 弃"字符串反解"，遍历携带 `type_args` 的 `AstType` 节点按 (fqn, args) 注册；命名空间内泛型 receiver 单态化打通 | `tests/generic_ns_test.np` |
+| 5 | `NPArray<T>` 真单态化 | 按五项核心决策落地；`objectAtIndex:` 等在特化副本返回元素类型 `X` | golden/40 + `tests/negative/nparray_generic_mixed.np` |
+| 6 | `--slots` 槽位清单 | append-only 清单定槽位，新方法只追加不重编号；跨 TU 布局一致性由清单保证 | multi_tu `10_slots_manifest` |
+
+**#6 实施要点（本会话收尾）**：manifest 模式不再按 filter 缩小适用范围；清单里有而本 TU 未实现的方法在 vtable struct 发**占位 fn-ptr 成员**（槽位保留、引用不发——与既有 NULL 槽位语义一致），跨 TU 布局对齐；`tests/multi_tu/run_multi_tu.sh` 修路径解析 bug（先 `cd` 项目根再解析相对 `$0` 的 CASES_ROOT 会落空 → 改用预先解析的 `SCRIPT_DIR`），现在从任意目录调用都正确。
+
+**连带清理**：`crates/nupac/src/pipeline.rs` 移除 unused import `ast_to_cg_unit`（`cargo build` 回到 0 warning）。
+
+### 装箱字面量补全：`@(expr)` / `@YES` / `@NO` / `@'c'` ✅ (Sep 2026, 本会话)
+
+- **缺口（实测探针确认）**：lexer 早有全部 token（`AtLParen`/`AtChar`/`AtBool`/`AtNumber`/`AtString`），但 parser 只接了 `@123`/`@1.5`（desugar 成 `[NPNumber numberWithInt:]`/`numberWithDouble:`）与 `@"..."`；`@(x+1)`、`@YES`、`@NO`、`@'c'` 只到 lexer，parser 零接线——实测报 `expected ';' after declaration (got '@(')` / `(got boxed)`。
+- **现四个形态全部真支持**：
+  - `@YES` / `@NO` → `[NPNumber numberWithInt:1/0]`（parser desugar，与 `@123` 同一 helper；BOOL 值归一化 0/1）
+  - `@'c'` → `[NPNumber numberWithChar:'c']`（parser desugar；`NPNumber` 新增 `+numberWithChar:` / `-charValue`，`.nh` + `.np` 同批）
+  - `@(expr)` → **checker 按操作数静态类型改写成对应工厂**：`double`/`float`→`numberWithDouble:`、BOOL→`numberWithBool:`、`char`→`numberWithChar:`、`long`/`long long`→`numberWithLongLong:`、其余整数（含 typedef 整数）→`numberWithInt:`。
+- **为什么落在 checker 而不是 parser**：parser 没有类型；后端是 **C99**，不能依赖 `_Generic`。与既有"对象下标改写""struct `==` 改写"同一先例——复用 `MsgSend` 节点构造，下游静态派发／nil 守卫／SEL 常量零特判。
+- **非算术类型报错（判断点①）**：`@(someObj)` → `illegal type 'NPString *' in a boxed expression — '@(...)' accepts arithmetic and BOOL values only`（对齐 ObjC 的 "illegal type in boxed expression"；Nupa 无字符串装箱，静默把指针当数值发出去会掩盖错误）。负例 `tests/negative/boxed_illegal_type.np`，报 `file:line:col` 精确。
+- **顺带修掉的真 bug（探针实测暴露）**：checker 的 `ArrayLit` 臂只回 `id`、**从不遍历元素** → `@[ @(i + 1) ]` 里那个 `@(expr)` 永远拿不到 `expr_type`、不被改写，生成 C 为 `nupa_array_create(3, <NPNumber>, (i + 1), <NPNumber>)`——**裸 int 混进对象数组**；编译通过、运行期才炸（exit=1，且前 5 段输出正常后又静默退出，极具迷惑性）。修法：`ArrayLit` 臂逐元素 `check_expr`（元素同时拿到 `expr_type`）。
+- **改动链**：lexer 零改动（token 已有）；parser（`@YES`/`@NO`/`@'c'` desugar + `@(` 分支 + `mk_npnumber_send` helper 收敛工厂发射）；CST/AST 新增 `Boxed` 表达式节点（elaborator 直转）；checker `maybe_rewrite_boxed_expr` + `ArrayLit` 遍历修复；codegen 兜底臂（`-fno-checker` 下按内层表达式透传）。
+- **测试**：`tests/boxed_literal_test.np`（7 段：字面量／表达式／BOOL／char 往返／链式接收者 `[@(i * 2) intValue]`／数组字面量／值相等）exit=0 逐项正确；负例 `tests/negative/boxed_illegal_type.np`。
+- **回归**：cargo test **103/103**、multi_tu **10/10**、test_all **267/275**（2 个 `-F` 既有失败不变、6 个 canceled 交互式不变）。
+- ✅ **勘误（2026-09-30 探针实测推翻上一条记录）**："C 风格强转直接跟消息发送解析失败"**不成立**——详见下节「强转接消息发送：勘误」。
+- ✅ **DictLit（`@{...}`）已落地**（本会话），并顺带挖出"多对字典根本解析不了"的 parser bug——详见下节「字典字面量 `@{...}` 落地」。
+
+### 强转接消息发送：勘误 ✅ (2026-09-30, 本会话)
+
+- **被推翻的记录**：上一节末尾曾记「C 风格强转直接跟消息发送 `(NPNumber *)[arr objectAtIndex:0]` 解析失败，测试已规避」。
+- **探针实测（20+ 形态，`-rewrite-nupa` 与端到端 `nupac run` 双验）：全部通过**。含无空格 `(NPNumber*)[...]`、`(NPNumber *)([arr objectAtIndex:0])`、`(NPNumber *)(id)[...]`、三元、`if` 条件、`for` 初始化、块字面量内、方法体内（`return` 位置）、数组字面量元素、`[(NPNumber *)[...] intValue]` 作接收者、泛型目标 `(NPArray<NPNumber *> *)[arr copy]`、`@class` 前向声明；默认 ARC、`-fno-nupa-arc`（MRC）、`-fno-checker` 三种模式都通过。
+- **为何不是"本会话刚修好"**：`git show HEAD:crates/parser/src/parser.rs` 的 cast 分支与工作树**逐字相同**（`parse_unary` 在本轮 diff 中只有 `@await` 一处新增），即这条"限制"在本会话之前就不存在。**教训与既有的"指定初始化器形态 4"同类**：判定"某语法未实现"必须跑最小探针，不能凭一次失败就归档。
+- **真正的剩余限制（如实记录）**：cast 的**目标类型名必须已在本 TU 内注册**（`@interface`/`@class`/`@implementation`/typedef/`struct` tag 都会注册）。`Foo *f = (Foo *)p;` 在 `Foo` 从未声明时报 `expected ';' after declaration (got identifier)`——报文完全没提 cast，这才是容易被误记成"强转接消息发送失败"的形态。
+- **为何不"顺手修"**：`(Foo *)p` 与 `(Foo) * p` 在 token 层**只差 `*` 的位置**，C 本身靠符号表消歧，nupa 单趟解析同样只能靠"类型名已知"判定。故这不是 bug，而是与 C 一致的约束。~~**但诊断可以更准**（留作后续）~~ → ✅ **已修（本会话）**：现在 `( IDENT * )` 这个 shape 的 `*` 在括号**内**、后面紧跟 `)`，解析器据此报 `unknown type name 'Foo' — declare it (@class / @interface / typedef) or include the header that declares it`，不再是级联报错。详见下面「C 类型名探测（符号表方案）」一节。
+- **配套**：`tests/boxed_literal_test.np` 第 6 段已把当时规避的三行恢复为自然写法 `NPNumber *head = (NPNumber *)[arr objectAtIndex:0];`（连同注释更正），7 段输出逐字不变。
+
+### 字典字面量 `@{...}` 落地 ✅ (Sep 2026, 本会话)
+
+- **先修掉的真 parser bug（比记录的缺口更严重）**：`@{ @"a": @1, @"b": @2 }` 此前**解析失败**——`expected '}' after literal (got ':')`。根因在 `parser.rs` 的 AtDict 分支：dict 的**值**用了 `parse_expression()`，它会吃逗号运算符，把 `@1, @"b"` 吞成一个 `Comma` 表达式，于是第二对的 `:` 撞上"expected '}'"。单对能用（键用的是 `parse_assignment()`）。修法：值改用 `parse_assignment()`（数组字面量早就是这个层级）。**多对字典此前从未解析成功过**，所以上一节"只是 checker 不遍历元素"低估了缺口。
+- **`@{}` = 空字典**（ObjC 语义：`@{}` 与 `@[]` 是两个字面量）；无冒号的非空 `@{a, b}` 仍保留宽容的数组回退。
+- **Foundation 新增两个类**：`NPDictionary`（不可变）/ `NPMutableDictionary`（可变，继承存储 ivar 与查询 API：`count`/`objectForKey:`/`allKeys`/`allValues`/`copy`/`description`）。存储照搬 `NPArray`（两个平行对象数组 + count），查找是**线性扫描**——这些字典都很小，真上哈希表还得跨每个键类保证 `hash`/`isEqual:` 成对正确。
+- **键相等语义 = 值语义（本轮用户拍板）**：`isEqual:` 在 `nupa_root` 上仍是**指针身份**（同 NSObject），但 `NPString`/`NPNumber` 各自重写为**值相等**（委托 `isEqualToString:`/`isEqualToNumber:`，ObjC 的 NSString/NSNumber 正是如此）。这是字典键可用性的语义保证（2026-09-30 勘误：字面量 interning 已落地，同内容字面量现为同一对象；值相等仍是语义保证）。**连带**：`tests/golden/32_foundation_dispatch/` 的期望 `eq other=0` → `eq other=1`，该目录 README 里"NPString 未重写 isEqual:"一段同步更正（root 默认仍是身份）。`NPDictionary` 自己也按内容实现 `isEqual:`（同 count 且每键映射到相等的值）。
+- **checker**：`DictLit` 臂逐**键与值** `check_expr`（对齐上一轮的 `ArrayLit` 修复）——内层 `@(expr)` 装箱、对象下标改写因此都能触发；并且**拒绝非对象条目**：`illegal type 'int' in a dictionary literal — keys and values must be Objective-C objects`（对齐 ObjC 的 "collection element of type 'int' is not an Objective-C object"；裸标量发进 `nupa_dictionary_create` 的 vararg 会编译通过、运行期读垃圾）。负例 `tests/negative/dict_illegal_entry.np`，`file:line:col` 精确、键值两处都报。
+- **顺带**：新增 `Checker::type_display()`——诊断里 `int` 拼成 `int` 而不是 `{:?}` 的 `Int`；装箱那条报错也改用它，`NPString *` 文案逐字未变。
+- **codegen**：`@{k: v, ...}` → `nupa_dictionary_create(n, k1, v1, ..., kn, vn)`——**弱符号 helper，仿 `nupa_array_create`**，仅当本 TU 内有 `NPDictionary` 时发射；交替 key/value vararg，nil 键跳过（不给扫描留洞）、nil 值存 NULL。TU 内无 `NPDictionary` 时保留历史的 `NULL` 占位。
+- **测试**：`tests/dict_literal_test.np`（9 段：多对 count／按**相等但不同**的字面量查键／空字典／`allKeys`/`allValues` 插入序／`@(expr)` 值与数字键的值语义／数组内嵌套字面量／可变字典插入-替换-删除／`copy` + 内容 `isEqual:`／`description`）exit=0 逐项正确；负例 `tests/negative/dict_illegal_entry.np`。
+- **回归**：`cargo build --workspace` **0 warning**、cargo test **103/103**、multi_tu **10/10**、`tests/stress/{hosted,baremetal}` build+run 通过、test_all **263/275**（2 个 `-F` 既有失败不变：`diamond_impl-F.np` 无 main、`double_release-F.np` 故意崩溃）。
+  - canceled **10**（上次记录 6）：逐个按源码与手动 `timeout 3` 核对，10 个全是**交互式/REPL** 用例（均含 `scanf`/`getchar`/`fgets` 或无限主循环，如 `timsort_test` 打印 "Enter numbers separated by spaces:" 后等输入，EOF 也不退），因此永远会撞 3s 的 `RUN_TIMEOUT`。与本次改动无关；passed+failed+canceled = 275 仍与基线总数对齐。
+- ⚠️ **已知限制（如实）**：`NPDictionary`/`NPMutableDictionary` **未接泛型**（`NPArray<T>` 是泛型，容器里只有它们不是）——`K`/`V` 双参数替换与单态化是独立工作；`objectForKeyedSubscript:`（`d[@"k"]`）**刻意未声明**，因为 checker 的对象下标改写只认 `objectAtIndex:`，声明它反而误导。
+
+### C 类型名探测（符号表方案）✅ (2026-09-30, 本会话)
+
+**动机**：上节末尾记的"cast 目标名必须已注册"其实只是表象。真问题是 nupa 的"这是不是一个类型名"判定**两头都错**，与 C/ObjC 的消歧方式不一致。
+
+- **真 clang 21 实测矩阵（`/tmp/objc_cmp/o*.m`，`clang -x objective-c`）**：
+
+  | 输入 | clang 结果 |
+  |---|---|
+  | `@interface Foo @end` + `(Foo *)p` | 通过（`@interface` 名即类型名）|
+  | `@class Foo;` + `(Foo *)p` | 通过（前向声明也算）|
+  | `Foo` 从未声明 + `(Foo *)p` | `error: use of undeclared identifier 'Foo'` + 级联 |
+  | `int Foo;` + `(Foo) * p` | 通过（乘法）|
+  | `int Foo;` + `(Foo *)p` | `error: expected expression`，箭头指向 `)` |
+  | `#include <stdio.h>` + `(FILE *)p` | 通过 |
+  | `#include <signal.h>` + `(sigset_t)v` | 通过 |
+  | `#include <time.h>` + `(time_t)v` | 通过 |
+  | 本地头里的 `MyHandle`/`MyCallback`（typedef） | 通过 |
+
+  **结论**：C/ObjC 判定"是不是类型名"**靠符号表**——typedef 名 + struct/union/enum tag（经典 lexer hack）；ObjC 在此基础上再加 `@interface`/`@class` 名。`Foo *f = (Foo *)p;` 在 `Foo` 从未声明时，**ObjC 里同样报错**。关键歧义：`(Foo *)p` 与 `(Foo) * p` 在 token 层**只差 `*` 的位置**；`*` 在括号**内**、后面紧跟 `)` → 不可能是乘法（`*` 不能以 `)` 为操作数）。
+
+- **nupa 改动前的缺陷（实测）**：`(sigset_t)v` → `error: expected ';' after declaration (got identifier)`；项目本地 typedef 同样失败；更糟的是 `x * y;`（两个 int 变量相乘）被 `cst_dump` 证实**误解析成 `y` 的声明（类型 `x *`）**——clang 对同一段 0 error。旧桥是 `parser.rs` 顶部约 45 个硬编码 libc typedef 名 + `IDENT *` 形状猜测，两头都错。内部还不一致：未知类型出现在**声明**里时 nupa 是放行给 clang 的（`Foo *f = 0;` 转译成功、clang 报 `unknown type name`），只有**强转**这条提前拦死。
+
+- **新模块 `crates/nupac/src/ctype_probe.rs`**（`lib.rs` 里 `pub mod ctype_probe;`）：
+  - `scan_c_type_names(preprocessed: &str) -> Vec<String>`：自带 C tokenizer（保留标点邻接、丢注释/字面量/`#` 行标记），扫 `typedef` 声明取声明符名。**刻意不收集 struct/union/enum tag**——C 里 tag 不是类型名，收了会让 nupa 接受 C 会拒绝的代码。`NOT_TYPE_NAMES` 过滤关键字/属性噪声，`DECLARATOR_QUALIFIERS` 用于跳过 `(*` 与名字间的 `const`/`restrict` 等。
+  - `probe_c_type_names(cc, includes, search_dirs, macros, arch, freestanding, nostdinc) -> Option<Vec<String>>`：写临时 shim（`#include <nupa/runtime.h>` + 透传的 `#include` 行），跑 `<cc> -E -x c -I<dirs> -D<macros> [-ffreestanding] [-nostdinc] [-arch a]`（两旗标独立，2026-09-30 拆分），扫 stdout。**失败/空结果返回 `None`**，调用方回退到 builtin + 形状猜测——绝不把能跑的构建变成报错。
+  - 11 个单元测试；实测性能：三头文件 shim `clang -E` **40ms**，恢复 98 个 typedef 名（`FILE`/`size_t`/`sigset_t`/`time_t`/`va_list`/`off_t`/`pthread_attr_t`/`clockid_t` 全中）。
+
+- **pipeline 串接**：`Pipeline` 新字段 `c_cc: Vec<String>` / `c_arch: Option<String>` / `no_ctype_probe: bool`；新私有方法 `c_type_names(&self, pre, macros, filename) -> (Vec<String>, bool)`（跳过条件：`no_ctype_probe || c_cc.is_empty() || pre.c_headers.is_empty()`；搜索目录 = **源文件所在目录优先** + `search_dirs`）；`transpile()` 改用 `Parser::with_c_type_names(&pre.resolved_nupa, &c_type_names, c_types_complete)`，`-v` 时打印 `[nupac] C type table: N names from M passthrough header(s)`。`main.rs` 在 `select_c_compiler` 后接线 `c_cc`/`c_arch`/`no_ctype_probe`。
+
+- **parser 两个判定点**：
+  - 新字段 `type_table_complete: bool`（`new()` 里 `false`）；新构造 `with_c_type_names(source, names, complete)`；新 `type_table_is_authoritative(&self)`。
+  - `parse_primary` 的 `( ... )` cast 分支：`is_cast` 为假、当前 token 是 Identifier、表权威、`scan_cast_star_paren`（纯 textual lookahead：标识符后跳空白 → 至少一个 `*`（允许 qualifier 夹在中间）→ `)`）为真、且名字既非 type name 也非 type param时，报 `unknown type name 'X' — declare it (@class / @interface / typedef) or include the header that declares it`——**代替**以前的级联错。
+  - `is_declaration_start()` 的 Identifier 分支：`IDENT IDENT` **永远算声明**（C 里相邻两个 primary 不成立）；`IDENT *` **只在表不权威时**才当声明猜测（否则 `x * y;` 是乘法）。
+
+- **逃生舱**：环境变量 `NUPA_NO_CTYPE_PROBE=1` 关闭探测（未加 CLI flag）。
+
+- **测试**：`crates/parser/tests/type_table_resolution.rs`（7 个：乘法非声明／已知 typedef 指针声明／未知名的形状回退／头文件 typedef 强转可解析／权威表下未知强转目标报错／非权威表下不报错／cast lookahead 区分括号内外 `*`）；`ctype_probe.rs` 内 11 个；e2e `tests/c_header_typedefs_test.np`（`sigset_t`/`pthread_attr_t *`/`pthread_t` 强转）——探针开 → exit=0；`NUPA_NO_CTYPE_PROBE=1` → **复现旧失败** `expected ';' after declaration (got integer)`（这是"曾经失败"的实锤对照）。
+
+- **回归**：`cargo build --workspace` **0 warning**、cargo test **121/121**（+18）、multi_tu **10/10**、`tests/stress/{hosted,baremetal,interop}` build+run 通过、test_all **282/294**（2 个 `-F` 既有失败不变、10 个 canceled 交互式不变）。分母 294 = 121 cargo + 172 `.np` + 1 example；比上节基线的 275 多 19，正好是 **+18 新 Rust 测试**（ctype_probe 11 + type_table_resolution 7）**+1 新 e2e `.np`**——已逐项对齐，无隐藏失败。
+
+- ⚠️ **仍开着的口子（如实）**：
+  - **不收集 struct/union/enum tag 是刻意的**（见上）。
+  - **probe 失败静默降级**到 builtin + 形状猜测（保可用性，代价是退回旧的误解析，只影响诊断质量）。
+  - 旧的硬编码白名单仍保留在 `parser.rs` 顶部作非权威回退路径，未删。
+  - 未加 CLI flag；未透传 `pre.c_headers` 的**内容**（只有原始 `#include` 行文本）。
+
+
+### 泛型真检查（步 1–3）：T 扶正为签名一等公民 + checker 代入检查 ✅ (Sep 2026, 本会话)
+
+> 路线拍板：**单态化 ⊕ 编译期检查**——保留既有 C++ 式单态化（专属类元数据/vtable/方法副本，README 不用改），补上 ObjC lightweight generics 式的编译期检查。运行期零变化，纯编译期收益。
+
+#### 三步落地
+
+| 步 | 内容 | 关键证据/决策 |
+|---|------|--------------|
+| **1** | `NPArray.nh`/`NPMutableArray.nh`（及对应 `.np`）元素位 `id` → `T`（`objectAtIndex:`/`firstObject:`/`addObject:` 等 15 处） | 前置探针实证 `T` 可直接写在方法签名（`MyBox<T>` → `MyBox_NPString_ptr_set_(NPString*, SEL, NPString*)`）；头文件原注释声称"specialization 用 T"但代码写 `id`——注释与代码不符，本步使其一致 |
+| **2** | codegen 单态化替换从"渲染串 `NPObject *` 盲替换"收敛为 **`TypePrim::Param` 哨兵替换** | 盲替换误伤实证：特化副本里 `-copy`/`-description`（真 `id` 位）被串改成 `NPString * self`。修法：`T_PARAM_RENDER = "NPObject * /*T*/"`（注释哨兵，漏网也是合法 C）+ `normalize_t_sentinels_text`（发射出口文本级归一化幸存哨兵——CgStmt 树无廉价全遍历，文本级替换最完备） |
+| **3** | checker：`MsgSend` 把接收者 `type_args` 代进方法签名 `Param` 位（实参 + 返回类型），复用 `types_compatible` 哲学 | 4 个历史漏检全变 error；裸拼写（无 type_args）完全擦除、**零迁移**（`/tmp/pcbare.np` 探针验证） |
+
+#### checker 实现要点（勿返工）
+
+- **`method_returns` 新表**：`collect_signatures` 顺带收方法返回类型（selector → declared return）。
+- **代入门控**：实参检查仅当 **接收者带 type_args 且签名含 Param 位**（`type_has_param`）——两道门缺一不可：
+  - 无 type_args 门 → 泛型类自己体内的 `[self addObject:...]` 会拿原始 `T` 与实参硬比（Foundation 全炸）；
+  - 无 Param 门 → `method_params` 按 selector **全局**键控，`stringWithFormat:` 等非泛型签名会被泛型接收者误代入（首轮探针 7 处误报）。
+- **返回类型代入**：接收者带 args → 代入；裸接收者 → **objectish 返回一律退回 `id`**，只留标量精度（`count`→`size_t`）。⚠️ 关键坑：全局 selector 表下 `-init` 返回 `NPMutableDictionary *` 会**污染所有类的 `[x init]`**（裸接收者拿错类型 → 13 处误报），objectish 退回 `id` 才是对的。
+- **兼容判定**（`named_types_compatible`，两处共用：实参 + 声明 init）：
+  - `id` 万能；两个具名类指针 → **名字相等或 superclass 链相关**（`is_subclass_of`，双向——下转型按 clang 惯例放行）；未知名（前向声明/外部 typedef）放行，绝不瞎猜；
+  - **裸模板 ↔ 同基特化互赋允许**（`split('<')[0]` 相等即同基）——特化与基类布局逐字节相同（已实证），`VectorBuffer *` ↔ `VectorBuffer<X> *` 本就二进制同构；
+  - 声明 init 的指针↔标量判定（`init_ptr_scalar_mismatch`）**两个方向都收窄**：标量→指针只拦**可证字面量**且豁免 `= 0`（C 空指针惯用法 `Foo *p = 0;` 误报 2 个测试）；指针→标量只拦**具体具名类**（裸 `id` 是回退类型，`[someId count]` 满天飞不能拦）。
+- **连带修**：`arg_type_ok`/`init_ptr_scalar_mismatch` 变 `&self` 方法（需要 symtab 查 superclass 链）。
+
+#### 用户拍板的三个语义决策 (2026-09-30)
+
+| 决策 | 选择 |
+|------|------|
+| ① `NPArray<A>` vs `NPArray<B>` | **不变**（与 ObjC lightweight generics 一致） |
+| ② 裸 `NPArray` → `NPArray<X>` | **warning（clang 同款档位）**——2026-09-30 二次拍板定案。首落地为双向静默，用户选"降为 warning"后实现 `init_generic_erasure_warning`：裸→特化报黄色 warning（`-Werror` 升级），特化→裸静默（丢承诺是安全的）。判据细节见下 |
+| ③ `@[...]` 字面量推断 | **推断**（全元素同型 → `NPArray<X>`，混合/非类元素回退裸 `NPArray`）——2026-09-30 已实现，见下 |
+
+#### 决策②③补全落地 ✅ (2026-09-30, 同会话)
+
+**② 裸→特化 warning（`init_generic_erasure_warning`，声明 init 处挂载）**：
+- 判据三要素（探针实证迭代两轮，勿再走弯路）：①泛型性看 **`type_args` 或 name 含 `<`**——`@using` 别名展开（`@using BoxOfStr = Box<NPString *> *;`）把 `<...>` 烧进 `name` 且 `type_args` 为空，只查 `type_args` 会漏别名形态；②方向是 **声明侧裸 ← 表达式侧特化**（`!v_gen || i_gen → None`——首版方向写反探针直接抓出）；③基类相同（`split('<')[0]` 比较，闭包写法有生命周期问题，用普通 let 绑定）。
+- 验证矩阵：`NPArray *loose → NPArray<NPString *> *typed` 报 warning（exit 0）；`-Werror` 升级 exit=1；`@using` 别名同报；typed→裸静默 0 条；`static_generics_zero_cost_test.np`（裸 `VectorBuffer` → `PointPipeline` 别名）rc=0 零改动通过。
+- ⚠️ 调试教训：临时 eprintln 钩子用 `NUPA_DBG_ERASURE` 环境变量门控，定位完即删——方向反了的 bug 靠它一轮定位。
+
+**③ `@[...]` 元素类型推断（`ArrayLit` 臂）**：
+- 全元素同为**具体具名类指针**（`Named + is_pointer + name 无 <`）→ 返回 `NPArray<X>`（type_args=[X]）；空数组/混合/含 id/未知类型 → 回退 `id`（裸）——既有代码零迁移。
+- **配套 1（NPNumber 工厂白名单）**：`@[ @1, @2 ]` 的元素 `@1` 是 `[NPNumber numberWithInt:1]`，而裸接收者的 objectish 返回已统一退回 `id`（修 `-init` 污染的副作用）→ 元素类型全变 `id`，推断静默失效。修法：`numberWith{Int,LongLong,Double,Bool,Char}:` 五个无子类无冲突的工厂直接返回 `NPNumber *`。
+- **配套 2（`named_types_compatible` 补 type_args 比较）**：名字相等直接放行导致 `NPArray<NPNumber *>` ↔ `NPArray<NPString *>` 静默互赋（决策①被击穿）。修法：基类相同且两侧 type_args 等长时逐位 `arg_type_ok`（子类仍可过）；长度不等（一侧裸）→ 放行（布局同一）。
+- **配套 3（`type_display` 带 type_args）**：报错从 `initializing 'NPArray *' from ... 'NPArray *'`（看不出差别）变为 `initializing 'NPArray<NPString *> *' from ... 'NPArray<NPNumber *> *'`。
+- 验证：`@[ @"a", @"b" ] → NPArray<NPString *> *` rc=0；`@[ @1, @2 ] → NPArray<NPNumber *> *` rc=0；`NPArray<NPString *> *bad = @[ @1, @2 ]` 报错 rc=1 文案清晰；`@[ @"a", @42 ]` 混合静默回退。
+
+#### 验证矩阵
+
+- **4 漏检全拦**：`[m addObject:7]`（标量进 T 容器）/ `[m addObject:@42]`（NPNumber* 进 NPString* 容器）/ `int v = [m objectAtIndex:0]`（指针→标量）/ `NPNumber *bad = [strArr objectAtIndex:0]`（具名类不匹配）。
+- **正例零误伤**：typed read（`NPString *s = [m objectAtIndex:0]`）、裸 NPArray 混用、`@42` 装箱、子类赋父类（`NPMutableString *` → `NPString *`）。
+- **回归**：cargo 121/121、test_all **286/294**（2 个 `-F` 既有失败不变；较改动前 +4 通过）、multi_tu 10/10、stress 三套全过、step1 生成 C 与改前基线逐字节一致（裸 NPArray 路径）。
+
+#### 残留（如实）—— 2026-09-30 二次更新（P0–P1 落地后）
+
+- ~~③ `@[...]` 类型推断未实现~~ → **已实现**（见上"决策②③补全落地"）。
+- ~~`-copy` 返回 `id`~~ → **已修**（P1，receiver-same-type 规则）：typed 容器上 `[m copy]`/`[m mutableCopy]` 返回**接收者同型**（含 type_args），`int bad = [m copy]`（指针→标量）与 `NPNumber *bad = [strArr copy]`（元素型不匹配）均被拦；裸接收者保持 `id`，零迁移。探针 `/tmp/pr_p1*.np` 四态全过。
+- **多参数泛型代入 bug（P0，本会话探针发现并修复）**：`substitute_type_args` 原先一律取 `args[0]`，`Pair<A, B>` 的 B 位被代成 A 的实参 → **合法代码编译失败**（步 3a 引入的回归，修 `-init` 污染前 MsgSend 恒返 `id` 不会误报）。修法：Param 节点自带参数名（parser 保留，`parser.rs:480`）+ 符号表 `type_params` 顺序表（binder 已填，`binder.rs:388`）**按名对号入座**；查不到名回退 `args[0]`（单参数旧行为）。验证：`Pair<NPString *, NPNumber *>` 正例 rc=0；反例（`setFirst:@7`、`int x = [p second]`）两处错误精确命中；单参数 4 漏检探针 + 正例探针零回归。
+- 子类元素进父类容器（`NPMutableString *` 进 `NPArray<NPString *>`）**可过**（superclass 链相关即放行）——**定性为设计决策，不改**：与 ObjC `__covariant` 读取侧行为一致；写侧仍受元素型检查约束（放进不该放的会被拦）。
+- ~~`NPDictionary<K, V>` 双参数泛型未接~~ → **已实现**（P3，见下节"残留清单落地"）。
+- ~~步 4（评估删对象容器单态化，纯 flash 优化）未动~~ → **评估已完成**（P4 量化账单：同程序特化比裸拼写 +42,848 字节（+41.5%），见下节；删与不删待用户拍板）。
+
+### 残留清单落地（P0–P4）✅ (2026-09-30, 本会话)
+
+> 用户拍板"按顺序全做，做完消掉待做清单"。全量回归：cargo 121/121、test_all 286/294（2 个 `-F` 既有失败不变）、multi_tu 10/10。
+
+| 项 | 落地 | 验证 |
+|---|------|------|
+| P0 多参数泛型代入 bug | `substitute_type_args` 按 Param 名 + 符号表 `type_params` 顺序对号入座（查不到名回退 `args[0]` 单参数旧行为） | `Pair<NPString *, NPNumber *>` 正例 rc=0；反例两处错误精确命中 rc=1；单参数 4 漏检探针零回归 |
+| P1 copy 接收者同型 | MsgSend 返回类型分支：`copy`/`mutableCopy` 且接收者带 type_args → 返回接收者同型（裸接收者保持 `id`） | typed `[m copy]` 元素型流经读侧 rc=0；`int bad = [m copy]` 与 `NPNumber *bad = [strArr copy]` 均拦 rc=1；裸 copy 零迁移 |
+| P2 文档刷新 | AGENTS.md 残留节二次更新（③ 标已实现、copy 已修、子类协变定性为设计决策） | — |
+| P3 `NPDictionary<K, V>` | AST `Class.type_params` 字段（CST→elaborator→AST）+ 四个 Foundation 头/实现签名 K/V + codegen **按参数名哨兵**（`/*K*/`/`/*V*/`）+ `name_flat` 多参数分隔符修复 + 发射出口哨兵归一化泛化为任意 `/*名*/` | 七探针：C 编译 rc=0、端到端 `1 2`、正例 rc=0、两反例 rc=1、裸拼写零迁移、既有 dict 测试 rc=0 |
+| P4 单态化 flash 账单 | 同程序裸 vs 特化双编译量化 | 见下表 |
+
+**P3 实施要点（勿返工）**：
+- 哨兵**按参数名**渲染（`ct.name`/`t.name` 保留 K/V 名，parser.rs:480）；单态化循环从模板 `ClassInfo.type_params`（两个构造点均填充）配对 `(哨兵, 实参)`，**多趟顺序替换**——哨兵互异不串扰，`substitute_cg_stmt` 50 处递归签名零改动。
+- `name_flat` 多参数 bug：分隔符 `_` 原在逗号处 push 到参数**前面**（首参数带前导 `_`、参数间无分隔）→ `NPDictionary__NPString_ptrNPNumber_ptr`；修为 arg 后置分隔。
+- `normalize_t_sentinels_text` 从只认 `/*T*/` 泛化为**严格标识符体**的 `NPObject * /*名*/` 才归一化——任意 `/* 注释 */` 透传不受影响。
+- 工厂方法（`+dictionary` 等）保持擦除 `id`/裸 `NPDictionary *` 返回——避免模板内嵌套泛型返回类型（`NPArray<K>`）引发模板递归实例化；`isEqual:` 按 ObjC 惯例收 `id`。
+
+**P4 量化账单（flash 拍板材料）**：同程序（array/dict/foreach 全用一遍）裸拼写 103,176 字节 vs 特化拼写 146,024 字节——**+42,848 字节（+41.5%）**，源码级 +1167 行 C / +75420 字节，全部是特化方法副本 + 类/vtable/meta-vtable 实例。布局逐字节相同 → RAM/速度收益 0，纯 flash 成本。删与不删（对象容器退化成纯编译期视图）**权利在用户手里**，本会话不动。
+
+#### 残留（三次更新后）
+- 待用户拍板：步 4（删对象容器单态化，P4 账单如上）。
+- 多 TU 泛型特化的一致性依赖各 TU 实例化集合相同（既有 `__sig` 启动期检查兜底，未变）。
+
+### `switch` 模式匹配（Swift 风格 `case`）✅ M1 落地 (Sep 2026, 本会话)
+
+**动机**：路线图把 `match` 否决掉的理由是"ObjC 对多路分发没有语法 construct，答案是 `isKindOfClass:` + 强转方法链"。Swift 后来证明了一个**窄得多的中间形态**可以纯语法化：**只改 `switch` 的 case 标签**（不动语句家族、不造新语句、不造穷尽性分析）。这既拿到了方法链的表达力，又避开了 `match` 的全部代价。
+
+**语法**：
+```objc
+switch (subject) {
+    case NPString *s:                 // 类型绑定 → isKindOfClass:，臂内 s 已是 (NPString *)subject
+    case > 100:                       // 悬空比较 → subject > 100
+    case > 0 && < 100:                // 区间
+    case @"literal":                  // 对象字面量 → isEqual:（值语义）
+    case 1, 2, 3:                     // 多值常量（顺带修好的既有缺口）
+    case T *x when x.count > 3:       // when guard（上下文关键词）
+    default:
+}
+```
+
+**落地方式（铁律：不引入新 IR，codegen 零改动）**：parser 识别 case 标签形态 → 含任一模式臂时整个 switch 降级为 `SwitchPat`（平面臂表）→ **新 crate `crates/pattern`**（pipeline **Step 3.95**，在 ARC/checker 之前）把 SwitchPat 改写成 `goto` 状态机 + C 标签：
+
+```c
+{ NPObject *__nupa_sw = (NPObject *)subject;   /* 对象 subject */
+  __auto_type __nupa_sw = subject;             /* 标量 subject */
+  if (nupa_isKindOfClass((NPObject *)__nupa_sw, &NUPA_CLASS_$_NPString)) goto __nupa_case_0_1;
+  if (__nupa_sw > 100) goto __nupa_case_0_2;
+  __nupa_case_0_1: { NPString *s = (NPString *)__nupa_sw; ... } goto __nupa_sw0_end;
+  __nupa_case_0_d: { ... }
+  __nupa_sw0_end: ; }
+```
+
+**实现要点（勿返工）**：
+- **每个降级 switch 独立标签命名空间**（`__nupa_sw{id}_*`，`SWITCH_SEQ` 原子计数器）——C 标签是**函数作用域**的，嵌套模式 switch 否则会发重复 `__nupa_case_0` 名（硬 C 错误）。
+- **subject 只物化一次**；标量用 `__auto_type`（eh pass 先例），**对象用 `NPObject *` + 强转**——本 pass 跑在 checker **之前**、静态类型未知，`__auto_type` 会继承指针类型并被 checker 判"对象初始化标量"。判据 = 臂表里有 `Bind` 或对象字面量臂。
+- **`break` 作用域感知改写**为 `goto __nupa_sw{id}_end`：臂体内的嵌套循环/内层 switch 的 `break` 不受影响（只在不属于任何内层 loop/switch 作用域时才改写）。
+- **fallthrough 保持 C 语义**：臂体末尾**不追加**隐式跳转，无 `break` 即落入下一臂（用例 7 验证 `t7=11`）。
+- **`when` 是上下文关键词**（lexer 不硬编码，仿既有的 `in` 降级先例）——`int when = 1;` 照常编译。
+- **Bind 形态判据用源切片扫描**（`scan_case_bind_shape`：标识符 `*` 标识符 [+ 可选 `when` guard] → `:`），不用投机 parse+回溯。
+
+**分类判据（parser `parse_case_pattern`）**：
+
+| 形态 | 判据 | 降级测试 |
+|------|------|----------|
+| `T *name` | 源切片扫描确认 Bind 形状 | `nupa_isKindOfClass(...)` + 臂内 `(T *)subject` 别名声明 |
+| `>` `<` `>=` `<=` 开头 | 悬空比较 | 表达式树里替换 subject |
+| `@"..."` / `@N` / `@YES` / `@'c'` / `@(expr)` | `is_object_literal` | `[subject isEqual:<lit>]` |
+| `when <expr>` | 上下文关键词 | 追加 `&& <expr>` |
+| 其他 | 普通 C 常量 | `subject == <const>` |
+
+⚠️ **`is_object_literal`（parser）与 `is_object_literal_expr`（pattern crate）必须一致**——不一致时全字面量 switch 会被路由到 C 路径，发 `case <装箱表达式>:`（实测 `case @42:` 曾生成 `case [NPNumber numberWithInt:42]:`，clang 报 "integer constant expression must have integer type"）。两处现已同款覆盖 `@String` / `Boxed` / `NPNumber` 工厂消息发送。
+
+**M1 限制（如实记录）**：
+- **常量臂与模式臂不可混用** → 报 `switch mixes plain constant 'case' arms with pattern arms — M1 cannot lower both in one switch; split them into separate switches`（负例 `tests/negative/switch_mixed_arms.np`）。C 路径需要原始 body，模式路径丢弃它。
+- **非恒定标签被拦截**：`case [obj msg]:` / `case f():` / `case a = b:` 报 `case label is not a constant expression`（负例 `tests/negative/switch_case_msg_send.np`）。⚠️ 首版 `expr_is_non_constant` 漏判消息发送本身（只递归操作数）→ 探针抓到仍透传进 C，已修为"消息发送/调用自身即非恒定"。
+- **嵌套模式的 case 作用域**未做跨层分析（内层 case 归内层）——与 C 一致，未专门验证。
+- 多值 `case 1, 2, 3:` 是**顺带修好的既有缺口**：旧路径用 `parse_expression` 吃逗号，发 `case (1, 2, 3):`。改为 `parse_assignment`（数组字面量早就是这个层级）。
+
+**连带修掉的既有 bug（stress hosted 暴露）**：**for-in desugar 把集合别名错用元素类型**——`T *__nupa_fi = <coll>` 里的 `T` 抄的是**循环变量**类型，生成 `NPString * __nupa_fi = arr;`，于是任何"元素类型比集合更具体"的 for-in（如 `for (NPString *item in npArray)`）都被 checker 拒。集合别名改用 `id`（与元素类型无关——集合是任何提供 `count`/`objectAtIndex:` 的对象）。既有 golden/30 全用 `NPObject *` 元素类型，**恰好掩盖了这个 bug**，是 stress hosted 第一个暴露它。
+
+**M2 候补**：常量臂与模式臂混合降级（保留原始 body 按臂分流）/ 穷尽性分析（对象 subject + Bind 臂缺 `default` 警告）/ `case is` 与 `case as` / 或模式（`case NPString *s, NPNumber *n:`）。
+
+**测试**：golden `tests/golden/42_switch_pat/`（7 场景 + README 记 desugar 形态与判据表）、`tests/switch_pat_test.np`；负例 `tests/negative/switch_mixed_arms.np` + `switch_case_msg_send.np`（均已从 test_all glob 排除）。
+**回归**：cargo test **121/121**、build **0 warning**、test_all **288/296**（2 个 `-F` 既有失败不变：`diamond_impl-F.np` 无 main、`double_release-F.np` 故意崩溃；6 canceled 交互式）、multi_tu **10/10**、stress 三套全过（baremetal/hosted/interop）。
+
+### 四项全语法压测遗留修复 ✅ (Sep 2026, 本会话) — catch 语义回正 / 成员 fn-ptr 调用 / 字面量 interning / 反向串检查
+
+> 全语法压力测试（full_syntax_test.np）沉淀的四个已知缺口/偏差，本会话全部开修。回归基线（最终二进制实测）：cargo test **137/137**、test_all **309/317**（2 个 `-F` 既有失败不变）、multi_tu **10/10**、trace golden **8/8**（NPAC= 指向 debug 新二进制）、eh_diff **7/7**（NPAC= 绝对路径）、stress 三套全过（baremetal/hosted/interop）。
+
+| # | 问题 | 修法 | 验证 |
+|---|------|------|------|
+| 1 | **typed `@catch` 是精确 isa 匹配**：抛子类、catch 父类 → 未捕获（与 ObjC isKindOf: 链相悖） | sjlj codegen 的 catch isa 检查从 `isa == &CLASS` 改为 `__nupa_eh_isa(...)` 调用（runtime.c:30 走 `nupa_isKindOf` superclass 链、nil 安全；eh checked 与裸机 runtime 本来就是该形态，零改动）。臂序语义探针四态实证：first-match 消费防双捕（11）、sibling miss 落外层（33）、父实例不中子臂（44）、`id` 臂全接（55） | `/tmp/px.np`（B=1）、`/tmp/px2.np` 四态、`-eh checked` 同结果；full_syntax §4.8 改回 ObjC 语义（父类臂在前接子类，期望 221→211） |
+| 2 | **struct 成员 fn-ptr 直接调用 `w.cb(3)` 被整个丢弃**（生成 `int a = (3);`，只剩实参） | 根因：elaborator 只对 `IvarRef` callee 保留 `FuncCall.callee`，`w.cb`（Dot→PropRef）被降级丢弃 + name 空串。修法两处：elaborator.rs `Call` 分支把 `PropRef` 也纳入 callee 保留；codegen `render_callee_expr` 新增 `PropRef` 渲染臂（镜像既有 PropRef 发射臂的 `.`/`->` 判定；ObjC property getter 形态返回空串不误伤） | dot `A=6`、arrow `B=8`、`-backend gcc` portable 同结果；生成 C `int a = w.cb(3);` 原样；full_syntax §1.4 别名中转 workaround 删除，直接 `w.cb(3)` |
+| 3 | **字符串字面量无 interning**：同内容 `@"..."` 每处是新对象，`containsObject:` 字面量直查落空 | 宿主模式 `nupa_stringFromCstr`（codegen 发射的 weak helper）加 256 槽 intern 表：同内容返回同一对象；表持有 +1 永不释放（ObjC 常量串语义：ARC unretained、MRC 不得手 release）；表满回退新建。**freestanding 保持原新建对象体**（`#ifdef __NUPA_FREESTANDING`，无 `<string.h>` 依赖） | `same_ptr=1 / contains=1 / idx=1 / diff_ptr=0`；full_syntax §3.4 改字面量直查；golden/43 既有用例零回归 |
+| 4 | **`@"..."` 传 C 串参数位静默乱码**（`stringWithUTF8String:@"bad"` 把对象头当字符数据） | checker 新增反向检查 `check_atstring_to_cstr`（`AtString` 实参 → `char *`/`const char *` 形参 = error，文案给 `[str UTF8String]` 修复提示），挂 MsgSend 与 FuncCall 两臂 | 负例 `tests/negative/atstring_to_cstr_param.np` exit=1 文案精确；正例（`[s UTF8String]`、裸串、`@noarc` 白名单）零误伤 |
+
+**连带修掉的误报（checker 签名表覆盖，探针实证后修）**：#4 检查上线路后 test_all 的 `tt.np` 新失败——根因**不是** NPError.np 违例，而是 checker 的 `method_params` 按 selector 全局键控 last-writer-wins：`tt.np:91` 自声明 `- (id)objectForKey:(const char*)key` 覆盖了 NPDictionary 的 `(K)key` 签名 → `[NPDictionary objectForKey:@"…"]` 被误判。修法（`method_kinds` 同款纪律）：新增 `method_param_decls` 全声明表 + `selector_param_all_cstr` **共识门**——字符串反向检查只在"该 selector 的**所有**声明都同意 char*"时才发（混合声明沉默）；另加 `method_params_by_class` 按接收者类链（`named_class_of` + `method_params_for_receiver` 沿 superclass 走查）优先解析签名。NPError.np 本身合法零改动。tt.np 恢复 MRC-retry 通过，test_all 回到 **309/317**。
+
+**文档同步**：AGENTS.md 三处旧记载更正（struct 成员 fn-ptr"不支持"→已支持；NPMutableArray"无 interning"→已 interning；isEqual: 一段）+ 本节；README.md typed-@catch highlights 行与字典节、CHINESE.md 字典节、golden/32 & 43 README 的 interning 表述全部更新；memory 旧"精确 isa 偏差"条目作废重写、新增 checker 签名表覆盖教训。
+
+### 生成代码语义三项修复 ✅ (Sep 2026, 本会话续) — 外部评审（GPT）发现的 2 P1 + 1 P2
+
+> 三项均先在当前二进制上转译复验确证（不是转述即信），再开修。回归基线（最终二进制实测）：cargo test **137/137**、test_all **309/317**（2 个 `-F` 既有失败不变）、multi_tu **10/10**、trace golden **8/8**、eh_diff **7/7**、stress 三套全过（baremetal/interop/hosted）。
+
+| # | 问题（复验确证） | 修法 | 验证 |
+|---|------|------|------|
+| P2 | **`#define X @"..."` 原样透传进 C**（`NPError.nh:9-11` 三条域名词宏；宏在 C 轨展开处是硬 clang 错误——本 TU 未展开只是侥幸） | preprocessor 的 `#define` C 透传点加 `cpp::body_has_nupa_syntax`（现成判据：`@"..."`/消息发送/block 字面量）过滤——**nupa 宏表照常注册**（nupac 自己展开全部调用点，零损失），只有 C 轨丢行；普通 C 宏不受影响。守卫 stash 路径同样过滤 | 探针：`#define @"` 在生成 C 中 0 条、nupa 侧展开 `nupa_stringFromCstr("NPErrorParse")` 保留、`#define ANSWER 42` 照常透传运行正确 |
+| P1 | **`__weak` 赋值不重注册**：decl-with-init 注册后，后续 `weakref = strong` 是普通赋值 → 槽位仍挂旧目标（常为初始 NULL）→ 源销毁不清零（`4.17 weakzero 0`） | codegen 新 pass `rewrite_weak_assigns`（挂在 `rewrite_block_var_refs` 后）：函数粒度收集 weak 局部名，语句级 Assign 改写为 `{ __auto_type tmp = <rhs 求值一次>; unregister→assign→register }`（与 weak-ivar setter 同款序列；eh/pattern pass 的 `__auto_type` 临时先例）。decl-with-init 注册 NULL 本身无害（weakUnregister 对未注册槽早退） | 探针：owned 源（alloc+init，ARC 块尾 release → dealloc → weakClearAll）`alive=1 / zeroed=1`；二次赋值 `swapped=1`；full_syntax §4.16-17 改用 owned 源后 `4.17 weakzero 1` |
+| P1 | **`@synchronized` 降级成普通块**（codegen 臂注释自认 "no lock semantics yet"；单线程测试"看起来正常"，语义未实现） | **真互斥**三层：①runtime.h/c 新 API `nupa_syncLock`（对象地址 FNV-1a → 256 桶 `atomic_flag` 自旋，返回桶号）/`nupa_syncUnlock`/`nupa_syncAutoCleanup`——C11 atomics 无 pthread 依赖、桶共享退化为锁粗化（绝不漏互斥）、无表增长上限；②codegen 臂发 `{ long __nupa_sync_N __attribute__((cleanup(nupa_syncAutoCleanup))) = nupa_syncLock((void *)obj); <body> }`（cleanup 覆盖正常出口/return/break/continue）；③裸机 runtime 同签名 no-op（单核互斥平凡成立）。**checker 配套**：锁块内 `@throw` 会 longjmp 绕过 cleanup → `stmt_has_throw` 递归（含 block 字面量/字典/数组字面量）发 warning；`-eh checked` 把 throw 重写为旗标+return、cleanup 会跑，无此隐患 | 探针：`sync=5 / early=7 / relock-ok`（早退后能重新加锁 = cleanup 生效）；警告探针（本地 `@try` 捕获隔离）warning 文案精确、无 throw 零误报；full_syntax `4.11 sync 5` |
+
+**测试侧教训（full_syntax §4.16）**：zeroing 验证必须用 **owned 源**（`[[NPString alloc] initWithUTF8String:...]` = +1，ARC 作用域尾注入 release → dealloc）；便利构造器（`stringWithUTF8String:`）返回 **autoreleased** 对象、从不销毁，修前修后输出相同——探针对象所有权选错会假阴性。
+
+**文档同步**：AGENTS.md Weak References 节补 assign 改写条目 + 本节；memory 两条新事实（@synchronized 真互斥 + weak assign 重注册；宏过滤）。
+
+#### 追加（同日第二轮评审）：async 状态机兜底 return ✅
+
+- **问题**：`nupa_async_state_*` entry 函数的 `switch (t->state)` 只覆盖 `case 1` 与 `case <final>`，异常状态（任务结构损坏、完成后误 resume）会落到非 void 函数末尾——UB，clang `-Wreturn-type`（full_syntax 生成 C 实证 2 条，GPT 复验发现）。
+- **修法**（`crates/async/src/lib.rs` entry_decl body）：switch 后追加完成协议作兜底——`t->state = -1; return 1;`（异常状态按"任务完成"结算，driver 的 join 循环能终止，不会死轮询）。
+- **验证**：生成 C `-Wreturn-type` **0 条**；兜底 return 已发射；async 端到端探针 `result=42` 不变；golden/34 stdout diff **MATCH**；回归 cargo **137/137**、test_all **309/317**、multi_tu **10/10**、stress 三套全过。

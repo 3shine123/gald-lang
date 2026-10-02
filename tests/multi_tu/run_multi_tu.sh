@@ -27,7 +27,11 @@
 #         ./run_multi_tu.sh 05_block   run one case (by dir name or number)
 #   NPAC=path/to/nupac ./run_multi_tu.sh
 set -u
-cd "$(dirname "$0")/../.."
+# Resolve the script location BEFORE any cd: $0 may be a relative path, and
+# resolving it after the cd below anchors it to the project root — invoking
+# this script from inside tests/multi_tu then found zero cases.
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+cd "$SCRIPT_DIR/../.."
 
 if [[ -z "${NPAC:-}" ]]; then
     for cand in target/debug/nupac target/release/nupac; do
@@ -39,7 +43,7 @@ if [[ -z "${NPAC:-}" || ! -x "$NPAC" ]]; then
     exit 2
 fi
 
-CASES_ROOT="$(cd "$(dirname "$0")" && pwd)"
+CASES_ROOT="$SCRIPT_DIR"
 NUPA_INC="$PWD/include"
 WORK="${TMPDIR:-/tmp}/nupa_multi_tu.$$"
 mkdir -p "$WORK"
@@ -69,10 +73,22 @@ run_case() {
     fi
 
     # 1. transpile every TU separately
+    # A case may pin a stable cross-TU vtable layout: a SLOTS_MANIFEST marker
+    # file in the case dir makes every TU compile with --slots <path>. The
+    # manifest lives in the WORK dir (nupac writes the assignment back after
+    # each compile; the case dir must stay clean). First TU creates it; the
+    # append-only contract means later TUs keep its slot order.
+    local slots_args=()
+    if [[ -f "$dir/SLOTS_MANIFEST" ]]; then
+        slots_args=(--slots "$out/slots.manifest")
+    fi
+
     local tsrc objs=() t
     for t in "${sources[@]}"; do
         tsrc="$out/$(basename "${t%.np}").c"
-        if ! "$NPAC" -rewrite-nupa "$t" -o "$tsrc" -I "$dir" "${INCS[@]}" > "$out/$name.transpile.log" 2>&1; then
+        # NOTE: macOS bash 3.2 under `set -u` rejects "${empty_arr[@]}" —
+        # the conditional expansion keeps empty slots_args legal.
+        if ! "$NPAC" -rewrite-nupa "$t" -o "$tsrc" -I "$dir" "${INCS[@]}" ${slots_args[@]+"${slots_args[@]}"} > "$out/$name.transpile.log" 2>&1; then
             echo "FAIL  $name (transpile)"
             sed 's/^/      /' "$out/$name.transpile.log" | head -12
             FAIL=$((FAIL+1)); FAILED_CASES+=("$name"); return

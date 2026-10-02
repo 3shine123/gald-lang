@@ -17,6 +17,31 @@ __thread jmp_buf __nupa_exception_buf;
 __thread id     __nupa_exception_value;
 #endif
 
+// ─── Checked-exception (Swift-scheme) error flag ──────────────────────────────
+
+#ifdef __NUPA_FREESTANDING
+int __nupa_eh_flag;
+id   __nupa_eh_val;
+#else
+__thread int __nupa_eh_flag;
+__thread id   __nupa_eh_val;
+#endif
+
+int __nupa_eh_isa(NPObject *obj, NPClass *cls) {
+    if (!obj || !cls) return 0;
+    return nupa_isKindOf(obj, cls) ? 1 : 0;
+}
+
+// Uncaught checked exception: an exception escaped `main` (flag still armed at
+// the function-tail guard of main). Mirror ObjC's wording on stderr, then
+// abort — the process MUST NOT exit 0 with an exception in flight.
+void nupa_eh_uncaught(void) {
+    const char *cls = (__nupa_eh_val && __nupa_eh_val->isa && __nupa_eh_val->isa->name)
+        ? __nupa_eh_val->isa->name : "?";
+    fprintf(stderr, "*** Terminating app due to uncaught exception of class '%s'\n", cls);
+    abort();
+}
+
 // ─── Weak reference side table ───────────────────────────────────────────────
 
 #define MAX_WEAK_ENTRIES 1024
@@ -90,6 +115,48 @@ void nupa_weakAutoCleanup(void *ptr) {
     nupa_weakUnregister((NPObject **)ptr);
 }
 
+// ─── @synchronized monitors ──────────────────────────────────────────────────
+//
+// Global bucket array of spinlocks keyed by object address (see runtime.h).
+// Hosted implementation: C11 atomics — `atomic_flag` test_and_set is a lock
+// primitive on every platform clang targets here, no pthread dependency, no
+// allocation, no table-growth ceiling. A thread that returns from
+// nupa_syncLock owns bucket[b] until the matching nupa_syncUnlock.
+
+#include <stdatomic.h>
+
+#define NUPA_SYNC_BUCKETS 256
+
+static atomic_flag nupa_sync_flags[NUPA_SYNC_BUCKETS];
+
+static unsigned nupa_sync_hash(void *object) {
+    unsigned long v = (unsigned long)(uintptr_t)object;
+    unsigned hash = 0x811C9DC5u;
+    for (unsigned i = 0; i < sizeof(void *); i++) {
+        hash ^= (unsigned char)(v & 0xFFu);
+        hash *= 0x01000193u;
+        v >>= 8;
+    }
+    return hash % NUPA_SYNC_BUCKETS;
+}
+
+long nupa_syncLock(void *object) {
+    unsigned b = nupa_sync_hash(object);
+    while (atomic_flag_test_and_set_explicit(&nupa_sync_flags[b], memory_order_acquire)) {
+        // spin
+    }
+    return (long)b;
+}
+
+void nupa_syncUnlock(long bucket) {
+    if (bucket < 0 || bucket >= NUPA_SYNC_BUCKETS) return;
+    atomic_flag_clear_explicit(&nupa_sync_flags[bucket], memory_order_release);
+}
+
+void nupa_syncAutoCleanup(void *ptr) {
+    nupa_syncUnlock(*(long *)ptr);
+}
+
 // ─── Selectors ───────────────────────────────────────────────────────────────
 
 SEL sel_registerName(const char *name) {
@@ -112,6 +179,12 @@ BOOL nupa_isKindOf(NPObject *obj, NPClass *cls) {
         isa = isa->superclass;
     }
     return 0;
+}
+
+/* Official ObjC spelling of isKindOf: (kept as a compatible alias).
+ * Same isa-chain walk. */
+BOOL nupa_isKindOfClass(NPObject *obj, NPClass *cls) {
+    return nupa_isKindOf(obj, cls);
 }
 
 // ─── Autorelease pool ─────────────────────────────────────────────────────────
@@ -229,6 +302,53 @@ NPObject *nupa_autorelease(NPObject *obj) {
 // nupa_stringFromCstr is emitted by the codegen in the generated C code.
 // The runtime.h declaration is used by the generated code to call it.
 // When NPString is not present, @"..." falls back to a regular C string literal.
+
+// ─── Async tasks (route map item #4) ────────────────────────────────────────
+
+// Cooperative single-thread async: the desugared method pumps its own task
+// to completion, so a task's lifetime is fully contained in the call that
+// created it (milestone 1). `parent` exists for milestone 2 (task graphs
+// where a suspended task resumes its awaiter).
+
+NupaTask *nupa_task_create(nupa_task_entry_fn entry, NPObject *self_obj, size_t frame_size) {
+    NupaTask *t = (NupaTask *)calloc(1, sizeof(NupaTask));
+    if (!t) return NULL;
+    t->state = 1;   /* state 1 = the entry's first case; 0 means "not started" */
+    t->finished = 0;
+    t->entry = entry;
+    t->self_obj = self_obj;
+    t->frame = frame_size ? calloc(1, frame_size) : NULL;
+    t->result = NULL;
+    t->parent = NULL;
+    return t;
+}
+
+int nupa_task_resume(NupaTask *task) {
+    if (!task || task->finished) return 1;
+    if (task->entry) {
+        if (task->entry(task) != 0) {
+            task->finished = 1;
+        }
+    } else {
+        task->finished = 1;
+    }
+    return task->finished ? 1 : 0;
+}
+
+void nupa_task_finish(NupaTask *task) {
+    if (task) task->finished = 1;
+}
+
+void *nupa_task_join(NupaTask *task) {
+    if (!task) return NULL;
+    while (!task->finished) {
+        (void)nupa_task_resume(task);
+    }
+    void *result = task->result;
+    if (task->frame) free(task->frame);
+    free(task);
+    return result;
+}
 
 // ─── Logging ─────────────────────────────────────────────────────────────────
 

@@ -14,6 +14,10 @@ nupa-symbol = { path = "../symbol" }
 nupa-ast = { path = "../ast" }
 nupa-cfg = { path = "../cfg" }
 nupa-arc = { path = "../arc" }
+nupa-async = { path = "../async" }
+nupa-eh = { path = "../eh" }
+nupa-defer = { path = "../defer" }
+nupa-pattern = { path = "../pattern" }
 nupa-trace = { path = "../trace" }
 nupa-checker = { path = "../checker" }
 attrs = { path = "../attrs" }

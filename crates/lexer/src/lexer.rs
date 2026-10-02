@@ -14,9 +14,12 @@ const KW_TABLE: &[(&str, KeywordKind)] = &[
     ("@required", KeywordKind::AtRequired),
     ("@class", KeywordKind::AtClass),
     ("@try", KeywordKind::AtTry),
+    ("@await", KeywordKind::AtAwait),
+    ("@defer", KeywordKind::AtDefer),
     ("@catch", KeywordKind::AtCatch),
     ("@finally", KeywordKind::AtFinally),
     ("@throw", KeywordKind::AtThrow),
+    ("@throws", KeywordKind::AtThrows),
     ("@synchronized", KeywordKind::AtSynchronized),
     ("@autoreleasepool", KeywordKind::AtAutoreleasepool),
     ("@public", KeywordKind::AtPublic),
@@ -66,7 +69,11 @@ const KW_TABLE: &[(&str, KeywordKind)] = &[
     ("while", KeywordKind::While),
     ("do", KeywordKind::Do),
     ("for", KeywordKind::For),
-    ("in", KeywordKind::In),
+    // `in` is deliberately NOT a keyword: ObjC/clang treat it as a contextual
+    // keyword recognised only inside a for-in header (position-based), so C
+    // identifiers named `in` (variables, struct fields, `x.in` member access)
+    // stay legal — nupa is a C superset. The parser matches the token TEXT
+    // `in` at the for-header position instead.
     ("break", KeywordKind::Break),
     ("continue", KeywordKind::Continue),
     ("goto", KeywordKind::Goto),
@@ -83,6 +90,10 @@ const KW_TABLE: &[(&str, KeywordKind)] = &[
     ("long", KeywordKind::Long),
     ("float", KeywordKind::Float),
     ("double", KeywordKind::Double),
+    // C99 `_Complex` (§6.2.5p13) — a type qualifier-ish keyword that follows
+    // `float`/`double` (`float _Complex x`). Kept as a keyword so
+    // `is_declaration_start` treats `float _Complex x` as a declaration.
+    ("_Complex", KeywordKind::Complex),
     ("signed", KeywordKind::Signed),
     ("unsigned", KeywordKind::Unsigned),
     ("const", KeywordKind::Const),
@@ -100,6 +111,11 @@ const KW_TABLE: &[(&str, KeywordKind)] = &[
     ("#ifndef", KeywordKind::Ifndef),
     ("#endif", KeywordKind::Endif),
     ("#pragma", KeywordKind::Pragma),
+    // `_Pragma` (ISO/IEC 9899:2011 §6.10.9, C99) is the operator spelling of a
+    // pragma. It shares `#pragma`'s handling: the parser parks the whole source
+    // line in a RawLine node and codegen re-emits it verbatim at the same
+    // position, so the C compiler applies it exactly where it was written.
+    ("_Pragma", KeywordKind::Pragma),
     ("#if", KeywordKind::If),
     ("#else", KeywordKind::Else),
     ("#elif", KeywordKind::Elif),
@@ -360,14 +376,63 @@ impl<'a> Lexer<'a> {
                     };
                 }
                 Some(b'(') => {
+                    self.advance(); // consume (
                     return Token {
-                        kind: TokenKind::LParen,
+                        kind: TokenKind::AtLParen,
                         keyword: KeywordKind::None,
                         start,
-                        length: 1,
+                        length: 2,
                         line,
                         column: col,
                         char_val: 0,
+                    };
+                }
+                Some(b'\'') => {
+                    // `@'c'` — boxed character literal (NPNumber char).
+                    self.advance(); // consume opening '
+                    let mut val = match self.advance() {
+                        Some(v) => v,
+                        None => 0,
+                    };
+                    if val == b'\\' {
+                        match self.advance() {
+                            Some(b'n') => val = b'\n',
+                            Some(b't') => val = b'\t',
+                            Some(b'r') => val = b'\r',
+                            Some(b'0') => val = b'\0',
+                            Some(b'b') => val = 8,
+                            Some(b'f') => val = 12,
+                            Some(b'v') => val = 11,
+                            Some(b'\\') => val = b'\\',
+                            Some(b'\'') => val = b'\'',
+                            Some(b'"') => val = b'"',
+                            Some(b'x') | Some(b'X') => {
+                                let mut hex_val = 0u32;
+                                for _ in 0..2 {
+                                    match self.peek() {
+                                        Some(d) if d.is_ascii_hexdigit() => {
+                                            hex_val = hex_val * 16 + (d as char).to_digit(16).unwrap();
+                                            self.advance();
+                                        }
+                                        _ => break,
+                                    }
+                                }
+                                val = hex_val as u8;
+                            }
+                            _ => {}
+                        }
+                    }
+                    if self.peek() == Some(b'\'') {
+                        self.advance();
+                    }
+                    return Token {
+                        kind: TokenKind::AtChar,
+                        keyword: KeywordKind::None,
+                        start,
+                        length: self.pos - start,
+                        line,
+                        column: col,
+                        char_val: val,
                     };
                 }
                 Some(nc) if nc.is_ascii_alphabetic() || nc == b'_' => {
@@ -381,12 +446,29 @@ impl<'a> Lexer<'a> {
                     }
                     let token_text = &self.source[start..self.pos];
                     let kw = lookup_keyword(token_text);
-                    let kind = if kw != KeywordKind::None {
-                        TokenKind::Keyword
-                    } else {
-                        TokenKind::Error
-                    };
-                    return self.make_token(kind, start, self.pos - start, kw);
+                    if kw == KeywordKind::None {
+                        // `@YES` / `@NO` / `@true` / `@false` — boxed BOOL
+                        // literal. Any other `@Ident` stays a loud Error token
+                        // rather than silently degrading.
+                        let bool_val = match token_text {
+                            "@YES" | "@true" => Some(1u8),
+                            "@NO" | "@false" => Some(0u8),
+                            _ => None,
+                        };
+                        if let Some(v) = bool_val {
+                            return Token {
+                                kind: TokenKind::AtBool,
+                                keyword: KeywordKind::None,
+                                start,
+                                length: self.pos - start,
+                                line,
+                                column: col,
+                                char_val: v,
+                            };
+                        }
+                        return self.make_token(TokenKind::Error, start, self.pos - start, KeywordKind::None);
+                    }
+                    return self.make_token(TokenKind::Keyword, start, self.pos - start, kw);
                 }
                 Some(nc) if nc.is_ascii_digit() => {
                     // `@123` / `@1.5` — NPNumber boxing literal. The `@` has
@@ -569,6 +651,15 @@ impl<'a> Lexer<'a> {
                     Some(b'f') | Some(b'F') => {
                         // Float suffix: the token kind is already known, so the
                         // outer `is_float` flag is irrelevant on this path.
+                        self.advance();
+                        let end = self.pos;
+                        return self.make_token(TokenKind::Float, start, end - start, KeywordKind::None);
+                    }
+                    Some(b'i') | Some(b'I') | Some(b'j') | Some(b'J') => {
+                        // C99 imaginary suffix (§6.4.4.2): `2.0i`, `1e3J`.
+                        // Consumed so the literal parses; the imaginary part is
+                        // NOT modelled — the token is emitted as a plain float
+                        // (known limitation, matches no downstream use yet).
                         self.advance();
                         let end = self.pos;
                         return self.make_token(TokenKind::Float, start, end - start, KeywordKind::None);
@@ -855,7 +946,7 @@ mod tests {
 
     #[test]
     fn test_at_array_dict_num() {
-        // @[ → AtArray, @{ → AtDict, @( → LParen (stripped)
+        // @[ → AtArray, @{ → AtDict, @( → AtLParen (boxed expression)
         let mut l = Lexer::new("@[ @{ @(");
         let t = l.next_token();
         assert_eq!(t.kind, TokenKind::AtArray);
@@ -864,9 +955,30 @@ mod tests {
         assert_eq!(t.kind, TokenKind::AtDict);
         assert_eq!(t.text("@[ @{ @("), "@{");
         let t = l.next_token();
-        assert_eq!(t.kind, TokenKind::LParen);
-        assert_eq!(t.text("@[ @{ @("), "@");
-        assert_eq!(l.next_token().kind, TokenKind::LParen);
+        assert_eq!(t.kind, TokenKind::AtLParen);
+        assert_eq!(t.text("@[ @{ @("), "@(");
+    }
+
+    #[test]
+    fn test_at_boxing_tokens() {
+        let src = "@'A' @'\\n' @YES @NO @true @false @Foo";
+        let mut l = Lexer::new(src);
+        let t = l.next_token();
+        assert_eq!(t.kind, TokenKind::AtChar);
+        assert_eq!(t.char_val, b'A');
+        let t = l.next_token();
+        assert_eq!(t.kind, TokenKind::AtChar);
+        assert_eq!(t.char_val, b'\n');
+        let t = l.next_token();
+        assert_eq!(t.kind, TokenKind::AtBool);
+        assert_eq!(t.char_val, 1);
+        let t = l.next_token();
+        assert_eq!(t.kind, TokenKind::AtBool);
+        assert_eq!(t.char_val, 0);
+        assert_eq!(l.next_token().kind, TokenKind::AtBool); // @true
+        assert_eq!(l.next_token().kind, TokenKind::AtBool); // @false
+        // Unknown `@Ident` stays a loud error instead of silently degrading.
+        assert_eq!(l.next_token().kind, TokenKind::Error);
     }
 
     #[test]

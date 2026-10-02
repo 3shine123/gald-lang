@@ -3,5 +3,6 @@
 // than rot unnoticed. Mark intentional exceptions with #[allow(dead_code)]
 // and a comment saying who will use it.
 #![deny(dead_code)]
+pub mod ctype_probe;
 pub mod pipeline;
 pub use pipeline::*;

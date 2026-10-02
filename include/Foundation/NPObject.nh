@@ -12,6 +12,8 @@ struct NPClass;
 - (void)release;
 - (id)retain;
 - (BOOL)isKindOf:(Class)cls;
+- (BOOL)isKindOfClass:(Class)cls;
+- (BOOL)isEqual:(id)object;
 - (id)description;
 @end
 

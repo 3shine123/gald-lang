@@ -3,7 +3,7 @@ use std::fs;
 use nupa_parser::parser::Parser;
 use nupa_binder::Binder;
 use nupa_elaborator::Elaborator;
-use nupa_codegen::{ast_to_cg_unit, emit_unit_with_headers, emit_bridge_header};
+use nupa_codegen::{emit_unit_with_headers, emit_bridge_header};
 use nupa_preprocessor::Preprocessor;
 use nupa_symbol::SymbolTable;
 use nupa_ast::ast::*;
@@ -20,6 +20,7 @@ pub struct Pipeline {
     pub no_arc: bool,
     pub no_checker: bool,
     pub no_libc: bool,
+    pub nostdinc: bool,
     pub verbose: bool,
     pub trace_refcount: bool,
     pub trace_max_iters: usize,
@@ -28,6 +29,25 @@ pub struct Pipeline {
     pub werror: bool,
     pub bridge_header: Option<String>,
     pub no_comments: bool,
+    /// `-eh checked`: Swift-scheme exception desugar (crates/eh). Default is
+    /// the sjlj backend (zero behavior change).
+    pub eh_checked: bool,
+    /// `--slots <manifest>`: append-only vtable slot manifest for stable
+    /// cross-TU layout (None = historical sorted layout).
+    pub slots_manifest: Option<String>,
+    /// C compiler + leading args used for the link step (e.g. `["zig", "cc"]`).
+    /// Also used by the C type-name probe; empty means "unknown", which skips
+    /// the probe.
+    pub c_cc: Vec<String>,
+    /// Target arch forwarded to the probe, mirroring the compile step's
+    /// `-arch` (header search paths on Apple SDKs depend on it).
+    pub c_arch: Option<String>,
+    /// `-fno-ctype-probe`: never invoke the C preprocessor to recover the C
+    /// type-name table. The parser then falls back to its builtin list and
+    /// shape heuristics — casts to C-header typedefs outside that list are
+    /// rejected again, and `x * y;` on two variables is misread as a
+    /// declaration. Useful when no C compiler is available at transpile time.
+    pub no_ctype_probe: bool,
 }
 
 impl Pipeline {
@@ -39,6 +59,7 @@ impl Pipeline {
             no_arc: false,
             no_checker: false,
             no_libc: false,
+            nostdinc: false,
             verbose: false,
             trace_refcount: false,
             trace_max_iters: 2,
@@ -47,6 +68,61 @@ impl Pipeline {
             werror: false,
             bridge_header: None,
             no_comments: false,
+            eh_checked: false,
+            slots_manifest: None,
+            c_cc: Vec::new(),
+            c_arch: None,
+            no_ctype_probe: false,
+        }
+    }
+
+    /// The C type names this TU's `#include`d headers declare, plus whether the
+    /// table is authoritative (produced by the real C preprocessor over the
+    /// same headers, macros, search paths and freestanding flags the compile
+    /// step uses). `(vec![], false)` means "unknown": the parser then keeps its
+    /// builtin list and shape fallbacks, so this can never reject code it
+    /// cannot prove wrong.
+    fn c_type_names(&self, pre: &Preprocessor, macros: &[&str], filename: &str) -> (Vec<String>, bool) {
+        if self.no_ctype_probe || self.c_cc.is_empty() || pre.c_headers.is_empty() {
+            return (Vec::new(), false);
+        }
+        // The source file's own directory comes first: `#include "x.h"` next to
+        // the `.np` is the natural spelling, and the C compiler resolves it
+        // relative to the including file (which for the emitted C is the
+        // invocation directory — `search_dirs` already carries `.`).
+        let mut dirs: Vec<String> = Vec::new();
+        if let Some(parent) = Path::new(filename).parent() {
+            let p = parent.to_string_lossy().to_string();
+            if !p.is_empty() {
+                dirs.push(p);
+            }
+        }
+        dirs.extend(self.search_dirs.iter().cloned());
+        match crate::ctype_probe::probe_c_type_names(
+            &self.c_cc,
+            &pre.c_headers,
+            &dirs,
+            macros,
+            self.c_arch.as_deref(),
+            self.no_libc,
+            self.nostdinc,
+        ) {
+            Some(names) => {
+                if self.verbose {
+                    eprintln!(
+                        "[nupac] C type table: {} names from {} passthrough header(s)",
+                        names.len(),
+                        pre.c_headers.len()
+                    );
+                }
+                (names, true)
+            }
+            None => {
+                if self.verbose {
+                    eprintln!("[nupac] C type probe unavailable — using the builtin type list");
+                }
+                (Vec::new(), false)
+            }
         }
     }
 
@@ -76,9 +152,22 @@ impl Pipeline {
         };
         let pre = Preprocessor::process(source, filename, &self.search_dirs, extra_macros)?;
 
+        // `#include`d C headers are passed through verbatim, so the parser never
+        // sees the typedefs they declare. Recover the table the C compiler will
+        // actually use (see `ctype_probe`) so the parser can resolve casts and
+        // `x * y;` by the symbol table, exactly as C does, instead of guessing
+        // from token shape. Failure is not an error: the table is then simply
+        // not authoritative, and the parser keeps its historical fallbacks.
+        let (c_type_names, c_types_complete) = self.c_type_names(&pre, extra_macros, filename);
+
         // Step 1: Parse the resolved nupa source
         if self.verbose { eprintln!("[nupac] parsing..."); }
-        let mut parser = Parser::new(&pre.resolved_nupa);
+        let mut parser = Parser::with_c_type_names(&pre.resolved_nupa, &c_type_names, c_types_complete);
+        // The parser reads one inlined buffer, so it has no `#include` boundary
+        // of its own. The line→file map is the only way it can scope an
+        // `NP_ASSUME_NONNULL` region to the file that opened it — without this
+        // an open region marks every pointer in every imported header nonnull.
+        parser.set_source_map(pre.source_map.clone());
         let mut cst = parser.parse_translation_unit()
             .ok_or_else(|| format!("Parse failed:\n{}", prefix_lines("[parser]",
                 &translate_lines(parser.last_error(), &pre.source_map))))?;
@@ -108,6 +197,45 @@ impl Pipeline {
         }
         let mut ast = elaborator.take_ast()
             .ok_or_else(|| "Elaboration produced no AST".to_string())?;
+
+        // Step 3.9: Checked-exception desugar (-eh checked) — MUST run before
+        // ARC so the injected early `return`s are ordinary control flow that
+        // ARC already releases for (running it after would reintroduce the
+        // sjlj cross-function leak this backend exists to fix).
+        if self.eh_checked {
+            if self.verbose { eprintln!("[nupac] eh desugar (checked)..."); }
+            let eh_diags = nupa_eh::check_unit(&ast);
+            if !eh_diags.errors.is_empty() {
+                self.has_error = true;
+                self.error_msg = format!("EH check failed:\n{}", prefix_lines("[eh]", &translate_lines(&eh_diags.errors.join("\n"), &pre.source_map)));
+                return Err(self.error_msg.clone());
+            }
+            nupa_eh::desugar_unit(&mut ast);
+        }
+
+        // Step 3.9: @defer splicing — AFTER eh desugar (checked-mode throws
+        // are already plain returns) and BEFORE ARC, so ARC's scope-end
+        // releases land after the user's defer statements (deferred code runs
+        // while objects are still alive). See AGENTS.md `@defer` section.
+        {
+            if self.verbose { eprintln!("[nupac] defer desugar..."); }
+            let defer_diags = nupa_defer::desugar_unit(&mut ast);
+            if !defer_diags.errors.is_empty() {
+                self.has_error = true;
+                self.error_msg = format!("Defer check failed:\n{}", prefix_lines("[defer]", &translate_lines(&defer_diags.errors.join("\n"), &pre.source_map)));
+                return Err(self.error_msg.clone());
+            }
+        }
+
+        // Step 3.95: Pattern-switch lowering — AFTER defer splicing (defer
+        // sees the original switch; lowered goto/labels are ordinary stmts it
+        // must never splice into) and BEFORE ARC (ARC/checker/codegen only
+        // ever see plain C statements: If/Decl/Goto/Label — zero new arms
+        // downstream). See AGENTS.md pattern-switch section.
+        {
+            if self.verbose { eprintln!("[nupac] pattern-switch lowering..."); }
+            nupa_pattern::desugar_unit(&mut ast);
+        }
 
         // Step 4: ARC analysis (skipped when -fno-nupa-arc is set)
         if self.verbose { eprintln!("[nupac] ARC analysis..."); }
@@ -170,12 +298,44 @@ impl Pipeline {
             return Ok(trace_refcounts(&ast, &opts));
         }
 
+        // Step 4.8: Async pre-pass — validate await placement, then desugar
+        // every async method body into the task-driven form (route map item
+        // #4). check_unit runs on the ORIGINAL AST; desugar_unit rewrites it
+        // in place before ARC/checker see the method bodies.
+        if self.verbose { eprintln!("[nupac] async analysis..."); }
+        let async_diags = nupa_async::check_unit(&ast);
+        if !async_diags.errors.is_empty() {
+            self.has_error = true;
+            self.error_msg = format!("Async check failed:\n{}", prefix_lines("[async]", &translate_lines(&async_diags.errors.join("\n"), &pre.source_map)));
+            return Err(self.error_msg.clone());
+        }
+        // Recoverable async warnings (e.g. `@await` without an `NPAsync<T>`
+        // marker) — printed purple like ARC warnings; `-Werror` escalates.
+        // Lines are inline-buffer positions: translate via SourceMap.
+        if !async_diags.warnings.is_empty() {
+            if self.werror {
+                self.has_error = true;
+                self.error_msg = format!("Async check failed (-Werror):\n{}", prefix_lines("[async]", &translate_lines(&async_diags.warnings.join("\n"), &pre.source_map)));
+                return Err(self.error_msg.clone());
+            }
+            for w in &async_diags.warnings {
+                // translate_lines already yields `file:line:col: msg`.
+                eprintln!("\x1b[1;35m[async] warning:\x1b[0m {}", translate_lines(w, &pre.source_map));
+            }
+        }
+        nupa_async::desugar_unit_m2(&mut ast);
+
         // Step 5: Check types (skipped when -fno-checker is set)
         if self.verbose { eprintln!("[nupac] checking types..."); }
+        let mut struct_eq_tags: Vec<String> = Vec::new();
         if !self.no_checker {
             let mut checker = Checker::new(Some(symtab_for_checker));
             checker.no_arc = self.no_arc;
             checker.source_map = Some(pre.source_map.clone());
+            // `-eh checked` rewrites `@throw` before the checker runs, so the
+            // bare `@throws` "must really throw" rule cannot see the
+            // statements it is meant to reconcile.
+            checker.eh_checked = self.eh_checked;
             if checker.check(&mut ast) != 0 {
                 return Err(format!("Type checking failed:\n{}", prefix_lines("[checker]", checker.last_error())));
             }
@@ -188,6 +348,7 @@ impl Pipeline {
             for w in checker.warnings() {
                 eprintln!("\x1b[1;35m[checker] warning:\x1b[0m {}", w);
             }
+            struct_eq_tags = checker.struct_eq_tags.clone();
         }
 
         // Step 5.5: Validate __attribute__ against backend
@@ -199,8 +360,30 @@ impl Pipeline {
 
         // Step 6: Generate C code
         if self.verbose { eprintln!("[nupac] generating C code..."); }
-        let cg = ast_to_cg_unit(&ast, self.backend);
+        // Slots manifest: read the assigned method order (if the file exists)
+        // BEFORE codegen, and write the post-compile assignment back after.
+        let slots: Option<Vec<String>> = self.slots_manifest.as_ref().and_then(|path| {
+            fs::read_to_string(path).ok().map(|content| {
+                content.lines().map(|l| l.trim().to_string()).filter(|l| !l.is_empty()).collect()
+            })
+        });
+        let mut cg = nupa_codegen::ast_to_cg_unit_with_slots(&ast, self.backend, slots.as_deref());
+        // Struct tags whose `==`/`!=` the checker rewrote to value-comparison
+        // calls; codegen emits one field-wise `nupa_struct_eq_<tag>` per tag.
+        cg.struct_eq_tags = struct_eq_tags;
         let c_code = emit_unit_with_headers(&cg, &pre.c_headers, &self.search_dirs, self.no_libc, self.backend, !self.no_comments);
+
+        // Step 6.4: Write back the slots manifest (append-only): the compiled
+        // assignment (previously-assigned slots kept + new methods appended)
+        // becomes the manifest, so a later TU compiled with the same manifest
+        // file shares this exact method→slot layout.
+        if let Some(ref path) = self.slots_manifest {
+            let manifest = cg.global_instance_method_names.join("\n");
+            if let Err(e) = fs::write(path, manifest + "\n") {
+                self.has_error = true;
+                return Err(format!("cannot write slots manifest {}: {}", path, e));
+            }
+        }
 
         // Step 6.5: Generate bridge header (if requested)
         if let Some(ref path) = self.bridge_header {
@@ -246,7 +429,7 @@ impl Pipeline {
                 for p in properties { self.validate_decl_attrs(p); }
                 for v in impl_vars { self.validate_decl_attrs(v); }
             }
-            AstDeclData::Aggregate { fields } => {
+            AstDeclData::Aggregate { fields, .. } => {
                 for f in fields { self.validate_decl_attrs(f); }
             }
             AstDeclData::Namespace(decls) => {

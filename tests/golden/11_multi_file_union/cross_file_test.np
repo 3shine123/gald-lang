@@ -3,7 +3,7 @@
 
 #import "diamond_base.nh"
 // 引入具体的实现细节类声明（这里假设转译器能够感知同目录或通过命令行联动编译）
-#import "diamond_impl.np"
+#import "diamond_impl-F.np"
 #include <stdio.h>
 
 int main(int argc, const char* argv[])
