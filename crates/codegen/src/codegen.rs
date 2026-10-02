@@ -3756,6 +3756,25 @@ pub fn ast_to_cg_unit(ast: &AstUnit, backend: Backend) -> CgUnit {
 }
 
 pub fn ast_to_cg_unit_with_slots(ast: &AstUnit, backend: Backend, slots_manifest: Option<&[String]>) -> CgUnit {
+    ast_to_cg_unit_with_slots_ext(ast, backend, slots_manifest, None)
+}
+
+/// Like [`ast_to_cg_unit_with_slots`], but also told which instance-method
+/// selectors are **public** for this TU — i.e. declared by a file it imports.
+///
+/// The uniform vtable then lays out the public segment first (alphabetical, and
+/// therefore identical in every TU that shares the same declarations) and
+/// appends the methods only this TU knows about after it. That keeps every
+/// public method's slot index stable across TUs even when their method sets
+/// differ, which is what lets a legal two-TU split — a library plus a client
+/// with its own classes — link and dispatch correctly instead of tripping the
+/// `__sig` guard.
+pub fn ast_to_cg_unit_with_slots_ext(
+    ast: &AstUnit,
+    backend: Backend,
+    slots_manifest: Option<&[String]>,
+    public_methods: Option<&std::collections::HashSet<String>>,
+) -> CgUnit {
     CURRENT_BACKEND.store(backend as u8, Ordering::Relaxed);
     *block_vars() = Some(std::collections::HashSet::new());
     *block_defs() = String::new();  // reset block-expansion buffer
@@ -5141,7 +5160,16 @@ method_names: info.method_names,
             }
             global_instance_method_names = ordered;
         }
-        None => global_instance_method_names.sort(),
+        None => {
+            global_instance_method_names.sort();
+            // R1 (stable slots): the public segment must occupy the SAME slot
+            // indices in every TU, or a legal two-TU split (library + client)
+            // ends up with disagreeing layouts. Sorting by "is private" is a
+            // stable sort, so both segments stay alphabetical internally.
+            if let Some(public) = public_methods {
+                global_instance_method_names.sort_by_key(|m| !public.contains(m));
+            }
+        }
     }
 
     let mut method_meta: HashMap<String, (usize, String)> = HashMap::new();

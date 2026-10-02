@@ -405,7 +405,14 @@ impl Pipeline {
                 content.lines().map(|l| l.trim().to_string()).filter(|l| !l.is_empty()).collect()
             })
         });
-        let mut cg = gald_codegen::ast_to_cg_unit_with_slots(&ast, self.backend, slots.as_deref());
+        // Selectors this TU sees through a header it imports — the "public"
+        // surface. Codegen gives them the same vtable slot indices in every TU,
+        // so a legal two-TU split does not produce disagreeing layouts.
+        // See doc/stable_slots_plan.md (R1).
+        let public_methods = collect_public_methods(&ast, filename, &pre.source_map);
+        let mut cg = gald_codegen::ast_to_cg_unit_with_slots_ext(
+            &ast, self.backend, slots.as_deref(), Some(&public_methods),
+        );
         // Struct tags whose `==`/`!=` the checker rewrote to value-comparison
         // calls; codegen emits one field-wise `gald_struct_eq_<tag>` per tag.
         cg.struct_eq_tags = struct_eq_tags;
@@ -527,6 +534,44 @@ fn translate_lines(msg: &str, sm: &gald_cst::source_map::SourceMap) -> String {
             _ => l.to_string(),
         }
     }).collect::<Vec<_>>().join("\n")
+}
+
+/// Sanitized selectors declared by a file this TU imports — its "public"
+/// surface. Codegen uses this to lay out the public vtable segment identically
+/// in every TU (`doc/stable_slots_plan.md`, rule R1).
+///
+/// Where the preprocessor has no source map, the set comes back empty and the
+/// historical alphabetical-only layout is used unchanged.
+fn collect_public_methods(
+    ast: &AstUnit,
+    main_file: &str,
+    map: &gald_cst::SourceMap,
+) -> std::collections::HashSet<String> {
+    use std::collections::HashSet;
+    let mut set: HashSet<String> = HashSet::new();
+    if map.is_empty() || main_file.is_empty() {
+        return set;
+    }
+    for d in &ast.decls {
+        let (file, _) = map.locate(d.line);
+        // Imported = a real origin that is not this file (spellings can differ:
+        // the main file is the driver's path, imports are `<dir>/<name>`).
+        let imported = !file.is_empty()
+            && file != main_file
+            && !file.ends_with(main_file)
+            && !main_file.ends_with(&file);
+        if !imported {
+            continue;
+        }
+        if let AstDeclData::Class { methods, .. } = &d.data {
+            for m in methods {
+                if let Some(sel) = &m.name {
+                    set.insert(sel.replace(':', "_"));
+                }
+            }
+        }
+    }
+    set
 }
 
 #[cfg(test)]
