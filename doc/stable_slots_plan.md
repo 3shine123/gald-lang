@@ -133,10 +133,13 @@ A+B 完成后动手做 C，试了两条路，都只走到一半：
 * **库构建已验证**（86K）：
 
   ```bash
-  galdc -rewrite-gald include/Foundation/Foundation.gh -o Foundation.c -I include   # 3175 行
+  galdc -rewrite-gald -fstrong-metadata include/Foundation/Foundation.gh -o Foundation.c -I include   # 3175 行
   clang -c Foundation.c -o Foundation.o -I include
   ar rcs libgaldfoundation.a Foundation.o
   ```
+
+  ⚠️ 建库**必须**带 `-fstrong-metadata`（P3 落地时新增）：否则库里的元数据仍是
+  `weak`，客户 TU 的空桩会在链接期胜出 → 段错误（详见下方「剩余一步」）。
 
 * **实测效果**（`#import <Foundation/Foundation.decl.gh>` + 链接库）：
 
@@ -147,23 +150,46 @@ A+B 完成后动手做 C，试了两条路，都只走到一半：
 
   也就是说：**你要的"生成代码干净"已经达成**，剩下的只是让它也能正确运行。
 
-### 剩余一步（精确，约半小时）
+### 剩余一步 —— 已完成 ✅（2026-10-02，第二趟）
 
-用户 TU 只看到声明，所以它仍然生成 `GALD_VTABLE_$_NFString` 之类的**空桩**；链接器的
-weak 合并可能选中空桩而不是库里的真表，于是 `[s length]` 走空指针 → 段错误（rc=139）。
+**问题**：用户 TU 只看到声明，所以它仍然生成 `GALD_VTABLE_$_NFString` 之类的**空桩**；
+链接器的 weak 合并可能选中空桩而不是库里的真表，于是 `[s length]` 走空指针 → 段错误（rc=139）。
 
-**解法：让库侧的元数据成为强符号。**
+**实现**：
 
-1. 加 CLI 标志 `-fstrong-metadata`；
-2. codegen 里三处元数据 emit 把 `__attribute__((weak))` 改成条件输出
-   （`GALD_VTABLE_$_X`、`GALD_META_VTABLE_$_X_inst`、`GALD_CLASS_$_X`；位置见
-   `emit` 阶段中 `for cm in &unit.classes` 的 vtable / meta-vtable / class 三个循环）；
-3. 编译库时带上该标志 → 强符号胜出，用户 TU 的空桩被丢弃。
+1. **CLI 标志 `-fstrong-metadata`** —— `crates/galdc/src/main.rs`（手动解析两处 + clap 补全
+   定义 + `DOUBLE_TO_SINGLE` + 帮助文本），透传 `Pipeline::strong_metadata` →
+   `CgUnit::strong_metadata`。
+2. **codegen 元数据 emit 条件化**（`crates/codegen/src/codegen.rs`，`emit_unit_with_headers`
+   内的一个 `meta_weak` 前缀）：默认仍是 `__attribute__((weak))`，`-fstrong-metadata` 时去掉：
+   * `GALD_VTABLE_$_X` 实例（vtable 循环）
+   * `GALD_META_VTABLE_$_X_inst`（meta-vtable 循环）
+   * `GALD_GETCLASS_$_X`（getClass 循环）
+   * `gald_metaInit` / `gald_meta_init`
+   * （`GALD_CLASS_$_X` 本身是 tentative definition —— common 符号，天然合并；其**内容**由
+     `gald_metaInit` 写入，所以把 `gald_metaInit` 变强就够了，变量无需改动。）
+3. **`collect_public_methods` 判定改为「在 `@interface` 中声明」**
+   （`crates/galdc/src/pipeline.rs`，即 `is_implementation: false`）。
+   * **保留了「来自导入文件」的过滤**：若一并去掉，主文件自己的 `@interface`（如
+     `11_vtable_private_slots` 里的 `App`）会挤进公共段，反而把公共方法错位。文档原话
+     「不依赖 source_map」不准确，实测必须两者同时成立。
+   * 原先两侧布局不一致的真正来源是 `NFError.localizedDescription`：它只在导入的
+     `@implementation`（`.gm`）里出现，库 TU 当成公共、客户 TU 当成私有 → 布局分叉。
+     改判后两侧的公共集完全一致（sig 相等）。
 
-**顺带（同一趟做，已验证过方向）**：`collect_public_methods` 的判定应从"是否由导入文件
-带来"改为"**是否在 `@interface` 里声明**"。后者不依赖 `source_map`，而且让库 TU（编译
-实现）与用户 TU（只读声明）的方法集**天然一致**——实测改用它之后 sig 立刻一致，唯一的
-残留问题就是上面那个空桩。
+### 验证（P3 端到端）
 
-（两个改动都做完后，`Foundation.decl.gh` 这条路径才算完整；在那之前它只保证"生成代码干净"，
-不能保证链接后正确。）
+```text
+sig：库 TU == 客户 TU（0xbe99f65a63e20021）
+弱符号库（不加 -fstrong-metadata）：rc=139（空桩胜出 → 段错误）
+强符号库（-fstrong-metadata）：len=5 s=hello，rc=0   ✅
+```
+
+回归门槛：`test_all` 343/351（0 failed）、`cargo test --workspace` 149/149、
+`tests/multi_tu/run_multi_tu.sh` 11/11（`09`、`11` 仍 `EXPECT_FAIL`，未假绿）。
+
+> 工具：`Foundation.decl.gh` 引用的两个脚本已补入库
+> （`tools/make-decl-headers.sh`、`tools/build-foundation-lib.sh`）。建库**统一走脚本**——
+> 它自带 `-fstrong-metadata`，并用 `nm` 校验元数据的确是强符号（弱符号会让守卫直接失败）。
+> 保护测试：`tests/strong_metadata/run_strong_metadata_test.sh`（强符号 / 弱客户端链接 /
+> 双强符号必须 duplicate symbol 三项）。

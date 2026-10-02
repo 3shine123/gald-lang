@@ -1265,6 +1265,7 @@ Options:
   -fgald-arc        Enable ARC (default)
   -fno-gald-arc     Disable ARC (manual MRC mode)
   -fno-checker      Skip type checking
+  -fstrong-metadata Emit class metadata as strong symbols (for building a precompiled library)
   -eh <mode>        Exception backend: checked (default) or legacy (alias sjlj)
   -ffreestanding    Bare-metal/freestanding output (no libc, no TLS)
   -backend <mode>   C compiler backend: clang (default), portable, or gcc
