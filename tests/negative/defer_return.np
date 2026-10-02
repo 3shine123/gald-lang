@@ -1,0 +1,10 @@
+// Negative: 'return' inside an '@defer' body is rejected (M1).
+// Expected error: 'return' inside an '@defer' body is not supported (M1)
+// See AGENTS.md `@defer` section (M1 limits).
+#include <stdio.h>
+
+int main() {
+    @defer { return 1; }
+    printf("unreachable\n");
+    return 0;
+}

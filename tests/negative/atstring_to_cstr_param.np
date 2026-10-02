@@ -1,0 +1,12 @@
+// #4 反向检查负例：@"..." 对象传入 C 串（char *）参数位 —— 静默乱码 bug，checker 必须拒绝。
+#import <Foundation/Foundation.nh>
+#include <stdio.h>
+
+static void takes_cstr(const char *s) {
+    printf("cstr=%s\n", s);
+}
+
+int main(void) {
+    takes_cstr(@"hello");   // error: cannot pass an @"..." object where a C string is expected
+    return 0;
+}

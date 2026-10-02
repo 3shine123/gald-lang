@@ -1,0 +1,4 @@
+Marker: when present, run_multi_tu.sh compiles every TU of this case with
+--slots <work>/slots.manifest (append-only stable vtable layout). lib.np has
+an extra method (mul:by:) main.np never sees — without the manifest this
+case aborts at startup (vtable layout mismatch); with it, it links and runs.

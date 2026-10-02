@@ -1,0 +1,33 @@
+#include <stdio.h>
+#import <Foundation/Foundation.nh>
+
+int main() {
+    @autoreleasepool {
+        NPArray *arr = @[ @"one", @"two", @"three" ];
+
+        // for-in over an NPArray: loop var is a fresh NPObject* per iteration
+        int idx = 0;
+        for (NPObject *x in arr) {
+            idx = idx + 1;
+            printf("%d: %s\n", idx, [(NPString *)x UTF8String]);
+        }
+
+        // nested for-in
+        NPArray *rows = @[ @[ @"a", @"b" ], @[ @"c", @"d" ] ];
+        for (NPObject *row in rows) {
+            for (NPObject *cell in (NPArray *)row) {
+                printf("cell %s\n", [(NPString *)cell UTF8String]);
+            }
+        }
+
+        // empty array: body must not run
+        NPArray *empty = [NPArray array];
+        int hits = 0;
+        for (NPObject *e in empty) {
+            hits = hits + 1;
+        }
+        printf("empty hits: %d\n", hits);
+    }
+    printf("for-in done\n");
+    return 0;
+}

@@ -6559,6 +6559,14 @@ pub fn emit_unit_with_headers(unit: &CgUnit, c_headers: &[String], search_dirs: 
         if !has_string_h {
             out.push_str("#include <string.h>\n");
         }
+        // abort() lives in the vtable __sig verification constructor every TU
+        // emits (hosted path). stdlib.h was previously only reached indirectly
+        // through user includes — minimal Foundation-only files compile-failed
+        // on the implicit declaration.
+        let has_stdlib_h = c_headers.iter().any(|h| h.contains("stdlib.h"));
+        if !has_stdlib_h {
+            out.push_str("#include <stdlib.h>\n");
+        }
     }
     for h in c_headers {
         out.push_str(h);

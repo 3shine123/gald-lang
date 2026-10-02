@@ -1,0 +1,24 @@
+// NPArray<T> true monomorphization: objectAtIndex: returns T, addObject takes T.
+// Bare NPArray (no args) keeps erased behavior.
+#import <Foundation/Foundation.nh>
+
+int main() {
+    // Immutable typed array
+    NPArray<NPString *> *a = [NPArray<NPString *> arrayWithObject:@"hello"];
+    NPString *s = [a objectAtIndex:0];
+    NPLog(@"first=%@", s);
+
+    // Mutable typed array (generic inheritance NPMutableArray<T> : NPArray<T>)
+    NPMutableArray<NPString *> *m = [[NPMutableArray<NPString *> alloc] init];
+    [m addObject:@"alpha"];
+    [m addObject:@"beta"];
+    NPString *e = [m objectAtIndex:1];
+    NPLog(@"elem=%@ count=%lu", e, [m count]);
+
+    // Bare spelling: zero migration, erased behavior unchanged
+    NPMutableArray *bare = [NPMutableArray array];
+    [bare addObject:@"x"];
+    [bare addObject:@42];
+    NPLog(@"bare count=%lu", [bare count]);
+    return 0;
+}

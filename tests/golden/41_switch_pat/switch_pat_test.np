@@ -1,0 +1,119 @@
+#import <Foundation/Foundation.nh>
+
+// M1 pattern-switch lowering (crate nupa-pattern, Step 3.95).
+// Exercises: Bind arm (isKindOfClass:), object-literal arm (isEqual:),
+// dangling-comparison Cond arm, `default:` body, `break` -> goto end, and a
+// nested loop whose `break` must bind to the loop (not the switch).
+
+@interface PatBall : NPObject
+@end
+
+@implementation PatBall
+@end
+
+int main() {
+    // 1. Bind arm + default + break.
+    NPObject *o = [[PatBall alloc] init];
+    int tag = 0;
+    switch (o) {
+        case PatBall *b:
+            tag = 1;
+            break;
+        default:
+            tag = 9;
+            break;
+    }
+    NPLog(@"bind tag=%d", tag);
+
+    // 2. Object-literal arms (value semantics via isEqual:).
+    NPString *s = @"x";
+    int t2 = 0;
+    switch (s) {
+        case @"x":
+            t2 = 2;
+            break;
+        case @"y":
+            t2 = 3;
+            break;
+        default:
+            t2 = 9;
+            break;
+    }
+    NPLog(@"lit t2=%d", t2);
+
+    // 3. Dangling-comparison arms: first matching arm wins (source order).
+    int n = 42;
+    int t3 = 0;
+    switch (n) {
+        case > 100:
+            t3 = 1;
+            break;
+        case > 10:
+            t3 = 2;
+            break;
+        default:
+            t3 = 3;
+    }
+    NPLog(@"cond t3=%d", t3);
+
+    // 4. `break` inside a nested loop binds to the loop, not the switch.
+    int t4 = 0;
+    switch (n) {
+        case > 0:
+            for (int i = 0; i < 5; i++) {
+                if (i == 3) { break; }
+                t4 = t4 + 1;
+            }
+            t4 = t4 + 100;
+            break;
+        default:
+            t4 = -1;
+    }
+    NPLog(@"loop t4=%d", t4);
+
+    // 5. Dangling comparison inside an && chain: BOTH comparisons must get the
+    //    subject spliced (placeholder is every comparison's left operand).
+    int t5 = 0;
+    switch (n) {
+        case > 0 && < 100:
+            t5 = 5;
+            break;
+        case > 100:
+            t5 = 50;
+            break;
+        default:
+            t5 = -5;
+    }
+    NPLog(@"cond-and t5=%d", t5);
+
+    // 6. `when` guard: an arm whose guard is false must fall through to the
+    //    next matching arm (the failed arm's binding must not leak).
+    int t6 = 0;
+    switch (o) {
+        case PatBall *b when tag == 2:
+            t6 = 1;
+            break;
+        case PatBall *b:
+            t6 = 6;
+            break;
+        default:
+            t6 = -1;
+    }
+    NPLog(@"guard t6=%d", t6);
+
+    // 7. Fallthrough: an arm WITHOUT `break` must run into the next arm's body
+    //    (C semantics — the goto dispatch must not append an implicit jump).
+    int t7 = 0;
+    n = 200;
+    switch (n) {
+        case > 100:
+            t7 = t7 + 1;      // no break → falls through below
+        case > 10:
+            t7 = t7 + 10;
+            break;
+        default:
+            t7 = -1;
+    }
+    NPLog(@"fallthrough t7=%d", t7);
+    return 0;
+}

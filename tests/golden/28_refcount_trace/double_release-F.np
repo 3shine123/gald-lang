@@ -1,0 +1,26 @@
+#include "nupa/runtime.h"
+#import "Foundation/NPObject.nh"
+#import "Foundation/NPObject.np"
+
+@interface Item : NPObject {
+    int _tag;
+}
+- (int)tag;
+@end
+
+@implementation Item
+
+- (int)tag {
+    return _tag;
+}
+
+@end
+
+int main() {
+    @noarc {
+        Item *a = [Item new];
+        [a release];
+        [a release];
+    }
+    return 0;
+}

@@ -1,0 +1,13 @@
+// Negative: a class named `NPAsync` collides with the reserved marker name
+// the parser unwraps in return-type position.
+// Expected error: 'NPAsync' is reserved for the async return-type marker —
+// pick a different class name
+#import <Foundation/Foundation.nh>
+
+@interface NPAsync : NPObject
+@end
+
+@implementation NPAsync
+@end
+
+int main() { return 0; }

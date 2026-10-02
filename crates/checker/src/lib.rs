@@ -2480,6 +2480,18 @@ AstExprData::Subscript { object, key, .. } => {
                     self.reject_npasync_type(t, d.line, d.col, "variable");
                 }
                 if let Some(ref name) = d.name {
+                    // Reserved compiler/runtime names the -eh desugar assigns
+                    // but never declares (the _N-suffixed temporaries ARE
+                    // desugar-declared and stay legal). A user re-declaration
+                    // would collide with the runtime global at link time.
+                    if matches!(name.as_str(),
+                        "__nupa_eh_flag" | "__nupa_eh_val" | "__nupa_eh_isa"
+                        | "__nupa_exception_value" | "__nupa_exception_buf")
+                    {
+                        self.check_error(d.line, d.col, &format!(
+                            "'{}' is reserved for the exception runtime (-eh); use a different name",
+                            name));
+                    }
                     if let Some(scope) = self.scope_vars.last_mut() {
                         if !scope.iter().any(|(n, _)| n == name) {
                             let t = head_type.clone().unwrap_or_else(|| AstType::new(TypePrim::Int));
@@ -2489,12 +2501,29 @@ AstExprData::Subscript { object, key, .. } => {
                 }
                 if let Some(ref mut i) = init {
                     let init_ty = self.check_expr(i);
-                    // Complex → real narrowing (clang -Wcomplex-component-init
-                    // territory): `double d = 1.0 + 2.0i;` silently drops the
-                    // imaginary part. Only provable cases are flagged — the
-                    // declared type comes from the AST, the init type from the
-                    // static expression walk (FloatRaw sets is_complex).
-                    if let (Some(vt), Some(it)) = (var_type.as_deref(), init_ty.as_ref()) {
+                    // `__auto_type` (eh desugar's hoisted expression temp,
+                    // `__nupa_eh_tmp_N`): GNU semantics — infer the declared
+                    // type from the initializer. An init the checker cannot
+                    // type falls back to `id` (universal object), never the
+                    // scalar-ish marker; mismatch checks are superseded.
+                    let is_auto = head_type.as_ref().map_or(false, |t| {
+                        t.prim == TypePrim::Named && t.name.as_deref() == Some("__auto_type")
+                    });
+                    if is_auto {
+                        let derived = init_ty
+                            .clone()
+                            .unwrap_or_else(|| AstType::new(TypePrim::Id));
+                        if let (Some(scope), Some(ref name)) =
+                            (self.scope_vars.last_mut(), d.name.as_ref())
+                        {
+                            for (n, t) in scope.iter_mut() {
+                                if n == name.as_str() {
+                                    *t = derived;
+                                    break;
+                                }
+                            }
+                        }
+                    } else if let (Some(vt), Some(it)) = (var_type.as_deref(), init_ty.as_ref()) {
                         let declared_complex = Self::is_complex_type(vt);
                         if !declared_complex && it.is_complex && Self::is_real_scalar(vt) {
                             self.check_warning(d.line, d.col, &format!(

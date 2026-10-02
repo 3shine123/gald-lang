@@ -1,0 +1,8 @@
+[package]
+name = "nupa-pattern"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+nupa-ast = { path = "../ast" }
+nupa-cst = { path = "../cst" }

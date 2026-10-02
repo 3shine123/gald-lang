@@ -1,0 +1,13 @@
+#import <Foundation/Foundation.nh>
+
+struct Inner { int a; int b[2]; };
+struct Outer { struct Inner in; int c; };
+
+int main() {
+    struct Outer o1 = {{1, {2, 3}}, 4};
+    struct Outer o2 = {{1, {2, 3}}, 4};
+    struct Outer o3 = {{1, {2, 3}}, 5};
+    NPLog(@"o1==o2: %d", o1 == o2);
+    NPLog(@"o1!=o3: %d", o1 != o3);
+    return 0;
+}

@@ -105,7 +105,7 @@ fn clap_command() -> ClapCommand {
         .arg(Arg::new("no-checker").long("fno-checker")
             .help("skip type checking"))
         .arg(Arg::new("eh").long("eh").value_name("CHECKED|SJLJ")
-            .help("exception backend: checked (Swift-scheme, no cross-frame leak) or sjlj (setjmp/longjmp, default)"))
+            .help("exception backend: checked (Swift-scheme, no cross-frame leak) or sjlj (setjmp/longjmp, default; 'legacy' is an alias)"))
         .arg(Arg::new("ffreestanding").long("ffreestanding")
             .help("bare-metal/freestanding output"))
         .arg(Arg::new("nostdinc").long("nostdinc")
@@ -390,7 +390,7 @@ fn nupac_flags() -> (Vec<(&'static str, &'static str)>, Vec<(&'static str, &'sta
         ("-fnupa-arc",    "enable ARC (default)"),
         ("-fno-nupa-arc", "disable ARC (MRC)"),
         ("-fno-checker",  "skip type checking"),
-        ("-eh",           "exception backend: checked or sjlj (default sjlj)"),
+        ("-eh",           "exception backend: checked or sjlj (default sjlj; 'legacy' is an alias)"),
         ("-ffreestanding", "bare-metal/freestanding output"),
         ("-nostdinc",     "pass -nostdinc to the C compiler (headers come from your -I dirs)"),
         ("-no-comments",  "omit readability comments in generated C (default: on)"),
@@ -720,9 +720,12 @@ fn main() {
                     .unwrap_or_default();
                 match v.as_str() {
                     "checked" => eh_checked = true,
-                    "sjlj" | "" => {}
+                    // 'legacy' names the sjlj backend for the pending default
+                    // flip (stage 6): scripts written against the new spelling
+                    // keep working after checked becomes the default.
+                    "sjlj" | "legacy" | "" => {}
                     other => {
-                        eprintln!("error: -eh expects 'checked' or 'sjlj' (got '{}')", other);
+                        eprintln!("error: -eh expects 'checked', 'sjlj' or 'legacy' (got '{}')", other);
                         std::process::exit(1);
                     }
                 }
@@ -785,9 +788,10 @@ fn main() {
             };
             match val.as_deref() {
                 Some("checked") => { eh_checked = true; i += adv; }
-                Some("sjlj") => { i += adv; }
+                // 'legacy' = sjlj alias for the pending default flip (stage 6).
+                Some("sjlj") | Some("legacy") => { i += adv; }
                 other => {
-                    eprintln!("error: -eh expects 'checked' or 'sjlj' (got '{}')",
+                    eprintln!("error: -eh expects 'checked', 'sjlj' or 'legacy' (got '{}')",
                         other.unwrap_or("(missing)"));
                     std::process::exit(1);
                 }

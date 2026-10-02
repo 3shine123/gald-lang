@@ -1,0 +1,22 @@
+// golden/37_complex — C99 `_Complex` passthrough + imaginary literals.
+//
+// Expectations cross-checked against clang (`clang -w probe.c && ./a.out`):
+// imaginary literals must reach C verbatim (FloatRaw), so `1.0 + 2.0i`
+// keeps its imaginary part — the f64 path used to emit `1.0f + 0.0f`.
+#include <stdio.h>
+#include <complex.h>
+
+typedef float _Complex cfloat;
+
+int main() {
+    double _Complex z = 1.0 + 2.0i;      // mixed real + imaginary literal
+    double _Complex w = 2.0i;            // bare imaginary literal
+    cfloat f = 1.5;                      // typedef of complex type
+    double _Complex m = 2.0i * f;        // imaginary literal arithmetic
+    printf("A=%.1f+%.1fi\n", creal(z), cimag(z));
+    printf("B=%.1f+%.1fi\n", creal(w), cimag(w));
+    printf("C=%.1f+%.1fi\n", (double)crealf(f), (double)cimagf(f));
+    printf("D=%.1f+%.1fi\n", creal(m), cimag(m));
+    printf("E=%f\n", cabs(z));           // complex.h function on complex value
+    return 0;
+}

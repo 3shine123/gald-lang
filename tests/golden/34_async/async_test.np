@@ -1,0 +1,37 @@
+#import <Foundation/Foundation.nh>
+
+// async/await (route map item #4, milestone 1):
+// - a method whose body contains `@await` is async (no annotation needed)
+// - `@await e` marks a suspension point; M1 evaluates it through the task
+//   machinery (`nupa_task_create` / `nupa_task_resume` / `nupa_task_join`)
+// - async methods with a return value may only be called from async contexts
+//   (compile-time rejected otherwise); async void methods are the entries.
+
+@interface Fetcher : NPObject
+- (int)compute:(int)n;
+- (int)twice:(int)n;
+- (void)runAll;
+@end
+
+@implementation Fetcher
+- (int)compute:(int)n {
+    int raw = @await n;          // suspension point
+    return raw * 2;
+}
+- (int)twice:(int)n {
+    int a = @await [self compute:n];   // await across a call chain
+    int b = @await [self compute:a];   // ...and twice in one body
+    return a + b;
+}
+// async void: the entry method (blocking wrapper semantics — pumps to completion)
+- (void)runAll {
+    int x = @await [self twice:3];
+    NPLog(@"result=%d", x);      // 3 -> 6 -> 12 => a+b = 18
+}
+@end
+
+int main() {
+    Fetcher *f = [[Fetcher alloc] init];
+    [f runAll];                  // async void callable from sync context
+    return 0;
+}

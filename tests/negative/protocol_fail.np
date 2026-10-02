@@ -1,0 +1,17 @@
+#include <stdio.h>
+#import <Foundation/Foundation.nh>
+
+@protocol Speaker
+- (void)speak;
+@end
+
+@interface Dog : NPObject <Speaker>
+@end
+
+@implementation Dog
+@end
+
+int main() {
+    Dog *d = [[Dog alloc] init];
+    return 0;
+}

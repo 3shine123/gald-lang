@@ -1,0 +1,44 @@
+#include <stdio.h>
+
+// C-superset guard for nullability: `nullable` / `nonnull` are CONTEXTUAL, not
+// hard keywords. Every declaration below must compile and run unchanged, or the
+// feature has broken the project's core rule (AGENTS.md: Nupa is a C superset).
+//
+// NOTE on `_Nullable` / `_Nonnull` / `_Null_unspecified`: deliberately NOT
+// tested here. Those are reserved words in clang, so plain C rejects them as
+// identifiers too — they are annotations, not names. The C-superset rule is
+// about `nullable` / `nonnull`, which clang treats as ordinary identifiers.
+
+int nullable = 5;
+int nonnull = 6;
+
+struct nullable_s {
+    int nullable;
+    int nonnull;
+};
+
+static int takes_named(int nullable, int nonnull) {
+    return nullable + nonnull;
+}
+
+typedef int nullable_t;
+
+int main(void) {
+    struct nullable_s s;
+    s.nullable = 1;
+    s.nonnull = 2;
+    nullable_t t = 3;
+
+    // A variable named like an annotation, shadowed in a nested scope.
+    int shadow = nullable;
+    {
+        int nullable = 100;
+        shadow = shadow + nullable;
+    }
+
+    int sum = takes_named(nonnull, nullable)
+            + s.nullable + s.nonnull + t
+            + shadow + nullable + nonnull;
+    printf("c-superset sum=%d\n", sum);
+    return 0;
+}

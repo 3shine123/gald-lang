@@ -870,6 +870,105 @@ int main() {                                // main 保持 int 返回值，await
 - **回退**：main.rs 5 触点 + pipeline.rs 2 + completions 2 全部还原；复验 test_all **309/317**、trace **8/8**、eh_diff **7/7**，基线精确复原。
 - **多架构结论不受影响**：ARM64 裸机 `@try` 的可用路径仍是 **`-eh checked`**（零 setjmp）；runtime.h builtin 映射的 `NUPA_SETJMP_DEFINED` override 钩子仍是待做项。
 
+### `-eh checked` 默认化工程 — 阶段 1：基线与 git 边界 (Sep 2026, 本会话)
+
+> 六阶段路线（债务→验收矩阵→再公投）立项；切换前默认保持 sjlj，开发验证全部走显式 `-eh checked`。分支 `eh-checked-default`，基线提交 `4d8dde5`（101 files，含既有修复与公投记录）。
+
+- **基线复验**：test_all **309/317**（2 failed 均为 `-F` 既有基线）、trace golden **8/8**、eh_diff **7/7**；cargo test 三轮被会话执行限制拦截未跑（单列补验项，预期 137/137）。
+- **双模式量测基线**（同源 `-rewrite-nupa` ± `-eh checked`）：
+
+| 文件 | 模式 | 行数 | 字节 | flag 引用 | 守卫 | 说明 |
+|------|------|------|------|-----------|------|------|
+| retain_release.np（**零 @try**） | legacy | 331 | 13,723 | 0 | 0 | 干净 |
+| 同上 | checked | 400 | 15,911 | 20 | 20 | **+69 行/+15.9%——20 处无意义守卫**，阶段 3 收窄的实锤 |
+| try_catch_basic_test.np（try/catch/finally 全套） | legacy | 3,255 | 172,896 | 0 | 0 | |
+| 同上 | checked | 4,496 | 218,658 | 364 | — | +1,241 行/+26.5%，含 try 区守卫链 |
+
+- **运行一致性**：try_catch_basic_test 双模式 stdout diff **MATCH**（9 行一致）——checked 当前产物语义正确，问题只在密度与 checker 适配。
+- 方法注：golden/15 `try_catch.np` 手动转译被 ARC checker 拦（`explicit 'release' not allowed`；test_all 靠 ARC retry 通过）——量测改用 `tests/try_catch_basic_test.np`。
+
+### `-eh checked` 默认化工程 — 阶段 2 前置：合成符号全集（枚举完成，Sep 2026）
+
+> checked 模式引入的全部编译器合成符号（eh crate 源枚举 × 生成 C 实证交叉验证，try_catch_basic 样本）。
+
+| 符号 | 类别 | C 类型 | 作用域 | 出处 |
+|------|------|--------|--------|------|
+| `__nupa_eh_flag` | EH 全局 | `int`（freestanding 普通全局 / hosted `__thread`） | runtime 拥有，函数内读写 | runtime.h:170-174；eh src 38 处 |
+| `__nupa_eh_val` | EH 全局 | `id`（NPObject *） | 同上 | runtime.h:171/174 |
+| `__nupa_eh_saved_N` | 函数局部 | `int` | 每 @try 序号独占（退出时交还在途状态） | eh src :918 |
+| `__nupa_eh_done_N` | 函数局部 | `int` | catch latch（objc_end_catch 语义） | eh src :919 |
+| `__nupa_eh_thrown_N` | 函数局部 | `NPObject *`（ARC 拥有此临时） | @throw 处 | eh src :750 |
+| `__nupa_eh_tmp_N` | 函数局部 | `__auto_type`（按初始化式推导） | 表达式 hoist | eh src :726 |
+| `__nupa_eh_isa` | runtime 函数（非变量） | 声明于 runtime.h | 调用点 | |
+| `__auto_type` | 类型关键字（GNU/C23） | — | 声明处 | 生成 C 39 处（同样本） |
+
+- `__nupa_sel_*` 是既有 SEL 常量（已放行），不在本清单。
+- **拒绝层归属待实证**：公投失败样本的错误前缀是 `<stdin>:102:82`（clang 格式），非 `[checker] file.np:line:col` 格式——早期归档"checker 拒收"可能有误（或是 clang 侧 `-include runtime.h` 缺失）。实现放行机制前必须先复现定层。
+- checker 放行先例锚点：`crates/checker/src/lib.rs:1532`（`&NUPA_CLASS_$_Foo`）。
+
+### `-eh checked` 默认化工程 — 阶段 2：checker 合成符号机制 ✅ (Sep 2026, 本会话)
+
+> **拒绝层归属勘误（推翻公投时的定性）**：公投日志 63 条 `[checker]` 格式错误全是泛型容器既有误报（`argument of type 'int' does not match...`），**零条**与 `__nupa_eh*` 相关；75+10 条 undeclared 是 **clang 格式**（`<stdin>:行:列`）。真 checker 层拒收只有一类：`initializing '__auto_type' from pointer/object expression — scalar expected`（`dict_literal_test` 62 条）——eh hoist 的 `__nupa_eh_tmp_N` 被 `init_ptr_scalar_mismatch` 标量规则拒绝。
+
+- ✅ **`__auto_type` 按初始化式推导**（GNU 语义，非豁免）：checker Variable 臂识别 `Named("__auto_type")`（eh `auto_type()` 的产物），用 `check_expr` 返回的真实类型**回写 scope_vars**（`__nupa_eh_tmp_N` 此后按真实类型参与赋值/实参/接收者检查）；init 不可推导回退 `id`（万能对象），mismatch 检查对 auto 跳过（被推导取代）。下游全自愈，零类型检查旁路。
+- ✅ **保留名声明守卫**（负例机制）：用户声明 `__nupa_eh_flag`/`__nupa_eh_val`/`__nupa_eh_isa`/`__nupa_exception_value`/`__nupa_exception_buf`（desugar 只赋值从不声明的 5 个 runtime 拥有名）→ checker error `'X' is reserved for the exception runtime (-eh)`；desugar 自己声明的 `_N` 后缀临时不受影响。负例持久化 `tests/negative/eh_reserved_name.np`。
+- ✅ **不跨作用域泄漏**（探针实证）：try 块结束后引用 `__nupa_eh_tmp_2` → `undeclared identifier`（C 词法作用域 + checker 只在声明处注册，合成名天然不逃逸）。
+- ✅ **连带修既有缺口（非 eh）**：hosted 生成 C 不含 `<stdlib.h>` 而 vtable `__sig` 校验构造器调 `abort()`（codegen.rs:6871）——最小 Foundation-only 文件 implicit declaration 硬错（legacy 同炸）。include 发射区补带去重的 `<stdlib.h>`（与 string.h 同款先例）。
+- **验证**：`dict_literal_test` 62 条 → **0**；`/tmp/eh_min2.np`（@throw/@catch/finally 链）端到端 RC=0 `caught 42 / after`；负例两处报错精确；泄漏探针 RC=1；eh_diff **7/7**；cargo build 0 warning。
+- **遗留**：~~`dict_literal`/`npstring_demo` + checked 的 RC=134 栈溢出归阶段 4~~ → **已由阶段 3 顺带清偿**（见阶段 4 记录）；公投 75 条 clang undeclared 的确切来源未完全归因（探针文件 include 都在场）——阶段 4 矩阵重推。
+
+### `-eh checked` 默认化工程 — 阶段 3：守卫收窄（异常效果分析）✅ (2026-10-01, 本会话)
+
+> 还第二笔债（守卫密度失控）。新机制 `EffectTable`（`crates/eh/src/lib.rs`）：desugar 前对整 TU 做**异常效果分析**，只有"真可能武装旗标"的语句才触发守卫/线性化；`stmt_may_arm`/`expr_has_call`/`decl_has_call` 三个"有调用就武装"的旧函数整体替换为表驱动版本。
+
+- ✅ **效果三态**：`NoThrow` / `MayThrow`（调用点后守卫）/ `AlwaysThrows`（裸 `@throws`：必返回零且旗标已武装，守卫活路）。判定源：`@throws(T)` → MayThrow；裸 `@throws`（`Some(Void)` 非指针，与 checker `throws_state` 同款编码）→ AlwaysThrows；无标注 → NoThrow。**兜底**：未标注但体内含裸 `@throw` 语句的（checker error 路径 / `-fno-checker`）自升级 MayThrow，不信任"NoThrow"承诺。
+- ✅ **`NOTHROW_C_FUNCS` 白名单**：runtime helper（retain/release/autorelease/alloc/metaInit/isKindOfClass/weak/sync/task）、libc（printf 系/str/mem/alloc）、kernel helper（kputs 系）、`NPLog`/`__NPLogv`、`nupa_array_create`/`nupa_dictionary_create`——这些不能跑 nupa 代码、不可能武装旗标。
+- ✅ **fixpoint 传递闭包**：调用 MayThrow 的函数本身会带着武装旗标返回零（尾守卫 return 不清旗标），其调用者也必须守卫——迭代到不动点。`middle 调 boom（boom 才 @throw）`：middle 从 NoThrow 升 MayThrow、main 随之升级——eh_diff case 01 跨帧链的根基，单遍扫描必挂。
+- ✅ **旗标赋值判武装**：desugar 后的 `@throw` 是 5 语句复合块，辅助调用（retain/autorelease）被白名单豁免、`__nupa_eh_flag = 1` 是普通赋值——首版实测改写后的 throw **丢失尾守卫**。修法：`Assign` 目标为 `__nupa_eh_flag` 的节点直接判 MayThrow（它就是武装机制本身）。
+- ✅ **选择子归一化沿用符号表铁律**：key 抹掉**每一个**冒号（`deployShield:` → `deployShield`），只 trim 尾冒号会让多段 selector 静默匹配失败（checker 下标 bug 先例）。
+- ✅ **`Namespace` 臂补递归**（scan_decl/desugar_decl/collect_upgrade 三处）：namespace 函数的 @throw 此前永不 desugar（defer crate 同款静默丢弃 bug，本轮预防性堵上）。
+- **量测（守卫密度，`grep -c 'if (__nupa_eh_flag'`）**：`retain_release.np`（零 @try）checked 守卫 **20 → 0**（legacy 0）；`try_catch_basic_test.np` flag 引用 **364 → 67**、体积 +26.5% → **+3.0%**（+5,157 bytes / 172,896）。零 @try 程序不再有任何守卫噪音。
+- **验证**：eh_diff **7/7**（含 01 跨帧/02 语句中断/04 rethrow——传递闭包与旗标赋值判定两补丁的正确性主场）；golden/36_defer PASS（rc=0）；golden/15_exceptions +MRC 逐字一致；golden/24 那行析构差异 **legacy 同样出现**（`.out` 陈旧既有基线，与 eh 无关，test_all 只校验 exit code）；test_all **309/317** 与基线精确一致（2 failed 均 `-F` 既有）。
+- **已知边界（如实）**：①未标注方法默认 NoThrow 是激进初版——动态派发语义下严格说应 MayThrow，但会重新淹没全部消息发送；依赖 checker 的 @throws 逃逸规则兜底（逃逸的 throw 必须被声明），`-fno-checker` 构建由"体内裸 @throw 自升级"兜底。②跨 TU 未知自由函数默认 MayThrow（无法验证外部 TU）。③`@throws` 一致性对账（interface/impl 双向）沿用 checker 既有机制，eh 侧只读 AST `throws` 字段。
+
+### `-eh checked` 默认化工程 — 阶段 4：Foundation 内联栈溢出 ✅ (2026-10-01, 本会话)
+
+> 第三笔债（Foundation 重文件 + checked → RC=134）——**由阶段 3 守卫收窄顺带清偿**，非独立修复。
+
+- **根因（钉死）**：RC=134（SIGABRT）来自 checked 守卫块的**深度嵌套**——旧"有调用就武装"规则下 Foundation 重文件几乎每条消息发送都触发守卫，`rewrite_stmts` 把剩余语句整体包进 `if (flag) {...}` 并递归重入，生成 C 呈数百层嵌套 `if`，clang 前端解析时栈耗尽。收窄后 `npstring_demo` checked 守卫数 **0**（零 `@try` 文件无任何守卫），嵌套链消失。
+- **实证**：`npstring_demo`（rc=0，输出正常）与 `dict_literal_test`（rc=0）两个原 RC=134 文件全部恢复；`npmutablearray_test`/`timsort_test` + checked 亦 rc=0。`grand_feature_stress_test.np` 已不在仓库（find 零命中），从验证清单剔除。
+- **结论**：**三笔债全清**——债 1 checker 合成符号（阶段 2）、债 2 守卫密度（阶段 3，20→0）、债 3 栈溢出（阶段 3 顺带，本节实证）。仅剩公投 75 条 clang undeclared 归因一项挂账（不阻塞矩阵——相关文件全部 rc=0 运行正常，属日志窗口归因问题）。阶段 5 进入验收矩阵。
+
+### `-eh checked` 默认化工程 — 阶段 5：验收矩阵十场景 ✅ (2026-10-01, 本会话)
+
+> 翻默认的验收门。全部显式 `-eh checked` 跑通，legacy 基线零回归。
+
+| # | 场景 | 结果 |
+|---|------|------|
+| 1 | 普通程序（零 @try） | retain_release checked 守卫 **0**（legacy 0；收窄前 20） |
+| 2 | 单层 @try | try_catch_basic flag 引用 **67**（收窄前 364）、体积 **+3.0%**（收窄前 +26.5%）；eh_min2 链端到端 |
+| 3 | 嵌套 @try/@finally | eh_diff 03 PASS |
+| 4 | 重抛 | eh_diff 04 PASS（catch 内 rethrow 传播外层） |
+| 5 | 跨函数传播 | eh_diff 01 PASS（跨帧释放 + 传递闭包正确） |
+| 6 | 裸机 ARM64 | baremetal checked 端到端 rc=0，**63 行输出与 legacy 逐字一致**（transpile `-ffreestanding -eh checked` → clang `-include runtime.h` → 链 runtime_freestanding.c + helpers.c + asm_ext.s） |
+| 7 | 多文件/多 TU | multi_tu **10/10**（legacy 基线）；01_basic checked 双 TU（lib+main）链接运行 **expected.txt MATCH** |
+| 8 | Foundation 大文件 | npstring_demo / dict_literal_test / npmutablearray_test / timsort_test + checked 全部 rc=0（原 RC=134 三处全清，见阶段 4） |
+| 9 | ARC / MRC | eh_diff 基准 `-fobjc-arc-exceptions` 7/7；golden/15 +MRC 逐字一致 |
+| 10 | 固定门槛 | test_all **309/317**（与基线精确一致，2 failed 均 `-F` 既有）、trace golden **8/8**、eh_diff **7/7**、裸机压测 13 项检查 rc=0 |
+
+- **守卫数/体积门槛（归档）**：零 `@try` 程序守卫数 = **0**（硬门——出现任何守卫即收窄失效）；含 `@try` 程序 flag 引用 ≤ 收窄前 67/364 ≈ **18%**，生成 C 体积增幅 ≤ **+3%**（收窄前 +26.5%）。
+- **遗留挂账**：cargo test 137/137 待用户放行（翻默认前的最后一道门）；公投 75 条 clang undeclared 归因（不阻塞）。
+- **下一步（阶段 6）**：cargo test 放行 + 全绿后，独立提交翻默认（`-eh legacy` 兼容旧模式）——遵守公投红线，勿跳过。
+
+### `-eh checked` 默认化工程 — 阶段 6 前置：`-eh legacy` 别名 ✅ (2026-10-01, 本会话)
+
+> 翻默认的兼容准备（**零行为变更**）。`legacy` 成为 sjlj 的官方别名，翻转提交收敛为"改默认值"一步。
+
+- **两处解析点同步**：主循环解析（`main.rs` ~:717）与 run 前扫描（~:787）均接受 `legacy`（行为 = sjlj：`eh_checked` 保持 false）；错误文案改为列出三值（`'checked', 'sjlj' or 'legacy'`）。
+- **文案同步**：clap 参数 help、手动 flag 表（:393）、zsh completions（`_nupac`）标注 "'legacy' is an alias"；fish completions 经 `eh=` 值列表天然覆盖，无需改动。
+- **验证**：`-eh legacy` transpile rc=0 且守卫数 0（sjlj 语义实证）；run 前扫描路径（`-eh legacy run …`）rc=0；`-eh bogus` 两处路径均清晰报错；`-eh checked` 行为不变。cargo build 0 warning。
+- **翻默认时序（红线）**：cargo test 137/137 放行且全绿 → 独立提交改默认（`-eh legacy` 兼容旧模式）→ 翻转后按旧拼写写的脚本零迁移。
+
 ### `-eh checked` 差分测试（tests/eh_diff/）— 01–05 全 PASS ✅ (Sep 2026, 本会话)
 
 - **差分 runner**：`./tests/eh_diff/run_eh_diff.sh`——每个用例同时用 nupac `-eh checked` 与 **clang `-fobjc-arc -fobjc-arc-exceptions -framework Foundation`** 编译运行，**stderr 逐行 diff**（基准钉死为 `-fobjc-arc-exceptions`：异常安全 ARC 是语义正确的参照，默认 `-fobjc-arc` 是缺陷参照）。`NPAC=` 环境变量可指定 nupac 二进制。**该目录已在 test_all.py glob 排除**（07 uncaught 故意非 0 退出，standalone 跑是幻影失败）。
