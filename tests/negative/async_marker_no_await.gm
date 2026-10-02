@@ -1,0 +1,21 @@
+// Negative: marked `NFAsync<T>` but the body never suspends — the marker
+// must not lie (same philosophy as bare `@throws` requiring a real throw).
+// Expected error: 'compute:' is marked 'NFAsync<T>' but its body never
+// suspends — remove the marker or add an '@await'
+#import <Foundation/Foundation.gh>
+
+@interface F : NFObject
+- (NFAsync<int>)compute:(int)n;
+@end
+
+@implementation F
+- (NFAsync<int>)compute:(int)n {
+    return n * 2;
+}
+@end
+
+int main() {
+    F *f = [[F alloc] init];
+    printf("r=%d\n", [f compute:21]);
+    return 0;
+}

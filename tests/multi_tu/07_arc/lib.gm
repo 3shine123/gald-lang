@@ -1,0 +1,15 @@
+#import "model.gh"
+
+@implementation Vault : NFObject {
+    @public
+    int _total;
+}
+- (int)total { return _total; }
+@end
+
+/* Convenience-style return: the caller does NOT own it. */
+NFString *VaultToken(void) {
+    return [NFString stringWithUTF8String:"s3cret"];
+}
+
+int VaultHelper(void) { return 64; }

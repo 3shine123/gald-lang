@@ -1,10 +1,10 @@
 [package]
-name = "nupa-parser"
+name = "gald-parser"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-nupa-lexer = { path = "../lexer" }
-nupa-cst = { path = "../cst" }
+gald-lexer = { path = "../lexer" }
+gald-cst = { path = "../cst" }
 [dev-dependencies]
-nupa-preprocessor = { path = "../preprocessor" }
+gald-preprocessor = { path = "../preprocessor" }

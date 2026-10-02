@@ -1,9 +1,9 @@
 // test_cst_visit — CST visitor + validation tests
 
-#include "nupa/lexer.h"
-#include "nupa/parser.h"
-#include "nupa/cst.h"
-#include "nupa/cst_visit.h"
+#include "gald/lexer.h"
+#include "gald/parser.h"
+#include "gald/cst.h"
+#include "gald/cst_visit.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

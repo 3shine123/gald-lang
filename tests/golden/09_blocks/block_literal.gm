@@ -1,0 +1,10 @@
+#include <stdio.h>
+#import <Foundation/Foundation.gh>
+
+int main() {
+    int (^square)(int) = ^int(int x) {
+        return x * x;
+    };
+    printf("square(5)=%d\n", square(5));
+    return 0;
+}

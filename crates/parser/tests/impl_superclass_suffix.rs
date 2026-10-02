@@ -1,11 +1,11 @@
-// Bug #2 regression: `@implementation Base : NPObject` with an empty body used
-// to leave the `: NPObject` superclass suffix unconsumed; the parser's fallback
+// Bug #2 regression: `@implementation Base : NFObject` with an empty body used
+// to leave the `: NFObject` superclass suffix unconsumed; the parser's fallback
 // token-skip then swallowed the following `@interface Sub ... @end`, so `Sub`
 // never reached the binder ("cannot find class 'Sub' for @implementation").
 //
 // Fix: parse_class_implementation now consumes the optional `: Super` suffix
 // (and records it in the CST), matching parse_class_interface.
-use nupa_parser::Parser;
+use gald_parser::Parser;
 
 fn decl_classes(src: &str) -> Vec<(String, String)> {
     let mut p = Parser::new(src);
@@ -14,9 +14,9 @@ fn decl_classes(src: &str) -> Vec<(String, String)> {
     for d in &unit.decls {
         if matches!(
             d.kind,
-            nupa_cst::CstDeclKind::ClassInterface | nupa_cst::CstDeclKind::ClassImplementation
+            gald_cst::CstDeclKind::ClassInterface | gald_cst::CstDeclKind::ClassImplementation
         ) {
-            let kind = if d.kind == nupa_cst::CstDeclKind::ClassInterface {
+            let kind = if d.kind == gald_cst::CstDeclKind::ClassInterface {
                 "interface"
             } else {
                 "implementation"
@@ -33,10 +33,10 @@ fn decl_classes(src: &str) -> Vec<(String, String)> {
 #[test]
 fn impl_with_superclass_suffix_and_empty_body_keeps_next_interface() {
     let src = r#"
-@interface Base : NPObject
+@interface Base : NFObject
 @end
 
-@implementation Base : NPObject
+@implementation Base : NFObject
 @end
 
 @interface Sub : Base
@@ -56,14 +56,14 @@ fn impl_with_superclass_suffix_and_empty_body_keeps_next_interface() {
             ("interface".into(), "Sub".into()),
             ("implementation".into(), "Sub".into()),
         ],
-        "the @interface Sub following an empty @implementation Base : NPObject was swallowed"
+        "the @interface Sub following an empty @implementation Base : NFObject was swallowed"
     );
 }
 
 #[test]
 fn impl_superclass_suffix_parsed_before_methods() {
     let src = r#"
-@implementation Base : NPObject
+@implementation Base : NFObject
 - (void)ping { }
 @end
 
@@ -98,5 +98,5 @@ int main() { return 0; }
     assert!(unit
         .decls
         .iter()
-        .any(|d| matches!(d.kind, nupa_cst::CstDeclKind::Function)));
+        .any(|d| matches!(d.kind, gald_cst::CstDeclKind::Function)));
 }

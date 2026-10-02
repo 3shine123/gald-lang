@@ -1,6 +1,6 @@
 # Nupa 黄金测试集
 
-按功能分类的系统化回归测试。每个测试包含 `.np`（源码）和 `.out`（期望输出）文件。
+按功能分类的系统化回归测试。每个测试包含 `.gm`（源码）和 `.out`（期望输出）文件。
 
 ## 目录结构
 
@@ -17,7 +17,7 @@
 10_edge_cases/      边界情况（nil、instancetype、@class、@selector 等）
 11_multi_file_union/多文件 #import 联合（故意失败样本用 -F 后缀标记）
 12_namespace/       @namespace / @using
-13_foundation/      Foundation 容器（NPString / NPArray / NPMutableArray / NPLog / description）
+13_foundation/      Foundation 容器（NFString / NFArray / NFMutableArray / NFLog / description）
 14_generics/        泛型单态化
 15_exceptions/      @try / @catch / @finally / @throw
 16_control_flow/    控制流（if / while / for / switch）
@@ -39,30 +39,30 @@
 34_async/           @await 状态机（里程碑 1+2）
 35_variadic_method/ 真 variadic 方法（va_list）
 36_defer/           @defer 作用域退出执行
-37_async_marker/    NPAsync<T> 声明式 async 标记
-38_macros/          nupa 语法宏展开（双轨 #define）
+37_async_marker/    NFAsync<T> 声明式 async 标记
+38_macros/          gald 语法宏展开（双轨 #define）
 39_complex/         C99 _Complex 透传
-40_nparray_generic/ NPArray<T> / NPDictionary<K,V> 真单态化 + 元素类型检查
+40_nfarray_generic/ NFArray<T> / NFDictionary<K,V> 真单态化 + 元素类型检查
 41_switch_pat/      switch 模式匹配（case T *x / case > 10 / when 守卫）
 42_boxed_literal/   装箱字面量 @(expr) / @YES / @NO / @'c'
 43_dict_literal/    字典字面量 @{ key: value }
 44_designated_init/ C99 指定初始化器六形态
 ```
 
-> 每个目录的 `README.md` 记录该特性的**实现要点、判据表、M1 限制与踩过的坑**——排查问题时先看它，比读 `.np` 快得多。
+> 每个目录的 `README.md` 记录该特性的**实现要点、判据表、M1 限制与踩过的坑**——排查问题时先看它，比读 `.gm` 快得多。
 >
 > 故意失败的样本**不放在 golden 目录**（否则被当普通 FAIL 计数），统一在 `tests/negative/`，已在 `test_all.py` 的 glob 排除；需要"必须编译失败且报错清晰"的用例（如协议缺必需方法、`@(obj)` 非法装箱、`@throws` 撒谎）都在那里。
 >
 > `25_freestanding/` 与 `26_baremetal_stress/` 各有专属 `build.sh`（需要 `-freestanding` 与裸机 assembler），**不在默认测试套件**，用它们自己的 runner 跑。
 
-> `28_refcount_trace/` 与其他 golden 目录不同：每个 `.np` 的 `.out` 不是程序运行输出，而是 `nupac -trace-refcount -trace-no-color -trace-max-iters 2` 的追踪快照。运行方式：
+> `28_refcount_trace/` 与其他 golden 目录不同：每个 `.gm` 的 `.out` 不是程序运行输出，而是 `galdc -trace-refcount -trace-no-color -trace-max-iters 2` 的追踪快照。运行方式：
 >
 > ```bash
 > ./tests/golden/28_refcount_trace/run_trace_golden.sh
-> # NPAC=/path/to/nupac ./tests/golden/28_refcount_trace/run_trace_golden.sh
+> # GALDC=/path/to/galdc ./tests/golden/28_refcount_trace/run_trace_golden.sh
 > ```
 >
-> 用例覆盖：多级 retain/release（1→4→0）、double-release 负计数检测、泄漏检测、ARC 自动注入的 `nupa_release`、别名共享、嵌套 `@autoreleasepool`（`@noarc` 内手动 autorelease）、if/else 分支状态克隆、循环迭代产生独立 `Class#N` 身份。`.np` 本身仍是可编译运行的合法 Nupa 程序，会被 `test_all.py` 的 glob 照常编译+运行。
+> 用例覆盖：多级 retain/release（1→4→0）、double-release 负计数检测、泄漏检测、ARC 自动注入的 `gald_release`、别名共享、嵌套 `@autoreleasepool`（`@noarc` 内手动 autorelease）、if/else 分支状态克隆、循环迭代产生独立 `Class#N` 身份。`.gm` 本身仍是可编译运行的合法 Nupa 程序，会被 `test_all.py` 的 glob 照常编译+运行。
 
 > x86_64 汇编是跨架构用例，不放入默认 arm64 测试套件，单独位于 `asm_x64/`（见下文）。
 
@@ -71,7 +71,7 @@
 在 arm64 Mac 上通过 Rosetta 运行 x86_64 汇编：
 
 ```bash
-nupac -arch x86_64 run -asm asm_x64/asm_x86_ext.s asm_x64/asm_x86_fusion_test.np
+galdc -arch x86_64 run -asm asm_x64/asm_x86_ext.s asm_x64/asm_x86_fusion_test.gm
 # 或
 ./asm_x64/build.sh
 ```
@@ -111,14 +111,14 @@ python3 test/golden/test_golden.py
 
 ## 添加新测试
 
-1. 在对应分类目录下创建 `test_name.np`
+1. 在对应分类目录下创建 `test_name.gm`
 2. 运行测试，用 `--update` 生成 .out 文件
 3. 验证输出正确后提交
 
 ## 特殊文件
 
-- `protocol_fail.np` — 无 `.out` 文件，预期编译失败
-- 其他所有 `.np` 文件必须对应一个 `.out` 文件
+- `protocol_fail.gm` — 无 `.out` 文件，预期编译失败
+- 其他所有 `.gm` 文件必须对应一个 `.out` 文件
 
 ## 当前状态
 

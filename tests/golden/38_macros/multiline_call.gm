@@ -1,0 +1,43 @@
+// golden/36_macros — function-like macro invocation spanning source lines
+//
+// A call is a token sequence (§6.10.3): the newline between arguments is
+// whitespace, not a terminator. The source-level expander streams the next
+// source line in and expands the call as a whole — previously a gald-track
+// call had to be closed on one line. The lines it collapses are attributed to
+// the line the call *starts* on, so a diagnostic inside (or after) the
+// expansion still names the line the author wrote.
+#import <Foundation/Foundation.gh>
+#include <stdio.h>
+
+// gald-track bodies (contain message sends) — expanded by galdc, not clang.
+#define TAG(o)              [o tag]
+#define ADD_TAGS(o, a, b)   ([o tag] + (a) + (b))
+
+@interface Widget { int uid; }
++ (id) alloc;
+- (id) init;
+- (int) tag;
+@end
+@implementation Widget
++ (id) alloc { return gald_alloc(self); }
+- (id) init   { uid = 5; return self; }
+- (int) tag   { return uid; }
+@end
+
+int main() {
+    gald_meta_init();
+    Widget *w = [[Widget alloc] init];
+
+    // Arguments spread over three lines.
+    int a = ADD_TAGS(w,
+                     1,
+                     2);
+    // A spanning call nested inside another spanning call.
+    int b = ADD_TAGS(w,
+                     ADD_TAGS(w,
+                              1,
+                              1),
+                     2);
+    printf("%d %d\n", a, b);
+    return 0;
+}

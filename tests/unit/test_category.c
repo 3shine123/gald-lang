@@ -1,8 +1,8 @@
-#include "nupa/parser.h"
-#include "nupa/lexer.h"
-#include "nupa/cst.h"
-#include "nupa/symbol.h"
-#include "nupa/binder.h"
+#include "gald/parser.h"
+#include "gald/lexer.h"
+#include "gald/cst.h"
+#include "gald/symbol.h"
+#include "gald/binder.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -16,7 +16,7 @@ static int passed = 0;
 
 static symbol_table_t *parse_and_bind(const char *src) {
     lexer_t lexer;
-    lexer_init(&lexer, src, strlen(src), "test.np");
+    lexer_init(&lexer, src, strlen(src), "test.gm");
     parser_t *p = parser_create(&lexer);
     translation_unit_t *unit = parser_parse_translation_unit(p);
     parser_destroy(p);
@@ -111,7 +111,7 @@ static void test_category_conflict(void) {
         "@end";
 
     lexer_t lexer;
-    lexer_init(&lexer, src, strlen(src), "test.np");
+    lexer_init(&lexer, src, strlen(src), "test.gm");
     parser_t *p = parser_create(&lexer);
     translation_unit_t *unit = parser_parse_translation_unit(p);
     symbol_table_t *st = symtab_alloc();

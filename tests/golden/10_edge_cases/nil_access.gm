@@ -1,0 +1,20 @@
+#include <stdio.h>
+#import <Foundation/Foundation.gh>
+
+@interface Obj : NFObject
+- (void)sayHi;
+@end
+
+@implementation Obj
+- (void)sayHi {
+    printf("hi\n");
+}
+@end
+
+int main() {
+    Obj *o = nil;
+    if (o == nil) {
+        printf("is nil\n");
+    }
+    return 0;
+}

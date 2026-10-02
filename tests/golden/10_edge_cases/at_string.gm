@@ -1,0 +1,11 @@
+#include <stdio.h>
+#include <stdlib.h>
+#import <Foundation/Foundation.gh>
+
+int main() {
+    @autoreleasepool {
+        NFString *s = @"Hello from Micrit!";
+        printf("%s\n", [s UTF8String]);
+    }
+    return 0;
+}

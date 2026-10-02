@@ -1,0 +1,36 @@
+// Types declared by `#include`d C headers — the parser never reads those headers
+// (they are passed through to the emitted C verbatim), so it used to rely on a
+// builtin list of ~45 libc typedefs plus token-shape guessing. Anything outside
+// that list was rejected: `(sigset_t)v` and `(pthread_attr_t *)p` both failed to
+// parse, although clang/ObjC accepts them.
+//
+// galdc now recovers the type names from the C preprocessor itself (the same
+// authority C resolves `(X *)p` versus `x * y` with), so casts to real header
+// typedefs work exactly as they do in C. Neither name below is in the builtin
+// list — the test only passes because the table is authoritative.
+#include <signal.h>
+#include <pthread.h>
+#include <stdio.h>
+
+int main(void) {
+    // 1. `(sigset_t)` — a non-pointer cast to a header typedef.
+    sigset_t set = (sigset_t)0;
+    sigemptyset(&set);
+    printf("1 sigset_t: %d %d\n", sigismember(&set, SIGINT), (int)sizeof(set));
+
+    // 2. `(pthread_attr_t *)` — the pointer-cast shape that was rejected.
+    pthread_attr_t attr;
+    if (pthread_attr_init(&attr) == 0) {
+        pthread_attr_t *ap = (pthread_attr_t *)&attr;
+        printf("2 attr cast: %d\n", pthread_attr_destroy(ap));
+    } else {
+        printf("2 attr cast: init failed\n");
+    }
+
+    // 3. The same names in ordinary declarations still work, and a variable
+    //    named like nothing in particular is still an expression.
+    pthread_t thread = (pthread_t)0;
+    printf("3 decl+cast: %d\n", (int)(thread == 0));
+
+    return 0;
+}

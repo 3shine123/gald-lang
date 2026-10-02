@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Regenerate the nupa attribute classification table from the official
+"""Regenerate the gald attribute classification table from the official
 Clang and GCC documentation.
 
 Scrapes:

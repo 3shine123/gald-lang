@@ -1,6 +1,6 @@
-use nupa_cst::*;
-use nupa_ast::*;
-use nupa_symbol::symbol::*;
+use gald_cst::*;
+use gald_ast::*;
+use gald_symbol::symbol::*;
 
 pub struct Elaborator {
     pub symtab: Option<SymbolTable>,
@@ -232,7 +232,7 @@ impl Elaborator {
                 // `a = b != c`.
                 let inner = self.convert_expr(e).unwrap_or_else(make_int_expr);
                 AstExpr {
-                    kind: nupa_ast::AstExprKind::Paren, expr_type: inner.expr_type.clone(),
+                    kind: gald_ast::AstExprKind::Paren, expr_type: inner.expr_type.clone(),
                     line: e.line, col: e.col,
                     data: AstExprData::Paren(Box::new(inner)),
                 }
@@ -489,7 +489,7 @@ impl Elaborator {
                 let mut cls = None;
                 // Prefer the current function's LOCAL variable type. The symbol
                 // table is unscoped, so a same-named local in an inlined library
-                // (e.g. `NPObject *tmp`) can shadow the user's typed variable.
+                // (e.g. `NFObject *tmp`) can shadow the user's typed variable.
                 if let Some(local_ty) = self.lookup_local_type(obj_name).cloned() {
                     let mut t: Option<&CstType> = Some(&local_ty);
                     loop {
@@ -637,12 +637,12 @@ impl Elaborator {
             }
             CstStmtData::SwitchPat { expr, arms, has_default, default_body } => {
                 // Each arm gets its own scope, entered BEFORE its guard and body
-                // are converted. A type binding (`case NPNumber *n:`) is
+                // are converted. A type binding (`case NFNumber *n:`) is
                 // referenced by both — `when n.intValue > 3` and the body — and
                 // neither could resolve it: `lookup_local_type` missed, so
                 // `n.intValue` fell through to an untyped PropRef and codegen
                 // emitted `n->intValue` against an unresolved struct
-                // ("no member named 'intValue' in 'struct NPNumber'").
+                // ("no member named 'intValue' in 'struct NFNumber'").
                 //
                 // Register the *CST* type (that's what `register_local_type`
                 // keys on, and what dot resolution reads back to find the
@@ -827,9 +827,9 @@ impl Elaborator {
                 let cls_sym = self.symtab.as_ref().and_then(|st| st.find_class(&fqn)).map(|s| s.name.clone());
                 let cls_sym_clone = cls_sym.clone();
                 self.current_class_sym = cls_sym.clone();
-                // Inject implicit root class nupa_root for classes without explicit superclass
+                // Inject implicit root class gald_root for classes without explicit superclass
                 let effective_superclass = superclass.as_ref().map(|s| s.clone()).or_else(|| {
-                    if fqn != "nupa_root" { Some("nupa_root".to_string()) } else { None }
+                    if fqn != "gald_root" { Some("gald_root".to_string()) } else { None }
                 });
                 let sup_name = effective_superclass.as_ref().and_then(|s| {
                     self.symtab.as_ref().and_then(|st| {
@@ -887,7 +887,7 @@ impl Elaborator {
                         p = param.next.as_mut().map(|n| &mut **n);
                     }
                 }
-                // Same FQN resolution for the @throws type (e.g. NPError inside
+                // Same FQN resolution for the @throws type (e.g. NFError inside
                 // a namespace must resolve to its FQN like any named type).
                 let mut resolved_throws = throws.clone();
                 if !self.ns_prefix.is_empty() {

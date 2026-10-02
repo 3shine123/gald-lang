@@ -1,0 +1,17 @@
+#include <stdio.h>
+#import <Foundation/Foundation.gh>
+
+@interface Item : NFObject
+@end
+
+@implementation Item
+- (void)dealloc {
+    printf("dealloc\n");
+}
+@end
+
+int main() {
+    Item *a = [Item new];
+    printf("before return\n");
+    return 0;
+}

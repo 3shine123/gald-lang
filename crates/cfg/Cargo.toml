@@ -1,7 +1,7 @@
 [package]
-name = "nupa-cfg"
+name = "gald-cfg"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-nupa-ast = { path = "../ast" }
+gald-ast = { path = "../ast" }

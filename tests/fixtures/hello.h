@@ -1,21 +1,21 @@
-#ifndef NUPA_HELLO_NP_H
-#define NUPA_HELLO_NP_H
+#ifndef GALD_HELLO_NF_H
+#define GALD_HELLO_NF_H
 
-#include <nupa/object.h>
+#include <gald/object.h>
 
-struct nupa_NPObject_vtable;
-struct nupa_Student_vtable;
+struct gald_NFObject_vtable;
+struct gald_Student_vtable;
 
-struct NPObject;
-NPObject * NPObject_init(NPObject * self, SEL _cmd);
-void NPObject_dealloc(NPObject * self, SEL _cmd);
-struct nupa_NPObject_vtable;
+struct NFObject;
+NFObject * NFObject_init(NFObject * self, SEL _cmd);
+void NFObject_dealloc(NFObject * self, SEL _cmd);
+struct gald_NFObject_vtable;
 struct Student;
-int Student_grade(NPObject * self, SEL _cmd);
-void Student_setGrade_(NPObject * self, SEL _cmd, int value);
-struct nupa_Student_vtable;
-extern NPClass nupa_NPObject_class;
-extern NPClass nupa_Student_class;
-void nupa_init(void);
+int Student_grade(NFObject * self, SEL _cmd);
+void Student_setGrade_(NFObject * self, SEL _cmd, int value);
+struct gald_Student_vtable;
+extern NFClass gald_NFObject_class;
+extern NFClass gald_Student_class;
+void gald_init(void);
 
-#endif /* NUPA_HELLO_NP_H */
+#endif /* GALD_HELLO_NF_H */

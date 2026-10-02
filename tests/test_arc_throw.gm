@@ -1,0 +1,23 @@
+#include <stdio.h>
+#import <Foundation/Foundation.gh>
+
+@interface Obj : NFObject
+- (void)doSomething;
+@end
+@implementation Obj
+- (void)doSomething { printf("done\n"); }
+@end
+
+int main() {
+    @autoreleasepool {
+        id obj = [[Obj alloc] init];
+        @try {
+            [obj doSomething];
+        }
+        @catch (id e) {
+            printf("caught\n");
+        }
+        [obj release];
+    }
+    return 0;
+}

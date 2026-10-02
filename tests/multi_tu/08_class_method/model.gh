@@ -1,0 +1,17 @@
+#import <Foundation/Foundation.gh>
+
+/* Class methods across TUs: `+` methods dispatch through the meta vtable, which
+   is a *separate* per-class struct (GALD_META_VTABLE_$_X). That is a second
+   layout that has to agree across the link, separate from the instance vtable. */
+@interface Factory : NFObject
++ (Factory *)make;
++ (int)magic;
++ (const char *)tag;
+@end
+
+@interface Widget : NFObject
++ (Widget *)create;
+- (int)widgetId;
+@end
+
+int FactoryHelper(void);

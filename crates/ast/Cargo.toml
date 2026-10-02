@@ -1,7 +1,7 @@
 [package]
-name = "nupa-ast"
+name = "gald-ast"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-nupa-cst = { path = "../cst" }
+gald-cst = { path = "../cst" }

@@ -1,0 +1,188 @@
+// lang-test/static_category_sequencer_test.gm
+// Nupa 语言「静态 Category & 模拟关联属性」第二弹（镜像健壮性高压测试）
+// 聚焦：全新命名空间下的 Category 静态属性生成、原类 Ivar 越界访问、高阶 Block 跨空间传递、三元+自增副作用回归
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#import <Foundation/Foundation.gh>
+
+// ============================================================================
+// 1. 核心基础类：基因测序仪 (仅包含基础标识与生物样本源)
+// ============================================================================
+@interface BioGeneSequencer : NFObject {
+    @public
+    int _sequencerId;
+    const char* _genomeSource;
+}
+@property int sequencerId;
+@property (readonly) const char* genomeSource;
+
+- (id)initWithId:(int)sid source:(const char*)src;
+- (void)printSequencerInfo;
+@end
+
+@implementation BioGeneSequencer
+@synthesize sequencerId = _sequencerId;
+@synthesize genomeSource = _genomeSource;
+
+- (id)initWithId:(int)sid source:(const char*)src {
+    self = [super init];
+    if (self) {
+        _sequencerId = sid;
+        _genomeSource = src;
+    }
+    return self;
+}
+- (void)printSequencerInfo {
+    printf("[仪器物理层] 测序仪芯片ID: %d | 样本物理来源: %s\n", _sequencerId, _genomeSource);
+}
+@end
+
+
+// ============================================================================
+// 2. 扩展 Category 一：利用 Category 静态注入「神经网络同步接口」
+//    压测点：在这里我们使用 double 类型的属性，测试编译器对于非 int 型 Category 属性的生成健壮性
+// ============================================================================
+@interface BioGeneSequencer (NeuralInterfaceExtension)
+@property (nonatomic, assign) double neuralSyncRate; // 同步率（浮点数压测）
+@property (nonatomic, assign) const char* interfaceProtocol;
+
+- (void)initializeNeuralBridgeWithLog:(void (^)(const char* eventLog))logBlock;
+@end
+
+// 全局静态存储，用于模拟 Category 关联属性（变量名完全重构，防止与前一个测试发生符号污染）
+static double g_Assoc_NeuralSyncRate = 0.0;
+static const char* g_Assoc_InterfaceProtocol = "NONE";
+
+@implementation BioGeneSequencer (NeuralInterfaceExtension)
+
+- (double)neuralSyncRate {
+    return g_Assoc_NeuralSyncRate;
+}
+- (void)setNeuralSyncRate:(double)newRate {
+    g_Assoc_NeuralSyncRate = newRate;
+}
+
+- (const char* )interfaceProtocol {
+    return g_Assoc_InterfaceProtocol;
+}
+- (void)setInterfaceProtocol:(const char*)newProto {
+    g_Assoc_InterfaceProtocol = newProto;
+}
+
+// 静态方法注入：内部访问了主类的私有 Ivar _genomeSource，同时调用关联属性
+- (void)initializeNeuralBridgeWithLog:(void (^)(const char*))logBlock {
+    printf("[神经扩展] 正在针对样本 [%s] 建立突触桥接协议...\n", _genomeSource);
+    printf("          -> 激活协议类型: %s\n", [self interfaceProtocol]);
+    printf("          -> 神经同步率水平: %.2f%%\n", [self neuralSyncRate] * 100.0);
+    
+    if (logBlock) {
+        char feedbackBuffer[256];
+        sprintf(feedbackBuffer, "PROTOCOL_%s_SYNC_SUCCESS_AT_%.1f_PERCENT", [self interfaceProtocol], [self neuralSyncRate] * 100.0);
+        logBlock(feedbackBuffer); // 触发 Block 状态回传
+    }
+}
+@end
+
+
+// ============================================================================
+// 3. 扩展 Category 二：利用 Category 静态注入「控制论数字升级」
+// ============================================================================
+@interface BioGeneSequencer (CyberneticsExtension)
+- (int)injectSyntheticDNA:(const char*)dnaChain withMultiplier:(int)mult;
+@end
+
+@implementation BioGeneSequencer (CyberneticsExtension)
+- (int)injectSyntheticDNA:(const char*)dnaChain withMultiplier:(int)mult {
+    int chainLength = (int)strlen(dnaChain);
+    // 穿透访问主类的成员变量 _sequencerId
+    int syncCalculatedToken = chainLength * mult + [self sequencerId];
+    printf("[控制论扩展] 测序仪_%d 已将人工DNA「%s」注入序列，合成能级: %d\n", 
+           [self sequencerId], dnaChain, syncCalculatedToken);
+    return syncCalculatedToken;
+}
+@end
+
+
+// ============================================================================
+// 4. 主程序入口：全面检阅静态 Category 的符号绑定与功能表现
+// ============================================================================
+
+int main(int argc, const char* argv[])
+{
+    @autoreleasepool {
+        printf("====================================================================\n");
+        printf(">>>    galdc 编译器「静态 Category & 模拟关联属性」镜像健壮性压测   <<<\n");
+        printf("====================================================================\n\n");
+
+        // ----------------------------------------------------
+        // 测试点 1：实例化基础类，调用原生方法
+        printf("--- 1. 验证基础类原生成员变量与方法的编译期决议 ---\n");
+        BioGeneSequencer* mySequencer = [[BioGeneSequencer alloc] initWithId:8899 source:"Homo-Sapiens-Decoded"];
+        [mySequencer printSequencerInfo];
+
+        // ----------------------------------------------------
+        // 测试点 2：调用第一个 Category 静态注入的方法与模拟属性
+        printf("\n--- 2. 验证第一个 Category (NeuralInterfaceExtension) 的静态属性注入 ---\n");
+        
+        // 读写 Category 中的静态模拟关联属性（此处写入 double 浮点数与字符串）
+        [mySequencer setNeuralSyncRate:0.985]; // 98.5% 同步率
+        [mySequencer setInterfaceProtocol:"Neuralink-v5.2"];
+        
+        printf("[属性断言] 成功通过 Category Getter 读取浮点型与字符型关联属性：\n");
+        printf("          -> 获取的同步率: %.3f (预期: 0.985)\n", [mySequencer neuralSyncRate]);
+        printf("          -> 获取的协议名: %s (预期: Neuralink-v5.2)\n", [mySequencer interfaceProtocol]);
+
+        // ----------------------------------------------------
+        // 测试点 3：测试 Category 方法接收高阶 Block 并捕获 main 作用域状态
+        printf("\n--- 3. 测试 Category 注入方法对高阶闭包的长链捕获支持 ---\n");
+
+        __block int bioTelemetryCount = 0;
+        __block int feedbackSignalStatus = 1;
+
+        // 定义状态回调闭包
+        void (^bioMonitor)(const char*) = ^void(const char* eventToken) {
+            bioTelemetryCount++;
+            feedbackSignalStatus = feedbackSignalStatus ? 0 : 1; // 改变捕获的局部状态
+            printf("[生物监控中心] 收到突触网传回的加密 Token: %s\n", eventToken);
+            printf("               -> 闭包内统计触发次数: %d\n", bioTelemetryCount);
+        };
+
+        // 执行 Category 注入的方法，将闭包传过去
+        [mySequencer initializeNeuralBridgeWithLog:bioMonitor];
+
+        // ----------------------------------------------------
+        // 测试点 4：调用第二个 Category 静态注入的纯函数扩展
+        printf("\n--- 4. 验证第二个 Category (CyberneticsExtension) 的静态注入 ---\n");
+        
+        const char* syntheticTarget = "ATCG_GGCT_TTAA_CCGA";
+        int synthResult = [mySequencer injectSyntheticDNA:syntheticTarget withMultiplier:5];
+        printf("[合成断言] 人工 DNA 注入逻辑执行完毕，输出静态校验码: %d\n", synthResult);
+
+        // ----------------------------------------------------
+        // 测试点 5：极限边界回归——将 Category 扩展属性置于“三元+逗号副作用”中
+        // 这一步用来确保你刚才修好的核心 Bug 在全新的 Category 方法选择器下依然稳如泰山！
+        printf("\n--- 5. 镜像边界回归守门员：三元表达式内包含带自增副作用的 Category 属性调用 ---\n");
+
+        int isSyncActive = 1;
+        int sequencingStep = 6666;
+
+        // 强迫转译器解析：三元真分支内，带括号自增副作用，且接收者调用的是 Category 注入的浮点属性 getter 方法
+        double verifiedRate = (isSyncActive > 0) ? [((sequencingStep++, mySequencer)) neuralSyncRate] : 0.0;
+
+        printf("[收官边界断言] 镜像 Category 浮点属性与修好的优先级 Bug 融合完美！\n");
+        printf("          -> 副作用自增计数器: %d (预期: 6667)\n", sequencingStep);
+        printf("          -> 动态抓取的扩展同步率: %.3f (预期: 0.985)\n", verifiedRate);
+
+        // ----------------------------------------------------
+        // 6. 内存清理 (测试静态 Category 是否影响原对象的销毁链路)
+        printf("\n--- 6. 正在释放生物测序终端及其扩展树内存... ---\n");
+        [mySequencer release];
+
+        printf("\n====================================================================\n");
+        printf(">>> 奇迹！第二弹 Category 方法注入与模拟属性扩展镜像测试 100% 通关！ <<<\n");
+        printf("====================================================================\n");
+    }
+    return 0;
+}

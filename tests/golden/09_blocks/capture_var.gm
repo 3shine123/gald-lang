@@ -1,0 +1,11 @@
+#include <stdio.h>
+#import <Foundation/Foundation.gh>
+
+int main() {
+    int base = 10;
+    int (^add)(int) = ^int(int x) {
+        return base + x;
+    };
+    printf("add(5)=%d\n", add(5));
+    return 0;
+}

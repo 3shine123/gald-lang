@@ -1,4 +1,4 @@
-#include "nupa/codegen.h"
+#include "gald/codegen.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -19,7 +19,7 @@ static char *emit_header_to_str(cg_unit_t *unit, const char *guard) {
 }
 
 static cg_unit_t *make_unit(void) {
-    return cg_unit_alloc("test.np");
+    return cg_unit_alloc("test.gm");
 }
 
 static void test_header_empty(void) {
@@ -42,14 +42,14 @@ static void test_header_func_decl(void) {
     d->u.func.return_type = strdup("int");
     d->u.func.param_count = 1;
     d->u.func.params = calloc(2, sizeof(*d->u.func.params));
-    d->u.func.params[0].type = strdup("NPObject *");
+    d->u.func.params[0].type = strdup("NFObject *");
     d->u.func.params[0].name = strdup("self");
     d->u.func.body = NULL; // declaration only
     cg_unit_add_decl(u, d);
 
     char *s = emit_header_to_str(u, "TEST_H");
     ASSERT(s != NULL, "got output");
-    ASSERT(strstr(s, "int foo(NPObject * self)") != NULL, "has func decl");
+    ASSERT(strstr(s, "int foo(NFObject * self)") != NULL, "has func decl");
     ASSERT(strstr(s, ";") != NULL, "has semicolon");
     ASSERT(strstr(s, "{") == NULL, "no body");
     free(s);
@@ -80,7 +80,7 @@ static void test_header_runtime_include(void) {
 
     char *s = emit_header_to_str(u, "X_H");
     ASSERT(s != NULL, "got output");
-    ASSERT(strstr(s, "#include <nupa/runtime.h>") != NULL, "has runtime.h");
+    ASSERT(strstr(s, "#include <gald/runtime.h>") != NULL, "has runtime.h");
     free(s);
     cg_unit_free(u);
     PASS();
@@ -89,12 +89,12 @@ static void test_header_runtime_include(void) {
 static void test_header_class_meta(void) {
     TEST("header class metadata");
     cg_unit_t *u = make_unit();
-    cg_unit_meta_add(u, "Foo", "NPObject", 0, NULL, NULL, 0, NULL, NULL, 0, NULL);
+    cg_unit_meta_add(u, "Foo", "NFObject", 0, NULL, NULL, 0, NULL, NULL, 0, NULL);
 
     char *s = emit_header_to_str(u, "META_H");
     ASSERT(s != NULL, "got output");
-    ASSERT(strstr(s, "extern NPClass nupa_Foo_class") != NULL, "has class extern");
-    ASSERT(strstr(s, "void nupa_meta_init(void)") != NULL, "has init decl");
+    ASSERT(strstr(s, "extern NFClass gald_Foo_class") != NULL, "has class extern");
+    ASSERT(strstr(s, "void gald_meta_init(void)") != NULL, "has init decl");
     free(s);
     cg_unit_free(u);
     PASS();
@@ -109,7 +109,7 @@ static void test_header_vtable_forward(void) {
 
     char *s = emit_header_to_str(u, "VT_H");
     ASSERT(s != NULL, "got output");
-    ASSERT(strstr(s, "struct nupa_Bar_vtable") != NULL, "has vtable forward");
+    ASSERT(strstr(s, "struct gald_Bar_vtable") != NULL, "has vtable forward");
     free(s);
     cg_unit_free(u);
     PASS();

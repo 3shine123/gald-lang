@@ -1,0 +1,75 @@
+#include <stdio.h>
+#include <gald/runtime.h>
+
+// ═══ C/struct 极端语法矩阵：逐项验证 Nupa 的 C 超集覆盖 ════════════════════
+// A: 命名 typedef struct
+typedef struct Point2 { int x; int y; } Point2;
+
+// B: typedef 到 tag 别名（tag 可未定义完整）
+typedef struct FooTag FooAlias;
+
+// D: 函数指针字段
+typedef struct CbHolder { int (*cb)(int); } CbHolder;
+
+// E: 函数指针数组字段
+typedef struct CbTable2 { int (*row[4])(int); } CbTable2;
+
+
+
+// F: const 字段
+typedef struct ConstCarrier { const int a; } ConstCarrier;
+
+// G: struct 嵌套成员
+struct InnerG { int a; int b; };
+typedef struct OuterG { struct InnerG inner; } OuterG;
+
+// H (unsupported, documented): anonymous inline struct field
+//   typedef struct AnonHolder { struct { int a; int b; } inl; } AnonHolder;
+//   —— Nupa 尚不支持匿名单内联 struct 字段，需命名 tag（见 AGENTS known limits）。
+
+// I: 位域
+typedef struct Bits2 { unsigned a : 3; unsigned b : 5; } Bits2;
+
+// J: 自指指针字段
+typedef struct Node2 { struct Node2 *next; int v; } Node2;
+
+// K: 多维数组 + 数组字段
+typedef struct Grid2 { int cells[4][4]; } Grid2;
+
+// L: 函数指针作参数
+int invoke2(int (*cb)(int), int v) { return cb ? cb(v) : 0; }
+
+// M: 函数指针作返回
+typedef int (*CbIntFn)(int);
+CbIntFn getCb2(void);
+
+// N: typedef 数组
+typedef int Row4[4];
+
+// P: union
+union U2 { int i; double d; };
+
+// O: 普通 struct 值成员（跨 type）
+typedef struct Outer2 { struct Point2 origin; } Outer2;
+
+// U: sizeof(struct)
+void use_all(void) {
+    Point2 p = { 1, 2 };
+    struct FooTag *ft = 0;
+    CbHolder c; c.cb = 0;
+    struct Node2 n; n.v = 3;
+    CbIntFn cbf = 0;
+    Row4 r = { 0, 0, 0, 0 };
+    union U2 u; u.i = 5;
+    struct Outer2 o;
+    Grid2 g;
+    size_t sz = sizeof(Grid2);
+    (void)p; (void)ft; (void)c; (void)n; (void)cbf;
+    (void)r; (void)u; (void)o; (void)g; (void)sz;
+}
+
+int main(void) {
+    use_all();
+    printf("c-struct matrix ok\n");
+    return 0;
+}

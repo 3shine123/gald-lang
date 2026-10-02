@@ -1,0 +1,15 @@
+#import "model.gh"
+#include <stdio.h>
+
+@implementation Shape : NFObject
+- (int)area { return 0; }
+- (const char *)name { return "shape"; }
+@end
+
+@implementation Circle : Shape
+- (int)radius { return 3; }
+- (int)area { return 9 * 3; }   /* r^2 * pi, pi=3 */
+- (const char *)name { return "circle"; }
+@end
+
+int ShapeHelper(void) { return 7; }

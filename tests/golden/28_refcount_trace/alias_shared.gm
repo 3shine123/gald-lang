@@ -1,0 +1,28 @@
+#include "gald/runtime.h"
+#import "Foundation/NFObject.gh"
+#import "Foundation/NFObject.gm"
+
+@interface Item : NFObject {
+    int _tag;
+}
+- (int)tag;
+@end
+
+@implementation Item
+
+- (int)tag {
+    return _tag;
+}
+
+@end
+
+int main() {
+    @noarc {
+        Item *shared = [Item new];
+        Item *alias = shared;
+        [alias retain];
+        [shared release];
+        [alias release];
+    }
+    return 0;
+}

@@ -1,5 +1,5 @@
-use nupa_cst::*;
-use nupa_symbol::symbol::*;
+use gald_cst::*;
+use gald_symbol::symbol::*;
 
 // Strip trailing `*` from a type expression, return (stripped, ptr_level)
 fn strip_ptr(fqn: &str) -> (String, usize) {
@@ -34,8 +34,8 @@ pub struct Binder {
 impl Binder {
     pub fn new(symtab: SymbolTable) -> Self {
         let mut binder = Binder { symtab, current_class: None, has_error: false, err_msg: String::new(), ns_prefix: String::new() };
-        // Register built-in implicit root class nupa_root
-        binder.symtab.declare(Symbol::new(SymbolKind::Class, "nupa_root"));
+        // Register built-in implicit root class gald_root
+        binder.symtab.declare(Symbol::new(SymbolKind::Class, "gald_root"));
         binder
     }
 
@@ -320,7 +320,7 @@ impl Binder {
                 // Capture superclass from the CST so the elaborator's ivar resolver
                 // can walk the superclass chain (subclass methods referencing an
                 // ivar declared in the parent, e.g. `_nodeType` declared in
-                // NPJsonNode used inside NPJsonStringNode's init).
+                // NFJsonNode used inside NFJsonStringNode's init).
                 let superclass_from_cst = match &d.data {
                     CstDeclData::Class { ref superclass, .. } => superclass.clone(),
                     _ => None,

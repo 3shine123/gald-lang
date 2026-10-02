@@ -1,0 +1,18 @@
+// Protocol conformance: missing required method — checker must report an error.
+#import <Foundation/Foundation.gh>
+
+@protocol Drawable
+@required
+- (void)draw;
+@end
+
+@interface Circle <Drawable>
+@end
+
+@implementation Circle
+@end
+
+int main() {
+    Circle *c = [[Circle alloc] init];
+    return 0;
+}

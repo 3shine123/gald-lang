@@ -1,0 +1,17 @@
+#import "model.gh"
+#include <stdio.h>
+
+/* client TU: class methods dispatched from a TU that never saw the
+   @implementation. `+make`/`+create` are alloc-family, so this TU owns the
+   results and releases them. */
+int main() {
+    Factory *f = [Factory make];
+    printf("tag=%s\n", [Factory tag]);
+    printf("magic=%d\n", [Factory magic]);
+    Widget *w = [Widget create];
+    printf("wid=%d\n", [w widgetId]);
+    printf("helper=%d\n", FactoryHelper());
+    gald_release(f);
+    gald_release(w);
+    return 0;
+}

@@ -9,21 +9,21 @@
 #     the hosted-only jmp_buf ABI — the bare-metal mandate)
 #   * legacy must reproduce the sjlj output, not merely "an equivalent one"
 #
-# Usage: NPAC=target/release/nupac ./gen_quality.sh
+# Usage: GALDC=target/release/galdc ./gen_quality.sh
 set -u
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 cd "$ROOT"
 
-NPAC="${NPAC:-}"
-if [[ -z "$NPAC" ]]; then
-    for cand in target/release/nupac target/debug/nupac; do
-        if [[ -x "$cand" ]]; then NPAC="$cand"; break; fi
+GALDC="${GALDC:-}"
+if [[ -z "$GALDC" ]]; then
+    for cand in target/release/galdc target/debug/galdc; do
+        if [[ -x "$cand" ]]; then GALDC="$cand"; break; fi
     done
 fi
-[[ -x "$NPAC" ]] || { echo "error: nupac not found"; exit 2; }
+[[ -x "$GALDC" ]] || { echo "error: galdc not found"; exit 2; }
 
-WORK="${TMPDIR:-/tmp}/nupa_eh_quality.$$"
+WORK="${TMPDIR:-/tmp}/gald_eh_quality.$$"
 mkdir -p "$WORK"
 trap 'rm -rf "$WORK"' EXIT
 
@@ -32,13 +32,13 @@ GOLD="tests/golden"
 
 # label|file|extra args
 CASES=(
-  "no_try|$GOLD/04_arc/retain_release.np|"
-  "single_try|$GOLD/15_exceptions/try_catch.np|-fno-nupa-arc"
-  "foundation|$GOLD/13_foundation/04_npstring/npstring_test.np|"
-  "big_file|examples/01_JSONEditor/json_editor.np|-fno-nupa-arc"
-  "c_superset|$GOLD/22_c_superset/c_superset.np|"
-  "freestanding|$GOLD/25_freestanding/freestanding.np|-ffreestanding"
-  "no_throw_plain|tests/eh_matrix/samples/no_throw_plain.np|"
+  "no_try|$GOLD/04_arc/retain_release.gm|"
+  "single_try|$GOLD/15_exceptions/try_catch.gm|-fno-gald-arc"
+  "foundation|$GOLD/13_foundation/04_nfstring/nfstring_test.gm|"
+  "big_file|examples/01_JSONEditor/json_editor.gm|-fno-gald-arc"
+  "c_superset|$GOLD/22_c_superset/c_superset.gm|"
+  "freestanding|$GOLD/25_freestanding/freestanding.gm|-ffreestanding"
+  "no_throw_plain|tests/eh_matrix/samples/no_throw_plain.gm|"
 )
 
 printf '%-14s %-9s %8s %8s %8s %9s %8s\n' \
@@ -55,12 +55,12 @@ for entry in "${CASES[@]}"; do
         # shellcheck disable=SC2206
         [[ -n "$extra" ]] && args+=($extra)
         out="$WORK/$label.$m.c"
-        if ! $NPAC -rewrite-nupa "${args[@]}" -o "$out" "$file" >/dev/null 2>&1; then
+        if ! $GALDC -rewrite-gald "${args[@]}" -o "$out" "$file" >/dev/null 2>&1; then
             printf '%-14s %-9s %s\n' "$label" "$m" "TRANSPILE-FAIL"
             continue
         fi
         lines=$(wc -l < "$out" | tr -d ' ')
-        guards=$(grep -c "__nupa_eh_flag" "$out" || true)
+        guards=$(grep -c "__gald_eh_flag" "$out" || true)
         setj=$(grep -cE "setjmp|longjmp" "$out" || true)
         bytes=$(wc -c < "$out" | tr -d ' ')
         # clang compile time of the generated C (only when it can compile)
@@ -76,15 +76,15 @@ done
 # no_throw_plain has no @try, no @throw, and no Foundation import (therefore no
 # inlined throwing chain). The stage-3 effect analysis must keep its checked
 # output completely free of EH guards. NOTE: judge by "any occurrence of
-# __nupa_eh_flag", not by a literal `if (__nupa_eh_flag` prefix — the codegen
-# parenthesizes the condition (`if ((__nupa_eh_flag == 0))`), so a prefix grep
+# __gald_eh_flag", not by a literal `if (__gald_eh_flag` prefix — the codegen
+# parenthesizes the condition (`if ((__gald_eh_flag == 0))`), so a prefix grep
 # reports 0 even when guards are present.
 plain_c="$WORK/no_throw_plain.checked.c"
 if [[ ! -f "$plain_c" ]]; then
     echo "GATE FAIL no_throw_plain did not transpile under -eh checked"
     exit 1
 fi
-g=$(grep -c "__nupa_eh_flag" "$plain_c" || true)
+g=$(grep -c "__gald_eh_flag" "$plain_c" || true)
 if [[ "$g" -eq 0 ]]; then
     echo "GATE OK   no_throw_plain / -eh checked : 0 guards (nothing to pay)"
 else

@@ -1,10 +1,10 @@
-#include "nupa/elaborator.h"
-#include "nupa/parser.h"
-#include "nupa/lexer.h"
-#include "nupa/cst.h"
-#include "nupa/symbol.h"
-#include "nupa/binder.h"
-#include "nupa/checker.h"
+#include "gald/elaborator.h"
+#include "gald/parser.h"
+#include "gald/lexer.h"
+#include "gald/cst.h"
+#include "gald/symbol.h"
+#include "gald/binder.h"
+#include "gald/checker.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -31,7 +31,7 @@ static int run_elaboration(symbol_table_t *st, translation_unit_t *unit) {
 
 static symbol_table_t *parse_and_elab(const char *src, translation_unit_t **out_unit) {
     lexer_t lexer;
-    lexer_init(&lexer, src, strlen(src), "test.np");
+    lexer_init(&lexer, src, strlen(src), "test.gm");
     parser_t *p = parser_create(&lexer);
     *out_unit = parser_parse_translation_unit(p);
     parser_destroy(p);

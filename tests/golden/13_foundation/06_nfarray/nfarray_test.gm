@@ -1,0 +1,48 @@
+#include <stdio.h>
+#import <Foundation/Foundation.gh>
+
+int main() {
+    @autoreleasepool {
+        NFString *a = @"a";
+        NFString *b = @"b";
+        NFString *c = @"c";
+
+        // 1. arrayWithObjects:count: + count + objectAtIndex
+        id objs[3];
+        objs[0] = a;
+        objs[1] = b;
+        objs[2] = c;
+        NFArray *arr = [NFArray arrayWithObjects:objs count:3];
+        printf("count=%zu elem0=%s elem1=%s elem2=%s\n",
+            [arr count],
+            [[arr objectAtIndex:0] UTF8String],
+            [[arr objectAtIndex:1] UTF8String],
+            [[arr objectAtIndex:2] UTF8String]);
+
+        // 2. firstObject / lastObject
+        printf("first=%s last=%s\n",
+            [[arr firstObject] UTF8String], [[arr lastObject] UTF8String]);
+
+        // 3. arrayWithObject: / array (empty)
+        NFArray *single = [NFArray arrayWithObject:b];
+        printf("single=%zu first=%s\n", [single count], [[single firstObject] UTF8String]);
+        NFArray *empty = [NFArray array];
+        printf("empty=%zu first=%p\n", [empty count], (void *)[empty firstObject]);
+
+        // 4. containsObject: / indexOfObject:
+        printf("contains b=%d idx b=%zu idx z=%zu\n",
+            [arr containsObject:b], [arr indexOfObject:b], [arr indexOfObject:NULL]);
+
+        // 5. @[] literal
+        NFArray *lit = @[ @"x", @"y" ];
+        printf("lit count=%zu last=%s\n", [lit count], [[lit lastObject] UTF8String]);
+
+        // 6. copy (returns a distinct immutable NFArray, +1 → released by ARC)
+        NFArray *copy = [arr copy];
+        printf("copy count=%zu src_count=%zu\n", [copy count], [arr count]);
+
+        // 7. description
+        printf("desc=%s\n", [[arr description] UTF8String]);
+    }
+    return 0;
+}

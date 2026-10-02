@@ -1,0 +1,27 @@
+#include <string.h>
+#import <Foundation/Foundation.gh>
+
+// struct ==/!= value comparison (route map item #2):
+// both operands the same value-struct type → field-wise gald_struct_eq_<tag>.
+// Pointers keep C address-comparison semantics; array fields compare via memcmp.
+
+struct Inner { int a; float b; };
+struct Wrap  { struct Inner in; int arr[4]; char *name; struct Inner *ptr; };
+
+int main() {
+    struct Inner i1 = {1, 2.5};
+    struct Inner i2 = {1, 2.5};
+    struct Inner i3 = {2, 2.5};
+
+    printf("inner eq=%d neq=%d diff=%d\n", i1 == i2, i1 != i2, i1 == i3);
+
+    struct Wrap w1 = {{1, 2.5}, {1,2,3,4}, "hi", &i1};
+    struct Wrap w2 = {{1, 2.5}, {1,2,3,4}, "hi", &i1};
+    struct Wrap w3 = {{1, 2.5}, {1,2,0,4}, "hi", &i1};
+
+    // nested struct field, array field (memcmp), pointer fields (address eq)
+    printf("wrap eq=%d diff=%d\n", w1 == w2, w1 == w3);
+
+    if (i1 == i2 && w1 != w3) { printf("control flow OK\n"); }
+    return 0;
+}

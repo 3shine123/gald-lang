@@ -1,6 +1,6 @@
-#include "nupa/parser.h"
-#include "nupa/lexer.h"
-#include "nupa/cst.h"
+#include "gald/parser.h"
+#include "gald/lexer.h"
+#include "gald/cst.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -14,7 +14,7 @@ static int passed = 0;
 static void do_test(const char *name, const char *src, int expected_decls) {
     TEST(name);
     lexer_t lexer;
-    lexer_init(&lexer, src, strlen(src), "test.np");
+    lexer_init(&lexer, src, strlen(src), "test.gm");
     parser_t *p = parser_create(&lexer);
     translation_unit_t *unit = parser_parse_translation_unit(p);
 

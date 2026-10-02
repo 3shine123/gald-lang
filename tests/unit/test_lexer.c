@@ -1,5 +1,5 @@
-#include "nupa/lexer.h"
-#include "nupa/token.h"
+#include "gald/lexer.h"
+#include "gald/token.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -19,7 +19,7 @@ static void test_identifiers(void) {
     TEST("identifiers");
     const char *src = "foo bar _private";
     lexer_t l;
-    lexer_init(&l, src, strlen(src), "test.np");
+    lexer_init(&l, src, strlen(src), "test.gm");
 
     token_t t = lexer_next(&l);
     if (t.kind != TOKEN_IDENTIFIER || t.length != 3 || strncmp(t.start, "foo", 3) != 0) {
@@ -44,7 +44,7 @@ static void test_keywords(void) {
 
     const char *src = "@interface @end self";
     lexer_t l;
-    lexer_init(&l, src, strlen(src), "test.np");
+    lexer_init(&l, src, strlen(src), "test.gm");
 
     token_t t = lexer_next(&l);
     if (t.kind != TOKEN_KEYWORD || t.keyword != KW_AT_INTERFACE) { FAIL("expected @interface"); return; }
@@ -59,7 +59,7 @@ static void test_integers(void) {
     TEST("integers");
     const char *src = "42 0xFF 123u";
     lexer_t l;
-    lexer_init(&l, src, strlen(src), "test.np");
+    lexer_init(&l, src, strlen(src), "test.gm");
 
     token_t t = lexer_next(&l);
     if (t.kind != TOKEN_INTEGER || t.length != 2) { FAIL("expected 42"); return; }
@@ -74,7 +74,7 @@ static void test_floats(void) {
     TEST("floats");
     const char *src = "3.14 1e10 .5";
     lexer_t l;
-    lexer_init(&l, src, strlen(src), "test.np");
+    lexer_init(&l, src, strlen(src), "test.gm");
 
     token_t t = lexer_next(&l);
     if (t.kind != TOKEN_FLOAT) { FAIL("expected float 3.14"); return; }
@@ -89,7 +89,7 @@ static void test_strings(void) {
     TEST("string literals");
     const char *src = "\"hello\" @\"world\"";
     lexer_t l;
-    lexer_init(&l, src, strlen(src), "test.np");
+    lexer_init(&l, src, strlen(src), "test.gm");
 
     token_t t = lexer_next(&l);
     if (t.kind != TOKEN_STRING || t.length != 5) { FAIL("expected \"hello\""); return; }
@@ -102,7 +102,7 @@ static void test_operators(void) {
     TEST("operators");
     const char *src = "++ == -> != ...";
     lexer_t l;
-    lexer_init(&l, src, strlen(src), "test.np");
+    lexer_init(&l, src, strlen(src), "test.gm");
 
     token_t t = lexer_next(&l);
     if (t.kind != TOKEN_INCR) { FAIL("expected ++"); return; }
@@ -121,7 +121,7 @@ static void test_comments(void) {
     TEST("comments skipped");
     const char *src = "/* block */ foo\nbar // line comment";
     lexer_t l;
-    lexer_init(&l, src, strlen(src), "test.np");
+    lexer_init(&l, src, strlen(src), "test.gm");
     token_t t = lexer_next(&l);
     if (t.kind != TOKEN_IDENTIFIER || strncmp(t.start, "foo", 3) != 0) { FAIL("expected 'foo' after block comment"); return; }
     t = lexer_next(&l);
@@ -132,7 +132,7 @@ static void test_comments(void) {
 static void test_eof(void) {
     TEST("EOF");
     lexer_t l;
-    lexer_init(&l, "", 0, "test.np");
+    lexer_init(&l, "", 0, "test.gm");
     token_t t = lexer_next(&l);
     if (t.kind != TOKEN_EOF) { FAIL("expected EOF"); return; }
     PASS();

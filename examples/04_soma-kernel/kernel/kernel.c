@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
-#include <nupa/runtime.h>
+#include <gald/runtime.h>
 #include "kernel.h"
 
 /* ================= freestanding libc bits ================= */
@@ -369,29 +369,29 @@ unsigned int soma_rotl(unsigned int v, int sh);
 
 /* Nupa @namespace SomaCore + @interface Calculator (implicit root class) */
 struct SomaCore__Calculator {
-    struct NPClass *isa;
+    struct NFClass *isa;
     uint32_t retain_count;
     int total;
 };
-extern NPClass nupa_SomaCore__Calculator_class;
-extern void nupa_meta_init(void);
+extern NFClass gald_SomaCore__Calculator_class;
+extern void gald_meta_init(void);
 void soma_class_demo(void);
 void soma_instance_demo(struct SomaCore__Calculator *acc);
 
 /* Nupa @interface NupaIoError — exception object for @try/@catch */
 struct SomaCore__NupaIoError {
-    struct NPClass *isa;
+    struct NFClass *isa;
     uint32_t retain_count;
     int code;
 };
-extern NPClass nupa_SomaCore__NupaIoError_class;
+extern NFClass gald_SomaCore__NupaIoError_class;
 void soma_exc_demo(id err);
 void soma_heap_demo(void);
 void soma_advanced_demo(void);
 void soma_kbd_demo(void);
 
-/* Runtime globals (nupa___nupa_root_class, __nupa_exception_buf,
- * __nupa_exception_value, memcpy) are provided by runtime_freestanding.c. */
+/* Runtime globals (gald___gald_root_class, __gald_exception_buf,
+ * __gald_exception_value, memcpy) are provided by runtime_freestanding.c. */
 void kmain(void) {
     extern volatile uint32_t tick;
 
@@ -402,26 +402,26 @@ void kmain(void) {
     pit_init(100);
 
     kputs("\n=== SOMA KERNEL (i686, 32-bit protected mode) ===\n");
-    kputs("built: clang + nasm + nupac transpile, ran under qemu-system-i386\n");
+    kputs("built: clang + nasm + galdc transpile, ran under qemu-system-i386\n");
 
     /* Nupa -> C : the Nupa module prints via kputs/kputdec/kputhex */
     soma_core_boot();
 
     /* Nupa advanced features: @namespace + @interface (implicit root class).
-     * nupa_meta_init() (emitted weak by the transpiler) fills in class
+     * gald_meta_init() (emitted weak by the transpiler) fills in class
      * metadata; the implicit root class metadata is defined above. */
-    nupa_meta_init();
+    gald_meta_init();
     soma_class_demo();
 
     struct SomaCore__Calculator acc;
     memset(&acc, 0, sizeof(acc));
-    acc.isa = &nupa_SomaCore__Calculator_class;   /* hand-built instance */
+    acc.isa = &gald_SomaCore__Calculator_class;   /* hand-built instance */
     soma_instance_demo(&acc);
 
     /* @try/@catch/@finally on bare metal: throw a hand-built NupaIoError */
     struct SomaCore__NupaIoError err;
     memset(&err, 0, sizeof(err));
-    err.isa = &nupa_SomaCore__NupaIoError_class;
+    err.isa = &gald_SomaCore__NupaIoError_class;
     err.code = 42;
     soma_exc_demo((id)&err);
 
@@ -435,7 +435,7 @@ void kmain(void) {
     kprintf("[c] call Nupa: fib(15)=%d gcd(1071,462)=%d\n",
             soma_fib(15), soma_gcd(1071, 462));
     kprintf("[c] call Nupa: rotl(0x12345678,4)=0x%x\n", soma_rotl(0x12345678u, 4));
-    kprintf("[c] call Nupa: fnv1a(\"nupa\")=0x%x\n", soma_fnv1a("nupa"));
+    kprintf("[c] call Nupa: fnv1a(\"gald\")=0x%x\n", soma_fnv1a("gald"));
 
     /* Nupa inline asm io_wait (outb to 0x80) used from C */
     for (int i = 0; i < 16; i++) soma_io_wait();

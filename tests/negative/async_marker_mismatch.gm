@@ -1,0 +1,23 @@
+// Negative: @interface marks `NFAsync<int>` but @implementation does not.
+// The marker is part of the method signature — the two declarations must
+// agree.
+// Expected error: 'NFAsync' marker mismatch on 'compute:': the @interface
+// and @implementation disagree — the marker is part of the method signature
+#import <Foundation/Foundation.gh>
+
+@interface F : NFObject
+- (NFAsync<int>)compute:(int)n;
+@end
+
+@implementation F
+- (int)compute:(int)n {
+    int raw = @await n;
+    return raw * 2;
+}
+@end
+
+int main() {
+    F *f = [[F alloc] init];
+    printf("r=%d\n", [f compute:21]);
+    return 0;
+}

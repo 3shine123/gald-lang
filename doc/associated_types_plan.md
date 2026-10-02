@@ -1,37 +1,37 @@
 # Associated Types：溯源、横向对比与拼写结论
 
 > 状态：**调研完成（2026-09-30），未实施**。本文是设计与决策的单一事实来源。
-> 触发问题："nupa 有了泛型协议，但缺一个更好用的关联语法，所以加 `@associated`？这来自 Swift 吗？其他语言怎么做的？"
+> 触发问题："gald 有了泛型协议，但缺一个更好用的关联语法，所以加 `@associated`？这来自 Swift 吗？其他语言怎么做的？"
 
 ## 0. 先修正提问里的前提（探针实证）
 
-提问的前提是"nupa 有了泛型协议"。**实测不成立，而且比"擦除"更弱。**
+提问的前提是"gald 有了泛型协议"。**实测不成立，而且比"擦除"更弱。**
 
 ```objc
 @protocol Boxable<T>          // ✅ 能解析
 - (T)unwrap;
 @end
 
-@interface MyBox : NPObject <Boxable<NPString *>>   // ✅ 能解析
-- (NPString *)unwrap;
+@interface MyBox : NFObject <Boxable<NFString *>>   // ✅ 能解析
+- (NFString *)unwrap;
 @end
 
-id<Boxable<NPString *>> b;    // ❌ 解析失败：expected '>' after type arguments
+id<Boxable<NFString *>> b;    // ❌ 解析失败：expected '>' after type arguments
 ```
 
-三组探针结论（`/tmp/p_gproto.np`、`/tmp/p_gproto2.np`）：
+三组探针结论（`/tmp/p_gproto.gm`、`/tmp/p_gproto2.gm`）：
 
 | 探针 | 形态 | 结果 |
 |---|---|---|
 | 1 | `@protocol P<T>` + `id<P>` + `@implementation` 里 `- (id)unwrap` | 编译运行通过（exit=0） |
-| 2 | 查生成 C 的方法签名 | `NPObject * NPString_unwrap(...)` —— **`T` 被擦除为 `id`/`NPObject *`**，未生成任何 `Boxable_<T>` 特化 |
-| 3 | `id<Boxable<NPString *>>` | **解析错误** |
+| 2 | 查生成 C 的方法签名 | `NFObject * NFString_unwrap(...)` —— **`T` 被擦除为 `id`/`NFObject *`**，未生成任何 `Boxable_<T>` 特化 |
+| 3 | `id<Boxable<NFString *>>` | **解析错误** |
 
 **所以真实状态是三层弱化，不是一层**：
 
 1. 协议头里的 `T` 在生成 C 时**退化为 `id`**（无特化）
 2. 协议**类型实参**（`id<P<X>>`）**根本无法解析**
-3. 类声明侧 `<Boxable<NPString *>>` 能解析，但 checker 的协议一致性检查**只按协议名匹配**（`protocol_refs: Vec<String>`，AGENTS.md 记载 binder 存的是名字），实参未被记录 → 一致性检查拿 `T` 无从比对
+3. 类声明侧 `<Boxable<NFString *>>` 能解析，但 checker 的协议一致性检查**只按协议名匹配**（`protocol_refs: Vec<String>`，AGENTS.md 记载 binder 存的是名字），实参未被记录 → 一致性检查拿 `T` 无从比对
 
 > ⚠️ 探针 1 的设计缺陷（自我更正）：它让 `@implementation` 写 `- (id)unwrap` 而非 `- (T)unwrap`，因此**证不了协议侧 `T` 是否被代入**。探针 2 用生成 C 的实际签名补上了这一环，才得出"T 被擦除"的结论。
 > **教训**：判定"某泛型机制是否工作"，必须看**生成产物**（特化符号是否存在），不能只看"编译通过"。
@@ -121,12 +121,12 @@ Nupa 若只加 `@associated` 而复用 `typedef` 做绑定，会有问题：
 - (Element)objectAtIndex:(size_t)i;   // 方法签名可用槽名
 @end
 
-@interface MyArray<E> : NPObject <Container>
+@interface MyArray<E> : NFObject <Container>
 @typealias Element = E;               // 绑定（独立关键字，不污染 typedef）
 @end
 ```
 
-**`@typealias` 而不是 `typealias`**（无 `@`）：因为 `typealias` 在 C 里不是词，但 Nupa 的 `typedef` 已经是 C 词，裸 `typealias` 会让用户以为是 `typedef` 的别名、产生混淆。`@` 前缀明确它属于"nupa 独有的声明槽"。
+**`@typealias` 而不是 `typealias`**（无 `@`）：因为 `typealias` 在 C 里不是词，但 Nupa 的 `typedef` 已经是 C 词，裸 `typealias` 会让用户以为是 `typedef` 的别名、产生混淆。`@` 前缀明确它属于"gald 独有的声明槽"。
 
 > ⚠️ 备选方案（更省，但我不推荐）：只加 `@associated`，绑定复用 `typedef`。
 > 理由：实现量小一半。**不推荐的理由**：AGENTS.md 记了 `<...>` 块在 `@interface` 里的判别本就脆弱（协议列表误路由 type_params、试探失败未回滚两个真 bug），再加一个"用 `typedef` 表达协议槽绑定"的语义会进一步浑浊化类型判定。**收益不抵复杂度。**
@@ -168,7 +168,7 @@ Nupa 若只加 `@associated` 而复用 `typedef` 做绑定，会有问题：
 
 | 步 | 内容 | 可验证标志 |
 |---|---|---|
-| **S0** | 协议真泛型化：`id<P<X>>` 能解析 + `T` 进生成签名（`P_<T>` 特化）+ 一致性检查记录实参 | `@protocol P<T>` + `id<P<NPString *>>` 实跑，生成 C 见特化符号 |
+| **S0** | 协议真泛型化：`id<P<X>>` 能解析 + `T` 进生成签名（`P_<T>` 特化）+ 一致性检查记录实参 | `@protocol P<T>` + `id<P<NFString *>>` 实跑，生成 C 见特化符号 |
 | **S1** | `@associated` 声明 + checker 校验"每个 `@associated` 都有 `@typealias` 绑定" | 缺绑定时报清晰错误 |
 | **S2** | `@typealias` 绑定 + 绑定类型与方法签名一致性校验 | 绑定错类型报错 |
 | **S3** | 调用点 `Element` 推断（`method_returns` 扩为 `(协议, selector)` 键） | `[c objectAtIndex:0]` 推出 `X` 而非 `id` |
@@ -178,7 +178,7 @@ Nupa 若只加 `@associated` 而复用 `typedef` 做绑定，会有问题：
 
 ## 5. 与 Nupa 现有替代品的关系
 
-Nupa 现在**已经有**一个"临时替代"（AGENTS.md 记载）：`NPDictionary<K, V>` 的 `objectForKey:` 返回 `V`，靠**按参数名渲染的文本哨兵**（`T_PARAM_RENDER = "NPObject * /*T*/"` + 出口文本级归一化）。
+Nupa 现在**已经有**一个"临时替代"（AGENTS.md 记载）：`NFDictionary<K, V>` 的 `objectForKey:` 返回 `V`，靠**按参数名渲染的文本哨兵**（`T_PARAM_RENDER = "NFObject * /*T*/"` + 出口文本级归一化）。
 
 **必须如实说明**：那是**替代品不是机制**。它：
 - ✅ 能跑通、能过测试、能生成正确 C

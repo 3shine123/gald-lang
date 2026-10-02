@@ -1,0 +1,18 @@
+#import "model.gh"
+#include <stdio.h>
+
+/* client TU: implements `onlyInClient` as well, so the two TUs disagree about
+   the uniform vtable layout. This case is EXPECTED TO FAIL — see EXPECT_FAIL
+   in this directory. The point is that it fails loudly and legibly, rather than
+   running and reading a function pointer from the wrong offset. */
+@implementation Widget : NFObject
+- (void)show { }
+- (int)onlyInClient { return 1; }
+@end
+
+int main() {
+    Widget *w = [[Widget alloc] init];
+    [w show];
+    printf("onlyInClient=%d\n", [w onlyInClient]);
+    return 0;
+}

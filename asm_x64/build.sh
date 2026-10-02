@@ -5,7 +5,7 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 
-NUPAC="${NUPAC:-../target/debug/nupac}"
+GALDC="${GALDC:-../target/debug/galdc}"
 
 echo "==> transpile + compile as x86_64 + run (Rosetta)"
-"$NUPAC" -arch x86_64 run -asm asm_x86_ext.s asm_x86_fusion_test.np
+"$GALDC" -arch x86_64 run -asm asm_x86_ext.s asm_x86_fusion_test.gm

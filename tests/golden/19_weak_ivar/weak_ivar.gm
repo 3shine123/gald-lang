@@ -1,0 +1,49 @@
+#include <stdio.h>
+#include <stdlib.h>
+#import <Foundation/Foundation.gh>
+
+@interface Widget : NFObject
+- (int)value;
+@end
+
+@implementation Widget
+- (int)value { return 42; }
+@end
+
+@interface Holder : NFObject {
+    @public (weak) Widget *_widget;
+}
+- (instancetype)initWithWidget:(Widget *)w;
+- (void)dealloc;
+@end
+
+@implementation Holder
+- (instancetype)initWithWidget:(Widget *)w {
+    self = [super init];
+    if (self) {
+        _widget = w;
+    }
+    return self;
+}
+- (void)dealloc {
+    [super dealloc];
+}
+@end
+
+int main() {
+    @autoreleasepool {
+        Holder *h = [[Holder alloc] initWithWidget:nil];
+        printf("before: %p\n", (void *)h->_widget);
+
+        Widget *w = [[Widget alloc] init];
+        h->_widget = w;
+        printf("after assign: %p\n", (void *)h->_widget);
+        printf("widget value: %d\n", [h->_widget value]);
+
+        [w release];
+        printf("after release: %p\n", (void *)h->_widget);
+
+        [h release];
+    }
+    return 0;
+}

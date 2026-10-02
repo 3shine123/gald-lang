@@ -4,12 +4,12 @@
 
 | 文件 | 期望 |
 |------|------|
-| `proto_conformance_test.np` | 编译通过，stdout 见 `proto_conformance_test.out` |
+| `proto_conformance_test.gm` | 编译通过，stdout 见 `proto_conformance_test.out` |
 
 `.out` 是程序 stdout 快照。`test_all.py` 只校验退出码（不比对 `.out`），输出有变化时需同步更新快照。
 
 ```bash
-./target/debug/nupac run tests/golden/31_proto_conformance/proto_conformance_test.np
+./target/debug/galdc run tests/golden/31_proto_conformance/proto_conformance_test.gm
 ```
 
 ## 行为
@@ -34,12 +34,12 @@
 @end
 ```
 
-`Square` 需实现 `draw` / `area` / `color`；`highlight` 是 `@optional`，不实现不报错。正例 `proto_conformance_test.np` 正是这个结构（协议继承链 + 可选方法豁免）。
+`Square` 需实现 `draw` / `area` / `color`；`highlight` 是 `@optional`，不实现不报错。正例 `proto_conformance_test.gm` 正是这个结构（协议继承链 + 可选方法豁免）。
 
 未实现时报错，格式与其它 checker 诊断一致（`file:line:col: error:`）：
 
 ```
-[checker] proto_missing_method.np:10:1: class 'Circle' does not implement
+[checker] proto_missing_method.gm:10:1: class 'Circle' does not implement
 required method 'draw' from protocol 'Drawable'
 ```
 
@@ -47,13 +47,13 @@ required method 'draw' from protocol 'Drawable'
 
 **故意失败**的用例不在本目录，在 **`tests/negative/`**——它们期望编译失败，与 golden 目录"快照程序 stdout"的语义相反：
 
-- `tests/negative/proto_missing_method.np` — `Circle <Drawable>` 未实现必需的 `draw`
-- `tests/negative/protocol_fail.np` — 同类样本（原在 `golden/07_protocols/`，历史遗留的故意失败用例，无 `.out` 快照）
+- `tests/negative/proto_missing_method.gm` — `Circle <Drawable>` 未实现必需的 `draw`
+- `tests/negative/protocol_fail.gm` — 同类样本（原在 `golden/07_protocols/`，历史遗留的故意失败用例，无 `.out` 快照）
 
 `tests/negative/` 已在 `test_all.py` 的 glob 中排除（`"negative" not in p.parts`），避免被当作普通 FAIL。验证方式：
 
 ```bash
-./target/debug/nupac run tests/negative/proto_missing_method.np   # 期望非 0 退出 + 上述错误信息
+./target/debug/galdc run tests/negative/proto_missing_method.gm   # 期望非 0 退出 + 上述错误信息
 ```
 
 ## 实现要点
@@ -66,7 +66,7 @@ required method 'draw' from protocol 'Drawable'
 - **父协议递归**：`parents` 逐层展开，带 `seen` 去重防环。
 - **跨 TU 安全**：无 `@implementation` 的类（header-only，实现链接自别处）整体跳过。
 - **协议名解析**：先查原名，再查 `ns::proto` 形式（命名空间内协议）。
-- **selector 归一化**：binder 存多段 selector 带尾冒号（`deployShield:`），AST 方法名可能不带，比较时 `trim_end_matches(':')`。不归一化会让 `ultimate_megafusion_test.np` 等 15 个测试误报。
+- **selector 归一化**：binder 存多段 selector 带尾冒号（`deployShield:`），AST 方法名可能不带，比较时 `trim_end_matches(':')`。不归一化会让 `ultimate_megafusion_test.gm` 等 15 个测试误报。
 
 ## 配套的 parser 修复
 
@@ -80,8 +80,8 @@ required method 'draw' from protocol 'Drawable'
 
 | 文件 | 期望 |
 |------|------|
-| `proto_intersection_test.np` | 编译通过（组合声明 + 交集类型正例），stdout 见 `.out` |
-| `tests/negative/proto_intersection_missing.np` | 编译必须失败：`class 'Bad' does not implement required method 'serialize'` |
+| `proto_intersection_test.gm` | 编译通过（组合声明 + 交集类型正例），stdout 见 `.out` |
+| `tests/negative/proto_intersection_missing.gm` | 编译必须失败：`class 'Bad' does not implement required method 'serialize'` |
 
 ```objc
 @protocol Renderable <Drawable & Serializable>   // ① 组合声明：binder 把 P、Q 的 required 并入 R 的 parents

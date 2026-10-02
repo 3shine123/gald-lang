@@ -115,197 +115,197 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5baebc0774151f905a1a2cc41989300b1e6fbb29aff0ceffa1064fdd3088d582"
 
 [[package]]
-name = "is_terminal_polyfill"
-version = "1.70.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a6cb138bb79a146c1bd460005623e142ef0181e3d0219cb493e02f7d08a35695"
-
-[[package]]
-name = "nupa-arc"
+name = "gald-arc"
 version = "0.1.0"
 dependencies = [
- "nupa-ast",
- "nupa-cfg",
- "nupa-cst",
- "nupa-ownership",
+ "gald-ast",
+ "gald-cfg",
+ "gald-cst",
+ "gald-ownership",
 ]
 
 [[package]]
-name = "nupa-ast"
+name = "gald-ast"
 version = "0.1.0"
 dependencies = [
- "nupa-cst",
+ "gald-cst",
 ]
 
 [[package]]
-name = "nupa-async"
+name = "gald-async"
 version = "0.1.0"
 dependencies = [
- "nupa-ast",
- "nupa-cst",
+ "gald-ast",
+ "gald-cst",
 ]
 
 [[package]]
-name = "nupa-binder"
+name = "gald-binder"
 version = "0.1.0"
 dependencies = [
- "nupa-ast",
- "nupa-cst",
- "nupa-lexer",
- "nupa-parser",
- "nupa-symbol",
+ "gald-ast",
+ "gald-cst",
+ "gald-lexer",
+ "gald-parser",
+ "gald-symbol",
 ]
 
 [[package]]
-name = "nupa-cfg"
+name = "gald-cfg"
 version = "0.1.0"
 dependencies = [
- "nupa-ast",
+ "gald-ast",
 ]
 
 [[package]]
-name = "nupa-checker"
+name = "gald-checker"
 version = "0.1.0"
 dependencies = [
- "nupa-ast",
- "nupa-cst",
- "nupa-symbol",
+ "gald-ast",
+ "gald-cst",
+ "gald-symbol",
 ]
 
 [[package]]
-name = "nupa-codegen"
+name = "gald-codegen"
 version = "0.1.0"
 dependencies = [
  "attrs",
- "nupa-ast",
- "nupa-cst",
- "nupa-elaborator",
- "nupa-ownership",
- "nupa-symbol",
+ "gald-ast",
+ "gald-cst",
+ "gald-elaborator",
+ "gald-ownership",
+ "gald-symbol",
 ]
 
 [[package]]
-name = "nupa-cpp"
+name = "gald-cpp"
 version = "0.1.0"
 
 [[package]]
-name = "nupa-cst"
+name = "gald-cst"
 version = "0.1.0"
 
 [[package]]
-name = "nupa-cst-visit"
+name = "gald-cst-visit"
 version = "0.1.0"
 dependencies = [
- "nupa-cst",
+ "gald-cst",
 ]
 
 [[package]]
-name = "nupa-defer"
+name = "gald-defer"
 version = "0.1.0"
 dependencies = [
- "nupa-ast",
- "nupa-cst",
+ "gald-ast",
+ "gald-cst",
 ]
 
 [[package]]
-name = "nupa-eh"
+name = "gald-eh"
 version = "0.1.0"
 dependencies = [
- "nupa-ast",
- "nupa-cst",
+ "gald-ast",
+ "gald-cst",
 ]
 
 [[package]]
-name = "nupa-elaborator"
+name = "gald-elaborator"
 version = "0.1.0"
 dependencies = [
- "nupa-ast",
- "nupa-binder",
- "nupa-cst",
- "nupa-symbol",
+ "gald-ast",
+ "gald-binder",
+ "gald-cst",
+ "gald-symbol",
 ]
 
 [[package]]
-name = "nupa-layout"
+name = "gald-layout"
 version = "0.1.0"
 
 [[package]]
-name = "nupa-lexer"
+name = "gald-lexer"
 version = "0.1.0"
 
 [[package]]
-name = "nupa-ownership"
+name = "gald-ownership"
 version = "0.1.0"
 dependencies = [
- "nupa-ast",
+ "gald-ast",
 ]
 
 [[package]]
-name = "nupa-parser"
+name = "gald-parser"
 version = "0.1.0"
 dependencies = [
- "nupa-cst",
- "nupa-lexer",
- "nupa-preprocessor",
+ "gald-cst",
+ "gald-lexer",
+ "gald-preprocessor",
 ]
 
 [[package]]
-name = "nupa-pattern"
+name = "gald-pattern"
 version = "0.1.0"
 dependencies = [
- "nupa-ast",
- "nupa-cst",
+ "gald-ast",
+ "gald-cst",
 ]
 
 [[package]]
-name = "nupa-preprocessor"
+name = "gald-preprocessor"
 version = "0.1.0"
 dependencies = [
- "nupa-cpp",
- "nupa-cst",
+ "gald-cpp",
+ "gald-cst",
 ]
 
 [[package]]
-name = "nupa-symbol"
+name = "gald-symbol"
 version = "0.1.0"
 dependencies = [
- "nupa-cst",
+ "gald-cst",
 ]
 
 [[package]]
-name = "nupa-trace"
+name = "gald-trace"
 version = "0.1.0"
 dependencies = [
- "nupa-ast",
- "nupa-cst",
- "nupa-ownership",
+ "gald-ast",
+ "gald-cst",
+ "gald-ownership",
 ]
 
 [[package]]
-name = "nupac"
+name = "galdc"
 version = "0.1.0"
 dependencies = [
  "attrs",
  "cc",
  "clap",
  "clap_complete",
- "nupa-arc",
- "nupa-ast",
- "nupa-async",
- "nupa-binder",
- "nupa-cfg",
- "nupa-checker",
- "nupa-codegen",
- "nupa-cst",
- "nupa-defer",
- "nupa-eh",
- "nupa-elaborator",
- "nupa-parser",
- "nupa-pattern",
- "nupa-preprocessor",
- "nupa-symbol",
- "nupa-trace",
+ "gald-arc",
+ "gald-ast",
+ "gald-async",
+ "gald-binder",
+ "gald-cfg",
+ "gald-checker",
+ "gald-codegen",
+ "gald-cst",
+ "gald-defer",
+ "gald-eh",
+ "gald-elaborator",
+ "gald-parser",
+ "gald-pattern",
+ "gald-preprocessor",
+ "gald-symbol",
+ "gald-trace",
 ]
+
+[[package]]
+name = "is_terminal_polyfill"
+version = "1.70.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a6cb138bb79a146c1bd460005623e142ef0181e3d0219cb493e02f7d08a35695"
 
 [[package]]
 name = "once_cell_polyfill"

@@ -1,0 +1,19 @@
+#include <stdio.h>
+#import "Foundation/Foundation.gh"
+
+@interface Foo : NFObject
+@property int value;
+@end
+
+@implementation Foo
+@end
+
+int main() {
+    @autoreleasepool {
+        Foo *f = [[Foo alloc] init];
+        f.value = 42;
+        printf("%d\n", f.value);
+        [f release];
+    }
+    return 0;
+}

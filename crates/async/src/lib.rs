@@ -21,7 +21,7 @@
 //!   2. diagnostics: calling a non-void async method from a sync context,
 //!   3. `@try` spanning an await rejection.
 
-use nupa_ast::{AstDecl, AstDeclData, AstExpr, AstExprData, AstExprKind, AstStmt, AstStmtData};
+use gald_ast::{AstDecl, AstDeclData, AstExpr, AstExprData, AstExprKind, AstStmt, AstStmtData};
 
 /// A method classified as async, with the data the desugar needs.
 pub struct AsyncMethod<'a> {
@@ -126,7 +126,7 @@ pub fn method_is_async(m: &AstDecl) -> bool {
 /// before desugar runs; any error aborts compilation).
 pub struct AsyncDiagnostics {
     pub errors: Vec<String>,
-    /// Recoverable mismatches — mostly the `NPAsync<T>` marker reconciliation
+    /// Recoverable mismatches — mostly the `NFAsync<T>` marker reconciliation
     /// (await-without-marker). Purple pipeline warnings; `-Werror` escalates.
     pub warnings: Vec<String>,
 }
@@ -137,10 +137,10 @@ pub struct AsyncDiagnostics {
 /// - reject calling a non-void async method from a synchronous context
 ///   (methods not classified async). Milestone 1 reports these; call-graph
 ///   precision improves in later milestones.
-pub fn check_unit(unit: &nupa_ast::AstUnit) -> AsyncDiagnostics {
+pub fn check_unit(unit: &gald_ast::AstUnit) -> AsyncDiagnostics {
     let mut diags = AsyncDiagnostics { errors: Vec::new(), warnings: Vec::new() };
 
-    // ── NPAsync<T> marker reconciliation (AGENTS.md `NPAsync<T>` section) ──
+    // ── NFAsync<T> marker reconciliation (AGENTS.md `NFAsync<T>` section) ──
     // The marker is a return-type-position flag; the body's awaits decide the
     // truth. Only implementations (methods WITH a body) reconcile against the
     // body — header-only `@interface` methods have no body to contradict
@@ -171,7 +171,7 @@ pub fn check_unit(unit: &nupa_ast::AstUnit) -> AsyncDiagnostics {
                     if let Some(&iface_marked) = iface_markers.get(&key) {
                         if iface_marked != marker {
                             diags.errors.push(format!(
-                                "{}:{}: 'NPAsync' marker mismatch on '{}': the @interface and @implementation disagree — the marker is part of the method signature",
+                                "{}:{}: 'NFAsync' marker mismatch on '{}': the @interface and @implementation disagree — the marker is part of the method signature",
                                 m.line, m.col, sym));
                         }
                     }
@@ -198,7 +198,7 @@ pub fn check_unit(unit: &nupa_ast::AstUnit) -> AsyncDiagnostics {
             for m in methods {
                 if let (AstDeclData::Method { return_type, .. }, Some(sym)) = (&m.data, &m.name) {
                     let rt_void = return_type.as_ref().map_or(true, |t| {
-                        t.prim == nupa_cst::TypePrim::Void && !t.is_pointer
+                        t.prim == gald_cst::TypePrim::Void && !t.is_pointer
                     });
                     if method_is_async(m) {
                         async_methods.push((sym.clone(), rt_void));
@@ -236,7 +236,7 @@ pub fn check_unit(unit: &nupa_ast::AstUnit) -> AsyncDiagnostics {
     diags
 }
 
-/// NPAsync<T> reconciliation table (AGENTS.md `NPAsync<T>` section):
+/// NFAsync<T> reconciliation table (AGENTS.md `NFAsync<T>` section):
 ///   marked + await     → ok
 ///   marked, no await   → error — the marker must not lie (same philosophy as
 ///                        bare `@throws` requiring a real throw)
@@ -253,11 +253,11 @@ fn reconcile_marker(
 ) {
     if marked && !has_await {
         diags.errors.push(format!(
-            "{}:{}: '{}' is marked 'NPAsync<T>' but its body never suspends — remove the marker or add an '@await'",
+            "{}:{}: '{}' is marked 'NFAsync<T>' but its body never suspends — remove the marker or add an '@await'",
             line, col, sym));
     } else if !marked && has_await {
         diags.warnings.push(format!(
-            "{}:{}: '{}' contains '@await' but its return type is not marked 'NPAsync<T>' — mark it so callers can see it suspends",
+            "{}:{}: '{}' contains '@await' but its return type is not marked 'NFAsync<T>' — mark it so callers can see it suspends",
             line, col, sym));
     }
 }
@@ -381,13 +381,13 @@ fn check_expr_sync_calls(
 /// Rewrite an async method body into the M1 task-driven form:
 ///
 /// ```text
-///     { NupaTask *__nupa_task = nupa_task_create(entry_stub, (NPObject *)self, 0);
+///     { NupaTask *__gald_task = gald_task_create(entry_stub, (NFObject *)self, 0);
 ///       ...original body with `await e` lowered...
-///       nupa_task_join(__nupa_task); }
+///       gald_task_join(__gald_task); }
 /// ```
 ///
 
-/// `await e` lowers to `(*__nupa_task->entry)(__nupa_task), (e)` — evaluate
+/// `await e` lowers to `(*__gald_task->entry)(__gald_task), (e)` — evaluate
 /// the task's next segment (M1: the entry stub is a no-op returning 1, so
 /// this is a pure sequencing hook), then the awaited expression. This keeps
 /// the AST/observable behavior of M1 identical to synchronous execution while
@@ -399,8 +399,8 @@ fn check_expr_sync_calls(
 /// their return value flows through the expression normally (only callable
 /// from async contexts per the check pass).
 pub fn desugar_method_body(body: &mut AstStmt) {
-    use nupa_ast::{AstStmtKind, AstType};
-    use nupa_cst::TypePrim;
+    use gald_ast::{AstStmtKind, AstType};
+    use gald_cst::TypePrim;
 
     let line = body.line;
     let col = body.col;
@@ -442,7 +442,7 @@ pub fn desugar_method_body(body: &mut AstStmt) {
         match &mut e.data {
             AstExprData::Await(inner) => {
                 lower_awaits_expr(inner);
-                // `await e` → `nupa_task_resume(task), (e)`
+                // `await e` → `gald_task_resume(task), (e)`
                 // Comma: first the hook (advances the task state machine),
                 // then the awaited expression's value is the result. (M1: entry is
                 // NULL so resume finishes the task immediately and returns 1 — a
@@ -451,11 +451,11 @@ pub fn desugar_method_body(body: &mut AstStmt) {
                     kind: AstExprKind::FuncCall, expr_type: None, line, col,
                     data: AstExprData::FuncCall {
                         func: None,
-                        name: "nupa_task_resume".to_string(),
+                        name: "gald_task_resume".to_string(),
                         callee: None,
                         args: vec![AstExpr {
                             kind: AstExprKind::VarRef, expr_type: None, line, col,
-                            data: AstExprData::VarRef { sym: None, name: "__nupa_task".to_string() },
+                            data: AstExprData::VarRef { sym: None, name: "__gald_task".to_string() },
                         }],
                     },
                 };
@@ -515,7 +515,7 @@ pub fn desugar_method_body(body: &mut AstStmt) {
         kind: AstExprKind::FuncCall, expr_type: None, line, col,
         data: AstExprData::FuncCall {
             func: None,
-            name: "nupa_task_create".to_string(),
+            name: "gald_task_create".to_string(),
             callee: None,
             args: vec![
                 AstExpr { kind: AstExprKind::Int, expr_type: None, line, col, data: AstExprData::Int(0) }, // entry: NULL (M1)
@@ -525,8 +525,8 @@ pub fn desugar_method_body(body: &mut AstStmt) {
         },
     };
     let task_decl = AstDecl {
-        kind: nupa_ast::AstDeclKind::Variable,
-        name: Some("__nupa_task".to_string()),
+        kind: gald_ast::AstDeclKind::Variable,
+        name: Some("__gald_task".to_string()),
         line, col,
         data: AstDeclData::Variable {
             var_type: Some(Box::new({
@@ -550,11 +550,11 @@ pub fn desugar_method_body(body: &mut AstStmt) {
             kind: AstExprKind::FuncCall, expr_type: None, line, col,
             data: AstExprData::FuncCall {
                 func: None,
-                name: "nupa_task_join".to_string(),
+                name: "gald_task_join".to_string(),
                 callee: None,
                 args: vec![AstExpr {
                     kind: AstExprKind::VarRef, expr_type: None, line, col,
-                    data: AstExprData::VarRef { sym: None, name: "__nupa_task".to_string() },
+                    data: AstExprData::VarRef { sym: None, name: "__gald_task".to_string() },
                 }],
             },
         }),
@@ -571,7 +571,7 @@ pub fn desugar_method_body(body: &mut AstStmt) {
 }
 
 /// Apply the desugar over the whole unit: rewrite every async method body.
-pub fn desugar_unit(unit: &mut nupa_ast::AstUnit) {
+pub fn desugar_unit(unit: &mut gald_ast::AstUnit) {
     for decl in &mut unit.decls {
         if let AstDeclData::Class { methods, .. } = &mut decl.data {
             for m in methods.iter_mut() {
@@ -587,8 +587,8 @@ pub fn desugar_unit(unit: &mut nupa_ast::AstUnit) {
 
 // ─── Milestone 2: real state machine (frame + entry fn + driver) ────────────
 
-use nupa_ast::{AstDeclKind, AstStmtKind, AstType};
-use nupa_cst::TypePrim;
+use gald_ast::{AstDeclKind, AstStmtKind, AstType};
+use gald_cst::TypePrim;
 
 /// Named struct field type for the frame: `struct <Method>_frame`.
 fn frame_type_name(symbol: &str) -> String {
@@ -633,12 +633,12 @@ pub fn desugar_method_m2(
     // struct bodies, leaving `sizeof(struct …_frame)` on an incomplete type.
     // Pad so the frame is always a complete type.
     if frame_fields.is_empty() {
-        frame_fields.push(("__nupa_pad".to_string(), AstType::new(TypePrim::Char)));
+        frame_fields.push(("__gald_pad".to_string(), AstType::new(TypePrim::Char)));
     }
 
     let ftname = frame_type_name(method_symbol);
     let flat = sanitize_symbol(method_symbol);
-    let entry_name = format!("nupa_async_state_{}", flat);
+    let entry_name = format!("gald_async_state_{}", flat);
 
     // 2. Frame typedef decl.
     // Fields use the Ivar variant: codegen's Struct branch reads
@@ -685,7 +685,7 @@ pub fn desugar_method_m2(
     let final_state = state_counter;
 
     // 4. Entry function:
-    //   static int nupa_async_state_<M>(NupaTask *t) {
+    //   static int gald_async_state_<M>(NupaTask *t) {
     //     struct <M>_frame *f = (struct <M>_frame *)t->frame;  // M3 uses f
     //     switch (t->state) {
     //       case 1: ...body with lowered awaits...
@@ -713,7 +713,7 @@ pub fn desugar_method_m2(
     // (f = the frame) and `self` to `t->self_obj`, then rewrite returns to
     // the completion protocol (result/state/return 1).
     let mut case_body_stmts = body_stmts;
-    // Only params are rewritten to `__nupa_f->param` (the frame carries them
+    // Only params are rewritten to `__gald_f->param` (the frame carries them
     // across the entry boundary). Body-internal locals stay on the C stack:
     // in M2's synchronous-drive model there is no suspension between their
     // declaration and last use, so rewriting their reads to the (never
@@ -728,7 +728,7 @@ pub fn desugar_method_m2(
         kind: AstStmtKind::Decl, line: body.line, col: body.col,
         data: AstStmtData::Decl(AstDecl {
             kind: AstDeclKind::Variable,
-            name: Some("__nupa_f".to_string()),
+            name: Some("__gald_f".to_string()),
             line: body.line, col: body.col,
             data: AstDeclData::Variable {
                 var_type: Some(Box::new({
@@ -868,13 +868,13 @@ pub fn desugar_method_m2(
     top_decls.push(entry_decl);
 
     // 5. Rewrite the method body: create + join + return cast result.
-    //    NupaTask *t = nupa_task_create(nupa_async_state_<M>, self, sizeof(struct <M>_frame));
-    //    join → nupa_task_join(t) discards; result read needs join to return it:
-    //    use (return_type)(long)nupa_task_join(t) for non-void, else plain join.
+    //    NupaTask *t = gald_task_create(gald_async_state_<M>, self, sizeof(struct <M>_frame));
+    //    join → gald_task_join(t) discards; result read needs join to return it:
+    //    use (return_type)(long)gald_task_join(t) for non-void, else plain join.
     let create_call = AstExpr {
         kind: AstExprKind::FuncCall, expr_type: None, line: body.line, col: body.col,
         data: AstExprData::FuncCall {
-            func: None, name: "nupa_task_create".to_string(), callee: None,
+            func: None, name: "gald_task_create".to_string(), callee: None,
             args: vec![
                 ident_expr(&entry_name, body.line, body.col),
                 ident_expr("self", body.line, body.col),
@@ -904,7 +904,7 @@ pub fn desugar_method_m2(
     let create_call = AstExpr {
         kind: AstExprKind::FuncCall, expr_type: None, line: body.line, col: body.col,
         data: AstExprData::FuncCall {
-            func: None, name: "nupa_task_create".to_string(), callee: None,
+            func: None, name: "gald_task_create".to_string(), callee: None,
             args: vec![
                 ident_expr(&entry_name, body.line, body.col),
                 ident_expr("self", body.line, body.col),
@@ -913,14 +913,14 @@ pub fn desugar_method_m2(
         },
     };
     // Driver: task create FIRST, then fill frame params, then join.
-    // ((struct <M>_frame *)__nupa_task->frame)->param = param;
+    // ((struct <M>_frame *)__gald_task->frame)->param = param;
     let mut pre: Vec<AstStmt> = Vec::new();
     let task_decl = AstDecl {
         kind: AstDeclKind::Variable,
-        name: Some("__nupa_task".to_string()),
+        name: Some("__gald_task".to_string()),
         line: body.line, col: body.col,
         data: AstDeclData::Variable {
-            var_type: Some(Box::new(nupa_task_ptr_type())),
+            var_type: Some(Box::new(gald_task_ptr_type())),
             init: Some(Box::new(create_call)),
             is_static: false, is_extern: false, is_const: false,
             is_block_qual: false, is_weak: false, next: None,
@@ -929,7 +929,7 @@ pub fn desugar_method_m2(
     };
     pre.push(AstStmt { kind: AstStmtKind::Decl, line: body.line, col: body.col, data: AstStmtData::Decl(task_decl) });
     for (pname, _) in params {
-        // obj expr: (struct FT *)(__nupa_task->frame)
+        // obj expr: (struct FT *)(__gald_task->frame)
         let frame_access = AstExpr {
             kind: AstExprKind::Cast, expr_type: None, line: body.line, col: body.col,
             data: AstExprData::Cast {
@@ -942,7 +942,7 @@ pub fn desugar_method_m2(
                     t.subtype = Some(Box::new(st));
                     t
                 },
-                expr: Box::new(member_expr("__nupa_task", "frame", body.line, body.col)),
+                expr: Box::new(member_expr("__gald_task", "frame", body.line, body.col)),
             },
         };
         pre.push(AstStmt {
@@ -968,14 +968,14 @@ pub fn desugar_method_m2(
     let is_void = return_type.map_or(true, |t| t.prim == TypePrim::Void && !t.is_pointer);
     let mut post: Vec<AstStmt> = Vec::new();
     if is_void {
-        post.push(call_stmt("nupa_task_join", vec![ident_expr("__nupa_task", body.line, body.col)], body.line, body.col));
+        post.push(call_stmt("gald_task_join", vec![ident_expr("__gald_task", body.line, body.col)], body.line, body.col));
     } else {
-        // long __nupa_r = (long)nupa_task_join(t);
+        // long __gald_r = (long)gald_task_join(t);
         post.push(AstStmt {
             kind: AstStmtKind::Decl, line: body.line, col: body.col,
             data: AstStmtData::Decl(AstDecl {
                 kind: AstDeclKind::Variable,
-                name: Some("__nupa_r".to_string()),
+                name: Some("__gald_r".to_string()),
                 line: body.line, col: body.col,
                 data: AstDeclData::Variable {
                     var_type: Some(Box::new(AstType::new(TypePrim::Long))),
@@ -983,7 +983,7 @@ pub fn desugar_method_m2(
                         kind: AstExprKind::Cast, expr_type: None, line: body.line, col: body.col,
                         data: AstExprData::Cast {
                             target_type: AstType::new(TypePrim::Long),
-                            expr: Box::new(call_expr("nupa_task_join", vec![ident_expr("__nupa_task", body.line, body.col)], body.line, body.col)),
+                            expr: Box::new(call_expr("gald_task_join", vec![ident_expr("__gald_task", body.line, body.col)], body.line, body.col)),
                         },
                     })),
                     is_static: false, is_extern: false, is_const: false,
@@ -1011,7 +1011,7 @@ pub fn desugar_method_m2(
     out.extend(rewritten);
     out.extend(post);
     if !is_void {
-        // return (T)__nupa_r;
+        // return (T)__gald_r;
         let rt = return_type.cloned().unwrap_or_else(|| AstType::new(TypePrim::Int));
         out.push(AstStmt {
             kind: AstStmtKind::Return, line: body.line, col: body.col,
@@ -1019,7 +1019,7 @@ pub fn desugar_method_m2(
                 kind: AstExprKind::Cast, expr_type: None, line: body.line, col: body.col,
                 data: AstExprData::Cast {
                     target_type: rt.clone(),
-                    expr: Box::new(ident_expr("__nupa_r", body.line, body.col)),
+                    expr: Box::new(ident_expr("__gald_r", body.line, body.col)),
                 },
             }))),
         });
@@ -1123,7 +1123,7 @@ fn lower_awaits_m2_expr(e: &mut AstExpr, state: &mut i32) {
     }
 }
 
-/// Rewrite references inside the entry body: params → `__nupa_f->param`,
+/// Rewrite references inside the entry body: params → `__gald_f->param`,
 /// `self` → `t->self_obj`. The entry only receives the task, so all
 /// param/self access must go through the frame / task.
 fn rewrite_entry_refs_stmt(s: &mut AstStmt, params: &[(String, AstType)]) {
@@ -1169,8 +1169,8 @@ fn rewrite_entry_refs_expr(e: &mut AstExpr, params: &[(String, AstType)]) {
                 // t->self_obj
                 *e = member_expr("t", "self_obj", line, col);
             } else if params.iter().any(|(n, _)| n == name) {
-                // __nupa_f->param
-                *e = member_expr("__nupa_f", name, line, col);
+                // __gald_f->param
+                *e = member_expr("__gald_f", name, line, col);
             }
         }
         AstExprData::MsgSend { receiver, args, .. } => {
@@ -1338,7 +1338,7 @@ fn call_stmt(name: &str, args: Vec<AstExpr>, line: usize, col: usize) -> AstStmt
     AstStmt { kind: AstStmtKind::Expr, line, col, data: AstStmtData::Expr(call_expr(name, args, line, col)) }
 }
 
-fn nupa_task_ptr_type() -> AstType {
+fn gald_task_ptr_type() -> AstType {
     let mut inner = AstType::new(TypePrim::Named);
     inner.name = Some("NupaTask".to_string());
     let mut t = AstType::new(TypePrim::Named);
@@ -1348,14 +1348,14 @@ fn nupa_task_ptr_type() -> AstType {
 }
 
 /// Build a CstParam for the entry function's `(NupaTask *t)`.
-fn cst_param(type_name: &str, name: &str) -> nupa_cst::CstParam {
-    let mut t = nupa_cst::CstType::new(TypePrim::Named);
+fn cst_param(type_name: &str, name: &str) -> gald_cst::CstParam {
+    let mut t = gald_cst::CstType::new(TypePrim::Named);
     t.name = Some(type_name.to_string());
-    let mut ptr = nupa_cst::CstType::new(TypePrim::Named);
+    let mut ptr = gald_cst::CstType::new(TypePrim::Named);
     ptr.is_pointer = true;
     ptr.name = Some(type_name.to_string());
     ptr.subtype = Some(Box::new(t));
-    nupa_cst::CstParam {
+    gald_cst::CstParam {
         name: Some(name.to_string()),
         par_type: Some(Box::new(ptr)),
         external_name: None,
@@ -1365,7 +1365,7 @@ fn cst_param(type_name: &str, name: &str) -> nupa_cst::CstParam {
 }
 
 /// Apply the M2 desugar over the whole unit.
-pub fn desugar_unit_m2(unit: &mut nupa_ast::AstUnit) {
+pub fn desugar_unit_m2(unit: &mut gald_ast::AstUnit) {
     let mut top_decls: Vec<AstDecl> = Vec::new();
     for decl in unit.decls.iter_mut() {
         if let AstDeclData::Class { methods, .. } = &mut decl.data {

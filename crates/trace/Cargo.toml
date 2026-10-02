@@ -1,9 +1,9 @@
 [package]
-name = "nupa-trace"
+name = "gald-trace"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-nupa-ast = { path = "../ast" }
-nupa-ownership = { path = "../ownership" }
-nupa-cst = { path = "../cst" }
+gald-ast = { path = "../ast" }
+gald-ownership = { path = "../ownership" }
+gald-cst = { path = "../cst" }

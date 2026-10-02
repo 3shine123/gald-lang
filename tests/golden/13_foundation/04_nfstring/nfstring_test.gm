@@ -1,0 +1,39 @@
+#include <stdio.h>
+#include <string.h>
+#import <Foundation/Foundation.gh>
+
+int main() {
+    @autoreleasepool {
+        NFString *s1 = [NFString stringWithUTF8String:"hello"];
+        NFString *s2 = [NFString stringWithUTF8String:"world"];
+
+        NFString *s3 = [s1 stringByAppendingUTF8String:" "];
+        s3 = [s3 stringByAppendingString:s2];
+
+        printf("%s\n", [s3 UTF8String]);
+        printf("len=%zu\n", [s3 length]);
+
+        if ([s1 isEqualToString:[NFString stringWithUTF8String:"hello"]]) {
+            printf("equal\n");
+        }
+
+        NFString *sub = [s3 substringFromIndex:6];
+        printf("%s\n", [sub UTF8String]);
+
+        printf("hash=%u\n", [s1 hash]);
+
+        NFString *upper = [s1 uppercaseString];
+        printf("upper=%s\n", [upper UTF8String]);
+
+        NFString *lower = [upper lowercaseString];
+        printf("lower=%s\n", [lower UTF8String]);
+
+        if ([s3 hasPrefix:[NFString stringWithUTF8String:"hello"]]) {
+            printf("has prefix\n");
+        }
+        if ([s3 hasSuffix:[NFString stringWithUTF8String:"world"]]) {
+            printf("has suffix\n");
+        }
+    }
+    return 0;
+}

@@ -1,0 +1,14 @@
+#include <stdio.h>
+#import <Foundation/Foundation.gh>
+
+int main() {
+    @autoreleasepool {
+        SEL sel1 = @selector(alloc);
+        SEL sel2 = @selector(init);
+        SEL sel3 = @selector(doSomething:with:);
+        if (sel1.name[0] != '\0' && sel2.name[0] != '\0' && sel3.name[0] != '\0') {
+            printf("selectors ok\n");
+        } else { return 1; }
+    }
+    return 0;
+}

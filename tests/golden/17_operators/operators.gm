@@ -1,0 +1,28 @@
+#include <stdio.h>
+#import <Foundation/Foundation.gh>
+
+int main() {
+    int a = 5, b = 3;
+    printf("a=%d b=%d\n", a, b);
+
+    // Ternary
+    int max = a > b ? a : b;
+    printf("max=%d\n", max);
+
+    // Compound assignment
+    a += b; printf("a+=b → %d\n", a);
+    a -= 2; printf("a-=2 → %d\n", a);
+    a *= 3; printf("a*=3 → %d\n", a);
+
+    // Postfix ++/--
+    int c = 0;
+    printf("c++=%d (then c=%d)\n", c++, c);
+    printf("c--=%d (then c=%d)\n", c--, c);
+
+    // Prefix ++/--
+    int d = 10;
+    printf("++d=%d\n", ++d);
+    printf("--d=%d\n", --d);
+
+    return 0;
+}

@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 """
-nupa test runner — parallel transpile + compile + run with timeout.
+gald test runner — parallel transpile + compile + run with timeout.
 Usage: python3 test_all.py [-j JOBS]
 
-Environment overrides (useful for cross-platform testing, e.g. a musl nupac
+Environment overrides (useful for cross-platform testing, e.g. a musl galdc
 inside a Linux VM against the repo mounted at /mnt/mac):
-  NUPAC=/path/to/nupac   binary under test (default: target/debug/nupac;
-                         same convention as run_trace_golden.sh's NPAC=)
-  NUPA_CC="clang ..."    C compiler + flags nupac passes through to the backend
-                         (e.g. extra -I/-L/-l). Leave unset to use nupac's
+  GALDC=/path/to/galdc   binary under test (default: target/debug/galdc;
+                         same convention as run_trace_golden.sh's GALDC=)
+  GALD_CC="clang ..."    C compiler + flags galdc passes through to the backend
+                         (e.g. extra -I/-L/-l). Leave unset to use galdc's
                          built-in selection (clang; zig cc on Windows).
 """
 
@@ -26,29 +26,29 @@ PROJECT = Path(__file__).resolve().parent
 BUILDDIR = PROJECT / "builddir"
 INCLUDE = PROJECT / "include"
 
-# Binary override: NUPAC=/path/to/nupac python3 test_all.py  (e.g. cross-platform
-# testing with a musl binary on Linux VMs; same convention as run_trace_golden.sh's NPAC=)
-NUPAC = Path(os.environ.get("NUPAC", str(PROJECT / "target" / "debug" / "nupac")))
+# Binary override: GALDC=/path/to/galdc python3 test_all.py  (e.g. cross-platform
+# testing with a musl binary on Linux VMs; same convention as run_trace_golden.sh's GALDC=)
+GALDC = Path(os.environ.get("GALDC", str(PROJECT / "target" / "debug" / "galdc")))
 RUN_TIMEOUT = 3
 
-# ── Collect test binary names from .np files ──
-def _np_suite_files() -> list[Path]:
-    """All host-run .np tests, excluding out-of-band suites (QEMU kernel, cross-arch,
+# ── Collect test binary names from .gm files ──
+def _gm_suite_files() -> list[Path]:
+    """All host-run .gm tests, excluding out-of-band suites (QEMU kernel, cross-arch,
     freestanding) and the cross-TU suite.
 
     tests/multi_tu is driven by its own runner (run_multi_tu.sh), which transpiles
-    each .np in a case to a SEPARATE translation unit and links them together.
-    test_all.py compiles every .np standalone, so it would report each lib.np as
-    "no main entry" and each main.np as a lone file — 18 phantom failures."""
+    each .gm in a case to a SEPARATE translation unit and links them together.
+    test_all.py compiles every .gm standalone, so it would report each lib.gm as
+    "no main entry" and each main.gm as a lone file — 18 phantom failures."""
     return sorted(
-        p for p in PROJECT.glob("tests/**/*.np")
+        p for p in PROJECT.glob("tests/**/*.gm")
         if "soma-kernel" not in p.parts
         and "25_freestanding" not in p.parts
         and "26_baremetal_stress" not in p.parts
         and "multi_tu" not in p.parts
         # tests/stress/* are driven by their own build.sh runners, each with
         # bespoke flags and no standalone main: baremetal needs -ffreestanding,
-        # hosted needs -asm asm_host.s, interop's lib.np is a library file
+        # hosted needs -asm asm_host.s, interop's lib.gm is a library file
         # linked against a C caller. Same rationale as multi_tu above.
         and "stress" not in p.parts
         # Deliberate-failure negative tests (checker must reject them); they
@@ -62,16 +62,16 @@ def _np_suite_files() -> list[Path]:
         and "eh_diff" not in p.parts
     )
 
-NP_FILES = _np_suite_files()
+GM_FILES = _gm_suite_files()
 TEST_BINS = set()
-for f in NP_FILES:
+for f in GM_FILES:
     stem = f.stem
     TEST_BINS.add(f"/tmp/{stem}")
 
-# ── Cleanup: kill orphaned nupac processes + leftover test binaries on exit ──
+# ── Cleanup: kill orphaned galdc processes + leftover test binaries on exit ──
 def _cleanup():
-    # Kill nupac itself
-    subprocess.run(["pkill", "-f", r"target/(debug|release)/nupac"], capture_output=True)
+    # Kill galdc itself
+    subprocess.run(["pkill", "-f", r"target/(debug|release)/galdc"], capture_output=True)
     # Kill all compiled test binaries (e.g. /tmp/core_fusion, /tmp/tt, …)
     for bin_path in TEST_BINS:
         subprocess.run(["pkill", "-f", f"^{bin_path}($| )"], capture_output=True)
@@ -150,10 +150,10 @@ def run_cargo_tests() -> tuple[int, int, list[str]]:
         return 0, 1, [str(e)]
 
 
-def _has_main(np_path: Path) -> bool:
-    """Heuristic: does this .np file define its own `int main` entry point?"""
+def _has_main(gm_path: Path) -> bool:
+    """Heuristic: does this .gm file define its own `int main` entry point?"""
     try:
-        text = np_path.read_text(encoding="utf-8", errors="replace")
+        text = gm_path.read_text(encoding="utf-8", errors="replace")
     except Exception:
         return True
     import re as _re
@@ -162,10 +162,10 @@ def _has_main(np_path: Path) -> bool:
     return bool(_re.search(r"\bint\s+main\s*\(", stripped)) or bool(_re.search(r"\bvoid\s+main\s*\(", stripped))
 
 
-def _needs_mrc(np_path: Path) -> bool:
-    """Detect if a .np file uses manual retain/release (MRC) patterns."""
+def _needs_mrc(gm_path: Path) -> bool:
+    """Detect if a .gm file uses manual retain/release (MRC) patterns."""
     try:
-        text = np_path.read_text(encoding="utf-8", errors="replace")
+        text = gm_path.read_text(encoding="utf-8", errors="replace")
     except Exception:
         return False
     import re as _re
@@ -174,12 +174,12 @@ def _needs_mrc(np_path: Path) -> bool:
     # Check for manual retain/release/dealloc/autorelease calls
     has_mrc = bool(_re.search(r"\[\w+\s+(retain|release|autorelease|dealloc)\]", stripped))
     # Also check for ARC annotations in the file
-    has_arc_flag = bool(_re.search(r"-fno-nupa-arc", stripped))
+    has_arc_flag = bool(_re.search(r"-fno-gald-arc", stripped))
     return has_mrc or has_arc_flag
 
 
-def _run_np(cmd: list, np_path: Path, timeout: int) -> tuple:
-    """Run nupac with the given command, return (stdout, stderr, returncode, timed_out)."""
+def _run_np(cmd: list, gm_path: Path, timeout: int) -> tuple:
+    """Run galdc with the given command, return (stdout, stderr, returncode, timed_out)."""
     try:
         proc = subprocess.Popen(
             cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
@@ -200,27 +200,27 @@ def _run_np(cmd: list, np_path: Path, timeout: int) -> tuple:
         return "", str(e), -1, False
 
 
-def _is_expected_fail(np_path: Path) -> bool:
-    """`foo-F.np` is a deliberate-failure sample kept in-tree as documentation
+def _is_expected_fail(gm_path: Path) -> bool:
+    """`foo-F.gm` is a deliberate-failure sample kept in-tree as documentation
     (no main entry, or an intentional over-release crash). It is *supposed* to
     fail, so the suite records it as EXPECTED_FAIL rather than FAIL — and a
     sample that unexpectedly passes is itself reported as a failure."""
-    return np_path.name.endswith("-F.np")
+    return gm_path.name.endswith("-F.gm")
 
 
-def _compile_only(np_path: Path, asm_args: list[str], inc_args: list[str],
+def _compile_only(gm_path: Path, asm_args: list[str], inc_args: list[str],
                   tmpdir: Path) -> tuple[bool, str]:
     """Alternative acceptance for a test that cannot be RUN in this harness
     (interactive programs block on stdin and hit the timeout). Transpile +
     compile + link into a real binary must still succeed; that is the strongest
     verdict reachable without a TTY. Tries ARC first, then MRC (same fallback
-    the runner applies to `nupac run`)."""
-    for extra, label in (([], "ARC"), (["-fno-nupa-arc"], "MRC")):
-        bin_path = Path(tmpdir) / (np_path.stem + ".compileonly")
-        cmd = [str(NUPAC), str(np_path), "-o", str(bin_path)] + asm_args + inc_args + extra
+    the runner applies to `galdc run`)."""
+    for extra, label in (([], "ARC"), (["-fno-gald-arc"], "MRC")):
+        bin_path = Path(tmpdir) / (gm_path.stem + ".compileonly")
+        cmd = [str(GALDC), str(gm_path), "-o", str(bin_path)] + asm_args + inc_args + extra
         try:
             proc = subprocess.run(cmd, capture_output=True, text=True,
-                                  timeout=60, cwd=str(np_path.parent))
+                                  timeout=60, cwd=str(gm_path.parent))
         except Exception:
             continue
         if proc.returncode == 0:
@@ -228,48 +228,48 @@ def _compile_only(np_path: Path, asm_args: list[str], inc_args: list[str],
     return False, ""
 
 
-def process_np(np_file: str, tmpdir: Path) -> tuple[str, bool, list[str], str]:
+def process_gm(gm_file: str, tmpdir: Path) -> tuple[str, bool, list[str], str]:
     """
-    Run one .np file via `nupac run`.
+    Run one .gm file via `galdc run`.
     First tries with ARC (default), then retries with MRC if it fails.
     Returns (relative_path, passed, info_lines, status_tag).
     """
-    np_path = Path(np_file)
+    gm_path = Path(gm_file)
     try:
-        rel = str(np_path.relative_to(PROJECT / "tests"))
+        rel = str(gm_path.relative_to(PROJECT / "tests"))
     except ValueError:
-        rel = str(np_path.relative_to(PROJECT))
+        rel = str(gm_path.relative_to(PROJECT))
     proc = None
-    expected_fail = _is_expected_fail(np_path)
+    expected_fail = _is_expected_fail(gm_path)
 
     # Skip module-only files (no main entry); they're meant to be #import'd
-    if not _has_main(np_path):
+    if not _has_main(gm_path):
         if expected_fail:
             return rel, True, [
                 "EXPECTED FAIL (-F sample: no main entry, it is meant to be #import'd)"
             ], "EXPECTED_FAIL"
         return rel, False, ["FAIL (no main entry)"], "FAIL"
 
-    # Auto-include sibling assembly (.s) files: link alongside the .np
+    # Auto-include sibling assembly (.s) files: link alongside the .gm
     asm_args: list[str] = []
-    sibling_s = np_path.with_suffix(".s")
+    sibling_s = gm_path.with_suffix(".s")
     if sibling_s.exists():
         asm_args = ["-asm", str(sibling_s)]
     # In the mega_fusion folder, auto-link sibling hand-written C helpers (.c).
     # Avoid linking generated .c outputs in other subdirs (duplicate symbols).
-    if "mega_fusion" in np_path.parts:
-        sibling_c = np_path.with_suffix(".c")
+    if "mega_fusion" in gm_path.parts:
+        sibling_c = gm_path.with_suffix(".c")
         if sibling_c.exists():
             asm_args += ["-asm", str(sibling_c)]
     # Add the test's directory to the include path so `#include "header.h"` works
-    inc_args = ["-I", str(np_path.parent)]
+    inc_args = ["-I", str(gm_path.parent)]
 
     # Try with ARC first
-    cmd = [str(NUPAC), "run", str(np_path)] + asm_args + inc_args
-    stdout, stderr, rc, timed_out = _run_np(cmd, np_path, RUN_TIMEOUT + 2)
+    cmd = [str(GALDC), "run", str(gm_path)] + asm_args + inc_args
+    stdout, stderr, rc, timed_out = _run_np(cmd, gm_path, RUN_TIMEOUT + 2)
 
     if timed_out:
-        ok, mode = _compile_only(np_path, asm_args, inc_args, tmpdir)
+        ok, mode = _compile_only(gm_path, asm_args, inc_args, tmpdir)
         if ok:
             return rel, True, [
                 f"CANCELED (interactive — run needs a TTY); alternative acceptance: "
@@ -284,11 +284,11 @@ def process_np(np_file: str, tmpdir: Path) -> tuple[str, bool, list[str], str]:
         return rel, True, out_lines, "PASS"
 
     # ARC failed — retry with MRC
-    mrc_cmd = [str(NUPAC), "run", str(np_path), "-fno-nupa-arc"] + asm_args + inc_args
-    mrc_stdout, mrc_stderr, mrc_rc, mrc_timed_out = _run_np(mrc_cmd, np_path, RUN_TIMEOUT + 2)
+    mrc_cmd = [str(GALDC), "run", str(gm_path), "-fno-gald-arc"] + asm_args + inc_args
+    mrc_stdout, mrc_stderr, mrc_rc, mrc_timed_out = _run_np(mrc_cmd, gm_path, RUN_TIMEOUT + 2)
 
     if mrc_timed_out:
-        ok, mode = _compile_only(np_path, asm_args, inc_args, tmpdir)
+        ok, mode = _compile_only(gm_path, asm_args, inc_args, tmpdir)
         if ok:
             return rel, True, [
                 f"CANCELED (interactive — run needs a TTY); alternative acceptance: "
@@ -342,7 +342,7 @@ def process_np(np_file: str, tmpdir: Path) -> tuple[str, bool, list[str], str]:
 # ── main ─────────────────────────────────────────────────────────
 
 def main():
-    parser = argparse.ArgumentParser(description="nupa test runner")
+    parser = argparse.ArgumentParser(description="gald test runner")
     parser.add_argument("-j", type=int, default=0, help="parallel jobs (default: CPU count)")
     args = parser.parse_args()
     JOBS = args.j if args.j else (os.cpu_count() or 4)
@@ -363,49 +363,49 @@ def main():
 
 # ── 2. NP tests ──
     console.rule(f"[bold]NP Tests  (parallel x{JOBS})")
-    np_files = _np_suite_files()
-    np_pass = 0
-    np_fail = 0
-    np_canceled = 0
-    np_expected = 0
-    np_retry = 0
-    np_retry_suspect = 0
-    if np_files:
-        with tempfile.TemporaryDirectory(prefix="nupa_test_") as tmpdir_str:
+    gm_files = _gm_suite_files()
+    gm_pass = 0
+    gm_fail = 0
+    gm_canceled = 0
+    gm_expected = 0
+    gm_retry = 0
+    gm_retry_suspect = 0
+    if gm_files:
+        with tempfile.TemporaryDirectory(prefix="gald_test_") as tmpdir_str:
             tmpdir = Path(tmpdir_str)
             with ThreadPoolExecutor(max_workers=JOBS) as executor:
-                futures = {executor.submit(process_np, str(f), tmpdir): f for f in np_files}
+                futures = {executor.submit(process_gm, str(f), tmpdir): f for f in gm_files}
                 for future in as_completed(futures):
                     rel, ok, lines, tag = future.result()
                     if tag == "CANCELED":
-                        np_canceled += 1
+                        gm_canceled += 1
                     elif tag == "EXPECTED_FAIL":
-                        np_expected += 1
+                        gm_expected += 1
                     elif tag == "PASS_MRC":
-                        np_pass += 1
-                        np_retry += 1
+                        gm_pass += 1
+                        gm_retry += 1
                         if any("SUSPECT" in l for l in lines):
-                            np_retry_suspect += 1
+                            gm_retry_suspect += 1
                     elif ok:
-                        np_pass += 1
+                        gm_pass += 1
                     else:
-                        np_fail += 1
+                        gm_fail += 1
                     console.print(panel(rel, lines, tag))
-            canceled_str = f", [yellow]{np_canceled} canceled[/]" if np_canceled else ""
-            expected_str = f", [cyan]{np_expected} expected-fail[/]" if np_expected else ""
+            canceled_str = f", [yellow]{gm_canceled} canceled[/]" if gm_canceled else ""
+            expected_str = f", [cyan]{gm_expected} expected-fail[/]" if gm_expected else ""
             retry_str = ""
-            if np_retry:
-                retry_str = f", [yellow]{np_retry} ARC→MRC retry[/]"
-                if np_retry_suspect:
-                    retry_str += f" ([red]{np_retry_suspect} SUSPECT[/])"
-            console.print(f"\n  [bold]{np_pass}/{len(np_files)}[/] .np files passed, [red]{np_fail}[/] failed{canceled_str}{expected_str}{retry_str}")
+            if gm_retry:
+                retry_str = f", [yellow]{gm_retry} ARC→MRC retry[/]"
+                if gm_retry_suspect:
+                    retry_str += f" ([red]{gm_retry_suspect} SUSPECT[/])"
+            console.print(f"\n  [bold]{gm_pass}/{len(gm_files)}[/] .gm files passed, [red]{gm_fail}[/] failed{canceled_str}{expected_str}{retry_str}")
     else:
-        console.print("  [yellow]No .np files found.[/]")
+        console.print("  [yellow]No .gm files found.[/]")
 
     # ── 3. Examples ──
     console.rule(f"[bold]Examples  (parallel x{JOBS})")
     example_files = sorted(
-        p for p in PROJECT.glob("examples/**/*.np")
+        p for p in PROJECT.glob("examples/**/*.gm")
         if "04_soma-kernel" not in p.parts
         and "02_ncurses" not in p.parts
         and "03_LibUI" not in p.parts
@@ -417,10 +417,10 @@ def main():
     ex_retry = 0
     ex_retry_suspect = 0
     if example_files:
-        with tempfile.TemporaryDirectory(prefix="nupa_example_") as tmpdir_str:
+        with tempfile.TemporaryDirectory(prefix="gald_example_") as tmpdir_str:
             tmpdir = Path(tmpdir_str)
             with ThreadPoolExecutor(max_workers=JOBS) as executor:
-                futures = {executor.submit(process_np, str(f), tmpdir): f for f in example_files}
+                futures = {executor.submit(process_gm, str(f), tmpdir): f for f in example_files}
                 for future in as_completed(futures):
                     rel, ok, lines, tag = future.result()
                     if tag == "CANCELED":
@@ -446,18 +446,18 @@ def main():
                     retry_str += f" ([red]{ex_retry_suspect} SUSPECT[/])"
             console.print(f"\n  [bold]{ex_pass}/{len(example_files)}[/] examples passed, [red]{ex_fail}[/] failed{canceled_str}{expected_str}{retry_str}")
     else:
-        console.print("  [yellow]No example .np files found.[/]")
+        console.print("  [yellow]No example .gm files found.[/]")
 
     # ── Grand total ──
     elapsed = time.time() - start
-    total_fail = unit_fail + np_fail + ex_fail
-    total_pass = unit_pass + np_pass + ex_pass
-    total = (unit_pass + unit_fail + np_pass + np_fail + np_canceled + np_expected
+    total_fail = unit_fail + gm_fail + ex_fail
+    total_pass = unit_pass + gm_pass + ex_pass
+    total = (unit_pass + unit_fail + gm_pass + gm_fail + gm_canceled + gm_expected
              + ex_pass + ex_fail + ex_canceled + ex_expected)
-    canceled_str = f", [yellow]{np_canceled + ex_canceled} canceled[/]" if np_canceled + ex_canceled else ""
-    expected_str = f", [cyan]{np_expected + ex_expected} expected-fail[/]" if np_expected + ex_expected else ""
-    retry_total = np_retry + ex_retry
-    suspect_total = np_retry_suspect + ex_retry_suspect
+    canceled_str = f", [yellow]{gm_canceled + ex_canceled} canceled[/]" if gm_canceled + ex_canceled else ""
+    expected_str = f", [cyan]{gm_expected + ex_expected} expected-fail[/]" if gm_expected + ex_expected else ""
+    retry_total = gm_retry + ex_retry
+    suspect_total = gm_retry_suspect + ex_retry_suspect
     retry_str = f", [yellow]{retry_total} ARC→MRC retry[/]" if retry_total else ""
     if suspect_total:
         retry_str += f" ([red]{suspect_total} SUSPECT — ARC-mode defect, not the explicit-MM check[/])"

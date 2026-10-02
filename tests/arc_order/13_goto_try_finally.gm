@@ -1,0 +1,31 @@
+#import <Foundation/Foundation.gh>
+
+// ARC order 13: `goto` inside a @try body. The jump leaves the inner block
+// (so its local is released), stays inside the @try (so the @finally still
+// runs on normal completion).
+
+@interface AO13Item : NFObject
+@end
+
+@implementation AO13Item
+- (void)dealloc {
+    NFLog(@"ao13 dealloc");
+    [super dealloc];
+}
+@end
+
+int main() {
+    @try {
+        {
+            AO13Item *x = [[AO13Item alloc] init];
+            goto inside;
+        }
+    inside:
+        NFLog(@"ao13 after goto");
+    }
+    @finally {
+        NFLog(@"ao13 finally");
+    }
+    NFLog(@"ao13 done");
+    return 0;
+}

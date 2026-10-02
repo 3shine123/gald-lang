@@ -1,0 +1,18 @@
+#include <stdio.h>
+#import <Foundation/Foundation.gh>
+
+@interface Factory : NFObject
++ (int)makeId;
+@end
+
+@implementation Factory
++ (int)makeId {
+    return 42;
+}
+@end
+
+int main() {
+    int id = [Factory makeId];
+    printf("ID: %d\n", id);
+    return 0;
+}

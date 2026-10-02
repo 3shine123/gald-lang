@@ -2,8 +2,8 @@
 // types? The end-to-end negative probe compiled and ran with no diagnostic, so
 // the annotation is being lost somewhere between parser and checker. Assert at
 // the earliest point to bisect the pipeline.
-use nupa_cst::*;
-use nupa_parser::Parser;
+use gald_cst::*;
+use gald_parser::Parser;
 
 fn methods_of(src: &str) -> Vec<(Option<Nullability>, Vec<(String, Nullability)>)> {
     let mut p = Parser::new(src);
@@ -31,7 +31,7 @@ fn methods_of(src: &str) -> Vec<(Option<Nullability>, Vec<(String, Nullability)>
 
 #[test]
 fn method_param_nonnull_is_recorded() {
-    let got = methods_of("@interface S : NPObject\n- (void)need:(nonnull NPString *)s;\n@end\n");
+    let got = methods_of("@interface S : NFObject\n- (void)need:(nonnull NFString *)s;\n@end\n");
     println!("nonnull param -> {:?}", got);
     assert_eq!(got.len(), 1, "expected 1 method, got {:?}", got);
     assert_eq!(got[0].1[0].1, Nullability::Nonnull, "nonnull NOT recorded: {:?}", got);
@@ -39,21 +39,21 @@ fn method_param_nonnull_is_recorded() {
 
 #[test]
 fn method_param_nullable_is_recorded() {
-    let got = methods_of("@interface S : NPObject\n- (void)maybe:(nullable NPString *)s;\n@end\n");
+    let got = methods_of("@interface S : NFObject\n- (void)maybe:(nullable NFString *)s;\n@end\n");
     println!("nullable param -> {:?}", got);
     assert_eq!(got[0].1[0].1, Nullability::Nullable, "nullable NOT recorded: {:?}", got);
 }
 
 #[test]
 fn method_return_nullable_is_recorded() {
-    let got = methods_of("@interface S : NPObject\n- (nullable NPString *)f;\n@end\n");
+    let got = methods_of("@interface S : NFObject\n- (nullable NFString *)f;\n@end\n");
     println!("nullable return -> {:?}", got);
     assert_eq!(got[0].0, Some(Nullability::Nullable), "nullable return NOT recorded");
 }
 
 #[test]
 fn underscore_form_is_recorded() {
-    let got = methods_of("@interface S : NPObject\n- (void)need:(_Nonnull NPString *)s;\n@end\n");
+    let got = methods_of("@interface S : NFObject\n- (void)need:(_Nonnull NFString *)s;\n@end\n");
     println!("_Nonnull param -> {:?}", got);
     assert_eq!(got[0].1[0].1, Nullability::Nonnull, "_Nonnull NOT recorded: {:?}", got);
 }
@@ -70,11 +70,11 @@ fn contextual_keyword_still_a_variable_name() {
 #[test]
 fn region_makes_unannotated_pointer_nonnull() {
     let got = methods_of(
-        "NP_ASSUME_NONNULL_BEGIN\n\
-         @interface R : NPObject\n\
-         - (void)take:(NPString *)s;\n\
+        "NF_ASSUME_NONNULL_BEGIN\n\
+         @interface R : NFObject\n\
+         - (void)take:(NFString *)s;\n\
          @end\n\
-         NP_ASSUME_NONNULL_END\n",
+         NF_ASSUME_NONNULL_END\n",
     );
     println!("region param -> {:?}", got);
     assert_eq!(got.len(), 1, "expected 1 method, got {:?}", got);
@@ -89,11 +89,11 @@ fn region_makes_unannotated_pointer_nonnull() {
 fn region_does_not_touch_non_pointers() {
     // `int` is not a pointer: the region must leave it alone.
     let got = methods_of(
-        "NP_ASSUME_NONNULL_BEGIN\n\
-         @interface R : NPObject\n\
+        "NF_ASSUME_NONNULL_BEGIN\n\
+         @interface R : NFObject\n\
          - (void)f:(int)n;\n\
          @end\n\
-         NP_ASSUME_NONNULL_END\n",
+         NF_ASSUME_NONNULL_END\n",
     );
     println!("region non-pointer -> {:?}", got);
     assert_eq!(got[0].1[0].1, Nullability::Unspecified, "non-pointer annotated: {:?}", got);
@@ -102,11 +102,11 @@ fn region_does_not_touch_non_pointers() {
 #[test]
 fn explicit_nullable_beats_region_default() {
     let got = methods_of(
-        "NP_ASSUME_NONNULL_BEGIN\n\
-         @interface R : NPObject\n\
-         - (void)opt:(nullable NPString *)s;\n\
+        "NF_ASSUME_NONNULL_BEGIN\n\
+         @interface R : NFObject\n\
+         - (void)opt:(nullable NFString *)s;\n\
          @end\n\
-         NP_ASSUME_NONNULL_END\n",
+         NF_ASSUME_NONNULL_END\n",
     );
     println!("region opt-out -> {:?}", got);
     assert_eq!(got[0].1[0].1, Nullability::Nullable, "opt-out lost: {:?}", got);
@@ -115,13 +115,13 @@ fn explicit_nullable_beats_region_default() {
 #[test]
 fn region_ends_after_end_marker() {
     let got = methods_of(
-        "NP_ASSUME_NONNULL_BEGIN\n\
-         @interface A : NPObject\n\
-         - (void)in:(NPString *)s;\n\
+        "NF_ASSUME_NONNULL_BEGIN\n\
+         @interface A : NFObject\n\
+         - (void)in:(NFString *)s;\n\
          @end\n\
-         NP_ASSUME_NONNULL_END\n\
-         @interface B : NPObject\n\
-         - (void)out:(NPString *)s;\n\
+         NF_ASSUME_NONNULL_END\n\
+         @interface B : NFObject\n\
+         - (void)out:(NFString *)s;\n\
          @end\n",
     );
     println!("before/after region -> {:?}", got);
@@ -135,11 +135,11 @@ fn region_ends_after_end_marker() {
 
 #[test]
 fn unclosed_region_is_an_error() {
-    let mut p = Parser::new("NP_ASSUME_NONNULL_BEGIN\n@interface R : NPObject\n@end\n");
+    let mut p = Parser::new("NF_ASSUME_NONNULL_BEGIN\n@interface R : NFObject\n@end\n");
     p.parse_translation_unit();
     assert!(p.has_error(), "unclosed region must be reported");
     assert!(
-        p.last_error().contains("without a matching NP_ASSUME_NONNULL_END"),
+        p.last_error().contains("without a matching NF_ASSUME_NONNULL_END"),
         "wrong message: {}",
         p.last_error()
     );
@@ -167,16 +167,16 @@ fn function_return_annotation_is_recorded() {
     }
 
     // Both spellings, prefix and postfix.
-    let got = ret_nulls("nullable NPString *pref(void) { return 0; }\n");
+    let got = ret_nulls("nullable NFString *pref(void) { return 0; }\n");
     println!("fn return prefix -> {:?}", got);
     assert_eq!(got[0], Nullability::Nullable, "prefix not recorded: {:?}", got);
 
-    let got = ret_nulls("NPString * _Nullable post(void) { return 0; }\n");
+    let got = ret_nulls("NFString * _Nullable post(void) { return 0; }\n");
     println!("fn return postfix -> {:?}", got);
     assert_eq!(got[0], Nullability::Nullable, "postfix not recorded: {:?}", got);
 
     // Unannotated stays unspecified — the no-false-positive guard.
-    let got = ret_nulls("NPString *plain(void) { return 0; }\n");
+    let got = ret_nulls("NFString *plain(void) { return 0; }\n");
     println!("fn return plain -> {:?}", got);
     assert_eq!(got[0], Nullability::Unspecified, "plain annotated: {:?}", got);
 }
@@ -204,23 +204,23 @@ fn block_param_and_return_annotations_are_recorded() {
     }
 
     // Block param annotated, both spellings.
-    let (ret, ps) = typedef_block("typedef void (^B)(nonnull NPString *s);\n");
+    let (ret, ps) = typedef_block("typedef void (^B)(nonnull NFString *s);\n");
     println!("block param prefix -> ret={:?} params={:?}", ret, ps);
     assert_eq!(ps, vec![Nullability::Nonnull], "block param prefix not recorded");
 
-    let (ret, ps) = typedef_block("typedef void (^B)(NPString * _Nullable s);\n");
+    let (ret, ps) = typedef_block("typedef void (^B)(NFString * _Nullable s);\n");
     println!("block param postfix -> ret={:?} params={:?}", ret, ps);
     assert_eq!(ps, vec![Nullability::Nullable], "block param postfix not recorded");
 
     // Unannotated stays unspecified (no false positive).
-    let (_ret, ps) = typedef_block("typedef void (^B)(NPString *s);\n");
+    let (_ret, ps) = typedef_block("typedef void (^B)(NFString *s);\n");
     println!("block param plain -> params={:?}", ps);
     assert_eq!(ps, vec![Nullability::Unspecified], "plain block param annotated");
 }
 
 #[test]
 fn block_literal_return_annotation_is_recorded() {
-    let mut p = Parser::new("typedef nullable NPString * (^Get)(void);\n");
+    let mut p = Parser::new("typedef nullable NFString * (^Get)(void);\n");
     let unit = p.parse_translation_unit().expect("unit");
     let mut found = None;
     for d in &unit.decls {
@@ -234,11 +234,11 @@ fn block_literal_return_annotation_is_recorded() {
 
 #[test]
 fn double_ptr_postfix_annotates_middle_level() {
-    // `NPError * _Nullable * out` — the postfix word follows the FIRST star, so
+    // `NFError * _Nullable * out` — the postfix word follows the FIRST star, so
     // it annotates that (middle) level; the outer stays unannotated. This is
     // the out-param shape: the error object is nullable, the out-pointer is
     // always valid because the callee writes through it.
-    let mut p = Parser::new("void f(NPError * _Nullable * out);\n");
+    let mut p = Parser::new("void f(NFError * _Nullable * out);\n");
     let unit = p.parse_translation_unit().expect("unit");
     let mut found = None;
     for d in &unit.decls {
@@ -265,11 +265,11 @@ fn double_ptr_postfix_annotates_middle_level() {
 
 #[test]
 fn double_ptr_prefix_is_rejected_like_clang() {
-    // `nullable NPError * *` — which level did the author mean? clang refuses
+    // `nullable NFError * *` — which level did the author mean? clang refuses
     // to guess ("nullability specifier cannot be applied to non-pointer type
-    // 'Widget'", verified against the host SDK); nupa matches that and points
+    // 'Widget'", verified against the host SDK); gald matches that and points
     // at the postfix spelling that annotates a chosen level.
-    let mut p = Parser::new("void f(nullable NPError * * out);\n");
+    let mut p = Parser::new("void f(nullable NFError * * out);\n");
     p.parse_translation_unit();
     assert!(p.has_error(), "prefix nullability on a double pointer must be rejected");
     assert!(

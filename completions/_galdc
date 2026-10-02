@@ -1,0 +1,42 @@
+#compdef galdc
+
+_galdc() {
+    if [[ $CURRENT -eq 2 ]]; then
+        if [[ $PREFIX == -* ]]; then
+            _arguments \
+                '-Werror[promote warnings to errors]' \
+                '-emit-bridge-header[emit a C bridge header for calling Nupa from C]' \
+                '-rewrite-gald[transpile to C only (no link)]' \
+                '-v[show verbose transpilation info]' \
+                '--verbose[show verbose transpilation info]' \
+                '--version[print version and exit]' \
+                '-fgald-arc[enable ARC (default)]' \
+                '-fno-gald-arc[disable ARC (MRC)]' \
+                '-fno-checker[skip type checking]' \
+                '-eh[exception backend: checked (default) or legacy/sjlj (setjmp/longjmp rollback)]' \
+                '-ffreestanding[bare-metal/freestanding output]' \
+                '-nostdinc[pass -nostdinc to the C compiler (headers come from your -I dirs)]' \
+                '-no-comments[omit readability comments in generated C (default: on)]' \
+                '-trace-refcount[print a static reference-count trace (no codegen)]' \
+                '-trace-max-iters[loop iterations in the refcount trace (default 2)]' \
+                '-trace-no-color[disable colors in the refcount trace]' \
+                '-backend[C compiler backend (clang is the default)]' \
+                '-o[output path (binary or .c)]' \
+                '-I[add include dir]' \
+                '-L[add lib dir]' \
+                '-l[link a library (e.g. -l gmp)]' \
+                '-S[link a real assembly file (repeatable)]' \
+                '-asm[link a real assembly file (repeatable)]' \
+                '-arch[target arch]'
+        else
+            _values 'galdc command' 'run'
+            _files
+        fi
+        return
+    fi
+    if [[ ${words[2]} == "run" ]]; then
+        _files
+        return
+    fi
+    _files
+}

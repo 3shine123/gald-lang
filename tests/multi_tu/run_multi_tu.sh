@@ -5,7 +5,7 @@
 # ---------------
 # Nupa's uniform vtable is built per translation unit from the set of instance
 # methods that TU happens to see. Two TUs that see DIFFERENT method sets compile
-# two different `struct nupa_vtable` layouts, while the linker weak-merges the
+# two different `struct gald_vtable` layouts, while the linker weak-merges the
 # vtable *instances* into a single allocation. Dispatch through the losing
 # layout then reads the wrong slot: silent garbage or a segfault at whatever
 # offset the miscalculation lands on. Plain C never hits this because every
@@ -17,15 +17,15 @@
 # not as a mystery crash three weeks later.
 #
 # Each case is a directory containing:
-#   *.nh   declarations shared by both TUs (the only channel between them)
-#   lib.np the "library" TU: defines the classes, exposes entry points
-#   main.np the "client" TU: sees only the .nh, drives the classes
+#   *.gh   declarations shared by both TUs (the only channel between them)
+#   lib.gm the "library" TU: defines the classes, exposes entry points
+#   main.gm the "client" TU: sees only the .gh, drives the classes
 #   expected.txt  the stdout the program must print (optional; absent = no
 #                 output assertion, only "it must run and exit 0")
 #
 # Usage:  ./run_multi_tu.sh            run everything
 #         ./run_multi_tu.sh 05_block   run one case (by dir name or number)
-#   NPAC=path/to/nupac ./run_multi_tu.sh
+#   GALDC=path/to/galdc ./run_multi_tu.sh
 set -u
 # Resolve the script location BEFORE any cd: $0 may be a relative path, and
 # resolving it after the cd below anchors it to the project root — invoking
@@ -33,32 +33,32 @@ set -u
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 cd "$SCRIPT_DIR/../.."
 
-if [[ -z "${NPAC:-}" ]]; then
-    for cand in target/debug/nupac target/release/nupac; do
-        if [[ -x "$cand" ]]; then NPAC="$cand"; break; fi
+if [[ -z "${GALDC:-}" ]]; then
+    for cand in target/debug/galdc target/release/galdc; do
+        if [[ -x "$cand" ]]; then GALDC="$cand"; break; fi
     done
 fi
-if [[ -z "${NPAC:-}" || ! -x "$NPAC" ]]; then
-    echo "error: nupac binary not found (build it, or set NPAC=)" >&2
+if [[ -z "${GALDC:-}" || ! -x "$GALDC" ]]; then
+    echo "error: galdc binary not found (build it, or set GALDC=)" >&2
     exit 2
 fi
 
 CASES_ROOT="$SCRIPT_DIR"
-NUPA_INC="$PWD/include"
-WORK="${TMPDIR:-/tmp}/nupa_multi_tu.$$"
+GALD_INC="$PWD/include"
+WORK="${TMPDIR:-/tmp}/gald_multi_tu.$$"
 mkdir -p "$WORK"
 trap 'rm -rf "$WORK"' EXIT
 
 FILTER="${1:-}"
 PASS=0; FAIL=0; FAILED_CASES=()
 
-# Emitted C needs -I include (nupa/runtime.h) and the case dir (its own .nh).
+# Emitted C needs -I include (gald/runtime.h) and the case dir (its own .gh).
 # Note: Foundation is NOT imported by most cases — a case that only needs a
 # base class uses the implicit root, which keeps the method set (and therefore
 # the vtable layout) as small as possible. That is deliberate: the fewer
 # selectors a case drags in, the more precisely a failure points at the
 # feature under test.
-INCS=(-I "$NUPA_INC" -I "$NUPA_INC/Foundation")
+INCS=(-I "$GALD_INC" -I "$GALD_INC/Foundation")
 
 run_case() {
     local dir="$1" name
@@ -67,15 +67,15 @@ run_case() {
     mkdir -p "$out"
 
     local sources=()
-    while IFS= read -r f; do sources+=("$f"); done < <(find "$dir" -name '*.np' | sort)
+    while IFS= read -r f; do sources+=("$f"); done < <(find "$dir" -name '*.gm' | sort)
     if [[ ${#sources[@]} -eq 0 ]]; then
-        echo "SKIP  $name (no .np sources)"; return
+        echo "SKIP  $name (no .gm sources)"; return
     fi
 
     # 1. transpile every TU separately
     # A case may pin a stable cross-TU vtable layout: a SLOTS_MANIFEST marker
     # file in the case dir makes every TU compile with --slots <path>. The
-    # manifest lives in the WORK dir (nupac writes the assignment back after
+    # manifest lives in the WORK dir (galdc writes the assignment back after
     # each compile; the case dir must stay clean). First TU creates it; the
     # append-only contract means later TUs keep its slot order.
     local slots_args=()
@@ -84,20 +84,20 @@ run_case() {
     fi
 
     # Optional EH backend selection for the acceptance matrix:
-    #   NUPA_EH_FLAG="-eh checked" ./run_multi_tu.sh
+    #   GALD_EH_FLAG="-eh checked" ./run_multi_tu.sh
     # Unset (the default) = the shipped default backend, zero behavior change.
     local eh_args=()
-    if [[ -n "${NUPA_EH_FLAG:-}" ]]; then
+    if [[ -n "${GALD_EH_FLAG:-}" ]]; then
         # shellcheck disable=SC2206
-        eh_args=(${NUPA_EH_FLAG})
+        eh_args=(${GALD_EH_FLAG})
     fi
 
     local tsrc objs=() t
     for t in "${sources[@]}"; do
-        tsrc="$out/$(basename "${t%.np}").c"
+        tsrc="$out/$(basename "${t%.gm}").c"
         # NOTE: macOS bash 3.2 under `set -u` rejects "${empty_arr[@]}" —
         # the conditional expansion keeps empty slots_args legal.
-        if ! "$NPAC" -rewrite-nupa "$t" -o "$tsrc" -I "$dir" "${INCS[@]}" ${slots_args[@]+"${slots_args[@]}"} ${eh_args[@]+"${eh_args[@]}"} > "$out/$name.transpile.log" 2>&1; then
+        if ! "$GALDC" -rewrite-gald "$t" -o "$tsrc" -I "$dir" "${INCS[@]}" ${slots_args[@]+"${slots_args[@]}"} ${eh_args[@]+"${eh_args[@]}"} > "$out/$name.transpile.log" 2>&1; then
             echo "FAIL  $name (transpile)"
             sed 's/^/      /' "$out/$name.transpile.log" | head -12
             FAIL=$((FAIL+1)); FAILED_CASES+=("$name"); return
@@ -107,7 +107,7 @@ run_case() {
 
     # 2. link them into one program together with the runtime
     if ! clang -std=c99 -fblocks -w "${INCS[@]}" \
-            "${objs[@]}" "$NUPA_INC/nupa/runtime.c" \
+            "${objs[@]}" "$GALD_INC/gald/runtime.c" \
             -o "$out/$name.bin" > "$out/$name.link.log" 2>&1; then
         echo "FAIL  $name (link)"
         sed 's/^/      /' "$out/$name.link.log" | head -12
@@ -161,7 +161,7 @@ run_case() {
     PASS=$((PASS+1))
 }
 
-echo "using nupac: $NPAC"
+echo "using galdc: $GALDC"
 echo "using clang: $(clang --version | head -1)"
 echo
 

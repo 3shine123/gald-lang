@@ -1,0 +1,24 @@
+#include "gald/runtime.h"
+#import "Foundation/NFObject.gh"
+#import "Foundation/NFObject.gm"
+
+@interface Item : NFObject {
+    int _tag;
+}
+- (int)tag;
+@end
+
+@implementation Item
+
+- (int)tag {
+    return _tag;
+}
+
+@end
+
+int main() {
+    Item *a = [Item new];
+    Item *b = [Item new];
+    Item *c = [Item new];
+    return 0;
+}

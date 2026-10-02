@@ -1,8 +1,8 @@
 [package]
-name = "nupa-async"
+name = "gald-async"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-nupa-ast = { path = "../ast" }
-nupa-cst = { path = "../cst" }
+gald-ast = { path = "../ast" }
+gald-cst = { path = "../cst" }

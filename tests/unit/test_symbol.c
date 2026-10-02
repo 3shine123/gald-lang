@@ -1,4 +1,4 @@
-#include "nupa/symbol.h"
+#include "gald/symbol.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -11,10 +11,10 @@ static int passed = 0;
 
 static void test_sym_alloc(void) {
     TEST("sym alloc/free");
-    symbol_t *s = sym_alloc(SYM_CLASS, "NPObject");
+    symbol_t *s = sym_alloc(SYM_CLASS, "NFObject");
     if (!s) { FAIL("sym_alloc returned NULL"); return; }
     if (s->kind != SYM_CLASS) { FAIL("wrong kind"); sym_free(s); return; }
-    if (strcmp(s->name, "NPObject") != 0) { FAIL("wrong name"); sym_free(s); return; }
+    if (strcmp(s->name, "NFObject") != 0) { FAIL("wrong name"); sym_free(s); return; }
     sym_free(s);
     PASS();
 }
@@ -78,13 +78,13 @@ static void test_symtab_class_lookup(void) {
     TEST("symtab find class/protocol");
     symbol_table_t *st = symtab_alloc();
 
-    symbol_t *cls = sym_alloc(SYM_CLASS, "NPObject");
+    symbol_t *cls = sym_alloc(SYM_CLASS, "NFObject");
     symbol_t *proto = sym_alloc(SYM_PROTOCOL, "NSCoding");
 
     symtab_declare(st, cls);
     symtab_declare(st, proto);
 
-    if (symtab_find_class(st, "NPObject") != cls) { FAIL("find NPObject failed"); symtab_free(st); return; }
+    if (symtab_find_class(st, "NFObject") != cls) { FAIL("find NFObject failed"); symtab_free(st); return; }
     if (symtab_find_class(st, "Nonexistent") != NULL) { FAIL("should be NULL"); symtab_free(st); return; }
     if (symtab_find_protocol(st, "NSCoding") != proto) { FAIL("find NSCoding failed"); symtab_free(st); return; }
 

@@ -1,0 +1,438 @@
+// hosted_test.gm — FULL-syntax stress test against the standard library
+// (Foundation). Runs via:  galdc run hosted_test.gm -asm asm_host.s
+// Companion to the freestanding stress (tests/stress/baremetal) — this one
+// uses Foundation + ARC + @await, everything the bare-metal build can't.
+
+#import <Foundation/Foundation.gh>
+#include <stdio.h>
+
+// ── external assembly (asm_host.s) ──
+extern int asm_square(int v);
+extern int asm_add3(int a, int b, int c);
+extern unsigned asm_rotr32(unsigned v, unsigned r);
+
+typedef int (*IntFn)(int);
+typedef int (^IntBin)(int, int);
+typedef BOOL (^Pred)(int);
+
+// ── C layer: structs, enum, ==, function pointers ──
+typedef struct Point { int x; int y; } Point;
+
+struct Ops {
+    int num;
+    IntFn fn;              // function-pointer field
+    struct Point at;       // nested struct field
+};
+
+enum Mode { MODE_OFF = 0, MODE_ON = 1, MODE_TURBO = 2 };
+
+static int g_hits = 0;
+static int bump(void) { return ++g_hits; }
+
+// enum-typed PARAM emits `struct Mode` (known bug) — take int, still get
+// real enum constants in the switch.
+static const char *mode_name(int m) {
+    switch (m) {
+        case MODE_OFF:   return "off";
+        case MODE_ON:    return "on";
+        case MODE_TURBO: return "turbo";
+    }
+    return "?";
+}
+
+static int c_add(int a, int b) { return a + b; }
+
+// struct == discovery order: Point's eq must exist before Ops's eq
+// (eq functions emit in discovery order; Ops's nested field calls Point's).
+static void check_struct_eq(void) {
+    struct Point p1; p1.x = 1; p1.y = 2;
+    struct Point p2; p2.x = 1; p2.y = 2;
+    struct Point *pp = &p1;
+    printf("[C1] Point ==: %d  !=: %d  ptr==&obj: %d\n",
+           p1 == p2, p1 != p2, pp == &p1);
+
+    struct Ops a; a.num = 1; a.fn = &asm_square; a.at.x = 7; a.at.y = 8;
+    struct Ops b; b.num = 1; b.fn = &asm_square; b.at.x = 7; b.at.y = 8;
+    struct Ops c; c.num = 2; c.fn = &asm_square; c.at.x = 7; c.at.y = 8;
+    printf("[C2] Ops ==: %d  !=: %d\n", a == b, a != c);
+}
+
+// ── protocols: conformance + P & Q ──
+@protocol Drawable
+@required
+- (void) draw;
+@optional
+- (void) highlight;
+@end
+
+@protocol Serializable
+@required
+- (int) serialize;
+@end
+
+@protocol Renderable <Drawable & Serializable>   // composed protocol
+@end
+
+// ── async classes (declared like plain ObjC; @await in the body) ──
+@interface Fetcher : NFObject {
+    int _base;
+}
+- (int) compute:(int)n;
+- (int) fetchRemote:(int)seed;
+- (void) runAll;
+@end
+
+@implementation Fetcher
+- (int) compute:(int)n {
+    int raw = @await n;                 // suspension point
+    return raw * 2;
+}
+- (int) fetchRemote:(int)seed {
+    int doubled = @await [self compute:seed];   // await a method → infected
+    return doubled + 1;
+}
+- (void) runAll {                       // async void entry (blocking wrapper)
+    int x = @await [self fetchRemote:21];
+    printf("[ASY] result=%d (expect 43)\n", x);
+}
+@end
+
+@namespace Stress
+
+    // ── animals for dispatch + for-in ──
+    @protocol Speaker
+    @required
+    - (void) speak;
+    @end
+
+    @interface Animal : NFObject {
+        @public int legs;
+    }
+    - (id) init;
+    - (int) legs;
+    - (void) setLegs:(int)l;
+    - (void) speak;
+    - (BOOL) isDog;
+    @end
+    @implementation Animal
+    - (id) init  { self = [super init]; legs = 4; return self; }
+    - (int) legs   { return legs; }
+    - (void) setLegs:(int)l { legs = l; }
+    - (void) speak { printf("..."); }
+    - (BOOL) isDog { return NO; }
+    @end
+
+    @interface Dog : Animal
+    - (id) init;
+    - (void) speak;
+    - (int) serialize;
+    - (void) draw;
+    - (BOOL) isEqual:(id)other;
+    @end
+    @implementation Dog
+    - (id) init  { self = [super init]; return self; }
+    - (void) speak { printf("woof"); }
+    - (int) serialize { return 1; }
+    - (void) draw { printf("[DOG draw]\n"); }
+    - (BOOL) isEqual:(id)other { return self == other; }
+    @end
+
+    @interface Cat : Animal
+    - (id) init;
+    - (void) speak;
+    - (void) draw;                       // has draw but not serialize
+    @end
+    @implementation Cat
+    - (id) init  { self = [super init]; return self; }
+    - (void) speak { printf("meow"); }
+    - (void) draw { printf("[CAT draw]\n"); }
+    @end
+
+    // Robot conforms to Renderable (composed: Drawable & Serializable)
+    @interface Robot : NFObject <Renderable>
+    - (id) init;
+    - (void) draw;
+    - (int) serialize;
+    @end
+    @implementation Robot
+    - (id) init  { self = [super init]; return self; }
+    - (void) draw { printf("[ROBOT draw]\n"); }
+    - (int) serialize { return 0xBEEF; }
+    @end
+
+    // conformance is checked: removing speak() from Dog breaks the build.
+    @interface ErrBoom : NFObject {
+        int code;
+    }
+    - (id) init;
+    - (int) errorCode;
+    - (void) setCode:(int)c;
+    @end
+    @implementation ErrBoom
+    - (id) init  { self = [super init]; return self; }
+    - (int) errorCode { return code; }
+    - (void) setCode:(int)c { code = c; }
+    @end
+
+    // weak-ref holder
+    @interface Holder : NFObject {
+        __weak Animal *_weakRef;
+    }
+    - (id) init;
+    - (void) hold:(Animal *)a;
+    - (int) weakAlive;
+    @end
+    @implementation Holder
+    - (id) init  { self = [super init]; return self; }
+    - (void) hold:(Animal *)a { _weakRef = a; }
+    - (int) weakAlive { return _weakRef != nil ? 1 : 0; }
+    @end
+
+@endnamespace
+
+// ── generics (top level; namespace-qualified receivers don't specialize) ──
+@interface Box<T> : NFObject {
+    T _v;
+}
+- (void) set:(T)v;
+- (T) value;
+@end
+@implementation Box
+- (void) set:(T)v { _v = v; }
+- (T) value { return _v; }
+@end
+
+// C functions receiving gald objects
+static int poke_speak(id<Stress::Speaker> s) { [s speak]; return 1; }
+
+// ── @throws 声明标注：typed / bare / 本地 @try 豁免（编译期对账） ──
+@interface Thrower : NFObject
+- (int) risky:(int)n @throws(NFString *);   // typed
+- (int) bare:(int)n @throws;                // bare
+@end
+
+@implementation Thrower
+- (int) risky:(int)n @throws(NFString *) {
+    if (n < 0) {
+        @throw @"risky-fail";
+    }
+    return n * 2;
+}
+- (int) bare:(int)n @throws {
+    if (n < 0) {
+        @throw @"bare-fail";
+    }
+    return n + 1;
+}
+@end
+
+// 未标注 + 本地 @try 捕获（不逃逸）→ checker 放行
+static int local_throw_catch(int n) {
+    @try {
+        if (n < 0) {
+            @throw @"local-fail";
+        }
+        return n * 3;
+    } @catch (NFString *e) {
+        return -1;
+    }
+}
+
+int main() {
+    printf("=== hosted stress ===\n");
+
+    // ── 1. C layer ──
+    check_struct_eq();
+    printf("[C3] mode(TURBO)=%s  fnptr add(2,3)=%d  sizeof(Ops)=%d\n",
+           mode_name(MODE_TURBO), c_add(2, 3), (int)sizeof(struct Ops));
+
+    // ── 2. Foundation: strings, arrays, boxing, variadic ctor ──
+    NFString *s1 = @"hello";
+    NFString *s2 = [s1 stringByAppendingString:@" world"];
+    printf("[F1] string: %s (len %zu)\n", [s2 UTF8String], [s2 length]);
+
+    // BUG NOTE: `NFString *a = @"one", *b = @"two";` (pointer declarators in a
+    // comma list with initializers) fails to parse — split declarations.
+    NFString *a = @"one";
+    NFString *b = @"two";
+    NFString *c = @"three";
+    NFArray *arr = [NFArray arrayWithObjects:a, b, c, nil];   // variadic
+    printf("[F2] array count=%zu first=%s\n", [arr count],
+           [[arr objectAtIndex:0] UTF8String]);
+
+    NFMutableArray *marr = [NFMutableArray arrayWithCapacity:4];
+    [marr addObject:@"x"];
+    [marr addObject:@"y"];
+    [marr insertObject:@"w" atIndex:0];
+    printf("[F3] mutable: %s %s %s\n",
+           [[marr objectAtIndex:0] UTF8String],
+           [[marr objectAtIndex:1] UTF8String],
+           [[marr objectAtIndex:2] UTF8String]);
+
+    NFNumber *n = @42;                       // boxed literal
+    printf("[F4] @42 → %d  double @1.5 → %.1f\n", [n intValue], [@1.5 doubleValue]);
+
+    printf("[F5] NFLog: ");
+    NFLog(@"%@ has %zu items", s2, [arr count]);
+
+    // ── 3. for-in over NFArray + nested ──
+    printf("[L1] for-in:");
+    for (NFString *item in arr) {
+        printf(" %s", [item UTF8String]);
+    }
+    printf("\n");
+
+    NFArray *rows = @[ @[ @"a", @"b" ], @[ @"c" ] ];
+    printf("[L2] nested:");
+    for (NFObject *row in rows) {
+        for (NFString *cell in (NFArray *)row) {
+            printf(" %s", [cell UTF8String]);
+        }
+    }
+    printf("\n");
+
+    // ── 4. dispatch trio over mixed array ──
+    Stress::Dog *dog = [[Stress::Dog alloc] init];
+    Stress::Cat *cat = [[Stress::Cat alloc] init];
+    Stress::Robot *robot = [[Stress::Robot alloc] init];
+    NFArray *zoo = [NFArray arrayWithObjects:dog, cat, robot, nil];
+    printf("[D1] dispatch:");
+    for (id item in zoo) {
+        if ([item isKindOfClass:[Stress::Dog class]]) {
+            printf(" dog(w:%d)", ((Stress::Animal *)item)->legs);
+            [(Stress::Dog *)item draw];
+        } else if ([item isKindOfClass:[Stress::Cat class]]) {
+            printf(" cat");
+            [(Stress::Cat *)item draw];
+        } else if ([item respondsToSelector:@selector(serialize)]) {
+            printf(" robot(%x)", [(id<Stress::Serializable>)item serialize]);
+        }
+    }
+    printf("\n");
+    printf("[D2] isEqual self:%d other:%d\n",
+           [dog isEqual:dog], [dog isEqual:cat]);
+    printf("[D3] id<Speaker> send=%d\n", poke_speak(dog));
+
+    // ── 5. P & Q intersection receiver ──
+    // robot conforms to Renderable = Drawable & Serializable (composed)
+    [(id<Stress::Renderable>)robot draw];
+    printf("[P1] composed proto serialize=%x\n",
+           [(id<Stress::Renderable>)robot serialize]);
+
+    // ── 6. generics: two specializations ──
+    Box<NFString *> *sb = [[Box alloc] init];
+    [sb set:s1];
+    printf("[G1] box<NFString*> = %s\n", [[sb value] UTF8String]);
+
+    Box<int *> *ib = [[Box alloc] init];
+    int stored = 555;
+    [ib set:&stored];
+    printf("[G2] box<int*> = %d\n", *(int *)[ib value]);
+
+    // ── 7. blocks: explicit ret type + __block + typedef fn-ptr ──
+    __block int mul = 2;
+    IntBin mix = ^int(int x, int y) {
+        mul = mul + x;
+        return x * y + mul;
+    };
+    printf("[B1] block(2,3)=%d mul-after=%d\n", mix(2, 3), mul);
+
+    Pred isEven = ^BOOL(int v) { return (v % 2) == 0; };
+    printf("[B2] pred(4)=%d pred(5)=%d\n", isEven(4), isEven(5));
+
+    IntFn fp = &asm_square;
+    printf("[B3] fnptr→asm square(9)=%d add3(1,2,3)=%d rotr=%x\n",
+           fp(9), asm_add3(1, 2, 3), asm_rotr32(0xF000000Fu, 4));
+
+    // ── 8. exceptions: typed catch chain + finally + nested ──
+    // BUG NOTE (found by this stress test): `@throw e;` inside a @catch of
+    // the SAME @try re-enters that same catch — infinite loop (the jmp_buf
+    // is not disarmed when the handler runs). Rethrow avoided here.
+    Stress::ErrBoom *err = [[Stress::ErrBoom alloc] init];
+    [err setCode:42];
+    @try {
+        @try {
+            bump();
+            @throw err;
+        }
+        @catch (Stress::ErrBoom *inner) {
+            printf("[E1] inner caught %d (no rethrow: re-enters same catch)\n",
+                   [inner errorCode]);
+        }
+        @finally {
+            printf("[E1] inner finally\n");
+        }
+        printf("[E1] after inner try (finally order correct)\n");
+        @throw err;                 // now propagates straight to the outer catch
+    }
+    @catch (Stress::ErrBoom *e2) {
+        printf("[E2] outer caught %d\n", [e2 errorCode]);
+    }
+    @catch (id generic) {
+        printf("[E2] wrong generic handler\n");
+    }
+    @finally {
+        printf("[E2] outer finally\n");
+    }
+
+    // ── 8b. @throws 声明标注：typed / bare / 本地 @try 豁免 ──
+    Thrower *t8 = [[Thrower alloc] init];
+    printf("[E3] @throws ok=%d/%d local=%d\n",
+           [t8 risky:21], [t8 bare:41], local_throw_catch(7));
+    @try {
+        [t8 risky:-1];                     // 抛出路径
+    } @catch (NFString *e3) {
+        printf("[E3] throws caught %s\n", [e3 UTF8String]);
+    }
+
+    // ── 9. @synchronized + @noarc + @autoreleasepool + __weak ──
+    Stress::Animal *pet = [[Stress::Animal alloc] init];
+    [pet setLegs:4];
+    @synchronized (pet) {
+        [pet setLegs:[pet legs] + 1];
+    }
+    printf("[M1] synchronized legs=%d\n", [pet legs]);
+
+    Stress::Holder *h = [[Stress::Holder alloc] init];
+    [h hold:pet];
+    printf("[M2] weak alive=%d\n", [h weakAlive]);
+
+    @autoreleasepool {
+        Stress::Animal *tmp = [[Stress::Animal alloc] init];
+        printf("[M3] pool: tmp legs=%d\n", [tmp legs]);
+    }
+    printf("[M3] pool popped\n");
+
+    @noarc {
+        Stress::Animal *raw = [[Stress::Animal alloc] init];
+        [raw retain];
+        printf("[M4] noarc rc=2 alive\n");
+        [raw release];
+        [raw release];           // back to 0
+    }
+    printf("[M4] noarc survived\n");
+
+    // ── 10. @selector + SEL ──
+    SEL sel = @selector(setLegs:);
+    printf("[S1] selector built (respondsToSelector needs a literal): %d %d\n",
+           [pet respondsToSelector:@selector(setLegs:)],
+           [pet respondsToSelector:@selector(noSuchMethodHere)]);
+
+    // ── 11. inline asm ──
+    unsigned in1 = 21, out1 = 0;
+    __asm__ __volatile__ ("mul %w0, %w1, %w1" : "=r"(out1) : "r"(in1));
+    printf("[A1] inline mul(21)=%u\n", out1);
+
+    // ── 12. async/await ──
+    Fetcher *f2 = [[Fetcher alloc] init];
+    [f2 runAll];                     // async void entry — blocks to completion
+
+    // ── 13. misc: nil messaging, static fn, chained sends ──
+    Stress::Animal *gone = nil;
+    printf("[X1] msg to nil → %d\n", [gone legs]);
+    printf("[X2] bump()=%d chained=%s\n", bump(),
+           [[[s1 stringByAppendingString:@"-"] stringByAppendingString:@"chain"] UTF8String]);
+
+    printf("=== hosted stress done ===\n");
+    return 0;
+}

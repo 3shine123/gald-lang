@@ -9,13 +9,13 @@
 
 | 类别 | ObjC 例子 | Nupa 例子 | 命名规则 |
 |---|---|---|---|
-| 框架类 | `NSObject`, `NSString` | `NPObject`, `NPString`, `NPArray` | CamelCase + `NP` 前缀 |
-| 运行时 C API（基础） | `objc_alloc`, `objc_release` | `nupa_alloc`, `nupa_release` | snake_case + `nupa_` 前缀 |
-| 运行时 C API（方法级） | `objc_autoreleasePoolPush` | `nupa_autoreleasepoolPush` | 直译 ObjC 方法名的 CamelCase |
-| 运行时元数据变量 | `objc_class` 外部符号 | `NUPA_CLASS_$_X` | 全大写 + `_` / `$_` 分隔 |
-| 运行时类型 | `objc_object`, `objc_class` | `struct nupa_vtable`, `struct nupa_root` | snake_case + `nupa_` 前缀 |
-| 编译器内部符号 | `__block_impl`, `_cmd` | `__nupa_byref_X`, `_cmd` | `__` 前缀（编译器保留） |
-| Block 展开（gcc/portable） | `__block_invoke_(...)` | `__nupa_block_{N}` | `__nupa_` 前缀 |
+| 框架类 | `NSObject`, `NSString` | `NFObject`, `NFString`, `NFArray` | CamelCase + `NP` 前缀 |
+| 运行时 C API（基础） | `objc_alloc`, `objc_release` | `gald_alloc`, `gald_release` | snake_case + `gald_` 前缀 |
+| 运行时 C API（方法级） | `objc_autoreleasePoolPush` | `gald_autoreleasepoolPush` | 直译 ObjC 方法名的 CamelCase |
+| 运行时元数据变量 | `objc_class` 外部符号 | `GALD_CLASS_$_X` | 全大写 + `_` / `$_` 分隔 |
+| 运行时类型 | `objc_object`, `objc_class` | `struct gald_vtable`, `struct gald_root` | snake_case + `gald_` 前缀 |
+| 编译器内部符号 | `__block_impl`, `_cmd` | `__gald_byref_X`, `_cmd` | `__` 前缀（编译器保留） |
+| Block 展开（gcc/portable） | `__block_invoke_(...)` | `__gald_block_{N}` | `__gald_` 前缀 |
 | Ivar 私有变量 | `_name`（属性合成） | `_name`（@synthesize） | `_` 单下划线前缀 |
 
 ---
@@ -26,58 +26,58 @@ ObjC 的 `NS`/`CF`/`CG` 前缀 → Nupa 用 `NP`。
 
 | 当前 | 规范 | 对应 ObjC |
 |---|---|---|
-| `NPObject` | ✅ | `NSObject` |
-| `NPClass` | ✅ | 运行时元类型 |
-| `NPString` | ✅ | `NSString` |
-| `NPMutableString` | ✅ | `NSMutableString` |
-| `NPArray` | ✅ | `NSArray` |
-| `NPMutableArray` | ✅ | `NSMutableArray` |
-| `NPDictionary` | ✅ | `NSDictionary` |
-| `NPMutableDictionary` | ✅ | `NSMutableDictionary` |
+| `NFObject` | ✅ | `NSObject` |
+| `NFClass` | ✅ | 运行时元类型 |
+| `NFString` | ✅ | `NSString` |
+| `NFMutableString` | ✅ | `NSMutableString` |
+| `NFArray` | ✅ | `NSArray` |
+| `NFMutableArray` | ✅ | `NSMutableArray` |
+| `NFDictionary` | ✅ | `NSDictionary` |
+| `NFMutableDictionary` | ✅ | `NSMutableDictionary` |
 
-> 类名用 `NP`（Nupa）前缀，与 ObjC 的 `NS` 一一对应；后续新增容器（`NPSet`/`NPOrderedSet` 等）沿用。
+> 类名用 `NP`（Nupa）前缀，与 ObjC 的 `NS` 一一对应；后续新增容器（`NFSet`/`NFOrderedSet` 等）沿用。
 
 ---
 
-## 3. 运行时 C API（`nupa_` 前缀）
+## 3. 运行时 C API（`gald_` 前缀）
 
-ObjC 用 `objc_` 前缀 → Nupa 用 `nupa_`。
+ObjC 用 `objc_` 前缀 → Nupa 用 `gald_`。
 
 ### 3.1 基础内存 / 引用计数（snake_case）
 
 | 符号 | 对应 | 说明 |
 |---|---|---|
-| `nupa_alloc` | `objc_alloc` | 分配实例 |
-| `nupa_init` | `objc_init` | 初始化 |
-| `nupa_retain` / `nupa_release` | `objc_retain`/`objc_release` | RC +/−1 |
-| `nupa_autorelease` | `objc_autorelease` | 池化释放 |
-| `nupa_free` / `nupa_malloc` | 裸机分配器 | bump allocator |
+| `gald_alloc` | `objc_alloc` | 分配实例 |
+| `gald_init` | `objc_init` | 初始化 |
+| `gald_retain` / `gald_release` | `objc_retain`/`objc_release` | RC +/−1 |
+| `gald_autorelease` | `objc_autorelease` | 池化释放 |
+| `gald_free` / `gald_malloc` | 裸机分配器 | bump allocator |
 
 ### 3.2 方法级 / 池 / 元数据（直译 ObjC 方法名，CamelCase）
 
 | 符号 | 说明 |
 |---|---|
-| `nupa_metaInit` | 初始化类元数据（弱符号） |
-| `nupa_autoreleasepoolPush` / `nupa_autoreleasepoolPop` | 自动释放池 |
-| `nupa_stringFromCstr` | C 串 → `NPString`（codegen 弱发射） |
-| `nupa_isKindOf` | 类型判断（保留 CamelCase，不转 snake） |
-| `nupa_array_create` | `@[...]` 字面量的运行时构造 |
-| `nupa_dictionary_create` | `@{...}` 字面量的运行时构造（交替 key/value varargs） |
-| `nupa_weakRegister` / `nupa_weakUnregister` / `nupa_weakClearAll` | 弱引用 |
+| `gald_metaInit` | 初始化类元数据（弱符号） |
+| `gald_autoreleasepoolPush` / `gald_autoreleasepoolPop` | 自动释放池 |
+| `gald_stringFromCstr` | C 串 → `NFString`（codegen 弱发射） |
+| `gald_isKindOf` | 类型判断（保留 CamelCase，不转 snake） |
+| `gald_array_create` | `@[...]` 字面量的运行时构造 |
+| `gald_dictionary_create` | `@{...}` 字面量的运行时构造（交替 key/value varargs） |
+| `gald_weakRegister` / `gald_weakUnregister` / `gald_weakClearAll` | 弱引用 |
 
-> **关于 snake 与 Camel 混用**：基础内存/RC 函数沿用早期 snake_case（`nupa_alloc`…）；后加的、直接对应某条 ObjC 方法语义的函数按 ObjC 方法名 CamelCase（`nupa_metaInit`、`nupa_autoreleasepoolPush`）。两者都以 `nupa_` 前缀开头，不冲突。
+> **关于 snake 与 Camel 混用**：基础内存/RC 函数沿用早期 snake_case（`gald_alloc`…）；后加的、直接对应某条 ObjC 方法语义的函数按 ObjC 方法名 CamelCase（`gald_metaInit`、`gald_autoreleasepoolPush`）。两者都以 `gald_` 前缀开头，不冲突。
 
 ---
 
-## 4. 运行时类型（snake_case + nupa_ 前缀）
+## 4. 运行时类型（snake_case + gald_ 前缀）
 
 | 当前 | 说明 |
 |---|---|
-| `struct nupa_root` | 隐式根类 |
-| `struct nupa_vtable` | 统一实例 VTable |
-| `struct nupa_X_meta_vtable` | 类（meta）VTable |
-| `enum nupa_vtable_index` | 全局方法索引枚举 |
-| `nupa_autoreleasepool_t` | 自动释放池句柄 |
+| `struct gald_root` | 隐式根类 |
+| `struct gald_vtable` | 统一实例 VTable |
+| `struct gald_X_meta_vtable` | 类（meta）VTable |
+| `enum gald_vtable_index` | 全局方法索引枚举 |
+| `gald_autoreleasepool_t` | 自动释放池句柄 |
 
 ---
 
@@ -87,41 +87,41 @@ Nupa 每个类生成一组全大写的元数据符号，分隔符随后端：
 
 | 后端 | 分隔符 | 例子 |
 |---|---|---|
-| clang / gcc | `$_` | `NUPA_CLASS_$_NPString` |
-| portable | `_` | `NUPA_CLASS_NPString` |
+| clang / gcc | `$_` | `GALD_CLASS_$_NFString` |
+| portable | `_` | `GALD_CLASS_NFString` |
 
-| 符号 | 例子（NPString） | 说明 |
+| 符号 | 例子（NFString） | 说明 |
 |---|---|---|
-| `NUPA_CLASS_$_X` | `NUPA_CLASS_$_NPString` | 类对象实例 |
-| `NUPA_VTABLE_$_X` | `NUPA_VTABLE_$_NPString` | 实例 VTable |
-| `NUPA_META_VTABLE_$_X` | `NUPA_META_VTABLE_$_NPString` | 类（meta）VTable |
-| `NUPA_GETCLASS_$_X` | `NUPA_GETCLASS_$_NPString` | 返回 `&NUPA_CLASS_$_X` |
+| `GALD_CLASS_$_X` | `GALD_CLASS_$_NFString` | 类对象实例 |
+| `GALD_VTABLE_$_X` | `GALD_VTABLE_$_NFString` | 实例 VTable |
+| `GALD_META_VTABLE_$_X` | `GALD_META_VTABLE_$_NFString` | 类（meta）VTable |
+| `GALD_GETCLASS_$_X` | `GALD_GETCLASS_$_NFString` | 返回 `&GALD_CLASS_$_X` |
 
-> 根类：`NUPA_CLASS_$_nupa_root`；另有 `NUPA_ROOT_DEFINED` 宏标记根类已定义。
+> 根类：`GALD_CLASS_$_gald_root`；另有 `GALD_ROOT_DEFINED` 宏标记根类已定义。
 
 ---
 
-## 6. 选择器常量（`__nupa_sel_` 前缀）
+## 6. 选择器常量（`__gald_sel_` 前缀）
 
 ```
-__nupa_sel_{selector名}   selector 用 `_` 代替 `:` 
-__nupa_sel_init                       → init
-__nupa_sel_stringWithUTF8String_      → stringWithUTF8String:
-__nupa_sel_timsort_count_using_       → timsort:count:using:
+__gald_sel_{selector名}   selector 用 `_` 代替 `:` 
+__gald_sel_init                       → init
+__gald_sel_stringWithUTF8String_      → stringWithUTF8String:
+__gald_sel_timsort_count_using_       → timsort:count:using:
 ```
 
 常量本体是 `static const SEL`（`.name` + FNV-1a `.hash`）。
 
 ---
 
-## 7. Block 展开命名（`__nupa_` 前缀，gcc/portable）
+## 7. Block 展开命名（`__gald_` 前缀，gcc/portable）
 
 | 符号 | 例子 | 说明 |
 |---|---|---|
-| `__nupa_block_{N}` | `__nupa_block_0` | 每个字面量的静态 invoke 函数 |
-| `struct __nupa_block_layout_{N}` | `struct __nupa_block_layout_0` | 每个字面量的布局 | 
-| `struct __nupa_block_header` | `struct __nupa_block_header` | 所有展开块共享的头（isa/flags/reserved/invoke） |
-| `__nupa_byref_{变量名}` | `__nupa_byref_counter` | `__block` 变量包装 struct |
+| `__gald_block_{N}` | `__gald_block_0` | 每个字面量的静态 invoke 函数 |
+| `struct __gald_block_layout_{N}` | `struct __gald_block_layout_0` | 每个字面量的布局 | 
+| `struct __gald_block_header` | `struct __gald_block_header` | 所有展开块共享的头（isa/flags/reserved/invoke） |
+| `__gald_byref_{变量名}` | `__gald_byref_counter` | `__block` 变量包装 struct |
 
 ---
 
@@ -129,18 +129,18 @@ __nupa_sel_timsort_count_using_       → timsort:count:using:
 
 | 当前 | 说明 |
 |---|---|
-| `__nupa_sel_NAME` | 选择器常量 |
-| `__nupa_tmp_{N}` | 表达式中临时变量 |
-| `__nupa_pool` | `@autoreleasepool` 池变量 |
-| `__nupa_exception_buf` / `__nupa_exception_value` | `@try/@catch` 异常状态 |
-| `__nupa_saved` / `__nupa_state` | 嵌套 try 的 jmp_buf 保存 |
+| `__gald_sel_NAME` | 选择器常量 |
+| `__gald_tmp_{N}` | 表达式中临时变量 |
+| `__gald_pool` | `@autoreleasepool` 池变量 |
+| `__gald_exception_buf` / `__gald_exception_value` | `@try/@catch` 异常状态 |
+| `__gald_saved` / `__gald_state` | 嵌套 try 的 jmp_buf 保存 |
 | `_cmd` / `self` | 同 ObjC |
 
 ---
 
 ## 9. Ivar 命名（`_` 单下划线前缀）
 
-```nupa
+```gald
 @property int age;
 @synthesize age = _age;   // ivar 名为 _age
 ```
@@ -154,11 +154,11 @@ __nupa_sel_timsort_count_using_       → timsort:count:using:
 C 侧调用 Nupa 对象方法的包装函数：
 
 ```
-nupa_{类名}_{方法名}             数组类方法名
-nupa_NPString_stringWithUTF8String_   → 类方法
-nupa_NPString_UTF8String              → 实例方法
+gald_{类名}_{方法名}             数组类方法名
+gald_NFString_stringWithUTF8String_   → 类方法
+gald_NFString_UTF8String              → 实例方法
 
-格外显式初始化：nupa_metaInit()
+格外显式初始化：gald_metaInit()
 ```
 
 见 README/CHINESE「C 桥接」小节。
@@ -179,10 +179,10 @@ nupa_NPString_UTF8String              → 实例方法
 | `respondsToSelector` / `mirroring` | VTable 索引固定，运行时无动态查找 |
 
 > **未来规划（主静辅动）**：为模组/游戏预留"边界动态"，已出规划文档 `~/Desktop/Nupa-主静辅动-动态特性规划.md`。届时将**新增**：
-> - `nupa_classNamed(const char *)`（运行时类注册表）
-> - `nupa_respondsToSelector(id, SEL)`
-> - `nupa_performSelector...`（受限签名）
-> - `nupa_overrideMethod(...)`（vtable 槽替换 = 模组覆盖）
+> - `gald_classNamed(const char *)`（运行时类注册表）
+> - `gald_respondsToSelector(id, SEL)`
+> - `gald_performSelector...`（受限签名）
+> - `gald_overrideMethod(...)`（vtable 槽替换 = 模组覆盖）
 > 核心热路径保持静态；不引入 `objc_msgSend` 全量动态派发。
 
 ---
@@ -193,18 +193,18 @@ nupa_NPString_UTF8String              → 实例方法
 
 | 符号 | 旧 → 新 | 状态 |
 |---|---|---|
-| 隐式根类 | `__nupa_root` → `nupa_root` | ✅ 完成（`struct nupa_root`、`nupa_root_init` 等） |
-| 根类元数据 | `nupa___nupa_root_class` → `NUPA_CLASS_$_nupa_root` | ✅ 完成（随 §5 全大写规范） |
-| 元数据变量 | `nupa_{类}_class` → `NUPA_CLASS_$_X` | ✅ 完成 |
-| 类型判断 | `nupa_isKindOf` 保留 CamelCase（不回退 snake） | ✅ 定案 |
+| 隐式根类 | `__gald_root` → `gald_root` | ✅ 完成（`struct gald_root`、`gald_root_init` 等） |
+| 根类元数据 | `gald___gald_root_class` → `GALD_CLASS_$_gald_root` | ✅ 完成（随 §5 全大写规范） |
+| 元数据变量 | `gald_{类}_class` → `GALD_CLASS_$_X` | ✅ 完成 |
+| 类型判断 | `gald_isKindOf` 保留 CamelCase（不回退 snake） | ✅ 定案 |
 
 ---
 
 ## 13. 快速记忆
 
-- **类**：`NP` + CamelCase（`NPArray`）
-- **运行时函数**：`nupa_` + （基础 snake / 方法级 Camel）
-- **元数据**：`NUPA_{KIND}_$_名字`
-- **编译器符号**：`__nupa_` 开头
+- **类**：`NP` + CamelCase（`NFArray`）
+- **运行时函数**：`gald_` + （基础 snake / 方法级 Camel）
+- **元数据**：`GALD_{KIND}_$_名字`
+- **编译器符号**：`__gald_` 开头
 - **ivar**：`_` 单下划线
-- **C 侧桥接**：`nupa_{类}_{方法}`
+- **C 侧桥接**：`gald_{类}_{方法}`

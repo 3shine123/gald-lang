@@ -1,8 +1,0 @@
-#include <stdio.h>
-// 缺口:struct 右花括号之后的 __attribute__ 无法解析。
-// C 里这是合法写法,并能让 packed 真正生效。nupac 只支持名前写法。
-struct P {
-    int a;
-    int b;
-} __attribute__((packed, aligned(8)));
-int main(void) { return 0; }

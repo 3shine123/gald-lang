@@ -1,0 +1,5 @@
+#import <Foundation/Foundation.gh>
+// Shared declarations: both TUs see this method set via the header.
+@interface Calc : NFObject
+- (int)add:(int)a to:(int)b;
+@end

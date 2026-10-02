@@ -135,7 +135,7 @@ pub enum CstExprKind {
     /// identifier elsewhere, e.g. `int await = 1;`).
     Await,
     /// `@(expr)` — boxed-expression literal. The parser cannot pick the
-    /// `NPNumber` factory (it has no types), so the node is carried through
+    /// `NFNumber` factory (it has no types), so the node is carried through
     /// to the checker, which rewrites it by the expression's static type.
     Boxed,
 }
@@ -334,12 +334,12 @@ pub enum CstStmtData {
     SwitchPat {
         expr: Box<CstExpr>,
         /// Flat arm list; the brace structure of the C switch body is not
-        /// preserved (arms are labels, never nested scopes in nupa).
+        /// preserved (arms are labels, never nested scopes in gald).
         arms: Vec<CstArm>,
         has_default: bool,
         /// Body of the `default:` arm, grouped with its fallthrough siblings
         /// by the flat-arm collector. The pattern crate emits it as a
-        /// `__nupa_case_d` labeled block; `None` = no default (or the default
+        /// `__gald_case_d` labeled block; `None` = no default (or the default
         /// body was not captured, e.g. the single-arm wrapper nodes).
         default_body: Option<Box<CstStmt>>,
     },
@@ -432,7 +432,7 @@ pub enum CstDeclData {
         /// Trailing `@throws` / `@throws(T)` annotation (declaration position).
         /// `None` = not annotated. Compile-time only — never emitted to C.
         throws: Option<Box<CstType>>,
-        /// `NPAsync<T>` return-type marker: the parser unwraps it to `T` and
+        /// `NFAsync<T>` return-type marker: the parser unwraps it to `T` and
         /// sets this flag (pure compile-time metadata, never emitted to C).
         async_marker: bool,
     },
@@ -500,7 +500,7 @@ pub enum CstDeclData {
         /// before `;` or `{`). `None` = not annotated. Compile-time only —
         /// never emitted to C. Distinct from the `@throw` statement.
         throws: Option<Box<CstType>>,
-        /// `NPAsync<T>` return-type marker (see Function).
+        /// `NFAsync<T>` return-type marker (see Function).
         async_marker: bool,
     },
     Namespace(Vec<CstDecl>),

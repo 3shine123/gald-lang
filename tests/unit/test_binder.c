@@ -1,8 +1,8 @@
-#include "nupa/binder.h"
-#include "nupa/parser.h"
-#include "nupa/lexer.h"
-#include "nupa/cst.h"
-#include "nupa/symbol.h"
+#include "gald/binder.h"
+#include "gald/parser.h"
+#include "gald/lexer.h"
+#include "gald/cst.h"
+#include "gald/symbol.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -15,7 +15,7 @@ static int passed = 0;
 
 static int do_bind(const char *src) {
     lexer_t lexer;
-    lexer_init(&lexer, src, strlen(src), "test.np");
+    lexer_init(&lexer, src, strlen(src), "test.gm");
     parser_t *p = parser_create(&lexer);
     translation_unit_t *unit = parser_parse_translation_unit(p);
     if (!unit) { parser_destroy(p); return -1; }
@@ -33,7 +33,7 @@ static int do_bind(const char *src) {
 
 static int do_bind_get_symtab(const char *src, symbol_table_t **out_st) {
     lexer_t lexer;
-    lexer_init(&lexer, src, strlen(src), "test.np");
+    lexer_init(&lexer, src, strlen(src), "test.gm");
     parser_t *p = parser_create(&lexer);
     translation_unit_t *unit = parser_parse_translation_unit(p);
     if (!unit) { parser_destroy(p); return -1; }

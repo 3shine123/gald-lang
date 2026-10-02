@@ -1,0 +1,47 @@
+// test: @using namespace — import all classes from a namespace
+#include <stdio.h>
+#import <Foundation/Foundation.gh>
+
+@namespace Game
+    @interface Player : NFObject {
+        @public
+        int id;
+    }
+    - (id)initWithId:(int)i;
+    @end
+
+    @implementation Player
+    - (id)initWithId:(int)i {
+        self = [super init];
+        if (self) id = i;
+        return self;
+    }
+    @end
+
+    @interface Enemy : NFObject {
+        @public
+        int hp;
+    }
+    - (id)initWithHP:(int)h;
+    @end
+
+    @implementation Enemy
+    - (id)initWithHP:(int)h {
+        self = [super init];
+        if (self) hp = h;
+        return self;
+    }
+    @end
+@endnamespace
+
+@using namespace Game;
+
+int main() {
+    @autoreleasepool {
+        Player *p = [[Player alloc] initWithId:7];
+        Enemy *e = [[Enemy alloc] initWithHP:80];
+        printf("[using_ns] Player id=%d, Enemy hp=%d\n", p->id, e->hp);
+        [p release]; [e release];
+    }
+    return 0;
+}

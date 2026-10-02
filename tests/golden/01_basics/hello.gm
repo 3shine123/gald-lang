@@ -1,0 +1,13 @@
+#include <stdio.h>
+#import <Foundation/Foundation.gh>
+
+@interface Student : NFObject
+@property int grade;
+@end
+
+int main() {
+    Student *s = [[Student alloc] init];
+    s.grade = 5;
+    printf("Grade: %d\n", s.grade);
+    return 0;
+}

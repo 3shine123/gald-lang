@@ -12,16 +12,16 @@
 
 | # | 规则 | 反例（修复前） |
 |---|---|---|
-| 1 | 退出表达式**读取**了某 owned 局部 → 先求值到临时变量，再 release，最后 return/throw | `return [[h text] length] - 5;` 先 `nupa_release(h)` → UAF |
-| 2 | 所有权**转移**只认两类：裸局部 `return h;`，或显式的 `return nupa_autorelease(h);` / `return [h autorelease];` | `return [h text];` 曾被当作转移 → `h` 永不释放（泄漏） |
+| 1 | 退出表达式**读取**了某 owned 局部 → 先求值到临时变量，再 release，最后 return/throw | `return [[h text] length] - 5;` 先 `gald_release(h)` → UAF |
+| 2 | 所有权**转移**只认两类：裸局部 `return h;`，或显式的 `return gald_autorelease(h);` / `return [h autorelease];` | `return [h text];` 曾被当作转移 → `h` 永不释放（泄漏） |
 | 3 | `@throw` 只释放**最近 `@try` 边界以内**的局部；边界之外的局部在 handler 返回后仍然有效 | `@throw` 释放了函数级局部，函数尾再释放一次 → 双释放 |
 
 规则 1 的 lowering：
 
 ```c
-__auto_type __nupa_arc_ret_N = <完整求值的退出表达式>;   /* 只在表达式确实读局部时生成 */
-nupa_release(<局部>);                                    /* 逆序，与既有 ARC 一致 */
-return __nupa_arc_ret_N;                                 /* 或 @throw __nupa_arc_ret_N */
+__auto_type __gald_arc_ret_N = <完整求值的退出表达式>;   /* 只在表达式确实读局部时生成 */
+gald_release(<局部>);                                    /* 逆序，与既有 ARC 一致 */
+return __gald_arc_ret_N;                                 /* 或 @throw __gald_arc_ret_N */
 ```
 
 仅在必要时引入临时变量（表达式不读任何待释放局部时直接插 release，不加临时变量）。临时变量是**已算好值的普通副本**，不引入额外 retain/release。
@@ -50,16 +50,16 @@ return __nupa_arc_ret_N;                                 /* 或 @throw __nupa_ar
 | 16 | `@finally` 内**再次 throw** | 向**外**传播，不重入本层 catch |
 | 17 | `@finally` 内 `return` | 覆盖 try 的返回值；finally 先跑，局部释放一次 |
 
-（编号 12 未使用；`^int(void)` 的 parser 回归在 `tests/block_void_params_test.np`。）
+（编号 12 未使用；`^int(void)` 的 parser 回归在 `tests/block_void_params_test.gm`。）
 
 组合：`{default, -eh checked, -eh legacy} × {ARC, MRC}`。
 
 - ARC：stdout 必须等于 `.out` 且 exit 0
 - MRC：只断言 exit 0（MRC 不注入 release，不打印 dealloc）
-- `.np` 的 `NPLog` 输出走 **stderr**（`runtime.c`），runner 合并两个流后比对
+- `.gm` 的 `NFLog` 输出走 **stderr**（`runtime.c`），runner 合并两个流后比对
 
 ```bash
-NPAC=target/release/nupac ./tests/arc_order/run_arc_order.sh
+GALDC=target/release/galdc ./tests/arc_order/run_arc_order.sh
 ```
 
 另有 ASan 强验证（见下）。
@@ -70,7 +70,7 @@ NPAC=target/release/nupac ./tests/arc_order/run_arc_order.sh
 |---|---|
 | `crates/arc/src/arc.rs` | 新增 `insert_exit_cleanup`（规则 1/2）、`transferred_var`（规则 2）、`collect_captures_*`（block 捕获感知）、`throw_floor`（规则 3）；移除 `clear_all` 与"return 前盲插 release" |
 | `crates/eh/src/lib.rs` | checked 后端：`rewrite_try` 把 `@finally` 体 splice 到 try 体内每个 `return` 之前（新的 `splice_finally_before_exits`）；新增 `pub fn splice_finally_exits` 供 legacy 使用 |
-| `crates/nupac/src/pipeline.rs` | legacy（sjlj）路径新增 `@finally` 早退 splice pass（Step 3.92，在 ARC 之前） |
+| `crates/galdc/src/pipeline.rs` | legacy（sjlj）路径新增 `@finally` 早退 splice pass（Step 3.92，在 ARC 之前） |
 
 ### 为什么不重复释放
 
@@ -86,7 +86,7 @@ NPAC=target/release/nupac ./tests/arc_order/run_arc_order.sh
 
 C 的 label 是**函数级**的，`goto` 可以跳出任意嵌套块——跳过的那些作用域的 owned
 局部原本无人释放（pattern-switch lowering 生成的正是这个形状：arm body 在嵌套
-compound 里，`goto __nupa_swN_end` 跳出去）。
+compound 里，`goto __gald_swN_end` 跳出去）。
 
 判定用**作用域路径**（从函数体到该语句列表的语句索引序列）而非单纯深度：
 
@@ -98,7 +98,7 @@ compound 里，`goto __nupa_swN_end` 跳出去）。
 
 被释放的变量**不**从作用域登记中移除：其它未走这条 goto 的路径仍会在作用域末尾释放它们，因此每条路径恰好释放一次。
 
-负例：`tests/negative/arc_goto_into_scope.np`。
+负例：`tests/negative/arc_goto_into_scope.gm`。
 
 ### owned ivar（14–15）
 
@@ -107,16 +107,16 @@ compound 里，`goto __nupa_swN_end` 跳出去）。
 | 类的情况 | 行为 |
 |---|---|
 | **没有**自定义 `dealloc` | ARC 合成 dealloc（wrapper）：先链到父类 dealloc 入口，再**逆序**释放本类的 owned ivar |
-| **有**自定义 `dealloc` | ARC 不介入——body 可能已经手动释放了 ivar（`NPObject_release(_x)` / `[_x release]`），叠加就是 double free |
+| **有**自定义 `dealloc` | ARC 不介入——body 可能已经手动释放了 ivar（`NFObject_release(_x)` / `[_x release]`），叠加就是 double free |
 
-判定 owned ivar：仅**单级**对象指针（`NPObject **` 这类 C 数组排除——它曾导致
-`NPArray._items` 被当作对象释放而崩溃），排除 weak / 函数指针 / block / C 标量指针；
-`id` 计入。释放用 `nupa_release`（nil 安全，部分初始化对象安全）。
+判定 owned ivar：仅**单级**对象指针（`NFObject **` 这类 C 数组排除——它曾导致
+`NFArray._items` 被当作对象释放而崩溃），排除 weak / 函数指针 / block / C 标量指针；
+`id` 计入。释放用 `gald_release`（nil 安全，部分初始化对象安全）。
 
 判定「自定义 dealloc」必须看 `method_owners == 本类`——`method_names` 也含**继承**条目，
-否则任何 `NPObject` 子类都会被当作"写了 dealloc"而失去合成。
+否则任何 `NFObject` 子类都会被当作"写了 dealloc"而失去合成。
 
-**MRC（`-fno-nupa-arc`）下完全不生成**（`CgUnit.no_arc` 门控）：手写保留计数的程序里
+**MRC（`-fno-gald-arc`）下完全不生成**（`CgUnit.no_arc` 门控）：手写保留计数的程序里
 ivar 归程序员所有。
 
 ## 修复位置（汇总）
@@ -125,7 +125,7 @@ ivar 归程序员所有。
 |---|---|
 | `crates/arc/src/arc.rs` | `insert_exit_cleanup`（退出表达式先求值后清理）、`transferred_var`（所有权转移只认裸局部/autorelease）、`collect_captures_*`（block 捕获感知）、`throw_floor`（`@throw` 按最近 `@try` 限界）、`build_goto_plan` + `walk_labels_gotos`（`goto` 作用域路径分析）、移除 `clear_all` |
 | `crates/eh/src/lib.rs` | `rewrite_try` 把 `@finally` 体 splice 到 try 体内每个 `return` 前（`splice_finally_before_exits`）；`pub fn splice_finally_exits` 供 legacy 使用 |
-| `crates/nupac/src/pipeline.rs` | legacy 的 `@finally` 早退 splice pass（Step 3.92）；ARC 错误上报 |
+| `crates/galdc/src/pipeline.rs` | legacy 的 `@finally` 早退 splice pass（Step 3.92）；ARC 错误上报 |
 | `crates/codegen/src/codegen.rs` | `emit_arc_dealloc_wrappers`（合成 ivar 释放）、`owned_ivars_of` / `is_owned_object_ivar_type`、`CgUnit.no_arc` |
 | `crates/parser/src/parser.rs` | block 字面量参数表中的无名 `void` 视为空参数（`^int(void)` ≡ `^int()`） |
 
@@ -137,9 +137,9 @@ ivar 归程序员所有。
 ## ASan 强验证
 
 ```bash
-for c in tests/arc_order/[0-9][0-9]_*.np; do
-  ./target/release/nupac -rewrite-nupa -o /tmp/a.c "$c"
-  clang -fsanitize=address -fblocks -w -I include -o /tmp/a /tmp/a.c include/nupa/runtime.c
+for c in tests/arc_order/[0-9][0-9]_*.gm; do
+  ./target/release/galdc -rewrite-gald -o /tmp/a.c "$c"
+  clang -fsanitize=address -fblocks -w -I include -o /tmp/a /tmp/a.c include/gald/runtime.c
   /tmp/a
 done
 ```

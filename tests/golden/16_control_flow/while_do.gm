@@ -1,0 +1,18 @@
+#include <stdio.h>
+#import <Foundation/Foundation.gh>
+
+int main() {
+    int i = 0;
+    while (i < 5) {
+        printf("while: %d\n", i);
+        i++;
+    }
+
+    int j = 0;
+    do {
+        printf("do-while: %d\n", j);
+        j++;
+    } while (j < 3);
+
+    return 0;
+}

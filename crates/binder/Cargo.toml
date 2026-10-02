@@ -1,13 +1,13 @@
 [package]
-name = "nupa-binder"
+name = "gald-binder"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-nupa-cst = { path = "../cst" }
-nupa-ast = { path = "../ast" }
-nupa-symbol = { path = "../symbol" }
+gald-cst = { path = "../cst" }
+gald-ast = { path = "../ast" }
+gald-symbol = { path = "../symbol" }
 
 [dev-dependencies]
-nupa-lexer = { path = "../lexer" }
-nupa-parser = { path = "../parser" }
+gald-lexer = { path = "../lexer" }
+gald-parser = { path = "../parser" }

@@ -1,12 +1,12 @@
 [package]
-name = "nupa-codegen"
+name = "gald-codegen"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-nupa-cst = { path = "../cst" }
-nupa-ast = { path = "../ast" }
-nupa-symbol = { path = "../symbol" }
-nupa-elaborator = { path = "../elaborator" }
+gald-cst = { path = "../cst" }
+gald-ast = { path = "../ast" }
+gald-symbol = { path = "../symbol" }
+gald-elaborator = { path = "../elaborator" }
 attrs = { path = "../attrs" }
-nupa-ownership = { path = "../ownership" }
+gald-ownership = { path = "../ownership" }

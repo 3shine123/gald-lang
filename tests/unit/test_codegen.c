@@ -1,4 +1,4 @@
-#include "nupa/codegen.h"
+#include "gald/codegen.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -20,7 +20,7 @@ static void test_expr_int(void) {
 static void test_expr_call(void) {
     TEST("cg_expr call");
     cg_expr_t *e = cg_expr_alloc(CEXPR_CALL);
-    e->u.call.name = strdup("nupa_release");
+    e->u.call.name = strdup("gald_release");
     e->u.call.args = calloc(2, sizeof(cg_expr_t *));
     e->u.call.args[0] = cg_expr_alloc(CEXPR_IDENT);
     e->u.call.args[0]->u.id = strdup("obj");

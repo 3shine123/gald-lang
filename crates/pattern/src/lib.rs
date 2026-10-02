@@ -18,21 +18,21 @@
 //! }
 //! /* lowered */
 //! {
-//!     __auto_type __nupa_sw = value;               /* evaluated once */
-//!     if (__nupa_sw > 10) goto __nupa_case_0;      /* Cond */
-//!     if (nupa_isKindOfClass((NPObject *)__nupa_sw, &NUPA_CLASS_$_NSString)
-//!         && __nupa_s_len_guard) goto __nupa_case_1;   /* Bind + when */
-//!     if ([__nupa_sw isEqual:@"hello"]) goto __nupa_case_2;  /* literal */
-//!     goto __nupa_case_d;                          /* default */
-//!     goto __nupa_sw_end;                          /* no default: skip */
-//! __nupa_case_0:;
+//!     __auto_type __gald_sw = value;               /* evaluated once */
+//!     if (__gald_sw > 10) goto __gald_case_0;      /* Cond */
+//!     if (gald_isKindOfClass((NFObject *)__gald_sw, &GALD_CLASS_$_NSString)
+//!         && __gald_s_len_guard) goto __gald_case_1;   /* Bind + when */
+//!     if ([__gald_sw isEqual:@"hello"]) goto __gald_case_2;  /* literal */
+//!     goto __gald_case_d;                          /* default */
+//!     goto __gald_sw_end;                          /* no default: skip */
+//! __gald_case_0:;
 //!     big();
-//!     goto __nupa_sw_end;
-//! __nupa_case_1:;
+//!     goto __gald_sw_end;
+//! __gald_case_1:;
 //!     /* binding alias declared in the arm body scope */
-//!     goto __nupa_sw_end;
+//!     goto __gald_sw_end;
 //! ...
-//! __nupa_sw_end:;
+//! __gald_sw_end:;
 //! }
 //! ```
 //!
@@ -43,15 +43,15 @@
 //! would bind to the enclosing `if`'s loop context wrongly (or escape the
 //! switch entirely). So every `break` that belongs to THIS switch (i.e. seen
 //! while no deeper loop/switch has been entered) is rewritten to
-//! `goto __nupa_sw_end`. `break`s inside nested loops/switches are left
+//! `goto __gald_sw_end`. `break`s inside nested loops/switches are left
 //! untouched — the same two-set discipline the defer pass uses (`pending` vs
 //! `jump`).
 //!
 //! ## Fallthrough
 //!
 //! Without `break`, control falls from one arm into the next — the C
-//! semantics, preserved by the `goto __nupa_case_{i+1}` chain: each arm's
-//! body ends with `goto __nupa_sw_end` ONLY if the original body already
+//! semantics, preserved by the `goto __gald_case_{i+1}` chain: each arm's
+//! body ends with `goto __gald_sw_end` ONLY if the original body already
 //! ended in break-like flow... actually simpler: each label block falls
 //! through to the next label block naturally (labels are adjacent), and a
 //! rewritten `break` jumps to the end. This reproduces C fallthrough
@@ -63,15 +63,15 @@
 //! - Return/throw inside arms work naturally (plain C statements).
 //! - Object-literal equality is `isEqual:` (value semantics); nil subject
 //!   short-circuits to "no match" (messaging nil yields 0).
-use nupa_ast::{AstArm, AstDecl, AstDeclData, AstDeclKind, AstExpr, AstExprData, AstExprKind,
+use gald_ast::{AstArm, AstDecl, AstDeclData, AstDeclKind, AstExpr, AstExprData, AstExprKind,
               AstPattern, AstStmt, AstStmtData, AstStmtKind, AstType};
-use nupa_cst::TypePrim;
+use gald_cst::TypePrim;
 
 /// Unit-level entry: lower every `SwitchPat` under every decl (methods,
 /// functions, namespaces, class method lists). Same traversal shape as
-/// `nupa_defer::desugar_unit` — namespaces must recurse or their switches
+/// `gald_defer::desugar_unit` — namespaces must recurse or their switches
 /// would reach codegen's catch-all and be silently dropped.
-pub fn desugar_unit(unit: &mut nupa_ast::AstUnit) {
+pub fn desugar_unit(unit: &mut gald_ast::AstUnit) {
     for decl in &mut unit.decls {
         lower_decl(decl);
     }
@@ -162,17 +162,17 @@ fn lower_switch_pat(sw: AstStmt) -> AstStmt {
     };
     // Every lowered switch gets its own label namespace: C labels are
     // function-scoped, so nested pattern switches would otherwise emit
-    // duplicate `__nupa_sw_end` / `__nupa_case_0` names (hard C error).
+    // duplicate `__gald_sw_end` / `__gald_case_0` names (hard C error).
     let id = SWITCH_SEQ.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
-    let subj = "__nupa_sw".to_string();
-    let end_label = format!("__nupa_sw{}_end", id);
-    let default_label = format!("__nupa_case_{}_d", id);
+    let subj = "__gald_sw".to_string();
+    let end_label = format!("__gald_sw{}_end", id);
+    let default_label = format!("__gald_case_{}_d", id);
     let mut out: Vec<AstStmt> = Vec::new();
 
     // 1. Materialize the subject exactly once. This pass runs BEFORE the
     //    checker, so the static type is unknown: an object-valued subject
     //    (Bind arm, or a value-semantics @literal arm) is declared
-    //    `NPObject *` with the expression cast to it — `__auto_type` would
+    //    `NFObject *` with the expression cast to it — `__auto_type` would
     //    inherit the pointer type and the checker rejects an object
     //    initializing a scalar. Scalar subjects (plain constants / dangling
     //    comparisons) keep `__auto_type` (eh precedent).
@@ -183,7 +183,7 @@ fn lower_switch_pat(sw: AstStmt) -> AstStmt {
     });
     let init = *subject;
     let (sty, sinit) = if object_subject {
-        (npobject_type(), cast_to_npobject(init))
+        (nfobject_type(), cast_to_nfobject(init))
     } else {
         (auto_type(), init)
     };
@@ -191,7 +191,7 @@ fn lower_switch_pat(sw: AstStmt) -> AstStmt {
 
     // 1b. Hoist every type binding above the dispatch chain. A `when` guard is
     //     evaluated in the `if (...) goto ...` tests, which run BEFORE any arm
-    //     body — so `case NPNumber *n when n.intValue > 3:` referenced `n`
+    //     body — so `case NFNumber *n when n.intValue > 3:` referenced `n`
     //     before its declaration and the generated C failed to compile
     //     ("use of undeclared identifier 'n'"). Declaring the aliases here
     //     makes them visible to both the guards and the bodies. Each alias is
@@ -199,7 +199,7 @@ fn lower_switch_pat(sw: AstStmt) -> AstStmt {
     //     harmless; the type test remains the `isKindOfClass` call.
     //
     //     A name bound by more than one arm (pathological, but parseable:
-    //     `case NPString *s:` + `case NPNumber *s:`) would be a C redeclaration
+    //     `case NFString *s:` + `case NFNumber *s:`) would be a C redeclaration
     //     in this shared scope, so only the first is hoisted; the later arm
     //     keeps its own in-body declaration. `hoisted[i]` records which arms got
     //     the shared declaration, so the body pass below knows not to
@@ -299,7 +299,7 @@ fn lower_switch_pat(sw: AstStmt) -> AstStmt {
 /// Unique tag source for one lowered switch (see `lower_switch_pat`).
 static SWITCH_SEQ: std::sync::atomic::AtomicUsize = std::sync::atomic::AtomicUsize::new(0);
 
-fn case_label(id: usize, i: usize) -> String { format!("__nupa_case_{}_{}", id, i) }
+fn case_label(id: usize, i: usize) -> String { format!("__gald_case_{}_{}", id, i) }
 
 /// The if-test for one arm, splicing the subject where the pattern needs it.
 fn arm_test(arm: &AstArm, subj: &str) -> AstExpr {
@@ -334,19 +334,19 @@ fn arm_test(arm: &AstArm, subj: &str) -> AstExpr {
         }
         AstPattern::Cond(e) => splice_subject(e, subj),
         AstPattern::Bind { ty, .. } => {
-            // nupa_isKindOfClass((NPObject *)subj, &NUPA_CLASS_$_<Flat>)
+            // gald_isKindOfClass((NFObject *)subj, &GALD_CLASS_$_<Flat>)
             let flat = flat_type_name(ty);
             AstExpr {
                 kind: AstExprKind::FuncCall, expr_type: None, line, col,
                 data: AstExprData::FuncCall {
                     func: None,
-                    name: "nupa_isKindOfClass".to_string(),
+                    name: "gald_isKindOfClass".to_string(),
                     callee: None,
                     args: vec![
-                        cast_to_npobject(ident(subj, line, col)),
+                        cast_to_nfobject(ident(subj, line, col)),
                         AstExpr {
                             kind: AstExprKind::VarRef, expr_type: None, line, col,
-                            data: AstExprData::VarRef { sym: None, name: format!("&NUPA_CLASS_$_{}", flat) },
+                            data: AstExprData::VarRef { sym: None, name: format!("&GALD_CLASS_$_{}", flat) },
                         },
                     ],
                 },
@@ -424,17 +424,17 @@ fn ident(name: &str, line: usize, col: usize) -> AstExpr {
     }
 }
 
-/// `NPObject *` — the erased type every nupa object shares (subject and
+/// `NFObject *` — the erased type every gald object shares (subject and
 /// binding casts both go through it).
-fn npobject_type() -> AstType {
+fn nfobject_type() -> AstType {
     let mut t = AstType::new(TypePrim::Named);
-    t.name = Some("NPObject".to_string());
+    t.name = Some("NFObject".to_string());
     t.is_pointer = true;
     t
 }
 
-fn cast_to_npobject(e: AstExpr) -> AstExpr {
-    let t = npobject_type();
+fn cast_to_nfobject(e: AstExpr) -> AstExpr {
+    let t = nfobject_type();
     let (l, c) = (e.line, e.col);
     AstExpr { kind: AstExprKind::Cast, expr_type: None, line: l, col: c, data: AstExprData::Cast { target_type: t, expr: Box::new(e) } }
 }
@@ -468,7 +468,7 @@ fn var_decl(name: &str, ty: AstType, init: Option<AstExpr>, line: usize, col: us
     }
 }
 
-/// Bind-arm alias: `T *name = (T *)(NPObject *)__nupa_sw;` — declared inside
+/// Bind-arm alias: `T *name = (T *)(NFObject *)__gald_sw;` — declared inside
 /// the arm body so scoping stays block-local (no cross-arm leakage).
 fn bind_alias_decl(ty: &AstType, name: &str, subj: &str, line: usize, col: usize) -> AstStmt {
     let mut t = ty.clone();
@@ -476,7 +476,7 @@ fn bind_alias_decl(ty: &AstType, name: &str, subj: &str, line: usize, col: usize
     let subj_e = ident(subj, line, col);
     let cast = AstExpr {
         kind: AstExprKind::Cast, expr_type: None, line, col,
-        data: AstExprData::Cast { target_type: t.clone(), expr: Box::new(cast_to_npobject(subj_e)) },
+        data: AstExprData::Cast { target_type: t.clone(), expr: Box::new(cast_to_nfobject(subj_e)) },
     };
     var_decl(name, t, Some(cast), line, col)
 }
@@ -484,7 +484,7 @@ fn bind_alias_decl(ty: &AstType, name: &str, subj: &str, line: usize, col: usize
 /// Flatten a bound type to its class-metadata symbol segment: `NSString` →
 /// `NSString`; namespaced `NS::Obj` → `NS__Obj` (codegen's name_flat rule).
 fn flat_type_name(ty: &AstType) -> String {
-    let base = ty.name.clone().unwrap_or_else(|| "NPObject".to_string());
+    let base = ty.name.clone().unwrap_or_else(|| "NFObject".to_string());
     base.replace("::", "__")
 }
 
@@ -494,14 +494,14 @@ fn flat_type_name(ty: &AstType) -> String {
 /// an all-literal switch is routed to the C path and emits `case <boxed>:`.
 ///
 /// Covers `@"..."` (AtString), `@(expr)` (Boxed, rewritten by the checker into
-/// an `NPNumber` factory) and the desugared `@N`/`@YES`/`@'c'` form (a message
-/// send on the `NPNumber` class — see the parser's `mk_npnumber_send`).
+/// an `NFNumber` factory) and the desugared `@N`/`@YES`/`@'c'` form (a message
+/// send on the `NFNumber` class — see the parser's `mk_nfnumber_send`).
 fn is_object_literal_expr(e: &AstExpr) -> bool {
     match &e.data {
         AstExprData::AtString(_) | AstExprData::Boxed(_) => true,
         AstExprData::MsgSend { receiver, .. } => {
             matches!(receiver.data, AstExprData::AtString(_))
-                || matches!(&receiver.data, AstExprData::VarRef { name, .. } if name == "NPNumber")
+                || matches!(&receiver.data, AstExprData::VarRef { name, .. } if name == "NFNumber")
         }
         _ => false,
     }

@@ -3,13 +3,13 @@
 #
 # WHY THIS EXISTS
 # ---------------
-# ARC injects `nupa_release` for owned locals at every exit point. **Order
+# ARC injects `gald_release` for owned locals at every exit point. **Order
 # matters**: the exit expression (`return` / `@throw`) must be FULLY evaluated
 # before any local it uses is released — otherwise the release is a
 # use-after-free. Conversely a local used only by the exit expression must
 # still be released (skipping it is a leak).
 #
-# Each case is `NN_name.np` + `NN_name.out` (expected stdout under ARC).
+# Each case is `NN_name.gm` + `NN_name.out` (expected stdout under ARC).
 # Six combinations are exercised per case:
 #   {default, -eh checked, -eh legacy} x {ARC, MRC}
 #
@@ -17,25 +17,30 @@
 #   MRC: ARC injects nothing (manual memory management), so only exit 0 is
 #        asserted — dealloc output is not expected.
 #
-# Usage: ./run_arc_order.sh            NPAC=target/debug/nupac ./run_arc_order.sh
+# Usage: ./run_arc_order.sh            GALDC=target/debug/galdc ./run_arc_order.sh
 set -u
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 cd "$ROOT"
 
-NPAC="${NPAC:-}"
-if [[ -z "$NPAC" ]]; then
-    for c in target/release/nupac target/debug/nupac; do
-        if [[ -x "$c" ]]; then NPAC="$c"; break; fi
+GALDC="${GALDC:-}"
+if [[ -z "$GALDC" ]]; then
+    for c in target/release/galdc target/debug/galdc; do
+        if [[ -x "$c" ]]; then GALDC="$c"; break; fi
     done
 fi
-if [[ ! -x "${NPAC:-}" ]]; then
-    echo "error: nupac not found (build it, or set NPAC=)" >&2
+if [[ ! -x "${GALDC:-}" ]]; then
+    echo "error: galdc not found (build it, or set GALDC=)" >&2
     exit 2
 fi
-NPAC="$PWD/$NPAC"
+# Absolute paths pass through unchanged: an unconditional "$PWD/$GALDC"
+# would turn an absolute GALDC into "$PWD/$PWD/target/.../galdc".
+case "$GALDC" in
+    /*) ;;
+    *) GALDC="$PWD/$GALDC" ;;
+esac
 
-WORK="${TMPDIR:-/tmp}/nupa_arc_order.$$"
+WORK="${TMPDIR:-/tmp}/gald_arc_order.$$"
 mkdir -p "$WORK"
 trap 'rm -rf "$WORK"' EXIT
 
@@ -46,9 +51,9 @@ mode_flags() {
         arc-default) printf '' ;;
         arc-checked) printf -- '-eh checked' ;;
         arc-legacy)  printf -- '-eh legacy' ;;
-        mrc-default) printf -- '-fno-nupa-arc' ;;
-        mrc-checked) printf -- '-fno-nupa-arc -eh checked' ;;
-        mrc-legacy)  printf -- '-fno-nupa-arc -eh legacy' ;;
+        mrc-default) printf -- '-fno-gald-arc' ;;
+        mrc-checked) printf -- '-fno-gald-arc -eh checked' ;;
+        mrc-legacy)  printf -- '-fno-gald-arc -eh legacy' ;;
     esac
 }
 
@@ -57,24 +62,24 @@ norm() {
 }
 
 echo "=== ARC evaluation-order suite ==="
-echo "nupac: $NPAC"
+echo "galdc: $GALDC"
 echo
 printf '%-30s %-12s %s\n' "case" "mode" "result"
 printf -- '--------------------------------------------------------------------------\n'
 
 PASS=0; FAIL=0; FAILED=()
 
-for np in "$SCRIPT_DIR"/[0-9][0-9]_*.np; do
+for np in "$SCRIPT_DIR"/[0-9][0-9]_*.gm; do
     [[ -f "$np" ]] || continue
-    name="$(basename "$np" .np)"
+    name="$(basename "$np" .gm)"
     ref="$SCRIPT_DIR/$name.out"
     for m in "${MODES[@]}"; do
         # shellcheck disable=SC2206
         ff=($(mode_flags "$m"))
-        # NPLog writes to stderr (runtime.c), so merge the streams: for these
+        # NFLog writes to stderr (runtime.c), so merge the streams: for these
         # cases the program's observable output *is* the stderr transcript.
         log="$WORK/$name.$m.log"
-        "$NPAC" run -o "$WORK/$name.$m.bin" ${ff[@]+"${ff[@]}"} "$np" >"$log" 2>&1
+        "$GALDC" run -o "$WORK/$name.$m.bin" ${ff[@]+"${ff[@]}"} "$np" >"$log" 2>&1
         rc=$?
         ok=1
         note=""

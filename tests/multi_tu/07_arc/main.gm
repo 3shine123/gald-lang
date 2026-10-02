@@ -1,0 +1,14 @@
+#import "model.gh"
+#include <stdio.h>
+
+/* client TU: an object allocated here and stored into an object owned by the
+   lib TU, plus an unowned convenience object coming back out. */
+int main() {
+    Vault *v = [[Vault alloc] init];
+    NFString *tok = VaultToken();
+    printf("token=%s\n", [tok UTF8String]);
+    printf("total=%d\n", [v total]);
+    printf("helper=%d\n", VaultHelper());
+    gald_release(v);
+    return 0;
+}

@@ -1,4 +1,4 @@
-# nupa test_all.sh — delegate everything to parallel Python runner
+# gald test_all.sh — delegate everything to parallel Python runner
 # Usage: ./test_all.sh [-jN]
 
 JOBS=1
@@ -10,11 +10,11 @@ done
 
 cd "$(dirname "$0")"
 python3 test_all.py $ARGS
-# Kill any leftover nupac processes (orphaned if Python was killed by timeout)
-pkill -f "target/debug/nupac" 2>/dev/null || true
-pkill -f "target/release/nupac" 2>/dev/null || true
-# Kill orphaned test binaries (compiled .np executables left in /tmp/)
-for f in tests/*.np; do
-    stem=$(basename "$f" .np)
+# Kill any leftover galdc processes (orphaned if Python was killed by timeout)
+pkill -f "target/debug/galdc" 2>/dev/null || true
+pkill -f "target/release/galdc" 2>/dev/null || true
+# Kill orphaned test binaries (compiled .gm executables left in /tmp/)
+for f in tests/*.gm; do
+    stem=$(basename "$f" .gm)
     pkill -f "^/tmp/$stem($| )" 2>/dev/null || true
 done

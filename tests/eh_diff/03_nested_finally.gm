@@ -1,0 +1,22 @@
+// 差分用例 3:嵌套 @finally 执行顺序 —— inner finally 在传播给外层 catch 之前执行
+#import <Foundation/Foundation.gh>
+
+int main() {
+    @try {
+        @try {
+            NFLog(@"inner try");
+            @throw @"inner-err";
+        }
+        @finally {
+            NFLog(@"inner finally");
+        }
+    }
+    @catch (NFString *e) {
+        NFLog(@"outer caught");
+    }
+    @finally {
+        NFLog(@"outer finally");
+    }
+    NFLog(@"end");
+    return 0;
+}

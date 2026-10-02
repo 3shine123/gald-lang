@@ -1,0 +1,23 @@
+#include <stdint.h>
+#include <stddef.h>
+
+#include "gald/runtime.h"
+
+#import "NFObject.gh"
+#import "NFObject.gm"
+#import "NFString.gh"
+#import "NFString.gm"
+#import "NFMutableString.gh"
+#import "NFMutableString.gm"
+#import "NFArray.gh"
+#import "NFArray.gm"
+#import "NFMutableArray.gh"
+#import "NFMutableArray.gm"
+#import "NFDictionary.gh"
+#import "NFDictionary.gm"
+#import "NFMutableDictionary.gh"
+#import "NFMutableDictionary.gm"
+#import "NFNumber.gh"
+#import "NFNumber.gm"
+#import "NFError.gh"
+#import "NFError.gm"

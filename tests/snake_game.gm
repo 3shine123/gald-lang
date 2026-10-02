@@ -1,0 +1,368 @@
+#import <stdio.h>
+#import <stdlib.h>
+#import <string.h>
+#import <time.h>
+#import <termios.h>
+#import <unistd.h>
+#import <sys/select.h>
+#import <Foundation/Foundation.gh>
+
+// ==========================================================
+// 1. 终端原始模式管理：控制实时非阻塞输入
+// ==========================================================
+static struct termios orig_termios;
+
+static void disableRawMode() {
+    tcsetattr(STDIN_FILENO, TCSAFLUSH, &orig_termios);
+    // 恢复显示光标
+    printf("\033[?25h");
+    fflush(stdout);
+}
+
+static void enableRawMode() {
+    tcgetattr(STDIN_FILENO, &orig_termios);
+    atexit(disableRawMode);
+    
+    struct termios raw = orig_termios;
+    raw.c_lflag &= ~(ECHO | ICANON);
+    tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw);
+    
+    // 隐藏光标，避免闪烁
+    printf("\033[?25l");
+    fflush(stdout);
+}
+
+// 检查键盘是否按下（150毫秒不阻塞时钟）
+static int kbhit() {
+    struct timeval tv = {0, 150000}; // 150ms 游戏 Tick
+    fd_set fds;
+    FD_ZERO(&fds);
+    FD_SET(STDIN_FILENO, &fds);
+    return select(STDIN_FILENO + 1, &fds, NULL, NULL, &tv);
+}
+
+
+// ==========================================================
+// 2. Class 声明：食物 (Food)
+// ==========================================================
+@interface Food : NFObject {
+@public
+    int _x;
+    int _y;
+}
+@property int x;
+@property int y;
+
+- (instancetype)initWithX:(int)x y:(int)y;
+
+@end
+
+
+// ==========================================================
+// 3. Class 声明：贪吃蛇 (Snake)
+// ==========================================================
+@interface Snake : NFObject {
+@public
+    // 💥 原生数组存储蛇身坐标
+    int _bodyX[100];
+    int _bodyY[100];
+    int _length;
+    char _direction;
+}
+@property int length;
+@property char direction;
+
+- (instancetype)initWithX:(int)x y:(int)y;
+- (void)move;
+- (void)grow;
+- (int)checkSelfCollision;
+
+@end
+
+
+// ==========================================================
+// 4. Class 声明：游戏引擎 (GameEngine)
+// ==========================================================
+@interface GameEngine : NFObject {
+@public
+    Snake *_snake;
+    Food *_apple;
+    int _width;
+    int _height;
+    int _score;
+    int _gameOver;
+}
+@property int score;
+@property int gameOver;
+
+- (instancetype)initWithWidth:(int)w height:(int)h;
+- (void)processInfut:(char)key;
+- (void)update;
+- (void)renderWithComboBlock:(int (^)(int))comboBlock;
+
+@end
+
+
+// ==========================================================
+// ==========================================================
+// @implementation 具体类实现
+// ==========================================================
+// ==========================================================
+
+@implementation Food
+
+@synthesize x = _x;
+@synthesize y = _y;
+
+- (instancetype)initWithX:(int)x y:(int)y {
+    self = [super init];
+    if (self) {
+        _x = x;
+        _y = y;
+    }
+    return self;
+}
+
+@end
+
+
+@implementation Snake
+
+@synthesize length = _length;
+@synthesize direction = _direction;
+
+- (instancetype)initWithX:(int)x y:(int)y {
+    self = [super init];
+    if (self) {
+        _length = 3;
+        _direction = 'd'; // 默认向右 (d)
+        
+        // 初始化身体数组
+        for (int i = 0; i < 100; i++) {
+            _bodyX[i] = x - i;
+            _bodyY[i] = y;
+        }
+    }
+    return self;
+}
+
+- (void)move {
+    // 蛇身随蛇头移动
+    for (int i = _length - 1; i > 0; i--) {
+        _bodyX[i] = _bodyX[i - 1];
+        _bodyY[i] = _bodyY[i - 1];
+    }
+    
+    // 根据方向移动蛇头
+    if (_direction == 'w') _bodyY[0]--;
+    else if (_direction == 's') _bodyY[0]++;
+    else if (_direction == 'a') _bodyX[0]--;
+    else if (_direction == 'd') _bodyX[0]++;
+
+    // 💥 边缘穿越（屏幕环绕效果，游戏体验极佳）
+    if (_bodyX[0] >= 20) _bodyX[0] = 0;
+    if (_bodyX[0] < 0)  _bodyX[0] = 19;
+    if (_bodyY[0] >= 15) _bodyY[0] = 0;
+    if (_bodyY[0] < 0)  _bodyY[0] = 14;
+}
+
+- (void)grow {
+    if (_length < 100) {
+        _bodyX[_length] = _bodyX[_length - 1];
+        _bodyY[_length] = _bodyY[_length - 1];
+        _length++;
+    }
+}
+
+- (int)checkSelfCollision {
+    // 蛇头撞向蛇身
+    for (int i = 1; i < _length; i++) {
+        if (_bodyX[0] == _bodyX[i] && _bodyY[0] == _bodyY[i]) {
+            return 1; // 发生碰撞
+        }
+    }
+    return 0;
+}
+
+@end
+
+
+@implementation GameEngine
+
+@synthesize score = _score;
+@synthesize gameOver = _gameOver;
+
+- (instancetype)initWithWidth:(int)w height:(int)h {
+    self = [super init];
+    if (self) {
+        _width = w;
+        _height = h;
+        _score = 0;
+        _gameOver = 0;
+        
+        // 实例化蛇和苹果
+        _snake = [[Snake alloc] initWithX:5 y:5];
+        _apple = [[Food alloc] initWithX:10 y:5];
+    }
+    return self;
+}
+
+- (void)processInfut:(char)key {
+    char currentDir = [_snake direction];
+    if (key == 'w' && currentDir != 's') [_snake setDirection:'w'];
+    else if (key == 's' && currentDir != 'w') [_snake setDirection:'s'];
+    else if (key == 'a' && currentDir != 'd') [_snake setDirection:'a'];
+    else if (key == 'd' && currentDir != 'a') [_snake setDirection:'d'];
+    else if (key == 'q' || key == 'Q') {
+        _gameOver = 1;
+    }
+}
+
+- (void)update {
+    [_snake move];
+    
+    // 1. 判断是否吞食食物
+    if ([_snake _bodyX][0] == [_apple x] && [_snake _bodyY][0] == [_apple y]) {
+        [_snake grow];
+        _score += 10;
+        
+        // 在空闲格子上重新刷新食物位置
+        int valid = 0;
+        while (!valid) {
+            int rx = rand() % _width;
+            int ry = rand() % _height;
+            
+            int hit = 0;
+            for (int i = 0; i < [_snake length]; i++) {
+                if ([_snake _bodyX][i] == rx && [_snake _bodyY][i] == ry) {
+                    hit = 1;
+                    break;
+                }
+            }
+            if (!hit) {
+                [_apple setX:rx];
+                [_apple setY:ry];
+                valid = 1;
+            }
+        }
+    }
+    
+    // 2. 自我碰撞判定
+    if ([_snake checkSelfCollision]) {
+        _gameOver = 1;
+    }
+}
+
+- (void)renderWithComboBlock:(int (^)(int))comboBlock {
+    // 💥 ANSI Escape Cursor to Home：实现极速无闪烁渲染！
+    printf("\033[H");
+    
+    printf("====================================================\n");
+    printf("            🐍 MICRIT 终端街机贪吃蛇 🐍             \n");
+    printf("====================================================\n");
+    
+    // 绘制上边框
+    printf(" +");
+    for (int i = 0; i < _width; i++) printf("-");
+    printf("+\n");
+    
+    for (int y = 0; y < _height; y++) {
+        printf(" |");
+        for (int x = 0; x < _width; x++) {
+            // 蛇头
+            if (x == [_snake _bodyX][0] && y == [_snake _bodyY][0]) {
+                printf("O");
+            } else {
+                // 蛇身
+                int isBody = 0;
+                for (int i = 1; i < [_snake length]; i++) {
+                    if (x == [_snake _bodyX][i] && y == [_snake _bodyY][i]) {
+                        isBody = 1;
+                        break;
+                    }
+                }
+                
+                if (isBody) {
+                    printf("o");
+                } else if (x == [_apple x] && y == [_apple y]) {
+                    printf("@"); // 神秘苹果
+                } else {
+                    printf(" ");
+                }
+            }
+        }
+        printf("|\n");
+    }
+    
+    // 绘制下边框
+    printf(" +");
+    for (int i = 0; i < _width; i++) printf("-");
+    printf("+\n");
+    
+    // 💥 调用外部传入的 Block，计算双倍战意积分
+    int finalScore = comboBlock(_score);
+    printf("  [SCORE]: %d | [LENGTH]: %d | (Press 'W/A/S/D' to Move, 'Q' to Quit)\n", finalScore, [_snake length]);
+    printf("====================================================\n");
+}
+
+- (void)dealloc {
+    if (_snake) NFObject_release(_snake);
+    if (_apple) NFObject_release(_apple);
+}
+
+@end
+
+
+// ==========================================================
+// 5. 街机主程序
+// ==========================================================
+int main(int argc, const char * argv[]) {
+    @autoreleasepool {
+        srand((unsigned int)time(NULL));
+        
+        // 开启非阻塞终端原始模式
+        enableRawMode();
+        
+        // 清屏并复位游标
+        printf("\033[2J\033[H");
+        
+        // 初始化 20x15 经典网格引擎
+        GameEngine *engine = [[GameEngine alloc] initWithWidth:20 height:15];
+        
+        // 💥 定义闭包：捕获外部倍率，用于计算极限得分
+        int multiplier = 2;
+        int (^comboCalculator)(int) = ^int(int baseScore) {
+            return baseScore * multiplier;
+        };
+        
+        // 游戏核心非阻塞循环
+        while (![engine gameOver]) {
+            // 渲染画面
+            [engine renderWithComboBlock:comboCalculator];
+            
+            // 150毫秒非阻塞按键读取
+            if (kbhit()) {
+                char ch;
+                if (read(STDIN_FILENO, &ch, 1) == 1) {
+                    [engine processInfut:ch];
+                }
+            }
+            
+            // 物理引擎推进
+            [engine update];
+        }
+        
+        // 恢复终端原样（这一步由 atexit(disableRawMode) 兜底，但我们在此主动完成一次）
+        disableRawMode();
+        
+        printf("\n======================================================\n");
+        printf("                      Game Over!                      \n");
+        printf("======================================================\n");
+        printf(" 💀 很遗憾，你的小蛇撞到了自己！\n");
+        printf(" 🏆 最终狂暴得分 (Combo x%d): %d 点！\n", multiplier, comboCalculator([engine score]));
+        printf("======================================================\n\n");
+        
+        if (engine) NFObject_release(engine);
+    }
+    return 0;
+}

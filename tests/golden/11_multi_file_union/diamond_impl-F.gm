@@ -1,0 +1,67 @@
+// lang-test/diamond_impl-F.gm
+// 混合实现文件
+
+#import "diamond_base.gh"
+#include <stdio.h>
+
+@interface NFCraftPilot : NFObject
+{
+    @public
+    NFShipSystem* boundSystem; // 逆向持有互引用
+    const char* pilotName;
+}
+- (id)initWithName:(const char*)name;
+- (void)bindSystem:(NFShipSystem*)sys;
+@end
+
+@implementation NFCraftPilot
+- (id)initWithName:(const char*)name {
+    self = [super init];
+    if (self) { pilotName = name; boundSystem = nil; }
+    return self;
+}
+- (void)bindSystem:(NFShipSystem*)sys { boundSystem = sys; }
+@end
+
+
+@implementation NFShipSystem
+- (id)initWithId:(int)sid {
+    self = [super init];
+    if (self) { systemStatusId = sid; currentPilot = nil; }
+    return self;
+}
+- (void)linkPilot:(id)pilot {
+    currentPilot = (NFCraftPilot*)pilot;
+    // 跨对象反向注册，进一步织密互依赖网
+    [currentPilot bindSystem:self];
+}
+@end
+
+
+// ============ 3. 终极符号轰炸：实现多重菱形协议的混合类 ============
+// 该类同时实现了 Left 和 Right 协议，而它们都继承自 Base 协议
+@interface NFDiamondAbuser : NFObject <NFLeftProtocol, NFRightProtocol>
+{
+    @public
+    int _collisionCounter;
+}
+@property (nonatomic, assign) int collisionCounter;
+@end
+
+@implementation NFDiamondAbuser
+@synthesize collisionCounter = _collisionCounter;
+
+// 协议汇聚点实现
+- (void)executeCoreTask {
+    _collisionCounter += 100;
+    printf("[菱形汇聚] 成功穿透 Left 和 Right 协议网，执行最底层 Base 协议核心任务！\n");
+}
+- (void)leftBranchAction {
+    _collisionCounter += 10;
+    printf("[左翼协议] 触发左分支动作。\n");
+}
+- (void)rightBranchAction {
+    _collisionCounter += 5;
+    printf("[右翼协议] 触发右分支动作。\n");
+}
+@end

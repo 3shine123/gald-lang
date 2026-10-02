@@ -1,0 +1,14 @@
+#import <Foundation/Foundation.gh>
+
+int main() {
+    @autoreleasepool {
+        void (^blk)(void) = ^{
+            char buf[128];
+            buf[0] = 'x';
+            buf[1] = 0;
+            printf("block-array=%s\n", buf);
+        };
+        blk();
+    }
+    return 0;
+}

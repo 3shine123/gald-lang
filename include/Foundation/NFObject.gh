@@ -1,0 +1,29 @@
+#ifndef NFOBJECT_NH
+#define NFOBJECT_NH
+
+#include <stdint.h>
+#include <stddef.h>
+
+struct NFClass;
+
+@interface gald_root
+- (id)init;
+- (void)dealloc;
+- (void)release;
+- (id)retain;
+- (BOOL)isKindOf:(Class)cls;
+- (BOOL)isKindOfClass:(Class)cls;
+- (BOOL)isEqual:(id)object;
+- (id)description;
+@end
+
+@interface NFObject : gald_root
++ (id)alloc;
++ (id)new;
+- (id)init;
+- (void)dealloc;
+- (void)release;
+- (id)retain;
+@end
+
+#endif

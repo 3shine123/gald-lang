@@ -1,10 +1,10 @@
 [package]
-name = "nupa-elaborator"
+name = "gald-elaborator"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-nupa-cst = { path = "../cst" }
-nupa-ast = { path = "../ast" }
-nupa-symbol = { path = "../symbol" }
-nupa-binder = { path = "../binder" }
+gald-cst = { path = "../cst" }
+gald-ast = { path = "../ast" }
+gald-symbol = { path = "../symbol" }
+gald-binder = { path = "../binder" }

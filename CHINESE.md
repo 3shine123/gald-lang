@@ -7,7 +7,7 @@
 
 [**查看项目示例**](#项目示例)
 
-[概述](#概述) · [为什么要创造出 Nupa？](#为什么要创造出-nupa) · [项目示例](#项目示例) · [快速开始](#快速开始) · [语言特性](#语言特性) · [新特性](#新特性) · [编译与运行](#编译与运行) · [代码示例](#代码示例) · [设计原则](#设计原则) · [路线图](#路线图) · [FAQ](#faq)
+[概述](#概述) · [为什么要创造出 Nupa？](#为什么要创造出-gald) · [项目示例](#项目示例) · [快速开始](#快速开始) · [语言特性](#语言特性) · [新特性](#新特性) · [编译与运行](#编译与运行) · [代码示例](#代码示例) · [设计原则](#设计原则) · [路线图](#路线图) · [FAQ](#faq)
 
 </div>
 
@@ -60,7 +60,7 @@ Nupa 是一门**纯静态**的 Objective-C 方言（C 超集语言）。Nupa 源
 | **`04_soma-kernel/`** | 很小的 32 位 i386 操作系统内核（NASM + C + Nupa），裸机 `-ffreestanding` 模式                 | `./run.sh` 或 `./run.sh --gui` |
 | **`03_LibUI/`**       | 基于 [libui-ng](https://github.com/libui-ng/libui-ng) 的 GUI 应用，全部回调纯 Nupa | `./run_libui.sh`              |
 | **`02_ncurses/`**     | 终端示例（`ncurses_demo`、`sysmon`），使用 `Terminal::Ncurses` 绑定                 | `make run`                    |
-| **`01_JSONEditor/`**  | 多文件 JSON 编辑器，分屏终端预览                                                     | `nupac run json_editor.np`    |
+| **`01_JSONEditor/`**  | 多文件 JSON 编辑器，分屏终端预览                                                     | `galdc run json_editor.gm`    |
 
 ---
 
@@ -76,106 +76,106 @@ Nupa 是一门**纯静态**的 Objective-C 方言（C 超集语言）。Nupa 源
 ### 构建
 
 ```bash
-git clone https://github.com/3shine123/nupa-lang.git
-cd nupa-lang
+git clone https://github.com/3shine123/gald-lang.git
+cd gald-lang
 cargo build --release
 ```
 
 ### 安装
 
-构建完成后，`nupac` 同目录下会自动生成 `install.sh`（以及头文件和 `libnupa.a`）。直接运行它即可安装到系统：
+构建完成后，`galdc` 同目录下会自动生成 `install.sh`（以及头文件和 `libgald.a`）。直接运行它即可安装到系统：
 
 ```bash
 # 源码编译后——脚本就在二进制旁边
 cd target/release        # 或 target/debug（如果你跑的是 cargo build）
-./install.sh             # 默认安装到 /opt/nupa
+./install.sh             # 默认安装到 /opt/gald
 ./install.sh /usr/local  # 可选：换成其他前缀
 ```
 
 脚本会安装：
 
-- **二进制** → `<prefix>/bin/nupac`
-- **静态库** → `<prefix>/lib/libnupa.a`
+- **二进制** → `<prefix>/bin/galdc`
+- **静态库** → `<prefix>/lib/libgald.a`
 - **头文件** → `<prefix>/include/`
-- **系统头文件** → `/usr/local/include/{Foundation,nupa}/`（需写权限；无权限时自动跳过，可用 sudo 重试，或传第二个参数指定目录，如 `./install.sh /opt/nupa ~/include`）
+- **系统头文件** → `/usr/local/include/{Foundation,gald}/`（需写权限；无权限时自动跳过，可用 sudo 重试，或传第二个参数指定目录，如 `./install.sh /opt/gald ~/include`）
 
 安装脚本会自动检测系统语言（中文 / English）。
 
-或者下载预编译的 Release 压缩包（`nupa-<platform>.tar.gz` 或 `.zip`），解压后运行里面的 `install.sh`：
+或者下载预编译的 Release 压缩包（`gald-<platform>.tar.gz` 或 `.zip`），解压后运行里面的 `install.sh`：
 
 ```bash
-tar xzf nupa-x86_64-unknown-linux-musl.tar.gz
-cd nupa-x86_64-unknown-linux-musl
+tar xzf gald-x86_64-unknown-linux-musl.tar.gz
+cd gald-x86_64-unknown-linux-musl
 ./install.sh
 ```
 
-> **提示：** 把 `nupac` 加入 PATH 并装好系统头文件后，`<nupa/runtime.h>` 和 `<Foundation/...>` 会自动被找到，无需手动加 `-I include`。
+> **提示：** 把 `galdc` 加入 PATH 并装好系统头文件后，`<gald/runtime.h>` 和 `<Foundation/...>` 会自动被找到，无需手动加 `-I include`。
 
 ### 编译一个 Nupa 程序
 
 ```bash
-# 只输出 C 代码（自动推导 .np → .c）
-nupac -rewrite-nupa hello.np
-nupac hello.np -rewrite-nupa               # flag 放哪都行
-nupac -rewrite-nupa hello.np -o out.c      # 也可以显式指定路径
-# （双横线 --rewrite-nupa 形式同样接受）
+# 只输出 C 代码（自动推导 .gm → .c）
+galdc -rewrite-gald hello.gm
+galdc hello.gm -rewrite-gald               # flag 放哪都行
+galdc -rewrite-gald hello.gm -o out.c      # 也可以显式指定路径
+# （双横线 --rewrite-gald 形式同样接受）
 
 # 单独用 Clang 编译转译后 C 代码（两种方式）：
 #   1) 直接编译运行时源码
-clang -I include -o hello hello.c include/nupa/runtime.c
-#   2) 链接编译好的 libnupa.a（位于 nupac 二进制同目录）
-clang -I include -o hello hello.c -Ltarget/release -lnupa
+clang -I include -o hello hello.c include/gald/runtime.c
+#   2) 链接编译好的 libgald.a（位于 galdc 二进制同目录）
+clang -I include -o hello hello.c -Ltarget/release -lgald
 
 # 直接输出对象文件
-nupac hello.np -o hello.o                  # -c 模式，不链接
+galdc hello.gm -o hello.o                  # -c 模式，不链接
 
 # 编译到可执行文件
-nupac hello.np -o hello_bin                # 转译 + 编译 + 链接
+galdc hello.gm -o hello_bin                # 转译 + 编译 + 链接
 
 # 编译 + 运行
-nupac run hello.np
-nupac run hello.np -o hello_bin            # 运行后保留二进制
-nupac run hello.np                          # 运行后自动清理临时文件
+galdc run hello.gm
+galdc run hello.gm -o hello_bin            # 运行后保留二进制
+galdc run hello.gm                          # 运行后自动清理临时文件
 
 # 显示编译警告
-nupac -v run hello.np
+galdc -v run hello.gm
 
-# [!] 错误：不用 -rewrite-nupa 却输出 .c
-nupac hello.np -o hello.c   → Error: use -rewrite-nupa to output C code
+# [!] 错误：不用 -rewrite-gald 却输出 .c
+galdc hello.gm -o hello.c   → Error: use -rewrite-gald to output C code
 
 # [!] 错误：没有指定任何输出方式
-nupac hello.np              → Error: specify -o or -rewrite-nupa
+galdc hello.gm              → Error: specify -o or -rewrite-gald
 ```
 
 ### Shell 补全（Tab 自动补全）
 
-`nupac` 自带用 [clap_complete](https://crates.io/crates/clap_complete) 生成的 **zsh / bash / fish** 补全脚本。随时可用以下命令重新生成：
+`galdc` 自带用 [clap_complete](https://crates.io/crates/clap_complete) 生成的 **zsh / bash / fish** 补全脚本。随时可用以下命令重新生成：
 
 ```bash
-nupac -gen-completions zsh > _nupac
-nupac -gen-completions bash > nupac.bash
-nupac -gen-completions fish > nupac.fish
+galdc -gen-completions zsh > _galdc
+galdc -gen-completions bash > galdc.bash
+galdc -gen-completions fish > galdc.fish
 ```
 
-`install.sh` 也会把脚本装进安装包（`share/nupac/completions/`）。
+`install.sh` 也会把脚本装进安装包（`share/galdc/completions/`）。
 
 **zsh** —— 把目录加进 `fpath`（必须在 `compinit` 之前）：
 
 ```zsh
-fpath=(/opt/nupa/share/nupac/completions $fpath)
+fpath=(/opt/gald/share/galdc/completions $fpath)
 autoload -U compinit && compinit
 ```
 
 **bash**：
 
 ```bash
-source /opt/nupa/share/nupac/completions/nupac.bash
+source /opt/gald/share/galdc/completions/galdc.bash
 ```
 
 **fish**：
 
 ```fish
-source /opt/nupa/share/nupac/completions/nupac.fish
+source /opt/gald/share/galdc/completions/galdc.fish
 ```
 
 装完新版本后清一下 zsh 缓存：`rm -f ~/.zcompdump*`，再开新终端。
@@ -198,18 +198,18 @@ source /opt/nupa/share/nupac/completions/nupac.fish
 
 ### 类系统
 
-```nupa
-@interface Animal : NPObject {
+```gald
+@interface Animal : NFObject {
 @public
-    NPString *_name;
+    NFString *_name;
 }
-- (instancetype)initWithName:(NPString *)name;
+- (instancetype)initWithName:(NFString *)name;
 - (void)speak;
-@property (readonly) NPString *name;
+@property (readonly) NFString *name;
 @end
 
 @implementation Animal
-- (instancetype)initWithName:(NPString *)name {
+- (instancetype)initWithName:(NFString *)name {
     self = [super init];
     if (self) {
         _name = name;
@@ -224,29 +224,29 @@ source /opt/nupa/share/nupac/completions/nupac.fish
 
 ### 协议
 
-```nupa
+```gald
 @protocol Drawable
 - (void)draw;
 - (BOOL)isVisible;
 @end
 
-@interface Shape : NPObject <Drawable>
+@interface Shape : NFObject <Drawable>
 @end
 ```
 
 ### 属性
 
-```nupa
-@interface Person : NPObject
-@property NPString *name;
+```gald
+@interface Person : NFObject
+@property NFString *name;
 @property int age;
-@property (readonly) NPString *identifier;
+@property (readonly) NFString *identifier;
 @end
 ```
 
 ### 类别（Category）
 
-```nupa
+```gald
 @interface Person (Printing)
 - (void)printGreeting;
 @end
@@ -260,12 +260,12 @@ source /opt/nupa/share/nupac/completions/nupac.fish
 
 ### Block
 
-```nupa
+```gald
 int (^square)(int) = ^int(int x) {
     return x * x;
 };
 
-void (^logAndCall)(NPString *, void (^)(void)) = ^void(NPString *msg, void (^next)(void)) {
+void (^logAndCall)(NFString *, void (^)(void)) = ^void(NFString *msg, void (^next)(void)) {
     printf("[LOG] %s\n", msg);
     if (next) next();
 };
@@ -273,26 +273,26 @@ void (^logAndCall)(NPString *, void (^)(void)) = ^void(NPString *msg, void (^nex
 
 ### @autoreleasepool
 
-```nupa
+```gald
 @autoreleasepool {
-    NPString *temp = [NPString stringWithUTF8String:"hello"];
+    NFString *temp = [NFString stringWithUTF8String:"hello"];
     // temp 在 pool pop 时自动 release
 }
 ```
 
 ### @selector
 
-```nupa
+```gald
 SEL sel = @selector(doSomething:);
 ```
 
 ### C 完全兼容
 
-```nupa
+```gald
 #include <stdio.h>
 #include <stdlib.h>
 
-@interface Wrapper : NPObject
+@interface Wrapper : NFObject
 - (void)callCFunction;
 @end
 ```
@@ -301,7 +301,7 @@ SEL sel = @selector(doSomething:);
 
 Nupa 支持 `__attribute__((...))` 透传。你可以在全局声明和 struct 字段上直接写 C 的 `__attribute__`，编译器会把它们原样保留到生成的 C 代码中。
 
-```nupa
+```gald
 __attribute__((packed))
 struct Point {
     int x;
@@ -329,7 +329,7 @@ Nupa 转译为 C 后，C 代码可以直接调用 Nupa 对象方法。但消息�
 **用法**：先转译 Nupa 库成 C，同时生成桥接头：
 
 ```bash
-nupac -rewrite-nupa lib.np -o lib.c -emit-bridge-header lib.h
+galdc -rewrite-gald lib.gm -o lib.c -emit-bridge-header lib.h
 ```
 
 然后 C 代码包含桥接头，直接调用：
@@ -338,74 +338,74 @@ nupac -rewrite-nupa lib.np -o lib.c -emit-bridge-header lib.h
 #include "lib.h"
 
 int main(void) {
-    nupa_metaInit();  // 必须在使用 Nupa 对象前调用
+    gald_metaInit();  // 必须在使用 Nupa 对象前调用
 
-    // 类方法：nupa_<类名>_<方法名>(参数...)
-    NPString *s = nupa_NPString_stringWithUTF8String_("Hello");
+    // 类方法：gald_<类名>_<方法名>(参数...)
+    NFString *s = gald_NFString_stringWithUTF8String_("Hello");
 
-    // 实例方法：nupa_<类名>_<方法名>(self, 参数...)
-    size_t len = nupa_NPString_length(s);
-    const char *cstr = nupa_NPString_UTF8String(s);
+    // 实例方法：gald_<类名>_<方法名>(self, 参数...)
+    size_t len = gald_NFString_length(s);
+    const char *cstr = gald_NFString_UTF8String(s);
 
     // 嵌套消息发送（等价于 Nupa 的 [[s UTF8String] ...]）
-    const char *nested = nupa_NPString_UTF8String(
-        nupa_NPString_stringWithUTF8String_("nested")
+    const char *nested = gald_NFString_UTF8String(
+        gald_NFString_stringWithUTF8String_("nested")
     );
 
     // 多参数消息发送（等价于 Nupa 的 [arr replaceObjectAtIndex:0 withObject:obj]）
-    NPArray *arr = nupa_NPArray_arrayWithObject_(s);
-    nupa_NPArray_replaceObjectAtIndex_withObject_(arr, 0, s);
+    NFArray *arr = gald_NFArray_arrayWithObject_(s);
+    gald_NFArray_replaceObjectAtIndex_withObject_(arr, 0, s);
 
     // 多参数带命名空间：selector 的每个 : 对应函数名里的一个 _
-    // [obj foo:arg1 bar:arg2] → nupa_<类>_foo_bar_(obj, arg1, arg2)
+    // [obj foo:arg1 bar:arg2] → gald_<类>_foo_bar_(obj, arg1, arg2)
     // [m replaceCharactersInRange:rng withString:str]
-    // → nupa_NPMutableString_replaceCharactersInRange_withString_(m, rng, str)
+    // → gald_NFMutableString_replaceCharactersInRange_withString_(m, rng, str)
 }
 ```
 
 编译时链接 `lib.c` 和 `runtime.c`：
 
 ```bash
-clang caller.c lib.c include/nupa/runtime.c -I include -o app
+clang caller.c lib.c include/gald/runtime.c -I include -o app
 ```
 
-⚠️ 调用方 `main` 必须先调用 `nupa_metaInit()` 初始化类元数据。桥接头使用了 `sel_registerName` 在运行时解析 selector，因此**不需要**依赖 codegen 生成的 `static const` SEL 常量（这些常量跨文件不可见）。
+⚠️ 调用方 `main` 必须先调用 `gald_metaInit()` 初始化类元数据。桥接头使用了 `sel_registerName` 在运行时解析 selector，因此**不需要**依赖 codegen 生成的 `static const` SEL 常量（这些常量跨文件不可见）。
 
 #### 从 C 管理内存
 
-Nupa 的 **ARC 是编译期概念，只分析 `.np` 源码**——C 代码调用桥接函数时，返回值不会自动 retain/release。需要手动管理，遵循 ObjC 的内存管理命名约定：
+Nupa 的 **ARC 是编译期概念，只分析 `.gm` 源码**——C 代码调用桥接函数时，返回值不会自动 retain/release。需要手动管理，遵循 ObjC 的内存管理命名约定：
 
 | 方法家族                               | 调用者拥有？         | C 端怎么做                                 |
 | ---------------------------------- | -------------- | -------------------------------------- |
-| `alloc`、`new`、`copy`、`mutableCopy` | ✅ +1           | 用完必须 `nupa_release(obj)`               |
+| `alloc`、`new`、`copy`、`mutableCopy` | ✅ +1           | 用完必须 `gald_release(obj)`               |
 | `init`                             | ❌ 消耗 alloc     | 不需要操作                                  |
-| 其他（如 `stringWithUTF8String:`）      | ❌ autoreleased | 不需要操作；若需跨 pool 存活，先 `nupa_retain(obj)` |
+| 其他（如 `stringWithUTF8String:`）      | ❌ autoreleased | 不需要操作；若需跨 pool 存活，先 `gald_retain(obj)` |
 
 ```c
 #include "lib.h"
 
 int main(void) {
-    nupa_metaInit();
-    nupa_autoreleasepool_t *pool = nupa_autoreleasepoolPush();
+    gald_metaInit();
+    gald_autoreleasepool_t *pool = gald_autoreleasepoolPush();
 
     // 便利构造器返回 autoreleased 对象，在当前 pool 内使用即可
-    NPString *s = nupa_NPString_stringWithUTF8String_("hello");
-    printf("%s\n", nupa_NPString_UTF8String(s));
+    NFString *s = gald_NFString_stringWithUTF8String_("hello");
+    printf("%s\n", gald_NFString_UTF8String(s));
 
     // 如需跨 pool 存活：先 retain，用完 release
-    NPString *t = nupa_NPString_stringWithUTF8String_("world");
-    nupa_retain(t);
-    nupa_autoreleasepoolPop(pool);      // t 存活（retain 过）
-    printf("%s\n", nupa_NPString_UTF8String(t));
-    nupa_release(t);
+    NFString *t = gald_NFString_stringWithUTF8String_("world");
+    gald_retain(t);
+    gald_autoreleasepoolPop(pool);      // t 存活（retain 过）
+    printf("%s\n", gald_NFString_UTF8String(t));
+    gald_release(t);
 
     // alloc/copy 家族返回 +1 → 必须 release
-    NPString *copy = nupa_NPString_copy(s);
-    nupa_release(copy);
+    NFString *copy = gald_NFString_copy(s);
+    gald_release(copy);
 }
 ```
 
-`nupa_retain`、`nupa_release`、`nupa_autorelease`、`nupa_autoreleasepoolPush`/`nupa_autoreleasepoolPop` 声明在 `<nupa/runtime.h>` 中，对任何 Nupa 对象都可用。这就是 MRC（手动引用计数）模型——从 C 侧看，Nupa 对象就是按"我拥有/不拥有"约定管理的裸指针。
+`gald_retain`、`gald_release`、`gald_autorelease`、`gald_autoreleasepoolPush`/`gald_autoreleasepoolPop` 声明在 `<gald/runtime.h>` 中，对任何 Nupa 对象都可用。这就是 MRC（手动引用计数）模型——从 C 侧看，Nupa 对象就是按"我拥有/不拥有"约定管理的裸指针。
 
 ### 新特性
 
@@ -413,22 +413,22 @@ Nupa 在 Objective-C 语法基础上，加入了一些 ObjC 本身没有的语�
 
 **近期亮点：**
 
-- **原生裸机支持（`-ffreestanding`）** — 编译为自包含 C，无 libc、无 Foundation、无 TLS；`@try/@catch` 走默认的 `-eh checked` 后端（纯旗标 + 守卫，**完全不用 `setjmp/longjmp`**，这正是裸机可用的前提；`-eh legacy` 才回退到 `__builtin_setjmp/longjmp`），零样板的 `runtime_freestanding.c` 提供 bump allocator、`NUPA_CLASS_$_nupa_root`、异常状态和 `memcpy`。
+- **原生裸机支持（`-ffreestanding`）** — 编译为自包含 C，无 libc、无 Foundation、无 TLS；`@try/@catch` 走默认的 `-eh checked` 后端（纯旗标 + 守卫，**完全不用 `setjmp/longjmp`**，这正是裸机可用的前提；`-eh legacy` 才回退到 `__builtin_setjmp/longjmp`），零样板的 `runtime_freestanding.c` 提供 bump allocator、`GALD_CLASS_$_gald_root`、异常状态和 `memcpy`。
 - **C 超集** — `@protocol` + 一致性检查、`@property` + `@synthesize`、`instancetype`、`@public` ivar、点语法、struct + 函数指针、内联汇编、C 风格类型转换。
-- **类型化 `@catch`** — 每个 catch 块现在检查 `isa == &NUPA_CLASS_$_Class`，只有匹配的类才进入该处理器；多个 catch 正确隔离。
+- **类型化 `@catch`** — 每个 catch 块现在检查 `isa == &GALD_CLASS_$_Class`，只有匹配的类才进入该处理器；多个 catch 正确隔离。
 - **ARC 修复** — 作用域栈模型不再在嵌套作用域结束时释放父作用域变量；`for` 初始化对象提升修复了泄漏和非法 `for` 头。
-- **`@noarc` 块** — 块级 MRC：在 ARC 模式下，`@noarc { }` 块内允许手动 `retain`/`release`/`dealloc`/`autorelease`；是 `-fno-nupa-arc` 和 clang `-fno-objc-arc` 的块级等价物。
+- **`@noarc` 块** — 块级 MRC：在 ARC 模式下，`@noarc { }` 块内允许手动 `retain`/`release`/`dealloc`/`autorelease`；是 `-fno-gald-arc` 和 clang `-fno-objc-arc` 的块级等价物。
 - **`__attribute__` 透传 + `-backend`** — 完整支持 C 的 `__attribute__((...))` 和所有 `__` 前缀的 C 预定义标识符（`__FILE__`、`__LINE__`、`__builtin_*`、`__extension__`、`__typeof__`、`__alignof__` 等）；`-backend` 选项控制哪些编译器专属属性允许使用。
 
 ### for-in 遍历
 
-```nupa
-for (NPString *s in arr) {
+```gald
+for (NFString *s in arr) {
     printf("%s\n", [s UTF8String]);
 }
 ```
 
-在 parser 层 desugar 为对 `[coll count]` / `[coll objectAtIndex:]` 的下标循环——集合表达式只求值一次，nil 安全（`[nil count]` 为 0），元素是借用语义（不 retain/release）。普通 C 数组和 `NPArray` 都能用。
+在 parser 层 desugar 为对 `[coll count]` / `[coll objectAtIndex:]` 的下标循环——集合表达式只求值一次，nil 安全（`[nil count]` 为 0），元素是借用语义（不 retain/release）。普通 C 数组和 `NFArray` 都能用。
 
 ### 协议一致性检查
 
@@ -442,7 +442,7 @@ class 'Circle' does not implement required method 'draw' from protocol 'Drawable
 
 复用 C 的 `&` 运算符同时要求多个协议——零新语法：
 
-```nupa
+```gald
 // ① 交集类型：接收者必须同时实现两个协议
 void render(id<Drawable & Serializable> item);
 
@@ -457,7 +457,7 @@ void render(id<Drawable & Serializable> item);
 
 根类现在实现了 ObjC 官方拼写的类型分发三件套，不需要任何新语言结构就能写惯用的多路分发：
 
-```nupa
+```gald
 for (id item in items) {
     if ([item isKindOfClass:[Dog class]]) {
         [(Dog *)item bark];
@@ -467,13 +467,13 @@ for (id item in items) {
 }
 ```
 
-`isKindOfClass:` 沿 isa 链查找，`respondsToSelector:` 查统一 vtable，`isEqual:` 在根类上默认指针相等（与 `NSObject` 一致）——而 `NPString` 与 `NPNumber` 各自重写为**值相等**，这正是字典键能用的前提。旧拼写 `isKindOf:` 保留作兼容别名。
+`isKindOfClass:` 沿 isa 链查找，`respondsToSelector:` 查统一 vtable，`isEqual:` 在根类上默认指针相等（与 `NSObject` 一致）——而 `NFString` 与 `NFNumber` 各自重写为**值相等**，这正是字典键能用的前提。旧拼写 `isKindOf:` 保留作兼容别名。
 
 ### struct `==` / `!=` 值比较
 
 C 直接拒绝 struct 的 `a == b`；Nupa 复用现有运算符，desugar 为生成的逐字段比较函数：
 
-```nupa
+```gald
 struct Point a = {1, 2};
 struct Point b = {1, 2};
 
@@ -487,8 +487,8 @@ p == &a               // 指针比较语义不变
 
 方法体里含 `@await` 即为 async——无需任何标注，与 C++20 用 `co_await` 判定协程的风格一致（声明端与普通 ObjC 方法一字不差，vtable 布局不变）：
 
-```nupa
-@interface Fetcher : NPObject
+```gald
+@interface Fetcher : NFObject
 - (int)compute:(int)n;
 - (void)runAll;
 @end
@@ -502,7 +502,7 @@ p == &a               // 指针比较语义不变
 // async void = 入口方法（阻塞泵到完成）
 - (void)runAll {
     int x = @await [self compute:21]; // await 一个调用会把本方法也传染成 async
-    NPLog(@"result=%d", x);
+    NFLog(@"result=%d", x);
 }
 @end
 
@@ -518,23 +518,23 @@ int main() {
 - **链式传染**——方法体里出现 `@await` 它自己就是 async；非 void 的 async 方法只能在 async 上下文中 await 调用（同步调用编译期报错）。
 - **`@await` 降级为状态机**——方法体在挂起点被拆进 `switch(task->state)` 驱动的堆上 `NupaTask`；活过挂起点的局部变量提升进每方法一个的 frame 结构体。
 - **`@try` 跨越 `@await`** 会被拒绝（`jmp_buf` 无法活过挂起点）；`@noarc` 跨 await 合法；break/continue 跨 await 变成状态跳转。
-- 协作式单线程调度器（`nupa_run_all`）与 I/O 集成是下一个里程碑。
+- 协作式单线程调度器（`gald_run_all`）与 I/O 集成是下一个里程碑。
 
 ### `switch` 模式匹配（`case` 模式）
 
 `case` 标签可以写**模式**，不只是整型常量。类型分发的内核仍是方法链——模式 desugar 成 `isKindOfClass:` / `isEqual:` / 比较——但你写成声明式的样子：
 
-```nupa
+```gald
 // 对象模式可以在同一个 switch 里自由混用：
 switch (subject) {
-    case NPString *s:                          // 类型绑定 → isKindOfClass:
-        NPLog(@"string: %s", [s UTF8String]);
+    case NFString *s:                          // 类型绑定 → isKindOfClass:
+        NFLog(@"string: %s", [s UTF8String]);
         break;
-    case NPNumber *n when [n intValue] > 3:    // 类型绑定 + `when` 守卫
-        NPLog(@"number: %d", [n intValue]);
+    case NFNumber *n when [n intValue] > 3:    // 类型绑定 + `when` 守卫
+        NFLog(@"number: %d", [n intValue]);
         break;
     case @"literal":                           // 对象字面量 → isEqual:（值语义）
-        NPLog(@"matched a literal");
+        NFLog(@"matched a literal");
         break;
     default:
         break;
@@ -543,10 +543,10 @@ switch (subject) {
 // 比较模式用在**标量** subject 上：
 switch (n) {
     case > 100:
-        NPLog(@"big");
+        NFLog(@"big");
         break;
     case > 0 && < 100:                         // 区间
-        NPLog(@"small");
+        NFLog(@"small");
         break;
     default:
         break;
@@ -555,7 +555,7 @@ switch (n) {
 // 普通多值常量仍是纯 C：
 switch (n) {
     case 1, 2, 3:
-        NPLog(@"one of 1-3");
+        NFLog(@"one of 1-3");
         break;
     default:
         break;
@@ -564,10 +564,10 @@ switch (n) {
 
 | 模式 | 降级为 |
 |------|--------|
-| `T *name` | `nupa_isKindOfClass(subject, &NUPA_CLASS_$_T)`；臂内 `name` 已绑定为 `(T *)subject` |
+| `T *name` | `gald_isKindOfClass(subject, &GALD_CLASS_$_T)`；臂内 `name` 已绑定为 `(T *)subject` |
 | `> 10` / `< 10` / `>= 0` / `<= 9` | `subject > 10`（subject 填进悬空的操作数位） |
 | `> 0 && < 100` | `subject > 0 && subject < 100` |
-| `@"lit"` / `@42` / `@YES` / `@'c'` / `@(expr)` | `[subject isEqual:<字面量>]`——值语义，`@"lit"` 能匹配**另一个**内容相同的 NPString |
+| `@"lit"` / `@42` / `@YES` / `@'c'` / `@(expr)` | `[subject isEqual:<字面量>]`——值语义，`@"lit"` 能匹配**另一个**内容相同的 NFString |
 | `T *x when <expr>` | 类型测试再 `&&` 上守卫 |
 | 其余 | 普通 C 常量，用 `==` 比较 |
 
@@ -586,38 +586,38 @@ M1 限制，全部**报错而非静默编译错**：
 
 ### 装箱字面量（`@(expr)` / `@YES` / `@NO` / `@'c'`）
 
-```nupa
-NPNumber *a = @123;          // int
-NPNumber *b = @1.5;          // double
-NPNumber *c = @YES;          // BOOL → 1
-NPNumber *d = @'c';          // char
-NPNumber *e = @(i + 1);      // 工厂由操作数的静态类型决定
+```gald
+NFNumber *a = @123;          // int
+NFNumber *b = @1.5;          // double
+NFNumber *c = @YES;          // BOOL → 1
+NFNumber *d = @'c';          // char
+NFNumber *e = @(i + 1);      // 工厂由操作数的静态类型决定
 ```
 
-每个形态都产出真正的 `NPNumber`：字面量自身的类型选定工厂（`numberWithInt:` / `numberWithDouble:` / `numberWithChar:`），`@(expr)` 则按**操作数的静态类型**选——`double`/`float` → `numberWithDouble:`、`BOOL` → `numberWithBool:`、`char` → `numberWithChar:`、`long`/`long long` → `numberWithLongLong:`、其余整数 → `numberWithInt:`。装箱结果就是普通对象，照常派发：`[@(i * 2) intValue]`。
+每个形态都产出真正的 `NFNumber`：字面量自身的类型选定工厂（`numberWithInt:` / `numberWithDouble:` / `numberWithChar:`），`@(expr)` 则按**操作数的静态类型**选——`double`/`float` → `numberWithDouble:`、`BOOL` → `numberWithBool:`、`char` → `numberWithChar:`、`long`/`long long` → `numberWithLongLong:`、其余整数 → `numberWithInt:`。装箱结果就是普通对象，照常派发：`[@(i * 2) intValue]`。
 
 `@(expr)` 的改写落在 **checker** 而不是 parser：parser 没有类型，后端是 C99 更没有 `_Generic` 可用。改写复用普通消息发送节点，静态派发与 nil 守卫因此零特判——与对象下标、struct `==` 同一套机制。非算术类型不会被默默装箱，而是报错：
 
 ```
-illegal type 'NPString *' in a boxed expression — '@(...)' accepts arithmetic and BOOL values only
+illegal type 'NFString *' in a boxed expression — '@(...)' accepts arithmetic and BOOL values only
 ```
 
 ### 字典字面量（`@{ key: value }`）
 
-```nupa
-NPDictionary *d = @{ @"a": @1, @"b": @2, @"c": @3 };
-NPLog(@"%d", [[d objectForKey:@"b"] intValue]);   // 2
+```gald
+NFDictionary *d = @{ @"a": @1, @"b": @2, @"c": @3 };
+NFLog(@"%d", [[d objectForKey:@"b"] intValue]);   // 2
 printf("%lu\n", (unsigned long)[d count]);        // 3
 
-NPMutableDictionary *m = [NPMutableDictionary dictionary];
+NFMutableDictionary *m = [NFMutableDictionary dictionary];
 [m setObject:@10 forKey:@"x"];
 [m setObject:@11 forKey:@"x"];   // 相等的键是替换，不追加
 [m removeObjectForKey:@"x"];
 
-NPDictionary *empty = @{};       // `@{}` 是空字典（数组是 `@[]`）
+NFDictionary *empty = @{};       // `@{}` 是空字典（数组是 `@[]`）
 ```
 
-键用 `isEqual:` 比较，因此 `NPString`/`NPNumber` 键是**值语义**。字符串字面量已 **interning**（同内容 → 同一对象，ObjC 常量串语义），且值相等仍是语义保证——用新写的 `@"b"` 查询照样能找到条目。存储照搬 `NPArray`——两个平行对象数组 + 线性扫描；`count` / `objectForKey:` / `allKeys` / `allValues` / `copy` / `description` / 按内容的 `isEqual:` 补全了 API。条目必须是对象（与 ObjC 一致）：
+键用 `isEqual:` 比较，因此 `NFString`/`NFNumber` 键是**值语义**。字符串字面量已 **interning**（同内容 → 同一对象，ObjC 常量串语义），且值相等仍是语义保证——用新写的 `@"b"` 查询照样能找到条目。存储照搬 `NFArray`——两个平行对象数组 + 线性扫描；`count` / `objectForKey:` / `allKeys` / `allValues` / `copy` / `description` / 按内容的 `isEqual:` 补全了 API。条目必须是对象（与 ObjC 一致）：
 
 ```
 illegal type 'int' in a dictionary literal — keys and values must be Objective-C objects
@@ -625,10 +625,10 @@ illegal type 'int' in a dictionary literal — keys and values must be Objective
 
 ### 异常语义（`-eh checked` —— 默认后端）
 
-Nupa 的异常是**不用栈展开的 ObjC 异常语义**。`@try`/`@catch`/`@finally`/`@throw` 的行为与 clang `-fobjc-arc-exceptions` 模式完全一致——差分测试套件（`tests/eh_diff/run_eh_diff.sh`）把每个用例同时跑在 nupac 与真 clang/ObjC 下、逐行 diff stderr，锁定这一保证（7/7 通过）。
+Nupa 的异常是**不用栈展开的 ObjC 异常语义**。`@try`/`@catch`/`@finally`/`@throw` 的行为与 clang `-fobjc-arc-exceptions` 模式完全一致——差分测试套件（`tests/eh_diff/run_eh_diff.sh`）把每个用例同时跑在 galdc 与真 clang/ObjC 下、逐行 diff stderr，锁定这一保证（7/7 通过）。
 
-```nupa
-@interface Boom : NPObject
+```gald
+@interface Boom : NFObject
 - (void)fire;
 @end
 
@@ -642,13 +642,13 @@ int main() {
     @try {
         Boom *b = [[Boom alloc] init];
         [b fire];                       // 执行到此为止
-        NPLog(@"never runs");
+        NFLog(@"never runs");
     }
-    @catch (NPString *e) {
-        NPLog(@"caught: %@", e);
+    @catch (NFString *e) {
+        NFLog(@"caught: %@", e);
     }
     @finally {
-        NPLog(@"finally always runs");
+        NFLog(@"finally always runs");
     }
     return 0;
 }
@@ -661,10 +661,10 @@ int main() {
 - **typed catch 链按 isa 匹配** —— 不匹配的 `@catch` 放行给外层 `@try`；catch 内重抛传播到外层处理器，不会重入本层。
 - **`@finally` 顺序** —— 内层 finally 在外层 catch 之前执行；外层 finally 在外层 catch 之后执行。
 - **block 字面量内的 `@throw`** —— 像普通调用点一样传播到外层 `@try`。
-- **未捕获异常 abort** —— 输出 ObjC 措辞 `*** Terminating app due to uncaught exception of class 'NPString'`，退出码 1。
+- **未捕获异常 abort** —— 输出 ObjC 措辞 `*** Terminating app due to uncaught exception of class 'NFString'`，退出码 1。
 - **C 调用方不会错过异常** —— 桥接头 wrapper 检查错误旗标并 abort，而不是静默返回零值。
 
-**`-eh checked` 已是默认后端**——直接 `nupac run` 就用它。`-eh legacy`（别名 `-eh sjlj`）切回旧的零开销 setjmp 后端，是一条完整的回退路径；该后端有经典限制：跨函数抛出会跳过中间帧的清理（见下方已知限制）。
+**`-eh checked` 已是默认后端**——直接 `galdc run` 就用它。`-eh legacy`（别名 `-eh sjlj`）切回旧的零开销 setjmp 后端，是一条完整的回退路径；该后端有经典限制：跨函数抛出会跳过中间帧的清理（见下方已知限制）。
 
 ### `@throws` —— 声明式异常
 
@@ -677,17 +677,17 @@ int main() {
 | 形态 | `@throw expr;` | `@throws(T *)` 或裸 `@throws` |
 | 进生成的 C 吗 | 进（setjmp/旗标机制） | **永不** —— 无代码、不占 vtable 槽位 |
 
-```nupa
-@interface Repo : NPObject
-- (NPString *)fetch:(const char *)url @throws(NPError *);   // 会抛 NPError *
+```gald
+@interface Repo : NFObject
+- (NFString *)fetch:(const char *)url @throws(NFError *);   // 会抛 NFError *
 - (int)parse:(const char *)s @throws;                       // 会抛，类型不注明
 - (int)count;                                              // 从不抛
 @end
 
 @implementation Repo
-- (NPString *)fetch:(const char *)url @throws(NPError *) {
+- (NFString *)fetch:(const char *)url @throws(NFError *) {
     if (!url) {
-        @throw [[NPError alloc] init];   // 语句：抛出
+        @throw [[NFError alloc] init];   // 语句：抛出
     }
     return @"ok";
 }
@@ -699,7 +699,7 @@ int main() {
 **checker 强制什么**
 
 - `@throws(T *)` —— 逃逸出本声明的每个 `@throw`，其静态类型必须与 `T` 相容（允许子类）：
-  `error: '@throw' of type 'AppError *' does not match the declared '@throws(NPString *)'`
+  `error: '@throw' of type 'AppError *' does not match the declared '@throws(NFString *)'`
 - 裸 `@throws` —— 体内必须确有逃逸的 `@throw`：
   `error: 'liar' is marked '@throws' but its body never executes '@throw'`
 - 不写 —— 逃逸的 `@throw` 报 error：
@@ -707,7 +707,7 @@ int main() {
 
 被**同一体内** `@try` 捕获的 `@throw` 不算逃逸，因此 `main`、以及自己就地兜住的 helper 都不需要标注：
 
-```nupa
+```gald
 static void bad(int n) {                        // error：逃逸出 'bad'
     if (n < 0) {
         @throw [[AppError alloc] init];
@@ -733,30 +733,30 @@ static void guarded(int n) {                    // 通过 —— 就地捕获
 
 类型判定刻意保守：`@"..."` 字面量、裸 C 字符串、Cast 目标类型、已知类型的变量会被判定；**消息发送不判**（只有 selector 的注册表无从得知其类），因此它对任意声明类型都放行。标注纯编译期——增删 `@throws` 不改变生成的 C、程序输出与 ARC 行为。两个关键词互相写错位置本身也是 error：体内写 `@throws`、声明上写 `@throw(...)`，各会收到一条指明正确关键词的诊断。
 
-#### 隐式根类（nupa_root）
+#### 隐式根类（gald_root）
 
-Nupa 现在支持用户自定义根类。你不再需要强制继承 `NPObject`——不写父类的 `@interface` 会自动获得编译器注入的隐式根类 `nupa_root`，同时保持 `id` 类型的统一性和静态派发能力。
+Nupa 现在支持用户自定义根类。你不再需要强制继承 `NFObject`——不写父类的 `@interface` 会自动获得编译器注入的隐式根类 `gald_root`，同时保持 `id` 类型的统一性和静态派发能力。
 
 **之前：**
 
-```nupa
-@interface Animal : NPObject   // 必须继承 NPObject
+```gald
+@interface Animal : NFObject   // 必须继承 NFObject
 ```
 
 **之后：**
 
-```nupa
+```gald
 @interface Animal              // 不写父类 → 隐式根类
-@interface Animal : NPObject   // 显式继承 NPObject 仍然合法
+@interface Animal : NFObject   // 显式继承 NFObject 仍然合法
 ```
 
 两者都合法，且 `id` 可以指向任何 Nupa 对象。
 
 #### 核心机制
 
-当用户不写父类时，编译器自动注入 `nupa_root`：
+当用户不写父类时，编译器自动注入 `gald_root`：
 
-```nupa
+```gald
 // 用户代码：
 @interface Animal {
     int age;
@@ -765,7 +765,7 @@ Nupa 现在支持用户自定义根类。你不再需要强制继承 `NPObject`�
 @end
 
 // 编译器视为：
-@interface Animal : nupa_root {
+@interface Animal : gald_root {
     int age;
 }
 - (void)speak;
@@ -776,17 +776,17 @@ Nupa 现在支持用户自定义根类。你不再需要强制继承 `NPObject`�
 
 ```c
 // 编译器内置结构
-struct nupa_object_header {
-    struct nupa_vtable *vtable;
+struct gald_object_header {
+    struct gald_vtable *vtable;
 };
 
-struct nupa_root {
-    struct nupa_object_header header;
+struct gald_root {
+    struct gald_object_header header;
 };
 
 // Animal 的 struct
 struct Animal {
-    struct nupa_root __super;  // 包含 header
+    struct gald_root __super;  // 包含 header
     int age;
 };
 ```
@@ -794,25 +794,25 @@ struct Animal {
 #### id 的新定义
 
 ```c
-typedef struct nupa_root *nupa_id_t;
+typedef struct gald_root *gald_id_t;
 ```
 
-`id` 不再绑定任何具体类，只要求对象以 `nupa_root` 开头：
+`id` 不再绑定任何具体类，只要求对象以 `gald_root` 开头：
 
-```nupa
+```gald
 Animal *a = [[Animal alloc] init];
-id obj = a;                    // ✅ 合法，Animal 继承自 nupa_root
+id obj = a;                    // ✅ 合法，Animal 继承自 gald_root
 [obj speak];                   // 静态派发：obj->header.vtable[...]
 ```
 
-#### NPObject vs nupa_root
+#### NFObject vs gald_root
 
 | 写法                          | 含义                       | 适用场景            |
 | --------------------------- | ------------------------ | --------------- |
-| `@interface Xxx`            | 隐式继承 `nupa_root`，最轻量     | 自定义内存布局、内核、嵌入式  |
-| `@interface Xxx : NPObject` | 显式继承，获得 retain/release 等 | 用户态应用、需要完整运行时支持 |
+| `@interface Xxx`            | 隐式继承 `gald_root`，最轻量     | 自定义内存布局、内核、嵌入式  |
+| `@interface Xxx : NFObject` | 显式继承，获得 retain/release 等 | 用户态应用、需要完整运行时支持 |
 
-```nupa
+```gald
 // 自定义根类：轻量，无引用计数
 @interface KernelTask {
     int pid;
@@ -821,9 +821,9 @@ id obj = a;                    // ✅ 合法，Animal 继承自 nupa_root
 - (void)run;
 @end
 
-// 使用 NPObject：完整功能，自动内存管理
-@interface UserModel : NPObject
-@property NPString *name;
+// 使用 NFObject：完整功能，自动内存管理
+@interface UserModel : NFObject
+@property NFString *name;
 @end
 ```
 
@@ -832,21 +832,21 @@ id obj = a;                    // ✅ 合法，Animal 继承自 nupa_root
 Nupa 可以编译为**无 libc、无 Foundation、无 TLS** 的自包含 C，直接用于内核、MCU、嵌入式裸机开发。
 
 ```bash
-nupac -rewrite-nupa -ffreestanding kernel.np   # 生成自包含 C
+galdc -rewrite-gald -ffreestanding kernel.gm   # 生成自包含 C
 ```
 
 `-ffreestanding` 模式下转译出的 C：
 
-- 不 `#include <string.h>`，改 `#include <nupa/runtime.h>`（freestanding 分支）
+- 不 `#include <string.h>`，改 `#include <gald/runtime.h>`（freestanding 分支）
 - `@try/@catch/@finally` 走默认 `-eh checked` 后端：纯旗标 + 守卫，零 `setjmp/longjmp`、零 `jmp_buf`（`-eh legacy` 才用 `__builtin_setjmp/longjmp` + 普通全局而非 `__thread`）
-- 类型（`SEL`/`NPClass`/`NPObject`/`id`）自含
+- 类型（`SEL`/`NFClass`/`NFObject`/`id`）自含
 - **不捆绑 Clang Blocks 运行时** —— block 字面量引用 `__NSConcreteStackBlock`/`_Block_copy`/`_Block_release`；真裸机上要么链接一个 Blocks runtime 移植，要么用 `-backend portable`/`-backend gcc`（block 展开为普通 C 函数，无 ABI 符号）
 
-用户只需提供：`nupa_nupa_root_class`、异常全局（如用 `@try`）、`memcpy`（如用 `@try`）、freestanding 头（`stdint.h`/`stddef.h`/`stdbool.h`）。
+用户只需提供：`gald_gald_root_class`、异常全局（如用 `@try`）、`memcpy`（如用 `@try`）、freestanding 头（`stdint.h`/`stddef.h`/`stdbool.h`）。
 
-**裸机分配器 + `[[Class alloc] init]`**（`include/nupa/runtime_freestanding.c`）：
+**裸机分配器 + `[[Class alloc] init]`**（`include/gald/runtime_freestanding.c`）：
 
-```nupa
+```gald
 @interface HeapCounter {
     int total;
 }
@@ -855,7 +855,7 @@ nupac -rewrite-nupa -ffreestanding kernel.np   # 生成自包含 C
 - (int) add:(int)x;
 @end
 @implementation HeapCounter
-+ (id) alloc  { return nupa_alloc(self); }   // bump allocator
++ (id) alloc  { return gald_alloc(self); }   // bump allocator
 - (id) init   { return self; }
 - (int) add:(int)x { total += x; return total; }
 @end
@@ -872,19 +872,19 @@ void demo(void) {
 - 类方法 / 实例方法消息派发
 - `@try/@catch/@finally`
 - `@selector`、内联 asm、C 类型转换
-- `[[Class alloc] init]` 裸机堆分配 + ARC 自动 `nupa_release`
+- `[[Class alloc] init]` 裸机堆分配 + ARC 自动 `gald_release`
 
 运行示例（soma-kernel 在 qemu 下）：
 
 ```
-[nupa] class method [SomaCore::Calculator compute:21] = 43
-[nupa] instance methods on C-created obj: add:7 -> 7, add:35 -> 42, value = 42
-[nupa] @try/@catch demo:
+[gald] class method [SomaCore::Calculator compute:21] = 43
+[gald] instance methods on C-created obj: add:7 -> 7, add:35 -> 42, value = 42
+[gald] @try/@catch demo:
        try body, throwing...
        caught [e errorCode] = 42
        finally always runs
        after-try continues
-[nupa] alloc+init (bump allocator):
+[gald] alloc+init (bump allocator):
        [c add:10]=10 [c add:20]=30 [c value]=30
 ```
 
@@ -908,8 +908,8 @@ obj->header.vtable[INDEX_doSomething](obj, arg);
    已实现：
 
 - [x] 隐式根类注入（语义分析阶段）
-- [x] `nupa_root` 和 `nupa_object_header` 的 C 代码生成
-- [x] `id` → `nupa_id_t` 的类型映射
+- [x] `gald_root` 和 `gald_object_header` 的 C 代码生成
+- [x] `id` → `gald_id_t` 的类型映射
 - [x] 统一 VTable 索引分配
 - [x] 根类/子类 struct 生成
 - [x] 单元测试覆盖
@@ -918,9 +918,9 @@ obj->header.vtable[INDEX_doSomething](obj, arg);
 
 `@namespace` 用于组织类、函数、常量等代码实体，避免全局命名冲突。这是 ObjC 没有的特性——在传统 ObjC 中需要用前缀（如 `NS`、`UI`）来模拟。
 
-```nupa
+```gald
 @namespace Game
-    @interface Player : NPObject {
+    @interface Player : NFObject {
         int health;
     }
     - (id)init;
@@ -938,7 +938,7 @@ obj->header.vtable[INDEX_doSomething](obj, arg);
 @endnamespace
 
 @namespace UI
-    @interface HUD : NPObject {}
+    @interface HUD : NFObject {}
     - (void)showPlayerHealth:(Game::Player *)player;
     @end
 @endnamespace
@@ -951,8 +951,8 @@ obj->header.vtable[INDEX_doSomething](obj, arg);
 | `Game::Player`            | `Game__Player`               |
 | `Game::Entities::Enemy`   | `Game__Entities__Enemy`      |
 | 方法 `-[Game::Player init]` | `Game__Player_init`          |
-| VTable                    | `NUPA_VTABLE_$_Game__Player` |
-| 类元数据                      | `NUPA_CLASS_$_Game__Player`  |
+| VTable                    | `GALD_VTABLE_$_Game__Player` |
+| 类元数据                      | `GALD_CLASS_$_Game__Player`  |
 
 **特性**：
 
@@ -969,7 +969,7 @@ obj->header.vtable[INDEX_doSomething](obj, arg);
 
 **形式一：导入完整限定名**
 
-```nupa
+```gald
 @using Game::Player;
 Game::Player *p = [[Game::Player alloc] init];
 // 可以直接用 Player 代替 Game::Player
@@ -978,7 +978,7 @@ Player *p = [[Player alloc] init];
 
 **形式二：导入并指定别名**
 
-```nupa
+```gald
 @using GP = Game::Player;
 // 用 GP 作为 Game::Player 的别名
 GP *p = [[GP alloc] init];
@@ -986,7 +986,7 @@ GP *p = [[GP alloc] init];
 
 **形式三：导入整个命名空间**
 
-```nupa
+```gald
 @using namespace Game;
 // Game 命名空间下的所有类可以直接用短名访问
 Player *p = [[Player alloc] init];
@@ -1003,13 +1003,13 @@ Enemy *e = [[Enemy alloc] init];
 
 在 ARC 模式下，checker 禁止手动内存管理：
 
-```nupa
+```gald
 [obj release]; // 错误：explicit 'release' not allowed in ARC mode
 ```
 
-`@noarc { }` 划定一个可以手动管理内存的块——它是 `-fno-nupa-arc`（以及 clang 的 `-fno-objc-arc`）的块级等价物：
+`@noarc { }` 划定一个可以手动管理内存的块——它是 `-fno-gald-arc`（以及 clang 的 `-fno-objc-arc`）的块级等价物：
 
-```nupa
+```gald
 @noarc {
     [obj retain];
     [obj release];
@@ -1022,8 +1022,8 @@ Enemy *e = [[Enemy alloc] init];
 - **块级作用域** — 只有 `@noarc { }` 内的语句豁免。块外仍使用静态 ARC，块外手动 `retain`/`release`/`dealloc`/`autorelease` 是编译错误。
 - **不注入 ARC** — ARC 分析器完全跳过 `@noarc` 块，不为其中使用的对象插入任何 retain/release。
 - **运行时方法豁免** — `retain`/`release`/`dealloc`/`autorelease` 自身的实现无需 `@noarc` 即可调用这些方法。
-- **全程序等价物** — `-fno-nupa-arc` 把整个程序切到 MRC；`@noarc` 对单个块做同样的事。
-- **Foundation** — NPString/NPMutableString 的便捷构造器（`+stringWithUTF8String:`、`+stringWithString:`）把刻意为之的 `autorelease` 包在 `@noarc { }` 里。
+- **全程序等价物** — `-fno-gald-arc` 把整个程序切到 MRC；`@noarc` 对单个块做同样的事。
+- **Foundation** — NFString/NFMutableString 的便捷构造器（`+stringWithUTF8String:`、`+stringWithString:`）把刻意为之的 `autorelease` 包在 `@noarc { }` 里。
 
 ---
 
@@ -1032,8 +1032,8 @@ Enemy *e = [[Enemy alloc] init];
 `-trace-refcount` 在 **ARC 注入之后**对 AST 跑一个静态引用计数模拟器，按时间顺序打印每个存活对象的计数追踪，然后直接退出（不生成代码、不编译）。它是调试辅助工具，用来验证每个对象恰好被 release 一次（无泄漏、无二次释放）。
 
 ```bash
-nupac -trace-refcount app.np                              # 彩色追踪
-nupac -trace-refcount -trace-no-color -trace-max-iters 2 app.np
+galdc -trace-refcount app.gm                              # 彩色追踪
+galdc -trace-refcount -trace-no-color -trace-max-iters 2 app.gm
 ```
 
 选项：
@@ -1048,7 +1048,7 @@ nupac -trace-refcount -trace-no-color -trace-max-iters 2 app.np
 
 Go 风格的延迟清理：`@defer { ... }` 把自己的 body 注册到**最内层复合语句块**上，body 在该块的**每一处出口**执行——块尾自然出口、任意深度的 `return`、跳出该块的 `break`/`continue`、同函数 `@throw`——最内层优先（LIFO）。
 
-```nupa
+```gald
 - (void)work {
     FILE *f = fopen("cfg.txt", "r");
     @defer { fclose(f); }            // 下面每处出口都会执行
@@ -1070,14 +1070,14 @@ M1 限制（编译期强制）：`@defer` 必须直接位于块内；defer 体�
 
 实现：纯 desugar（`crates/defer`，pipeline Step 3.9——`-eh checked` 改写之后、ARC 之前）。codegen/checker/运行时看到的都是普通语句——下游零改动。Golden：`tests/golden/36_defer/`。
 
-### `NPAsync<T>` —— 声明式 async 标记
+### `NFAsync<T>` —— 声明式 async 标记
 
-`@await` M1/M2 有个软肋：头文件里看不出方法会挂起。`NPAsync<T>` 把 async-ness 扶正为**返回类型位可见的标记**——parser 把它解包为 `T`，纯编译期元数据：生成 C 中 `NPAsync` 出现 **0 次**，vtable 布局、跨 TU 链接、桥接头全部不受影响。
+`@await` M1/M2 有个软肋：头文件里看不出方法会挂起。`NFAsync<T>` 把 async-ness 扶正为**返回类型位可见的标记**——parser 把它解包为 `T`，纯编译期元数据：生成 C 中 `NFAsync` 出现 **0 次**，vtable 布局、跨 TU 链接、桥接头全部不受影响。
 
-```nupa
-@interface Fetcher : NPObject
-- (NPAsync<int>)compute:(int)n;   // 会挂起，完成后给 int
-+ (NPAsync<void>)runAll;          // 入口方法
+```gald
+@interface Fetcher : NFObject
+- (NFAsync<int>)compute:(int)n;   // 会挂起，完成后给 int
++ (NFAsync<void>)runAll;          // 入口方法
 - (int)plain:(int)n;              // 不标 = 承诺不挂起
 @end
 ```
@@ -1086,16 +1086,16 @@ M1 限制（编译期强制）：`@defer` 必须直接位于块内；defer 体�
 
 | 声明 | 体内 | 判定 |
 |------|------|------|
-| `NPAsync<T>` | 有 `@await` | ✅ |
-| `NPAsync<T>` | 无 `@await` | **error** —— `'compute:' is marked 'NPAsync<T>' but its body never suspends — remove the marker or add an '@await'` |
-| 裸 `T` | 有 `@await` | **warning** —— `'compute:' contains '@await' but its return type is not marked 'NPAsync<T>' — mark it so callers can see it suspends`（`-Werror` 升级拦截） |
+| `NFAsync<T>` | 有 `@await` | ✅ |
+| `NFAsync<T>` | 无 `@await` | **error** —— `'compute:' is marked 'NFAsync<T>' but its body never suspends — remove the marker or add an '@await'` |
+| 裸 `T` | 有 `@await` | **warning** —— `'compute:' contains '@await' but its return type is not marked 'NFAsync<T>' — mark it so callers can see it suspends`（`-Werror` 升级拦截） |
 | 裸 `T` | 无 `@await` | ✅ |
 
-- 标记是签名的一部分：`@interface` 与 `@implementation` 必须一致——`'NPAsync' marker mismatch on 'compute:': the @interface and @implementation disagree` 报 error。仅头文件声明的 `@interface` 方法豁免（跨 TU 安全）。
-- 值位一律拒绝——变量/参数/ivar/属性：`'NPAsync<T>' is a declaration marker, not a value type (variable) — '@await' the async call instead`。
-- `NPAsync` 是保留类名。
+- 标记是签名的一部分：`@interface` 与 `@implementation` 必须一致——`'NFAsync' marker mismatch on 'compute:': the @interface and @implementation disagree` 报 error。仅头文件声明的 `@interface` 方法豁免（跨 TU 安全）。
+- 值位一律拒绝——变量/参数/ivar/属性：`'NFAsync<T>' is a declaration marker, not a value type (variable) — '@await' the async call instead`。
+- `NFAsync` 是保留类名。
 
-Golden：`tests/golden/37_async_marker/`；负例在 `tests/negative/async_marker_*.np`。
+Golden：`tests/golden/37_async_marker/`；负例在 `tests/negative/async_marker_*.gm`。
 
 ### 对象下标订阅（容器对象的 `a[0]`）
 
@@ -1106,52 +1106,52 @@ Golden：`tests/golden/37_async_marker/`；负例在 `tests/negative/async_marke
 | `recv[i]` | `[recv objectAtIndex:i]` | 接收者的类声明了 `objectAtIndex:` |
 | `recv[i] = v` | `[recv setObject:v atIndex:i]` | 类还声明了 `setObject:atIndex:` |
 
-```nupa
-NPArray *a = @[ @"x", @"y", @"z" ];
-NPLog(@"%@", a[0]);            // → [a objectAtIndex:0]
-NPMutableArray *m = [NPMutableArray array];
+```gald
+NFArray *a = @[ @"x", @"y", @"z" ];
+NFLog(@"%@", a[0]);            // → [a objectAtIndex:0]
+NFMutableArray *m = [NFMutableArray array];
 [m addObject:@"first"];
 m[0] = @"hello";               // → [m setObject:@"hello" atIndex:0] —— 替换语义，不是追加
 ```
 
 普通 C 零误伤：`int c[3]; c[1]`、`char *p; p[0]`、`const char *s; s[2]` 全部原样透传为 C 下标（探针验证，零误报）。改写落在 checker（parser 层拿不到变量类型，emit 阶段没有 vtable 元数据），下游 vtable 派发、nil 守卫、SEL 常量零特判。
 
-字典下标（`d[@"k"]`）**有意不纳入**本改写：改写只映射到 `objectAtIndex:`，所以 `NPDictionary` 不声明 `objectForKeyedSubscript:`——声明它等于宣传一个会被发到错 selector 的写法。用 `[d objectForKey:@"k"]`。
+字典下标（`d[@"k"]`）**有意不纳入**本改写：改写只映射到 `objectAtIndex:`，所以 `NFDictionary` 不声明 `objectForKeyedSubscript:`——声明它等于宣传一个会被发到错 selector 的写法。用 `[d objectForKey:@"k"]`。
 
 ### 泛型真检查（单态化 + 元素类型）
 
-泛型容器**真单态化并做类型检查**。`NPArray<NPString *>` 与 `NPDictionary<NPString *, NPNumber *>` 会生成真正的特化 C（struct、vtable、类元数据、类型已代入的方法副本），checker 再把元素类型代入方法签名——所以元素类型是被强制的，不是被擦除的：
+泛型容器**真单态化并做类型检查**。`NFArray<NFString *>` 与 `NFDictionary<NFString *, NFNumber *>` 会生成真正的特化 C（struct、vtable、类元数据、类型已代入的方法副本），checker 再把元素类型代入方法签名——所以元素类型是被强制的，不是被擦除的：
 
-```nupa
-NPMutableArray<NPString *> *m = [NPMutableArray array];
+```gald
+NFMutableArray<NFString *> *m = [NFMutableArray array];
 [m addObject:@"a"];
-NPString *s = [m objectAtIndex:0];      // NPString *，不是 id
+NFString *s = [m objectAtIndex:0];      // NFString *，不是 id
 
-[m addObject:@42];                      // ✗ 报错：NPNumber* 放进 NPString* 容器
+[m addObject:@42];                      // ✗ 报错：NFNumber* 放进 NFString* 容器
 int bad = [m objectAtIndex:0];          // ✗ 报错：指针赋给标量
 ```
 
-`@[...]` 与 `@{...}` 字面量在**所有元素同型**时会**推断**元素类型，所以 `NPArray<NPString *> *a = @[ @"x", @"y" ];` 无需标注；混合类型数组回退成裸 `NPArray`。
+`@[...]` 与 `@{...}` 字面量在**所有元素同型**时会**推断**元素类型，所以 `NFArray<NFString *> *a = @[ @"x", @"y" ];` 无需标注；混合类型数组回退成裸 `NFArray`。
 
-两种拼写并存：裸 `NPArray` 依然完整支持（零迁移），只是擦除成 `id`。把裸容器赋给特化变量是允许的，但会告警——此时元素类型未经验证：
+两种拼写并存：裸 `NFArray` 依然完整支持（零迁移），只是擦除成 `id`。把裸容器赋给特化变量是允许的，但会告警——此时元素类型未经验证：
 
 ```text
-warning: assigning a bare 'NPArray *' to a specialization of it — the bare
+warning: assigning a bare 'NFArray *' to a specialization of it — the bare
 container's element type is unchecked; add an explicit cast if the contents are known to match
 ```
 
-`-Werror` 可升级拦截。`NPArray<A>` 与 `NPArray<B>` 之间互相赋值则不告警——与 ObjC lightweight generics 同样的宽松（你要回了 `id`，就给你 `id`）。
+`-Werror` 可升级拦截。`NFArray<A>` 与 `NFArray<B>` 之间互相赋值则不告警——与 ObjC lightweight generics 同样的宽松（你要回了 `id`，就给你 `id`）。
 
-代价要说清楚：特化是编译期代码，不是免费的类型安全。同一程序改用泛型拼写而非裸拼写，生成的 C 多约 42 KB / +41%——全是重复的方法体与元数据，布局逐字节相同，故运行期收益为零。Golden：`tests/golden/40_nparray_generic/`。
+代价要说清楚：特化是编译期代码，不是免费的类型安全。同一程序改用泛型拼写而非裸拼写，生成的 C 多约 42 KB / +41%——全是重复的方法体与元数据，布局逐字节相同，故运行期收益为零。Golden：`tests/golden/40_nfarray_generic/`。
 
 ### Nupa 语法宏（双轨 `#define`）
 
-含 **nupa 语法**（`[recv msg]`、`@` 字面量、`^{}` block）的 `#define` 宏体此前原样透传给 C 编译器——直接语法错误。nupac 现在自行解析并在源级展开。纯 C 宏体照旧透传、由 C 编译器展开，行为零变化。
+含 **gald 语法**（`[recv msg]`、`@` 字面量、`^{}` block）的 `#define` 宏体此前原样透传给 C 编译器——直接语法错误。galdc 现在自行解析并在源级展开。纯 C 宏体照旧透传、由 C 编译器展开，行为零变化。
 
-```nupa
-#define TAG(o)      [o tag]                    // nupa 轨：nupac 展开
+```gald
+#define TAG(o)      [o tag]                    // gald 轨：galdc 展开
 #define BUMP(o, n)  [o addTo:n times:1]
-#define LOG(x)      NPLog(@"tag=%d", x)        // 宏体含 @literal
+#define LOG(x)      NFLog(@"tag=%d", x)        // 宏体含 @literal
 #define TWICE(x)    ((x) + (x))                // C 轨：clang 展开
 
 int t = TAG(w);                                    // → [w tag]
@@ -1159,7 +1159,7 @@ BUMP(w, 3);
 LOG(TAG(w));
 ```
 
-展开语义遵循 ISO C §6.10.3（`crates/cpp` 独立实现，逐行对照 `clang -E` 交叉验证）：实参先完整展开再代入（`#`/`##` 操作数用 raw 文本）、`#param` 字符串化、`a ## b` 粘贴、`__VA_ARGS__` 逗号拼接、自递归冻结（蓝漆规则）、函数式宏裸名不展开、`\` 续行拼逻辑行。条件指令（`#if`/`#ifdef`/`#ifndef`/`#elif`/`#else`/`#endif`）也由 nupac 求值——`defined(X)` 操作数豁免展开、跳过的分组不定义宏、畸形条件指令报错而非静默吞文件。
+展开语义遵循 ISO C §6.10.3（`crates/cpp` 独立实现，逐行对照 `clang -E` 交叉验证）：实参先完整展开再代入（`#`/`##` 操作数用 raw 文本）、`#param` 字符串化、`a ## b` 粘贴、`__VA_ARGS__` 逗号拼接、自递归冻结（蓝漆规则）、函数式宏裸名不展开、`\` 续行拼逻辑行。条件指令（`#if`/`#ifdef`/`#ifndef`/`#elif`/`#else`/`#endif`）也由 galdc 求值——`defined(X)` 操作数豁免展开、跳过的分组不定义宏、畸形条件指令报错而非静默吞文件。
 
 限制（报清晰错误，不静默）：宏调用必须单行闭合（跨行用 `\` 续行）；宏体内不得出现 `_Pragma`。Golden：`tests/golden/38_macros/`。
 
@@ -1167,13 +1167,13 @@ LOG(TAG(w));
 
 C99 指定初始化器的六种形态全部可用，包括 ObjC 的 C 子集从来不需要的那些：
 
-```nupa
+```gald
 struct Point { int x; int y; };
 struct Point p1 = { .x = 1, .y = 2 };      // 1. 完整指定
 struct Point p2 = { .y = 5 };               // 2. 部分指定——未指定字段零填充
 struct Point p3 = { .x = 1, 7 };           // 3. 指定与位置式混合
 
-NPRange r = (NPRange){ .location = 3,      // 4. 复合字面量 + 指定
+NFRange r = (NFRange){ .location = 3,      // 4. 复合字面量 + 指定
                         .length = 9 };
 
 CGPoint pts[3] = { [0].wx = 1, [2].wy = 6 };  // 5. 数组元素
@@ -1187,7 +1187,7 @@ struct Outer o = { .in.a = 3, .tag = 9 }; // 6. 嵌套成员路径
 
 `float _Complex` / `double _Complex` 的声明、typedef、形参全程原样透传，虚数后缀字面量（`2.0i`、`1e3j`）按 **raw 文本**发射——此前虚部被静默丢弃（`2.0i` → `2.0f`）。
 
-```nupa
+```gald
 #include <complex.h>
 typedef float _Complex cfloat;
 
@@ -1197,7 +1197,7 @@ cfloat f = 1.5;
 printf("A=%.1f+%.1fi\n", creal(z), cimag(z));
 ```
 
-已知限制：nupa checker 无复数类型推导（复数宽度窄化不告警，语义由生成的 C 交 C 编译器保证）。Golden：`tests/golden/39_complex/`。
+已知限制：gald checker 无复数类型推导（复数宽度窄化不告警，语义由生成的 C 交 C 编译器保证）。Golden：`tests/golden/39_complex/`。
 
 ---
 
@@ -1206,7 +1206,7 @@ printf("A=%.1f+%.1fi\n", creal(z), cimag(z));
 ### 命令行选项
 
 ```bash
-nupac [options] <input.np>
+galdc [options] <input.gm>
 
 模式:
   (无)              默认：转译 + 编译到二进制（需要 -o）
@@ -1218,9 +1218,9 @@ nupac [options] <input.np>
   -L <dir>          添加库搜索路径
   -v, --verbose     显示详细输出（包括 Clang 编译警告）
   --version         显示版本号
-  --rewrite-nupa    只输出 C 代码（不编译）
-  -fnupa-arc        启用 ARC（默认）
-  -fno-nupa-arc     禁用 ARC（手动 MRC 模式）
+  --rewrite-gald    只输出 C 代码（不编译）
+  -fgald-arc        启用 ARC（默认）
+  -fno-gald-arc     禁用 ARC（手动 MRC 模式）
   -fno-checker      跳过类型检查
   -eh <mode>        异常后端：checked（默认）或 legacy（别名 sjlj）
   -ffreestanding    裸机/freestanding 输出（无 libc、无 TLS）
@@ -1251,11 +1251,11 @@ cargo test --workspace
 
 ### Hello World
 
-```nupa
+```gald
 #include <stdio.h>
-#import <Foundation/Foundation.nh>
+#import <Foundation/Foundation.gh>
 
-@interface Greeter : NPObject
+@interface Greeter : NFObject
 - (void)greet;
 @end
 
@@ -1276,8 +1276,8 @@ int main() {
 
 ### 多态
 
-```nupa
-@interface Animal : NPObject
+```gald
+@interface Animal : NFObject
 - (void)speak;
 @end
 
@@ -1311,10 +1311,10 @@ int main() {
 
 ### Block + ARC
 
-```nupa
-typedef void (^EventHandler)(int code, NPString *msg);
+```gald
+typedef void (^EventHandler)(int code, NFString *msg);
 
-@interface Engine : NPObject
+@interface Engine : NFObject
 - (void)onEvent:(EventHandler)handler;
 @end
 
@@ -1322,7 +1322,7 @@ int main() {
     @autoreleasepool {
         Engine *e = [[Engine alloc] init];
         int captured = 42;
-        [e onEvent:^void(int code, NPString *msg) {
+        [e onEvent:^void(int code, NFString *msg) {
             printf("code=%d msg=%s captured=%d\n", code, msg, captured);
         }];
     }
@@ -1334,8 +1334,8 @@ int main() {
 
 Nupa 通过**编译期单态化（monomorphization）**实现泛型——每个 `DataPack<QuantumToken *>` 都会生成独立的 C 结构体 `DataPack_QuantumToken_ptr`，类型参数被具体类型替换。没有类型擦除，没有装箱，没有运行时开销。
 
-```nupa
-@interface DataPack<T> : NPObject {
+```gald
+@interface DataPack<T> : NFObject {
     @public
     int _count;
     T _storage[2];
@@ -1355,7 +1355,7 @@ Nupa 通过**编译期单态化（monomorphization）**实现泛型——每个 
         _count--;
         T item = _storage[_count];
         _storage[_count] = 0;
-        return nupa_autorelease(item);
+        return gald_autorelease(item);
     }
     return 0;
 }
@@ -1410,7 +1410,7 @@ Nupa 的"后端"是**人类可读的 C99**，不是 LLVM IR。这意味着：
 - ✅ 静态 ARC
 - ✅ @selector / VTable 多态
 - ✅ 异常处理（`@try`/`@catch`/`@finally`/`@throw`）——**默认后端是 `-eh checked`**（旗标 + 守卫降级，unwind-safe ARC：跨函数抛出会释放每一帧的 owned 局部；不用 `setjmp/longjmp`，故裸机同样可用）
-  - `-eh legacy`（别名 `-eh sjlj`）切回旧的 `setjmp`/`longjmp` 后端。⚠️ 它的已知限制：跨函数抛出时**跨越作用域仍存活的对象会泄漏**（`longjmp` 跳过作用域末尾的 `nupa_release`）。该限制**不适用于默认后端**。
+  - `-eh legacy`（别名 `-eh sjlj`）切回旧的 `setjmp`/`longjmp` 后端。⚠️ 它的已知限制：跨函数抛出时**跨越作用域仍存活的对象会泄漏**（`longjmp` 跳过作用域末尾的 `gald_release`）。该限制**不适用于默认后端**。
 - ⏳ Foundation 标准库
 - ⏳ 编译器自举
 

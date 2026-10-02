@@ -1,0 +1,28 @@
+[package]
+name = "galdc"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+gald-cst = { path = "../cst" }
+gald-parser = { path = "../parser" }
+gald-binder = { path = "../binder" }
+gald-elaborator = { path = "../elaborator" }
+gald-codegen = { path = "../codegen" }
+gald-preprocessor = { path = "../preprocessor" }
+gald-symbol = { path = "../symbol" }
+gald-ast = { path = "../ast" }
+gald-cfg = { path = "../cfg" }
+gald-arc = { path = "../arc" }
+gald-async = { path = "../async" }
+gald-eh = { path = "../eh" }
+gald-defer = { path = "../defer" }
+gald-pattern = { path = "../pattern" }
+gald-trace = { path = "../trace" }
+gald-checker = { path = "../checker" }
+attrs = { path = "../attrs" }
+clap = "4.6.6"
+clap_complete = "4.6.9"
+
+[build-dependencies]
+cc = "1.0"
