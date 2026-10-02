@@ -1,7 +1,7 @@
 [-> English](README.md)
 
 <div align="center">
-<img src="doc/assets/Nupa_avatar.svg" alt="Nupa_avatar" width="210">
+<img src="doc/assets/Gald_avatar.svg" alt="Gald_avatar" width="210">
 
 # Gald 编程语言
 
