@@ -248,8 +248,29 @@ sig：库 TU == 客户 TU（0xbe99f65a63e20021）
    类」。按 `.gm` 分 TU 后每个 TU 只见到自己 + 依赖，其它类会漏初始化 —— 需要把类初始化改为
    **按类**（每类一个构造函数或每类一个 init 函数，全部运行）。
 
-因此 `-fstrong-metadata` 目前是库侧的**必要开关**，也是「我在提供这些类」这一意图的唯一显式
+因此 `-fstrong-metadata` 目前是**库 TU** 的必要开关，也是「我在提供这些类」这一意图的唯一显式
 表达。要删掉它，得先解决上面两点。
+
+### 更新（2026-10-03）：独立 TU 工作流已免旗标（评审确认项关闭）
+
+评审问「独立 TU 模式下是否要手写 `-fstrong-metadata`」。实证结论：**不用**——自动 strong
+已随 R2 存在，归属判据按**主文件是否持有 `@implementation`**，与扩展名无关：
+
+| 形态 | 命令 | 自有类元数据（无旗标，nm 实证） |
+|------|------|------------------------------|
+| 自包含 `.gh`（带 `@implementation`） | `galdc -rewrite-gald main.gh` | **STRONG**（vtable + meta-vtable） |
+| `.gm` 主文件（带 `@implementation`） | `galdc -rewrite-gald main.gm` | **STRONG**（同上） |
+| 纯声明 `.gh`（无实现进 TU） | `galdc -rewrite-gald decl.gh` | WEAK（正确：R2 客户端空桩必须输给 owner 的表） |
+| `Foundation.gh`（实现经 `#import "*.gm"` 进来） | 库构建脚本 | WEAK——`#import` 不授 ownership，**这正是库构建仍必须带旗标的原因** |
+
+- 守护：`tests/strong_metadata` 增至 **9 项**（新增 5a–5d：`.gh`/`.gm` 两形态自动 strong
+  正例；6：decl-only 反例），`nm` 直读符号强弱。**编译器零改动**——本节只是把既有行为
+  钉进回归。
+- 注意：galdc 无 `-c` 模式（`-o x.o` 产出的是可执行文件），独立 TU 的转译命令是
+  `-rewrite-gald`；评审设想的 `galdc -c main.gm → 自动 strong` 对应的现实命令即上表第二行。
+- 「仍未做」清单收窄为**仅库侧**：按 `.gm` 分 TU 的两个阻塞点（生成 C 自我冲突、
+  `gald_metaInit` 弱合并漏初始化）不变——后者对 R2 归属类已被 §10 的静态初始化强
+  `NFClass` 大幅缓解（归属类的元数据加载期即完成，不再依赖 metaInit 跑到）。
 
 ## 10. R3 落地：`__sig` 只覆盖公共段（2026-10-03）
 
