@@ -66,6 +66,7 @@ louder diagnostic, not a weaker one, so `EXPECT_FAIL_MATCH` looks for
 | `09_layout_mismatch` | **Negative case.** Both TUs `@implementation` the same class, so each owns it and the linker rejects the duplicate metadata (rule R2). Must fail loudly and mention the diagnosis — the contract is "fails legibly", not merely "fails", so a case that crashed for an unrelated reason does not pass by accident. Marked with `EXPECT_FAIL` + `EXPECT_FAIL_MATCH` (checked at link *and* at run). |
 | `10_slots_manifest` | `--slots` manifest mode: the manifest defines the complete layout (methods unknown to it appended at the end, never renumbered), so TUs compiled with the same manifest link correctly even with different method sets. The manifest is also the `__sig` segment. |
 | `11_vtable_private_slots` | The legal split R3 exists for: the lib implements `Widget` plus a TU-local private helper, the client sees only the shared `.gh` and defines its own `App`. Under R1+R2+R3 the shared segments agree (the `__sig` guard stays silent) and each TU dispatches its own privates — the case runs to `run=42`. |
+| `12_native_multi_input` | The compiler's own multi-input mode (`galdc main.gm lib.gm -o app`): one command transpiles each TU (its own galdc subprocess), compiles, and links — no manual clang. Same cross-TU dispatch as `01_basic`; marked with a `NATIVE` file so the runner drives the native path. |
 
 ## Writing a case
 

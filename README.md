@@ -127,11 +127,12 @@ clang -I include -o hello hello.c include/gald/runtime.c
 #   2) link the prebuilt libgald.a (lives next to the galdc binary)
 clang -I include -o hello hello.c -Ltarget/release -lgald
 
-# Output object file directly
-galdc hello.gm -o hello.o                  # -c mode, no linking
-
 # Compile to executable
 galdc hello.gm -o hello_bin                # transpile + compile + link
+
+# Multi-TU: extra positional inputs are compiled and linked in; .o/.a as-is
+galdc main.gm lib.gm -I include -o app     # two TUs, one command (no manual clang)
+galdc main.gm lib.o libfoo.a -o app        # mix gald sources with prebuilt objects
 
 # Compile + run
 galdc run hello.gm

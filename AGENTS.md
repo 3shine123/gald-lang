@@ -1999,3 +1999,13 @@ switch (subject) {
 - **问题**：`gald_async_state_*` entry 函数的 `switch (t->state)` 只覆盖 `case 1` 与 `case <final>`，异常状态（任务结构损坏、完成后误 resume）会落到非 void 函数末尾——UB，clang `-Wreturn-type`（full_syntax 生成 C 实证 2 条，GPT 复验发现）。
 - **修法**（`crates/async/src/lib.rs` entry_decl body）：switch 后追加完成协议作兜底——`t->state = -1; return 1;`（异常状态按"任务完成"结算，driver 的 join 循环能终止，不会死轮询）。
 - **验证**：生成 C `-Wreturn-type` **0 条**；兜底 return 已发射；async 端到端探针 `result=42` 不变；golden/34 stdout diff **MATCH**；回归 cargo **137/137**、test_all **309/317**、multi_tu **10/10**、stress 三套全过。
+
+### galdc 原生多输入多 TU 编译 ✅ (Oct 2026, 本会话)
+
+- **用法**：`galdc main.gm lib.gm -I include -o app` —— 额外位置参数 `.gm` 作为附加编译单元，一条命令完成"逐 TU 转译→编译→链接"；`.o`/`.a` 位置参数原样进链接（`galdc main.gm lib.o libfoo.a -o app`）。**compile 模式 only**：run 模式的额外位置参数仍是程序参数；`-rewrite-gald` 遇多输入响亮报错（一命令一产物）。
+- **实现（`crates/galdc/src/main.rs`）**：manual 循环收 `extra_inputs`/`extra_objects`；每个额外 TU 用**子进程自调用**（`current_exe() -rewrite-gald` → 临时 `.c`）转译——codegen 的 `METHOD_METADATA` 等是进程级 `OnceLock`，同进程二次转译不可行；最终**一次 clang 调用**把主 TU（stdin）+ 额外 `.c` + runtime 一起编译链接（与既有 runtime.c 同调用机制同构）。临时 `.c` 用后即删。
+- **旗标转发**：`-I/-fno-gald-arc/-fno-checker/-Werror/-eh/--slots/-backend/-arch/-ffreestanding/-nostdinc/-no-comments/-v` 全部转发给子进程；`-L/-l/-asm/-framework` 是链接期旗标、转译不需要，不转发。**`-fstrong-metadata` 刻意不转发**：它把整个 TU 的元数据升强符号，两个 TU 都强 → 共享类 duplicate symbol；首 TU 强、额外 TU 弱正好让链接器正确合并（`-v` 下打 note 说明）。
+- **blocks 探测扩展**：`-fblocks`/`-lBlocksRuntime` 的自动注入现在也扫额外 TU 的生成 C（任一 TU 含 `(^` 即注入）。
+- **守护**：`-trace-refcount` + 多输入报错（trace 单 TU 语义）；README/CHINESE 顺带修正既有错误行——`galdc hello.gm -o hello.o` 从未是 "-c mode"（`file` 探针实证产出 Mach-O 可执行文件），该行删除。
+- **测试**：multi_tu 新增 `12_native_multi_input/`（`NATIVE` 标记文件驱动 runner 走 galdc 原生路径，用例内容与 01_basic 同构）；`run_multi_tu.sh` 加 NATIVE 分支（一条 galdc 命令替代"逐 TU -rewrite-gald + clang"）。
+- **回归**：multi_tu **12/12**（11 旧用例零回归 + 新用例）、cargo test **153/153**、test_all **347/355**（0 failed，与基线一致）；探针矩阵 A–F 全过（单输入冒烟 / `.o` 直链 / `.a` 直链 / rewrite 守卫 exit=1 / trace 守卫 exit=1 / run 模式额外位置参数=程序参数语义不变）。

@@ -126,11 +126,12 @@ clang -I include -o hello hello.c include/gald/runtime.c
 #   2) 链接编译好的 libgald.a（位于 galdc 二进制同目录）
 clang -I include -o hello hello.c -Ltarget/release -lgald
 
-# 直接输出对象文件
-galdc hello.gm -o hello.o                  # -c 模式，不链接
-
 # 编译到可执行文件
 galdc hello.gm -o hello_bin                # 转译 + 编译 + 链接
+
+# 多 TU：额外位置参数作为附加编译单元一起编译链接；.o/.a 原样链接
+galdc main.gm lib.gm -I include -o app     # 两条编译单元一条命令（无需手动 clang）
+galdc main.gm lib.o libfoo.a -o app        # gald 源码与预编译目标混用
 
 # 编译 + 运行
 galdc run hello.gm
