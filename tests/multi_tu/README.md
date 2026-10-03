@@ -20,18 +20,19 @@ into "the test told me this feature cannot cross a TU boundary."
 
 ## The rule
 
-**Every instance method a class has must be visible to every TU that links
-against it.** In practice: declare all of them in the shared `.gh`. A method that
-exists only in an `@implementation` is seen by exactly one TU, which is
-sufficient to break the link.
+**Every instance method a class exposes publicly must be visible to every TU
+that links against it** — declare them in the shared `.gh`. Since R3, a method
+that exists only in an `@implementation` (TU-local private) no longer breaks the
+link: R1 gives the private tail slots no other TU indexes, R2 keeps its dispatch
+inside the owning TU, and the `__sig` fingerprint covers the shared segment only.
 
-Codegen stamps an FNV-1a signature of the layout into the vtable struct itself
-(`__sig`, first member) so it weak-merges together with the instance that won,
-and a per-TU `__attribute__((constructor))` verifies it. A mismatch aborts at
-load time with both signatures and this TU's method list — a loud failure rather
-than a wrong-offset call. (`gald_metaInit` is the wrong place for that check: it
-is weak-merged, so only one TU's copy ever runs and would only ever compare its
-own layout against itself.)
+Codegen stamps an FNV-1a signature of that shared segment into the vtable struct
+itself (`__sig`, first member) so it weak-merges together with the instance that
+won, and a per-TU `__attribute__((constructor))` verifies it. A mismatch aborts
+at load time with both signatures and this TU's method list — a loud failure
+rather than a wrong-offset call. (`gald_metaInit` is the wrong place for that
+check: it is weak-merged, so only one TU's copy ever runs and would only ever
+compare its own layout against itself.)
 
 ### Ownership (rule R2)
 
@@ -63,6 +64,8 @@ louder diagnostic, not a weaker one, so `EXPECT_FAIL_MATCH` looks for
 | `07_arc` | Compile-time ARC insertion stays correct when the halves were transpiled separately — including a convenience-style `+1`-free return from the lib TU. |
 | `08_class_method` | `+` methods dispatch through `GALD_META_VTABLE_$_X`, a *second* per-class layout that must agree across the link independently of the instance vtable. |
 | `09_layout_mismatch` | **Negative case.** Both TUs `@implementation` the same class, so each owns it and the linker rejects the duplicate metadata (rule R2). Must fail loudly and mention the diagnosis — the contract is "fails legibly", not merely "fails", so a case that crashed for an unrelated reason does not pass by accident. Marked with `EXPECT_FAIL` + `EXPECT_FAIL_MATCH` (checked at link *and* at run). |
+| `10_slots_manifest` | `--slots` manifest mode: the manifest defines the complete layout (methods unknown to it appended at the end, never renumbered), so TUs compiled with the same manifest link correctly even with different method sets. The manifest is also the `__sig` segment. |
+| `11_vtable_private_slots` | The legal split R3 exists for: the lib implements `Widget` plus a TU-local private helper, the client sees only the shared `.gh` and defines its own `App`. Under R1+R2+R3 the shared segments agree (the `__sig` guard stays silent) and each TU dispatches its own privates — the case runs to `run=42`. |
 
 ## Writing a case
 

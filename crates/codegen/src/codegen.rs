@@ -88,6 +88,47 @@ fn vtable_layout_sig(method_names: &[String]) -> u64 {
     h
 }
 
+/// R3: the `__sig` fingerprint must cover only the segment that has to agree
+/// across TUs — the public segment (R1 keeps its slot indices identical
+/// everywhere and R2 keeps private dispatch local to the owning TU). A
+/// TU-local private method must NOT make the signatures differ — that is
+/// exactly the legal library+client split
+/// `tests/multi_tu/11_vtable_private_slots` pins. With no public information,
+/// every method is shared and the fingerprint covers all of them (the pre-R3
+/// behavior).
+///
+/// Manifest mode: the manifest may carry the creator TU's private tail (the
+/// creator compiled manifest-less — the file did not exist yet — and wrote its
+/// full R1 assignment back). The creator therefore fingerprints its public
+/// segment, so the follower must fingerprint the manifest's public entries to
+/// match; filtering the manifest through the same public set makes the two
+/// agree exactly. With no public information the manifest itself is the
+/// segment (pre-R3 semantics for that mode).
+fn vtable_sig_segment(
+    slots_manifest: Option<&[String]>,
+    public_methods: Option<&std::collections::HashSet<String>>,
+    global_instance_method_names: &[String],
+) -> Vec<String> {
+    match slots_manifest {
+        Some(manifest) => match public_methods {
+            Some(public) => manifest
+                .iter()
+                .filter(|m| public.contains(*m))
+                .cloned()
+                .collect(),
+            None => manifest.to_vec(),
+        },
+        None => match public_methods {
+            Some(public) => global_instance_method_names
+                .iter()
+                .filter(|m| public.contains(*m))
+                .cloned()
+                .collect(),
+            None => global_instance_method_names.to_vec(),
+        },
+    }
+}
+
 // ─── Global vtable method metadata (set during ast_to_cg_unit) ────────────
 static METHOD_METADATA: OnceLock<HashMap<String, (usize, String)>> = OnceLock::new();
 // Per-class method signature: class_flat -> (method_name -> (index, ptr_type)).
@@ -397,6 +438,18 @@ pub struct CgUnit {
     /// arrives through an `#import` stays weak — that is what keeps the
     /// self-contained mode (every TU inlines Foundation) merging as before.
     pub owned_classes: std::collections::HashSet<String>,
+    /// The instance-method names whose vtable layout must agree across all
+    /// linked TUs — the segment the `__sig` fingerprint is computed over
+    /// (rule R3 of `doc/stable_slots_plan.md`).
+    ///
+    /// Under R1 the public segment (methods declared in imported
+    /// `@interface`s) occupies the same slot indices everywhere, and R2 keeps
+    /// each private method's dispatch inside its owning TU — so two TUs only
+    /// need to agree on the shared segment, and a TU-local private method must
+    /// NOT make the signatures differ (that is exactly the legal split case 11
+    /// pins). With a `--slots` manifest the shared portion is the manifest
+    /// itself; with neither, every method is shared (the pre-R3 behavior).
+    pub vtable_sig_names: Vec<String>,
 }
 
 #[derive(Debug, Clone)]
@@ -5195,6 +5248,11 @@ method_names: info.method_names,
         }
     }
 
+    // R3: the `__sig` fingerprint covers only the shared segment — see
+    // `vtable_sig_segment` for the segment rules.
+    let vtable_sig_names: Vec<String> =
+        vtable_sig_segment(slots_manifest, public_methods, &global_instance_method_names);
+
     let mut method_meta: HashMap<String, (usize, String)> = HashMap::new();
     for (idx, mname) in global_instance_method_names.iter().enumerate() {
         // Find the first class that has this method to get its signature.
@@ -5270,7 +5328,7 @@ method_names: info.method_names,
     // `no_arc` stays false here: this entry point feeds the header/prototype
     // paths, which never emit the ARC dealloc wrappers (that decision belongs
     // to the pipeline, which sets the flag on its own CgUnit).
-    let mut unit = CgUnit { decls, filename: ast.filename.clone(), c_headers: Vec::new(), selectors, classes, global_instance_method_names, struct_eq_tags: Vec::new(), no_arc: false, strong_metadata: false, owned_classes: std::collections::HashSet::new() };
+    let mut unit = CgUnit { decls, filename: ast.filename.clone(), c_headers: Vec::new(), selectors, classes, global_instance_method_names, struct_eq_tags: Vec::new(), no_arc: false, strong_metadata: false, owned_classes: std::collections::HashSet::new(), vtable_sig_names };
     // The authoritative record of which method function bodies exist: every
     // `CgDeclData::Function` with a body. This covers paths that do not go
     // through `ClassInfo::method_bodies` — notably @property-synthesised
@@ -7075,18 +7133,19 @@ pub fn emit_unit_with_headers(unit: &CgUnit, c_headers: &[String], search_dirs: 
     // All vtable instances use this struct type, making dispatch via member access
     // type-safe regardless of which class the receiver belongs to.
     if any_has_instance {
-        // Cross-TU layout signature: the uniform vtable's member set comes from
-        // THIS translation unit's methods. When two TUs see different method
-        // sets, each compiles a DIFFERENT `struct gald_vtable` layout while the
-        // linker weak-merges the vtable instances into one allocation — dispatch
-        // through the other TU's layout then reads the wrong slot (silent
-        // garbage or segfault). The signature travels INSIDE the vtable struct
-        // (first member) so it is weak-merged together with the instance that
-        // actually won; gald_metaInit() compares the winner's stored signature
-        // against its own TU's compile-time signature and aborts with a clear
-        // message on mismatch instead of dispatching through a foreign layout.
-        let sig: u64 = vtable_layout_sig(&unit.global_instance_method_names);
-        let _ = write!(out, "/* vtable layout signature: {:016x} (methods: {}) */\n", sig, unit.global_instance_method_names.len());
+        // Cross-TU layout signature (R3): the fingerprint covers the SHARED
+        // segment (`vtable_sig_names` — the public methods every linked TU
+        // imports, or the --slots manifest). R1 keeps that segment at identical
+        // slot indices everywhere and R2 keeps TU-local private dispatch inside
+        // the owning TU, so private tails must NOT make the signatures differ —
+        // that is the legal library+client split. Two TUs whose shared segments
+        // disagree would dispatch through different layouts while the linker
+        // weak-merges the vtable instances into one allocation — the signature
+        // travels INSIDE the vtable struct (first member) so it merges with the
+        // instance that actually won, and the per-TU constructor aborts with a
+        // clear message instead of dispatching through a foreign layout.
+        let sig: u64 = vtable_layout_sig(&unit.vtable_sig_names);
+        let _ = write!(out, "/* vtable layout signature: {:016x} (shared methods: {}) */\n", sig, unit.vtable_sig_names.len());
         // The diagnostic needs <stdio.h>, which a translation unit that only
         // includes <gald/runtime.h> may not pull in — and freestanding builds
         // have no stdio at all. When the standard headers are absent we still
@@ -7101,15 +7160,18 @@ pub fn emit_unit_with_headers(unit: &CgUnit, c_headers: &[String], search_dirs: 
             let _ = write!(out, "            \"gald: fatal: vtable layout mismatch across translation units.\\n\"\n");
             let _ = write!(out, "            \"  linked vtable sig %016llx, this translation unit sig %016llx\\n\"\n");
             let _ = write!(out, "            \"\\n\"\n");
-            let _ = write!(out, "            \"Gald builds one uniform 'struct gald_vtable' per translation unit, from the\\n\"\n");
-            let _ = write!(out, "            \"instance methods that TU happens to see. Two TUs that see different method\\n\"\n");
-            let _ = write!(out, "            \"sets compile different layouts, but the linker weak-merges the vtable\\n\"\n");
-            let _ = write!(out, "            \"instances into one allocation - so dispatch reads the wrong slot.\\n\"\n");
+            let _ = write!(out, "            \"Gald builds one uniform 'struct gald_vtable' per translation unit over the\\n\"\n");
+            let _ = write!(out, "            \"public method segment: the selectors declared in the @interfaces the TUs\\n\"\n");
+            let _ = write!(out, "            \"import (or the shared --slots manifest). R1 keeps that segment at\\n\"\n");
+            let _ = write!(out, "            \"identical slot indices in every TU, so two TUs whose public segments\\n\"\n");
+            let _ = write!(out, "            \"disagree dispatch through different layouts, while the linker\\n\"\n");
+            let _ = write!(out, "            \"weak-merges the vtable instances into one allocation.\\n\"\n");
             let _ = write!(out, "            \"\\n\"\n");
-            let _ = write!(out, "            \"Re-running galdc does NOT help: the method sets really do differ. The usual\\n\"\n");
-            let _ = write!(out, "            \"cause is a method defined in an @implementation but absent from the shared\\n\"\n");
-            let _ = write!(out, "            \".gh, so only the TU holding the implementation sees it. Declare every\\n\"\n");
-            let _ = write!(out, "            \"method in the header, or build the affected classes as a single TU.\\n\"\n");
+            let _ = write!(out, "            \"Re-running galdc does NOT help: the shared method sets really do differ.\\n\"\n");
+            let _ = write!(out, "            \"The usual cause is the two TUs importing different or differently\\n\"\n");
+            let _ = write!(out, "            \"versioned headers. Make the shared declarations identical, or build the\\n\"\n");
+            let _ = write!(out, "            \"affected classes as a single TU. TU-local private methods do not\\n\"\n");
+            let _ = write!(out, "            \"participate in this check.\\n\"\n");
             let _ = write!(out, "            \"See tests/multi_tu/ for worked examples of what does and does not link.\\n\"\n");
             let _ = write!(out, "            \"\\nMethods known to this TU:\\n  %s\\n\",\n");
             let _ = write!(out, "            (unsigned long long)winner, (unsigned long long)mine, method_list);\n");
@@ -7249,8 +7311,8 @@ pub fn emit_unit_with_headers(unit: &CgUnit, c_headers: &[String], search_dirs: 
     // Instance vtable instances (per-class typed, with designated initializers)
     section_comment(&mut out, comments, "Section 10 · Vtable & metadata instances");
     // Same signature the struct layout above was built for (kept in sync by
-    // construction — both derive from `global_instance_method_names`).
-    let vtable_sig: u64 = vtable_layout_sig(&unit.global_instance_method_names);
+    // construction — both derive from `vtable_sig_names`, the shared segment).
+    let vtable_sig: u64 = vtable_layout_sig(&unit.vtable_sig_names);
     for cm in &unit.classes {
         let flat_cn = name_flat(&cm.class_name);
         if comments {
@@ -7267,14 +7329,23 @@ pub fn emit_unit_with_headers(unit: &CgUnit, c_headers: &[String], search_dirs: 
             if let Some(pos) = cm.method_names.iter().position(|n| n == mname) {
                 if !cm.is_class_methods[pos] {
                     let owner = cm.method_owners.get(pos).cloned().unwrap_or_else(|| flat_cn.clone());
-                    // Only name the implementation when one was actually
-                    // emitted in this unit. A slot may exist for a method the
-                    // class only declares (e.g. by conforming to a protocol)
-                    // or inherits without overriding; referencing `Owner_method`
-                    // then would be an undefined symbol at link time. Keeping
-                    // the slot (as NULL) is what preserves a stable vtable
-                    // layout across translation units.
-                    if method_is_emitted(&owner, mname) {
+                    // Fill the slot by the method's OWNER:
+                    //  * emitted in this TU → reference the local definition;
+                    //  * inherited (owner is a parent class) → reference
+                    //    `Owner_method` even when this TU only declares it.
+                    //    The definition lives in the TU that owns the parent
+                    //    (rule R2) or in the precompiled library, and a
+                    //    prototype already exists — the parent's method list
+                    //    is only known through declarations, so every entry
+                    //    has one. A NULL here made `[[App alloc] init]`
+                    //    dispatch through slot 0 in a declaration-only client
+                    //    TU (P3 + own class): the owner's real table is in
+                    //    another TU and does not help THIS unit's dispatch.
+                    //  * own protocol stub (owner == this class, no body in
+                    //    this TU) → keep NULL; the slot is preserved for
+                    //    layout stability and the owner TU's instance (strong
+                    //    under R2) wins the merge with the real reference.
+                    if method_is_emitted(&owner, mname) || owner != flat_cn {
                         let (_, ptr_type) = METHOD_METADATA.get().unwrap().get(mname.as_str()).unwrap();
                         let _ = write!(out, "    .{} = ({}){}_{},\n", mname, ptr_type, owner, mname);
                     } else {
@@ -7323,13 +7394,85 @@ pub fn emit_unit_with_headers(unit: &CgUnit, c_headers: &[String], search_dirs: 
         out.push_str("}\n\n");
     }
 
-    // Class metadata variables. These are tentative definitions (a common
-    // symbol), so the per-TU copies merge harmlessly; the *contents* are
-    // written by `gald_metaInit` below, which `-fstrong-metadata` makes strong
-    // so a library's initialization is the one that runs.
+    // ARC dealloc wrappers — computed and emitted BEFORE the class-metadata
+    // section: both `gald_metaInit` and the owned-class static definitions
+    // below reference the wrappers by name, and the wrappers are `static`, so
+    // the definition must precede every reference (no forward declaration).
+    // Skipped entirely under `-fno-gald-arc`: MRC means the programmer owns
+    // the ivars.
+    let (arc_dealloc_names, arc_dealloc_defs) = if unit.no_arc {
+        (std::collections::HashMap::new(), String::new())
+    } else {
+        emit_arc_dealloc_wrappers(&unit.classes)
+    };
+    out.push_str(&arc_dealloc_defs);
+
+    // Class metadata variables. Two lifetimes:
+    //  * default: a tentative definition (a common symbol), so the per-TU
+    //    copies merge harmlessly; the *contents* are written by `gald_metaInit`
+    //    below (strong under `-fstrong-metadata`, so a library's copy runs).
+    //  * classes this TU OWNS (rule R2 — the @implementation is in this TU's
+    //    main file — or `-fstrong-metadata`): one fully initialized STRONG
+    //    definition. `gald_metaInit` is weak-merged — only one TU's copy runs,
+    //    and it only initializes the classes THAT TU can see — so a class that
+    //    exists only in the losing TU would stay zeroed (NULL vtable → segfault
+    //    on its first alloc/init; pinned by
+    //    tests/multi_tu/11_vtable_private_slots: the client's own class `App`
+    //    vanished the moment the shared __sig guard stopped aborting first).
+    //    Static initialization runs at load time in every scenario, needs no
+    //    constructor ordering, works freestanding, and a later gald_metaInit
+    //    over it rewrites identical values (an idempotent no-op). References
+    //    are safe: Section 9 already `extern`-declares every class symbol,
+    //    and the vtable instances live in Section 10.
     section_comment(&mut out, comments, "Section 11 · Class metadata initialization");
     for cm in &unit.classes {
-        let _ = write!(out, "NFClass {};\n", meta_symbol("CLASS_", &name_flat(&cm.class_name)));
+        let flat = name_flat(&cm.class_name);
+        let sym = meta_symbol("CLASS_", &flat);
+        let owned = unit.strong_metadata || unit.owned_classes.contains(&cm.class_name);
+        if !owned {
+            let _ = write!(out, "NFClass {};\n", sym);
+            continue;
+        }
+        let _ = write!(out, "NFClass {} = {{\n", sym);
+        out.push_str(&format!("        .name = \"{}\",\n", cm.class_name));
+        if let Some(ref sup) = cm.super_name {
+            out.push_str(&format!("        .superclass = &{},\n", meta_symbol("CLASS_", &name_flat(sup))));
+        } else {
+            out.push_str("        .superclass = NULL,\n");
+        }
+        out.push_str(&format!("        .instance_size = sizeof(struct {}),\n", flat));
+        if cm.method_names.is_empty() {
+            if let Some(ref sup) = cm.super_name {
+                out.push_str(&format!("        .vtable = &{},\n", meta_symbol("VTABLE_", &name_flat(sup))));
+            } else {
+                out.push_str("        .vtable = NULL,\n");
+            }
+        } else {
+            out.push_str(&format!("        .vtable = &{},\n", meta_symbol("VTABLE_", &flat)));
+        }
+        let has_class_methods = cm.is_class_methods.iter().any(|&c| c);
+        if !has_class_methods && cm.super_name.is_none() {
+            out.push_str("        .class_vtable = NULL,\n");
+        } else {
+            out.push_str(&format!("        .class_vtable = &{}_inst,\n", meta_symbol("META_VTABLE_", &flat)));
+        }
+        out.push_str("        .protocol_count = 0,\n");
+        // .dealloc — same rule as gald_metaInit below: an ARC-owned-ivar
+        // wrapper when one was generated for this class, else the class's own
+        // dealloc, else NULL.
+        if let Some(wrapper) = arc_dealloc_names.get(&flat) {
+            out.push_str(&format!("        .dealloc = (void (*)(NFObject *, SEL)){},\n", wrapper));
+        } else if let Some(pos) = cm.method_names.iter().position(|n| n == "dealloc") {
+            if !cm.is_class_methods[pos] {
+                let owner = cm.method_owners.get(pos).cloned().unwrap_or_else(|| flat.clone());
+                out.push_str(&format!("        .dealloc = (void (*)(NFObject *, SEL)){}_{},\n", owner, "dealloc"));
+            } else {
+                out.push_str("        .dealloc = NULL,\n");
+            }
+        } else {
+            out.push_str("        .dealloc = NULL,\n");
+        }
+        out.push_str("    };\n");
     }
     if !unit.classes.is_empty() { out.push('\n'); }
 
@@ -7338,9 +7481,11 @@ pub fn emit_unit_with_headers(unit: &CgUnit, c_headers: &[String], search_dirs: 
     // every TU's constructor is registered with the loader and runs, so each
     // translation unit validates its own compiled layout. Each vtable
     // instance carries the signature it was initialized for as its first
-    // member; if the copy the linker selected was built from a different
-    // method set, dispatch through this TU's `struct gald_vtable` layout
-    // would read the wrong slot — abort with a clear message instead.
+    // member; under R3 that signature covers the SHARED segment only (public
+    // methods / manifest), so a TU-local private tail never trips it — a
+    // mismatch means the shared layouts disagree, and dispatch through this
+    // TU's `struct gald_vtable` layout would read the wrong slot. Abort with
+    // a clear message instead.
     if any_has_instance && !unit.classes.is_empty() {
         let method_list: Vec<String> = unit.global_instance_method_names.clone();
         let _ = write!(out, "__attribute__((constructor)) static void __gald_vtable_layout_check(void) {{\n");
@@ -7353,15 +7498,8 @@ pub fn emit_unit_with_headers(unit: &CgUnit, c_headers: &[String], search_dirs: 
         let _ = write!(out, "}}\n\n");
     }
 
-    // ARC dealloc wrappers — emitted BEFORE the metadata instances that point
-    // at them, so no forward declaration is needed. Skipped entirely under
-    // `-fno-gald-arc`: MRC means the programmer owns the ivars.
-    let (arc_dealloc_names, arc_dealloc_defs) = if unit.no_arc {
-        (std::collections::HashMap::new(), String::new())
-    } else {
-        emit_arc_dealloc_wrappers(&unit.classes)
-    };
-    out.push_str(&arc_dealloc_defs);
+    // (ARC dealloc wrappers are computed and emitted above, before Section 11:
+    // both the owned-class static definitions and gald_metaInit reference them.)
 
     // gald_metaInit() — always emitted (weak, empty when the unit has no
     // classes): hand-written `main` naturally calls gald_meta_init(), and a
@@ -7778,6 +7916,8 @@ mod vtable_sig_tests {
             no_arc: false,
             strong_metadata: false,
             owned_classes: std::collections::HashSet::new(),
+            // Emitter test: the sig is computed from this list verbatim.
+            vtable_sig_names: vec!["dealloc".into(), "init".into(), "ping".into(), "release".into(), "retain".into()],
         };
         // The emitter needs METHOD_METADATA populated; seed it once for this
         // test binary. `set` is idempotent from the test's point of view.
@@ -7799,6 +7939,65 @@ mod vtable_sig_tests {
             "the layout check must live in a per-TU constructor, not in weak-merged gald_metaInit"
         );
         assert!(c.contains("gald_verify_vtable_sig"), "the verifier must be emitted");
+    }
+
+    /// R3: a TU-local private method must not change the fingerprint. A legal
+    /// library+client split (`tests/multi_tu/11_vtable_private_slots`) compiles
+    /// different method sets over the same shared (public) segment, so both
+    /// sigs must agree — that is what un-trips the runtime `__sig` guard.
+    #[test]
+    fn private_methods_do_not_change_the_signature_segment() {
+        let public: std::collections::HashSet<String> =
+            ["init".to_string(), "show".to_string()].into_iter().collect();
+        // lib TU sees a private helper; the client TU does not.
+        let lib = vtable_sig_segment(None, Some(&public), &[
+            "init".to_string(), "privateHelper".to_string(), "show".to_string(),
+        ]);
+        let client = vtable_sig_segment(None, Some(&public), &[
+            "init".to_string(), "show".to_string(),
+        ]);
+        assert_eq!(lib, client, "the shared segment must be identical despite the private tail");
+        assert_eq!(vtable_layout_sig(&lib), vtable_layout_sig(&client));
+    }
+
+    #[test]
+    fn manifest_mode_fingerprints_the_manifests_public_entries() {
+        let manifest = vec!["alloc".to_string(), "mul".to_string(), "show".to_string()];
+        let public: std::collections::HashSet<String> =
+            ["show".to_string()].into_iter().collect();
+        let seg = vtable_sig_segment(
+            Some(&manifest), Some(&public), &["privateHelper".to_string(), "show".to_string()],
+        );
+        assert_eq!(seg, vec!["show".to_string()],
+            "with a manifest, the manifest's public entries are the shared segment — \
+             the creator's private tail must not leak into the fingerprint");
+    }
+
+    /// The manifest's creator compiles manifest-less (the file does not exist
+    /// until it writes its assignment back), so creator and follower take
+    /// different code paths — they must still fingerprint the same segment.
+    #[test]
+    fn manifest_creator_and_follower_agree_on_the_segment() {
+        let public: std::collections::HashSet<String> =
+            ["add".to_string(), "init".to_string()].into_iter().collect();
+        // Creator: no manifest file yet → its own R1-ordered set (public
+        // alphabetical first, private tail last).
+        let creator = vtable_sig_segment(None, Some(&public), &[
+            "add".to_string(), "init".to_string(), "mul".to_string(),
+        ]);
+        // Follower: reads back the manifest the creator wrote (the creator's
+        // full set, private tail included).
+        let manifest = vec!["add".to_string(), "init".to_string(), "mul".to_string()];
+        let follower = vtable_sig_segment(Some(&manifest), Some(&public), &[]);
+        assert_eq!(creator, follower, "creator (manifest-less) and follower (manifest) \
+            must fingerprint the identical public segment");
+        assert_eq!(vtable_layout_sig(&creator), vtable_layout_sig(&follower));
+    }
+
+    #[test]
+    fn no_public_info_covers_every_method_like_pre_r3() {
+        let all = ["a".to_string(), "b".to_string()];
+        assert_eq!(vtable_sig_segment(None, None, &all), all);
     }
 }
 
@@ -7825,6 +8024,7 @@ mod eh_runtime_include_tests {
             no_arc: false,
             strong_metadata: false,
             owned_classes: std::collections::HashSet::new(),
+            vtable_sig_names: Vec::new(),
         }
     }
 
