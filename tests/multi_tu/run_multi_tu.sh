@@ -83,6 +83,13 @@ run_case() {
         slots_args=(--slots "$out/slots.manifest")
     fi
 
+    # NATIVE marker: drive galdc's own multi-input mode (`galdc main.gm
+    # lib.gm -o app`) instead of transpile-each-then-clang. Keeps the
+    # compiler's multi-TU feature itself under test, not just the link
+    # mechanics it shares with every other case.
+    local native=0
+    [[ -f "$dir/NATIVE" ]] && native=1
+
     # Optional EH backend selection for the acceptance matrix:
     #   GALD_EH_FLAG="-eh checked" ./run_multi_tu.sh
     # Unset (the default) = the shipped default backend, zero behavior change.
@@ -93,22 +100,57 @@ run_case() {
     fi
 
     local tsrc objs=() t
-    for t in "${sources[@]}"; do
-        tsrc="$out/$(basename "${t%.gm}").c"
-        # NOTE: macOS bash 3.2 under `set -u` rejects "${empty_arr[@]}" —
-        # the conditional expansion keeps empty slots_args legal.
-        if ! "$GALDC" -rewrite-gald "$t" -o "$tsrc" -I "$dir" "${INCS[@]}" ${slots_args[@]+"${slots_args[@]}"} ${eh_args[@]+"${eh_args[@]}"} > "$out/$name.transpile.log" 2>&1; then
-            echo "FAIL  $name (transpile)"
-            sed 's/^/      /' "$out/$name.transpile.log" | head -12
+    if [[ $native -eq 1 ]]; then
+        # NATIVE: one galdc command compiles and links every TU — the same
+        # job every other case does with per-TU -rewrite-gald + clang below.
+        # main.gm is the main TU (first input); the rest are extras.
+        local main_tu="" log="$out/$name.transpile.log"
+        local rest=()
+        for t in "${sources[@]}"; do
+            if [[ -z "$main_tu" && "$(basename "$t")" == "main.gm" ]]; then
+                main_tu="$t"
+            else
+                rest+=("$t")
+            fi
+        done
+        if [[ -z "$main_tu" ]]; then
+            main_tu="${sources[0]}"
+            rest=("${sources[@]:1}")
+        fi
+        if ! "$GALDC" "$main_tu" ${rest[@]+"${rest[@]}"} -I "$dir" "${INCS[@]}" \
+                ${slots_args[@]+"${slots_args[@]}"} ${eh_args[@]+"${eh_args[@]}"} \
+                -o "$out/$name.bin" > "$log" 2>&1; then
+            if [[ -f "$dir/EXPECT_FAIL" ]]; then
+                echo "PASS  $name (failed as expected at compile/link)"
+                PASS=$((PASS+1)); return
+            fi
+            echo "FAIL  $name (native multi-input compile)"
+            sed 's/^/      /' "$log" | head -12
             FAIL=$((FAIL+1)); FAILED_CASES+=("$name"); return
         fi
-        objs+=("$tsrc")
-    done
+    else
+        # 1. transpile every TU separately
+        # A case may pin a stable cross-TU vtable layout: a SLOTS_MANIFEST marker
+        # file in the case dir makes every TU compile with --slots <path>. The
+        # manifest lives in the WORK dir (galdc writes the assignment back after
+        # each compile; the case dir must stay clean). First TU creates it; the
+        # append-only contract means later TUs keep its slot order.
+        for t in "${sources[@]}"; do
+            tsrc="$out/$(basename "${t%.gm}").c"
+            # NOTE: macOS bash 3.2 under `set -u` rejects "${empty_arr[@]}" —
+            # the conditional expansion keeps empty slots_args legal.
+            if ! "$GALDC" -rewrite-gald "$t" -o "$tsrc" -I "$dir" "${INCS[@]}" ${slots_args[@]+"${slots_args[@]}"} ${eh_args[@]+"${eh_args[@]}"} > "$out/$name.transpile.log" 2>&1; then
+                echo "FAIL  $name (transpile)"
+                sed 's/^/      /' "$out/$name.transpile.log" | head -12
+                FAIL=$((FAIL+1)); FAILED_CASES+=("$name"); return
+            fi
+            objs+=("$tsrc")
+        done
 
-    # 2. link them into one program together with the runtime
-    if ! clang -std=c99 -fblocks -w "${INCS[@]}" \
-            "${objs[@]}" "$GALD_INC/gald/runtime.c" \
-            -o "$out/$name.bin" > "$out/$name.link.log" 2>&1; then
+        # 2. link them into one program together with the runtime
+        if ! clang -std=c99 -fblocks -w "${INCS[@]}" \
+                "${objs[@]}" "$GALD_INC/gald/runtime.c" \
+                -o "$out/$name.bin" > "$out/$name.link.log" 2>&1; then
         # A negative case may legitimately fail at LINK time. Under rule R2 a
         # class's metadata is emitted strong by the TU that owns its
         # @implementation, so two TUs implementing the same class are a
@@ -134,6 +176,7 @@ run_case() {
         echo "FAIL  $name (link)"
         sed 's/^/      /' "$out/$name.link.log" | head -12
         FAIL=$((FAIL+1)); FAILED_CASES+=("$name"); return
+    fi
     fi
 
     # 3. run it. A mismatch in the vtable layout signature aborts here with a

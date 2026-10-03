@@ -135,7 +135,10 @@ fn clap_command() -> ClapCommand {
         .arg(Arg::new("gen-completions").long("gen-completions").value_name("SHELL")
             .help("generate shell completion script (bash|zsh|fish|powershell|elvish)"))
         .arg(Arg::new("input").value_name("INPUT")
-            .help("input .gm file"))
+            .num_args(1..)
+            .help("input .gm file(s): first = main TU; each extra .gm is an \
+                   additional TU compiled and linked in (compile mode); .o/.a \
+                   are linked as-is"))
         .subcommand(ClapCommand::new("run")
             .about("compile + run, then delete binary")
             .disable_help_flag(true)
@@ -219,7 +222,7 @@ fn find_libgald(custom_libs: &[String]) -> Option<String> {
     None
 }
 
-fn compile_to_binary(cc: &[String], c_code: &str, bin_path: &str, include_dirs: &[String], lib_dirs: &[String], libs: &[String], asm_files: &[String], frameworks: &[String], arch: Option<&str>, verbose: bool, no_libc: bool, nostdinc: bool, shared: bool) {
+fn compile_to_binary(cc: &[String], c_code: &str, bin_path: &str, include_dirs: &[String], lib_dirs: &[String], libs: &[String], asm_files: &[String], extra_c_files: &[String], extra_objects: &[String], frameworks: &[String], arch: Option<&str>, verbose: bool, no_libc: bool, nostdinc: bool, shared: bool) {
     // Compiler may be multi-word (e.g. `zig cc`): program + leading args.
     let program = cc.first().map(|s| s.as_str()).unwrap_or("clang");
     let cc_extra: Vec<String> = cc.get(1..).unwrap_or(&[]).to_vec();
@@ -276,6 +279,16 @@ fn compile_to_binary(cc: &[String], c_code: &str, bin_path: &str, include_dirs: 
         clang_args.push("-arch".to_string());
         clang_args.push(a.to_string());
     }
+    // Additional translation units (multi-input mode): plain file inputs on
+    // the driver line — the C compiler compiles each TU and links everything
+    // in the same invocation (same shape as the bundled runtime.c below).
+    for c in extra_c_files {
+        clang_args.push(c.clone());
+    }
+    // Precompiled objects/archives (positional extra inputs): linked as-is.
+    for obj in extra_objects {
+        clang_args.push(obj.clone());
+    }
     // Real assembly (.s) / object (.o) files: assembled/linked alongside.
     for asm_file in asm_files {
         clang_args.push(asm_file.clone());
@@ -319,8 +332,12 @@ fn compile_to_binary(cc: &[String], c_code: &str, bin_path: &str, include_dirs: 
     }
     // Platform link conveniences (host mode only). Detected from the GENERATED
     // code, so the portable (gcc) backend — which expands blocks away — is
-    // automatically exempt.
-    if !no_libc && c_code.contains("(^") {
+    // automatically exempt. Extra TUs count too: a block literal in any TU
+    // needs the blocks runtime at link time.
+    let extras_have_blocks = extra_c_files.iter()
+        .filter_map(|p| fs::read_to_string(p).ok())
+        .any(|s| s.contains("(^"));
+    if !no_libc && (c_code.contains("(^") || extras_have_blocks) {
         // Blocks: Apple's clang enables them by default, upstream clang (Linux)
         // does not — and needs the separate BlocksRuntime at link time
         // (apt install libblocksruntime-dev).
@@ -591,14 +608,17 @@ fn main() {
     }
 
     if args.len() < 2 || args[1] == "-h" || args[1] == "--help" {
-        println!("Usage: galdc [command] [options] <input.gm>");
+        println!("Usage: galdc [command] [options] <input.gm> [more.gm|file.o|lib.a ...]");
         println!();
         println!("Commands:");
         println!("  run                 Compile, run, then delete binary");
         println!();
         println!("Modes (default: compile to binary):");
-        println!("  -rewrite-gald       Transpile to C only (no link)");
+        println!("  -rewrite-gald       Transpile to C only (no link; single input)");
         println!();
+        println!("Multi-TU (compile mode): extra positional .gm files become additional");
+        println!("translation units compiled and linked into the same binary; .o/.a files");
+        println!("are linked as-is. Example: galdc main.gm lib.gm -I include -o app");
         println!("Transpilation Options:");
         println!("  -o <path>                            Output path (binary or .c)");
         println!("  -I <dir>                             Add include directory");
@@ -664,6 +684,11 @@ fn main() {
     let mut lib_dirs = Vec::new();
     let mut libs = Vec::new(); // -l <name> → clang -l<name>
     let mut asm_files = Vec::new();
+    // Multi-TU mode: positional .gm inputs after the first. Each is transpiled
+    // in its own galdc pass and linked into the same binary.
+    let mut extra_inputs: Vec<String> = Vec::new();
+    // Precompiled objects/archives passed as extra positionals: linked as-is.
+    let mut extra_objects: Vec<String> = Vec::new();
     let mut frameworks = Vec::new();
     let mut no_arc = false;
     let mut no_checker = false;  // ARC mode by default
@@ -898,6 +923,22 @@ fn main() {
         } else if input.is_none() {
             input = Some(args[i].clone());
             i += 1;
+        } else if mode == "compile"
+            && (args[i].ends_with(".gm") || args[i].ends_with(".o") || args[i].ends_with(".a"))
+        {
+            // Additional input (multi-input mode). .gm → an extra translation
+            // unit (transpiled in its own galdc pass); .o/.a → linked as-is.
+            // Compile mode only: in run mode positionals are program arguments,
+            // and -rewrite-gald emits one .c per invocation.
+            if args[i].ends_with(".gm") {
+                extra_inputs.push(args[i].clone());
+            } else {
+                extra_objects.push(args[i].clone());
+            }
+            i += 1;
+        } else if mode == "rewrite" && args[i].ends_with(".gm") {
+            eprintln!("error: multiple inputs are supported in compile mode only — run one -rewrite-gald per file");
+            std::process::exit(1);
         } else if mode == "run" {
             program_args.push(args[i].clone());
             i += 1;
@@ -911,6 +952,11 @@ fn main() {
         eprintln!("No input file specified");
         std::process::exit(1);
     });
+
+    if trace_refcount && !extra_inputs.is_empty() {
+        eprintln!("error: -trace-refcount traces one translation unit; drop the extra inputs");
+        std::process::exit(1);
+    }
 
     let source = match fs::read_to_string(&input_path) {
         Ok(s) => s,
@@ -942,7 +988,7 @@ fn main() {
     pipeline.trace_max_iters = trace_max_iters;
     pipeline.trace_color = !trace_no_color;
     pipeline.eh_checked = eh_checked;
-    pipeline.slots_manifest = slots_manifest;
+    pipeline.slots_manifest = slots_manifest.clone();
     pipeline.strong_metadata = strong_metadata;
     if let Some(ref b) = backend {
         match attrs::Backend::parse(b) {
@@ -979,6 +1025,75 @@ fn main() {
         return;
     }
 
+    // Multi-TU mode: transpile each extra .gm in its own galdc subprocess.
+    // One process per TU is required: codegen's method-metadata tables are
+    // process-global (OnceLock), so a second in-process transpile is not
+    // possible. Transpile-affecting flags are forwarded; link-only flags
+    // (-L/-l/-asm/-framework) are not needed by the transpile step.
+    // -fstrong-metadata is deliberately NOT forwarded: it upgrades every
+    // metadata symbol in a TU to strong, so two TUs would both emit strong
+    // definitions for shared (non-owned) classes and the link would fail
+    // with duplicate symbols. In multi-input mode the first TU's strong
+    // symbols already win over the extras' weak ones.
+    let mut extra_c_files: Vec<String> = Vec::new();
+    if !extra_inputs.is_empty() {
+        let exe = std::env::current_exe().unwrap_or_else(|e| {
+            eprintln!("error: cannot locate galdc for multi-TU transpile: {}", e);
+            std::process::exit(1);
+        });
+        if strong_metadata {
+            println!("note: -fstrong-metadata applies to the first TU only (extras stay weak so shared metadata coalesces)");
+        }
+        for (n, tu) in extra_inputs.iter().enumerate() {
+            let stem = Path::new(tu).file_stem().and_then(|s| s.to_str()).unwrap_or("tu");
+            let mut tmp = std::env::temp_dir();
+            tmp.push(format!("{}-{}-galdc-{}.c", stem, std::process::id(), n));
+            let mut cmd: Vec<String> = vec![
+                exe.to_string_lossy().to_string(),
+                "-rewrite-gald".into(), tu.clone(),
+                "-o".into(), tmp.to_string_lossy().to_string(),
+            ];
+            for d in &include_dirs {
+                cmd.push("-I".into());
+                cmd.push(d.clone());
+            }
+            if no_arc { cmd.push("-fno-gald-arc".into()); }
+            if no_checker { cmd.push("-fno-checker".into()); }
+            if werror { cmd.push("-Werror".into()); }
+            cmd.push("-eh".into());
+            cmd.push(if eh_checked { "checked".into() } else { "legacy".into() });
+            if let Some(slots) = &slots_manifest {
+                cmd.push("--slots".into());
+                cmd.push(slots.clone());
+            }
+            if let Some(b) = &backend {
+                cmd.push("-backend".into());
+                cmd.push(b.clone());
+            }
+            if let Some(a) = &arch {
+                cmd.push("-arch".into());
+                cmd.push(a.clone());
+            }
+            if no_libc { cmd.push("-ffreestanding".into()); }
+            if nostdinc { cmd.push("-nostdinc".into()); }
+            if no_comments { cmd.push("-no-comments".into()); }
+            if verbose { cmd.push("-v".into()); }
+            if verbose {
+                println!("[galdc] transpiling extra TU: {}", tu);
+            }
+            let status = Command::new(&cmd[0]).args(&cmd[1..]).status()
+                .unwrap_or_else(|e| {
+                    eprintln!("error: failed to spawn galdc for {}: {}", tu, e);
+                    std::process::exit(1);
+                });
+            if !status.success() {
+                eprintln!("error: transpiling extra TU {} failed", tu);
+                std::process::exit(1);
+            }
+            extra_c_files.push(tmp.to_string_lossy().to_string());
+        }
+    }
+
     match mode {
         "rewrite" => {
             // -rewrite-gald: output C code to file
@@ -1013,7 +1128,11 @@ fn main() {
                 p.to_string_lossy().to_string()
             });
 
-            compile_to_binary(&cc, &c_code, &bin_path, &include_dirs, &lib_dirs, &libs, &asm_files, &frameworks, arch.as_deref(), verbose, no_libc, nostdinc, false);
+            compile_to_binary(&cc, &c_code, &bin_path, &include_dirs, &lib_dirs, &libs, &asm_files, &extra_c_files, &extra_objects, &frameworks, arch.as_deref(), verbose, no_libc, nostdinc, false);
+
+            for t in &extra_c_files {
+                let _ = fs::remove_file(t);
+            }
 
             let run_status = Command::new(&bin_path)
                 .args(&program_args)
@@ -1037,7 +1156,11 @@ fn main() {
                 || bin_path.ends_with(".so")
                 || bin_path.ends_with(".dll");
 
-            compile_to_binary(&cc, &c_code, &bin_path, &include_dirs, &lib_dirs, &libs, &asm_files, &frameworks, arch.as_deref(), verbose, no_libc, nostdinc, shared);
+            compile_to_binary(&cc, &c_code, &bin_path, &include_dirs, &lib_dirs, &libs, &asm_files, &extra_c_files, &extra_objects, &frameworks, arch.as_deref(), verbose, no_libc, nostdinc, shared);
+
+            for t in &extra_c_files {
+                let _ = fs::remove_file(t);
+            }
         }
     }
 }

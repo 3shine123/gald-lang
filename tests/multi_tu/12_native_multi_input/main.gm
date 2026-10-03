@@ -1,0 +1,13 @@
+#import "model.gh"
+#import <Foundation/Foundation.gh>
+#include <stdio.h>
+
+/* client TU: sees only the .gh, never lib.gm */
+int main() {
+    Greeter *g = [[Greeter alloc] init];
+    printf("%s\n", [g greeting:"world"]);
+    printf("count=%d\n", [g count]);
+    printf("helper=%d\n", GreeterHelper(41));
+    gald_release(g);
+    return 0;
+}
