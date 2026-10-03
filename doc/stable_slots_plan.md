@@ -240,10 +240,12 @@ sig：库 TU == 客户 TU（0xbe99f65a63e20021）
 按 R2 判据都算弱符号。要让库自动变强，需要「按 `.gm` 分别编译」的构建形态（每个 `.gm`
 作为 main 文件 → 各自拥有自己的类），但该形态目前**不受支持**：
 
-1. **生成 C 自我冲突**：直接编译 `include/Foundation/NFObject.gm` 时，`struct gald_root` /
-   `struct NFObject` 在 Section 4（带 `#ifndef` 的兜底定义）与 Section 5（类布局）各出现一次，
-   Section 5 那份无保护，还与 `gald/runtime.h` 冲突（`c_headers` 派生的 `header_structs`
-   没能把它跳过）。
+1. ~~**生成 C 自我冲突**~~ ✅ **已修复（2026-10-03，同日第二轮）**：直接编译
+   `include/Foundation/NFObject.gm` 时 `struct gald_root` / `struct NFObject` 曾在 Section 4
+   （带 `#ifndef` 的兜底定义）与类布局节各出现一次（后者无保护）。修法：Section 4 发射兜底体后
+   把 tag 登记进 `header_structs`，类布局节既有的 `header_structs.contains` 跳过自然生效——
+   同一生成文件每个根结构体恰好定义一次；runtime.h 在场时其定义胜出、跳过同样正确（无条件登记
+   两态皆安全）。守护：`tests/strong_metadata` check 7。
 2. **`gald_metaInit` 是单个弱符号**：只有一个 TU 的副本会运行，而它只初始化「该 TU 见得到的
    类」。按 `.gm` 分 TU 后每个 TU 只见到自己 + 依赖，其它类会漏初始化 —— 需要把类初始化改为
    **按类**（每类一个构造函数或每类一个 init 函数，全部运行）。
@@ -268,9 +270,10 @@ sig：库 TU == 客户 TU（0xbe99f65a63e20021）
   钉进回归。
 - 注意：galdc 无 `-c` 模式（`-o x.o` 产出的是可执行文件），独立 TU 的转译命令是
   `-rewrite-gald`；评审设想的 `galdc -c main.gm → 自动 strong` 对应的现实命令即上表第二行。
-- 「仍未做」清单收窄为**仅库侧**：按 `.gm` 分 TU 的两个阻塞点（生成 C 自我冲突、
-  `gald_metaInit` 弱合并漏初始化）不变——后者对 R2 归属类已被 §10 的静态初始化强
-  `NFClass` 大幅缓解（归属类的元数据加载期即完成，不再依赖 metaInit 跑到）。
+- ~~「仍未做」清单收窄为仅库侧~~ **同日再收窄**：阻塞点 1「生成 C 自我冲突」已修复（见 §9
+  「仍未做」第 1 条），按 `.gm` 分 TU 只剩 `gald_metaInit` 弱合并漏初始化——且对 R2 归属类
+  已被 §10 的静态初始化强 `NFClass` 大幅缓解（归属类的元数据加载期即完成，不再依赖 metaInit
+  跑到）。Foundation 库构建仍需旗标：`#import` 不授 ownership 是语义事实，不是缺陷。
 
 ## 10. R3 落地：`__sig` 只覆盖公共段（2026-10-03）
 
