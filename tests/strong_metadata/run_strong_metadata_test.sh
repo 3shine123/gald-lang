@@ -13,6 +13,16 @@
 #   3. LOUD FAILURE — if a client is *also* compiled with -fstrong-metadata the
 #      link must report a duplicate symbol, instead of silently picking one
 #      table at random.
+#   4. R2 OWNERSHIP — two TUs that both `@implementation` the same class are
+#      both owners and must be a duplicate symbol (no flag involved).
+#   5. AUTO-STRONG — the flag is NOT required for the standalone-TU workflow:
+#      a main file (.gh or .gm) holding an `@implementation` emits STRONG
+#      metadata for its owned class with no flag at all (ownership is derived
+#      from the main file). Guards the rule from regressing into
+#      "must remember -fstrong-metadata by hand".
+#   6. CLIENT STAYS WEAK — a declaration-only `.gh` (no @implementation
+#      reaching the TU) must NOT go strong: its stubs are the client side of
+#      rule R2 and must lose to the owner's table.
 #
 # Out-of-band (like tests/multi_tu): not part of test_all.py.
 set -uo pipefail
@@ -124,6 +134,97 @@ if "$galdc" -rewrite-gald "$work/lib_a.gm" -I "$work" -I include -o "$work/a.c" 
 else
     bad "4. could not transpile the two-owner case"
     sed 's/^/      /' "$work/a.log" "$work/b.log" | tail -12
+fi
+
+# ── 5/6 helpers: read symbol strength straight from the object file ──
+nm_is_weak() {
+    local obj="$1" sym="$2"
+    case "$(uname -s)" in
+        Darwin)
+            nm -m "$obj" 2>/dev/null | grep -F -- " $sym" | grep -q "weak external"
+            ;;
+        *)
+            nm "$obj" 2>/dev/null | grep -F -- " $sym" \
+                | grep -qE '^[0-9a-fA-F]+[[:space:]]+[WwVv][[:space:]]'
+            ;;
+    esac
+}
+sym_present() { nm "$1" 2>/dev/null | grep -qF -- " $2"; }
+check_strong() {
+    local obj="$1" sym="$2" label="$3"
+    if ! sym_present "$obj" "$sym"; then
+        bad "$label ('$sym' absent)"
+    elif nm_is_weak "$obj" "$sym"; then
+        bad "$label ('$sym' is weak — automatic strong metadata regressed)"
+    else
+        ok "$label"
+    fi
+}
+check_weak() {
+    local obj="$1" sym="$2" label="$3"
+    if ! sym_present "$obj" "$sym"; then
+        bad "$label ('$sym' absent)"
+    elif nm_is_weak "$obj" "$sym"; then
+        ok "$label"
+    else
+        bad "$label ('$sym' is strong — a declaration-only TU must stay weak)"
+    fi
+}
+
+# ── 5. AUTO-STRONG: a main file holding @implementation needs no flag ──
+# Both spellings of a standalone TU — a self-contained .gh and a .gm — must
+# emit STRONG metadata for the class they own, with no -fstrong-metadata.
+cat > "$work/own_iface.gh" <<'EOF'
+@interface OwnGm : NFObject
+- (int)ping;
+@end
+EOF
+cat > "$work/own.gh" <<'EOF'
+#import <Foundation/Foundation.gh>
+@interface OwnGh : NFObject
+- (int)ping;
+@end
+@implementation OwnGh : NFObject
+- (int)ping { return 42; }
+@end
+EOF
+cat > "$work/own.gm" <<'EOF'
+#import <Foundation/Foundation.gh>
+#import "own_iface.gh"
+@implementation OwnGm : NFObject
+- (int)ping { return 7; }
+@end
+EOF
+gh_ok=1 gm_ok=1
+"$galdc" -rewrite-gald "$work/own.gh" -I include -o "$work/owngh.c" > "$work/owngh.log" 2>&1 \
+    && clang -c -w "$work/owngh.c" -o "$work/owngh.o" -I include || gh_ok=0
+"$galdc" -rewrite-gald "$work/own.gm" -I "$work" -I include -o "$work/owngm.c" > "$work/owngm.log" 2>&1 \
+    && clang -c -w "$work/owngm.c" -o "$work/owngm.o" -I include || gm_ok=0
+if [[ $gh_ok -eq 1 && $gm_ok -eq 1 ]]; then
+    check_strong "$work/owngh.o" "_GALD_VTABLE_\$_OwnGh" "5a. standalone .gh with @implementation auto-strong (no flag)"
+    check_strong "$work/owngh.o" "_GALD_META_VTABLE_\$_OwnGh_inst" "5b. ... and its meta vtable too"
+    check_strong "$work/owngm.o" "_GALD_VTABLE_\$_OwnGm" "5c. standalone .gm with @implementation auto-strong (no flag)"
+    check_strong "$work/owngm.o" "_GALD_META_VTABLE_\$_OwnGm_inst" "5d. ... and its meta vtable too"
+else
+    bad "5. could not transpile/compile the standalone-TU probes"
+    sed 's/^/      /' "$work/owngh.log" "$work/owngm.log" | tail -12
+fi
+
+# ── 6. CLIENT STAYS WEAK: a declaration-only .gh must not go strong ──
+# Its NULL-filled stubs are the client side of rule R2; they must lose to the
+# owner's table, so they have to stay weak even without any flag.
+cat > "$work/client_decl.gh" <<'EOF'
+#import <Foundation/Foundation.gh>
+@interface ClientGadget : NFObject
+- (int)ping;
+@end
+EOF
+if "$galdc" -rewrite-gald "$work/client_decl.gh" -I include -o "$work/client_decl.c" > "$work/cd.log" 2>&1 \
+        && clang -c -w "$work/client_decl.c" -o "$work/client_decl.o" -I include; then
+    check_weak "$work/client_decl.o" "_GALD_VTABLE_\$_ClientGadget" "6. declaration-only .gh stub stays weak (no flag)"
+else
+    bad "6. could not transpile/compile the declaration-only probe"
+    sed 's/^/      /' "$work/cd.log" | tail -12
 fi
 
 echo "----"
