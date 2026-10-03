@@ -85,8 +85,8 @@ lib 自己的私有方法调用就会越界。
 | **A** | pipeline 收集「公共方法集」（来自导入文件的方法声明，用 `source_map` 判定），传入 codegen | 单元可读：打印集合内容 |
 | **B** | R1：`None` 分支改为「先字母序 sort，再稳定地把私有段排到尾部」 | 对比两个 TU 的 `struct gald_vtable`：公共段 offset 应一致 |
 | **C** | R2：元数据 / vtable 实例只由实现该类的 TU 生成 | `11_vtable_private_slots` 应能跑通（sig 校验此时可能仍需 D）—— ✅ 已落地（见 §9） |
-| **D** | R3：sig 校验改为公共段 | 11 用例输出 `run=42`；09 用例仍 EXPECT_FAIL |
-| **E** | 删除 11 用例的 EXPECT_FAIL 标记，跑全套回归 | 全部门槛绿 |
+| **D** | R3：sig 校验改为公共段 | ✅ 已实现并验证（2026-10-03，见 §10） |
+| **E** | 删除 11 用例的 EXPECT_FAIL 标记，跑全套回归 | ✅ 标记已删、`expected.txt`（`run=42`）比对通过；multi_tu 11/11 |
 
 ## 6. 风险与回退
 
@@ -250,3 +250,54 @@ sig：库 TU == 客户 TU（0xbe99f65a63e20021）
 
 因此 `-fstrong-metadata` 目前是库侧的**必要开关**，也是「我在提供这些类」这一意图的唯一显式
 表达。要删掉它，得先解决上面两点。
+
+## 10. R3 落地：`__sig` 只覆盖公共段（2026-10-03）
+
+> 状态：**已实现并全量验证通过**（2026-10-03）。
+> 验证过程中暴露并修掉了三个连带缺口（见本节末尾"验证链连带修复"）；
+> `tests/multi_tu/11_vtable_private_slots/` 的 `EXPECT_FAIL` / `EXPECT_FAIL_MATCH`
+> 已删除，用例转为 `expected.txt` 正向比对。
+
+### 实现内容（`crates/codegen/src/codegen.rs`）
+
+| 触点 | 内容 |
+|---|---|
+| `CgUnit.vtable_sig_names: Vec<String>` | 新字段：指纹覆盖的「共享段」方法名（两处测试构造点同步） |
+| `vtable_sig_segment()` | 纯函数三态段选择：有公共段信息 → **公共段**（manifest 模式下取 manifest ∩ 公共——creator 无 manifest 文件可读、按自己的公共段算，follower 读 manifest 过滤同一公共集，两者才相等）；无公共段信息 → 全量（pre-R3 行为） |
+| 两处 `vtable_layout_sig(...)` 调用点 | struct 定义处与实例发射处的 sig 计算均改读 `vtable_sig_names` |
+| 失败诊断文案 | 改为解释「公共段不一致」：TU-local 私有方法不参与校验 |
+| 单测 +3 | 私有尾部不改段 / manifest 即段 / 无公共信息=全量（`vtable_sig_tests`） |
+| `tests/multi_tu/11_vtable_private_slots/expected.txt` | `run=42`（验收输出，摘牌后生效） |
+
+### 为什么三条规则合起来是安全的
+
+| 保证 | 来源 |
+|---|---|
+| 公共方法槽位所有 TU 一致 | R1（公共段字母序在前） |
+| 私有方法派发只发生在归属 TU | R2（归属 TU 强符号实例；09 双归属在链接期 duplicate symbol） |
+| 两 TU 指纹相等 ⇔ 公共段一致 | R3（sig 只吃公共段） |
+
+于是 case 11（lib 多一个私有 `privateHelper`，main 多一个自己的 `App`）在 R3 下：
+两侧公共段相同 → sig 相同 → 不中止；`App` 的派发走 main 自己的强符号实例，
+`privateHelper` 只在 lib 的实例里。09（两 TU 都实现 Widget）行为不变：
+R2 在链接期拒绝，比 sig 更早。
+
+### 验证结果（2026-10-03 全绿）
+
+```text
+cargo build                 0 error / 0 warning
+cargo test --workspace      153/153（vtable_sig_tests 7 例全过）
+run_multi_tu.sh             11/11（10、11 转 PASS；09 仍在链接期 duplicate symbol）
+run_strong_metadata_test.sh 4/4
+run_arc_intern_test.sh      PASS
+test_all.sh -j4             347/355 passed, 0 failed, SUSPECT=0
+P3+自有类端到端             rc=0（len=5 s=hello run=42；App 为客户端自有实现）
+```
+
+### 验证链连带修复（三个真缺口，R3 摘牌后才暴露）
+
+| # | 缺口 | 修法 |
+|---|------|------|
+| 1 | **manifest 模式 creator/follower 指纹不一致**（case 10）：creator 先编译时 manifest 文件尚不存在 → 按"自己名字 ∩ 公共段"算；follower 读到 manifest → 按"manifest 全量"算（含 creator 的私有尾部）→ 误中止 | `vtable_sig_segment` 的 manifest 分支同样过公共段过滤——creator 与 follower 对同一公共集取交集，天然相等 |
+| 2 | **败方 TU 独有类从未初始化**（case 11）：`gald_metaInit` 弱合并只跑一个 TU 的副本，且只初始化该 TU 见得到的类 → 只存在于 main 的 `App` 的 `NFClass` 恒为零值 → `[[App alloc] init]` 解引用 NULL vtable（§9 阻塞点 2 的运行期形态） | 归属类（R2 集合或 `-fstrong-metadata`）发**完整初始化的强 `NFClass` 定义**（静态初始化，加载期完成，与构造函数顺序无关，裸机可用）；`gald_metaInit` 本体零改动（自包含模式行为不变）；ARC dealloc wrapper 发射点相应上移到 Section 11 之前（static 定义须先于引用） |
+| 3 | **仅声明 TU 的继承槽位为 NULL**（P3+自有类）：实例 vtable 对"本 TU 未发射的方法"一律填 NULL → 客户端自有类继承自库类的 `init/retain/...` 槽位全空 → 首次派发 segfault（自包含模式因 Foundation 实现总是内联而不暴露） | 槽位按 owner 分派：本 TU 已发射→引用；**继承槽位（owner 是父类）→ 一律引用 `Owner_method`**（定义在归属 TU 或预编译库，原型已存在）；仅本类协议存根（owner=本类且无实现）保持 NULL——槽位保留语义不变 |
