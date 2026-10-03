@@ -9,3 +9,4 @@
 - gald checker 的 method_params 按 selector 全局键控是 last-writer-wins——两个类声明同名 selector 不同形参（如 tt.gm 的 objectForKey:(const char*) vs NFDictionary 的 (K)）会互相覆盖产生误报；已加 method_param_decls 全声明表，字符串类检查走"全声明共识门"（全一致才报，method_kinds 同款纪律）。
 - gald @synchronized 已是真互斥（runtime.c C11 atomic_flag 256 桶自旋 + cleanup(gald_syncAutoCleanup) 解锁，return/break 均释放；@throw 越块 longjmp 绕过 cleanup → checker 对锁块内 @throw 发 warning；裸机同签名 no-op）；__weak 赋值由 rewrite_weak_assigns 重注册（unregister→assign→register）——zeroing 验证必须用 owned 源（alloc+init），便利构造器 autoreleased 不销毁、会假阴性。
 - gald preprocessor 过滤含 gald 语法（@"..."/消息发送/block）的 #define 不进 C 透传（判据 cpp::body_has_gald_syntax）——#define X @"..." 是非法 C；gald 宏表照常注册，galdc 自己展开调用点，C 轨丢行零损失。
+- gald-lang Foundation 按 .gm 分 TU 的元数据方案已定案 A（owner 静态初始化=铺满 §10 既有机制）；B（registration fragment）存档、复活条件=动态加载/运行时算值/反射；探针 9/9 个 Foundation .gm 已可独立编译；定案+路线图在 doc/stable_slots_plan.md §11
