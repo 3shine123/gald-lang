@@ -7,7 +7,7 @@ the per-class ownership rule R2 (§9).
 ./tests/strong_metadata/run_strong_metadata_test.sh
 ```
 
-Six checks, because "it printed the right thing" does not by itself prove the
+Seven checks, because "it printed the right thing" does not by itself prove the
 metadata linkage is correct:
 
 | # | What | Why it matters |
@@ -18,11 +18,13 @@ metadata linkage is correct:
 | 4 | two TUs that both `@implementation` the same class fail with `duplicate symbol` (**no flag involved**) | rule R2: ownership is derived from the main file, so a second owner must never merge silently |
 | 5 | a standalone TU — a self-contained `.gh` **or** a `.gm` holding an `@implementation` — emits **strong** metadata for its owned class **with no flag** (vtable + meta vtable, `nm`-verified) | the flag must never be something to remember by hand: R2 ownership is derived from the main file, so the standalone-TU workflow is automatic |
 | 6 | a declaration-only `.gh` stays **weak** with no flag | its NULL-filled stubs are the client side of R2 and must lose to the owner's table |
+| 7 | a main file that owns the root classes (`NFObject.gm` compiled standalone) compiles clean — `gald_root`/`NFObject` defined **exactly once** in the generated file | stable-slots §9 blocker 1: Section 4's guarded fallbacks used to be re-emitted unguarded by the class-layout section — a hard C redefinition error |
 
 Check 3 covers the explicit `-fstrong-metadata` switch; checks 4–6 cover the
 automatic side of the same rule: R2 makes a duplicate implementation loud (4)
 and the same ownership derivation makes standalone TUs automatically strong (5)
-while declaration-only clients stay weak (6). The flag is therefore a
+while declaration-only clients stay weak (6). Check 7 pins the §9 struct dedup.
+The flag is therefore a
 **library-side** switch only — needed because `Foundation.gh` receives its
 implementations through `#import`, which does not confer ownership.
 

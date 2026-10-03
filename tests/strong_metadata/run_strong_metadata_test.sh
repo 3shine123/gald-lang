@@ -227,6 +227,29 @@ else
     sed 's/^/      /' "$work/cd.log" | tail -12
 fi
 
+# ── 7. §9 STRUCT DEDUP: a main file owning the root classes compiles clean ──
+# Section 4 emits guarded fallbacks for gald_root/NFObject; the class-layout
+# section used to re-emit the same bodies unguarded in the same file — a hard
+# C redefinition error. The dedup records Section 4's bodies, so each root
+# struct is defined exactly once and the Foundation root TU compiles alone.
+dedup_ok=1
+if "$galdc" -rewrite-gald include/Foundation/NFObject.gm -I include -o "$work/nfo.c" > "$work/nfo.log" 2>&1; then
+    root_defs=$(grep -c 'struct gald_root {' "$work/nfo.c")
+    obj_defs=$(grep -c 'struct NFObject {' "$work/nfo.c")
+    if [[ "$root_defs" == "1" && "$obj_defs" == "1" ]] \
+            && clang -c -w "$work/nfo.c" -o "$work/nfo.o" -I include 2>>"$work/nfo.log"; then
+        ok "7. root-struct dedup: NFObject.gm as a main file compiles clean (one definition each)"
+    else
+        dedup_ok=0
+    fi
+else
+    dedup_ok=0
+fi
+if [[ $dedup_ok -eq 0 ]]; then
+    bad "7. root-struct dedup regressed (same-file double definition or compile failure)"
+    sed 's/^/      /' "$work/nfo.log" | tail -12
+fi
+
 echo "----"
 echo "strong-metadata: $pass passed, $fail failed"
 exit $((fail > 0))

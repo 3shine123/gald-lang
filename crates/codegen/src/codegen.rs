@@ -6954,6 +6954,13 @@ pub fn emit_unit_with_headers(unit: &CgUnit, c_headers: &[String], search_dirs: 
             let _ = writeln!(out, "}};");
             let _ = writeln!(out, "typedef struct {} {};", fc, fc);
             let _ = writeln!(out, "#endif");
+            // This file now carries a full (guarded) definition of the root
+            // struct: record it so the class-layout section below does not
+            // re-emit the same body unguarded — a same-file redefinition is a
+            // hard C error (stable-slots §9 blocker 1). When runtime.h *is*
+            // included, its own definitions win and skipping our copy is
+            // equally right, so recording unconditionally is safe either way.
+            header_structs.insert(fc.to_string());
         } else {
             let _ = write!(out, "struct {};\n", fc);
             let _ = write!(out, "typedef struct {} {};\n", fc, fc);
@@ -7238,7 +7245,8 @@ pub fn emit_unit_with_headers(unit: &CgUnit, c_headers: &[String], search_dirs: 
     }
     if !unit.classes.is_empty() { out.push('\n'); }
 
-    // Class struct definitions (skip if already in C headers)
+    // Class struct definitions (skip any whose full body is already defined —
+    // in a passthrough C header, or by Section 4's guarded root fallbacks)
     // Pre-compute a map from flat class name → CgClassMeta so we can walk the
     // superclass chain when emitting a subclass's struct fields. A subclass
     // struct must physically contain the parent's ivars (C has no inheritance),
