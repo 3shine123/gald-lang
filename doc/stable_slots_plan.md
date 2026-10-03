@@ -325,3 +325,38 @@ P3+自有类端到端             rc=0（len=5 s=hello run=42；App 为客户端
 | 1 | **manifest 模式 creator/follower 指纹不一致**（case 10）：creator 先编译时 manifest 文件尚不存在 → 按"自己名字 ∩ 公共段"算；follower 读到 manifest → 按"manifest 全量"算（含 creator 的私有尾部）→ 误中止 | `vtable_sig_segment` 的 manifest 分支同样过公共段过滤——creator 与 follower 对同一公共集取交集，天然相等 |
 | 2 | **败方 TU 独有类从未初始化**（case 11）：`gald_metaInit` 弱合并只跑一个 TU 的副本，且只初始化该 TU 见得到的类 → 只存在于 main 的 `App` 的 `NFClass` 恒为零值 → `[[App alloc] init]` 解引用 NULL vtable（§9 阻塞点 2 的运行期形态） | 归属类（R2 集合或 `-fstrong-metadata`）发**完整初始化的强 `NFClass` 定义**（静态初始化，加载期完成，与构造函数顺序无关，裸机可用）；`gald_metaInit` 本体零改动（自包含模式行为不变）；ARC dealloc wrapper 发射点相应上移到 Section 11 之前（static 定义须先于引用） |
 | 3 | **仅声明 TU 的继承槽位为 NULL**（P3+自有类）：实例 vtable 对"本 TU 未发射的方法"一律填 NULL → 客户端自有类继承自库类的 `init/retain/...` 槽位全空 → 首次派发 segfault（自包含模式因 Foundation 实现总是内联而不暴露） | 槽位按 owner 分派：本 TU 已发射→引用；**继承槽位（owner 是父类）→ 一律引用 `Owner_method`**（定义在归属 TU 或预编译库，原型已存在）；仅本类协议存根（owner=本类且无实现）保持 NULL——槽位保留语义不变 |
+
+## 11. 方案定案：Foundation 按 `.gm` 分 TU 用 A——owner 静态初始化（2026-10-03）
+
+> 用户拍板（"我想要更稳健的方案"）→ **方案 A**。本节是决策存档：探针起点、A/B 对比、B 的复活条件、开工路线图。
+
+### 探针数据（路线图第 1 步的起点，2026-10-03 实测）
+
+9 个 Foundation `.gm` 逐个当主文件编译（`galdc -rewrite-gald <f>.gm -I include` + `clang -c`）：
+
+- **9/9 独立编译通过**——NFObject（§9 修复解锁）之外，其余 8 个（NFArray / NFDictionary / NFError / NFMutableArray / NFMutableDictionary / NFMutableString / NFNumber / NFString）全部直接通过，无需逐个清理，好于预期。
+- import 链（实现经 `#import "*.gm"` 内联为**非 owner 弱副本**，R2 语义不变、链接期正确合并）：NFError → NFObject+NFString；NFMutableArray → NFArray；NFMutableDictionary → NFDictionary；NFNumber → NFObject；NFString → NFObject；NFArray / NFDictionary / NFMutableString / NFObject 无 `.gm` import。
+
+### A vs B（按本项目实际约束）
+
+| 轴 | A：owner 静态初始化 | B：registration fragment + 运行时遍历 |
+|---|---|---|
+| 初始化时机 | 加载期完成（§10 已实证） | 需运行时遍历或构造器 |
+| 裸机 `-ffreestanding` | 纯静态数据，零运行时依赖 | `.init_array` crt0 不跑，每个内核自行接线 |
+| 多平台 | 普通 C 全局定义，链接器机制 | section 遍历 API 三平台三样（ELF `__start_/__stop_` / Mach-O `getsectiondata` / PE 另一套） |
+| 漏注册失败模式 | **链接期响亮**（undefined / duplicate symbol） | **运行期静默**（段错误）——正是 stable-slots 工程消灭的那类错误 |
+| `--gc-sections` | 存活（NFClass 被分配点引用） | fragment 无静态引用会被丢弃（需每平台 `KEEP()`） |
+| "谁赢" | 链接期定死：owner 强 / 客户端弱（R2 已实证） | 注册顺序随链接序，first/last-wins 不可移植 |
+
+决定性论据：① Gald 元数据全是编译期常量（FNV 哈希、`sizeof`、extern 地址——case 11 跨 TU 静态初始化已实证），B 的运行时遍历**没有活干**，而"纯静态"是语言身份；② A 不是新方案——§10 的静态初始化强 `NFClass` 已落地全量验证，Foundation 分 TU 后每个 `.gm` 恰好是自己类的 owner，A 只是把既有路径铺满。
+
+### B 的复活条件（存档，勿轻易捡回）
+
+满足其一才重议：① 动态类加载/插件机制；② 元数据出现运行时才能算出的字段；③ 需要 ObjC 式运行时类发现/反射。三者均违背纯静态定位，目前看不到路径。
+
+### 开工路线图（下一阶段执行，勿重新论证）
+
+1. ~~逐文件探针~~ ✅（本节上表，9/9）。
+2. 库构建脚本改"逐 TU 编译 + `ar`"；**`-fstrong-metadata` 删除**（`.gm` 主文件自动 strong 已实证，迁移后旗标失去唯一用户——按"能删就删"惯例，旧拼写响亮报错）。
+3. `gald_metaInit` 退役验证：全类静态初始化后确认弱合并的 metaInit 退化为幂等空操作（或直接发射空体）。
+4. P3 端到端：客户端 `Foundation.decl.gh` + 链接新库；回归 multi_tu / strong_metadata / ASan / test_all 全量；跨 TU `__sig` 公共段一致性由用例矩阵核实。
