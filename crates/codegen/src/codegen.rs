@@ -416,17 +416,6 @@ pub struct CgUnit {
     /// `-fno-gald-arc`: manual retain/release. Object ivars are then the
     /// programmer's to release, so no ARC dealloc wrapper is generated.
     pub no_arc: bool,
-    /// `-fstrong-metadata`: emit the class metadata — vtable/meta-vtable
-    /// instances, getClass functions and `gald_metaInit` — as **strong**
-    /// symbols instead of `__attribute__((weak))`.
-    ///
-    /// This is the precompiled-library switch (P3). A client TU that only sees
-    /// the declarations still synthesizes empty stubs for every class it can
-    /// name; those stubs are weak, so a library built with this flag wins the
-    /// link and its real tables are the ones that survive. Without it the
-    /// linker may keep a client's NULL-filled stub and dispatch segfaults.
-    /// See `doc/stable_slots_plan.md` §8.
-    pub strong_metadata: bool,
     /// Classes whose `@implementation` sits in **this** TU's main file (not in
     /// an imported header) — the translation unit that owns them, per rule R2
     /// of `doc/stable_slots_plan.md`.
@@ -5328,7 +5317,7 @@ method_names: info.method_names,
     // `no_arc` stays false here: this entry point feeds the header/prototype
     // paths, which never emit the ARC dealloc wrappers (that decision belongs
     // to the pipeline, which sets the flag on its own CgUnit).
-    let mut unit = CgUnit { decls, filename: ast.filename.clone(), c_headers: Vec::new(), selectors, classes, global_instance_method_names, struct_eq_tags: Vec::new(), no_arc: false, strong_metadata: false, owned_classes: std::collections::HashSet::new(), vtable_sig_names };
+    let mut unit = CgUnit { decls, filename: ast.filename.clone(), c_headers: Vec::new(), selectors, classes, global_instance_method_names, struct_eq_tags: Vec::new(), no_arc: false, owned_classes: std::collections::HashSet::new(), vtable_sig_names };
     // The authoritative record of which method function bodies exist: every
     // `CgDeclData::Function` with a body. This covers paths that do not go
     // through `ClassInfo::method_bodies` — notably @property-synthesised
@@ -6817,11 +6806,11 @@ fn normalize_t_sentinels_text(c: &str) -> String {
 
 pub fn emit_unit_with_headers(unit: &CgUnit, c_headers: &[String], search_dirs: &[String], freestanding: bool, backend: Backend, comments: bool, eh_checked: bool) -> String {
     CURRENT_BACKEND.store(backend as u8, Ordering::Relaxed);
-    // Metadata linkage (`-fstrong-metadata`): the default is `weak`, so the
+    // Metadata linkage: the default is `weak`, so the
     // many per-TU copies of a class's vtable / meta-vtable / getClass coalesce
-    // to one. A precompiled library flips this so its real tables outrank a
-    // client TU's declaration-only stubs. See `CgUnit::strong_metadata`.
-    let meta_weak: &str = if unit.strong_metadata { "" } else { "__attribute__((weak)) " };
+    // to one. Ownership (rule R2 — `CgUnit::owned_classes`) decides which
+    // copies below are emitted strong instead. See `doc/stable_slots_plan.md`.
+    let meta_weak: &str = "__attribute__((weak)) ";
     let mut out = String::new();
     if comments {
         let _ = writeln!(out, "/* ============================================================");
@@ -7327,7 +7316,7 @@ pub fn emit_unit_with_headers(unit: &CgUnit, c_headers: &[String], search_dirs: 
             let _ = writeln!(out, "/* VTable instance: {} */", cm.class_name);
         }
         // R2: the TU that owns the @implementation emits strong metadata.
-        let cw = if unit.strong_metadata || unit.owned_classes.contains(&cm.class_name) { "" } else { "__attribute__((weak)) " };
+        let cw = if unit.owned_classes.contains(&cm.class_name) { "" } else { "__attribute__((weak)) " };
         let _ = write!(out, "{}struct gald_vtable {} = {{\n", cw, meta_symbol("VTABLE_", &flat_cn));
         // Stamp the layout signature this instance was built for, so whichever
         // copy of this instance wins the linker's weak merge also carries the
@@ -7378,12 +7367,26 @@ pub fn emit_unit_with_headers(unit: &CgUnit, c_headers: &[String], search_dirs: 
         if comments {
             let _ = writeln!(out, "/* Meta vtable instance: {} */", cm.class_name);
         }
-        let cw = if unit.strong_metadata || unit.owned_classes.contains(&cm.class_name) { "" } else { "__attribute__((weak)) " };
-        let _ = write!(out, "{}struct {} {}_inst = {{\n", cw, meta_symbol("META_VTABLE_", &name_flat(&cm.class_name)), meta_symbol("META_VTABLE_", &name_flat(&cm.class_name)));
+        let cw = if unit.owned_classes.contains(&cm.class_name) { "" } else { "__attribute__((weak)) " };
+        let flat = name_flat(&cm.class_name);
+        let _ = write!(out, "{}struct {} {}_inst = {{\n", cw, meta_symbol("META_VTABLE_", &flat), meta_symbol("META_VTABLE_", &flat));
         for (mname, owner) in &class_entries {
-            let _ = write!(out, "    .{} = {}_{},\n", mname, owner, mname);
+            // Same rule as the instance vtable above: an inherited class
+            // method (owner is a parent class) is defined in the owner's TU
+            // (R2) or the precompiled library — keep the reference. An OWN
+            // class method that is merely declared here (decl-header
+            // visibility, no body in this TU) must not reference a function
+            // this TU never defines: keep the slot NULL for layout stability
+            // and let the owner TU's strong instance win the merge with the
+            // real reference. Without this, importing a decl header alone
+            // pulls undefined class-method symbols into the link.
+            if method_is_emitted(owner, mname) || owner.as_str() != flat {
+                let _ = write!(out, "    .{} = {}_{},\n", mname, owner, mname);
+            } else {
+                let _ = write!(out, "    .{} = NULL,\n", mname);
+            }
         }
-        let _ = write!(out, "    .class = {},\n", meta_symbol("GETCLASS_", &name_flat(&cm.class_name)));
+        let _ = write!(out, "    .class = {},\n", meta_symbol("GETCLASS_", &flat));
         out.push_str("};\n\n");
     }
 
@@ -7395,7 +7398,7 @@ pub fn emit_unit_with_headers(unit: &CgUnit, c_headers: &[String], search_dirs: 
         if comments {
             let _ = writeln!(out, "/* +getClass for {} */", cm.class_name);
         }
-        let cw = if unit.strong_metadata || unit.owned_classes.contains(&cm.class_name) { "" } else { "__attribute__((weak)) " };
+        let cw = if unit.owned_classes.contains(&cm.class_name) { "" } else { "__attribute__((weak)) " };
         let _ = write!(out, "{}NFClass * {}(NFClass * self, SEL _cmd) {{\n", cw, meta_symbol("GETCLASS_", &name_flat(&cm.class_name)));
         out.push_str("    (void)_cmd;\n");
         out.push_str("    return self;\n");
@@ -7418,9 +7421,10 @@ pub fn emit_unit_with_headers(unit: &CgUnit, c_headers: &[String], search_dirs: 
     // Class metadata variables. Two lifetimes:
     //  * default: a tentative definition (a common symbol), so the per-TU
     //    copies merge harmlessly; the *contents* are written by `gald_metaInit`
-    //    below (strong under `-fstrong-metadata`, so a library's copy runs).
+    //    below (weak — it only back-fills what static initialization did not
+    //    already cover).
     //  * classes this TU OWNS (rule R2 — the @implementation is in this TU's
-    //    main file — or `-fstrong-metadata`): one fully initialized STRONG
+    //    main file): one fully initialized STRONG
     //    definition. `gald_metaInit` is weak-merged — only one TU's copy runs,
     //    and it only initializes the classes THAT TU can see — so a class that
     //    exists only in the losing TU would stay zeroed (NULL vtable → segfault
@@ -7436,7 +7440,7 @@ pub fn emit_unit_with_headers(unit: &CgUnit, c_headers: &[String], search_dirs: 
     for cm in &unit.classes {
         let flat = name_flat(&cm.class_name);
         let sym = meta_symbol("CLASS_", &flat);
-        let owned = unit.strong_metadata || unit.owned_classes.contains(&cm.class_name);
+        let owned = unit.owned_classes.contains(&cm.class_name);
         if !owned {
             let _ = write!(out, "NFClass {};\n", sym);
             continue;
@@ -7562,8 +7566,7 @@ pub fn emit_unit_with_headers(unit: &CgUnit, c_headers: &[String], search_dirs: 
         out.push_str("}\n\n");
         // snake_case alias: every other runtime symbol is snake_case, so
         // hand-written host code calls `gald_meta_init()`. Weak like the
-        // original so the many per-TU copies coalesce to one (strong under
-        // `-fstrong-metadata`, so a library's copy wins).
+        // original so the many per-TU copies coalesce to one.
         out.push_str(&format!("{}void gald_meta_init(void) {{ gald_metaInit(); }}\n\n", meta_weak));
     }
 
@@ -7917,13 +7920,12 @@ mod vtable_sig_tests {
                 properties: Vec::new(),
                 has_impl: true,
             }],
+            struct_eq_tags: Vec::new(),
+            no_arc: false,
+            owned_classes: std::collections::HashSet::new(),
             global_instance_method_names: vec![
                 "dealloc".into(), "init".into(), "ping".into(), "release".into(), "retain".into(),
             ],
-            struct_eq_tags: Vec::new(),
-            no_arc: false,
-            strong_metadata: false,
-            owned_classes: std::collections::HashSet::new(),
             // Emitter test: the sig is computed from this list verbatim.
             vtable_sig_names: vec!["dealloc".into(), "init".into(), "ping".into(), "release".into(), "retain".into()],
         };
@@ -8030,7 +8032,6 @@ mod eh_runtime_include_tests {
             global_instance_method_names: Vec::new(),
             struct_eq_tags: Vec::new(),
             no_arc: false,
-            strong_metadata: false,
             owned_classes: std::collections::HashSet::new(),
             vtable_sig_names: Vec::new(),
         }

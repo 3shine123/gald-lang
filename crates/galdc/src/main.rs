@@ -104,8 +104,6 @@ fn clap_command() -> ClapCommand {
             .help("disable ARC (MRC)"))
         .arg(Arg::new("no-checker").long("fno-checker")
             .help("skip type checking"))
-        .arg(Arg::new("strong-metadata").long("fstrong-metadata")
-            .help("emit class metadata as strong symbols (for building a precompiled library)"))
         .arg(Arg::new("eh").long("eh").value_name("CHECKED|SJLJ")
             .help("exception backend: checked (Swift-scheme, no cross-frame leak) or sjlj (setjmp/longjmp, default; 'legacy' is an alias)"))
         .arg(Arg::new("ffreestanding").long("ffreestanding")
@@ -152,7 +150,6 @@ const DOUBLE_TO_SINGLE: &[(&str, &str)] = &[
     ("--fgald-arc", "-fgald-arc"),
     ("--fno-gald-arc", "-fno-gald-arc"),
     ("--fno-checker", "-fno-checker"),
-    ("--fstrong-metadata", "-fstrong-metadata"),
     ("--eh", "-eh"),
     ("--ffreestanding", "-ffreestanding"),
     ("--nostdinc", "-nostdinc"),
@@ -410,7 +407,6 @@ fn galdc_flags() -> (Vec<(&'static str, &'static str)>, Vec<(&'static str, &'sta
         ("-fgald-arc",    "enable ARC (default)"),
         ("-fno-gald-arc", "disable ARC (MRC)"),
         ("-fno-checker",  "skip type checking"),
-        ("-fstrong-metadata", "emit class metadata as strong symbols (for building a precompiled library)"),
         ("-eh",           "exception backend: checked or sjlj (default sjlj; 'legacy' is an alias)"),
         ("-ffreestanding", "bare-metal/freestanding output"),
         ("-nostdinc",     "pass -nostdinc to the C compiler (headers come from your -I dirs)"),
@@ -648,13 +644,6 @@ fn main() {
         println!("                                     Default: clang");
         println!("                                     portable: only gcc+clang common attributes");
         println!("                                     gcc:   allow gcc-specific __attribute__");
-        println!("  -fstrong-metadata                    Emit class metadata (vtable /");
-        println!("                                     meta-vtable instances, getClass,");
-        println!("                                     gald_metaInit) as STRONG symbols");
-        println!("                                     instead of __attribute__((weak)).");
-        println!("                                     Use when building a precompiled");
-        println!("                                     library so its real tables outrank a");
-        println!("                                     client TU's declaration-only stubs.");
         println!("  -eh <mode>                           Exception backend:");
         println!("                                     checked (default): flag + guard lowering,");
         println!("                                       unwind-safe ARC, no setjmp/longjmp —");
@@ -709,7 +698,6 @@ fn main() {
     // legacy` / `-eh sjlj` select the old setjmp/longjmp backend for rollback.
     let mut eh_checked = DEFAULT_EH_CHECKED;
     let mut slots_manifest: Option<String> = None; // --slots <file> (stable cross-TU vtable layout)
-    let mut strong_metadata = false; // -fstrong-metadata (precompiled-library metadata linkage)
 
     // Check for "run" subcommand: look for `run` that is not preceded by a flag
     // (i.e. not `-o run` or `-I run`)
@@ -737,8 +725,6 @@ fn main() {
                 no_arc = false;
             } else if nj == "-fno-checker" {
                 no_checker = true;
-            } else if nj == "-fstrong-metadata" {
-                strong_metadata = true;
             } else if nj == "-ffreestanding" {
                 no_libc = true;
             } else if nj == "-nostdinc" {
@@ -800,9 +786,6 @@ fn main() {
             i += 1;
         } else if normalized == "-fno-checker" {
             no_checker = true;
-            i += 1;
-        } else if normalized == "-fstrong-metadata" {
-            strong_metadata = true;
             i += 1;
         } else if normalized == "-ffreestanding" {
             no_libc = true;
@@ -989,7 +972,6 @@ fn main() {
     pipeline.trace_color = !trace_no_color;
     pipeline.eh_checked = eh_checked;
     pipeline.slots_manifest = slots_manifest.clone();
-    pipeline.strong_metadata = strong_metadata;
     if let Some(ref b) = backend {
         match attrs::Backend::parse(b) {
             Some(be) => pipeline.backend = be,
@@ -1030,20 +1012,12 @@ fn main() {
     // process-global (OnceLock), so a second in-process transpile is not
     // possible. Transpile-affecting flags are forwarded; link-only flags
     // (-L/-l/-asm/-framework) are not needed by the transpile step.
-    // -fstrong-metadata is deliberately NOT forwarded: it upgrades every
-    // metadata symbol in a TU to strong, so two TUs would both emit strong
-    // definitions for shared (non-owned) classes and the link would fail
-    // with duplicate symbols. In multi-input mode the first TU's strong
-    // symbols already win over the extras' weak ones.
     let mut extra_c_files: Vec<String> = Vec::new();
     if !extra_inputs.is_empty() {
         let exe = std::env::current_exe().unwrap_or_else(|e| {
             eprintln!("error: cannot locate galdc for multi-TU transpile: {}", e);
             std::process::exit(1);
         });
-        if strong_metadata {
-            println!("note: -fstrong-metadata applies to the first TU only (extras stay weak so shared metadata coalesces)");
-        }
         for (n, tu) in extra_inputs.iter().enumerate() {
             let stem = Path::new(tu).file_stem().and_then(|s| s.to_str()).unwrap_or("tu");
             let mut tmp = std::env::temp_dir();

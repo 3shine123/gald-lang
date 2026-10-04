@@ -48,12 +48,6 @@ pub struct Pipeline {
     /// `--slots <manifest>`: append-only vtable slot manifest for stable
     /// cross-TU layout (None = historical sorted layout).
     pub slots_manifest: Option<String>,
-    /// `-fstrong-metadata`: emit class metadata (vtable / meta-vtable
-    /// instances, getClass functions, `gald_metaInit`) as strong symbols
-    /// instead of weak ones. Set it when building a precompiled library (P3):
-    /// the library's real tables then outrank a client TU's declaration-only
-    /// stubs. See `doc/stable_slots_plan.md` §8.
-    pub strong_metadata: bool,
     /// C compiler + leading args used for the link step (e.g. `["zig", "cc"]`).
     /// Also used by the C type-name probe; empty means "unknown", which skips
     /// the probe.
@@ -89,7 +83,6 @@ impl Pipeline {
             no_comments: false,
             eh_checked: DEFAULT_EH_CHECKED,
             slots_manifest: None,
-            strong_metadata: false,
             c_cc: Vec::new(),
             c_arch: None,
             no_ctype_probe: false,
@@ -427,7 +420,6 @@ impl Pipeline {
         // calls; codegen emits one field-wise `gald_struct_eq_<tag>` per tag.
         cg.struct_eq_tags = struct_eq_tags;
         cg.no_arc = self.no_arc;
-        cg.strong_metadata = self.strong_metadata;
         cg.owned_classes = owned_classes;
         let c_code = emit_unit_with_headers(&cg, &pre.c_headers, &self.search_dirs, self.no_libc, self.backend, !self.no_comments, self.eh_checked);
 

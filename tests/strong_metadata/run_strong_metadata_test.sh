@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# run_strong_metadata_test.sh — protection tests for -fstrong-metadata.
+# run_strong_metadata_test.sh — protection tests for class-metadata linkage.
 #
 # Guards the precompiled-library (P3) contract from doc/stable_slots_plan.md §8
 # on three levels, because "the program printed the right thing" alone does not
@@ -10,9 +10,12 @@
 #      which also enforces this.
 #   2. LINK + RUN  — a client TU that only sees declarations (weak stubs) links
 #      against the strong library and runs correctly.
-#   3. LOUD FAILURE — if a client is *also* compiled with -fstrong-metadata the
-#      link must report a duplicate symbol, instead of silently picking one
-#      table at random.
+#   3. LOUD FAILURE — the deleted -fstrong-metadata spelling is rejected with
+#      "Unknown argument": plan A removed the manual switch, so a legacy
+#      script still carrying it must fail loudly instead of half-working.
+#      (Duplicate-symbol loudness for two owners lives in check 4; against
+#      the per-TU *archive* a client re-implementation is standard C override
+#      semantics — the library member stays dormant unless referenced.)
 #   4. R2 OWNERSHIP — two TUs that both `@implementation` the same class are
 #      both owners and must be a duplicate symbol (no flag involved).
 #   5. AUTO-STRONG — the flag is NOT required for the standalone-TU workflow:
@@ -83,15 +86,26 @@ else
     sed 's/^/      /' "$work/app.log" | tail -20
 fi
 
-# ── 3. strong client + strong library: the link must fail loudly ──
-if "$galdc" -fstrong-metadata "$client" -I include -L "$lib" -lgaldfoundation -o "$work/app_dup" > "$work/dup.log" 2>&1; then
-    bad "3. two strong-metadata TUs linked without error (should be a duplicate symbol)"
+# ── 3. LOUD FAILURE: the old manual switch is gone ──
+# Plan A removed -fstrong-metadata: ownership is derived by construction
+# (R2), so there must be no manual strong-metadata path left. A script still
+# carrying the old spelling must be rejected, not silently accepted.
+cat > "$work/flag_probe.gm" <<'EOF'
+#import <Foundation/Foundation.decl.gh>
+int main() { return 0; }
+EOF
+# Flag AFTER the input hits the option loop → "Unknown argument"; flag BEFORE
+# the input falls into the positional-input slot → "cannot read" — both orders
+# must fail loudly, and the post-input one must name the flag.
+if "$galdc" "$work/flag_probe.gm" -fstrong-metadata -I include -o "$work/app_dup" > "$work/dup.log" 2>&1; then
+    bad "3. -fstrong-metadata was accepted — the deleted flag still parses"
 else
-    if grep -q "duplicate symbol" "$work/dup.log"; then
-        ok "3. two strong-metadata TUs are rejected with 'duplicate symbol'"
+    if grep -q "Unknown argument: -fstrong-metadata" "$work/dup.log" \
+            && ! "$galdc" -fstrong-metadata "$work/flag_probe.gm" -I include -o "$work/app_dup2" > "$work/dup2.log" 2>&1; then
+        ok "3. deleted -fstrong-metadata is rejected loudly (Unknown argument; both arg orders fail)"
     else
-        bad "3. link failed, but not with a duplicate-symbol diagnostic"
-        sed 's/^/      /' "$work/dup.log" | tail -20
+        bad "3. old flag failed, but not with the expected diagnostics"
+        sed 's/^/      /' "$work/dup.log" "$work/dup2.log" | tail -8
     fi
 fi
 
