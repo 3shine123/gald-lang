@@ -357,6 +357,25 @@ P3+自有类端到端             rc=0（len=5 s=hello run=42；App 为客户端
 ### 开工路线图（下一阶段执行，勿重新论证）
 
 1. ~~逐文件探针~~ ✅（本节上表，9/9）。
-2. 库构建脚本改"逐 TU 编译 + `ar`"；**`-fstrong-metadata` 删除**（`.gm` 主文件自动 strong 已实证，迁移后旗标失去唯一用户——按"能删就删"惯例，旧拼写响亮报错）。
-3. `gald_metaInit` 退役验证：全类静态初始化后确认弱合并的 metaInit 退化为幂等空操作（或直接发射空体）。
-4. P3 端到端：客户端 `Foundation.decl.gh` + 链接新库；回归 multi_tu / strong_metadata / ASan / test_all 全量；跨 TU `__sig` 公共段一致性由用例矩阵核实。
+2. ~~库构建脚本改"逐 TU 编译 + `ar`"；**`-fstrong-metadata` 删除**~~ ✅（2026-10-03，见下方落地记录）。
+3. ~~`gald_metaInit` 退役验证~~ ✅（2026-10-03：全类静态初始化后，强空 `gald_metaInit` 覆盖弱合并副本、程序照常运行——metaInit 只剩幂等回填，退役成立）。
+4. ~~P3 端到端 + 全量回归~~ ✅（2026-10-03，见下方落地记录）。
+
+### 落地记录 ✅（2026-10-03，本会话）——方案 A 全链完成
+
+**库构建（wrapper TU 形态）**：`tools/build-foundation-lib.sh` 重写为逐 TU 编译——每个 Foundation `.gm` 生成一个 wrapper（`#import <Foundation/Foundation.decl.gh>` 前置 + 原 `.gm` 全文），`@implementation` 落在 wrapper 的主文件里 → R2 ownership 保持、元数据自动 STRONG（nm 校验 9/9 强符号）。声明面 = decl.gh 全集，与客户端一致 → `__sig` 公共段一致。库 372K（`target/foundation/libgaldfoundation.a`）。
+
+**`-fstrong-metadata` 删除**（能删就删，无过渡期）：CLI 参数、clap Arg、`DOUBLE_TO_SINGLE`、flag 表、手动 help、两处解析点、pipeline 赋值、`Pipeline.strong_metadata` 字段、`CgUnit.strong_metadata` 字段、codegen 全部 `unit.strong_metadata ||` 合取（R2 独占判定）、multi-input 转发注释与提示。旧拼写两种参数位置都响亮失败（`Unknown argument` / `cannot read`），check 3 双序断言守护。
+
+**metaInit 退役实证**：客户端 TU 的 9 个 `NFClass` 全部走 §10 静态初始化（`__data` 段，非 BSS）；用 `.o` 位置参数直链强空 `gald_metaInit` 覆盖弱合并副本 → 客户端全程正常（`[metaInit: strong-empty override ran]`，输出逐字节不变）——metaInit 在 R2 归属世界只剩幂等回填，仅对 `#import "*.gm"` 的库构建路径仍有意义。
+
+**P3 端到端**：`Foundation.decl.gh` + `-lgaldfoundation` 客户端探针全绿（string/array/for-in/dict/isEqual，exit=0）。
+
+**实施中挖出并修掉的两个真 bug（探针实证，勿重蹈）**：
+
+1. **meta-vtable 对"声明可见但本 TU 未实现"的类方法无条件引用函数符号** → 链接 undefined（`NFError_errorWithCode_domain_` 等）。实例 vtable 在多 TU 会话已立"槽位保留、引用不发"的 EMITTED_METHODS 规则，meta-vtable 实例循环漏镜像。修法：同款 `method_is_emitted(owner, mname) || owner != 本类` 判定，own 未实现槽位 NULL（codegen.rs Meta vtable instances 循环）。decl-only 客户端 TU 现在完全不产生兄弟类的 undefined 引用。
+2. **给 9 个 `.gm` 源文件直接补 decl.gh import 是方向性错误**（已回退，`git diff` 归零）：`#import` 链让声明面泄漏进所有内联方——自包含 TU（如 trace golden 只 import NFObject）突然"看见" NFString/NFArray 的声明 → 桩 vtable 继承槽位引用 `NFArray_count` 等库符号 → 无库链接 undefined（7 个 test_all 失败）。正确形态是**wrapper TU 只存在于库构建时**：声明面扩大不污染源文件，自包含 TU 保持它要求的声明面。
+
+**回归门槛（全部实测）**：cargo 153/0、multi_tu 12/12、strong_metadata 10/10（check 3 已改测旗标删除的响亮拒绝）、arc_intern ASan PASS、test_all **347/355, 0 failed**（6 canceled 交互式、2 个 `-F` 既有基线、SUSPECT=0）——与基线精确一致。
+
+**残留挂账**：`gald_metaInit` 弱合并漏初始化对 R2 归属类已被静态强 `NFClass` 缓解；`#import "*.gm"` 的库构建路径（Foundation.gh 单 TU）仍需 metaInit 真身——已在构建脚本注释与 AGENTS 中如实声明。

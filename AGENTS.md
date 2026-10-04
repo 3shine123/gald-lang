@@ -2004,8 +2004,19 @@ switch (subject) {
 
 - **用法**：`galdc main.gm lib.gm -I include -o app` —— 额外位置参数 `.gm` 作为附加编译单元，一条命令完成"逐 TU 转译→编译→链接"；`.o`/`.a` 位置参数原样进链接（`galdc main.gm lib.o libfoo.a -o app`）。**compile 模式 only**：run 模式的额外位置参数仍是程序参数；`-rewrite-gald` 遇多输入响亮报错（一命令一产物）。
 - **实现（`crates/galdc/src/main.rs`）**：manual 循环收 `extra_inputs`/`extra_objects`；每个额外 TU 用**子进程自调用**（`current_exe() -rewrite-gald` → 临时 `.c`）转译——codegen 的 `METHOD_METADATA` 等是进程级 `OnceLock`，同进程二次转译不可行；最终**一次 clang 调用**把主 TU（stdin）+ 额外 `.c` + runtime 一起编译链接（与既有 runtime.c 同调用机制同构）。临时 `.c` 用后即删。
-- **旗标转发**：`-I/-fno-gald-arc/-fno-checker/-Werror/-eh/--slots/-backend/-arch/-ffreestanding/-nostdinc/-no-comments/-v` 全部转发给子进程；`-L/-l/-asm/-framework` 是链接期旗标、转译不需要，不转发。**`-fstrong-metadata` 刻意不转发**：它把整个 TU 的元数据升强符号，两个 TU 都强 → 共享类 duplicate symbol；首 TU 强、额外 TU 弱正好让链接器正确合并（`-v` 下打 note 说明）。
+- **旗标转发**：`-I/-fno-gald-arc/-fno-checker/-Werror/-eh/--slots/-backend/-arch/-ffreestanding/-nostdinc/-no-comments/-v` 全部转发给子进程；`-L/-l/-asm/-framework` 是链接期旗标、转译不需要，不转发。~~`-fstrong-metadata` 刻意不转发~~ → **旗标已随方案 A 删除**（见下方"方案 A 落地"节），不存在于任何解析路径。
 - **blocks 探测扩展**：`-fblocks`/`-lBlocksRuntime` 的自动注入现在也扫额外 TU 的生成 C（任一 TU 含 `(^` 即注入）。
 - **守护**：`-trace-refcount` + 多输入报错（trace 单 TU 语义）；README/CHINESE 顺带修正既有错误行——`galdc hello.gm -o hello.o` 从未是 "-c mode"（`file` 探针实证产出 Mach-O 可执行文件），该行删除。
 - **测试**：multi_tu 新增 `12_native_multi_input/`（`NATIVE` 标记文件驱动 runner 走 galdc 原生路径，用例内容与 01_basic 同构）；`run_multi_tu.sh` 加 NATIVE 分支（一条 galdc 命令替代"逐 TU -rewrite-gald + clang"）。
 - **回归**：multi_tu **12/12**（11 旧用例零回归 + 新用例）、cargo test **153/153**、test_all **347/355**（0 failed，与基线一致）；探针矩阵 A–F 全过（单输入冒烟 / `.o` 直链 / `.a` 直链 / rewrite 守卫 exit=1 / trace 守卫 exit=1 / run 模式额外位置参数=程序参数语义不变）。
+
+### 方案 A 落地：Foundation 逐 TU 编译 + `-fstrong-metadata` 删除 ✅ (2026-10-03, 本会话)
+
+> `doc/stable_slots_plan.md` §11 路线图第 2–4 步全部完成（详录见该文件"落地记录"节，此处记要点）。
+
+- **库构建改 wrapper TU**：`tools/build-foundation-lib.sh` 为每个 Foundation `.gm` 生成 wrapper（`#import <Foundation/Foundation.decl.gh>` 前置 + 原 `.gm` 全文）再逐 TU 编译 + `ar`——`@implementation` 落在 wrapper 主文件 → R2 ownership 保持、元数据自动 STRONG（脚本内 nm 校验 9/9 强符号，弱即 fail）；wrapper 声明面 = decl.gh 全集，与客户端一致 → `__sig` 公共段一致。产物 `target/foundation/libgaldfoundation.a`（372K）。
+- **`-fstrong-metadata` 全链删除**（无过渡期，旧拼写两种参数位置都响亮失败）：clap Arg、`DOUBLE_TO_SINGLE`、flag 表、手动 help、两处解析点、`Pipeline.strong_metadata`/`CgUnit.strong_metadata` 字段、codegen 全部 `unit.strong_metadata ||` 合取（R2 独占判定）。strong_metadata 套件 check 3 改测"删除旗标的响亮拒绝"（双序断言），套件 10/10。
+- **metaInit 退役实证**：R2 归属类的 `NFClass` 全部走 §10 静态初始化（`__data` 段）；用 `.o` 位置参数直链**强空 `gald_metaInit` 覆盖弱合并副本**，客户端全程正常——metaInit 只剩幂等回填。残留：`#import "*.gm"` 的单 TU 库构建路径仍需 metaInit 真身（构建脚本注释已声明）。
+- **连带修真 bug 1——meta-vtable 桩引用**：meta-vtable 实例对"声明可见但本 TU 未实现"的类方法曾无条件引用 `Owner_mname` → 链接 undefined（实例 vtable 早有 EMITTED_METHODS"槽位保留、引用不发"规则，meta-vtable 漏镜像）。修法：同款 `method_is_emitted(owner, mname) || owner != 本类` 判定，own 未实现槽位 NULL。
+- **连带修真 bug 2——源文件污染（方向性错误，已回退）**：曾直接给 9 个 `.gm` 补 decl.gh import——`#import` 链让声明面泄漏进所有内联方，自包含 TU 桩 vtable 引用库符号 → 无库链接 undefined（test_all 7 个失败）。教训：**声明面扩大只能发生在库构建的 wrapper 里，不能进源文件**。
+- **回归门槛（全部实测）**：cargo 153/0、multi_tu 12/12、strong_metadata 10/10、arc_intern ASan PASS、test_all **347/355, 0 failed**（6 canceled 交互式、2 个 `-F` 既有基线、SUSPECT=0）——与基线精确一致。

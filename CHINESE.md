@@ -1223,7 +1223,6 @@ galdc [options] <input.gm>
   -fgald-arc        启用 ARC（默认）
   -fno-gald-arc     禁用 ARC（手动 MRC 模式）
   -fno-checker      跳过类型检查
-  -fstrong-metadata 类元数据发射为强符号（用于构建预编译库）
   -eh <mode>        异常后端：checked（默认）或 legacy（别名 sjlj）
   -ffreestanding    裸机/freestanding 输出（无 libc、无 TLS）
   -backend <mode>   C 编译器后端：clang（默认）、portable、gcc
