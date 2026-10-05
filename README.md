@@ -134,6 +134,10 @@ galdc hello.gm -o hello_bin                # transpile + compile + link
 galdc main.gm lib.gm -I include -o app     # two TUs, one command (no manual clang)
 galdc main.gm lib.o libfoo.a -o app        # mix gald sources with prebuilt objects
 
+# Precompiled Foundation library: build once, link in every project
+./tools/build-foundation-lib.sh                            # → target/foundation/libgaldfoundation.a
+galdc app.gm -I include -L target/foundation -lgaldfoundation -o app
+
 # Compile + run
 galdc run hello.gm
 galdc run hello.gm -o hello_bin            # keep binary after run
@@ -351,7 +355,7 @@ Then include the bridge header from C:
 #include "lib.h"
 
 int main(void) {
-    gald_metaInit();  // required before using any Gald objects
+    gald_metaInit();  // metadata back-fill — see the note below
 
     // Class method: gald_<Class>_<method>(params...)
     NFString *s = gald_NFString_stringWithUTF8String_("Hello");
@@ -382,7 +386,7 @@ Link against the transpiled `.c` and `runtime.c`:
 clang caller.c lib.c include/gald/runtime.c -I include -o app
 ```
 
-⚠️ The caller's `main` must call `gald_metaInit()` first. The bridge header uses `sel_registerName` to resolve selectors at runtime, so it does **not** depend on the codegen-generated `static const` SEL constants (which are file-local and invisible across translation units).
+⚠️ The bridge header uses `sel_registerName` to resolve selectors at runtime, so it does **not** depend on the codegen-generated `static const` SEL constants (which are file-local and invisible across translation units). Class metadata itself is **statically initialized at load time** by every TU whose main file holds the `@implementation` — which is all `galdc` workflows. `gald_metaInit()` stays in the examples as a harmless idempotent back-fill; it is only *required* when a build reaches implementations through `#import "*.gm"` (single-TU umbrella builds), where no TU owns the metadata.
 
 #### Memory Management from C
 
@@ -1292,6 +1296,38 @@ cargo test --workspace
 ---
 
 ## Code Examples
+
+### Precompiled Foundation Library
+
+Instead of inlining Foundation into every TU (`#import <Foundation/Foundation.gh>`), build it once as a static library and link every project against it — faster per-file compiles, one copy of the implementation:
+
+```bash
+./tools/build-foundation-lib.sh            # → target/foundation/libgaldfoundation.a
+```
+
+The script transpiles each Foundation `.gm` as its **own translation unit** (a generated wrapper prepends the full declaration surface, then inlines the implementation text), compiles, and archives. Because each `@implementation` lands in its TU's main file, R2 ownership automatically emits that class's metadata as STRONG symbols — the script nm-verifies all nine and fails loudly if any come out weak. No `-fstrong-metadata` exists any more: ownership is derived by construction.
+
+Clients then import only the declaration header:
+
+```gald
+#import <Foundation/Foundation.decl.gh>    // declarations only — no implementations inlined
+
+int main() {
+    NFString *s = [NFString stringWithUTF8String:"hello"];
+    NFLog(@"%@", s);
+    return 0;
+}
+```
+
+```bash
+galdc app.gm -I include -L target/foundation -lgaldfoundation -o app
+```
+
+Notes:
+
+- **No flags to remember** — a main file holding `@implementation` is strong automatically; declaration-only clients stay weak, which is correct (the library's tables win the link).
+- **`gald_metaInit()`** is only *required* for umbrella builds that reach implementations through `#import "*.gm"` (single-TU builds where no TU owns the metadata). With the precompiled library — and with every normal `galdc` workflow — metadata is statically initialized at load time and the call is an idempotent no-op.
+- Re-implementing a library class in a client is standard C override semantics against the archive (the library's member stays dormant unless referenced) — but slots for methods you do not implement stay NULL, so implement everything you dispatch.
 
 ### Hello World
 

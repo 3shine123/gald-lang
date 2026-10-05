@@ -133,6 +133,10 @@ galdc hello.gm -o hello_bin                # 转译 + 编译 + 链接
 galdc main.gm lib.gm -I include -o app     # 两条编译单元一条命令（无需手动 clang）
 galdc main.gm lib.o libfoo.a -o app        # gald 源码与预编译目标混用
 
+# 预编译 Foundation 库：构建一次，处处链接
+./tools/build-foundation-lib.sh                            # → target/foundation/libgaldfoundation.a
+galdc app.gm -I include -L target/foundation -lgaldfoundation -o app
+
 # 编译 + 运行
 galdc run hello.gm
 galdc run hello.gm -o hello_bin            # 运行后保留二进制
@@ -339,7 +343,7 @@ galdc -rewrite-gald lib.gm -o lib.c -emit-bridge-header lib.h
 #include "lib.h"
 
 int main(void) {
-    gald_metaInit();  // 必须在使用 Gald 对象前调用
+    gald_metaInit();  // 元数据回填——见下方说明
 
     // 类方法：gald_<类名>_<方法名>(参数...)
     NFString *s = gald_NFString_stringWithUTF8String_("Hello");
@@ -370,7 +374,7 @@ int main(void) {
 clang caller.c lib.c include/gald/runtime.c -I include -o app
 ```
 
-⚠️ 调用方 `main` 必须先调用 `gald_metaInit()` 初始化类元数据。桥接头使用了 `sel_registerName` 在运行时解析 selector，因此**不需要**依赖 codegen 生成的 `static const` SEL 常量（这些常量跨文件不可见）。
+⚠️ 桥接头使用了 `sel_registerName` 在运行时解析 selector，因此**不需要**依赖 codegen 生成的 `static const` SEL 常量（这些常量跨文件不可见）。类元数据本身由每个主文件持有 `@implementation` 的 TU 在**加载期静态初始化**——所有 `galdc` 工作流皆是如此。`gald_metaInit()` 保留在示例中作为无害的幂等回填；只有当构建通过 `#import "*.gm"` 获取实现时（单 TU 伞形构建，无任何 TU 持有元数据）才**真正必需**。
 
 #### 从 C 管理内存
 
@@ -1249,6 +1253,38 @@ cargo test --workspace
 ---
 
 ## 代码示例
+
+### 预编译 Foundation 库
+
+不必在每个 TU 里内联 Foundation（`#import <Foundation/Foundation.gh>`），可以一次构建成静态库、各项目链接——单文件编译更快，实现只存一份：
+
+```bash
+./tools/build-foundation-lib.sh            # → target/foundation/libgaldfoundation.a
+```
+
+脚本把每个 Foundation `.gm` 作为**独立编译单元**转译（生成的 wrapper 前置完整声明面、再内联实现文本）、编译、归档。由于每个 `@implementation` 都落在其 TU 的主文件里，R2 ownership 自动把该类的元数据发射为 STRONG 符号——脚本 nm 校验全部九个，任何弱符号都会响亮失败。`-fstrong-metadata` 已不存在：ownership 由构造保证。
+
+客户端随后只导入声明头：
+
+```gald
+#import <Foundation/Foundation.decl.gh>    // 纯声明——不内联任何实现
+
+int main() {
+    NFString *s = [NFString stringWithUTF8String:"hello"];
+    NFLog(@"%@", s);
+    return 0;
+}
+```
+
+```bash
+galdc app.gm -I include -L target/foundation -lgaldfoundation -o app
+```
+
+要点：
+
+- **无需记任何旗标**——主文件持有 `@implementation` 自动为强；纯声明客户端保持弱，这正是正确的（库的真表在链接中胜出）。
+- **`gald_metaInit()`** 只对通过 `#import "*.gm"` 获取实现的伞形构建（单 TU 构建、无任何 TU 持有元数据）**真正必需**。用预编译库——以及所有常规 `galdc` 工作流——元数据在加载期静态初始化，该调用是幂等空操作。
+- 客户端重实现库类，对归档而言是标准 C 覆盖语义（库成员未被引用就保持休眠）——但未实现方法的槽位是 NULL，所以派发到的方法必须全部自己实现。
 
 ### Hello World
 
