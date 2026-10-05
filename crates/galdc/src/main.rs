@@ -219,7 +219,112 @@ fn find_libgald(custom_libs: &[String]) -> Option<String> {
     None
 }
 
-fn compile_to_binary(cc: &[String], c_code: &str, bin_path: &str, include_dirs: &[String], lib_dirs: &[String], libs: &[String], asm_files: &[String], extra_c_files: &[String], extra_objects: &[String], frameworks: &[String], arch: Option<&str>, verbose: bool, no_libc: bool, nostdinc: bool, shared: bool) {
+/// Find a precompiled Foundation library, same policy as `find_libgald`:
+/// next to the binary first, then known install/dev locations, then the
+/// user's `-L` dirs. Returns the DIRECTORY that holds `libgaldfoundation.a`.
+fn find_libgaldfoundation(custom_libs: &[String]) -> Option<String> {
+    if let Ok(exe_path) = std::env::current_exe() {
+        if let Some(exe_dir) = exe_path.parent() {
+            let lib_path = exe_dir.join("libgaldfoundation.a");
+            if lib_path.exists() {
+                return Some(exe_dir.to_string_lossy().to_string());
+            }
+        }
+    }
+    let mut paths = vec![
+        "target/foundation".to_string(), // in-repo dev location (build-foundation-lib.sh default)
+        "/opt/gald/lib".to_string(),
+        "/usr/local/lib/gald".to_string(),
+    ];
+    for p in custom_libs { paths.push(p.clone()); }
+    for p in &paths {
+        let libpath = format!("{}/libgaldfoundation.a", p);
+        if std::path::Path::new(&libpath).exists() {
+            return Some(p.clone());
+        }
+    }
+    None
+}
+
+/// Extract the target of an `#import <...>` directive, if any.
+fn import_angle_target(t: &str) -> Option<&str> {
+    let start = t.find('<')?;
+    let end = start + t[start..].find('>')?;
+    Some(&t[start + 1..end])
+}
+
+/// Extract the target of an `#import "..."` directive, if any.
+fn import_quoted_target(t: &str) -> Option<&str> {
+    let start = t.find('"')?;
+    let rest = &t[start + 1..];
+    let end = rest.find('"')?;
+    Some(&rest[..end])
+}
+
+/// True when this TU — or anything it transitively `#import`s — pulls in a
+/// Foundation IMPLEMENTATION file (`*.gm` under Foundation: the
+/// self-contained umbrella `Foundation.gm` or a per-class `NFString.gm`).
+/// Such a TU already carries the full Foundation code; auto-linking the
+/// precompiled library would add a competing strong copy of the class
+/// tables whose Foundation-only vtable sig wins the weak merge and trips
+/// the cross-TU `__sig` check (tests/multi_tu/12_native_multi_input, and
+/// cross_file_test.gm whose Foundation arrives via `diamond_base.gh`).
+/// Declaration-only clients (`Foundation.gh`) do not match and stay
+/// auto-linkable — the ObjC library model.
+///
+/// Checked at the SOURCE level on purpose: generated-C text markers cannot
+/// distinguish definitions from references (prototypes, vtable slots and
+/// stub instances all mention `NF<Class>_*`). Resolution mirrors the
+/// preprocessor's search roots (the importing file's directory, bundle
+/// `include/` + `include/Foundation/`), and only imports resolving INTO the
+/// real Foundation count — a user's own `X.gm` or a shadowing directory is
+/// ignored. Commented-out `#import` lines never match (they do not start
+/// with `#import`); block comments are not handled (none in the bundled
+/// headers).
+fn tu_imports_foundation_impl(path: &str) -> bool {
+    let bundle = resolve_bundle_root();
+    let mut visited = std::collections::HashSet::new();
+    foundation_impl_scan(std::path::Path::new(path), &bundle, &mut visited)
+}
+
+fn foundation_impl_scan(
+    path: &std::path::Path,
+    bundle: &std::path::Path,
+    visited: &mut std::collections::HashSet<std::path::PathBuf>,
+) -> bool {
+    if !visited.insert(path.to_path_buf()) {
+        return false;
+    }
+    let Ok(src) = fs::read_to_string(path) else { return false; };
+    let file_dir = path.parent();
+    for line in src.lines() {
+        let t = line.trim_start();
+        if !t.starts_with("#import") { continue; }
+        let target = match import_angle_target(t).or_else(|| import_quoted_target(t)) {
+            Some(x) => x,
+            None => continue,
+        };
+        if !(target.ends_with(".gh") || target.ends_with(".gm")) { continue; }
+        // Resolution order mirrors the preprocessor: the importing file's
+        // own directory first, then the bundle's include roots.
+        let mut roots: Vec<std::path::PathBuf> = Vec::new();
+        if let Some(d) = file_dir { roots.push(d.to_path_buf()); }
+        roots.push(bundle.join("include"));
+        roots.push(bundle.join("include").join("Foundation"));
+        let Some(resolved) = roots.iter().map(|r| r.join(target)).find(|p| p.exists()) else { continue; };
+        if target.ends_with(".gm")
+            && resolved.starts_with(bundle.join("include").join("Foundation"))
+        {
+            return true; // a Foundation implementation is inlined into this TU
+        }
+        if foundation_impl_scan(&resolved, bundle, visited) {
+            return true;
+        }
+    }
+    false
+}
+
+fn compile_to_binary(cc: &[String], c_code: &str, bin_path: &str, include_dirs: &[String], lib_dirs: &[String], libs: &[String], asm_files: &[String], extra_c_files: &[String], extra_objects: &[String], frameworks: &[String], arch: Option<&str>, verbose: bool, no_libc: bool, nostdinc: bool, shared: bool, foundation_impl_inlined: bool) {
     // Compiler may be multi-word (e.g. `zig cc`): program + leading args.
     let program = cc.first().map(|s| s.as_str()).unwrap_or("clang");
     let cc_extra: Vec<String> = cc.get(1..).unwrap_or(&[]).to_vec();
@@ -347,6 +452,26 @@ fn compile_to_binary(cc: &[String], c_code: &str, bin_path: &str, include_dirs: 
         // macOS folds libm into libSystem (sin/cos link implicitly); Linux
         // needs an explicit -lm. The linker drops it when unused (--as-needed).
         clang_args.push("-lm".to_string());
+    }
+    // Auto-link the precompiled Foundation library when one is findable —
+    // same policy as libgald: found → its real tables win the link; not
+    // found → silent no-op (a TU that imports Foundation.gm inlines the
+    // implementations itself and needs no library). Skipped in freestanding
+    // (the bare-metal user provides everything), shared mode (the host owns
+    // the Foundation), and when any TU already inlines Foundation
+    // implementations (`foundation_impl_inlined`, computed at the source
+    // level in main): the archive's STRONG Foundation-only vtable would win
+    // the weak merge and trip the __sig cross-TU check (multi_tu case 12).
+    // Auto-link is for declaration-only clients (`Foundation.gh`) — the
+    // ObjC model. An explicit `-l galdfoundation` suppresses the auto one
+    // (no duplicate).
+    if !no_libc && !shared && !foundation_impl_inlined && !libs.iter().any(|l| l == "galdfoundation") {
+        if let Some(fdir) = find_libgaldfoundation(lib_dirs) {
+            if verbose { eprintln!("[galdc]   auto-linking Foundation from {}", fdir); }
+            clang_args.push("-L".to_string());
+            clang_args.push(fdir);
+            clang_args.push("-lgaldfoundation".to_string());
+        }
     }
     // User link flags: -L dirs then -l libs, right before the implicit-libs
     // tail — linker resolution order matters (libs must follow the objects,
@@ -1068,6 +1193,12 @@ fn main() {
         }
     }
 
+    // Does any TU in this binary inline Foundation implementations? Checked
+    // at the SOURCE level (see tu_imports_foundation_impl) across the main
+    // input and every extra TU — a mixed binary must not auto-link either.
+    let foundation_impl_inlined = tu_imports_foundation_impl(&input_path)
+        || extra_inputs.iter().any(|t| tu_imports_foundation_impl(t));
+
     match mode {
         "rewrite" => {
             // -rewrite-gald: output C code to file
@@ -1102,7 +1233,7 @@ fn main() {
                 p.to_string_lossy().to_string()
             });
 
-            compile_to_binary(&cc, &c_code, &bin_path, &include_dirs, &lib_dirs, &libs, &asm_files, &extra_c_files, &extra_objects, &frameworks, arch.as_deref(), verbose, no_libc, nostdinc, false);
+            compile_to_binary(&cc, &c_code, &bin_path, &include_dirs, &lib_dirs, &libs, &asm_files, &extra_c_files, &extra_objects, &frameworks, arch.as_deref(), verbose, no_libc, nostdinc, false, foundation_impl_inlined);
 
             for t in &extra_c_files {
                 let _ = fs::remove_file(t);
@@ -1130,7 +1261,7 @@ fn main() {
                 || bin_path.ends_with(".so")
                 || bin_path.ends_with(".dll");
 
-            compile_to_binary(&cc, &c_code, &bin_path, &include_dirs, &lib_dirs, &libs, &asm_files, &extra_c_files, &extra_objects, &frameworks, arch.as_deref(), verbose, no_libc, nostdinc, shared);
+            compile_to_binary(&cc, &c_code, &bin_path, &include_dirs, &lib_dirs, &libs, &asm_files, &extra_c_files, &extra_objects, &frameworks, arch.as_deref(), verbose, no_libc, nostdinc, shared, foundation_impl_inlined);
 
             for t in &extra_c_files {
                 let _ = fs::remove_file(t);
