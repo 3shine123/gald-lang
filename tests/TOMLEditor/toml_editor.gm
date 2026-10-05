@@ -16,7 +16,7 @@
 #include <fcntl.h>
 #include <time.h>
 #include <setjmp.h>
-#import <Foundation/Foundation.gh>
+#import <Foundation/Foundation.gm>
 #import "toml_editor_types.gh"
 
 // ── C helpers ────────────────────────────────────────────────────────────────

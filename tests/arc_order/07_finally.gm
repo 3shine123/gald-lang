@@ -1,4 +1,4 @@
-#import <Foundation/Foundation.gh>
+#import <Foundation/Foundation.gm>
 
 // ARC order 07: `@finally` runs on the way out of a `@try` whose body returns.
 // The return expression must be evaluated (and the local's cleanup ordered

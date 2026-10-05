@@ -5,7 +5,7 @@
 #import <termios.h>
 #import <unistd.h>
 #import <sys/select.h>
-#import <Foundation/Foundation.gh>
+#import <Foundation/Foundation.gm>
 
 // ==========================================================
 // 1. 终端非阻塞原始模式

@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <ncurses.h>
-#import <Foundation/Foundation.gh>
+#import <Foundation/Foundation.gm>
 #import <Terminal/Ncurses.h>
 #import <Terminal/Ncurses.gm>
 

@@ -1,5 +1,5 @@
 // 差分用例 4:catch 内 rethrow —— 必须传播到外层 catch,不得重入本层
-#import <Foundation/Foundation.gh>
+#import <Foundation/Foundation.gm>
 
 @interface Err : NFObject @end
 @implementation Err

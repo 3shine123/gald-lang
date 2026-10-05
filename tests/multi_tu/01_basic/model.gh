@@ -1,4 +1,4 @@
-#import <Foundation/Foundation.gh>
+#import <Foundation/Foundation.gm>
 
 /* Declarations shared by both TUs — the ONLY channel between them.
    main.gm never sees lib.gm; it only sees these method signatures. */

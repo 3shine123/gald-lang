@@ -1,4 +1,4 @@
-#import <Foundation/Foundation.gh>
+#import <Foundation/Foundation.gm>
 
 // NFAsync<T> declaration marker (AGENTS.md `NFAsync<T>` section):
 // - `- (NFAsync<T>)m` marks a suspending method. The parser unwraps the

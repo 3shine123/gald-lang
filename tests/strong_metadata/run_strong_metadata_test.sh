@@ -54,7 +54,7 @@ bad()  { echo "FAIL  $1"; fail=$((fail+1)); }
 lib="$work/lib"
 client="$work/client.gm"
 cat > "$client" <<'EOF'
-#import <Foundation/Foundation.decl.gh>
+#import <Foundation/Foundation.gh>
 #include <stdio.h>
 int main() {
     @autoreleasepool {
@@ -91,7 +91,7 @@ fi
 # (R2), so there must be no manual strong-metadata path left. A script still
 # carrying the old spelling must be rejected, not silently accepted.
 cat > "$work/flag_probe.gm" <<'EOF'
-#import <Foundation/Foundation.decl.gh>
+#import <Foundation/Foundation.gh>
 int main() { return 0; }
 EOF
 # Flag AFTER the input hits the option loop → "Unknown argument"; flag BEFORE

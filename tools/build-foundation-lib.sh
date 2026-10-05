@@ -10,17 +10,8 @@
 #
 #   galdc app.gm -I include -L<outdir> -lgaldfoundation -o app
 #
-# WHY PER-TU WORKS (and the old single-TU build needed the flag)
-# --------------------------------------------------------------
-# Building `Foundation.gh` as one TU inlines every implementation through
-# `#import "*.gm"`; none of them is the main file, so ALL metadata came out
-# weak and a client's declaration-only stub could win the link (exit 139) —
-# that is why the old script mandated -fstrong-metadata. Compiling each .gm
-# separately makes its @implementation the main file: the owned class gets
-# strong metadata (plus the §10 statically-initialized strong NFClass), while
-# implementations reached via #import stay weak non-owner copies that merge
-# harmlessly with the owner's strong tables. `gald_metaInit` stays weak and
-# only back-fills what static initialization did not already cover.
+# The client imports `Foundation.gh` — the DECLARATION-ONLY umbrella (per the
+# project's .gh = declarations / .gm = implementations convention).
 set -euo pipefail
 
 root="$(cd "$(dirname "$0")/.." && pwd)"
@@ -82,7 +73,8 @@ check_strong() {
 
 echo "[1/4] transpile + compile each Foundation TU (wrapper = decl surface + implementation)"
 # Each TU is a generated WRAPPER: the full declaration surface
-# (Foundation.decl.gh) first, then the implementation .gm's own text — the
+# (Foundation.gh, the declaration-only umbrella) first, then the
+# implementation .gm's own text — the
 # @implementation lands in the MAIN FILE (not via #import), so R2 ownership
 # still applies and this TU's metadata is strong. The full surface gives
 # every TU the same shared vtable segment as a client (same __sig), and stub
@@ -93,11 +85,17 @@ echo "[1/4] transpile + compile each Foundation TU (wrapper = decl surface + imp
 # -I include/Foundation keeps that resolvable from the wrapper's location.
 objs=()
 tus="$outdir/_tus"
+rm -rf "$tus"   # stale wrappers from an interrupted earlier run must not survive
 mkdir -p "$tus"
+rm -f "$outdir"/*.o   # stale objects from an earlier run must not linger into [3/4]
 for gm in include/Foundation/*.gm; do
     name="$(basename "$gm" .gm)"
+    # Skip the self-contained umbrella (Foundation.gm): it is not a class —
+    # it has no vtable to verify, and archiving it would re-inline every
+    # implementation into the library, defeating the per-TU build.
+    [[ "$name" == "Foundation" ]] && continue
     wrap="$tus/$name.gm"
-    { echo '#import <Foundation/Foundation.decl.gh>'; cat "$gm"; } > "$wrap"
+    { echo '#import <Foundation/Foundation.gh>'; cat "$gm"; } > "$wrap"
     c="$outdir/$name.c"
     o="$outdir/$name.o"
     "$galdc" -rewrite-gald "$wrap" -o "$c" -I include -I include/Foundation
@@ -117,6 +115,7 @@ echo "[3/4] verify per-TU owned metadata is strong (nm)"
 # shipping a landmine.
 for gm in include/Foundation/*.gm; do
     name="$(basename "$gm" .gm)"
+    [[ "$name" == "Foundation" ]] && continue   # umbrella has no vtable (see [1/4])
     check_strong "$outdir/$name.o" "$name"
 done
 

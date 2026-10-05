@@ -1,4 +1,4 @@
-#import <Foundation/Foundation.gh>
+#import <Foundation/Foundation.gm>
 
 struct Inner { int a; int b[2]; };
 struct Outer { struct Inner in; int c; };

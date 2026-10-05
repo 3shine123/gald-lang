@@ -12,7 +12,7 @@
  *     to a callee that requires a non-null argument — pass a real object, or
  *     declare the parameter 'nullable'
  */
-#import <Foundation/Foundation.gh>
+#import <Foundation/Foundation.gm>
 
 @interface Greeter : NFObject
 - (void)greet:(nonnull NFString *)name;

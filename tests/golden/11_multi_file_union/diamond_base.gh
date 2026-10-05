@@ -1,7 +1,7 @@
 // lang-test/diamond_base.gh
 // 菱形继承与多重协议的前置声明文件
 
-#import <Foundation/Foundation.gh>
+#import <Foundation/Foundation.gm>
 
 // 1. 菱形继承协议网
 @protocol NFBaseProtocol <NFObject>

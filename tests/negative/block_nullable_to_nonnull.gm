@@ -14,7 +14,7 @@
  *
  * The fix is a guard: `if (s) { sink(s); }`.
  */
-#import <Foundation/Foundation.gh>
+#import <Foundation/Foundation.gm>
 
 typedef void (^SinkBlock)(nonnull NFString *s);
 

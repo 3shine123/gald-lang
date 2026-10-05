@@ -1,4 +1,4 @@
-#import <Foundation/Foundation.gh>
+#import <Foundation/Foundation.gm>
 
 // Negative: an object-literal subject with a dangling-comparison arm and no
 // object arm. `__auto_type __gald_sw = @7;` still yields a *pointer*, so

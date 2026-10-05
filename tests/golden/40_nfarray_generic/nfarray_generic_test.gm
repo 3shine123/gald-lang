@@ -1,6 +1,6 @@
 // NFArray<T> true monomorphization: objectAtIndex: returns T, addObject takes T.
 // Bare NFArray (no args) keeps erased behavior.
-#import <Foundation/Foundation.gh>
+#import <Foundation/Foundation.gm>
 
 int main() {
     // Immutable typed array

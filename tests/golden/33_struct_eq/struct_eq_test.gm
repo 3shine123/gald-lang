@@ -1,5 +1,5 @@
 #include <string.h>
-#import <Foundation/Foundation.gh>
+#import <Foundation/Foundation.gm>
 
 // struct ==/!= value comparison (route map item #2):
 // both operands the same value-struct type → field-wise gald_struct_eq_<tag>.

@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#import <Foundation/Foundation.gh>
+#import <Foundation/Foundation.gm>
 
 int main() {
     @autoreleasepool {

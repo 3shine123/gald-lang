@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#import <Foundation/Foundation.gh>
+#import <Foundation/Foundation.gm>
 
 @interface Widget : NFObject
 - (int)value;

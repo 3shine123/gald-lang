@@ -1,4 +1,4 @@
-#import <Foundation/Foundation.gh>
+#import <Foundation/Foundation.gm>
 
 /* Namespaces across TUs: `::` is encoded as `__` in C symbols, so a class
    defined in the lib TU under a namespace must still be reachable from the

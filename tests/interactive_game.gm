@@ -2,7 +2,7 @@
 #import <stdlib.h>
 #import <string.h>
 #import <time.h>
-#import <Foundation/Foundation.gh>
+#import <Foundation/Foundation.gm>
 
 // ==========================================================
 // 1. @protocol 声明：战斗契约

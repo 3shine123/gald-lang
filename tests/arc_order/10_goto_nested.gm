@@ -1,4 +1,4 @@
-#import <Foundation/Foundation.gh>
+#import <Foundation/Foundation.gm>
 
 // ARC order 10: `goto` leaving TWO nested scopes releases both, innermost
 // first (reverse declaration / stack order).

@@ -2020,3 +2020,13 @@ switch (subject) {
 - **连带修真 bug 1——meta-vtable 桩引用**：meta-vtable 实例对"声明可见但本 TU 未实现"的类方法曾无条件引用 `Owner_mname` → 链接 undefined（实例 vtable 早有 EMITTED_METHODS"槽位保留、引用不发"规则，meta-vtable 漏镜像）。修法：同款 `method_is_emitted(owner, mname) || owner != 本类` 判定，own 未实现槽位 NULL。
 - **连带修真 bug 2——源文件污染（方向性错误，已回退）**：曾直接给 9 个 `.gm` 补 decl.gh import——`#import` 链让声明面泄漏进所有内联方，自包含 TU 桩 vtable 引用库符号 → 无库链接 undefined（test_all 7 个失败）。教训：**声明面扩大只能发生在库构建的 wrapper 里，不能进源文件**。
 - **回归门槛（全部实测）**：cargo 153/0、multi_tu 12/12、strong_metadata 10/10、arc_intern ASan PASS、test_all **347/355, 0 failed**（6 canceled 交互式、2 个 `-F` 既有基线、SUSPECT=0）——与基线精确一致。
+
+### Foundation 伞头交换：`Foundation.gh` 回归纯声明 + 新增 `Foundation.gm` 自包含伞头 ✅ (2026-10-03, 本会话)
+
+> 用户拍板：`#import <Foundation/Foundation.decl.gh>` 这个名字太怪——按项目自己的约定（`.gh` = 声明、`.gm` = 实现），`Foundation.gh` 里内联实现才是异类。交换后与 C 的 `<foo.h>` + `-lfoo` 惯例对齐。
+
+- **交换**：`Foundation.gh` = 纯声明伞头（原 `Foundation.decl.gh` 的内容，注释重写）；`Foundation.gm` = 自包含伞头（原 `Foundation.gh` 的内容——9 个 `.gh` + 9 个 `.gm` 全列）；`Foundation.decl.gh` **删除**；`tools/make-decl-headers.sh`（其唯一用途是生成 decl.gh）一并删除。
+- **全局迁移**：229 个自包含 importer（`Foundation.gh` → `Foundation.gm`，`search_replace` 一轮 + 3 个引号形式手补）+ 库模式引用（`build-foundation-lib.sh` wrapper 前置行、strong_metadata 套件 :57/:94 客户端探针；套件 :197/:206/:231 的 standalone 探针在新语义下**恰好正确**，不动）。
+- **实施中修掉的三个坑（探针实证）**：① 重写 `Foundation.gh` 时漏抄 `NFMutableArray.gh`（照抄了 decl.gh 的 8 行清单）→ 客户端 `NFMutableArray` 未声明；② `_tus/` 与 `.o` 的**陈旧残留**让库构建 nm 校验扫到上一轮的死文件（`cannot open import: Foundation/Foundation.decl.gh`）→ 脚本补 `rm -rf _tus` + `rm -f *.o`；③ 新伞头 `Foundation.gm` 被 `*.gm` 通配扫进逐 TU 构建 → 它不是类（无 vtable）且会重复内联全部实现 → [1/4]/[3/4] 两循环都跳过 `Foundation` 名。
+- **探针双绿**：自包含（`Foundation.gm`，exit=0）+ P3 库模式（声明伞头 + `-lgaldfoundation`，exit=0）；回归 cargo 153/0、multi_tu 12/12、strong_metadata 10/10、arc_intern PASS、test_all **347/355, 0 failed**（SUSPECT=0）——与基线精确一致。
+- **文档**：README/CHINESE 的 Hello World 示例改 `Foundation.gm`（声明伞头裸编译会链接失败）；库模式示例全部换 `Foundation.gh`；`decl.gh` 提及仅存于历史记录节（如实存档，不改写）。

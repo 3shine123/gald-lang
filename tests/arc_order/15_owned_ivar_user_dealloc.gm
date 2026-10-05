@@ -1,4 +1,4 @@
-#import <Foundation/Foundation.gh>
+#import <Foundation/Foundation.gm>
 
 // ARC order 15: a class WITH a user `dealloc` owns its ivar policy. ARC must
 // NOT add a synthesized release on top of it — the body below already releases

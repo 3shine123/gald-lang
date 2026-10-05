@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-#import <Foundation/Foundation.gh>
+#import <Foundation/Foundation.gm>
 
 @interface Game : NFObject
 @property int board[9];

@@ -1,4 +1,4 @@
-#import <Foundation/Foundation.gh>
+#import <Foundation/Foundation.gm>
 
 // NEGATIVE: `goto` that jumps INTO a nested scope past an owned initializer.
 //

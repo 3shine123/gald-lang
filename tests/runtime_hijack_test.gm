@@ -2,7 +2,7 @@
 // 专为 galdc 设计的「匿名多态、不透明指针劫持与复合边界」极限测试
 // 基准框架：NFFoundation
 
-#import <Foundation/Foundation.gh>
+#import <Foundation/Foundation.gm>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

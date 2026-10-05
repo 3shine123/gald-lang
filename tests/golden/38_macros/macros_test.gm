@@ -5,7 +5,7 @@
 // lexing — the definition never reaches the C prelude.
 // Track 2 (C): plain C bodies pass through verbatim and are expanded by the
 // C compiler as before.
-#import <Foundation/Foundation.gh>
+#import <Foundation/Foundation.gm>
 #include <stdio.h>
 
 // ── gald-track macros (expanded by galdc) ──

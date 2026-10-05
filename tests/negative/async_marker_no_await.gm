@@ -2,7 +2,7 @@
 // must not lie (same philosophy as bare `@throws` requiring a real throw).
 // Expected error: 'compute:' is marked 'NFAsync<T>' but its body never
 // suspends — remove the marker or add an '@await'
-#import <Foundation/Foundation.gh>
+#import <Foundation/Foundation.gm>
 
 @interface F : NFObject
 - (NFAsync<int>)compute:(int)n;

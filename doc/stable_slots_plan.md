@@ -379,3 +379,5 @@ P3+自有类端到端             rc=0（len=5 s=hello run=42；App 为客户端
 **回归门槛（全部实测）**：cargo 153/0、multi_tu 12/12、strong_metadata 10/10（check 3 已改测旗标删除的响亮拒绝）、arc_intern ASan PASS、test_all **347/355, 0 failed**（6 canceled 交互式、2 个 `-F` 既有基线、SUSPECT=0）——与基线精确一致。
 
 **残留挂账**：`gald_metaInit` 弱合并漏初始化对 R2 归属类已被静态强 `NFClass` 缓解；`#import "*.gm"` 的库构建路径（Foundation.gh 单 TU）仍需 metaInit 真身——已在构建脚本注释与 AGENTS 中如实声明。
+
+> **追记（2026-10-03）——伞头交换**：用户拍板 `Foundation.decl.gh` 命名太怪，按 `.gh`/`.gm` 约定交换：**`Foundation.gh` 现为纯声明伞头**（本文 136–152 行等处写的 `Foundation.decl.gh` 一律读作它），**`Foundation.gm` 为自包含伞头**（原 `Foundation.gh` 的实现内联形态），`Foundation.decl.gh` 与 `tools/make-decl-headers.sh` 已删除。`build-foundation-lib.sh` 的 wrapper 前置行相应换为 `Foundation.gh`。上文历史记录保留原样，仅作对照。

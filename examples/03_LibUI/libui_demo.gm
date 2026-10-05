@@ -6,7 +6,7 @@
  * wrapper (include/LibUI.gm) keeps the C in C.
  * ───────────────────────────────────────────────────────────────────────── */
 
-#import <Foundation/Foundation.gh>
+#import <Foundation/Foundation.gm>
 #import <LibUI.gh>
 /* Single-TU build: the wrapper's implementation is inlined into this same
  * translation unit. (galdc's uniform-vtable layout is currently per-TU, so

@@ -9,7 +9,7 @@
 //   "创建 task 并交给调度器"是 C 槽位里没有、必须编译器/运行时机制的事；
 //   裸 launch 与标识符歧义（`int launch = 1;` 必须仍能编过）——与 @await 同判。
 
-#import <Foundation/Foundation.gh>
+#import <Foundation/Foundation.gm>
 #import <Foundation/NFAsync.gh>        // 提案：与 NFString / NFArray 并列入 Foundation
 
 @interface Cooker : NFObject

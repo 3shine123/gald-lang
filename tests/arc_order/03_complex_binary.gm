@@ -1,4 +1,4 @@
-#import <Foundation/Foundation.gh>
+#import <Foundation/Foundation.gm>
 
 // ARC order 03: a complex binary expression that calls two different selectors
 // on the same owned local — both calls must complete before the release.

@@ -1,4 +1,4 @@
-#import <Foundation/Foundation.gh>
+#import <Foundation/Foundation.gm>
 
 // Scenario 4 of the EH acceptance matrix: @finally ordering.
 //

@@ -1,4 +1,4 @@
-#import <Foundation/Foundation.gh>
+#import <Foundation/Foundation.gm>
 
 // async/await (route map item #4, milestone 1):
 // - a method whose body contains `@await` is async (no annotation needed)

@@ -1,4 +1,4 @@
-#import <Foundation/Foundation.gh>
+#import <Foundation/Foundation.gm>
 
 /* Generics across TUs: monomorphisation mangles `Stack<int *>` into a
    dedicated C struct + vtable. The client names the instantiation; the lib TU

@@ -1299,7 +1299,7 @@ cargo test --workspace
 
 ### Precompiled Foundation Library
 
-Instead of inlining Foundation into every TU (`#import <Foundation/Foundation.gh>`), build it once as a static library and link every project against it — faster per-file compiles, one copy of the implementation:
+Instead of inlining Foundation into every TU (`#import <Foundation/Foundation.gm>`, the self-contained umbrella), build it once as a static library and link every project against it — faster per-file compiles, one copy of the implementation:
 
 ```bash
 ./tools/build-foundation-lib.sh            # → target/foundation/libgaldfoundation.a
@@ -1310,7 +1310,7 @@ The script transpiles each Foundation `.gm` as its **own translation unit** (a g
 Clients then import only the declaration header:
 
 ```gald
-#import <Foundation/Foundation.decl.gh>    // declarations only — no implementations inlined
+#import <Foundation/Foundation.gh>    // declarations only — no implementations inlined
 
 int main() {
     NFString *s = [NFString stringWithUTF8String:"hello"];
@@ -1333,7 +1333,7 @@ Notes:
 
 ```gald
 #include <stdio.h>
-#import <Foundation/Foundation.gh>
+#import <Foundation/Foundation.gm>
 
 @interface Greeter : NFObject
 - (void)greet;

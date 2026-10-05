@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#import <Foundation/Foundation.gh>
+#import <Foundation/Foundation.gm>
 
 // 前置声明
 @class TacticalMechEntity;

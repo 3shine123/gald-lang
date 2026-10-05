@@ -1,5 +1,5 @@
 // Protocol conformance: all required methods implemented — must compile cleanly.
-#import <Foundation/Foundation.gh>
+#import <Foundation/Foundation.gm>
 
 @protocol Drawable
 @required

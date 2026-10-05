@@ -1,4 +1,4 @@
-#import <Foundation/Foundation.gh>
+#import <Foundation/Foundation.gm>
 
 // ARC order 08: a block literal captures an owned local, and the block is
 // CALLED inside the exit expression. The capture must be established (block

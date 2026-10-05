@@ -18,7 +18,7 @@
  * tests/golden/45_nullability/nullability.gm for the narrowing forms that
  * satisfy the checker.
  */
-#import <Foundation/Foundation.gh>
+#import <Foundation/Foundation.gm>
 
 @interface Sink : NFObject
 - (void)need:(nonnull NFString *)v;

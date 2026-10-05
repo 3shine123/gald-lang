@@ -1,4 +1,4 @@
-#import <Foundation/Foundation.gh>
+#import <Foundation/Foundation.gm>
 
 // ObjC type-introspection dispatch trio on the root class:
 //   isKindOfClass:      — isa-chain walk (official ObjC spelling)

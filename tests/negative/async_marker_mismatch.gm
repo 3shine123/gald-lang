@@ -3,7 +3,7 @@
 // agree.
 // Expected error: 'NFAsync' marker mismatch on 'compute:': the @interface
 // and @implementation disagree — the marker is part of the method signature
-#import <Foundation/Foundation.gh>
+#import <Foundation/Foundation.gm>
 
 @interface F : NFObject
 - (NFAsync<int>)compute:(int)n;

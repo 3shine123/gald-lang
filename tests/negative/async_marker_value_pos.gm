@@ -3,7 +3,7 @@
 // exist (callers `@await` and get `T` directly).
 // Expected error: 'NFAsync<T>' is a declaration marker, not a value type
 // (variable) — '@await' the async call instead
-#import <Foundation/Foundation.gh>
+#import <Foundation/Foundation.gm>
 
 int main() {
     NFAsync<int> x;

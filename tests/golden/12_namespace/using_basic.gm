@@ -1,6 +1,6 @@
 // test: @using basic — import single class with short name
 #include <stdio.h>
-#import <Foundation/Foundation.gh>
+#import <Foundation/Foundation.gm>
 
 @namespace Game
     @interface Player : NFObject {

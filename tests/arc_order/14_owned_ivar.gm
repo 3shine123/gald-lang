@@ -1,4 +1,4 @@
-#import <Foundation/Foundation.gh>
+#import <Foundation/Foundation.gm>
 
 // ARC order 14: owned object ivars must be released when their owner dies
 // (ObjC ARC generates this; previously they leaked).

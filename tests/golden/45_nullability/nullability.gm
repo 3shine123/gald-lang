@@ -3,7 +3,7 @@
 // Every case here must COMPILE AND RUN. The error paths live in
 // tests/negative/ (nullable_to_nonnull.gm etc.) — this file is the positive
 // half: annotations that are correct must stay silent, and narrow must work.
-#import <Foundation/Foundation.gh>
+#import <Foundation/Foundation.gm>
 
 @interface Port : NFObject
 // Unannotated → unspecified, accepts anything (progressive adoption).

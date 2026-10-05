@@ -3,7 +3,7 @@
 // Companion to the freestanding stress (tests/stress/baremetal) — this one
 // uses Foundation + ARC + @await, everything the bare-metal build can't.
 
-#import <Foundation/Foundation.gh>
+#import <Foundation/Foundation.gm>
 #include <stdio.h>
 
 // ── external assembly (asm_host.s) ──

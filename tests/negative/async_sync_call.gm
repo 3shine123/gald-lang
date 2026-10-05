@@ -1,4 +1,4 @@
-#import <Foundation/Foundation.gh>
+#import <Foundation/Foundation.gm>
 // EXPECT_FAIL: sync context (main) calling a non-void async method
 // → cannot call suspending method 'compute:' from non-async context
 @interface F : NFObject

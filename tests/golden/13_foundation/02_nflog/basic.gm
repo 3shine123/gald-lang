@@ -1,6 +1,6 @@
 // test: NFLog basic output
 #include <stdio.h>
-#import <Foundation/Foundation.gh>
+#import <Foundation/Foundation.gm>
 
 int main() {
     @autoreleasepool {

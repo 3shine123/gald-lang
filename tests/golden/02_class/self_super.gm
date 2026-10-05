@@ -1,5 +1,5 @@
 #include <stdio.h>
-#import <Foundation/Foundation.gh>
+#import <Foundation/Foundation.gm>
 
 @interface Base : NFObject
 - (void)identify;

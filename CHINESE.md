@@ -1256,7 +1256,7 @@ cargo test --workspace
 
 ### 预编译 Foundation 库
 
-不必在每个 TU 里内联 Foundation（`#import <Foundation/Foundation.gh>`），可以一次构建成静态库、各项目链接——单文件编译更快，实现只存一份：
+不必在每个 TU 里内联 Foundation（`#import <Foundation/Foundation.gm>`，自包含伞头），可以一次构建成静态库、各项目链接——单文件编译更快，实现只存一份：
 
 ```bash
 ./tools/build-foundation-lib.sh            # → target/foundation/libgaldfoundation.a
@@ -1267,7 +1267,7 @@ cargo test --workspace
 客户端随后只导入声明头：
 
 ```gald
-#import <Foundation/Foundation.decl.gh>    // 纯声明——不内联任何实现
+#import <Foundation/Foundation.gh>    // 纯声明——不内联任何实现
 
 int main() {
     NFString *s = [NFString stringWithUTF8String:"hello"];
@@ -1290,7 +1290,7 @@ galdc app.gm -I include -L target/foundation -lgaldfoundation -o app
 
 ```gald
 #include <stdio.h>
-#import <Foundation/Foundation.gh>
+#import <Foundation/Foundation.gm>
 
 @interface Greeter : NFObject
 - (void)greet;

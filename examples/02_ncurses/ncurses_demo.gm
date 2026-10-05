@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <ncurses.h>
-#import <Foundation/Foundation.gh>
+#import <Foundation/Foundation.gm>
 #import <Terminal/Ncurses.h>
 #import <Terminal/Ncurses.gm>
 

@@ -1,4 +1,4 @@
-#import <Foundation/Foundation.gh>
+#import <Foundation/Foundation.gm>
 
 // Scenario 15 of the EH acceptance matrix: @await coexisting with the
 // exception machinery.

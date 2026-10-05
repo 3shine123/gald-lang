@@ -1,4 +1,4 @@
-#import <Foundation/Foundation.gh>
+#import <Foundation/Foundation.gm>
 
 /* Blocks across a TU boundary: the client passes a Gald block to a lib-TU
    method. The block must be copied (it outlives the call frame) and invoked

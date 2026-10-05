@@ -1,6 +1,6 @@
 // test: alloc/init pattern (chained message send)
 #include <stdio.h>
-#import <Foundation/Foundation.gh>
+#import <Foundation/Foundation.gm>
 
 @interface Widget : NFObject {
     @public

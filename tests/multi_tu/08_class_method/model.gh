@@ -1,4 +1,4 @@
-#import <Foundation/Foundation.gh>
+#import <Foundation/Foundation.gm>
 
 /* Class methods across TUs: `+` methods dispatch through the meta vtable, which
    is a *separate* per-class struct (GALD_META_VTABLE_$_X). That is a second

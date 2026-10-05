@@ -9,7 +9,7 @@
 #ifndef LIBUI_NH
 #define LIBUI_NH
 
-#import <Foundation/Foundation.gh>
+#import <Foundation/Foundation.gm>
 
 @namespace LibUI
 

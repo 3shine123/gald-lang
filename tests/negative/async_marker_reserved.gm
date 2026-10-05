@@ -2,7 +2,7 @@
 // the parser unwraps in return-type position.
 // Expected error: 'NFAsync' is reserved for the async return-type marker —
 // pick a different class name
-#import <Foundation/Foundation.gh>
+#import <Foundation/Foundation.gm>
 
 @interface NFAsync : NFObject
 @end

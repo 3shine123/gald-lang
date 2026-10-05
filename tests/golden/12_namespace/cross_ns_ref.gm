@@ -1,6 +1,6 @@
 // test: cross-namespace references in method params and @using inside @namespace
 #include <stdio.h>
-#import <Foundation/Foundation.gh>
+#import <Foundation/Foundation.gm>
 
 @namespace Game
     @interface Player : NFObject {

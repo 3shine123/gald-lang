@@ -5,7 +5,7 @@
 
 #include <stdio.h>
 #include <string.h>
-#import <Foundation/Foundation.gh>
+#import <Foundation/Foundation.gm>
 
 extern int asm_x64_square(int x);
 extern int asm_x64_sum3(int a, int b, int c);
