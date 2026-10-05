@@ -2030,3 +2030,15 @@ switch (subject) {
 - **实施中修掉的三个坑（探针实证）**：① 重写 `Foundation.gh` 时漏抄 `NFMutableArray.gh`（照抄了 decl.gh 的 8 行清单）→ 客户端 `NFMutableArray` 未声明；② `_tus/` 与 `.o` 的**陈旧残留**让库构建 nm 校验扫到上一轮的死文件（`cannot open import: Foundation/Foundation.decl.gh`）→ 脚本补 `rm -rf _tus` + `rm -f *.o`；③ 新伞头 `Foundation.gm` 被 `*.gm` 通配扫进逐 TU 构建 → 它不是类（无 vtable）且会重复内联全部实现 → [1/4]/[3/4] 两循环都跳过 `Foundation` 名。
 - **探针双绿**：自包含（`Foundation.gm`，exit=0）+ P3 库模式（声明伞头 + `-lgaldfoundation`，exit=0）；回归 cargo 153/0、multi_tu 12/12、strong_metadata 10/10、arc_intern PASS、test_all **347/355, 0 failed**（SUSPECT=0）——与基线精确一致。
 - **文档**：README/CHINESE 的 Hello World 示例改 `Foundation.gm`（声明伞头裸编译会链接失败）；库模式示例全部换 `Foundation.gh`；`decl.gh` 提及仅存于历史记录节（如实存档，不改写）。
+
+### Foundation 库自动链接 — `find_libgaldfoundation` ✅ (2026-10-03, 本会话)
+
+> 用户拍板（"可以"）：让 galdc 像 `find_libgald` 一样自动探测并链接 `libgaldfoundation.a`，库模式命令行缩到 `galdc app.gm -o app`。
+
+- **实现**（`crates/galdc/src/main.rs`）：`find_libgaldfoundation(custom_libs)` 与 `find_libgald` 同款策略——exe 旁 → `target/foundation`（仓库内 dev 位置）→ `/opt/gald/lib` → `/usr/local/lib/gald` → 用户 `-L` 目录；`compile_to_binary` 新参 `foundation_impl_inlined` 布尔，找到即发 `-L dir -lgaldfoundation`（verbose 打 `[galdc] auto-linking Foundation from …`）。
+- **门控（关键——两种误开都会炸 `__sig`）**：仅**纯声明客户端**（`Foundation.gh`）自动链；`foundation_impl_inlined` 为真时跳过。判据是**源码级传递闭包**（`tu_imports_foundation_impl` → `foundation_impl_scan`，visited 去重防环）：主文件 + 每个 extra TU 的 `#import` 链中只要有一条解析到 bundle `include/Foundation/**.gm` 即真——直接 import（`Foundation.gm`）与**经 `.gh` 转手**（cross_file_test 经 `diamond_base.gh`、json_editor 经 `json_editor_types.gh`）都算。`-ffreestanding`、shared 模式、显式 `-lgaldfoundation` 也抑制。
+- **文本判别式两次被证伪（勿重蹈）**：① `= NF<Class>_`（vtable 槽位绑定行）——decl-only 客户端的 **meta vtable 类方法槽位**同样引用 `NF<Class>_<sel>` 符号（`.dictionaryWithObjects_forKeys_count_ = NFDictionary_…`），decl-only 也命中 → 纯声明客户端被误跳过、链接 undefined（exit=127）；② `struct NF<cls> {`——`@interface` 的 ivar 布局结构体 decl-only 客户端照发，无区分度。生成 C 上的文本启发式无法区分定义/原型/槽位引用/桩实例，**必须走源码 import 面**。
+- **探针实证的机理**（`-why_load`）：自包含 TU 的 `GALD_CLASS_$_NF*` 是 common 符号，**归档成员因这些符号被拉入**，其强 vtable（纯 Foundation 段签名）在双 TU 场景赢得 weak 合并 → `__sig` 启动期 abort（case 12）；单 TU 自包含 + 链库不炸是因为全 TU 只有一个 Foundation 面（自己的弱实例赢）——所以 case 12（main.gm+lib.gm 两 TU）才是爆炸形态。
+- **连带修复 test_all 2 failed**：首版判据只扫主文件的**直接** import 行，漏了传递链（cross_file_test/json_editor 的 Foundation 经 `.gh` 转手）→ MRC retry 链路运行期 `vtable layout mismatch`（exit 134）。改为传递闭包后 test_all **347/355, 0 failed**（cross_file_test 转 PASS_MRC、json_editor 恢复 CANCELED+编译替代验收）。
+- **探针矩阵全绿**：纯自动（无 -I/-L/-l，decl-only 客户端 auto-link + 运行正确）/ 显式旗标不重复（0 次 auto-link）/ 自包含跳过（0 次且 exit=0）/ 库缺席静默无操作（自包含照跑；decl-only 响亮报 undefined——预期）/ freestanding 跳过 / case 12 通过。
+- **回归**：cargo 153/0、multi_tu 12/12、strong_metadata 10/10、arc_intern PASS、test_all **347/355, 0 failed, SUSPECT=0**——与基线精确一致。

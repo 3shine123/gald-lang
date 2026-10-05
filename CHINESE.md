@@ -135,7 +135,8 @@ galdc main.gm lib.o libfoo.a -o app        # gald 源码与预编译目标混用
 
 # 预编译 Foundation 库：构建一次，处处链接
 ./tools/build-foundation-lib.sh                            # → target/foundation/libgaldfoundation.a
-galdc app.gm -I include -L target/foundation -lgaldfoundation -o app
+galdc app.gm -I include -L target/foundation -lgaldfoundation -o app   # 显式链接
+galdc app.gm -o app                                        # 或：库可找到时自动链接（纯声明客户端）
 
 # 编译 + 运行
 galdc run hello.gm
@@ -1277,12 +1278,16 @@ int main() {
 ```
 
 ```bash
-galdc app.gm -I include -L target/foundation -lgaldfoundation -o app
+galdc app.gm -I include -L target/foundation -lgaldfoundation -o app   # 显式链接
+
+# ……或者让 galdc 自己找到并链接库：
+galdc app.gm -o app
 ```
 
 要点：
 
 - **无需记任何旗标**——主文件持有 `@implementation` 自动为强；纯声明客户端保持弱，这正是正确的（库的真表在链接中胜出）。
+- **自动链接**——galdc 找得到 `libgaldfoundation.a`（二进制旁、`target/foundation`、`/opt/gald/lib`、`/usr/local/lib/gald` 或你的 `-L` 目录）就自动链。只对**纯声明客户端**生效：内联了 Foundation 实现（`Foundation.gm`——直接或经导入的 `.gh` 传递）的 TU 会跳过，自包含程序与多 TU 构建永远见不到库的强 vtable。`-ffreestanding`、shared 模式、显式 `-lgaldfoundation` 都会抑制自动链接。
 - **`gald_metaInit()`** 只对通过 `#import "*.gm"` 获取实现的伞形构建（单 TU 构建、无任何 TU 持有元数据）**真正必需**。用预编译库——以及所有常规 `galdc` 工作流——元数据在加载期静态初始化，该调用是幂等空操作。
 - 客户端重实现库类，对归档而言是标准 C 覆盖语义（库成员未被引用就保持休眠）——但未实现方法的槽位是 NULL，所以派发到的方法必须全部自己实现。
 

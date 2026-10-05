@@ -136,7 +136,8 @@ galdc main.gm lib.o libfoo.a -o app        # mix gald sources with prebuilt obje
 
 # Precompiled Foundation library: build once, link in every project
 ./tools/build-foundation-lib.sh                            # → target/foundation/libgaldfoundation.a
-galdc app.gm -I include -L target/foundation -lgaldfoundation -o app
+galdc app.gm -I include -L target/foundation -lgaldfoundation -o app   # explicit
+galdc app.gm -o app                                        # or: auto-linked when findable (decl-only clients)
 
 # Compile + run
 galdc run hello.gm
@@ -1320,12 +1321,16 @@ int main() {
 ```
 
 ```bash
-galdc app.gm -I include -L target/foundation -lgaldfoundation -o app
+galdc app.gm -I include -L target/foundation -lgaldfoundation -o app   # explicit
+
+# … or let galdc find and link the library itself:
+galdc app.gm -o app
 ```
 
 Notes:
 
 - **No flags to remember** — a main file holding `@implementation` is strong automatically; declaration-only clients stay weak, which is correct (the library's tables win the link).
+- **Auto-link** — galdc links `libgaldfoundation.a` automatically when it can find one (next to the binary, `target/foundation`, `/opt/gald/lib`, `/usr/local/lib/gald`, or your `-L` dirs). It only fires for **declaration-only clients**: a TU that inlines Foundation implementations (`Foundation.gm`, directly or through an imported `.gh`) is skipped, so self-contained programs and multi-TU builds never see the library's strong vtables. `-ffreestanding`, shared mode, and an explicit `-lgaldfoundation` all suppress the auto link.
 - **`gald_metaInit()`** is only *required* for umbrella builds that reach implementations through `#import "*.gm"` (single-TU builds where no TU owns the metadata). With the precompiled library — and with every normal `galdc` workflow — metadata is statically initialized at load time and the call is an idempotent no-op.
 - Re-implementing a library class in a client is standard C override semantics against the archive (the library's member stays dormant unless referenced) — but slots for methods you do not implement stay NULL, so implement everything you dispatch.
 
