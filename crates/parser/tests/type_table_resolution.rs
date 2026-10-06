@@ -1,11 +1,11 @@
 //! C resolves `(X *)p` versus `x * y` by the *symbol table*, not by token shape:
-//! a name is a type name or it is an ordinary identifier. galdc hands the parser
-//! a type-name table recovered from the C preprocessor (`galdc::ctype_probe`)
+//! a name is a type name or it is an ordinary identifier. nopac hands the parser
+//! a type-name table recovered from the C preprocessor (`nopac::ctype_probe`)
 //! and marks it authoritative; these tests pin the decisions that follow, plus
 //! the fallback behaviour when no authoritative table is available (which must
 //! never reject code).
 
-use gald_parser::Parser;
+use nopa_parser::Parser;
 
 fn type_names(names: &[&str]) -> Vec<String> {
     names.iter().map(|s| s.to_string()).collect()
@@ -20,13 +20,13 @@ fn statements(src: &str, names: &[String], complete: bool) -> Vec<String> {
         .find(|d| d.name.as_deref() == Some("main"))
         .expect("main");
     let mut out = Vec::new();
-    if let gald_cst::CstDeclData::Function { body: Some(b), .. } = &main_fn.data {
-        if let gald_cst::CstStmtData::Compound(stmts) = &b.data {
+    if let nopa_cst::CstDeclData::Function { body: Some(b), .. } = &main_fn.data {
+        if let nopa_cst::CstStmtData::Compound(stmts) = &b.data {
             for s in stmts {
                 out.push(match &s.data {
-                    gald_cst::CstStmtData::Decl(d) => format!("Decl({})", d.name.as_deref().unwrap_or("?")),
-                    gald_cst::CstStmtData::Expr(_) => "Expr".to_string(),
-                    gald_cst::CstStmtData::Return(_) => "Return".to_string(),
+                    nopa_cst::CstStmtData::Decl(d) => format!("Decl({})", d.name.as_deref().unwrap_or("?")),
+                    nopa_cst::CstStmtData::Expr(_) => "Expr".to_string(),
+                    nopa_cst::CstStmtData::Return(_) => "Return".to_string(),
                     other => format!("Other({:?})", std::mem::discriminant(other)),
                 });
             }

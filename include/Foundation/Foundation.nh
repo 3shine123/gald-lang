@@ -1,0 +1,28 @@
+// Foundation —— 纯声明伞头（declaration-only）。
+//
+// 按项目约定（`.nh` = 声明，`.np` = 实现），导入本头**不会**内联任何
+// Foundation 实现：你的 TU 只生成你自己的代码，Foundation 的实现只在
+// 预编译库里存一份 —— 也就是 Objective-C 的模型。
+//
+//     #import <Foundation/Foundation.nh>            // 纯声明
+//     nopac app.np -I include -L <libdir> -lnopafoundation -o app
+//
+// 自包含单 TU 构建（实现内联进每个使用者，无需库）导入实现伞头：
+//
+//     #import <Foundation/Foundation.np>
+//
+// 库的构建见 tools/build-foundation-lib.sh。
+#include <stdint.h>
+#include <stddef.h>
+
+#include "nopa/runtime.h"
+
+#import "NFObject.nh"
+#import "NFString.nh"
+#import "NFMutableString.nh"
+#import "NFArray.nh"
+#import "NFMutableArray.nh"
+#import "NFDictionary.nh"
+#import "NFMutableDictionary.nh"
+#import "NFNumber.nh"
+#import "NFError.nh"

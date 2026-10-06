@@ -1,0 +1,34 @@
+#ifndef NFMUTABLEDICTIONARY_NH
+#define NFMUTABLEDICTIONARY_NH
+
+#import <Foundation/NFDictionary.nh>
+
+// Mutable counterpart of NFDictionary. Inherits the storage ivars
+// (_keys / _values / _count / _capacity) and the querying API
+// (count / objectForKey: / allKeys / allValues / copy / description).
+//
+// `setObject:forKey:` keeps value semantics: an equal key (isEqual:) is
+// *replaced*, not appended, so `[d setObject:x forKey:@"k"]` twice leaves one
+// entry. Unlike ObjC, a nil value is ignored rather than removing the key
+// (use `removeObjectForKey:`), and a nil key is ignored rather than raising.
+@interface NFMutableDictionary<K, V> : NFDictionary<K, V> {
+@public
+    // ivars inherited from NFDictionary
+}
+
++ (NFMutableDictionary *)dictionary;
++ (NFMutableDictionary *)dictionaryWithCapacity:(size_t)capacity;
++ (NFMutableDictionary *)dictionaryWithObject:(V)value forKey:(K)key;
+
+- (NFMutableDictionary *)init;
+- (NFMutableDictionary *)initWithCapacity:(size_t)capacity;
+- (NFMutableDictionary *)initWithDictionary:(NFDictionary *)other;
+
+- (void)setObject:(V)value forKey:(K)key;
+- (void)addEntriesFromDictionary:(NFDictionary *)other;
+- (void)removeObjectForKey:(K)key;
+- (void)removeAllObjects;
+
+@end
+
+#endif

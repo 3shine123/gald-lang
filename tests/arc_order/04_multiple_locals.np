@@ -1,0 +1,34 @@
+#import <Foundation/Foundation.np>
+
+// ARC order 04: two owned locals used by one return expression — both must be
+// released after the expression is evaluated, each exactly once.
+
+@interface AO04A : NFObject
+- (int)value;
+@end
+
+@implementation AO04A
+- (void)dealloc {
+    NFLog(@"ao04 a dealloc");
+    [super dealloc];
+}
+- (int)value { return 3; }
+@end
+
+@interface AO04B : NFObject
+- (int)value;
+@end
+
+@implementation AO04B
+- (void)dealloc {
+    NFLog(@"ao04 b dealloc");
+    [super dealloc];
+}
+- (int)value { return 4; }
+@end
+
+int main() {
+    AO04A *a = [[AO04A alloc] init];
+    AO04B *b = [[AO04B alloc] init];
+    return [a value] + [b value] - 7;
+}

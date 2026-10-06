@@ -1,0 +1,35 @@
+#import <Foundation/Foundation.np>
+
+#define PI 3.14159265358979323846
+
+@interface Circle : NFObject {
+    @public
+    float _radius;
+}
+@property float radius;
+
+- (id)initWithRadius:(float)r;   // 实例方法
+- (float)area;                   // 实例方法
++ (void)run;
+@end
+
+@implementation Circle
+@synthesize radius = _radius;
+- (id)initWithRadius:(float)r {
+    self = [super init];
+    if (self) { _radius = r; }
+    return self;
+}
+- (float)area { return PI * _radius * _radius; }
++ (void)run {
+    Circle *c = [[Circle alloc] initWithRadius:5.0];
+    NFLog(@"Circle radius: %f, area: %f", c.radius, [c area]);
+}
+@end
+
+int main(int argc, const char * argv[]) {
+    @autoreleasepool {
+        [Circle run];   // 或 [[Circle alloc] init] 后发消息
+    }
+    return 0;
+}

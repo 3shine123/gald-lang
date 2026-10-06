@@ -1,0 +1,29 @@
+#include <stdio.h>
+#import <Foundation/Foundation.np>
+
+@interface Base : NFObject
+- (void)identify;
+@end
+
+@interface Derived : Base
+- (void)identify;
+@end
+
+@implementation Base
+- (void)identify {
+    printf("Base\n");
+}
+@end
+
+@implementation Derived
+- (void)identify {
+    printf("Derived\n");
+    [super identify];
+}
+@end
+
+int main() {
+    Derived *d = [[Derived alloc] init];
+    [d identify];
+    return 0;
+}

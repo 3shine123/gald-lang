@@ -1,0 +1,23 @@
+#include <stdio.h>
+#import <Foundation/Foundation.np>
+
+@interface Item : NFObject
+@end
+
+@implementation Item
+- (void)dealloc {
+    printf("dealloc\n");
+}
+@end
+
+int main() {
+    @autoreleasepool {
+        printf("first pool\n");
+    }
+    @autoreleasepool {
+        Item *a = [Item new];
+        printf("second pool\n");
+    }
+    printf("end\n");
+    return 0;
+}

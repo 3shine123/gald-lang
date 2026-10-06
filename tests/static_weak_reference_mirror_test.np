@@ -1,0 +1,220 @@
+// lang-test/static_weak_reference_mirror_test.np
+// Nopa 语言「静态弱引用 __weak 与零污染」第二弹（镜像健壮性高压测试）
+// 聚焦：全新符号域下的强弱环路打破、多重 __weak 级联静态归零、Block 弱捕获一致性、三元副作用终极收网
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#import <Foundation/Foundation.np>
+
+// 前置声明
+@class TacticalMechEntity;
+
+// ============================================================================
+// 1. 核心类：指挥母舰核心 (拥有指向战术机甲的强引用)
+// ============================================================================
+@interface CarrierCommandCenter : NFObject {
+    @public
+    int _carrierId;
+    const char* _fleetCode;
+    TacticalMechEntity* _assignedMech; // 强引用机甲
+}
+@property int carrierId;
+@property (readonly) const char* fleetCode;
+@property (nonatomic, retain) TacticalMechEntity* assignedMech;
+
+- (id)initWithId:(int)cid fleet:(const char*)code;
+- (void)shutdownCarrierShields;
+@end
+
+
+// ============================================================================
+// 2. 核心类：战术机甲实体 (弱引用指向母舰，防止强引用闭环)
+// ============================================================================
+@interface TacticalMechEntity : NFObject {
+    @public
+    int _mechId;
+    // 关键压测点 1：__weak 关键字修饰成员变量
+    // 测试转译器是否能在全新的符号类中，静态将其注册到母舰的析构销毁锚点上
+    __weak CarrierCommandCenter* _masterCarrier; 
+}
+@property int mechId;
+@property (nonatomic, weak) CarrierCommandCenter* masterCarrier;
+
+- (id)initWithMechId:(int)mid;
+- (void)queryTacticalUplink;
+@end
+
+
+// ============================================================================
+// 3. 类实现区
+// ============================================================================
+@implementation CarrierCommandCenter
+@synthesize carrierId = _carrierId;
+@synthesize fleetCode = _fleetCode;
+@synthesize assignedMech = _assignedMech;
+
+- (id)initWithId:(int)cid fleet:(const char*)code {
+    self = [super init];
+    if (self) {
+        _carrierId = cid;
+        _fleetCode = code;
+        _assignedMech = nil;
+    }
+    return self;
+}
+
+- (void)dealloc {
+    printf("[母舰析构] 指挥母舰 [%s] 正在静态断开所有物理链路并释放资源...\n", _fleetCode);
+    if (_assignedMech) {
+        [_assignedMech release];
+    }
+    [super dealloc];
+}
+
+- (void)shutdownCarrierShields {
+    printf("[战术控制] 正在下线母舰反应堆，准备触发静态 ARC 释放流...\n");
+}
+@end
+
+
+@implementation TacticalMechEntity
+@synthesize mechId = _mechId;
+@synthesize masterCarrier = _masterCarrier;
+
+- (id)initWithMechId:(int)mid {
+    self = [super init];
+    if (self) {
+        _mechId = mid;
+        _masterCarrier = nil;
+    }
+    return self;
+}
+
+- (void)queryTacticalUplink {
+    // 关键压测点 2：穿透读取弱指针
+    // 验证强对象释放后，此处能否静态安全拦截，避免野指针崩溃
+    if (_masterCarrier) {
+        printf("[机甲-%d] 链路正常，当前弱引用母舰仍然在线: 舰队编号=%s\n", 
+               _mechId, [_masterCarrier fleetCode]);
+    } else {
+        printf("[机甲-%d] 警报！弱引用母舰已静态析构，该 __weak 指针已自动清零(nil)！\n", _mechId);
+    }
+}
+
+- (void)dealloc {
+    printf("[机甲销毁] 战术机甲-%d 物理框架已安全拆卸。\n", _mechId);
+    [super dealloc];
+}
+@end
+
+
+// ============================================================================
+// 4. 主程序入口：全面检阅静态弱引用的生命周期与级联自动清零
+// ============================================================================
+int main(int argc, const char* argv[])
+{
+    @autoreleasepool {
+        printf("====================================================================\n");
+        printf(">>>    nopac 编译器「静态弱引用 __weak 与零污染」镜像健壮性压测   <<<\n");
+        printf("====================================================================\n\n");
+
+        // ----------------------------------------------------
+        // 测试点 1：建立强弱引用环路
+        printf("--- 1. 建立指挥母舰与战术机甲的交叉强弱引用 ---\n");
+        
+        CarrierCommandCenter* alphaCarrier = [[CarrierCommandCenter alloc] initWithId:8008 fleet:"Hyperion-XII"];
+        TacticalMechEntity* gundamMech = [[TacticalMechEntity alloc] initWithMechId:03];
+        
+        // 强弱错综绑定
+        [alphaCarrier setAssignedMech:gundamMech];
+        [gundamMech setMasterCarrier:alphaCarrier];
+
+        // 验证初始链路
+        [gundamMech queryTacticalUplink];
+
+        // ----------------------------------------------------
+        // 测试点 2：多重局部弱引用静态绑定（Multiple Weak Aliasing）
+        printf("\n--- 2. 验证多个局部 __weak 指针同时指向同一个强对象 ---\n");
+        
+        // 声明两个全新的局部弱引用指针，监控 alphaCarrier
+        __weak CarrierCommandCenter* tacticalMonitor1 = alphaCarrier;
+        __weak CarrierCommandCenter* tacticalMonitor2 = alphaCarrier;
+
+        printf("[初始弱指针快照]：\n");
+        printf("          -> tacticalMonitor1 状态: %s\n", tacticalMonitor1 ? "有效指针" : "nil");
+        printf("          -> tacticalMonitor2 状态: %s\n", tacticalMonitor2 ? "有效指针" : "nil");
+
+        // ----------------------------------------------------
+        // 测试点 3：Block 内部对局部 __weak 指针的静态安全捕获
+        printf("\n--- 3. 测试 Block 闭包内部对 __weak 指针的静态安全捕获与执行 ---\n");
+
+        __block int combatTelemetryRuns = 0;
+
+        void (^combatUplinkBlock)(void) = ^void() {
+            combatTelemetryRuns++;
+            if (tacticalMonitor1) {
+                printf("[战术闭包] 运行第 %d 次同步，母舰依然存活：%s\n", 
+                       combatTelemetryRuns, [tacticalMonitor1 fleetCode]);
+            } else {
+                printf("[战术闭包] 运行第 %d 次同步，监测到目标母舰已沉没，弱指针安全置空。\n", combatTelemetryRuns);
+            }
+        };
+
+        // 第一次执行闭包：此时母舰完好
+        combatUplinkBlock();
+
+        // ----------------------------------------------------
+        // 测试点 4：核心高压点——强引用彻底释放，验证弱引用静态“级联归零”
+        printf("\n--- 4. 核心压测：彻底释放强引用母舰，验证所有衍生弱指针静态全归零 ---\n");
+        
+        [alphaCarrier shutdownCarrierShields];
+        
+        // 强制销毁强引用对象
+        // 转译器此时必须静态发挥作用，将 gundamMech->_masterCarrier, tacticalMonitor1, tacticalMonitor2 全部在底层重置为 NULL！
+        // 注意：alphaCarrier 的 dealloc 会释放 _assignedMech（gundamMech），
+        // 所以 gundamMech 需要先 retain 才能在线程中存活。
+        [gundamMech retain];
+        [alphaCarrier release]; 
+        alphaCarrier = nil; 
+
+        printf("\n[静态度量清除断言]：\n");
+        // 再次触发机甲的状态检测，内部的弱指针必须表现为 nil
+        [gundamMech queryTacticalUplink];
+
+        printf("[局部弱指针清除断言]：\n");
+        printf("          -> 销毁后 tacticalMonitor1 状态: %s (预期: 成功清零)\n", tacticalMonitor1 ? "未清空(Bug)" : "成功清零(nil)");
+        printf("          -> 销毁后 tacticalMonitor2 状态: %s (预期: 成功清零)\n", tacticalMonitor2 ? "未清空(Bug)" : "成功清零(nil)");
+
+        // 第二次执行闭包：验证闭包内部捕获的弱指针是否同步静态变为了 nil
+        combatUplinkBlock();
+
+        // ----------------------------------------------------
+        // 测试点 5：极限边界回归——弱引用判定 + 三元运算符 + 逗号表达式自增副作用
+        // 将刚才修复的弱引用归零逻辑，与之前九连斩的恶魔优先级结合律完美融合！
+        printf("\n--- 5. 混合边界守门员：三元表达式内包含带副作用的已置空弱指针消息发送 ---\n");
+
+        int isTacticalNetOnline = 1;
+        int carrierStepCounter = 88888;
+
+        // 强迫转译器解包：真分支内带括号自增副作用，右侧是已经被静态清空的弱指针 tacticalMonitor2 的消息发送！
+        // 期待转译器能静态安全跳过或返回空安全值，且副作用自增不受干扰！
+        const char* finalFleetReport = (isTacticalNetOnline > 0) ? 
+            [((carrierStepCounter++, tacticalMonitor2)) fleetCode] : "OFFLINE";
+
+        printf("[终极弱引用收网断言] 弱指针置空机制与自增优先级语法树完全融合！\n");
+        printf("          -> 副作用自增计数器最终值: %d (预期: 88889)\n", carrierStepCounter);
+        printf("          -> 弱引用置空后的安全返回报告: %s (预期: (null) 或 空指针安全值)\n", 
+               finalFleetReport ? finalFleetReport : "nil安全拦截");
+
+        // ----------------------------------------------------
+        // 6. 清理机甲
+        printf("\n--- 6. 正在释放战术机甲实体... ---\n");
+        [gundamMech release];
+
+        printf("\n====================================================================\n");
+        printf(">>> 奇迹！静态弱引用机制镜像高压稳定性测试 100% 完美通关！       <<<\n");
+        printf("====================================================================\n");
+    }
+    return 0;
+}

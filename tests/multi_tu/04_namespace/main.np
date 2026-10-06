@@ -1,0 +1,13 @@
+#import "model.nh"
+#include <stdio.h>
+
+/* client TU: uses the namespace-qualified name, exactly as the lib TU
+   mangled it (Geo::Point -> Geo__Point). */
+int main() {
+    Geo::Origin *o = [[Geo::Origin alloc] init];
+    Geo::Point *p = o;
+    printf("mag=%d\n", [p magnitude]);
+    printf("helper=%d\n", GeoHelper());
+    nopa_release(o);
+    return 0;
+}

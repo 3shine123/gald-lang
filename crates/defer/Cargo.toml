@@ -1,8 +1,8 @@
 [package]
-name = "gald-defer"
+name = "nopa-defer"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-gald-ast = { path = "../ast" }
-gald-cst = { path = "../cst" }
+nopa-ast = { path = "../ast" }
+nopa-cst = { path = "../cst" }

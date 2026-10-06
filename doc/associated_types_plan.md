@@ -1,11 +1,11 @@
 # Associated Types：溯源、横向对比与拼写结论
 
 > 状态：**调研完成（2026-09-30），未实施**。本文是设计与决策的单一事实来源。
-> 触发问题："gald 有了泛型协议，但缺一个更好用的关联语法，所以加 `@associated`？这来自 Swift 吗？其他语言怎么做的？"
+> 触发问题："nopa 有了泛型协议，但缺一个更好用的关联语法，所以加 `@associated`？这来自 Swift 吗？其他语言怎么做的？"
 
 ## 0. 先修正提问里的前提（探针实证）
 
-提问的前提是"gald 有了泛型协议"。**实测不成立，而且比"擦除"更弱。**
+提问的前提是"nopa 有了泛型协议"。**实测不成立，而且比"擦除"更弱。**
 
 ```objc
 @protocol Boxable<T>          // ✅ 能解析
@@ -19,7 +19,7 @@
 id<Boxable<NFString *>> b;    // ❌ 解析失败：expected '>' after type arguments
 ```
 
-三组探针结论（`/tmp/p_gproto.gm`、`/tmp/p_gproto2.gm`）：
+三组探针结论（`/tmp/p_gproto.np`、`/tmp/p_gproto2.np`）：
 
 | 探针 | 形态 | 结果 |
 |---|---|---|
@@ -69,7 +69,7 @@ id<Boxable<NFString *>> b;    // ❌ 解析失败：expected '>' after type argu
 | **Scala** | 抽象类型成员 + 路径依赖 | `trait Container { type E; }` | ✅ 原生 | 路径依赖类型推断复杂 |
 | **TypeScript** | **结构化、鸭子类型** | `interface Container<E = unknown>` | ⚠️ 靠索引签名兜底 | 无 nominal 约束 |
 
-### 2.1 Kotlin 的拒绝值得单独说（对 Gald 最有参考价值）
+### 2.1 Kotlin 的拒绝值得单独说（对 Nopa 最有参考价值）
 
 Kotlin 设计团队**明确拒绝** associated types，选择只留泛型接口。理由（社区讨论归纳）：
 
@@ -77,7 +77,7 @@ Kotlin 设计团队**明确拒绝** associated types，选择只留泛型接口�
 - 想要就写 `interface Container<out E>`，代价是**放弃 nominal 约束**（结构化类型）
 - 社区共识：Kotlin 的 `Collection<E>` 里 `E` 完全由**使用点决定**，协议自身不承诺任何东西
 
-**对 Gald 的启示**：Gald 有**真单态化**（与 JVM 擦除相反的极端），所以 Kotlin 的"擦除困境"不存在。Gald 完全可以走 associated types 路线 —— 事实上 Gald 现在的位置**比 Kotlin 更尴尬**：既没有真泛型协议（`T` 擦除成 `id`），也没有 associated types，元素类型**两头落空**。
+**对 Nopa 的启示**：Nopa 有**真单态化**（与 JVM 擦除相反的极端），所以 Kotlin 的"擦除困境"不存在。Nopa 完全可以走 associated types 路线 —— 事实上 Nopa 现在的位置**比 Kotlin 更尴尬**：既没有真泛型协议（`T` 擦除成 `id`），也没有 associated types，元素类型**两头落空**。
 
 ## 3. `@associated` 拼写结论
 
@@ -109,8 +109,8 @@ struct Array<E>: Container {
 }
 ```
 
-Gald 若只加 `@associated` 而复用 `typedef` 做绑定，会有问题：
-- `typedef` 在 Gald 已有独立语义（`typedef struct {...} Name;` 是**定义聚合体**）
+Nopa 若只加 `@associated` 而复用 `typedef` 做绑定，会有问题：
+- `typedef` 在 Nopa 已有独立语义（`typedef struct {...} Name;` 是**定义聚合体**）
 - 复用一个语义不同的词来做绑定，会让 checker/binder 的判定变浑浊
 
 **建议：加两个 `@` 关键字**
@@ -126,7 +126,7 @@ Gald 若只加 `@associated` 而复用 `typedef` 做绑定，会有问题：
 @end
 ```
 
-**`@typealias` 而不是 `typealias`**（无 `@`）：因为 `typealias` 在 C 里不是词，但 Gald 的 `typedef` 已经是 C 词，裸 `typealias` 会让用户以为是 `typedef` 的别名、产生混淆。`@` 前缀明确它属于"gald 独有的声明槽"。
+**`@typealias` 而不是 `typealias`**（无 `@`）：因为 `typealias` 在 C 里不是词，但 Nopa 的 `typedef` 已经是 C 词，裸 `typealias` 会让用户以为是 `typedef` 的别名、产生混淆。`@` 前缀明确它属于"nopa 独有的声明槽"。
 
 > ⚠️ 备选方案（更省，但我不推荐）：只加 `@associated`，绑定复用 `typedef`。
 > 理由：实现量小一半。**不推荐的理由**：AGENTS.md 记了 `<...>` 块在 `@interface` 里的判别本就脆弱（协议列表误路由 type_params、试探失败未回滚两个真 bug），再加一个"用 `typedef` 表达协议槽绑定"的语义会进一步浑浊化类型判定。**收益不抵复杂度。**
@@ -176,9 +176,9 @@ Gald 若只加 `@associated` 而复用 `typedef` 做绑定，会有问题：
 
 **S0 是硬前置** —— 不做 S0，S1–S4 全部无从谈起（`T` 都是擦除的）。
 
-## 5. 与 Gald 现有替代品的关系
+## 5. 与 Nopa 现有替代品的关系
 
-Gald 现在**已经有**一个"临时替代"（AGENTS.md 记载）：`NFDictionary<K, V>` 的 `objectForKey:` 返回 `V`，靠**按参数名渲染的文本哨兵**（`T_PARAM_RENDER = "NFObject * /*T*/"` + 出口文本级归一化）。
+Nopa 现在**已经有**一个"临时替代"（AGENTS.md 记载）：`NFDictionary<K, V>` 的 `objectForKey:` 返回 `V`，靠**按参数名渲染的文本哨兵**（`T_PARAM_RENDER = "NFObject * /*T*/"` + 出口文本级归一化）。
 
 **必须如实说明**：那是**替代品不是机制**。它：
 - ✅ 能跑通、能过测试、能生成正确 C
@@ -195,5 +195,5 @@ Gald 现在**已经有**一个"临时替代"（AGENTS.md 记载）：`NFDictiona
 | `@associated` 来自 Swift 吗？ | **不是**。源自 Haskell type classes（1988），associated types 由 POPL 2005《Associated types with class》提出；Swift 2014-15 继承并做成语法糖 |
 | 其他语言怎么做？ | Haskell 原生 / Swift 声明+绑定 / Rust trait 关联类型 / Scala 抽象类型成员 / **Kotlin 明确拒绝**（因 JVM 擦除）/ TS 靠结构化 |
 | `@associated` 拼写对吗？ | **对**，与 AGENTS.md 的 `@` 判据自洽。但**必须配 `@typealias` 绑定**才完整 —— 只加声明不如不加 |
-| Gald 现在缺的是它吗？ | **更前置**：泛型协议基本是擦除的（`id<P<X>>` 连解析都不行）。**应先做 S0 协议真泛型化**，再谈 associated types |
+| Nopa 现在缺的是它吗？ | **更前置**：泛型协议基本是擦除的（`id<P<X>>` 连解析都不行）。**应先做 S0 协议真泛型化**，再谈 associated types |
 | 值得做吗？ | 值得，且**风险低**（vtable 布局不受影响、`__sig` 照旧）。但**工作量前置依赖重**，不应作为独立增量 |

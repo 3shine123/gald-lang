@@ -1,10 +1,10 @@
 [package]
-name = "gald-arc"
+name = "nopa-arc"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-gald-ast = { path = "../ast" }
-gald-cfg = { path = "../cfg" }
-gald-ownership = { path = "../ownership" }
-gald-cst = { path = "../cst" }
+nopa-ast = { path = "../ast" }
+nopa-cfg = { path = "../cfg" }
+nopa-ownership = { path = "../ownership" }
+nopa-cst = { path = "../cst" }

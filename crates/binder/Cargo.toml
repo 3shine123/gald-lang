@@ -1,13 +1,13 @@
 [package]
-name = "gald-binder"
+name = "nopa-binder"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-gald-cst = { path = "../cst" }
-gald-ast = { path = "../ast" }
-gald-symbol = { path = "../symbol" }
+nopa-cst = { path = "../cst" }
+nopa-ast = { path = "../ast" }
+nopa-symbol = { path = "../symbol" }
 
 [dev-dependencies]
-gald-lexer = { path = "../lexer" }
-gald-parser = { path = "../parser" }
+nopa-lexer = { path = "../lexer" }
+nopa-parser = { path = "../parser" }

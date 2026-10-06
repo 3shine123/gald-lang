@@ -8,11 +8,11 @@ Fixed 2026-10-02. Full analysis: `doc/arc_intern_uaf.md`.
 
 An interned `@"..."` constant assigned straight to an object ivar was freed by
 the synthesised ARC dealloc (which releases owned ivars), leaving
-`gald_stringFromCstr`'s intern table pointing at freed memory; the next intern
-lookup `strcmp()`d it. `full_syntax_test.gm` hit this as an intermittent
+`nopa_stringFromCstr`'s intern table pointing at freed memory; the next intern
+lookup `strcmp()`d it. `full_syntax_test.np` hit this as an intermittent
 `SUSPECT` (exit 1 with no output — the abort discards buffered stdout).
 
-The fix: the intern table now takes its **own** reference (`gald_retain(obj)`)
+The fix: the intern table now takes its **own** reference (`nopa_retain(obj)`)
 when it stores an object, instead of aliasing the object's initial `+1`.
 
 ## Why this is out-of-band

@@ -1,0 +1,45 @@
+#import <Foundation/Foundation.np>
+
+// ARC order 14: owned object ivars must be released when their owner dies
+// (ObjC ARC generates this; previously they leaked).
+//
+// Three ivars cover the interesting cases: two live objects (released in
+// reverse declaration order) and one left nil (release must be nil-safe).
+
+@interface AO14Child : NFObject
+@end
+
+@implementation AO14Child
+- (void)dealloc {
+    NFLog(@"ao14 child dealloc");
+    [super dealloc];
+}
+@end
+
+@interface AO14Owner : NFObject {
+@public
+    AO14Child *_first;
+    AO14Child *_second;
+    AO14Child *_neverSet;
+}
+@end
+
+@implementation AO14Owner
+- (instancetype)init {
+    self = [super init];
+    if (self) {
+        _first = [[AO14Child alloc] init];
+        _second = [[AO14Child alloc] init];
+    }
+    return self;
+}
+// NOTE: deliberately NO `dealloc` here — ARC synthesizes the ivar release for
+// classes that do not declare one. The case where a user dealloc DOES exist
+// (and releases ivars itself) is covered by 15_owned_ivar_user_dealloc.
+@end
+
+int main() {
+    AO14Owner *o = [[AO14Owner alloc] init];
+    NFLog(@"ao14 done using");
+    return 0;
+}

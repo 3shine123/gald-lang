@@ -1,4 +1,4 @@
-use gald_preprocessor::Preprocessor;
+use nopa_preprocessor::Preprocessor;
 
 fn main() {
     let search_dirs = vec![
@@ -6,8 +6,8 @@ fn main() {
         ".".into(),
         "include/Foundation".into(),
     ];
-    let pre = Preprocessor::process_file("tests/static_generics_template_test.gm", &search_dirs).unwrap();
-    let lines: Vec<&str> = pre.resolved_gald.lines().collect();
+    let pre = Preprocessor::process_file("tests/static_generics_template_test.np", &search_dirs).unwrap();
+    let lines: Vec<&str> = pre.resolved_nopa.lines().collect();
     eprintln!("Total lines: {}", lines.len());
     for (i, line) in lines.iter().enumerate() {
         if i+1 >= 70 && i+1 <= 85 {

@@ -1,0 +1,17 @@
+#import <Foundation/Foundation.np>
+// EXPECT_FAIL: missing required method 'serialize' from protocol 'Serializable'
+// via the id<P & Q> conjunction on @interface Bad <Drawable & Serializable>.
+@protocol Drawable
+@required
+- (void)draw;
+@end
+@protocol Serializable
+@required
+- (const char *)serialize;
+@end
+@interface Bad <Drawable & Serializable>
+@end
+@implementation Bad
+- (void)draw { printf("draw\n"); }
+@end
+int main() { return 0; }

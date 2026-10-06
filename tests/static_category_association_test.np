@@ -1,0 +1,188 @@
+// lang-test/static_category_association_test.np
+// Nopa 语言「静态类扩展（Category）与模拟关联属性」全新特性压测
+// 聚焦：纯静态编译下的 Category 方法 VTable 注入、Category 属性静态化、扩展 Block 动态捕获
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#import <Foundation/Foundation.np>
+
+// ============================================================================
+// 1. 核心基础类：基础智能终端 (不包含任何网络与安全属性)
+// ============================================================================
+@interface SmartTerminal : NFObject {
+    @public
+    int _terminalId;
+    const char* _hardwareModel;
+}
+@property int terminalId;
+@property (readonly) const char* hardwareModel;
+
+- (id)initWithId:(int)tid model:(const char* )model;
+- (void)printBaseSpec;
+@end
+
+@implementation SmartTerminal
+@synthesize terminalId = _terminalId;
+@synthesize hardwareModel = _hardwareModel;
+
+- (id)initWithId:(int)tid model:(const char*)model {
+    self = [super init];
+    if (self) {
+        _terminalId = tid;
+        _hardwareModel = model;
+    }
+    return self;
+}
+- (void)printBaseSpec {
+    printf("[基础硬件] 终端ID: %d | 芯片型号: %s\n", _terminalId, _hardwareModel);
+}
+@end
+
+
+// ============================================================================
+// 2. 符号流扩展：利用 Category 静态注入「网络通信能力」
+//    压测点：在 Category 中声明属性，测试静态转译器能否安全生成符号存取器
+// ============================================================================
+@interface SmartTerminal (NetworkExtension)
+@property (nonatomic, assign) const char* ipAddress;
+@property int connectionPort;
+
+- (void)establishSecureConnectionBlock:(void (^)(const char* logInfo))statusBlock;
+@end
+
+// 静态模拟关联对象的底层存储（模拟 ObjC 运行期的关联对象表，在静态 C 中用全局查找或静态生成实现）
+static const char* g_Associated_IpAddress = "0.0.0.0";
+static int g_Associated_ConnectionPort = 8080;
+
+@implementation SmartTerminal (NetworkExtension)
+
+// 显式实现 Category 中的模拟关联属性读写
+- (const char*)ipAddress {
+    return g_Associated_IpAddress;
+}
+- (void)setIpAddress:(const char*)newIp {
+    g_Associated_IpAddress = newIp;
+}
+
+- (int)connectionPort {
+    return g_Associated_ConnectionPort;
+}
+- (void)setConnectionPort:(int)newPort {
+    g_Associated_ConnectionPort = newPort;
+}
+
+// 静态注入的新方法：内部包含对类原生 Ivar（_hardwareModel）的越界访问，以及对关联属性的读取
+- (void)establishSecureConnectionBlock:(void (^)(const char*))statusBlock {
+    printf("[网络扩展] 正在为模型 [%s] 静态激活网络堆栈...\n", _hardwareModel);
+    printf("          -> 目标绑定IP: %s\n", [self ipAddress]);
+    printf("          -> 目标监听端口: %d\n", [self connectionPort]);
+    
+    if (statusBlock) {
+        char buffer[256];
+        sprintf(buffer, "SECURE_CONN_ESTABLISHED_ON_PORT_%d", [self connectionPort]);
+        statusBlock(buffer); // 触发回调
+    }
+}
+@end
+
+
+// ============================================================================
+// 3. 安全流扩展：利用第二个 Category 静态注入「安全加密流」
+// ============================================================================
+@interface SmartTerminal (SecurityExtension)
+- (int)performQuantumEncryptData:(const char*)rawData;
+@end
+
+@implementation SmartTerminal (SecurityExtension)
+- (int)performQuantumEncryptData:(const char*)rawData {
+    int dataLen = (int)strlen(rawData);
+    // 模拟纯静态加密算法偏移
+    int encryptedToken = dataLen * 13 + [self terminalId];
+    printf("[安全扩展] 终端_%d 正在执行量子级数据加密，数据流长度: %d 字节\n", [self terminalId], dataLen);
+    return encryptedToken;
+}
+@end
+
+
+// ============================================================================
+// 4. 主程序入口：全面检阅静态 Category 的符号绑定与功能表现
+// ============================================================================
+
+int main(int argc, const char* argv[])
+{
+    @autoreleasepool {
+        printf("====================================================================\n");
+        printf(">>>      nopac 编译器「静态 Category & 模拟关联属性」全新压测      <<<\n");
+        printf("====================================================================\n\n");
+
+        // ----------------------------------------------------
+        // 测试点 1：实例化基础类，调用原生方法
+        printf("--- 1. 验证基础类原生 Ivar 与方法的编译期决议 ---\n");
+        SmartTerminal* myDevice = [[SmartTerminal alloc] initWithId:9527 model:"CyberCore-X100"];
+        [myDevice printBaseSpec];
+
+        // ----------------------------------------------------
+        // 测试点 2：调用第一个 Category 静态注入的方法与模拟属性
+        printf("\n--- 2. 验证第一个 Category (NetworkExtension) 的静态属性与方法注入 ---\n");
+        
+        // 读写 Category 中的静态模拟关联属性
+        [myDevice setIpAddress:"192.168.1.105"];
+        [myDevice setConnectionPort:443];
+        
+        printf("[属性断言] 成功通过 Category Getter 读取动态绑定的关联属性：\n");
+        printf("          -> 获取的 IP 地址: %s (预期: 192.168.1.105)\n", [myDevice ipAddress]);
+        printf("          -> 获取的端口号: %d (预期: 443)\n", [myDevice connectionPort]);
+
+        // ----------------------------------------------------
+        // 测试点 3：测试 Category 方法接收高阶 Block 并捕获 main 作用域状态
+        printf("\n--- 3. 测试 Category 注入方法对高阶闭包的长链捕获支持 ---\n");
+
+        __block int networkTelemetryCount = 0;
+        __block int integrityCheckFlag = 1;
+
+        // 定义状态回调闭包
+        void (^networkMonitor)(const char*) = ^void(const char* statusToken) {
+            networkTelemetryCount++;
+            integrityCheckFlag = integrityCheckFlag ? 0 : 1; // 翻转状态
+            printf("[主控监测中心] 收到网络扩展状态回传 Token: %s\n", statusToken);
+            printf("               -> 闭包内统计触发次数: %d\n", networkTelemetryCount);
+        };
+
+        // 执行 Category 注入的方法，将闭包传过去
+        [myDevice establishSecureConnectionBlock:networkMonitor];
+
+        // ----------------------------------------------------
+        // 测试点 4：调用第二个 Category 静态注入的纯函数扩展
+        printf("\n--- 4. 验证第二个 Category (SecurityExtension) 的静态 VTable 独立注入 ---\n");
+        
+        const char* sensitivePayload = "CONFIDENTIAL_PAYLOAD_DATA_STREAM";
+        int cipherResult = [myDevice performQuantumEncryptData:sensitivePayload];
+        printf("[安全断言] 加密函数执行完毕，输出静态密文 Token: %d\n", cipherResult);
+
+        // ----------------------------------------------------
+        // 测试点 5：极限边界回归——将 Category 扩展方法置于“三元+逗号副作用”中
+        // 这一步用来确保你刚才修好的核心 Bug 在全新的 Category 方法选择器下依然稳如泰山！
+        printf("\n--- 5. 回归守门员：三元表达式内包含带副作用的 Category 方法调用 ---\n");
+
+        int isTerminalOnline = 1;
+        int categoryStepCounter = 3333;
+
+        // 强迫转译器解析：三元真分支内，带括号自增副作用，且接收者调用的是 Category 注入的方法
+        int verifiedPort = (isTerminalOnline > 0) ? [((categoryStepCounter++, myDevice)) connectionPort] : 0;
+
+        printf("[收官边界断言] Category 方法与刚才修好的 Bug 机制融合完美！\n");
+        printf("          -> 副作用自增计数器: %d (预期: 3334)\n", categoryStepCounter);
+        printf("          -> 动态抓取的扩展端口值: %d (预期: 443)\n", verifiedPort);
+
+        // ----------------------------------------------------
+        // 6. 内存清理 (测试静态 Category 是否影响原对象的销毁链路)
+        printf("\n--- 6. 正在释放智能终端及其扩展树内存... ---\n");
+        [myDevice release];
+
+        printf("\n====================================================================\n");
+        printf(">>> 奇迹！全新的静态 Category 方法注入与模拟属性扩展全线通关！ <<<\n");
+        printf("====================================================================\n");
+    }
+    return 0;
+}

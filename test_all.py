@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 """
-gald test runner — parallel transpile + compile + run with timeout.
+nopa test runner — parallel transpile + compile + run with timeout.
 Usage: python3 test_all.py [-j JOBS]
 
-Environment overrides (useful for cross-platform testing, e.g. a musl galdc
+Environment overrides (useful for cross-platform testing, e.g. a musl nopac
 inside a Linux VM against the repo mounted at /mnt/mac):
-  GALDC=/path/to/galdc   binary under test (default: target/debug/galdc;
-                         same convention as run_trace_golden.sh's GALDC=)
-  GALD_CC="clang ..."    C compiler + flags galdc passes through to the backend
-                         (e.g. extra -I/-L/-l). Leave unset to use galdc's
+  NOPAC=/path/to/nopac   binary under test (default: target/debug/nopac;
+                         same convention as run_trace_golden.sh's NOPAC=)
+  NOPA_CC="clang ..."    C compiler + flags nopac passes through to the backend
+                         (e.g. extra -I/-L/-l). Leave unset to use nopac's
                          built-in selection (clang; zig cc on Windows).
 """
 
@@ -26,29 +26,29 @@ PROJECT = Path(__file__).resolve().parent
 BUILDDIR = PROJECT / "builddir"
 INCLUDE = PROJECT / "include"
 
-# Binary override: GALDC=/path/to/galdc python3 test_all.py  (e.g. cross-platform
-# testing with a musl binary on Linux VMs; same convention as run_trace_golden.sh's GALDC=)
-GALDC = Path(os.environ.get("GALDC", str(PROJECT / "target" / "debug" / "galdc")))
+# Binary override: NOPAC=/path/to/nopac python3 test_all.py  (e.g. cross-platform
+# testing with a musl binary on Linux VMs; same convention as run_trace_golden.sh's NOPAC=)
+NOPAC = Path(os.environ.get("NOPAC", str(PROJECT / "target" / "debug" / "nopac")))
 RUN_TIMEOUT = 3
 
-# ── Collect test binary names from .gm files ──
+# ── Collect test binary names from .np files ──
 def _gm_suite_files() -> list[Path]:
-    """All host-run .gm tests, excluding out-of-band suites (QEMU kernel, cross-arch,
+    """All host-run .np tests, excluding out-of-band suites (QEMU kernel, cross-arch,
     freestanding) and the cross-TU suite.
 
     tests/multi_tu is driven by its own runner (run_multi_tu.sh), which transpiles
-    each .gm in a case to a SEPARATE translation unit and links them together.
-    test_all.py compiles every .gm standalone, so it would report each lib.gm as
-    "no main entry" and each main.gm as a lone file — 18 phantom failures."""
+    each .np in a case to a SEPARATE translation unit and links them together.
+    test_all.py compiles every .np standalone, so it would report each lib.np as
+    "no main entry" and each main.np as a lone file — 18 phantom failures."""
     return sorted(
-        p for p in PROJECT.glob("tests/**/*.gm")
+        p for p in PROJECT.glob("tests/**/*.np")
         if "soma-kernel" not in p.parts
         and "25_freestanding" not in p.parts
         and "26_baremetal_stress" not in p.parts
         and "multi_tu" not in p.parts
         # tests/stress/* are driven by their own build.sh runners, each with
         # bespoke flags and no standalone main: baremetal needs -ffreestanding,
-        # hosted needs -asm asm_host.s, interop's lib.gm is a library file
+        # hosted needs -asm asm_host.s, interop's lib.np is a library file
         # linked against a C caller. Same rationale as multi_tu above.
         and "stress" not in p.parts
         # Deliberate-failure negative tests (checker must reject them); they
@@ -73,10 +73,10 @@ for f in GM_FILES:
     stem = f.stem
     TEST_BINS.add(f"/tmp/{stem}")
 
-# ── Cleanup: kill orphaned galdc processes + leftover test binaries on exit ──
+# ── Cleanup: kill orphaned nopac processes + leftover test binaries on exit ──
 def _cleanup():
-    # Kill galdc itself
-    subprocess.run(["pkill", "-f", r"target/(debug|release)/galdc"], capture_output=True)
+    # Kill nopac itself
+    subprocess.run(["pkill", "-f", r"target/(debug|release)/nopac"], capture_output=True)
     # Kill all compiled test binaries (e.g. /tmp/core_fusion, /tmp/tt, …)
     for bin_path in TEST_BINS:
         subprocess.run(["pkill", "-f", f"^{bin_path}($| )"], capture_output=True)
@@ -156,7 +156,7 @@ def run_cargo_tests() -> tuple[int, int, list[str]]:
 
 
 def _has_main(gm_path: Path) -> bool:
-    """Heuristic: does this .gm file define its own `int main` entry point?"""
+    """Heuristic: does this .np file define its own `int main` entry point?"""
     try:
         text = gm_path.read_text(encoding="utf-8", errors="replace")
     except Exception:
@@ -168,7 +168,7 @@ def _has_main(gm_path: Path) -> bool:
 
 
 def _needs_mrc(gm_path: Path) -> bool:
-    """Detect if a .gm file uses manual retain/release (MRC) patterns."""
+    """Detect if a .np file uses manual retain/release (MRC) patterns."""
     try:
         text = gm_path.read_text(encoding="utf-8", errors="replace")
     except Exception:
@@ -179,12 +179,12 @@ def _needs_mrc(gm_path: Path) -> bool:
     # Check for manual retain/release/dealloc/autorelease calls
     has_mrc = bool(_re.search(r"\[\w+\s+(retain|release|autorelease|dealloc)\]", stripped))
     # Also check for ARC annotations in the file
-    has_arc_flag = bool(_re.search(r"-fno-gald-arc", stripped))
+    has_arc_flag = bool(_re.search(r"-fno-nopa-arc", stripped))
     return has_mrc or has_arc_flag
 
 
 def _run_np(cmd: list, gm_path: Path, timeout: int) -> tuple:
-    """Run galdc with the given command, return (stdout, stderr, returncode, timed_out)."""
+    """Run nopac with the given command, return (stdout, stderr, returncode, timed_out)."""
     try:
         proc = subprocess.Popen(
             cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
@@ -206,11 +206,11 @@ def _run_np(cmd: list, gm_path: Path, timeout: int) -> tuple:
 
 
 def _is_expected_fail(gm_path: Path) -> bool:
-    """`foo-F.gm` is a deliberate-failure sample kept in-tree as documentation
+    """`foo-F.np` is a deliberate-failure sample kept in-tree as documentation
     (no main entry, or an intentional over-release crash). It is *supposed* to
     fail, so the suite records it as EXPECTED_FAIL rather than FAIL — and a
     sample that unexpectedly passes is itself reported as a failure."""
-    return gm_path.name.endswith("-F.gm")
+    return gm_path.name.endswith("-F.np")
 
 
 def _compile_only(gm_path: Path, asm_args: list[str], inc_args: list[str],
@@ -219,10 +219,10 @@ def _compile_only(gm_path: Path, asm_args: list[str], inc_args: list[str],
     (interactive programs block on stdin and hit the timeout). Transpile +
     compile + link into a real binary must still succeed; that is the strongest
     verdict reachable without a TTY. Tries ARC first, then MRC (same fallback
-    the runner applies to `galdc run`)."""
-    for extra, label in (([], "ARC"), (["-fno-gald-arc"], "MRC")):
+    the runner applies to `nopac run`)."""
+    for extra, label in (([], "ARC"), (["-fno-nopa-arc"], "MRC")):
         bin_path = Path(tmpdir) / (gm_path.stem + ".compileonly")
-        cmd = [str(GALDC), str(gm_path), "-o", str(bin_path)] + asm_args + inc_args + extra
+        cmd = [str(NOPAC), str(gm_path), "-o", str(bin_path)] + asm_args + inc_args + extra
         try:
             proc = subprocess.run(cmd, capture_output=True, text=True,
                                   timeout=60, cwd=str(gm_path.parent))
@@ -235,7 +235,7 @@ def _compile_only(gm_path: Path, asm_args: list[str], inc_args: list[str],
 
 def process_gm(gm_file: str, tmpdir: Path) -> tuple[str, bool, list[str], str]:
     """
-    Run one .gm file via `galdc run`.
+    Run one .np file via `nopac run`.
     First tries with ARC (default), then retries with MRC if it fails.
     Returns (relative_path, passed, info_lines, status_tag).
     """
@@ -255,7 +255,7 @@ def process_gm(gm_file: str, tmpdir: Path) -> tuple[str, bool, list[str], str]:
             ], "EXPECTED_FAIL"
         return rel, False, ["FAIL (no main entry)"], "FAIL"
 
-    # Auto-include sibling assembly (.s) files: link alongside the .gm
+    # Auto-include sibling assembly (.s) files: link alongside the .np
     asm_args: list[str] = []
     sibling_s = gm_path.with_suffix(".s")
     if sibling_s.exists():
@@ -270,7 +270,7 @@ def process_gm(gm_file: str, tmpdir: Path) -> tuple[str, bool, list[str], str]:
     inc_args = ["-I", str(gm_path.parent)]
 
     # Try with ARC first
-    cmd = [str(GALDC), "run", str(gm_path)] + asm_args + inc_args
+    cmd = [str(NOPAC), "run", str(gm_path)] + asm_args + inc_args
     stdout, stderr, rc, timed_out = _run_np(cmd, gm_path, RUN_TIMEOUT + 2)
 
     if timed_out:
@@ -289,7 +289,7 @@ def process_gm(gm_file: str, tmpdir: Path) -> tuple[str, bool, list[str], str]:
         return rel, True, out_lines, "PASS"
 
     # ARC failed — retry with MRC
-    mrc_cmd = [str(GALDC), "run", str(gm_path), "-fno-gald-arc"] + asm_args + inc_args
+    mrc_cmd = [str(NOPAC), "run", str(gm_path), "-fno-nopa-arc"] + asm_args + inc_args
     mrc_stdout, mrc_stderr, mrc_rc, mrc_timed_out = _run_np(mrc_cmd, gm_path, RUN_TIMEOUT + 2)
 
     if mrc_timed_out:
@@ -347,7 +347,7 @@ def process_gm(gm_file: str, tmpdir: Path) -> tuple[str, bool, list[str], str]:
 # ── main ─────────────────────────────────────────────────────────
 
 def main():
-    parser = argparse.ArgumentParser(description="gald test runner")
+    parser = argparse.ArgumentParser(description="nopa test runner")
     parser.add_argument("-j", type=int, default=0, help="parallel jobs (default: CPU count)")
     args = parser.parse_args()
     JOBS = args.j if args.j else (os.cpu_count() or 4)
@@ -376,7 +376,7 @@ def main():
     gm_retry = 0
     gm_retry_suspect = 0
     if gm_files:
-        with tempfile.TemporaryDirectory(prefix="gald_test_") as tmpdir_str:
+        with tempfile.TemporaryDirectory(prefix="nopa_test_") as tmpdir_str:
             tmpdir = Path(tmpdir_str)
             with ThreadPoolExecutor(max_workers=JOBS) as executor:
                 futures = {executor.submit(process_gm, str(f), tmpdir): f for f in gm_files}
@@ -403,14 +403,14 @@ def main():
                 retry_str = f", [yellow]{gm_retry} ARC→MRC retry[/]"
                 if gm_retry_suspect:
                     retry_str += f" ([red]{gm_retry_suspect} SUSPECT[/])"
-            console.print(f"\n  [bold]{gm_pass}/{len(gm_files)}[/] .gm files passed, [red]{gm_fail}[/] failed{canceled_str}{expected_str}{retry_str}")
+            console.print(f"\n  [bold]{gm_pass}/{len(gm_files)}[/] .np files passed, [red]{gm_fail}[/] failed{canceled_str}{expected_str}{retry_str}")
     else:
-        console.print("  [yellow]No .gm files found.[/]")
+        console.print("  [yellow]No .np files found.[/]")
 
     # ── 3. Examples ──
     console.rule(f"[bold]Examples  (parallel x{JOBS})")
     example_files = sorted(
-        p for p in PROJECT.glob("examples/**/*.gm")
+        p for p in PROJECT.glob("examples/**/*.np")
         if "04_soma-kernel" not in p.parts
         and "02_ncurses" not in p.parts
         and "03_LibUI" not in p.parts
@@ -422,7 +422,7 @@ def main():
     ex_retry = 0
     ex_retry_suspect = 0
     if example_files:
-        with tempfile.TemporaryDirectory(prefix="gald_example_") as tmpdir_str:
+        with tempfile.TemporaryDirectory(prefix="nopa_example_") as tmpdir_str:
             tmpdir = Path(tmpdir_str)
             with ThreadPoolExecutor(max_workers=JOBS) as executor:
                 futures = {executor.submit(process_gm, str(f), tmpdir): f for f in example_files}
@@ -451,7 +451,7 @@ def main():
                     retry_str += f" ([red]{ex_retry_suspect} SUSPECT[/])"
             console.print(f"\n  [bold]{ex_pass}/{len(example_files)}[/] examples passed, [red]{ex_fail}[/] failed{canceled_str}{expected_str}{retry_str}")
     else:
-        console.print("  [yellow]No example .gm files found.[/]")
+        console.print("  [yellow]No example .np files found.[/]")
 
     # ── Grand total ──
     elapsed = time.time() - start

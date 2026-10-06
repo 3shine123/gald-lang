@@ -8,7 +8,7 @@ metadata: the emitted C signature is just `T` — `NFAsync` appears **0 times**
 in the generated C (checked via grep), so vtable layout, cross-TU linking and
 the bridge header are untouched.
 
-## Reconciliation (`gald_async::check_unit`, pre-desugar)
+## Reconciliation (`nopa_async::check_unit`, pre-desugar)
 
 | declaration | body | verdict |
 |-------------|------|---------|
@@ -22,7 +22,7 @@ an **error**. Only implementations (methods with a body) reconcile against the
 body; header-only `@interface` methods are exempt (cross-TU safety, same rule
 as the protocol-conformance check).
 
-## Test coverage (`async_marker_test.gm`)
+## Test coverage (`async_marker_test.np`)
 
 - `NFAsync<int>` compute with a `@await` suspension point → marked+await ok
 - `NFAsync<void>` class-method entry, called from `main` (blocking wrapper)
@@ -35,10 +35,10 @@ Expected stdout: `runAll x=42 y=6`.
 
 | file | expected error |
 |------|----------------|
-| `async_marker_mismatch.gm` | `@interface`/`@implementation` marker disagreement |
-| `async_marker_no_await.gm` | marked but body never suspends |
-| `async_marker_value_pos.gm` | `NFAsync<T>` in a variable position |
-| `async_marker_reserved.gm` | class named `NFAsync` (reserved) |
+| `async_marker_mismatch.np` | `@interface`/`@implementation` marker disagreement |
+| `async_marker_no_await.np` | marked but body never suspends |
+| `async_marker_value_pos.np` | `NFAsync<T>` in a variable position |
+| `async_marker_reserved.np` | class named `NFAsync` (reserved) |
 
 Also rejected in value positions: parameters and ivars (same checker helper,
 verified by probe — see AGENTS.md `NFAsync<T>` section).

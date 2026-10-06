@@ -1,0 +1,31 @@
+#include "nopa/runtime.h"
+#import "Foundation/NFObject.nh"
+#import "Foundation/NFObject.np"
+
+@interface Item : NFObject {
+    int _tag;
+}
+- (int)tag;
+@end
+
+@implementation Item
+
+- (int)tag {
+    return _tag;
+}
+
+@end
+
+int main() {
+    @noarc {
+        @autoreleasepool {
+            @autoreleasepool {
+                Item *inner = [Item new];
+                [inner autorelease];
+            }
+            Item *outer = [Item new];
+            [outer autorelease];
+        }
+    }
+    return 0;
+}

@@ -1,0 +1,34 @@
+/* golden/36_macros/pragma_passthrough — `_Pragma` is a C99 *pass-through line*.
+ *
+ * `_Pragma("...")` (ISO/IEC 9899:2011 §6.10.9) is not a nopa construct: nopac
+ * parks the whole source line in a RawLine node and re-emits it verbatim at the
+ * same position, exactly like `#pragma mark`. Position is the entire point of a
+ * pragma, so the program below makes position observable at run time:
+ * `pack(push, 1)` must still be in effect while `struct Packed` is laid out
+ * (5 bytes, not 8), and the matching `pack(pop)` must restore the default
+ * layout for `struct Unfacked`.
+ *
+ * Expected stdout: Packed=5 Unfacked=8
+ *
+ * (`_Pragma` hidden inside a macro *body* is a different matter — the operator
+ * would take effect at the invocation site, which a source-level expander has
+ * no way to place. That case is a clear error; see
+ * tests/negative/pragma_in_macro_body.np.)
+ */
+#include <stdio.h>
+
+_Pragma("pack(push, 1)")
+struct Packed { char tag; int value; };
+_Pragma("pack(pop)")
+
+struct Unfacked { char tag; int value; };
+
+int main(void) {
+    _Pragma("clang diagnostic push")
+
+    printf("Packed=%d Unfacked=%d\n",
+           (int)sizeof(struct Packed), (int)sizeof(struct Unfacked));
+
+    _Pragma("clang diagnostic pop")
+    return 0;
+}

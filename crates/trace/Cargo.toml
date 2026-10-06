@@ -1,9 +1,9 @@
 [package]
-name = "gald-trace"
+name = "nopa-trace"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-gald-ast = { path = "../ast" }
-gald-ownership = { path = "../ownership" }
-gald-cst = { path = "../cst" }
+nopa-ast = { path = "../ast" }
+nopa-ownership = { path = "../ownership" }
+nopa-cst = { path = "../cst" }

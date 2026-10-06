@@ -1,0 +1,23 @@
+// 差分用例 4:catch 内 rethrow —— 必须传播到外层 catch,不得重入本层
+#import <Foundation/Foundation.np>
+
+@interface Err : NFObject @end
+@implementation Err
+@end
+
+int main() {
+    @try {
+        @try {
+            @throw [[Err alloc] init];
+        }
+        @catch (Err *e) {
+            NFLog(@"inner caught, rethrow");
+            @throw e;
+        }
+    }
+    @catch (Err *e2) {
+        NFLog(@"outer caught");
+    }
+    NFLog(@"end");
+    return 0;
+}

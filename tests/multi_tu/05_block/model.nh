@@ -1,0 +1,16 @@
+#import <Foundation/Foundation.np>
+
+/* Blocks across a TU boundary: the client passes a Nopa block to a lib-TU
+   method. The block must be copied (it outlives the call frame) and invoked
+   from code the client never compiled. */
+typedef void (^Ticker)(int);
+
+@interface Pump : NFObject {
+    @protected
+    Ticker _handler;
+}
+- (void)onTick:(Ticker)handler;
+- (void)fire:(int)n;
+@end
+
+int PumpHelper(void);

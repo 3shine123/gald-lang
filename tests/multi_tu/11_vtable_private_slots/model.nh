@@ -1,0 +1,6 @@
+#import <Foundation/Foundation.np>
+
+// Public surface of `Widget`: what every TU is allowed to see and call.
+@interface Widget : NFObject
+- (void)show;
+@end

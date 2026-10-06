@@ -1,5 +1,5 @@
 # asm_x64_ext.s — x86_64 (Mach-O/AT&T) external routines for the Rosetta cross-target test.
-# Built with `galdc -arch x86_64` and executed via Rosetta on this arm64 Mac.
+# Built with `nopac -arch x86_64` and executed via Rosetta on this arm64 Mac.
 
     .text
     .balign 16

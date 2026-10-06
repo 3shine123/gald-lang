@@ -23,5 +23,5 @@ members = [
     "crates/preprocessor",
     "crates/cpp",
     "crates/attrs",
-    "crates/galdc",
+    "crates/nopac",
 ]

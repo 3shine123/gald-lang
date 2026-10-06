@@ -1,0 +1,37 @@
+{
+  "name": "nopa-lang",
+  "displayName": "Nopa Language",
+  "description": "Syntax highlighting and language support for Nopa — a statically-dispatched Objective-C dialect",
+  "version": "0.2.0",
+  "publisher": "nopa-lang",
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "nopa",
+        "aliases": [
+          "Nopa",
+          "nopa",
+          ".np"
+        ],
+        "extensions": [
+          ".np",
+          ".nh"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "nopa",
+        "scopeName": "source.np",
+        "path": "./syntaxes/nopa.tmLanguage.json"
+      }
+    ]
+  }
+}

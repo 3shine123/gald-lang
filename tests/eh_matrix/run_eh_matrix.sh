@@ -24,25 +24,25 @@
 #
 # Usage:
 #   ./run_eh_matrix.sh                # full matrix
-#   GALDC=target/debug/galdc ./run_eh_matrix.sh
+#   NOPAC=target/debug/nopac ./run_eh_matrix.sh
 set -u
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 cd "$ROOT"
 
-GALDC="${GALDC:-}"
-if [[ -z "$GALDC" ]]; then
-    for cand in target/release/galdc target/debug/galdc; do
-        if [[ -x "$cand" ]]; then GALDC="$cand"; break; fi
+NOPAC="${NOPAC:-}"
+if [[ -z "$NOPAC" ]]; then
+    for cand in target/release/nopac target/debug/nopac; do
+        if [[ -x "$cand" ]]; then NOPAC="$cand"; break; fi
     done
 fi
-if [[ ! -x "$GALDC" ]]; then
-    echo "error: galdc binary not found (build it, or set GALDC=)" >&2
+if [[ ! -x "$NOPAC" ]]; then
+    echo "error: nopac binary not found (build it, or set NOPAC=)" >&2
     exit 2
 fi
-GALDC_ABS="$(cd "$(dirname "$GALDC")" && pwd)/$(basename "$GALDC")"
+NOPAC_ABS="$(cd "$(dirname "$NOPAC")" && pwd)/$(basename "$NOPAC")"
 
-WORK="${TMPDIR:-/tmp}/gald_eh_matrix.$$"
+WORK="${TMPDIR:-/tmp}/nopa_eh_matrix.$$"
 mkdir -p "$WORK"
 trap 'rm -rf "$WORK"' EXIT
 
@@ -82,14 +82,14 @@ norm_tail() {
 }
 
 echo "=== EH acceptance matrix ==="
-echo "galdc : $GALDC_ABS"
+echo "nopac : $NOPAC_ABS"
 echo "clang : $(clang --version | head -1)"
 echo
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Generic scenario: run a .gm in all three modes, compare stdout to the
+# Generic scenario: run a .np in all three modes, compare stdout to the
 # reference .out when one is supplied.
-#   run_scene <scene> <file> <ref-or-empty> [extra galdc args...]
+#   run_scene <scene> <file> <ref-or-empty> [extra nopac args...]
 # ─────────────────────────────────────────────────────────────────────────────
 run_scene() {
     local scene="$1" file="$2" ref="$3"; shift 3
@@ -99,14 +99,14 @@ run_scene() {
         eh_argv "$m"
         local d="$WORK/$scene.$m"
         local log="$d.stdout" errf="$d.stderr" rcfile="$d.rc" bin="$d.bin"
-        "$GALDC_ABS" run -o "$bin" ${EH_ARGV[@]+"${EH_ARGV[@]}"} \
+        "$NOPAC_ABS" run -o "$bin" ${EH_ARGV[@]+"${EH_ARGV[@]}"} \
             ${extra[@]+"${extra[@]}"} "$file" >"$log" 2>"$errf"
         local rc=$?
         local used_mrc=0
         # ARC->MRC retry: the exact fallback test_all.py applies to goldens
         # that still carry explicit retain/release.
         if [[ $rc -ne 0 ]] && grep -q "not allowed in ARC mode" "$errf"; then
-            "$GALDC_ABS" run -o "$bin" -fno-gald-arc ${EH_ARGV[@]+"${EH_ARGV[@]}"} \
+            "$NOPAC_ABS" run -o "$bin" -fno-nopa-arc ${EH_ARGV[@]+"${EH_ARGV[@]}"} \
                 ${extra[@]+"${extra[@]}"} "$file" >"$log" 2>"$errf"
             rc=$?; used_mrc=1
         fi
@@ -159,33 +159,33 @@ report_scene() {
 # extra args
 # ─────────────────────────────────────────────────────────────────────────────
 GOLD="tests/golden"
-run_scene "01_plain_gald"      "$GOLD/01_basics/hello_world.gm"                    "$GOLD/01_basics/hello_world.out"
-run_scene "02_try_catch"       "$GOLD/15_exceptions/try_catch.gm"                  "$GOLD/15_exceptions/try_catch.out"
-run_scene "03_nested_try"      "tests/eh_diff/03_nested_finally.gm"                ""
-run_scene "04_finally_order"   "tests/eh_matrix/samples/finally_order.gm"          ""
-run_scene "05_rethrow"         "tests/eh_diff/04_rethrow.gm"                       ""
-run_scene "06_cross_frame"     "tests/eh_diff/01_cross_frame_release.gm"           ""
-run_scene "07_arc"             "$GOLD/04_arc/retain_release.gm"                    "$GOLD/04_arc/retain_release.out"
+run_scene "01_plain_nopa"      "$GOLD/01_basics/hello_world.np"                    "$GOLD/01_basics/hello_world.out"
+run_scene "02_try_catch"       "$GOLD/15_exceptions/try_catch.np"                  "$GOLD/15_exceptions/try_catch.out"
+run_scene "03_nested_try"      "tests/eh_diff/03_nested_finally.np"                ""
+run_scene "04_finally_order"   "tests/eh_matrix/samples/finally_order.np"          ""
+run_scene "05_rethrow"         "tests/eh_diff/04_rethrow.np"                       ""
+run_scene "06_cross_frame"     "tests/eh_diff/01_cross_frame_release.np"           ""
+run_scene "07_arc"             "$GOLD/04_arc/retain_release.np"                    "$GOLD/04_arc/retain_release.out"
 # 08_mrc has no .out reference on purpose: retain_release.out is the ARC
 # transcript (it ends with a `dealloc` line MRC never prints, since MRC does
 # not release the object). The verdict here is "runs, and all three modes
 # agree", which report_scene enforces.
-run_scene "08_mrc"             "$GOLD/04_arc/retain_release.gm"                    "" -fno-gald-arc
-run_scene "09_autoreleasepool" "$GOLD/05_autoreleasepool/nested_pool.gm"           "$GOLD/05_autoreleasepool/nested_pool.out"
-run_scene "11_foundation_big"  "$GOLD/13_foundation/04_nfstring/nfstring_test.gm"  "$GOLD/13_foundation/04_nfstring/nfstring_test.out"
-run_scene "12_c_superset"      "$GOLD/22_c_superset/c_superset.gm"                 ""
-run_scene "15_await_eh"        "tests/eh_matrix/samples/async_eh.gm"               ""
-run_scene "16_block_throw"     "tests/eh_diff/06_block_throw.gm"                   ""
+run_scene "08_mrc"             "$GOLD/04_arc/retain_release.np"                    "" -fno-nopa-arc
+run_scene "09_autoreleasepool" "$GOLD/05_autoreleasepool/nested_pool.np"           "$GOLD/05_autoreleasepool/nested_pool.out"
+run_scene "11_foundation_big"  "$GOLD/13_foundation/04_nfstring/nfstring_test.np"  "$GOLD/13_foundation/04_nfstring/nfstring_test.out"
+run_scene "12_c_superset"      "$GOLD/22_c_superset/c_superset.np"                 ""
+run_scene "15_await_eh"        "tests/eh_matrix/samples/async_eh.np"               ""
+run_scene "16_block_throw"     "tests/eh_diff/06_block_throw.np"                   ""
 # 17: the guard-density gate's runtime half — a program that cannot throw must
 # run identically in all three modes (the static half, "checked emits zero
 # guards", lives in gen_quality.sh).
-run_scene "17_no_throw_plain"  "tests/eh_matrix/samples/no_throw_plain.gm"         ""
+run_scene "17_no_throw_plain"  "tests/eh_matrix/samples/no_throw_plain.np"         ""
 # 18: full-syntax sweep (C superset + Foundation + inline asm + @throws + @await)
-run_scene "18_full_syntax"     "tests/full_syntax_test.gm"                         "" -asm tests/full_syntax_test.s
+run_scene "18_full_syntax"     "tests/full_syntax_test.np"                         "" -asm tests/full_syntax_test.s
 
 # ─────────────────────────────────────────────────────────────────────────────
 # 10. multi-TU: two separately-transpiled translation units linked together.
-#     Driven by tests/multi_tu/run_multi_tu.sh, which honours GALD_EH_FLAG.
+#     Driven by tests/multi_tu/run_multi_tu.sh, which honours NOPA_EH_FLAG.
 # ─────────────────────────────────────────────────────────────────────────────
 scene_multi_tu() {
     local scene="10_multi_tu"
@@ -194,7 +194,7 @@ scene_multi_tu() {
         local log="$WORK/${scene}.${m}.log"
         # Every case, not just one: this is both the multi-TU/x-TU-layout gate
         # and a Foundation-inlining (large concatenated TU) gate.
-        GALD_EH_FLAG="${EH_ARGV[*]:-}" GALDC="$GALDC_ABS" \
+        NOPA_EH_FLAG="${EH_ARGV[*]:-}" NOPAC="$NOPAC_ABS" \
             ./tests/multi_tu/run_multi_tu.sh >"$log" 2>&1
         if grep -qE "^multi-TU: [0-9]+ passed, 0 failed" "$log"; then
             record "$scene" "$m" "PASS"
@@ -216,14 +216,14 @@ scene_freestanding() {
         local d="$WORK/$scene.$m"; mkdir -p "$d"
         local log="$d/build.log"
         {
-            "$GALDC_ABS" -rewrite-gald -ffreestanding ${EH_ARGV[@]+"${EH_ARGV[@]}"} \
-                -o "$d/fs.c" tests/golden/25_freestanding/freestanding.gm || exit 10
-            clang -I include -include gald/runtime.h -D_FORTIFY_SOURCE=0 \
+            "$NOPAC_ABS" -rewrite-nopa -ffreestanding ${EH_ARGV[@]+"${EH_ARGV[@]}"} \
+                -o "$d/fs.c" tests/golden/25_freestanding/freestanding.np || exit 10
+            clang -I include -include nopa/runtime.h -D_FORTIFY_SOURCE=0 \
                 -Wno-unused-variable -c "$d/fs.c" -o "$d/fs.o" || exit 11
-            clang -I include -U__GALD_FREESTANDING -D_FORTIFY_SOURCE=0 \
+            clang -I include -U__NOPA_FREESTANDING -D_FORTIFY_SOURCE=0 \
                 -c tests/golden/25_freestanding/helpers.c -o "$d/helpers.o" || exit 12
-            clang -I include -U__GALD_FREESTANDING -D_FORTIFY_SOURCE=0 \
-                -c include/gald/runtime_freestanding.c -o "$d/rt.o" || exit 13
+            clang -I include -U__NOPA_FREESTANDING -D_FORTIFY_SOURCE=0 \
+                -c include/nopa/runtime_freestanding.c -o "$d/rt.o" || exit 13
             clang "$d/fs.o" "$d/helpers.o" "$d/rt.o" -o "$d/fs" || exit 14
             "$d/fs" || exit 15
         } >"$log" 2>&1
@@ -244,12 +244,12 @@ scene_baremetal() {
         local d="$WORK/$scene.$m"; mkdir -p "$d"
         local log="$d/build.log"
         {
-            "$GALDC_ABS" -rewrite-gald -ffreestanding ${EH_ARGV[@]+"${EH_ARGV[@]}"} \
-                -o "$d/bm.c" "$bm/baremetal_test.gm" || exit 10
-            clang -I include -include gald/runtime.h -D_FORTIFY_SOURCE=0 \
+            "$NOPAC_ABS" -rewrite-nopa -ffreestanding ${EH_ARGV[@]+"${EH_ARGV[@]}"} \
+                -o "$d/bm.c" "$bm/baremetal_test.np" || exit 10
+            clang -I include -include nopa/runtime.h -D_FORTIFY_SOURCE=0 \
                 -Wno-unused-variable -c "$d/bm.c" -o "$d/bm.o" || exit 11
             clang -I include -D_FORTIFY_SOURCE=0 \
-                -c include/gald/runtime_freestanding.c -o "$d/rt.o" || exit 12
+                -c include/nopa/runtime_freestanding.c -o "$d/rt.o" || exit 12
             clang -D_FORTIFY_SOURCE=0 -c "$bm/helpers.c" -o "$d/helpers.o" || exit 13
             clang -c "$bm/asm_ext.s" -o "$d/asm.o" || exit 14
             clang "$d/bm.o" "$d/helpers.o" "$d/rt.o" "$d/asm.o" -o "$d/bm" || exit 15
@@ -263,18 +263,18 @@ scene_baremetal
 # ─────────────────────────────────────────────────────────────────────────────
 # Gate: the DEFAULT invocation (no -eh flag) must actually be the checked
 # backend, and `-eh legacy` must actually be sjlj. Fingerprints:
-#   checked : __gald_eh_flag present, setjmp/longjmp absent
-#   sjlj    : setjmp/longjmp present, __gald_eh_flag absent
+#   checked : __nopa_eh_flag present, setjmp/longjmp absent
+#   sjlj    : setjmp/longjmp present, __nopa_eh_flag absent
 # ─────────────────────────────────────────────────────────────────────────────
 default_backend_gate() {
-    local probe="tests/golden/15_exceptions/try_catch.gm"
+    local probe="tests/golden/15_exceptions/try_catch.np"
     local d="$WORK/default_gate"; mkdir -p "$d"
-    "$GALDC_ABS" -rewrite-gald -fno-gald-arc -o "$d/default.c" "$probe" >/dev/null 2>&1
-    "$GALDC_ABS" -rewrite-gald -eh legacy -fno-gald-arc -o "$d/legacy.c" "$probe" >/dev/null 2>&1
+    "$NOPAC_ABS" -rewrite-nopa -fno-nopa-arc -o "$d/default.c" "$probe" >/dev/null 2>&1
+    "$NOPAC_ABS" -rewrite-nopa -eh legacy -fno-nopa-arc -o "$d/legacy.c" "$probe" >/dev/null 2>&1
     local dflag dsetj lflag lsetj
-    dflag=$(grep -c "__gald_eh_flag" "$d/default.c" || true)
+    dflag=$(grep -c "__nopa_eh_flag" "$d/default.c" || true)
     dsetj=$(grep -cE "setjmp|longjmp" "$d/default.c" || true)
-    lflag=$(grep -c "__gald_eh_flag" "$d/legacy.c" || true)
+    lflag=$(grep -c "__nopa_eh_flag" "$d/legacy.c" || true)
     lsetj=$(grep -cE "setjmp|longjmp" "$d/legacy.c" || true)
     echo "== default-backend gate =="
     echo "  no -eh flag : flag=$dflag setjmp=$dsetj   (want flag>0 setjmp=0 -> checked)"

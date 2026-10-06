@@ -1,10 +1,10 @@
 [package]
-name = "gald-elaborator"
+name = "nopa-elaborator"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-gald-cst = { path = "../cst" }
-gald-ast = { path = "../ast" }
-gald-symbol = { path = "../symbol" }
-gald-binder = { path = "../binder" }
+nopa-cst = { path = "../cst" }
+nopa-ast = { path = "../ast" }
+nopa-symbol = { path = "../symbol" }
+nopa-binder = { path = "../binder" }

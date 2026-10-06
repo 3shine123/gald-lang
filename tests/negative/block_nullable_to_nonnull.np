@@ -1,0 +1,29 @@
+/* tests/negative/ — this file MUST FAIL to compile, with a clear error.
+ *
+ * A nullable value passed to a NONNULL block parameter through a typedef —
+ * the form essentially all real block code uses. The checker resolves the
+ * typedef's block signature (`typedef_blocks`) and enforces it at the
+ * invocation site.
+ *
+ * Expected (exit != 0):
+ *
+ *     Type checking failed:
+ *     [checker] tests/negative/block_nullable_to_nonnull.np:22:10: nullable
+ *     value passed to nonnull parameter 'NFString' — the callee may assume it
+ *     is non-nil; guard with 'if (x)' or pass a non-null value
+ *
+ * The fix is a guard: `if (s) { sink(s); }`.
+ */
+#import <Foundation/Foundation.np>
+
+typedef void (^SinkBlock)(nonnull NFString *s);
+
+static void call_it(SinkBlock sink, nullable NFString *s) {
+    sink(s);   // ← s is nullable, the block demands nonnull, no guard
+}
+
+int main(void) {
+    SinkBlock k = ^(nonnull NFString *v) { NFLog(@"%s", [v UTF8String]); };
+    call_it(k, nil);
+    return 0;
+}

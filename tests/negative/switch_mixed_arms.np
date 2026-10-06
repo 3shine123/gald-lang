@@ -1,0 +1,23 @@
+#import <Foundation/Foundation.np>
+
+// Negative: M1 cannot lower a switch that mixes a plain constant `case` arm
+// with pattern arms — the constant arm needs the original C body, while the
+// pattern path discards it. The parser must reject this instead of silently
+// dropping the constant arm. Expected: exit=1 with
+//   "switch mixes plain constant 'case' arms with pattern arms"
+int main(void) {
+    NFObject *o = @42;
+    int r = 0;
+    switch (o) {
+        case 1:
+            r = 1;
+            break;
+        case @42:
+            r = 2;
+            break;
+        default:
+            r = 9;
+    }
+    NFLog(@"r=%d", r);
+    return 0;
+}

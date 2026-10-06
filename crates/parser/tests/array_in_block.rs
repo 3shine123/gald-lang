@@ -1,4 +1,4 @@
-use gald_parser::Parser;
+use nopa_parser::Parser;
 
 #[test]
 fn array_decl_inside_block_literal_keeps_size() {
@@ -17,11 +17,11 @@ int main() {
         .find(|d| d.name.as_deref() == Some("main"))
         .expect("main");
     let mut found = false;
-    if let gald_cst::CstDeclData::Function { body: Some(b), .. } = &main_fn.data {
-        if let gald_cst::CstStmtData::Compound(stmts) = &b.data {
+    if let nopa_cst::CstDeclData::Function { body: Some(b), .. } = &main_fn.data {
+        if let nopa_cst::CstStmtData::Compound(stmts) = &b.data {
             for s in stmts {
-                if let gald_cst::CstStmtData::Decl(d) = &s.data {
-                    if let gald_cst::CstDeclData::Variable { var_type: Some(_t), initializer, .. } = &d.data {
+                if let nopa_cst::CstStmtData::Decl(d) = &s.data {
+                    if let nopa_cst::CstDeclData::Variable { var_type: Some(_t), initializer, .. } = &d.data {
                         walk_init(initializer.as_deref(), &mut found);
                     }
                 }
@@ -31,13 +31,13 @@ int main() {
     assert!(found, "block literal with array decl not found in CST");
 }
 
-fn walk_init(e: Option<&gald_cst::CstExpr>, found: &mut bool) {
+fn walk_init(e: Option<&nopa_cst::CstExpr>, found: &mut bool) {
     if let Some(e) = e {
-        if let gald_cst::CstExprData::Block { body: Some(b), .. } = &e.data {
-            if let gald_cst::CstStmtData::Compound(stmts) = &b.data {
+        if let nopa_cst::CstExprData::Block { body: Some(b), .. } = &e.data {
+            if let nopa_cst::CstStmtData::Compound(stmts) = &b.data {
                 for s in stmts {
-                    if let gald_cst::CstStmtData::Decl(d) = &s.data {
-                        if let gald_cst::CstDeclData::Variable { var_type: Some(t), .. } = &d.data {
+                    if let nopa_cst::CstStmtData::Decl(d) = &s.data {
+                        if let nopa_cst::CstDeclData::Variable { var_type: Some(t), .. } = &d.data {
                             if d.name.as_deref() == Some("buf") {
                                 *found = true;
                                 assert!(t.is_array, "block-local array decl must keep is_array (got is_array={})", t.is_array);

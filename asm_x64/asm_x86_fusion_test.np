@@ -1,0 +1,150 @@
+// asm_x86_fusion_test.np
+// x86_64 汇编融合压测（在 arm64 Mac 上通过 Rosetta 执行）：
+//   外部 .s 汇编 + 内联汇编 + 类/协议/Block/异常/struct/cast/fn指针/@selector/ARC
+// 构建：nopac -arch x86_64 run -asm asm_x86_ext.s asm_x86_fusion_test.np
+
+#include <stdio.h>
+#include <string.h>
+#import <Foundation/Foundation.np>
+
+extern int asm_x64_square(int x);
+extern int asm_x64_sum3(int a, int b, int c);
+extern unsigned asm_x64_rotl32(unsigned x, int n);
+extern unsigned asm_x64_clz32(unsigned x);
+
+// ---- C 超集 struct ----
+typedef struct {
+    int lo;
+    int hi;
+} IntPair;
+
+// ---- 协议 ----
+@protocol IMixed
+- (int)mix;
+- (const char*)name;
+@end
+
+// ---- 类（含继承 + VTable 多态 + 属性） ----
+@interface X86_NS : NFObject <IMixed> {
+    @public
+    int _acc;
+    int _steps;
+    const char* _tag;
+}
+@property int acc;
+@property int steps;
+@property (readonly) const char* tag;
+
+- (id)initWithTag:(const char*)tag;
+- (int)fold:(int)word;
+- (int)triple:(int)a andB:(int)b andC:(int)c;
+@end
+
+@implementation X86_NS
+@synthesize acc = _acc;
+@synthesize steps = _steps;
+@synthesize tag = _tag;
+
+- (id)initWithTag:(const char*)tag {
+    self = [super init];
+    if (self) { _acc = 0; _steps = 0; _tag = tag; }
+    return self;
+}
+
+- (int)fold:(int)word {
+    // 内联 x86_64 asm：acc = (acc + word) * 3
+    asm volatile("addl %[w], %[a]\n\t"
+                 "imull $3, %[a]"
+                 : [a] "+r"(_acc)
+                 : [w] "r"(word)
+                 : "cc");
+    _steps++;
+    return _acc;
+}
+
+- (int)triple:(int)a andB:(int)b andC:(int)c {
+    int res = a;
+    asm volatile("addl %[b], %[r]\n\t"
+                 "addl %[c], %[r]"
+                 : [r] "+r"(res)
+                 : [b] "r"(b), [c] "r"(c)
+                 : "cc");
+    return res;
+}
+
+- (int)mix {
+    return _acc;
+}
+
+- (const char*)name {
+    return _tag;
+}
+
+- (void)corrupt {
+    printf("    [%s] 抛异常\n", _tag);
+    @throw [NFObject alloc];
+}
+@end
+
+int main(int argc, const char* argv[])
+{
+    @autoreleasepool {
+        printf("=== x86_64 (Rosetta) 内联+外部 asm x Nopa 高级特性 ===\n");
+
+        X86_NS* n = [[X86_NS alloc] initWithTag:"x64-fusion"];
+
+        // 1. 内联 asm 折叠
+        [n fold:10];
+        int f3 = [n fold:40];
+        printf("fold([10,30,40])=%d acc=%d steps=%d\n", f3, [n acc], [n steps]);
+        printf("mix=%d triple(1,2,3)=%d\n", [n mix], [n triple:1 andB:2 andC:3]);
+
+        // 2. 外部 asm
+        printf("square(9)=%d sum3(1,2,3)=%d\n", asm_x64_square(9), asm_x64_sum3(1,2,3));
+        printf("rotl32(12345678,8)=%08X clz32(1)=%u clz32(0)=%u\n",
+               asm_x64_rotl32(0x12345678, 8), asm_x64_clz32(1), asm_x64_clz32(0));
+
+        // 3. struct + C cast + 内联 asm 就地合并
+        IntPair pair;
+        pair.lo = asm_x64_square(7);
+        pair.hi = asm_x64_sum3(1, 2, 3);
+        int* raw = (int*)&pair;
+        int merged = 0;
+        asm("addl %[a], %[m]\n\taddl %[b], %[m]"
+            : [m] "+r"(merged)
+            : [a] "r"(raw[0]), [b] "r"(raw[1]));
+        printf("raw[0]=%d raw[1]=%d merged=%d\n", raw[0], raw[1], merged);
+
+        // 4. Block + __block 捕获
+        __block int count = 0;
+        void (^cb)(int) = ^void(int v) {
+            count++;
+            printf("    [block] #%d v=%d\n", count, v);
+        };
+        cb(asm_x64_square(8));
+        cb(asm_x64_sum3(10, 20, 30));
+        printf("block count=%d\n", count);
+
+        // 5. 协议多态
+        id<IMixed> pl = (id<IMixed>)n;
+        printf("protocol name=%s mix=%d\n", [pl name], [pl mix]);
+
+        // 6. @selector
+        SEL sel = @selector(mix);
+        printf("SEL name=%s\n", sel.name);
+
+        // 7. @try/@catch/@finally
+        @try {
+            [n corrupt];
+            printf("    never\n");
+        } @catch(id e) {
+            printf("    caught: acc=%d\n", [n acc]);
+        } @finally {
+            printf("    finally\n");
+        }
+
+        [n release];
+        printf("=== x86_64 fusion DONE ===\n");
+    }
+    return 0;
+}

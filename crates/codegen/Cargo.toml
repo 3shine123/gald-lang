@@ -1,12 +1,12 @@
 [package]
-name = "gald-codegen"
+name = "nopa-codegen"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-gald-cst = { path = "../cst" }
-gald-ast = { path = "../ast" }
-gald-symbol = { path = "../symbol" }
-gald-elaborator = { path = "../elaborator" }
+nopa-cst = { path = "../cst" }
+nopa-ast = { path = "../ast" }
+nopa-symbol = { path = "../symbol" }
+nopa-elaborator = { path = "../elaborator" }
 attrs = { path = "../attrs" }
-gald-ownership = { path = "../ownership" }
+nopa-ownership = { path = "../ownership" }

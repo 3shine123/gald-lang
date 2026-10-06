@@ -1,0 +1,51 @@
+#include <stdio.h>
+#import <Foundation/Foundation.np>
+
+// Test: generic class with method body using type parameter substitution
+@interface Stack<T> : NFObject {
+    @public
+    T _items[3];
+    int _count;
+}
+- (void)push:(T)item;
+- (T)pop;
+- (BOOL)isEmpty;
+@end
+
+@implementation Stack
+- (void)push:(T)item {
+    if (_count < 3) {
+        _items[_count++] = item;
+    }
+}
+- (T)pop {
+    if (_count > 0) {
+        _count--;
+        T item = _items[_count];
+        _items[_count] = 0;
+        return item;
+    }
+    return 0;
+}
+- (BOOL)isEmpty {
+    return _count == 0;
+}
+@end
+
+@interface Token : NFObject
+@property const char *name;
+@end
+@implementation Token
+@end
+
+int main() {
+    @autoreleasepool {
+        Stack<Token*> *stack = [[Stack alloc] init];
+        Token *t1 = [[Token alloc] init];
+        Token *t2 = [[Token alloc] init];
+        [stack push:t1];
+        [stack push:t2];
+        printf("Stack<Token*> works: isEmpty=%d\n", [stack isEmpty]);
+    }
+    return 0;
+}

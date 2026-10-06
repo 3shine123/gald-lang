@@ -6,7 +6,7 @@
 
 ## Language / compiler gaps
 
-- [ ] **Debug information** — galdc does not emit DWARF; debugging generated C is the only option today.
+- [ ] **Debug information** — nopac does not emit DWARF; debugging generated C is the only option today.
 - [ ] **Generic class-method return instantiation** — type arguments on class methods (`+ (NFArray<T>)...`) are not substituted; monomorphization covers instance-side signatures and declared types.
 - [ ] **Categories across TUs** — category method dispatch works single-TU; cross-TU category layout is limited.
 - [ ] **Protocol inheritance across TUs** — same caveat; protocol conformance checking is per-TU.
@@ -27,4 +27,4 @@
 
 ## Tooling
 
-- [ ] **Windows native validation** — `galdc.exe` builds and cross-compiles, but runtime behavior on real Windows is untested (zig cc backend, `__thread` semantics).
+- [ ] **Windows native validation** — `nopac.exe` builds and cross-compiles, but runtime behavior on real Windows is untested (zig cc backend, `__thread` semantics).

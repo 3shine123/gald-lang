@@ -1,0 +1,14 @@
+#import <Foundation/Foundation.np>
+
+/* Protocol conformance across TUs: the lib TU defines a class conforming to a
+   protocol, the client declares a variable of the protocol-typed shape and
+   sends messages to it. */
+@protocol Greeter
+- (const char *)greet:(const char *)who;
+@end
+
+@interface Rude : NFObject <Greeter>
+- (const char *)mood;
+@end
+
+const char *GreetVia(id<Greeter> g, const char *who);

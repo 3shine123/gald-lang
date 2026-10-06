@@ -1,0 +1,32 @@
+#include "nopa/runtime.h"
+#import "Foundation/NFObject.nh"
+#import "Foundation/NFObject.np"
+
+@interface Item : NFObject {
+    int _tag;
+}
+- (int)tag;
+@end
+
+@implementation Item
+
+- (int)tag {
+    return _tag;
+}
+
+@end
+
+int main() {
+    int cond = 1;
+    @noarc {
+        Item *branch = [Item new];
+        if (cond) {
+            [branch retain];
+            [branch release];
+            [branch release];
+        } else {
+            [branch release];
+        }
+    }
+    return 0;
+}

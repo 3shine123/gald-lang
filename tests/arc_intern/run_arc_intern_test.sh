@@ -14,27 +14,27 @@ set -euo pipefail
 root="$(cd "$(dirname "$0")/../.." && pwd)"
 cd "$root"
 
-galdc="${GALDC:-}"
-if [[ -z "$galdc" ]]; then
-    for cand in target/debug/galdc target/release/galdc; do
-        if [[ -x "$cand" ]]; then galdc="$cand"; break; fi
+nopac="${NOPAC:-}"
+if [[ -z "$nopac" ]]; then
+    for cand in target/debug/nopac target/release/nopac; do
+        if [[ -x "$cand" ]]; then nopac="$cand"; break; fi
     done
 fi
-if [[ -z "$galdc" || ! -x "$galdc" ]]; then
-    echo "error: galdc not found (run 'cargo build', or set GALDC=/path/to/galdc)" >&2
+if [[ -z "$nopac" || ! -x "$nopac" ]]; then
+    echo "error: nopac not found (run 'cargo build', or set NOPAC=/path/to/nopac)" >&2
     exit 2
 fi
 
-work="$(mktemp -d "${TMPDIR:-/tmp}/gald_arc_intern.XXXXXX")"
+work="$(mktemp -d "${TMPDIR:-/tmp}/nopa_arc_intern.XXXXXX")"
 trap 'rm -rf "$work"' EXIT
 
-src="tests/arc_intern/arc_intern_uaf.gm"
+src="tests/arc_intern/arc_intern_uaf.np"
 bin="$work/repro"
 log="$work/asan.log"
 
-# Force the sanitizer through galdc's C-compiler override.
-GALD_CC="${GALD_CC:-clang -fsanitize=address -g -O0}" \
-    "$galdc" "$src" -I include -o "$bin" > "$work/build.log" 2>&1 || {
+# Force the sanitizer through nopac's C-compiler override.
+NOPA_CC="${NOPA_CC:-clang -fsanitize=address -g -O0}" \
+    "$nopac" "$src" -I include -o "$bin" > "$work/build.log" 2>&1 || {
         echo "FAIL: build failed"; sed 's/^/  /' "$work/build.log" | tail -20; exit 1;
     }
 

@@ -1,0 +1,15 @@
+// negative: nopa macro invocation not closed on one line
+// nopac must refuse with a clear error (multi-line calls unsupported).
+#import <Foundation/Foundation.np>
+#include <stdio.h>
+
+#define TAG(o) [o tag]
+
+int main() {
+    nopa_meta_init();
+    NFObject *w = (NFObject *)0;
+    // call split across lines — unsupported
+    printf("%d\n", TAG(
+        w));
+    return 0;
+}

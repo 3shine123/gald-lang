@@ -1,5 +1,5 @@
-#include "gald/cfg.h"
-#include "gald/ast.h"
+#include "nopa/cfg.h"
+#include "nopa/ast.h"
 #include <stdio.h>
 #include <stdlib.h>
 

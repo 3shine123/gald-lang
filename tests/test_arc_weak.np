@@ -1,0 +1,30 @@
+#include <stdio.h>
+#import <Foundation/Foundation.np>
+
+// Minimal NSObject-like class for ARC weak ref test
+@interface MyObject : NFObject
+@end
+
+@implementation MyObject
+@end
+
+@interface Watcher : NFObject {
+    @public (weak) id _target;
+}
+@property (weak) id target;
+@end
+
+@implementation Watcher
+@synthesize target = _target;
+@end
+
+int main() {
+    @autoreleasepool {
+        id obj = [[MyObject alloc] init];
+        Watcher *w = [[Watcher alloc] init];
+        w->_target = obj;  // weak assign, no retain
+        [obj release];
+        [w release];
+    }
+    return 0;
+}

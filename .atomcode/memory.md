@@ -11,3 +11,4 @@
 - gald preprocessor 过滤含 gald 语法（@"..."/消息发送/block）的 #define 不进 C 透传（判据 cpp::body_has_gald_syntax）——#define X @"..." 是非法 C；gald 宏表照常注册，galdc 自己展开调用点，C 轨丢行零损失。
 - gald-lang Foundation 按 .gm 分 TU 的元数据方案已定案 A（owner 静态初始化=铺满 §10 既有机制）；B（registration fragment）存档、复活条件=动态加载/运行时算值/反射；探针 9/9 个 Foundation .gm 已可独立编译；定案+路线图在 doc/stable_slots_plan.md §11
 - Commit messages: write in ENGLISH — user reacted negatively ("我靠提交怎么都是中文？") to Chinese-language commits; history left as-is by their choice, but new commits should use English natural language (Conventional Commit types/scopes unchanged).
+- Nopa 改名定案（用户纠正）：库文件名保留全称 libnopa.a / libnopafoundation.a，绝不缩写为 libnp*；头 .nh、实现 .np；编译器 nopac；NF- 类前缀不变。

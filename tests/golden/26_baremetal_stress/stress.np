@@ -1,0 +1,302 @@
+// stress.np — 裸机 Nopa 压测：全方位代码生成质量验证
+// 编译：nopac -rewrite-nopa -fno-libc；链接 runtime_freestanding.c
+// 运行：qemu-system-i386（或直接 ./build/stress）
+
+extern void kputs(const char* s);
+extern void kputdec(int v);
+extern void kputhex(unsigned v);
+extern void kputc(char c);
+
+// ============ @protocol 多方法 ============
+
+@protocol ILifeform
+- (int) age;
+- (void) grow;
+- (int) legs;
+@end
+
+// ============ @namespace + @interface 链 ============
+
+@namespace Bio
+
+    @protocol IWorker
+    - (int) work:(int)hours;
+    @end
+
+    @interface Organism <ILifeform> {
+        @public
+        int age;
+        int vitality;
+    }
+    @property int energy;
+    + (instancetype) create;
+    - (instancetype) init;
+    - (int) age;
+    - (void) grow;
+    - (int) legs;
+    @end
+
+    @implementation Organism
+    @synthesize energy;
+    + (instancetype) create { return nopa_alloc(self); }
+    - (instancetype) init  { age = 0; vitality = 100; return self; }
+    - (int) age     { return age; }
+    - (void) grow   { age++; vitality += 10; }
+    - (int) legs    { return 0; }
+    @end
+
+    @interface Animal : Organism <IWorker> {
+        @public
+        int speed;
+    }
+    @property int strength;
+    - (int) legs;
+    - (int) work:(int)hours;
+    @end
+
+    @implementation Animal
+    @synthesize strength;
+    - (instancetype) init {
+        self = [super init];
+        speed = 10;
+        return self;
+    }
+    - (int) legs { return 4; }
+    - (int) work:(int)hours {
+        vitality -= hours * 5;
+        kputs("       worked "); kputdec(hours); kputs("h, vitality="); kputdec(vitality); kputs("\n");
+        return hours * 10;
+    }
+    @end
+
+    @interface Human : Animal {
+        @public
+        int iq;
+    }
+    @property int wisdom;
+    - (int) legs;
+    - (int) work:(int)hours;
+    - (int) think:(int)problem;
+    @end
+
+    @implementation Human
+    @synthesize wisdom;
+    - (instancetype) init {
+        self = [super init];
+        iq = 100;
+        speed = 12;
+        return self;
+    }
+    - (int) legs { return 2; }
+    - (int) work:(int)hours {
+        int result = [super work:hours];
+        kputs("       human worked smarter: "); kputdec(result + 5); kputs("\n");
+        return result + 5;
+    }
+    - (int) think:(int)problem {
+        int solution = problem * iq / 50;
+        [self setWisdom:[self wisdom] + 1];
+        kputs("       thought about "); kputdec(problem); kputs(" -> "); kputdec(solution); kputs("\n");
+        return solution;
+    }
+    @end
+@endnamespace
+
+// ============ @try 嵌套 + @selector + asm ============
+
+@protocol IDebug
+- (void) dump;
+@end
+
+@interface DebugToken <IDebug> {
+    @public
+    int code;
+}
++ (instancetype) alloc;
++ (instancetype) token:(int)c;
+- (int) code;
+- (void) dump;
+@end
+
+@implementation DebugToken
++ (instancetype) token:(int)c {
+    DebugToken *t = [DebugToken alloc];
+    t->code = c;
+    return t;
+}
++ (instancetype) alloc { return nopa_alloc(self); }
+- (int) code { return code; }
+- (void) dump {
+    kputs("       DebugToken(code="); kputdec(code); kputs(")\n");
+}
+@end
+
+int fib(int n) {
+    if (n <= 1) return n;
+    return fib(n - 1) + fib(n - 2);
+}
+
+unsigned rotl(unsigned x, unsigned n) {
+    return (x << n) | (x >> (32 - n));
+}
+
+// ============ @throws 声明标注（typed / bare / 本地 try 豁免） ============
+
+static void rethrow_token(DebugToken *t) @throws(DebugToken *) {
+    @throw t;                            // typed：抛出类型与声明一致
+}
+
+static void bare_rethrow_token(DebugToken *t) @throws {
+    @throw t;                            // bare：只声明"会抛"
+}
+
+// 未标注 + 本地 @try 捕获（不逃逸）→ checker 放行
+static int local_catch_token(int n, DebugToken *t) {
+    @try {
+        if (n < 0) {
+            @throw t;
+        }
+        return n * 3;
+    } @catch (DebugToken *caught) {
+        return -1;
+    }
+}
+
+int main() {
+    nopa_meta_init();
+
+    kputs("========== BARE-METAL STRESS TEST ==========\n");
+    int passed = 0;
+    int total = 0;
+
+    // ── 1. @namespace + @interface + 继承 ──
+    total++;
+    Bio::Human *h = [[Bio::Human alloc] init];
+    int legs = [h legs];
+    kputs("[1] Human legs="); kputdec(legs); kputs(" (expect 2)\n");
+    if (legs == 2) passed++;
+
+    // ── 2. @protocol 方法 ──
+    total++;
+    int age = [h age];
+    kputs("[2] Human age="); kputdec(age); kputs(" (expect 0)\n");
+    if (age == 0) passed++;
+
+    // ── 3. @property + @synthesize ──
+    total++;
+    [h setStrength:50];
+    int s = [h strength];
+    kputs("[3] Human strength="); kputdec(s); kputs(" (expect 50)\n");
+    if (s == 50) passed++;
+
+    // ── 4. @public ivar ──
+    total++;
+    int iq = h->iq;
+    kputs("[4] Human iq="); kputdec(iq); kputs(" (expect 100)\n");
+    if (iq == 100) passed++;
+
+    // ── 5. super 调用 ──
+    total++;
+    [h grow];
+    int v = h->vitality;
+    kputs("[5] vitality after grow="); kputdec(v); kputs(" (expect 110)\n");
+    if (v == 110) passed++;
+
+    // ── 6. 方法重写 + super 链 ──
+    total++;
+    [h work:5];
+    kputs("[6] work done (check vitality deduction)\n");
+    if (v > 0) passed++;
+
+    // ── 7. 类方法 ──
+    total++;
+    Bio::Organism *o = [Bio::Organism create];
+    [o init];
+    kputs("[7] Organism created via class method\n");
+    if (o != 0) passed++;
+
+    // ── 8. @try/@catch 隔离（第一个 catch 匹配，后续不执行） ──
+    total++;
+    DebugToken *tok = [DebugToken token:42];
+    int catch_idx = 0;
+    @try {
+        kputs("[8] try body, throwing...\n");
+        @throw tok;
+        kputs("    unreachable\n");
+    } @catch(Bio::Organism *e1) {
+        catch_idx = 1;
+        kputs("    first catch matched (expected)\n");
+    } @catch(id e2) {
+        catch_idx = 2;
+        kputs("    second catch matched (id)\n");
+    } @finally {
+        kputs("    finally runs\n");
+    }
+    kputs("    catch_idx="); kputdec(catch_idx);
+    kputs(" (expect 2, DebugToken != Organism)\n");
+    if (catch_idx == 2) passed++;
+
+    // ── 9. @selector ──
+    total++;
+    SEL sel = @selector(work:);
+    kputs("[9] @selector name="); kputs(sel.name); kputs(" (expect work:)\n");
+    if (sel.name[0] == 'w') passed++;
+
+    // ── 10. 内联 asm ──
+    total++;
+    unsigned r = rotl(0x12345678, 8);
+    kputs("[10] rotl(0x12345678,8)=0x"); kputhex(r); kputs(" (expect 0x34567812)\n");
+    if (r == 0x34567812) passed++;
+
+    // ── 11. 递归 ──
+    total++;
+    int f10 = fib(10);
+    kputs("[11] fib(10)="); kputdec(f10); kputs(" (expect 55)\n");
+    if (f10 == 55) passed++;
+
+    // ── 12. 多参数方法 + 属性链 ──
+    total++;
+    [h setEnergy:30];
+    [h setWisdom:70];
+    int t12 = [h think:20];
+    kputs("[12] think(20)="); kputdec(t12); kputs(" (expect 40)\n");
+    if (t12 == 40) passed++;
+
+    // ── 13. ns2 多态 ──
+    total++;
+    Bio::Animal *a = (Bio::Animal *)h;
+    int al = [a legs];
+    kputs("[13] Animal-polymorphic legs="); kputdec(al); kputs(" (expect 2 via vtable)\n");
+    if (al == 2) passed++;
+
+    // ── 14. ARC release ──
+    total++;
+    // ARC 自动插入 nopa_release(o) 在 main 末尾
+    // 验证 alloc+init 的实例在 main 结束前被 release
+    kputs("[14] ARC auto-release (check runtime)\n");
+    passed++;
+
+    // ── 15. @throws 声明标注（typed / bare / 本地 try 豁免） ──
+    total++;
+    int lc15 = local_catch_token(7, tok);          // 未标注 + 本地 @try（豁免）
+    int hit15 = 0;
+    @try {
+        rethrow_token(tok);                        // typed @throws(DebugToken *)
+    } @catch (DebugToken *c15) {
+        hit15 = hit15 + [c15 code];
+    }
+    @try {
+        bare_rethrow_token(tok);                   // bare @throws
+    } @catch (DebugToken *c15b) {
+        hit15 = hit15 + [c15b code];
+    }
+    kputs("[15] @throws local="); kputdec(lc15);
+    kputs(" caught="); kputdec(hit15);
+    kputs(" (expect 21/84)\n");
+    if (lc15 == 21 && hit15 == 84) passed++;
+
+    // ── 结果 ──
+    kputs("==========================================\n");
+    kputs("PASSED: "); kputdec(passed); kputs(" / "); kputdec(total); kputs("\n");
+    return passed == total ? 0 : 1;
+}

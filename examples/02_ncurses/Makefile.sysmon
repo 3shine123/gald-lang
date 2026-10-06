@@ -1,20 +1,20 @@
 # System Monitor
 # Run: make run
 
-GALDC = ../../target/debug/galdc
+NOPAC = ../../target/debug/nopac
 NCURSES = /opt/homebrew/opt/ncurses
 
 all: sysmon
 
-sysmon.c: sysmon.gm
-	$(GALDC) -rewrite-gald sysmon.gm -o sysmon.c -fno-gald-arc
+sysmon.c: sysmon.np
+	$(NOPAC) -rewrite-nopa sysmon.np -o sysmon.c -fno-nopa-arc
 
 sysmon: sysmon.c
 	clang -std=c99 -fblocks \
 		-I ../../include -I ../../include/Foundation -I ../../include/Terminal \
 		-I $(NCURSES)/include \
 		sysmon.c \
-		../../include/gald/runtime.c \
+		../../include/nopa/runtime.c \
 		../../include/Terminal/ncurses_mouse.c \
 		../../include/Terminal/sysinfo.c \
 		$(NCURSES)/lib/libncurses.dylib \

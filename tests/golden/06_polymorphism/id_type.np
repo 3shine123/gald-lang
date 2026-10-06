@@ -1,0 +1,28 @@
+#include <stdio.h>
+#import <Foundation/Foundation.np>
+
+@interface Animal : NFObject
+- (void)speak;
+@end
+
+@interface Dog : Animal
+- (void)speak;
+@end
+
+@implementation Animal
+- (void)speak {
+    printf("?... ");
+}
+@end
+
+@implementation Dog
+- (void)speak {
+    printf("Woof!\n");
+}
+@end
+
+int main() {
+    id any = [[Dog alloc] init];
+    [any speak];
+    return 0;
+}

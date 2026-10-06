@@ -1,0 +1,735 @@
+// baremetal_test.np — freestanding FULL-syntax stress test.
+// Compiled with `nopac -rewrite-nopa -fno-libc` (no Foundation, no libc includes
+// in generated C), then built on the host per golden/25 methodology:
+//   clang -include nopa/runtime.h  (libc setjmp available)
+//   + runtime_freestanding.c (bump allocator, exception globals, pool)
+//   + helpers.c (console) + asm_ext.s (real ARM64 assembly)
+// Exercises every language feature usable without Foundation.
+// NOTE: @await IS exercised (§16 R5) — runtime_freestanding.c provides the
+// NFTask API. I/O (NFLog etc.) is intentionally absent: bare metal has no
+// console contract; use kputs-style externs from helpers.c.
+
+extern void kputs(const char *s);
+extern void kputdec(int v);
+extern void kputhex(unsigned v);
+
+// ── external ARM64 assembly (asm_ext.s) ──
+extern int asm_square(int v);
+extern int asm_add3(int a, int b, int c);
+extern unsigned asm_rotr32(unsigned v, unsigned r);
+
+// ── preprocessor macro tracks (Sep 2026 fix) ──
+#define BM_MAX 8               // plain C macro → passes through to the C track
+#define BM_TAG @"baretag"      // nopa-syntax macro → filtered OUT of the C track
+                               // (invalid-C passthrough fix); nopac still expands it
+
+typedef int (*IntFn)(int);
+typedef int (^IntBin)(int, int);
+
+// ── plain C struct layer: typedef/nested/fn-ptr field/eq ──
+typedef struct Point { int x; int y; } Point;
+
+struct Ops {
+    int num;
+    IntFn fn;          // function-pointer field
+    Point at;          // nested struct field
+};
+
+static int g_hits = 0;          // static global
+static int bump(void) { return ++g_hits; }   // static function
+
+// value-compare: struct == / != (checker desugars to nopa_struct_eq_*)
+static void check_struct_eq(void) {
+    // Point == first: eq functions emit in discovery order, and Ops's eq
+    // calls Point's — so Point's must be discovered before Ops's.
+    struct Point p1; p1.x = 1; p1.y = 2;   // tag form: typedef-name vars
+    struct Point p2; p2.x = 1; p2.y = 2;   // don't get the == rewrite
+    struct Point *pp = &p1;
+    if (p1 == p2)    kputs("[C3] Point ==  OK\n");
+    else             kputs("[C3] Point ==  FAIL\n");
+    if (pp == &p1)   kputs("[C4] ptr == &obj OK (pointer semantics kept)\n");
+    else             kputs("[C4] ptr == FAIL\n");
+
+    struct Ops a; a.num = 1; a.fn = &asm_square; a.at.x = 7; a.at.y = 8;
+    struct Ops b; b.num = 1; b.fn = &asm_square; b.at.x = 7; b.at.y = 8;
+    struct Ops c; c.num = 2; c.fn = &asm_square; c.at.x = 7; c.at.y = 8;
+    if (a == b)      kputs("[C1] struct Ops ==  OK\n");      // field-wise (nested: calls Point eq)
+    else             kputs("[C1] struct Ops ==  FAIL\n");
+    if (a != c)      kputs("[C2] struct Ops !=  OK\n");
+    else             kputs("[C2] struct Ops !=  FAIL\n");
+
+    // member fn-ptr DIRECT call: the callee expression was silently dropped
+    // before the fix (generated `int a = (3);`); now calls through the field
+    struct Ops d; d.num = 0; d.fn = &asm_square; d.at.x = 0; d.at.y = 0;
+    if (d.fn(9) == 81) kputs("[C8] member fn-ptr call OK\n");
+    else               kputs("[C8] member fn-ptr call FAIL\n");
+}
+
+// enum + switch
+enum Mode { MODE_OFF = 0, MODE_ON = 1, MODE_TURBO = 2 };
+
+static const char *mode_name(int m) {   // int param; enum-typed params work too now (TagKind fix) — see mode_name2
+    switch (m) {
+        case MODE_OFF:   return "off";
+        case MODE_ON:    return "on";
+        case MODE_TURBO: return "turbo";
+    }
+    return "?";
+}
+
+// C-level control flow stress: for/while/do/bitwise/ternary/postfix
+static unsigned loopsum(int n) {
+    unsigned acc = 0;
+    for (int i = 0; i < n; i++) acc += (unsigned)i;
+    int j = n;
+    while (j > 0) { acc += 1u; j--; }
+    do { acc += 2u; } while (0);
+    unsigned mask = 0xF0F0F0F0u;
+    mask |= 0x0000FFFFu; mask &= 0xFFFF00FFu; mask ^= 0xFF00FF00u;
+    mask <<= 2; mask >>= 1;
+    acc ^= mask;
+    acc = acc > 1000u ? acc - 1000u : acc;          // ternary
+    char buf[3] = "AB";                              // writable copy:
+    const unsigned char *p = (const unsigned char *)buf;
+    unsigned char first = *p;
+    unsigned char next  = (*p)++;                    // postfix on deref: (*p)++
+    acc += (unsigned)first + (unsigned)next;         // (writing a literal = SIGBUS)
+    return acc;
+}
+
+@namespace Metal
+
+    // ── protocols: required / optional / composition P & Q ──
+    @protocol Tagged
+    @required
+    - (int) tag;
+    @optional
+    - (void) bonus;
+    @end
+
+    @protocol Alive
+    @required
+    - (int) heart;
+    @end
+
+    @protocol LiveTag <Tagged & Alive>     // composed protocol declaration
+    @end
+
+    // ── error classes for typed @catch ──
+    @interface Err { int code; }
+    + (id) alloc;
+    - (id) init;
+    - (int) tag;
+    - (int) heart;
+    - (int) errorCode;
+    - (void) setCode:(int)c;
+    @end
+    @implementation Err
+    + (id) alloc { return nopa_alloc(self); }
+    - (id) init  { return self; }
+    - (int) tag     { return 100; }
+    - (int) heart   { return 1; }
+    - (int) errorCode  { return code; }
+    - (void) setCode:(int)c { code = c; }
+    @end
+
+    @interface OtherErr { int code; }
+    + (id) alloc;
+    - (id) init;
+    - (int) errorCode;
+    @end
+    @implementation OtherErr
+    + (id) alloc { return nopa_alloc(self); }
+    - (id) init  { return self; }
+    - (int) errorCode { return code; }
+    @end
+
+    // subclass for typed-@catch isa-chain coverage: the PARENT type (Err)
+    // must catch a SubErr instance via the isKindOf chain (__nopa_eh_isa)
+    @interface SubErr : Err { int spare; }
+    + (id) alloc;
+    - (id) init;
+    @end
+    @implementation SubErr
+    + (id) alloc { return nopa_alloc(self); }
+    - (id) init  { return self; }
+    @end
+
+    // ── the workhorse: implicit root class + ARC + ivars ──
+    @interface Widget <LiveTag> {
+        @public int uid;
+        int weight;
+    }
+    + (int)  make:(int)b plus:(int)delta;         // param NOT named `base`:
+    + (id)   alloc;
+    - (id)   init;
+    - (id)   initWithUid:(int)u weight:(int)w;
+    - (int)  tag;
+    - (int)  heart;
+    - (int)  weight;
+    - (void) setWeight:(int)w;
+    - (int)  addTo:(int)v times:(int)k;           // multi-part instance method
+    - (NFAsync<int>) sumAsync:(int)v;             // async declaration marker (erased in C)
+    + (NFAsync<void>) awaitMake;                  // async entries: @await lives here,
+    + (NFAsync<void>) awaitSum:(Metal::Widget *)ww;   // never in main (canonical pattern)
+    - (id)   retain;
+    - (void) release;
+    - (id)   autorelease;
+    - (void) dealloc;
+    - (BOOL) isKindOfClass:(Class)cls;
+    - (BOOL) isEqual:(id)object;
+    @end
+
+    @implementation Widget
+    + (int) make:(int)b plus:(int)delta { return b * 2 + delta; }
+    // NOTE: naming this param `base` corrupts it to `base.__forwarding->__value`
+    // (block-capture rewrite is name-global, not function-scoped)
+    + (id)   alloc { return nopa_alloc(self); }
+    - (id)   init  { return self; }
+    - (id)   initWithUid:(int)u weight:(int)w { uid = u; weight = w; return self; }
+    - (int)  tag     { return uid; }
+    - (int)  heart   { return weight > 0 ? 1 : 0; }
+    - (int)  weight  { return weight; }
+    - (void) setWeight:(int)w { weight = w; }
+    - (int)  addTo:(int)v times:(int)k { return v + k * uid; }
+    - (NFAsync<int>) sumAsync:(int)v {
+        int r = @await [self addTo:v times:2];    // 5 + 2*7 = 19 (v=5, uid=7)
+        return r + v;                             // 24
+    }
+    + (NFAsync<void>) awaitMake {
+        int awaited = @await [Metal::Widget make:10 plus:3];
+        kputs("[R5] @await make:plus:=");
+        kputdec(awaited);
+        kputs("\n");
+    }
+    + (NFAsync<void>) awaitSum:(Metal::Widget *)ww {
+        int av = @await [ww sumAsync:5];
+        kputs("[R8] async marker sum=");
+        kputdec(av);
+        kputs("\n");
+    }
+    - (id)   retain       { nopa_retain(self); return self; }
+    - (void) release      { nopa_release(self); }
+    - (id)   autorelease { return nopa_autorelease(self); }
+    - (void) dealloc     { }
+    - (BOOL) isKindOfClass:(Class)cls { return nopa_isKindOfClass(self, cls); }
+    - (BOOL) isEqual:(id)object { return self == object; }
+    @end
+
+    // ── inheritance + super + method override ──
+    @interface TurboWidget : Widget {
+        int boost;
+    }
+    + (id) alloc;
+    - (id) init;
+    - (int) tag;                                  // override
+    - (int) boost;
+    - (void) setBoost:(int)b;
+    @end
+    @implementation TurboWidget
+    + (id) alloc { return nopa_alloc(self); }
+    - (id) init  { return self; }
+    - (int) tag  { return [super tag] + boost; }  // super dispatch
+    - (int) boost { return boost; }
+    - (void) setBoost:(int)b { boost = b; }
+    @end
+
+    // ── custom collection: for-in needs only count/objectAtIndex: ──
+    @interface Array {
+        id _items[8];
+        int _n;
+    }
+    + (id) alloc;
+    - (id) init;
+    - (void) add:(id)obj;
+    - (unsigned) count;
+    - (id) objectAtIndex:(unsigned)i;
+    @end
+    @implementation Array
+    + (id) alloc { return nopa_alloc(self); }
+    - (id) init  { return self; }
+    - (void) add:(id)obj { if (_n < 8) { _items[_n] = obj; _n++; } }
+    - (unsigned) count   { return (unsigned)_n; }
+    - (id) objectAtIndex:(unsigned)i { return _items[i]; }
+    @end
+
+    // forward-declared class, never defined (pointer-only use)
+    @class Ghost;
+
+@endnamespace
+
+// ── generic monomorphization: Box over a C pointer type (top level —
+//    namespace-qualified generic receivers do not specialize) ──
+@interface Box<T> {
+    T _v;
+}
++ (id) alloc;
+- (id) init;
+- (void) set:(T)v;
+- (T) value;
+@end
+@implementation Box
++ (id) alloc { return nopa_alloc(self); }
+- (id) init  { return self; }
+- (void) set:(T)v { _v = v; }
+- (T) value { return _v; }
+@end
+
+// ── switch pattern-matching subjects: small top-level class pair ──
+@interface Animal {
+    int voice;
+}
++ (id) alloc;
+- (id) init;
+- (int) speak;
+- (void) setVoice:(int)v;
+@end
+@implementation Animal
++ (id) alloc { return nopa_alloc(self); }
+- (id) init  { return self; }
+- (int) speak { return voice; }
+- (void) setVoice:(int)v { voice = v; }
+@end
+
+@interface Dog : Animal {
+    int leash;
+}
++ (id) alloc;
+- (id) init;
+- (int) speak;                                    // override
+- (void) setLeash:(int)l;
+@end
+@implementation Dog
++ (id) alloc { return nopa_alloc(self); }
+- (id) init  { return self; }
+- (int) speak { return [super speak] + leash; }   // super dispatch + own ivar
+- (void) setLeash:(int)l { leash = l; }
+@end
+
+// C function that RECEIVES a nopa object and sends messages to it
+static int poke_tag(Metal::Widget *w) { return [w tag]; }
+static int poke_id_proto(id<Metal::Tagged> t) { return [t tag]; }   // id<P> receiver
+
+// ── @throws 声明标注（编译期对账；freestanding 同样生效，零运行时开销） ──
+
+static void rethrow_err(Metal::Err *e) @throws(Metal::Err *) {
+    @throw e;                            // typed：抛出类型与声明一致
+}
+
+static void bare_rethrow_err(Metal::Err *e) @throws {
+    @throw e;                            // bare：只声明"会抛"
+}
+
+// 未标注 + 本地 @try 捕获（不逃逸）→ checker 放行
+static int local_catch(int n, Metal::Err *e) {
+    @try {
+        if (n < 0) {
+            @throw e;
+        }
+        return n * 3;
+    } @catch (Metal::Err *caught) {
+        return -1;
+    }
+}
+
+// ── @defer: scope-exit execution (LIFO, early return) ──
+static void defer_order(void) {
+    kputs("[D1] enter\n");
+    @defer { kputs("[D1] defer A (registered first)\n"); }
+    @defer { kputs("[D1] defer B (registered second)\n"); }
+    kputs("[D1] body end\n");          // exit order: B, then A (LIFO)
+}
+
+static int defer_return(int n) {
+    @defer { kputs("[D2] defer ran on return\n"); }
+    if (n > 0) { return n; }
+    return -n;
+}
+
+// ── switch pattern matching: scalar arms (dangling compare + when guard) ──
+static void pattern_scalar(int pv) {
+    switch (pv) {
+        case > 100:
+            kputs("[P1] big\n");
+            break;
+        case > 40 when pv < 45:
+            kputs("[P1] mid (when) OK\n");
+            break;
+        case > 0 && < 40:
+            kputs("[P1] small\n");
+            break;
+        default:
+            kputs("[P1] default\n");
+            break;
+    }
+}
+
+// ── switch pattern matching: object type-bind arms (isKindOfClass lowering,
+//    arm ordering: most specific first) ──
+static void pattern_obj(id obj) {
+    switch (obj) {
+        case Dog *d:
+            kputs("[P2] dog arm speak=");
+            kputdec([d speak]);
+            kputs("\n");
+            break;
+        case Animal *a:
+            kputs("[P2] animal arm speak=");
+            kputdec([a speak]);
+            kputs("\n");
+            break;
+        default:
+            kputs("[P2] obj default\n");
+            break;
+    }
+}
+
+// ── nullability context keywords (compile-time annotations; `nullable`/
+//    `nonnull` remain legal as plain identifiers elsewhere) ──
+static int nn_sum(const int * _Nonnull a, const int * _Nullable b) {
+    return *a + (b ? *b : 0);
+}
+
+// ── enum TagKind: enum-typed param now emits `enum Mode` (was `struct Mode`) ──
+static const char *mode_name2(enum Mode m) {
+    switch (m) {
+        case MODE_OFF:   return "off2";
+        case MODE_TURBO: return "turbo2";
+    }
+    return "?2";
+}
+
+// ── @synchronized: cleanup unlock covers the early return; an immediate
+//    second call must relock without spinning forever ──
+static int sync_early(Metal::Widget *w) {
+    @synchronized (w) {
+        return 7;
+    }
+}
+
+int main() {
+    // (nopa_metaInit() is emitted by codegen at the top of main)
+    kputs("=== baremetal stress ===\n");
+
+    // ── 1. C layer: struct eq / enum switch / loops / asm ──
+    check_struct_eq();
+    kputs("[C5] mode(TURBO)=");  kputs(mode_name(MODE_TURBO));  kputs("\n");
+    kputs("[C6] loopsum(10)=");
+    kputdec((int)loopsum(10));
+    kputs("\n");
+
+    // ── 2. class methods + multi-part selectors ──
+    kputs("[N1] +make:plus: = ");
+    kputdec([Metal::Widget make:20 plus:1]);
+    kputs("\n");
+
+    // ── 3. ARC objects: alloc/init chain, ivars, methods ──
+    Metal::Widget *w = [[Metal::Widget alloc] initWithUid:7 weight:30];
+    kputs("[N2] tag=");   kputdec([w tag]);
+    kputs(" weight=");    kputdec([w weight]);
+    kputs(" addTo:10 times:3="); kputdec([w addTo:10 times:3]);
+    kputs("\n");
+    [w setWeight:99];
+    kputs("[N3] setWeight→"); kputdec([w weight]);
+    kputs(" uid(arrow public)="); kputdec(w->uid);
+    kputs("\n");
+
+    // ── 4. inheritance + super ──
+    Metal::TurboWidget *tw = [[Metal::TurboWidget alloc] init];
+    [tw setBoost:1000];
+    [tw setWeight:5];
+    kputs("[N4] TurboWidget tag(super+boost)=");
+    kputdec([tw tag]);
+    kputs("\n");
+
+    // ── 5. protocol conformance + id<P> + id<P & Q> receiver ──
+    kputs("[N5] poke id<Tagged>=");  kputdec(poke_id_proto(w));
+    kputs("\n");
+
+    // ── 6. for-in over a CUSTOM collection (desugar → count/objectAtIndex:) ──
+    Metal::Array *arr = [[Metal::Array alloc] init];
+    [arr add:w];
+    [arr add:tw];
+    kputs("[N6] for-in custom:");
+    for (id x in arr) {
+        kputdec([x tag]);
+        kputs(" ");
+    }
+    kputs("\n");
+
+    // ── 7. typed @catch chain + @finally ──
+    Metal::Err *e = [[Metal::Err alloc] init];
+    [e setCode:42];
+    @try {
+        bump();
+        @throw e;
+        kputs("[N7] unreachable\n");
+    }
+    @catch (Metal::Err *err) {
+        kputs("[N7] caught Err code=");
+        kputdec([err errorCode]);
+        kputs("\n");
+    }
+    @catch (Metal::OtherErr *oe) {
+        kputs("[N7] wrong handler!\n");
+    }
+    @finally {
+        kputs("[N7] finally ran\n");
+    }
+
+    // ── 7b. @throws 声明标注（typed / bare / 本地 try 豁免） ──
+    kputs("[N7b] @throws local=");
+    kputdec(local_catch(7, e));
+    kputs("/");
+    kputdec(local_catch(-7, e));
+    kputs(" (expect 21/-1)\n");
+    @try {
+        rethrow_err(e);                    // typed @throws(Metal::Err *)
+        kputs("[N7b] unreachable\n");
+    }
+    @catch (Metal::Err *err2) {
+        kputs("[N7b] typed rethrow caught code=");
+        kputdec([err2 errorCode]);
+        kputs("\n");
+    }
+    @try {
+        bare_rethrow_err(e);               // bare @throws
+    }
+    @catch (Metal::Err *err3) {
+        kputs("[N7b] bare rethrow caught\n");
+    }
+
+    // ── 8. @selector + SEL ──
+    SEL s = @selector(setWeight:);
+    kputs("[N8] @selector built, tag via send=");
+    kputdec([w tag]);
+    kputs(" (sel non-null: ");
+    kputdec(s.name != 0 ? 1 : 0);
+    kputs(")\n");
+
+    // ── 9. blocks + __block ──
+    __block int base = 100;
+    IntBin mix = ^int(int a, int b) {      // explicit ret: inference gives ^void
+        base = base + a;
+        return a * b + base;
+    };
+    kputs("[N9] block(2,3)=");
+    kputdec(mix(2, 3));
+    kputs(" base after=");
+    kputdec(base);
+    kputs("\n");
+
+    // ── 10. generic Box<int *> ──
+    int stored = 555;
+    Box<int *> *box = [[Box<int *> alloc] init];   // explicit specialized receiver
+    [box set:&stored];
+    kputs("[N10] box value=");
+    kputdec(*(int *)[box value]);          // cast: generic dispatch returns id
+    kputs("\n");
+
+    // ── 11. inline asm: extended + named operands + %w + asm goto ──
+    unsigned in1 = 21, out1 = 0, out2 = 0;
+    __asm__ __volatile__ ("mul %w0, %w1, %w1" : "=r"(out1) : "r"(in1));
+    __asm__ __volatile__ ("add %w[result], %w[a], %w[b]"
+                          : [result] "=r"(out2)
+                          : [a] "r"(in1), [b] "r"(in1));
+    kputs("[A1] inline mul=");   kputdec((int)out1);
+    kputs(" named add=");        kputdec((int)out2);
+    kputs("\n");
+
+    unsigned rv = asm_rotr32(0xF000000Fu, 4);
+    kputs("[A2] ext asm rotr(0xF000000F,4)=");
+    kputhex(rv);
+    kputs("\n");
+
+    int goto_val = 5;
+    asm goto ("cmp %w0, #5; b.eq %l1" : : "r"(goto_val) : "cc" : asm_hit);
+    kputs("[A3] asm goto: not taken\n");
+    goto skip_hit;
+asm_hit:
+    kputs("[A3] asm goto: TAKEN (wrong branch!)\n");
+    goto skip_hit;
+    // (fallthrough impossible — both paths jump past)
+skip_hit:
+    kputs("[A3] asm goto done\n");
+
+    // ── 12. fn pointer through C and asm ──
+    IntFn f1 = &asm_square;
+    kputs("[A4] fnptr asm_square(9)=");
+    kputdec(f1(9));
+    kputs(" add3(1,2,3)=");
+    kputdec(asm_add3(1, 2, 3));
+    kputs("\n");
+
+    // ── 13. @synchronized + @noarc + @autoreleasepool ──
+    @synchronized (w) {
+        [w setWeight:[w weight] + 1];
+    }
+    kputs("[M1] synchronized weight=");
+    kputdec([w weight]);
+    kputs("\n");
+
+    @noarc {
+        Metal::Widget *m = [[Metal::Widget alloc] init];
+        [m retain];
+        kputs("[M2] noarc manual rc="); kputdec((int)m->uid * 0 + 1); kputs(" (alive)\n");
+        [m release];
+        [m release];      // rc back to 0 — bump allocator no-op free
+    }
+    kputs("[M2] noarc survived\n");
+
+    @autoreleasepool {
+        // explicit autorelease is ARC-forbidden: create + autorelease a
+        // private object fully inside @noarc (the documented pattern —
+        // never mix manual ownership with an outer ARC-managed local).
+        @noarc {
+            Metal::Widget *tmp = [[Metal::Widget alloc] init];
+            [tmp autorelease];
+            kputs("[M3] autoreleased obj in pool\n");
+        }
+    }
+    kputs("[M3] pool popped\n");
+
+    // ── 14. nil messaging + forward-declared class + respondsToSelector ──
+    Metal::Ghost *ghost = (Metal::Ghost *)0;
+    int dead = [ghost tag];              // nil guard → 0
+    kputs("[N8b] msg to nil →"); kputdec(dead); kputs("\n");
+    // respondsToSelector: is a compiler pseudo-method (no slot, no declaration)
+    kputs("[N8c] w resp tag=");
+    kputdec([w respondsToSelector:@selector(tag)] ? 1 : 0);
+    kputs(" w resp missing=");
+    kputdec([w respondsToSelector:@selector(foobarbaz)] ? 1 : 0);
+    kputs(" nil resp=");
+    kputdec([ghost respondsToSelector:@selector(tag)] ? 1 : 0);
+    kputs("\n");
+
+    // ── 15. typeof / builtin / sizeof / static fn ──
+    __typeof__(in1) t2 = in1 * 2;
+    int biased = __builtin_expect(t2 > 40, 1);
+    kputs("[C7] typeof+expect=");
+    kputdec((int)t2);
+    kputs("/");
+    kputdec(biased);
+    kputs(" sizeof(struct Ops)=");
+    kputdec((int)sizeof(struct Ops));
+    kputs(" bump()=");
+    kputdec(bump());
+    kputs("\n");
+
+    // object received by plain C function (static, above)
+    kputs("[N11] poke_tag(w)=");
+    kputdec(poke_tag(w));
+    kputs("\n");
+
+    // ── 16. bare-metal runtime parity (isKindOfClass/isEqual/weak/await/log) ──
+    if ([w isKindOfClass:[Metal::Widget class]])
+        kputs("[R1] isKindOfClass OK\n");
+    else
+        kputs("[R1] isKindOfClass FAIL\n");
+    if ([w isKindOfClass:[Metal::TurboWidget class]])
+        kputs("[R2] isKindOfClass(sub) FAIL\n");
+    else
+        kputs("[R2] isKindOfClass(sub) correctly NO\n");
+    if ([w isEqual:w]) kputs("[R3] isEqual self OK\n");
+    else               kputs("[R3] isEqual FAIL\n");
+
+    __weak Metal::Widget *wweak = w;
+    if (wweak) kputs("[R4] __weak alias OK\n");
+    else       kputs("[R4] __weak FAIL\n");
+
+    [Metal::Widget awaitMake];    // blocking wrapper pumps the task internally
+
+    // ── 17. new-syntax batch (Sep 2026): defer / pattern switch / async
+    //        marker / weak re-registration / parent-chain catch / macros ──
+
+    // @defer: LIFO on scope exit + early-return path
+    defer_order();
+    kputs("[D3] defer_return(5)=");
+    kputdec(defer_return(5));
+    kputs("\n");
+
+    // nullability annotations + C-superset identifiers (`nullable`, `in`)
+    int nn_a = 40, nn_b = 2;
+    kputs("[C9] nn_sum(40,2)=");
+    kputdec(nn_sum(&nn_a, &nn_b));
+    kputs(" nn_sum(40,0)=");
+    kputdec(nn_sum(&nn_a, 0));
+    int nullable = 5;                  // context keyword as identifier
+    kputs(" int nullable=");
+    kputdec(nullable);
+    kputs("\n");
+
+    // enum-typed param (TagKind fix) + `in` as an ordinary identifier
+    kputs("[C10] mode_name2(TURBO)=");
+    kputs(mode_name2(MODE_TURBO));
+    int in = 6;
+    kputs(" in*7=");
+    kputdec(in * 7);
+    kputs("\n");
+
+    // C-track macro passthrough still works (BM_MAX as an array size)
+    int bm_arr[BM_MAX];
+    bm_arr[0] = 3;
+    kputs("[C11] bm_arr[0]=");
+    kputdec(bm_arr[0]);
+    kputs(" (the BM_TAG #define line must be absent from the generated C)\n");
+
+    // switch pattern: scalar arms (range + when guard)
+    pattern_scalar(42);
+    pattern_scalar(7);
+    pattern_scalar(999);
+
+    // switch pattern: object type-bind arms + arm ordering
+    Animal *pet = [[Animal alloc] init];
+    [pet setVoice:5];
+    Dog *rex = [[Dog alloc] init];
+    [rex setVoice:11];
+    pattern_obj(rex);                  // dog arm (most specific first)
+    pattern_obj(pet);                  // animal arm
+    pattern_obj(w);                    // neither Dog nor Animal → default
+
+    // typed for-in with a specific element type (collection alias uses id)
+    kputs("[N12] for-in typed:");
+    for (Metal::Widget *item in arr) {
+        kputdec([item tag]);
+        kputs(" ");
+    }
+    kputs("\n");
+
+    // @synchronized early return + immediate relock (cleanup unlock)
+    kputs("[M4] sync early=");
+    kputdec(sync_early(w));
+    kputdec(sync_early(w));
+    kputs(" (relock survived)\n");
+
+    // typed @catch through the PARENT chain (__nopa_eh_isa / isKindOf)
+    Metal::SubErr *se = [[Metal::SubErr alloc] init];
+    [se setCode:99];
+    @try {
+        @throw se;
+        kputs("[N13] unreachable\n");
+    }
+    @catch (Metal::Err *err4) {
+        kputs("[N13] parent catch code=");
+        kputdec([err4 errorCode]);
+        kputs("\n");
+    }
+
+    // NFAsync<T> declaration marker (erased in C) + @await chain
+    [Metal::Widget awaitSum:w];
+
+    // __weak ASSIGN re-registration + zeroing when the object dies
+    @noarc {
+        Metal::Widget *src = [[Metal::Widget alloc] init];
+        __weak Metal::Widget *wz;
+        wz = src;                      // assign path registers the weak slot
+        if (wz) kputs("[R6] weak assign alias OK\n");
+        else    kputs("[R6] weak assign FAIL\n");
+        [src release];                 // rc→0 → weakClearAll zeroes wz
+        if (!wz) kputs("[R7] weak zeroed OK\n");
+        else     kputs("[R7] weak zero FAIL\n");
+    }
+
+    kputs("=== baremetal stress done ===\n");
+    return 0;
+}

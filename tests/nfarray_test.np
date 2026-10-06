@@ -1,0 +1,42 @@
+#include <stdio.h>
+#import <Foundation/Foundation.np>
+
+int main() {
+    @autoreleasepool {
+        // 1. @[] 字面量
+        NFArray *arr = @[ @"a", @"b", @"c" ];
+        printf("1 count: %zu\n", [arr count]);
+        printf("1 [0]: %s [1]: %s [2]: %s\n",
+            [[arr objectAtIndex:0] UTF8String],
+            [[arr objectAtIndex:1] UTF8String],
+            [[arr objectAtIndex:2] UTF8String]);
+
+        // 2. firstObject / lastObject
+        printf("2 first: %s last: %s\n",
+            [[arr firstObject] UTF8String], [[arr lastObject] UTF8String]);
+
+        // 3. containsObject / indexOfObject
+        NFString *b = @"b";
+        printf("3 contains b: %d, index: %zu\n",
+            [arr containsObject:b], [arr indexOfObject:b]);
+
+        // 4. arrayWithObject / array
+        NFArray *single = [NFArray arrayWithObject:@"only"];
+        printf("4 single count: %zu\n", [single count]);
+        NFArray *empty = [NFArray array];
+        printf("4 empty count: %zu\n", [empty count]);
+
+        // 5. copy
+        NFArray *copy_arr = [arr copy];
+        printf("5 copy count: %zu\n", [copy_arr count]);
+
+        // 6. description
+        printf("6 desc: %s\n", [[arr description] UTF8String]);
+
+        // 7. 混合类型（对象 + 数字字符串）
+        NFArray *mixed = @[ @"x", @"y" ];
+        printf("7 mixed count: %zu\n", [mixed count]);
+    }
+    printf("NFArray tests done\n");
+    return 0;
+}

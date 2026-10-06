@@ -1,0 +1,28 @@
+#include "nopa/runtime.h"
+#import "Foundation/NFObject.nh"
+#import "Foundation/NFObject.np"
+
+@interface Item : NFObject {
+    int _tag;
+}
+- (int)tag;
+@end
+
+@implementation Item
+
+- (int)tag {
+    return _tag;
+}
+
+@end
+
+int main() {
+    @noarc {
+        Item *shared = [Item new];
+        Item *alias = shared;
+        [alias retain];
+        [shared release];
+        [alias release];
+    }
+    return 0;
+}

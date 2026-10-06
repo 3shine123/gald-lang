@@ -1,0 +1,91 @@
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <ncurses.h>
+#import <Foundation/Foundation.np>
+#import <Terminal/Ncurses.h>
+#import <Terminal/Ncurses.np>
+
+/* C helpers from sysinfo.c */
+float nk_cpu_usage(void);
+void nk_mem_info(unsigned long long *used, unsigned long long *total);
+void nk_disk_info(unsigned long long *used, unsigned long long *total);
+
+int main() {
+    @autoreleasepool {
+        Terminal::Ncurses::Screen *scr = [Terminal::Ncurses::Screen screen];
+        int cols = [scr cols], rows = [scr rows];
+
+        Terminal::Ncurses::Window *win = [[Terminal::Ncurses::Window alloc]
+            initWithRect:0 y:0 w:cols h:rows];
+
+        Terminal::Ncurses::Button *quitBtn = [[Terminal::Ncurses::Button alloc]
+            initWithWindow:win x:2 y:rows-2 w:10 text:@" Quit "];
+
+        int running = 1;
+        while (running) {
+            float cpu = nk_cpu_usage();
+            unsigned long long mem_used = 0, mem_total = 0;
+            unsigned long long disk_used = 0, disk_total = 0;
+            nk_mem_info(&mem_used, &mem_total);
+            nk_disk_info(&disk_used, &disk_total);
+
+            char buf[128];
+
+            [win drawBox];
+            [win print:0 x:2 text:@" System Monitor "];
+
+            /* ── CPU ── */
+            [win print:2 x:2 text:@"CPU"];
+            int cpu_bars = (int)(cpu / 5.0f);
+            if (cpu_bars > 20) cpu_bars = 20;
+            memset(buf, ' ', 20); buf[20] = '\0';
+            for (int i = 0; i < cpu_bars && i < 20; i++) buf[i] = '#';
+            wattron([win handle], A_REVERSE);
+            [win print:3 x:4 text:[NFString stringWithUTF8String:buf]];
+            wattroff([win handle], A_REVERSE);
+            snprintf(buf, sizeof(buf), "  %.1f%%", cpu);
+            [win print:3 x:26 text:[NFString stringWithUTF8String:buf]];
+
+            /* ── Memory ── */
+            [win print:5 x:2 text:@"Memory"];
+            float mem_pct = mem_total > 0 ? (float)mem_used / mem_total * 100.0f : 0;
+            int mem_bars = (int)(mem_pct / 5.0f);
+            if (mem_bars > 20) mem_bars = 20;
+            memset(buf, ' ', 20); buf[20] = '\0';
+            for (int i = 0; i < mem_bars && i < 20; i++) buf[i] = '#';
+            wattron([win handle], A_REVERSE);
+            [win print:6 x:4 text:[NFString stringWithUTF8String:buf]];
+            wattroff([win handle], A_REVERSE);
+            snprintf(buf, sizeof(buf), "  %.1f%%  (%llu MB / %llu MB)", mem_pct, mem_used / 1000000, mem_total / 1000000);
+            [win print:6 x:26 text:[NFString stringWithUTF8String:buf]];
+
+            /* ── Disk ── */
+            [win print:8 x:2 text:@"Disk"];
+            float disk_pct = disk_total > 0 ? (float)disk_used / disk_total * 100.0f : 0;
+            int disk_bars = (int)(disk_pct / 5.0f);
+            if (disk_bars > 20) disk_bars = 20;
+            memset(buf, ' ', 20); buf[20] = '\0';
+            for (int i = 0; i < disk_bars && i < 20; i++) buf[i] = '#';
+            wattron([win handle], A_REVERSE);
+            [win print:9 x:4 text:[NFString stringWithUTF8String:buf]];
+            wattroff([win handle], A_REVERSE);
+            snprintf(buf, sizeof(buf), "  %.1f%%  (%llu GB / %llu GB)", disk_pct, disk_used / 1000000000, disk_total / 1000000000);
+            [win print:9 x:26 text:[NFString stringWithUTF8String:buf]];
+
+            [quitBtn draw];
+            [win update];
+            refresh();
+
+            timeout(2000);
+            int ch = wgetch(stdscr);
+            if (ch == 'q' || ch == 'Q') running = 0;
+        }
+
+        [quitBtn release];
+        [win release];
+        [scr release];
+    }
+    return 0;
+}

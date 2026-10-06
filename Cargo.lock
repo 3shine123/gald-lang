@@ -115,197 +115,197 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5baebc0774151f905a1a2cc41989300b1e6fbb29aff0ceffa1064fdd3088d582"
 
 [[package]]
-name = "gald-arc"
+name = "is_terminal_polyfill"
+version = "1.70.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a6cb138bb79a146c1bd460005623e142ef0181e3d0219cb493e02f7d08a35695"
+
+[[package]]
+name = "nopa-arc"
 version = "0.1.0"
 dependencies = [
- "gald-ast",
- "gald-cfg",
- "gald-cst",
- "gald-ownership",
+ "nopa-ast",
+ "nopa-cfg",
+ "nopa-cst",
+ "nopa-ownership",
 ]
 
 [[package]]
-name = "gald-ast"
+name = "nopa-ast"
 version = "0.1.0"
 dependencies = [
- "gald-cst",
+ "nopa-cst",
 ]
 
 [[package]]
-name = "gald-async"
+name = "nopa-async"
 version = "0.1.0"
 dependencies = [
- "gald-ast",
- "gald-cst",
+ "nopa-ast",
+ "nopa-cst",
 ]
 
 [[package]]
-name = "gald-binder"
+name = "nopa-binder"
 version = "0.1.0"
 dependencies = [
- "gald-ast",
- "gald-cst",
- "gald-lexer",
- "gald-parser",
- "gald-symbol",
+ "nopa-ast",
+ "nopa-cst",
+ "nopa-lexer",
+ "nopa-parser",
+ "nopa-symbol",
 ]
 
 [[package]]
-name = "gald-cfg"
+name = "nopa-cfg"
 version = "0.1.0"
 dependencies = [
- "gald-ast",
+ "nopa-ast",
 ]
 
 [[package]]
-name = "gald-checker"
+name = "nopa-checker"
 version = "0.1.0"
 dependencies = [
- "gald-ast",
- "gald-cst",
- "gald-symbol",
+ "nopa-ast",
+ "nopa-cst",
+ "nopa-symbol",
 ]
 
 [[package]]
-name = "gald-codegen"
+name = "nopa-codegen"
 version = "0.1.0"
 dependencies = [
  "attrs",
- "gald-ast",
- "gald-cst",
- "gald-elaborator",
- "gald-ownership",
- "gald-symbol",
+ "nopa-ast",
+ "nopa-cst",
+ "nopa-elaborator",
+ "nopa-ownership",
+ "nopa-symbol",
 ]
 
 [[package]]
-name = "gald-cpp"
+name = "nopa-cpp"
 version = "0.1.0"
 
 [[package]]
-name = "gald-cst"
+name = "nopa-cst"
 version = "0.1.0"
 
 [[package]]
-name = "gald-cst-visit"
+name = "nopa-cst-visit"
 version = "0.1.0"
 dependencies = [
- "gald-cst",
+ "nopa-cst",
 ]
 
 [[package]]
-name = "gald-defer"
+name = "nopa-defer"
 version = "0.1.0"
 dependencies = [
- "gald-ast",
- "gald-cst",
+ "nopa-ast",
+ "nopa-cst",
 ]
 
 [[package]]
-name = "gald-eh"
+name = "nopa-eh"
 version = "0.1.0"
 dependencies = [
- "gald-ast",
- "gald-cst",
+ "nopa-ast",
+ "nopa-cst",
 ]
 
 [[package]]
-name = "gald-elaborator"
+name = "nopa-elaborator"
 version = "0.1.0"
 dependencies = [
- "gald-ast",
- "gald-binder",
- "gald-cst",
- "gald-symbol",
+ "nopa-ast",
+ "nopa-binder",
+ "nopa-cst",
+ "nopa-symbol",
 ]
 
 [[package]]
-name = "gald-layout"
+name = "nopa-layout"
 version = "0.1.0"
 
 [[package]]
-name = "gald-lexer"
+name = "nopa-lexer"
 version = "0.1.0"
 
 [[package]]
-name = "gald-ownership"
+name = "nopa-ownership"
 version = "0.1.0"
 dependencies = [
- "gald-ast",
+ "nopa-ast",
 ]
 
 [[package]]
-name = "gald-parser"
+name = "nopa-parser"
 version = "0.1.0"
 dependencies = [
- "gald-cst",
- "gald-lexer",
- "gald-preprocessor",
+ "nopa-cst",
+ "nopa-lexer",
+ "nopa-preprocessor",
 ]
 
 [[package]]
-name = "gald-pattern"
+name = "nopa-pattern"
 version = "0.1.0"
 dependencies = [
- "gald-ast",
- "gald-cst",
+ "nopa-ast",
+ "nopa-cst",
 ]
 
 [[package]]
-name = "gald-preprocessor"
+name = "nopa-preprocessor"
 version = "0.1.0"
 dependencies = [
- "gald-cpp",
- "gald-cst",
+ "nopa-cpp",
+ "nopa-cst",
 ]
 
 [[package]]
-name = "gald-symbol"
+name = "nopa-symbol"
 version = "0.1.0"
 dependencies = [
- "gald-cst",
+ "nopa-cst",
 ]
 
 [[package]]
-name = "gald-trace"
+name = "nopa-trace"
 version = "0.1.0"
 dependencies = [
- "gald-ast",
- "gald-cst",
- "gald-ownership",
+ "nopa-ast",
+ "nopa-cst",
+ "nopa-ownership",
 ]
 
 [[package]]
-name = "galdc"
+name = "nopac"
 version = "0.1.0"
 dependencies = [
  "attrs",
  "cc",
  "clap",
  "clap_complete",
- "gald-arc",
- "gald-ast",
- "gald-async",
- "gald-binder",
- "gald-cfg",
- "gald-checker",
- "gald-codegen",
- "gald-cst",
- "gald-defer",
- "gald-eh",
- "gald-elaborator",
- "gald-parser",
- "gald-pattern",
- "gald-preprocessor",
- "gald-symbol",
- "gald-trace",
+ "nopa-arc",
+ "nopa-ast",
+ "nopa-async",
+ "nopa-binder",
+ "nopa-cfg",
+ "nopa-checker",
+ "nopa-codegen",
+ "nopa-cst",
+ "nopa-defer",
+ "nopa-eh",
+ "nopa-elaborator",
+ "nopa-parser",
+ "nopa-pattern",
+ "nopa-preprocessor",
+ "nopa-symbol",
+ "nopa-trace",
 ]
-
-[[package]]
-name = "is_terminal_polyfill"
-version = "1.70.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a6cb138bb79a146c1bd460005623e142ef0181e3d0219cb493e02f7d08a35695"
 
 [[package]]
 name = "once_cell_polyfill"

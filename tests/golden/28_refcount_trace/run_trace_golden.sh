@@ -1,37 +1,37 @@
 #!/bin/bash
 # run_trace_golden.sh — run the refcount tracer (-trace-refcount) over
-# tests/golden/28_refcount_trace/*.gm and diff the output against *.out.
+# tests/golden/28_refcount_trace/*.np and diff the output against *.out.
 # Usage: ./run_trace_golden.sh
-#   GALDC    path to the galdc binary. Auto-detected: prefer an explicit $GALDC,
-#           then target/release/galdc, then target/debug/galdc. Auto-detection
+#   NOPAC    path to the nopac binary. Auto-detected: prefer an explicit $NOPAC,
+#           then target/release/nopac, then target/debug/nopac. Auto-detection
 #           matters because a stale binary silently produces line-number-only
 #           diffs that look like real regressions.
 set -u
 cd "$(dirname "$0")/../../.."
 
-if [[ -z "${GALDC:-}" ]]; then
-    for cand in target/release/galdc target/debug/galdc; do
-        if [[ -x "$cand" ]]; then GALDC="$cand"; break; fi
+if [[ -z "${NOPAC:-}" ]]; then
+    for cand in target/release/nopac target/debug/nopac; do
+        if [[ -x "$cand" ]]; then NOPAC="$cand"; break; fi
     done
 fi
-if [[ -z "${GALDC:-}" || ! -x "$GALDC" ]]; then
-    echo "error: galdc binary not found (build it, or set GALDC=)" >&2
+if [[ -z "${NOPAC:-}" || ! -x "$NOPAC" ]]; then
+    echo "error: nopac binary not found (build it, or set NOPAC=)" >&2
     exit 2
 fi
-echo "using galdc: $GALDC"
+echo "using nopac: $NOPAC"
 DIR=tests/golden/28_refcount_trace
 PASS=0
 FAIL=0
 
-for np in "$DIR"/*.gm; do
-    out="${np%.gm}.out"
+for np in "$DIR"/*.np; do
+    out="${np%.np}.out"
     if [[ ! -f "$out" ]]; then
         echo "SKIP  $np (no $out)"
         continue
     fi
     # trace with colors disabled for deterministic diffing
     tmp=/tmp/refcount_trace.$$.txt
-    "$GALDC" -trace-refcount -trace-no-color -trace-max-iters 2 "$np" > "$tmp" 2>&1
+    "$NOPAC" -trace-refcount -trace-no-color -trace-max-iters 2 "$np" > "$tmp" 2>&1
     rc=$?
     if [[ $rc -ne 0 ]]; then
         echo "FAIL  $np (tracer exit $rc)"

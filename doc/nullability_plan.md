@@ -1,8 +1,8 @@
 # Nullability 实施方案（M1 + M2）
 
 > 状态：**规划已定，M1 待实施**。本文是实现的单一事实来源。
-> 背景：ObjC 2015 年最大的语言演进（`nullable` / `nonnull` / `NS_ASSUME_NONNULL_BEGIN`）在 Gald 完全缺失，
-> 而 Gald 的 `nil` 安全性是核心卖点（所有消息派发都有 nil 守卫）——这是与现代 ObjC 最大的显著差距。
+> 背景：ObjC 2015 年最大的语言演进（`nullable` / `nonnull` / `NS_ASSUME_NONNULL_BEGIN`）在 Nopa 完全缺失，
+> 而 Nopa 的 `nil` 安全性是核心卖点（所有消息派发都有 nil 守卫）——这是与现代 ObjC 最大的显著差距。
 
 ## 0. 为什么抄 ObjC 的三态设计，而不是布尔
 
@@ -16,12 +16,12 @@ ObjC 故意用**三态**而非布尔，这决定了一切：
 
 第三态是整套设计的支点：
 
-- **审计可行**：ObjC 的 `NS_ASSUME_NONNULL_BEGIN/END`（Gald 拼写 `NF_ASSUME_NONNULL_BEGIN` / `NF_ASSUME_NONNULL_END`）把整段指针**自动**变 nonnull，区域内想例外才写 `_Nullable`。
+- **审计可行**：ObjC 的 `NS_ASSUME_NONNULL_BEGIN/END`（Nopa 拼写 `NF_ASSUME_NONNULL_BEGIN` / `NF_ASSUME_NONNULL_END`）把整段指针**自动**变 nonnull，区域内想例外才写 `_Nullable`。
   审计成本从 **O(声明数)** 降到 **O(1)** —— 新加声明自动获正确默认值。
 - **兼容性**：老代码（无标注）默认 unspecified，零改动不报新错。这是 ObjC 能在存量代码库上增量落地的关键。
 - **不撒谎**：`nullable` 的代价是调用方要处理 nil，所以它必须**显式写出来**；`unspecified` 不承担这个义务。
 
-Gald 处境**比 ObjC 更好**：ObjC 至少能用 `NS_ASSUME_NONNULL` 表达"这里不该传 nil"，Gald 现在连表达这个意图的语法都没有。
+Nopa 处境**比 ObjC 更好**：ObjC 至少能用 `NS_ASSUME_NONNULL` 表达"这里不该传 nil"，Nopa 现在连表达这个意图的语法都没有。
 
 ## 1. 语法落点
 
@@ -45,10 +45,10 @@ NF_ASSUME_NONNULL_END
 ### 1.2 关键约束：**必须是上下文关键词**
 
 ObjC 里 `nullable` / `nonnull` 是宏（展开成 `_Nullable`），所以 `int nullable = 5;` 在 ObjC 里能编译。
-但 Gald 若把它们登记进 `KW_TABLE` 当硬关键词，`int nullable = 5;` 就会炸 —— **违反 C 超集铁律**。
+但 Nopa 若把它们登记进 `KW_TABLE` 当硬关键词，`int nullable = 5;` 就会炸 —— **违反 C 超集铁律**。
 
 → 复用项目既有先例（`in` / `when` / `copy` / `retain` 全部是上下文关键词，lexer 不硬编码，只在类型位识别）。
-这是 Gald 相对 ObjC 的一个真实优势：**同一语义，两套拼写，且不破坏 C 标识符可用性**。
+这是 Nopa 相对 ObjC 的一个真实优势：**同一语义，两套拼写，且不破坏 C 标识符可用性**。
 
 ### 1.3 落点清单
 
@@ -61,7 +61,7 @@ ObjC 里 `nullable` / `nonnull` 是宏（展开成 `_Nullable`），所以 `int 
 | ivar | `@public nullable NFString *t;` | ✅ | `CstType.nulls` |
 | `id` / `instancetype` 的 nullability | `nullable id` | ✅ | `CstType.nulls` |
 | block 参数/返回 | `void (^)(nullable id)` | ⏭ M2 | `CstType.block_params` 递归 |
-| out-param（**ObjC 的 `NSError **`，Gald 对应类尚不存在**） | `- (BOOL)f:(NSError **)e;` | ⏭ M2 | 已知难点，见 §6 |
+| out-param（**ObjC 的 `NSError **`，Nopa 对应类尚不存在**） | `- (BOOL)f:(NSError **)e;` | ⏭ M2 | 已知难点，见 §6 |
 
 ## 2. 三态表示
 
@@ -129,20 +129,20 @@ NF_ASSUME_NONNULL_BEGIN
 NF_ASSUME_NONNULL_END
 ```
 
-**这是真语法，不是宏** —— 这是本节最重要的事实，理由见 §5.2。它沿用 ObjC 的 `NS_ASSUME_NONNULL_*` 拼写（仅把 `NS_` 换成 Gald 的 `NF_`），让 ObjC 开发者零学习成本认出，迁移时也便于对照苹果文档。
+**这是真语法，不是宏** —— 这是本节最重要的事实，理由见 §5.2。它沿用 ObjC 的 `NS_ASSUME_NONNULL_*` 拼写（仅把 `NS_` 换成 Nopa 的 `NF_`），让 ObjC 开发者零学习成本认出，迁移时也便于对照苹果文档。
 
-### 5.2 为什么不能是宏（ObjC 的实现方式在 Gald 不可用）
+### 5.2 为什么不能是宏（ObjC 的实现方式在 Nopa 不可用）
 
-ObjC 那两个标记是**宏**，内部是 `_Pragma("clang assume_nonnull begin")`。**galdc 明确拒绝宏体内的 `_Pragma`**：
+ObjC 那两个标记是**宏**，内部是 `_Pragma("clang assume_nonnull begin")`。**nopac 明确拒绝宏体内的 `_Pragma`**：
 
 ```
 // crates/cpp/src/lib.rs:358
-"macro '{}' has '_Pragma' in its body, which gald cannot expand — '_Pragma'
+"macro '{}' has '_Pragma' in its body, which nopa cannot expand — '_Pragma'
  (§6.10.9) takes effect at the invocation site during preprocessing, and a
  source-level expander has no position to place it"
 ```
 
-即 ObjC 的实现机制在 Gald 里**根本不可用**，这个标记只能是语法。负例见 `tests/negative/pragma_in_macro_body.gm`。
+即 ObjC 的实现机制在 Nopa 里**根本不可用**，这个标记只能是语法。负例见 `tests/negative/pragma_in_macro_body.np`。
 
 ### 5.3 已知代价（如实记录，勿当 bug 修）
 
@@ -172,25 +172,25 @@ for (kstr, kw) in KW_TABLE { if *kstr == s { return *kw; } }
 
 - **lexer**：作为**标识符**识别（不是关键词，守 C 超集铁律）—— 两条路径都要在，且**必须原样透传进生成的 C**（clang 需要它们生效），故走既有 `RawLine` 通道
 - **parser**：声明列表维护 `nonnull_region: bool`；在区内，每个**指针类型缺省标注**改为 `Nonnull`
-- **区域状态按文件作用域**：进入新文件（`#import` 边界）清零，`Foundation.gh` 内部不受用户的区域状态影响
+- **区域状态按文件作用域**：进入新文件（`#import` 边界）清零，`Foundation.nh` 内部不受用户的区域状态影响
 - **未闭合即 `#import`**：报 warning（`assume_nonnull region left open at #import`）
 
 ## 6. 已知难点（如实记录，不假装简单）
 
-1. **out-param（ObjC 的 `NSError **`）** —— 这是 ObjC nullability 至今只部分检查的经典难点，也是"该特性不该一次做对"的真实刻度。Gald Foundation 目前**没有错误类**（无 `NFError`），M1 明确不碰。
+1. **out-param（ObjC 的 `NSError **`）** —— 这是 ObjC nullability 至今只部分检查的经典难点，也是"该特性不该一次做对"的真实刻度。Nopa Foundation 目前**没有错误类**（无 `NFError`），M1 明确不碰。
 2. **block 参数/返回的 nullability** —— `CstType.block_params` 是递归结构，M1 跳过。
-3. **`nullable` 与 ARC 的交互** —— ARC 的 `RefVal` 状态机把对象局部标 `Owned`；`nullable` 意味着可能为 nil，注入的 `gald_release` 需要 nil 守卫。**必须核实 ARC 注入路径已有该守卫**，否则 `nullable` 会引入新的 over-release。
+3. **`nullable` 与 ARC 的交互** —— ARC 的 `RefVal` 状态机把对象局部标 `Owned`；`nullable` 意味着可能为 nil，注入的 `nopa_release` 需要 nil 守卫。**必须核实 ARC 注入路径已有该守卫**，否则 `nullable` 会引入新的 over-release。
 4. **跨 TU** —— 纯编译期，不影响 vtable 布局，`__sig` 不变。✅ 无风险。
 
 ## 7. 测试矩阵
 
 | 类别 | 文件 | 覆盖 |
 |---|---|---|
-| 正例 | `tests/golden/45_nullability/nullability.gm` + `.out` | 三态标注、区域默认、流敏感 narrow、block 外全部落点 |
-| 负例 | `tests/negative/null_to_nonnull.gm` | nullable → nonnull 传参，报错 |
-| 负例 | `tests/negative/nonnull_on_int.gm` | `nonnull int` 误用 |
-| 负例 | `tests/negative/assume_unclosed.gm` | 区域未闭合就 `#import` |
-| C 超集 | `tests/nullable_c_superset_test.gm` | `int nullable = 5;` / `int nonnull = 6;` / `struct { int nullable; }` 全部照常编译（**守护上下文关键词决策不被回退**） |
+| 正例 | `tests/golden/45_nullability/nullability.np` + `.out` | 三态标注、区域默认、流敏感 narrow、block 外全部落点 |
+| 负例 | `tests/negative/null_to_nonnull.np` | nullable → nonnull 传参，报错 |
+| 负例 | `tests/negative/nonnull_on_int.np` | `nonnull int` 误用 |
+| 负例 | `tests/negative/assume_unclosed.np` | 区域未闭合就 `#import` |
+| C 超集 | `tests/nullable_c_superset_test.np` | `int nullable = 5;` / `int nonnull = 6;` / `struct { int nullable; }` 全部照常编译（**守护上下文关键词决策不被回退**） |
 | 回归 | — | `cargo test` + `test_all` + multi_tu + stress 四套基线 |
 
 ## 8. 实施切分
@@ -206,19 +206,19 @@ for (kstr, kw) in KW_TABLE { if *kstr == s { return *kw; } }
 **§6.3 的疑问已解答**：`nullable` 不会引入 over-release。
 
 ```c
-// include/gald/runtime.c:222
-void gald_release(NFObject *obj) {
+// include/nopa/runtime.c:222
+void nopa_release(NFObject *obj) {
     if (!obj) return;              // ← nil 安全，ARC 注入的 release 天然安全
     if (obj->retain_count > 0) obj->retain_count--;
     ...
 }
 ```
 
-`gald_release` 自身就是 nil 安全的，所以 ARC 注入的 `gald_release(local)` 在 `nullable` 场景下（局部为 nil）**不会**崩、不会 over-release。
+`nopa_release` 自身就是 nil 安全的，所以 ARC 注入的 `nopa_release(local)` 在 `nullable` 场景下（局部为 nil）**不会**崩、不会 over-release。
 
 ⚠️ **但有一处仍需在 M1 实施时确认**（本次未核）：`crates/arc/src/arc.rs:35` 构造的 release 调用是
-`FuncCall { name: "gald_release", args: [target] }` —— 需确认这条路径**不会**被 checker 的
-`nullable` 检查拦下（`gald_release` 的参数类型是 `NFObject *`，若标为 `nonnull` 则注入调用会误报）。
+`FuncCall { name: "nopa_release", args: [target] }` —— 需确认这条路径**不会**被 checker 的
+`nullable` 检查拦下（`nopa_release` 的参数类型是 `NFObject *`，若标为 `nonnull` 则注入调用会误报）。
 **实施 M1 时第一件事**：把 runtime 内部注入的 release 调用列入诊断豁免名单（仿既有
-`&GALD_CLASS_$_X` 内部引用的 `__` 前缀放行规则，见 AGENTS.md 记载的 eh desugar 豁免）。
+`&NOPA_CLASS_$_X` 内部引用的 `__` 前缀放行规则，见 AGENTS.md 记载的 eh desugar 豁免）。
 

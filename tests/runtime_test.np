@@ -1,0 +1,228 @@
+// NFRuntimeTest.h -> 专为测试终极 @ 关键字与运行时异常编写的测试文件
+// 基于 NFFoundation 框架的 Objective-C 风格黑魔法级测试
+
+#import <Foundation/Foundation.np>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+// ============ 1. 模拟 ObjC 运行时的类型编码 (Type Encodings) ============
+// 用字符串代表类型，模拟动态内省时对结构的判断
+#define _NF_INT_CODING   "i"
+#define _NF_STR_CODING   "*"
+#define _NF_OBJ_CODING   "@"
+
+// ============ 2. 异常对象定义 ============
+@interface NFException : NFObject
+{
+    @private
+    const char* _name;
+    const char* _reason;
+    id _userInfo;
+}
+@property (nonatomic, readonly) const char* name;
+@property (nonatomic, readonly) const char* reason;
+
+- (id)initWithName:(const char*)aName reason:(const char*)aReason;
+@end
+
+@implementation NFException
+@synthesize name = _name;
+@synthesize reason = _reason;
+
+- (id)initWithName:(const char*)aName reason:(const char*)aReason
+{
+    self = [super init];
+    if (self) {
+        _name = aName;
+        _reason = aReason;
+        _userInfo = nil;
+    }
+    return self;
+}
+@end
+
+
+// ============ 3. 类簇抽象基类：JSON 节点 ============
+// 测试抽象类、类方法返回子类实例（类簇模式）
+@interface NFJsonNode : NFObject
+{
+    @protected
+    int _nodeType; // 0: Base, 1: String, 2: Number
+}
++ (NFJsonNode*)nodeWithSerializableObject:(id)obj;
+- (const char*)typeSignature;
+- (const char*)asString;
+- (int)asInteger;
+@end
+
+// ============ 4. 类簇具体子类：字符串节点 ============
+@interface NFJsonStringNode : NFJsonNode
+{
+    @private
+    const char* _stringValue;
+}
+- (id)initWithString:(const char*)str;
+@end
+
+@implementation NFJsonStringNode
+- (id)initWithString:(const char*)str
+{
+    self = [super init];
+    if (self) {
+        _nodeType = 1;
+        _stringValue = str;
+    }
+    return self;
+}
+- (const char*)typeSignature { return _NF_STR_CODING; }
+- (const char*)asString { return _stringValue; }
+- (int)asInteger {
+    // 字符串转整型，如果格式不对应该由上层抛出异常
+    return atoi(_stringValue);
+}
+@end
+
+// ============ 5. 类簇具体子类：数字节点 ============
+@interface NFJsonNumberNode : NFJsonNode
+{
+    @private
+    int _intValue;
+}
+- (id)initWithInteger:(int)val;
+@end
+
+@implementation NFJsonNumberNode
+- (id)initWithInteger:(int)val
+{
+    self = [super init];
+    if (self) {
+        _nodeType = 2;
+        _intValue = val;
+    }
+    return self;
+}
+- (const char*)typeSignature { return _NF_INT_CODING; }
+- (int)asInteger { return _intValue; }
+- (const char*)asString {
+    // 模拟分配缓冲区返回字符串
+    static char buf[16];
+    sprintf(buf, "%d", _intValue);
+    return buf;
+}
+@end
+
+
+// 抽象基类实现（包含工厂动态创建）
+@implementation NFJsonNode
++ (NFJsonNode*)nodeWithSerializableObject:(id)obj
+{
+    // 如果编译器支持类似以 @ 符号开头的类型检查或字符串前缀
+    // 这里模拟根据外部传入对象的内部特征动态返回子类（Class Cluster 核心）
+    if (obj == nil) return nil;
+    
+    // 模拟动态内省：如果对象可以响应特定选择器（这里用普通调用模拟）
+    // 假设我们传入的是纯 C 字符串，则包装为 StringNode
+    return [[NFJsonStringNode alloc] initWithString:(const char*)obj];
+}
+
+- (const char*)typeSignature { return _NF_OBJ_CODING; }
+- (const char*)asString { return ""; }
+- (int)asInteger { return 0; }
+@end
+
+
+// ============ 6. 核心解析器：高压测试 @try-@catch ============
+@interface NFJsonParser : NFObject
+{
+    @public
+    int parseState;
+}
+- (void)parseRawTokens:(const char*)tokens node:(NFJsonNode*)node;
+@end
+
+@implementation NFJsonParser
+
+- (void)parseRawTokens:(const char*)tokens node:(NFJsonNode*)node
+{
+    printf("[解析器] 开始解析 Token 序列: %s\n", tokens);
+    
+    // 终极压力测试：@try ... @catch ... @finally 块
+    @try {
+        parseState = 1; // 进入解析状态
+        
+        if (tokens == NULL || strlen(tokens) == 0) {
+            // 模拟抛出异常对象
+            NFException* ex = [[NFException alloc] initWithName:"NFJsonParseException" 
+                                                         reason:"Token 序列为空，无法解析结构"];
+            @throw ex; 
+        }
+        
+        // 模拟检查节点类型签名
+        if (strcmp([node typeSignature], _NF_STR_CODING) == 0) {
+            printf("[解析器断言] 目标是一个字符串类簇节点，安全转换值: %s\n", [node asString]);
+        } else {
+            // 类型不匹配，故意引发类型不匹配异常
+            NFException* ex = [[NFException alloc] initWithName:"NFMismatchTypeException" 
+                                                         reason:"预期需要 String 类型节点，但收到了不匹配的节点签名"];
+            @throw ex;
+        }
+    }
+    @catch (NFException* exception) {
+        // 捕获自定义的 NFException
+        printf("\n【@catch 捕获异常】\n");
+        printf("异常名称: %s\n", [exception name]);
+        printf("错误原因: %s\n", [exception reason]);
+        parseState = -1; // 异常状态
+        
+        [exception release]; // 清理异常对象
+    }
+    @catch (id unknownException) {
+        // 捕获未知的万能指针异常
+        printf("【@catch 捕获未知错误】\n");
+        parseState = -2;
+    }
+    @finally {
+        // 无论如何都会执行的清理代码
+        printf("[@finally 释放哨兵] 状态机当前归位，状态码: %d\n", parseState);
+    }
+}
+@end
+
+
+// ============ 7. 程序入口 ============
+int main(int argc, const char* argv[])
+{
+    @autoreleasepool {
+        printf(">>> 开始 NFFoundation 终极运行时与异常黑魔法测试 <<<\n\n");
+
+        // 1. 初始化解析器
+        NFJsonParser* parser = [[NFJsonParser alloc] init];
+
+        // 2. 利用类簇创建节点
+        printf("--- 测试点 1: 类簇动态工厂创建 ---\n");
+        NFJsonNode* strNode = [NFJsonNode nodeWithSerializableObject:(id)"2026-Spaceship"];
+        NFJsonNode* numNode = [[NFJsonNumberNode alloc] initWithInteger:888]; // 直接实例化子类
+
+        // 3. 测试正常流（预期成功）
+        printf("\n--- 测试点 2: 正常解析（匹配签名） ---\n");
+        [parser parseRawTokens:"{\"ship\": \"2026-Spaceship\"}" node:strNode];
+
+        // 4. 测试异常流 A：触发类型不匹配错误
+        printf("\n--- 测试点 3: 异常触发（将数字节点送入需要字符串的解析器） ---\n");
+        [parser parseRawTokens:"{\"count\": 888}" node:numNode];
+
+        // 5. 测试异常流 B：触发空指针重大错误
+        printf("\n--- 测试点 4: 异常触发（送入空字符串，测试 @throw 逻辑） ---\n");
+        [parser parseRawTokens:NULL node:strNode];
+
+        // 6. 深度清理
+        printf("\n>>> 正在注销运行时上下文并回收内存... <<<\n");
+        [strNode release];
+        [numNode release];
+        [parser release];
+
+        printf(">>> 终极编译测试圆满完成！ <<<\n");
+    }
+    return 0;
+}

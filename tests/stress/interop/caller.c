@@ -1,44 +1,44 @@
 // caller.c — plain C host for three-way interop:
-//   C (this file) → Gald (lib.c, via bridge header lib.h) → asm (asm_lib.s)
-//   and Gald → C (helper.c) / Gald → asm directly.
-// Build: see build.sh. main() must call gald_metaInit() first.
+//   C (this file) → Nopa (lib.c, via bridge header lib.h) → asm (asm_lib.s)
+//   and Nopa → C (helper.c) / Nopa → asm directly.
+// Build: see build.sh. main() must call nopa_metaInit() first.
 #include <stdio.h>
 #include "lib.h"
 
 // Free functions and class metadata are not bridged (the bridge header
 // emits instance-method wrappers only) — declare manually; defined in lib.c.
-extern int gald_add(int a, int b);
-extern NFClass GALD_CLASS_$_Calc;
+extern int nopa_add(int a, int b);
+extern NFClass NOPA_CLASS_$_Calc;
 
 int main(void) {
-    gald_metaInit();   // required before any class use
+    nopa_metaInit();   // required before any class use
 
-    // ── 1. C → Gald free function (which links ARM64 asm) ──
-    printf("[X1] gald_add(20,22) = %d (expect 42)\n", gald_add(20, 22));
+    // ── 1. C → Nopa free function (which links ARM64 asm) ──
+    printf("[X1] nopa_add(20,22) = %d (expect 42)\n", nopa_add(20, 22));
 
-    // ── 2. C → Gald object lifecycle ──
+    // ── 2. C → Nopa object lifecycle ──
     // +alloc is a class method (inherited from NFObject): the bridge header
     // emits instance wrappers only, so dispatch it via the class metadata
     // exactly like generated code does.
-    Calc *calc = (Calc *)gald_Calc_init(gald_alloc(&GALD_CLASS_$_Calc));
+    Calc *calc = (Calc *)nopa_Calc_init(nopa_alloc(&NOPA_CLASS_$_Calc));
     if (!calc) { printf("alloc/init failed\n"); return 1; }
 
-    gald_Calc_add_(calc, 10);
-    gald_Calc_add_(calc, 32);
-    printf("[X2] total = %d (expect 42)\n", gald_Calc_total(calc));
+    nopa_Calc_add_(calc, 10);
+    nopa_Calc_add_(calc, 32);
+    printf("[X2] total = %d (expect 42)\n", nopa_Calc_total(calc));
 
-    // ── 3. C → Gald method → ARM64 asm ──
+    // ── 3. C → Nopa method → ARM64 asm ──
     printf("[X3] squareOf(9) via asm = %d (expect 81)\n",
-           gald_Calc_squareOf_(calc, 9));
+           nopa_Calc_squareOf_(calc, 9));
 
-    // ── 4. C → Gald method → plain C helper ──
+    // ── 4. C → Nopa method → plain C helper ──
     printf("[X4] scale 6 by 7 via C helper = %d (expect 42)\n",
-           gald_Calc_scale_by_(calc, 6, 7));
+           nopa_Calc_scale_by_(calc, 6, 7));
 
-    // ── 5. C → Gald method that uses a block internally ──
-    int r = gald_Calc_mix_with_(calc, 5, 8);
+    // ── 5. C → Nopa method that uses a block internally ──
+    int r = nopa_Calc_mix_with_(calc, 5, 8);
     printf("[X5] mix(5,with:8) = %d (expect 41), total now %d (expect 83)\n",
-           r, gald_Calc_total(calc));
+           r, nopa_Calc_total(calc));
 
     printf("=== interop done ===\n");
     return 0;

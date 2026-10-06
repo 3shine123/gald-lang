@@ -1,0 +1,44 @@
+#include <stdio.h>
+#import <Foundation/Foundation.np>
+
+// 3-level inheritance chain testing [super method] dispatch
+
+@interface Grandparent : NFObject
+- (void)describe;
+@end
+
+@implementation Grandparent
+- (void)describe {
+    printf("Grandparent\n");
+}
+@end
+
+@interface Parent : Grandparent
+- (void)describe;
+@end
+
+@implementation Parent
+- (void)describe {
+    printf("Parent\n");
+    [super describe];
+}
+@end
+
+@interface Child : Parent
+- (void)describe;
+@end
+
+@implementation Child
+- (void)describe {
+    printf("Child\n");
+    [super describe];
+}
+@end
+
+int main() {
+    @autoreleasepool {
+        Child *c = [[Child alloc] init];
+        [c describe];
+    }
+    return 0;
+}

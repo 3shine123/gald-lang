@@ -1,13 +1,13 @@
 [-> 中文](CHINESE.md)
 
 <div align="center">
-<img src="doc/assets/Gald_avatar.svg" alt="Gald_avatar" width="210">
+<img src="doc/assets/Nopa_avatar.svg" alt="Nopa_avatar" width="210">
 
-# The Gald Programming Language
+# The Nopa Programming Language
 
 [**View Project Examples**](#project-examples)
 
-[Overview](#overview) · [Why Gald?](#why-gald) · [Project Examples](#project-examples) · [Quick Start](#quick-start) · [Language Features](#language-features) · [New Features](#new-features) · [Compilation & CLI](#compilation--cli) · [Code Examples](#code-examples) · [Design Principles](#design-principles) · [Roadmap](#roadmap) · [FAQ](#faq)
+[Overview](#overview) · [Why Nopa?](#why-nopa) · [Project Examples](#project-examples) · [Quick Start](#quick-start) · [Language Features](#language-features) · [New Features](#new-features) · [Compilation & CLI](#compilation--cli) · [Code Examples](#code-examples) · [Design Principles](#design-principles) · [Roadmap](#roadmap) · [FAQ](#faq)
 
 </div>
 
@@ -25,15 +25,15 @@
 
 ## **Overview**
 
-Gald is a **purely static** Objective-C dialect (C superset language). Gald source is transpiled to C99, then compiled to native machine code by Clang. No runtime message forwarding, no GC pauses, no JIT warm-up — all method dispatch, memory management, and polymorphism are resolved at compile time. It currently works — there are games and tools running in it. If you find it interesting, feel free to give it a try.
+Nopa is a **purely static** Objective-C dialect (C superset language). Nopa source is transpiled to C99, then compiled to native machine code by Clang. No runtime message forwarding, no GC pauses, no JIT warm-up — all method dispatch, memory management, and polymorphism are resolved at compile time. It currently works — there are games and tools running in it. If you find it interesting, feel free to give it a try.
 
 I don't intend to replace ObjC or Swift. I just miss ObjC's syntax and wanted to let it live again in a statically compiled world. ☺️
 
 ---
 
-## Why Gald?
+## Why Nopa?
 
-I simply like ObjC's message send syntax `[obj message]`. ObjC's runtime (`objc_msgSend`) is heavy, and I wanted to write ObjC-like code that compiles straight to C — so Gald was born: ObjC syntax compiled statically, no runtime dependency, generating clean C.
+I simply like ObjC's message send syntax `[obj message]`. ObjC's runtime (`objc_msgSend`) is heavy, and I wanted to write ObjC-like code that compiles straight to C — so Nopa was born: ObjC syntax compiled statically, no runtime dependency, generating clean C.
 
 This is not a production-ready language. It's a toy, exploring the question: "what happens if you transpile ObjC into plain static C?"
 
@@ -59,10 +59,10 @@ This is not a production-ready language. It's a toy, exploring the question: "wh
 
 | Project               | Description                                                                              | Run                            |
 | --------------------- | ---------------------------------------------------------------------------------------- | ------------------------------ |
-| **`04_soma-kernel/`** | Tiny 32‑bit i386 OS kernel (NASM + C + Gald), bare‑metal `-ffreestanding` mode                | `./run.sh` or `./run.sh --gui` |
-| **`03_LibUI/`**       | GUI app via [libui-ng](https://github.com/libui-ng/libui-ng), all callbacks in pure Gald | `./run_libui.sh`               |
+| **`04_soma-kernel/`** | Tiny 32‑bit i386 OS kernel (NASM + C + Nopa), bare‑metal `-ffreestanding` mode                | `./run.sh` or `./run.sh --gui` |
+| **`03_LibUI/`**       | GUI app via [libui-ng](https://github.com/libui-ng/libui-ng), all callbacks in pure Nopa | `./run_libui.sh`               |
 | **`02_ncurses/`**     | Terminal demos (`ncurses_demo`, `sysmon`) using `Terminal::Ncurses`                      | `make run`                     |
-| **`01_JSONEditor/`**  | Multi‑file JSON editor with split‑screen terminal preview                                | `galdc run json_editor.gm`     |
+| **`01_JSONEditor/`**  | Multi‑file JSON editor with split‑screen terminal preview                                | `nopac run json_editor.np`     |
 
 ---
 
@@ -77,81 +77,81 @@ This is not a production-ready language. It's a toy, exploring the question: "wh
 ### Build
 
 ```bash
-git clone https://github.com/3shine123/gald-lang.git
-cd gald-lang
+git clone https://github.com/3shine123/nopa-lang.git
+cd nopa-lang
 cargo build --release
 ```
 
 ### Install
 
-The build automatically drops an `install.sh` (plus headers and `libgald.a`) next to the `galdc` binary. Install it to your system with:
+The build automatically drops an `install.sh` (plus headers and `libnopa.a`) next to the `nopac` binary. Install it to your system with:
 
 ```bash
 # After building from source — the script lives next to the binary
 cd target/release        # or target/debug if you ran a plain `cargo build`
-./install.sh             # installs to /opt/gald by default
+./install.sh             # installs to /opt/nopa by default
 ./install.sh /usr/local  # optional: pick a different prefix
 ```
 
 This installs:
 
-- **binary** → `<prefix>/bin/galdc`
-- **static lib** → `<prefix>/lib/libgald.a`
+- **binary** → `<prefix>/bin/nopac`
+- **static lib** → `<prefix>/lib/libnopa.a`
 - **headers** → `<prefix>/include/`
-- **system headers** → `/usr/local/include/{Foundation,gald}/` (needs write permission; skip with `sudo` or pass a second arg like `./install.sh /opt/gald ~/include`)
+- **system headers** → `/usr/local/include/{Foundation,nopa}/` (needs write permission; skip with `sudo` or pass a second arg like `./install.sh /opt/nopa ~/include`)
 
 The installer auto-detects your language (中文 / English).
 
-Alternatively, download a prebuilt release archive (`gald-<platform>.tar.gz` or `.zip`) from the releases page, extract it, and run the `install.sh` inside:
+Alternatively, download a prebuilt release archive (`nopa-<platform>.tar.gz` or `.zip`) from the releases page, extract it, and run the `install.sh` inside:
 
 ```bash
-tar xzf gald-x86_64-unknown-linux-musl.tar.gz
-cd gald-x86_64-unknown-linux-musl
+tar xzf nopa-x86_64-unknown-linux-musl.tar.gz
+cd nopa-x86_64-unknown-linux-musl
 ./install.sh
 ```
 
-> **Tip:** with `galdc` on your PATH and system headers installed, `<gald/runtime.h>` and `<Foundation/...>` resolve automatically — no `-I include` needed.
+> **Tip:** with `nopac` on your PATH and system headers installed, `<nopa/runtime.h>` and `<Foundation/...>` resolve automatically — no `-I include` needed.
 
-### Compile a Gald Program
+### Compile a Nopa Program
 
 ```bash
-# Just output C code (auto-derives .gm → .c)
-galdc -rewrite-gald hello.gm
-galdc hello.gm -rewrite-gald               # flag works anywhere
-galdc -rewrite-gald hello.gm -o out.c      # explicit path also works
-# (--rewrite-gald double-dash form also accepted)
+# Just output C code (auto-derives .np → .c)
+nopac -rewrite-nopa hello.np
+nopac hello.np -rewrite-nopa               # flag works anywhere
+nopac -rewrite-nopa hello.np -o out.c      # explicit path also works
+# (--rewrite-nopa double-dash form also accepted)
 
 # Compile the transpiled C alone with Clang — two ways:
 #   1) compile the runtime source directly
-clang -I include -o hello hello.c include/gald/runtime.c
-#   2) link the prebuilt libgald.a (lives next to the galdc binary)
-clang -I include -o hello hello.c -Ltarget/release -lgald
+clang -I include -o hello hello.c include/nopa/runtime.c
+#   2) link the prebuilt libnopa.a (lives next to the nopac binary)
+clang -I include -o hello hello.c -Ltarget/release -lnopa
 
 # Compile to executable
-galdc hello.gm -o hello_bin                # transpile + compile + link
+nopac hello.np -o hello_bin                # transpile + compile + link
 
 # Multi-TU: extra positional inputs are compiled and linked in; .o/.a as-is
-galdc main.gm lib.gm -I include -o app     # two TUs, one command (no manual clang)
-galdc main.gm lib.o libfoo.a -o app        # mix gald sources with prebuilt objects
+nopac main.np lib.np -I include -o app     # two TUs, one command (no manual clang)
+nopac main.np lib.o libfoo.a -o app        # mix nopa sources with prebuilt objects
 
 # Precompiled Foundation library: build once, link in every project
-./tools/build-foundation-lib.sh                            # → target/foundation/libgaldfoundation.a
-galdc app.gm -I include -L target/foundation -lgaldfoundation -o app   # explicit
-galdc app.gm -o app                                        # or: auto-linked when findable (decl-only clients)
+./tools/build-foundation-lib.sh                            # → target/foundation/libnopafoundation.a
+nopac app.np -I include -L target/foundation -lnopafoundation -o app   # explicit
+nopac app.np -o app                                        # or: auto-linked when findable (decl-only clients)
 
 # Compile + run
-galdc run hello.gm
-galdc run hello.gm -o hello_bin            # keep binary after run
-galdc run hello.gm                          # auto-clean temp binary
+nopac run hello.np
+nopac run hello.np -o hello_bin            # keep binary after run
+nopac run hello.np                          # auto-clean temp binary
 
 # Show compilation warnings
-galdc -v run hello.gm
+nopac -v run hello.np
 
-# [!] Error: .c output without -rewrite-gald
-galdc hello.gm -o hello.c   → Error: use -rewrite-gald to output C code
+# [!] Error: .c output without -rewrite-nopa
+nopac hello.np -o hello.c   → Error: use -rewrite-nopa to output C code
 
 # [!] Error: no output method specified
-galdc hello.gm              → Error: specify -o or -rewrite-gald
+nopac hello.np              → Error: specify -o or -rewrite-nopa
 ```
 
 ### Foundation: Two Usage Modes
@@ -160,9 +160,9 @@ Foundation supports two modes. Both are fully supported; **for real projects we 
 
 **Self-contained / unity mode** — implementations are inlined via `#import`; no library needed. Good for single files, quick experiments, and legacy builds:
 
-```gald
-// hello.gm
-#import <Foundation/Foundation.gm>   // declarations + implementations, all inlined
+```nopa
+// hello.np
+#import <Foundation/Foundation.np>   // declarations + implementations, all inlined
 
 int main() {
     NFLog(@"hello %@", [NFString stringWithUTF8String:"world"]);
@@ -171,14 +171,14 @@ int main() {
 ```
 
 ```bash
-galdc run hello.gm
+nopac run hello.np
 ```
 
 **Precompiled Foundation / multi-TU mode (recommended)** — the implementation lives in a static library built once; your TU only compiles your own code:
 
-```gald
-// app.gm
-#import <Foundation/Foundation.gh>   // declarations only — nothing inlined
+```nopa
+// app.np
+#import <Foundation/Foundation.nh>   // declarations only — nothing inlined
 
 int main() {
     NFLog(@"hello %@", [NFString stringWithUTF8String:"world"]);
@@ -187,42 +187,42 @@ int main() {
 ```
 
 ```bash
-./tools/build-foundation-lib.sh   # once → target/foundation/libgaldfoundation.a
-galdc app.gm -o app               # the library is found and linked automatically
+./tools/build-foundation-lib.sh   # once → target/foundation/libnopafoundation.a
+nopac app.np -o app               # the library is found and linked automatically
 ```
 
-Under the hood: in self-contained mode the inlined implementations are not their TU's main file, so their class metadata is weak (duplicated per TU and merged). In library mode each Foundation `.gm` is compiled as its own TU, so its `@implementation` owns the metadata and emits it strong — one copy in the archive. Full owner/strong/weak rules: `doc/architecture.md`.
+Under the hood: in self-contained mode the inlined implementations are not their TU's main file, so their class metadata is weak (duplicated per TU and merged). In library mode each Foundation `.np` is compiled as its own TU, so its `@implementation` owns the metadata and emits it strong — one copy in the archive. Full owner/strong/weak rules: `doc/architecture.md`.
 
 ### Shell Completion (Tab autocomplete)
 
-`galdc` ships with generated completion scripts for **zsh**, **bash** and **fish**, built with
+`nopac` ships with generated completion scripts for **zsh**, **bash** and **fish**, built with
 [clap_complete](https://crates.io/crates/clap_complete). Regenerate them any time with:
 
 ```bash
-galdc -gen-completions zsh > _galdc
-galdc -gen-completions bash > galdc.bash
-galdc -gen-completions fish > galdc.fish
+nopac -gen-completions zsh > _nopac
+nopac -gen-completions bash > nopac.bash
+nopac -gen-completions fish > nopac.fish
 ```
 
-The scripts are also copied into the install bundle (`share/galdc/completions/`) by `install.sh`.
+The scripts are also copied into the install bundle (`share/nopac/completions/`) by `install.sh`.
 
 **zsh** — add the directory to `fpath` before `compinit` runs:
 
 ```zsh
-fpath=(/opt/gald/share/galdc/completions $fpath)
+fpath=(/opt/nopa/share/nopac/completions $fpath)
 autoload -U compinit && compinit
 ```
 
 **bash**:
 
 ```bash
-source /opt/gald/share/galdc/completions/galdc.bash
+source /opt/nopa/share/nopac/completions/nopac.bash
 ```
 
 **fish**:
 
 ```fish
-source /opt/gald/share/galdc/completions/galdc.fish
+source /opt/nopa/share/nopac/completions/nopac.fish
 ```
 
 After installing a new version, clear the zsh cache with `rm -f ~/.zcompdump*` and open a new terminal.
@@ -243,7 +243,7 @@ cargo test --workspace
 
 ### Class System
 
-```gald
+```nopa
 @interface Animal : NFObject {
 @public
     NFString *_name;
@@ -269,7 +269,7 @@ cargo test --workspace
 
 ### Protocol
 
-```gald
+```nopa
 @protocol Drawable
 - (void)draw;
 - (BOOL)isVisible;
@@ -281,7 +281,7 @@ cargo test --workspace
 
 ### Properties
 
-```gald
+```nopa
 @interface Person : NFObject
 @property NFString *name;
 @property int age;
@@ -291,7 +291,7 @@ cargo test --workspace
 
 ### Category
 
-```gald
+```nopa
 @interface Person (Printing)
 - (void)printGreeting;
 @end
@@ -305,7 +305,7 @@ cargo test --workspace
 
 ### Block
 
-```gald
+```nopa
 int (^square)(int) = ^int(int x) {
     return x * x;
 };
@@ -318,7 +318,7 @@ void (^logAndCall)(NFString *, void (^)(void)) = ^void(NFString *msg, void (^nex
 
 ### @autoreleasepool
 
-```gald
+```nopa
 @autoreleasepool {
     NFString *temp = [NFString stringWithUTF8String:"hello"];
     // temp is released when the pool pops
@@ -327,13 +327,13 @@ void (^logAndCall)(NFString *, void (^)(void)) = ^void(NFString *msg, void (^nex
 
 ### @selector
 
-```gald
+```nopa
 SEL sel = @selector(doSomething:);
 ```
 
 ### Full C Compatibility
 
-```gald
+```nopa
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -344,9 +344,9 @@ SEL sel = @selector(doSomething:);
 
 ### C Attributes (__attribute__)
 
-Gald supports `__attribute__((...))` pass-through. You can write C `__attribute__` on global declarations and struct fields, and the compiler preserves them verbatim in the generated C output.
+Nopa supports `__attribute__((...))` pass-through. You can write C `__attribute__` on global declarations and struct fields, and the compiler preserves them verbatim in the generated C output.
 
-```gald
+```nopa
 __attribute__((packed))
 struct Point {
     int x;
@@ -369,11 +369,11 @@ Unknown attributes (not in the table) produce a warning and pass through — nev
 
 ### Memory Management
 
-Gald uses **compile-time static ARC**. The compiler determines each object reference's lifetime through CFG dataflow analysis and inserts retain/release calls automatically. No manual `retain`/`release`/`autorelease` needed.
+Nopa uses **compile-time static ARC**. The compiler determines each object reference's lifetime through CFG dataflow analysis and inserts retain/release calls automatically. No manual `retain`/`release`/`autorelease` needed.
 
-In MRC mode (`-fno-gald-arc`):
+In MRC mode (`-fno-nopa-arc`):
 
-```gald
+```nopa
 NFObject *obj = [[NFObject alloc] init];
 // ... use obj ...
 [obj release]; // MRC manual release
@@ -381,12 +381,12 @@ NFObject *obj = [[NFObject alloc] init];
 
 ### C Bridge (`-emit-bridge-header`)
 
-Gald transpiles to C, but calling Gald object methods from C normally requires verbose vtable-index and SEL-constant boilerplate. `-emit-bridge-header` generates a header with `static inline` wrappers for every method, so C code can call Gald objects like ordinary C functions.
+Nopa transpiles to C, but calling Nopa object methods from C normally requires verbose vtable-index and SEL-constant boilerplate. `-emit-bridge-header` generates a header with `static inline` wrappers for every method, so C code can call Nopa objects like ordinary C functions.
 
-**Usage**: transpile a Gald library to C, then generate the bridge header:
+**Usage**: transpile a Nopa library to C, then generate the bridge header:
 
 ```bash
-galdc -rewrite-gald lib.gm -o lib.c -emit-bridge-header lib.h
+nopac -rewrite-nopa lib.np -o lib.c -emit-bridge-header lib.h
 ```
 
 Then include the bridge header from C:
@@ -395,95 +395,95 @@ Then include the bridge header from C:
 #include "lib.h"
 
 int main(void) {
-    gald_metaInit();  // metadata back-fill — see the note below
+    nopa_metaInit();  // metadata back-fill — see the note below
 
-    // Class method: gald_<Class>_<method>(params...)
-    NFString *s = gald_NFString_stringWithUTF8String_("Hello");
+    // Class method: nopa_<Class>_<method>(params...)
+    NFString *s = nopa_NFString_stringWithUTF8String_("Hello");
 
-    // Instance method: gald_<Class>_<method>(self, params...)
-    size_t len = gald_NFString_length(s);
-    const char *cstr = gald_NFString_UTF8String(s);
+    // Instance method: nopa_<Class>_<method>(self, params...)
+    size_t len = nopa_NFString_length(s);
+    const char *cstr = nopa_NFString_UTF8String(s);
 
-    // Nested message send (like Gald's [[s UTF8String] ...])
-    const char *nested = gald_NFString_UTF8String(
-        gald_NFString_stringWithUTF8String_("nested")
+    // Nested message send (like Nopa's [[s UTF8String] ...])
+    const char *nested = nopa_NFString_UTF8String(
+        nopa_NFString_stringWithUTF8String_("nested")
     );
 
-    // Multi-argument message send (like Gald's [arr replaceObjectAtIndex:0 withObject:obj])
-    NFArray *arr = gald_NFArray_arrayWithObject_(s);
-    gald_NFArray_replaceObjectAtIndex_withObject_(arr, 0, s);
+    // Multi-argument message send (like Nopa's [arr replaceObjectAtIndex:0 withObject:obj])
+    NFArray *arr = nopa_NFArray_arrayWithObject_(s);
+    nopa_NFArray_replaceObjectAtIndex_withObject_(arr, 0, s);
 
     // Each colon in the selector becomes an underscore in the function name:
-    //   [obj foo:arg1 bar:arg2] → gald_<Class>_foo_bar_(obj, arg1, arg2)
+    //   [obj foo:arg1 bar:arg2] → nopa_<Class>_foo_bar_(obj, arg1, arg2)
     //   [m replaceCharactersInRange:rng withString:str]
-    //   → gald_NFMutableString_replaceCharactersInRange_withString_(m, rng, str)
+    //   → nopa_NFMutableString_replaceCharactersInRange_withString_(m, rng, str)
 }
 ```
 
 Link against the transpiled `.c` and `runtime.c`:
 
 ```bash
-clang caller.c lib.c include/gald/runtime.c -I include -o app
+clang caller.c lib.c include/nopa/runtime.c -I include -o app
 ```
 
-⚠️ The bridge header uses `sel_registerName` to resolve selectors at runtime, so it does **not** depend on the codegen-generated `static const` SEL constants (which are file-local and invisible across translation units). Class metadata itself is **statically initialized at load time** by every TU whose main file holds the `@implementation` — which is all `galdc` workflows. `gald_metaInit()` stays in the examples as a harmless idempotent back-fill; it is only *required* when a build reaches implementations through `#import "*.gm"` (single-TU umbrella builds), where no TU owns the metadata.
+⚠️ The bridge header uses `sel_registerName` to resolve selectors at runtime, so it does **not** depend on the codegen-generated `static const` SEL constants (which are file-local and invisible across translation units). Class metadata itself is **statically initialized at load time** by every TU whose main file holds the `@implementation` — which is all `nopac` workflows. `nopa_metaInit()` stays in the examples as a harmless idempotent back-fill; it is only *required* when a build reaches implementations through `#import "*.np"` (single-TU umbrella builds), where no TU owns the metadata.
 
 #### Memory Management from C
 
-Gald's **ARC is compile-time and applies only to `.gm` source** — it never sees calls coming from C. When C code calls bridge functions, objects are **not** automatically retained or released. Manage them manually, following the ObjC memory-management naming convention:
+Nopa's **ARC is compile-time and applies only to `.np` source** — it never sees calls coming from C. When C code calls bridge functions, objects are **not** automatically retained or released. Manage them manually, following the ObjC memory-management naming convention:
 
 | Method family                                  | Caller owns?       | What C code must do                                                             |
 | ---------------------------------------------- | ------------------ | ------------------------------------------------------------------------------- |
-| `alloc`, `new`, `copy`, `mutableCopy`          | ✅ +1               | Must call `gald_release(obj)` when done                                         |
+| `alloc`, `new`, `copy`, `mutableCopy`          | ✅ +1               | Must call `nopa_release(obj)` when done                                         |
 | `init`                                         | ❌ consumes `alloc` | Nothing                                                                         |
-| everything else (e.g. `stringWithUTF8String:`) | ❌ autoreleased     | Nothing, but `gald_retain(obj)` if it must outlive the current autorelease pool |
+| everything else (e.g. `stringWithUTF8String:`) | ❌ autoreleased     | Nothing, but `nopa_retain(obj)` if it must outlive the current autorelease pool |
 
 ```c
 #include "lib.h"
 
 int main(void) {
-    gald_metaInit();
-    gald_autoreleasepool_t *pool = gald_autoreleasepoolPush();
+    nopa_metaInit();
+    nopa_autoreleasepool_t *pool = nopa_autoreleasepoolPush();
 
     // +1 (returns autoreleased convenience object); use within this pool only
-    NFString *s = gald_NFString_stringWithUTF8String_("hello");
-    printf("%s\n", gald_NFString_UTF8String(s));
+    NFString *s = nopa_NFString_stringWithUTF8String_("hello");
+    printf("%s\n", nopa_NFString_UTF8String(s));
 
     // If it must outlive the pool: retain now, release later
-    NFString *t = gald_NFString_stringWithUTF8String_("world");
-    gald_retain(t);
-    gald_autoreleasepoolPop(pool);      // t survives (was retained)
-    printf("%s\n", gald_NFString_UTF8String(t));
-    gald_release(t);
+    NFString *t = nopa_NFString_stringWithUTF8String_("world");
+    nopa_retain(t);
+    nopa_autoreleasepoolPop(pool);      // t survives (was retained)
+    printf("%s\n", nopa_NFString_UTF8String(t));
+    nopa_release(t);
 
     // alloc-family returns +1 → must release
-    NFString *u = gald_NFString_alloc(gald_NFString_stringWithUTF8String_("x") /* placeholder */);
-    // (real usage: gald_NFString_copy(s) returns +1, release it)
-    NFString *copy = gald_NFString_copy(s);
-    gald_release(copy);
+    NFString *u = nopa_NFString_alloc(nopa_NFString_stringWithUTF8String_("x") /* placeholder */);
+    // (real usage: nopa_NFString_copy(s) returns +1, release it)
+    NFString *copy = nopa_NFString_copy(s);
+    nopa_release(copy);
 }
 ```
 
-`gald_retain`, `gald_release`, `gald_autorelease`, `gald_autoreleasepoolPush`/`gald_autoreleasepoolPop` are declared in `<gald/runtime.h>` and work on any Gald object. This is exactly the manual-retain-count (MRC) model — from the C side you can think of Gald objects as raw pointers you own or don't own by convention.
+`nopa_retain`, `nopa_release`, `nopa_autorelease`, `nopa_autoreleasepoolPush`/`nopa_autoreleasepoolPop` are declared in `<nopa/runtime.h>` and work on any Nopa object. This is exactly the manual-retain-count (MRC) model — from the C side you can think of Nopa objects as raw pointers you own or don't own by convention.
 
 ---
 
 ## New Features
 
-Gald adds features on top of Objective-C syntax that ObjC itself doesn't have.
+Nopa adds features on top of Objective-C syntax that ObjC itself doesn't have.
 
 **Recent highlights:**
 
-- **Native bare-metal support (`-ffreestanding`)** — compiles to self-contained C with no libc, no Foundation, no TLS; `@try/@catch` uses `__builtin_setjmp/longjmp`, and a zero-boilerplate `runtime_freestanding.c` provides the bump allocator, `GALD_CLASS_$_gald_root`, exception state, and `memcpy`.
+- **Native bare-metal support (`-ffreestanding`)** — compiles to self-contained C with no libc, no Foundation, no TLS; `@try/@catch` uses `__builtin_setjmp/longjmp`, and a zero-boilerplate `runtime_freestanding.c` provides the bump allocator, `NOPA_CLASS_$_nopa_root`, exception state, and `memcpy`.
 - **C superset** — `@protocol` + conformance, `@property` + `@synthesize`, `instancetype`, `@public` ivars, dot syntax, structs + function pointers, inline asm, C-style casts.
-- **Typed `@catch`** — catch arms match via `__gald_eh_isa` (isKindOf: superclass-chain semantics, like ObjC): a parent-class arm catches subclass instances, and the first matching arm consumes the exception so later arms never double-catch.
+- **Typed `@catch`** — catch arms match via `__nopa_eh_isa` (isKindOf: superclass-chain semantics, like ObjC): a parent-class arm catches subclass instances, and the first matching arm consumes the exception so later arms never double-catch.
 - **ARC fixes** — scope-stack model no longer releases parent-scope variables at nested scope end; `for`-init object hoisting stops leaks and invalid `for` headers.
-- **`@noarc` block** — block-level MRC: in ARC mode, manual `retain`/`release`/`dealloc`/`autorelease` inside `@noarc { }` is allowed; the block-level analogue of `-fno-gald-arc` and clang's `-fno-objc-arc`.
+- **`@noarc` block** — block-level MRC: in ARC mode, manual `retain`/`release`/`dealloc`/`autorelease` inside `@noarc { }` is allowed; the block-level analogue of `-fno-nopa-arc` and clang's `-fno-objc-arc`.
 - **`__attribute__` pass-through + `-backend`** — full support for C `__attribute__((...))` and all `__`-prefixed C predefined identifiers (`__FILE__`, `__LINE__`, `__builtin_*`, `__extension__`, `__typeof__`, `__alignof__`, ...); the `-backend` flag controls which compiler-specific attributes are allowed.
 
 ### for-in Enumeration
 
-```gald
+```nopa
 for (NFString *s in arr) {
     printf("%s\n", [s UTF8String]);
 }
@@ -503,7 +503,7 @@ class 'Circle' does not implement required method 'draw' from protocol 'Drawable
 
 Reuse C's `&` operator to require several protocols at once — no new syntax:
 
-```gald
+```nopa
 // ① Intersection type: the receiver must implement both
 void render(id<Drawable & Serializable> item);
 
@@ -518,7 +518,7 @@ Protocol types stay compile-time constraint labels only — vtable slots are una
 
 The official ObjC spellings are now implemented on the root class, enabling idiomatic multi-way dispatch without any new language construct:
 
-```gald
+```nopa
 for (id item in items) {
     if ([item isKindOfClass:[Dog class]]) {
         [(Dog *)item bark];
@@ -532,9 +532,9 @@ for (id item in items) {
 
 ### Struct `==` / `!=` Value Comparison
 
-C rejects `a == b` on structs outright; Gald reuses the existing operators and desugars to a generated field-by-field compare function:
+C rejects `a == b` on structs outright; Nopa reuses the existing operators and desugars to a generated field-by-field compare function:
 
-```gald
+```nopa
 struct Point a = {1, 2};
 struct Point b = {1, 2};
 
@@ -548,7 +548,7 @@ p == &a               // pointer comparison semantics unchanged
 
 A method whose body contains `@await` is async — no annotation needed, mirroring C++20's `co_await`-based coroutines (the declaration looks like a perfectly ordinary ObjC method, so vtable layout is unchanged):
 
-```gald
+```nopa
 @interface Fetcher : NFObject
 - (int)compute:(int)n;
 - (void)runAll;
@@ -579,13 +579,13 @@ Design rules:
 - **Infection is chain-based** — a method calling `@await` becomes async itself; async methods with a return value may only be awaited from async contexts (compile-time rejected otherwise).
 - **`@await` lowers to a state machine** — the body is split at suspension points into a `switch(task->state)` driver over a heap `NFTask`; locals that survive a suspension are lifted into a per-method frame struct.
 - **`@try` spanning an `@await`** is rejected (a `jmp_buf` cannot survive a suspension point); `@noarc` across awaits is allowed; break/continue across awaits become state jumps.
-- A cooperative single-thread scheduler (`gald_run_all`) and I/O integration are planned as the next milestone.
+- A cooperative single-thread scheduler (`nopa_run_all`) and I/O integration are planned as the next milestone.
 
 ### Switch Pattern Matching (`case` patterns)
 
 `case` labels accept **patterns**, not just integer constants. Type dispatch stays a method chain in spirit — the patterns desugar to `isKindOfClass:` / `isEqual:` / comparisons — but you write them declaratively:
 
-```gald
+```nopa
 // Object patterns mix freely in one switch:
 switch (subject) {
     case NFString *s:                      // type binding → isKindOfClass:
@@ -625,7 +625,7 @@ switch (n) {
 
 | pattern | lowers to |
 |---------|-----------|
-| `T *name` | `gald_isKindOfClass(subject, &GALD_CLASS_$_T)`; inside the arm, `name` is already bound to `(T *)subject` |
+| `T *name` | `nopa_isKindOfClass(subject, &NOPA_CLASS_$_T)`; inside the arm, `name` is already bound to `(T *)subject` |
 | `> 10`, `< 10`, `>= 0`, `<= 9` | `subject > 10` (the subject is spliced into the dangling operand) |
 | `> 0 && < 100` | `subject > 0 && subject < 100` |
 | `@"lit"`, `@42`, `@YES`, `@'c'`, `@(expr)` | `[subject isEqual:<literal>]` — value semantics, so `@"lit"` matches a *different* NFString with the same contents |
@@ -647,7 +647,7 @@ Implementation: the parser classifies each label and flattens the whole switch i
 
 ### Boxed Literals (`@(expr)` / `@YES` / `@NO` / `@'c'`)
 
-```gald
+```nopa
 NFNumber *a = @123;          // int
 NFNumber *b = @1.5;          // double
 NFNumber *c = @YES;          // BOOL → 1
@@ -665,7 +665,7 @@ illegal type 'NFString *' in a boxed expression — '@(...)' accepts arithmetic 
 
 ### Dictionary Literals (`@{ key: value }`)
 
-```gald
+```nopa
 NFDictionary *d = @{ @"a": @1, @"b": @2, @"c": @3 };
 NFLog(@"%d", [[d objectForKey:@"b"] intValue]);   // 2
 printf("%lu\n", (unsigned long)[d count]);        // 3
@@ -686,9 +686,9 @@ illegal type 'int' in a dictionary literal — keys and values must be Objective
 
 ### Exception Semantics (`-eh checked` — the default backend)
 
-Gald's exceptions are **ObjC exceptions by value, without unwinding**. `@try`/`@catch`/`@finally`/`@throw` behave exactly like clang's `-fobjc-arc-exceptions` mode — and a differential test suite (`tests/eh_diff/run_eh_diff.sh`) locks this in by running each case under both galdc and real clang/ObjC, then diffing stderr line by line (7/7 cases pass).
+Nopa's exceptions are **ObjC exceptions by value, without unwinding**. `@try`/`@catch`/`@finally`/`@throw` behave exactly like clang's `-fobjc-arc-exceptions` mode — and a differential test suite (`tests/eh_diff/run_eh_diff.sh`) locks this in by running each case under both nopac and real clang/ObjC, then diffing stderr line by line (7/7 cases pass).
 
-```gald
+```nopa
 @interface Boom : NFObject
 - (void)fire;
 @end
@@ -725,7 +725,7 @@ The semantics you get:
 - **Uncaught exceptions abort** with ObjC's wording: `*** Terminating app due to uncaught exception of class 'NFString'`, exit code 1.
 - **C callers can't miss an exception** — bridge-header wrappers check the error flag and abort rather than silently returning a zero value.
 
-**`-eh checked` is the default backend** — a plain `galdc run` compiles with it. `-eh legacy` (alias `-eh sjlj`) selects the old zero-overhead setjmp backend and remains a complete rollback; that backend has the classic limitation: a cross-frame throw skips intermediate frames' cleanup (documented below).
+**`-eh checked` is the default backend** — a plain `nopac run` compiles with it. `-eh legacy` (alias `-eh sjlj`) selects the old zero-overhead setjmp backend and remains a complete rollback; that backend has the classic limitation: a cross-frame throw skips intermediate frames' cleanup (documented below).
 
 ### `@throws` — Declared Exceptions
 
@@ -738,7 +738,7 @@ The semantics you get:
 | Shape | `@throw expr;` | `@throws(T *)` or bare `@throws` |
 | In generated C | yes (the setjmp/flag machinery) | **never** — no code, no vtable slot |
 
-```gald
+```nopa
 @interface Repo : NFObject
 - (NFString *)fetch:(const char *)url @throws(NFError *);   // throws NFError *
 - (int)parse:(const char *)s @throws;                       // throws; type unstated
@@ -755,7 +755,7 @@ The semantics you get:
 @end
 ```
 
-Apple has occupied exactly this slot — trailing metadata before the `;` — with macros for over a decade (`NS_DESIGNATED_INITIALIZER`, `NS_REQUIRES_NIL_TERMINATION`, `API_AVAILABLE(...)`). Gald promotes the slot to first-class syntax and lets the checker reconcile it.
+Apple has occupied exactly this slot — trailing metadata before the `;` — with macros for over a decade (`NS_DESIGNATED_INITIALIZER`, `NS_REQUIRES_NIL_TERMINATION`, `API_AVAILABLE(...)`). Nopa promotes the slot to first-class syntax and lets the checker reconcile it.
 
 **What the checker enforces**
 
@@ -768,7 +768,7 @@ Apple has occupied exactly this slot — trailing metadata before the `;` — wi
 
 A `@throw` caught by a `@try` **in the same body** is never an escape, so `main` and locally-guarded helpers need no annotation:
 
-```gald
+```nopa
 static void bad(int n) {                        // error: escapes 'bad'
     if (n < 0) {
         @throw [[AppError alloc] init];
@@ -794,30 +794,30 @@ static void guarded(int n) {                    // fine — caught locally
 
 The type check is deliberately conservative: `@"..."` literals, bare C strings, casts, and variables of known type are judged; a message send is not (its class is not knowable from a selector-only registry), so it satisfies any declared type. Annotations are compile-time only — adding or removing `@throws` never changes generated C, program output, or ARC behaviour. Misusing the pair is itself an error: `@throws` inside a body, or `@throw(...)` on a declaration, each gets a diagnostic naming the other keyword.
 
-### Implicit Root Class (`gald_root`)
+### Implicit Root Class (`nopa_root`)
 
-Gald now supports user-defined root classes. You no longer need to inherit from `NFObject` — an `@interface` without a superclass automatically gets a compiler-injected implicit root class `gald_root`, while keeping `id` type uniformity and static dispatch.
+Nopa now supports user-defined root classes. You no longer need to inherit from `NFObject` — an `@interface` without a superclass automatically gets a compiler-injected implicit root class `nopa_root`, while keeping `id` type uniformity and static dispatch.
 
 **Before:**
 
-```gald
+```nopa
 @interface Animal : NFObject   // had to inherit NFObject
 ```
 
 **After:**
 
-```gald
+```nopa
 @interface Animal              // no superclass → implicit root class
 @interface Animal : NFObject   // explicit NFObject still works
 ```
 
-Both are valid, and `id` can point to any Gald object.
+Both are valid, and `id` can point to any Nopa object.
 
 #### How It Works
 
-When no superclass is specified, the compiler injects `gald_root`:
+When no superclass is specified, the compiler injects `nopa_root`:
 
-```gald
+```nopa
 // User code:
 @interface Animal {
     int age;
@@ -826,7 +826,7 @@ When no superclass is specified, the compiler injects `gald_root`:
 @end
 
 // Compiler treats as:
-@interface Animal : gald_root {
+@interface Animal : nopa_root {
     int age;
 }
 - (void)speak;
@@ -837,17 +837,17 @@ Generated C code:
 
 ```c
 // Built-in structures
-struct gald_object_header {
-    struct gald_vtable *vtable;
+struct nopa_object_header {
+    struct nopa_vtable *vtable;
 };
 
-struct gald_root {
-    struct gald_object_header header;
+struct nopa_root {
+    struct nopa_object_header header;
 };
 
 // Animal's struct
 struct Animal {
-    struct gald_root __super;  // contains header
+    struct nopa_root __super;  // contains header
     int age;
 };
 ```
@@ -855,20 +855,20 @@ struct Animal {
 #### `id` Type
 
 ```c
-typedef struct gald_root *gald_id_t;
+typedef struct nopa_root *nopa_id_t;
 ```
 
-`id` is no longer tied to `NFObject` — it only requires the object to start with `gald_root`. This means:
+`id` is no longer tied to `NFObject` — it only requires the object to start with `nopa_root`. This means:
 
-```gald
+```nopa
 Animal *a = [[Animal alloc] init];
-id obj = a;                    // valid: Animal inherits from gald_root
+id obj = a;                    // valid: Animal inherits from nopa_root
 [obj speak];                   // static dispatch: obj->header.vtable[...]
 ```
 
 #### Explicit Inheritance Still Works
 
-```gald
+```nopa
 @interface Dog : Animal {
     NFString *breed;
 }
@@ -879,19 +879,19 @@ Generated C:
 
 ```c
 struct Dog {
-    struct Animal __super;     // contains gald_root → header
+    struct Animal __super;     // contains nopa_root → header
     struct NFString *breed;
 };
 ```
 
-#### `NFObject` vs `gald_root`
+#### `NFObject` vs `nopa_root`
 
 | Declaration                 | Means                             | Use Case                        |
 | --------------------------- | --------------------------------- | ------------------------------- |
-| `@interface Xxx`            | Implicit `gald_root`, lightweight | Custom layout, kernel, embedded |
+| `@interface Xxx`            | Implicit `nopa_root`, lightweight | Custom layout, kernel, embedded |
 | `@interface Xxx : NFObject` | Explicit NFObject, full runtime   | User apps, ARC, retain/release  |
 
-```gald
+```nopa
 // Lightweight root class, no refcounting overhead
 @interface KernelTask {
     int pid;
@@ -908,24 +908,24 @@ struct Dog {
 
 #### Bare-Metal / Freestanding Support (`-ffreestanding`)
 
-Gald can compile to **self-contained C with no libc, no Foundation, no TLS**, for kernels, MCUs, and bare-metal embedded development.
+Nopa can compile to **self-contained C with no libc, no Foundation, no TLS**, for kernels, MCUs, and bare-metal embedded development.
 
 ```bash
-galdc -rewrite-gald -ffreestanding kernel.gm   # emits self-contained C
+nopac -rewrite-nopa -ffreestanding kernel.np   # emits self-contained C
 ```
 
 In `-ffreestanding` mode the transpiled C:
 
-- does **not** `#include <string.h>`; instead `#include <gald/runtime.h>` (freestanding branch)
+- does **not** `#include <string.h>`; instead `#include <nopa/runtime.h>` (freestanding branch)
 - implements `@try/@catch/@finally` with the default `-eh checked` backend — plain flag + guard control flow, **no `setjmp`/`longjmp` and no `jmp_buf` at all**, which is what makes the bare-metal target work. (`-eh legacy` falls back to `__builtin_setjmp/longjmp`, with plain non-`__thread` exception globals.)
 - is self-contained for `SEL`/`NFClass`/`NFObject`/`id`
 - does **not** bundle the Clang Blocks runtime — block literals reference `__NSConcreteStackBlock`/`_Block_copy`/`_Block_release`; on real bare metal, either link a Blocks runtime port or use `-backend portable`/`-backend gcc` (blocks lower to plain C functions, no ABI symbols)
 
-The user only provides: `GALD_CLASS_$_gald_root`, the exception globals (if using `@try`), `memcpy` (if using `@try`), and freestanding headers (`stdint.h`/`stddef.h`/`stdbool.h`).
+The user only provides: `NOPA_CLASS_$_nopa_root`, the exception globals (if using `@try`), `memcpy` (if using `@try`), and freestanding headers (`stdint.h`/`stddef.h`/`stdbool.h`).
 
-**Bare-metal allocator + `[[Class alloc] init]`** (`include/gald/runtime_freestanding.c`):
+**Bare-metal allocator + `[[Class alloc] init]`** (`include/nopa/runtime_freestanding.c`):
 
-```gald
+```nopa
 @interface HeapCounter {
     int total;
 }
@@ -934,7 +934,7 @@ The user only provides: `GALD_CLASS_$_gald_root`, the exception globals (if usin
 - (int) add:(int)x;
 @end
 @implementation HeapCounter
-+ (id) alloc  { return gald_alloc(self); }   // bump allocator
++ (id) alloc  { return nopa_alloc(self); }   // bump allocator
 - (id) init   { return self; }
 - (int) add:(int)x { total += x; return total; }
 @end
@@ -951,25 +951,25 @@ Features verified bare-metal (`examples/04_soma-kernel/` i386 protected-mode ker
 - Class / instance method messaging
 - `@try/@catch/@finally`
 - `@selector`, inline asm, C-style casts
-- `[[Class alloc] init]` heap allocation + ARC auto-`gald_release`
+- `[[Class alloc] init]` heap allocation + ARC auto-`nopa_release`
 
 Sample output (soma-kernel under qemu):
 
 ```
-[gald] class method [SomaCore::Calculator compute:21] = 43
-[gald] instance methods on C-created obj: add:7 -> 7, add:35 -> 42, value = 42
-[gald] @try/@catch demo:
+[nopa] class method [SomaCore::Calculator compute:21] = 43
+[nopa] instance methods on C-created obj: add:7 -> 7, add:35 -> 42, value = 42
+[nopa] @try/@catch demo:
        try body, throwing...
        caught [e errorCode] = 42
        finally always runs
        after-try continues
-[gald] alloc+init (bump allocator):
+[nopa] alloc+init (bump allocator):
        [c add:10]=10 [c add:20]=30 [c value]=30
 ```
 
 #### Method Dispatch
 
-All Gald objects dispatch through a unified VTable mechanism:
+All Nopa objects dispatch through a unified VTable mechanism:
 
 ```c
 // [obj doSomething:arg]
@@ -983,21 +983,21 @@ The compiler assigns a fixed global index to each selector. All classes place th
 The object header is minimal:
 
 ```c
-struct gald_object_header {
-    struct gald_vtable *vtable;
+struct nopa_object_header {
+    struct nopa_vtable *vtable;
     // no retain count, no flags
 };
 ```
 
-Reference counting is managed by compile-time static ARC analysis, not stored in the object. `gald_id_t` is a plain C pointer (8 bytes on 64-bit), zero ABI overhead for passing, assigning, and array storage.
+Reference counting is managed by compile-time static ARC analysis, not stored in the object. `nopa_id_t` is a plain C pointer (8 bytes on 64-bit), zero ABI overhead for passing, assigning, and array storage.
 
 #### Status
 
    Implemented:
 
 - [x] Implicit root class injection (semantic analysis)
-- [x] `gald_root` and `gald_object_header` C code generation
-- [x] `id` → `gald_id_t` type mapping
+- [x] `nopa_root` and `nopa_object_header` C code generation
+- [x] `id` → `nopa_id_t` type mapping
 - [x] Unified VTable index allocation
 - [x] Root/subclass struct generation
 - [x] Unit test coverage
@@ -1006,7 +1006,7 @@ Reference counting is managed by compile-time static ARC analysis, not stored in
 
 `@namespace` organizes classes, functions, and constants, avoiding global name collisions. This is a feature ObjC lacks — traditional ObjC relies on prefix conventions (e.g., `NS`, `UI`) to simulate namespacing.
 
-```gald
+```nopa
 @namespace Game
     @interface Player : NFObject {
         int health;
@@ -1034,13 +1034,13 @@ Reference counting is managed by compile-time static ARC analysis, not stored in
 
 **Encoding rules**: `::` separators are encoded as `__` in C symbols.
 
-| Gald Symbol                   | Transpiled C Symbol          |
+| Nopa Symbol                   | Transpiled C Symbol          |
 | ----------------------------- | ---------------------------- |
 | `Game::Player`                | `Game__Player`               |
 | `Game::Entities::Enemy`       | `Game__Entities__Enemy`      |
 | Method `-[Game::Player init]` | `Game__Player_init`          |
-| VTable                        | `GALD_VTABLE_$_Game__Player` |
-| Class metadata                | `GALD_CLASS_$_Game__Player`  |
+| VTable                        | `NOPA_VTABLE_$_Game__Player` |
+| Class metadata                | `NOPA_CLASS_$_Game__Player`  |
 
 **Features**:
 
@@ -1057,7 +1057,7 @@ Reference counting is managed by compile-time static ARC analysis, not stored in
 
 **Form 1: Import a fully qualified name**
 
-```gald
+```nopa
 @using Game::Player;
 Game::Player *p = [[Game::Player alloc] init];
 // After @using, the short name Player can be used instead
@@ -1066,7 +1066,7 @@ Player *p = [[Player alloc] init];
 
 **Form 2: Import with an alias**
 
-```gald
+```nopa
 @using GP = Game::Player;
 // GP is an alias for Game::Player
 GP *p = [[GP alloc] init];
@@ -1074,7 +1074,7 @@ GP *p = [[GP alloc] init];
 
 **Form 3: Import an entire namespace**
 
-```gald
+```nopa
 @using namespace Game;
 // All classes under Game can be accessed by short name
 Player *p = [[Player alloc] init];
@@ -1091,13 +1091,13 @@ Enemy *e = [[Enemy alloc] init];
 
 In ARC mode, the checker forbids manual memory management:
 
-```gald
+```nopa
 [obj release]; // error: explicit 'release' not allowed in ARC mode
 ```
 
-`@noarc { }` scopes a block where you manage memory manually — the block-level analogue of `-fno-gald-arc` (and clang's `-fno-objc-arc`):
+`@noarc { }` scopes a block where you manage memory manually — the block-level analogue of `-fno-nopa-arc` (and clang's `-fno-objc-arc`):
 
-```gald
+```nopa
 @noarc {
     [obj retain];
     [obj release];
@@ -1110,7 +1110,7 @@ Key points:
 - **Block-level scope** — only statements inside `@noarc { }` are exempt. Everything outside still uses static ARC, and manual `retain`/`release`/`dealloc`/`autorelease` outside the block is a compile error.
 - **No ARC injection** — the ARC analyzer skips `@noarc` blocks entirely, inserting no retain/release for objects used there.
 - **Runtime-method exemption** — the implementations of `retain`/`release`/`dealloc`/`autorelease` themselves may call these methods without `@noarc`.
-- **Whole-program analogue** — `-fno-gald-arc` switches the whole program to MRC; `@noarc` does the same for a single block.
+- **Whole-program analogue** — `-fno-nopa-arc` switches the whole program to MRC; `@noarc` does the same for a single block.
 - **Foundation** — the NFString/NFMutableString convenience constructors (`+stringWithUTF8String:`, `+stringWithString:`) wrap their deliberate `autorelease` in `@noarc { }`.
 
 ---
@@ -1120,8 +1120,8 @@ Key points:
 `-trace-refcount` runs a static reference-count simulator over the AST **after** ARC injection, printing a chronological, color-coded trace of every retained object's count, then exits without codegen or compilation. It is a debug aid for verifying that each object is released exactly once (no leaks, no double-releases).
 
 ```bash
-galdc -trace-refcount app.gm                          # color trace
-galdc -trace-refcount -trace-no-color -trace-max-iters 2 app.gm
+nopac -trace-refcount app.np                          # color trace
+nopac -trace-refcount -trace-no-color -trace-max-iters 2 app.np
 ```
 
 Options:
@@ -1136,7 +1136,7 @@ Options:
 
 Go-style deferred cleanup: `@defer { ... }` registers its body with the innermost enclosing block, and the body runs at **every exit** of that block — the natural end, a `return` at any depth, a `break`/`continue` that jumps out of it, and a same-function `@throw` — innermost first (LIFO).
 
-```gald
+```nopa
 - (void)work {
     FILE *f = fopen("cfg.txt", "r");
     @defer { fclose(f); }            // runs at every exit below
@@ -1162,7 +1162,7 @@ Implementation: pure desugar (`crates/defer`, pipeline step 3.9 — after the `-
 
 `@await` M1/M2 left one soft spot: a header cannot tell you whether a method suspends. `NFAsync<T>` promotes async-ness to a **return-type marker** that is visible in the declaration — the parser unwraps it to `T`, so it is pure compile-time metadata: `NFAsync` appears **zero times** in the generated C, and vtable layout, cross-TU linking, and the bridge header are untouched.
 
-```gald
+```nopa
 @interface Fetcher : NFObject
 - (NFAsync<int>)compute:(int)n;   // suspends, yields an int
 + (NFAsync<void>)runAll;          // entry point
@@ -1183,7 +1183,7 @@ The body's awaits decide the truth, and the checker reconciles both directions:
 - Value positions are rejected — variables, parameters, ivars, properties: `'NFAsync<T>' is a declaration marker, not a value type (variable) — '@await' the async call instead`.
 - `NFAsync` is a reserved class name.
 
-Golden: `tests/golden/37_async_marker/`; negatives under `tests/negative/async_marker_*.gm`.
+Golden: `tests/golden/37_async_marker/`; negatives under `tests/negative/async_marker_*.np`.
 
 ### Object Subscripting (`a[0]` on NFArray)
 
@@ -1194,7 +1194,7 @@ Golden: `tests/golden/37_async_marker/`; negatives under `tests/negative/async_m
 | `recv[i]` | `[recv objectAtIndex:i]` | receiver's class declares `objectAtIndex:` |
 | `recv[i] = v` | `[recv setObject:v atIndex:i]` | class also declares `setObject:atIndex:` |
 
-```gald
+```nopa
 NFArray *a = @[ @"x", @"y", @"z" ];
 NFLog(@"%@", a[0]);            // → [a objectAtIndex:0]
 NFMutableArray *m = [NFMutableArray array];
@@ -1210,7 +1210,7 @@ Dictionary subscripting (`d[@"k"]`) is deliberately **not** part of this rewrite
 
 Generic containers **monomorphize and are type-checked**. `NFArray<NFString *>` and `NFDictionary<NFString *, NFNumber *>` generate real specialized C (struct, vtable, class metadata, method copies with substituted types), and the checker substitutes the element types into method signatures — so the element type is enforced, not erased:
 
-```gald
+```nopa
 NFMutableArray<NFString *> *m = [NFMutableArray array];
 [m addObject:@"a"];
 NFString *s = [m objectAtIndex:0];      // NFString *, not id
@@ -1232,12 +1232,12 @@ container's element type is unchecked; add an explicit cast if the contents are 
 
 Note the cost: specialization is compile-time code, not free type safety. The same program using containers generically instead of bare compiles to ~42 KB / +41% more C — all duplicated method bodies and metadata, byte-identical layout, so zero runtime benefit. Golden: `tests/golden/40_nfarray_generic/`.
 
-### Gald-Syntax Macros (dual-track `#define`)
+### Nopa-Syntax Macros (dual-track `#define`)
 
-`#define` bodies containing **gald syntax** (`[recv msg]`, `@`-literals, `^{}` blocks) used to be passed through verbatim to the C compiler — a syntax error. galdc now parses and expands them at the source level. Plain-C macro bodies pass through unchanged and are expanded by the C compiler as before; behavior is identical there.
+`#define` bodies containing **nopa syntax** (`[recv msg]`, `@`-literals, `^{}` blocks) used to be passed through verbatim to the C compiler — a syntax error. nopac now parses and expands them at the source level. Plain-C macro bodies pass through unchanged and are expanded by the C compiler as before; behavior is identical there.
 
-```gald
-#define TAG(o)      [o tag]                    // gald track: expanded by galdc
+```nopa
+#define TAG(o)      [o tag]                    // nopa track: expanded by nopac
 #define BUMP(o, n)  [o addTo:n times:1]
 #define LOG(x)      NFLog(@"tag=%d", x)        // body contains an @literal
 #define TWICE(x)    ((x) + (x))                // C track: expanded by clang
@@ -1247,7 +1247,7 @@ BUMP(w, 3);
 LOG(TAG(w));
 ```
 
-Expansion rules follow ISO C §6.10.3 (implemented independently in `crates/cpp`, cross-checked line-by-line against `clang -E`): arguments are fully expanded before substitution (`#`/`##` operands use raw text), `#param` stringifies, `a ## b` pastes, `__VA_ARGS__` joins with commas, self-recursive macros freeze (blue-paint), a function-like macro's bare name outside a call does not expand, and `\` continuations join logical lines. Conditional directives (`#if`/`#ifdef`/`#ifndef`/`#elif`/`#else`/`#endif`) are evaluated by galdc too — `defined(X)` operands are exempt from expansion, skipped groups don't define macros, and malformed conditionals error instead of silently swallowing the file.
+Expansion rules follow ISO C §6.10.3 (implemented independently in `crates/cpp`, cross-checked line-by-line against `clang -E`): arguments are fully expanded before substitution (`#`/`##` operands use raw text), `#param` stringifies, `a ## b` pastes, `__VA_ARGS__` joins with commas, self-recursive macros freeze (blue-paint), a function-like macro's bare name outside a call does not expand, and `\` continuations join logical lines. Conditional directives (`#if`/`#ifdef`/`#ifndef`/`#elif`/`#else`/`#endif`) are evaluated by nopac too — `defined(X)` operands are exempt from expansion, skipped groups don't define macros, and malformed conditionals error instead of silently swallowing the file.
 
 Limits (clear errors, not silent): a macro invocation must close on one line (use `\` to continue), and macro bodies may not contain `_Pragma`. Golden: `tests/golden/38_macros/`.
 
@@ -1255,7 +1255,7 @@ Limits (clear errors, not silent): a macro invocation must close on one line (us
 
 All six C99 designated-initializer forms work, including the ones ObjC's C subset never needed:
 
-```gald
+```nopa
 struct Point { int x; int y; };
 struct Point p1 = { .x = 1, .y = 2 };      // 1. full designated
 struct Point p2 = { .y = 5 };               // 2. partial — omitted fields zero-filled
@@ -1275,7 +1275,7 @@ Positional entries continue from the last designated field (form 3 puts `7` in `
 
 `float _Complex` / `double _Complex` declarations, typedefs, and parameters pass through untouched, and imaginary literals (`2.0i`, `1e3j`) are emitted **raw** — the imaginary part used to be silently dropped (`2.0i` → `2.0f`).
 
-```gald
+```nopa
 #include <complex.h>
 typedef float _Complex cfloat;
 
@@ -1285,7 +1285,7 @@ cfloat f = 1.5;
 printf("A=%.1f+%.1fi\n", creal(z), cimag(z));
 ```
 
-Known limit: the gald checker has no complex type inference (narrowing between complex widths isn't warned; semantics are enforced by the C compiler). Golden: `tests/golden/39_complex/`.
+Known limit: the nopa checker has no complex type inference (narrowing between complex widths isn't warned; semantics are enforced by the C compiler). Golden: `tests/golden/39_complex/`.
 
 ---
 
@@ -1294,7 +1294,7 @@ Known limit: the gald checker has no complex type inference (narrowing between c
 ### Command-Line Options
 
 ```bash
-galdc [options] <input.gm>
+nopac [options] <input.np>
 
 Modes:
   (none)            Default: transpile + compile to binary (requires -o)
@@ -1306,9 +1306,9 @@ Options:
   -L <dir>          Add library search path
   -v, --verbose     Show verbose output (including Clang warnings)
   -V, --version     Show version number
-  -rewrite-gald     Output C code only (no compilation)
-  -fgald-arc        Enable ARC (default)
-  -fno-gald-arc     Disable ARC (manual MRC mode)
+  -rewrite-nopa     Output C code only (no compilation)
+  -fnopa-arc        Enable ARC (default)
+  -fno-nopa-arc     Disable ARC (manual MRC mode)
   -fno-checker      Skip type checking
   -eh <mode>        Exception backend: checked (default) or legacy (alias sjlj)
   -ffreestanding    Bare-metal/freestanding output (no libc, no TLS)
@@ -1316,7 +1316,7 @@ Options:
   -arch <target>    Build for target architecture (e.g. -arch x86_64)
   -asm <file.s>     Link a real assembly file (repeatable)
   -gen-completions <shell>  Generate shell completion script (zsh|bash|fish)
-  -emit-bridge-header <file.h>  Generate a C bridge header for calling Gald from C
+  -emit-bridge-header <file.h>  Generate a C bridge header for calling Nopa from C
 
 Refcount trace (debug aid):
   -trace-refcount                Print a static reference-count trace of each retained object, in source order
@@ -1339,18 +1339,18 @@ cargo test --workspace
 
 ### Precompiled Foundation Library
 
-Instead of inlining Foundation into every TU (`#import <Foundation/Foundation.gm>`, the self-contained umbrella), build it once as a static library and link every project against it — faster per-file compiles, one copy of the implementation:
+Instead of inlining Foundation into every TU (`#import <Foundation/Foundation.np>`, the self-contained umbrella), build it once as a static library and link every project against it — faster per-file compiles, one copy of the implementation:
 
 ```bash
-./tools/build-foundation-lib.sh            # → target/foundation/libgaldfoundation.a
+./tools/build-foundation-lib.sh            # → target/foundation/libnopafoundation.a
 ```
 
-The script transpiles each Foundation `.gm` as its **own translation unit** (a generated wrapper prepends the full declaration surface, then inlines the implementation text), compiles, and archives. Because each `@implementation` lands in its TU's main file, R2 ownership automatically emits that class's metadata as STRONG symbols — the script nm-verifies all nine and fails loudly if any come out weak. No `-fstrong-metadata` exists any more: ownership is derived by construction.
+The script transpiles each Foundation `.np` as its **own translation unit** (a generated wrapper prepends the full declaration surface, then inlines the implementation text), compiles, and archives. Because each `@implementation` lands in its TU's main file, R2 ownership automatically emits that class's metadata as STRONG symbols — the script nm-verifies all nine and fails loudly if any come out weak. No `-fstrong-metadata` exists any more: ownership is derived by construction.
 
 Clients then import only the declaration header:
 
-```gald
-#import <Foundation/Foundation.gh>    // declarations only — no implementations inlined
+```nopa
+#import <Foundation/Foundation.nh>    // declarations only — no implementations inlined
 
 int main() {
     NFString *s = [NFString stringWithUTF8String:"hello"];
@@ -1360,24 +1360,24 @@ int main() {
 ```
 
 ```bash
-galdc app.gm -I include -L target/foundation -lgaldfoundation -o app   # explicit
+nopac app.np -I include -L target/foundation -lnopafoundation -o app   # explicit
 
-# … or let galdc find and link the library itself:
-galdc app.gm -o app
+# … or let nopac find and link the library itself:
+nopac app.np -o app
 ```
 
 Notes:
 
 - **No flags to remember** — a main file holding `@implementation` is strong automatically; declaration-only clients stay weak, which is correct (the library's tables win the link).
-- **Auto-link** — galdc links `libgaldfoundation.a` automatically when it can find one (next to the binary, `target/foundation`, `/opt/gald/lib`, `/usr/local/lib/gald`, or your `-L` dirs). It only fires for **declaration-only clients**: a TU that inlines Foundation implementations (`Foundation.gm`, directly or through an imported `.gh`) is skipped, so self-contained programs and multi-TU builds never see the library's strong vtables. `-ffreestanding`, shared mode, and an explicit `-lgaldfoundation` all suppress the auto link.
-- **`gald_metaInit()`** is only *required* for umbrella builds that reach implementations through `#import "*.gm"` (single-TU builds where no TU owns the metadata). With the precompiled library — and with every normal `galdc` workflow — metadata is statically initialized at load time and the call is an idempotent no-op.
+- **Auto-link** — nopac links `libnopafoundation.a` automatically when it can find one (next to the binary, `target/foundation`, `/opt/nopa/lib`, `/usr/local/lib/nopa`, or your `-L` dirs). It only fires for **declaration-only clients**: a TU that inlines Foundation implementations (`Foundation.np`, directly or through an imported `.nh`) is skipped, so self-contained programs and multi-TU builds never see the library's strong vtables. `-ffreestanding`, shared mode, and an explicit `-lnopafoundation` all suppress the auto link.
+- **`nopa_metaInit()`** is only *required* for umbrella builds that reach implementations through `#import "*.np"` (single-TU builds where no TU owns the metadata). With the precompiled library — and with every normal `nopac` workflow — metadata is statically initialized at load time and the call is an idempotent no-op.
 - Re-implementing a library class in a client is standard C override semantics against the archive (the library's member stays dormant unless referenced) — but slots for methods you do not implement stay NULL, so implement everything you dispatch.
 
 ### Hello World
 
-```gald
+```nopa
 #include <stdio.h>
-#import <Foundation/Foundation.gm>
+#import <Foundation/Foundation.np>
 
 @interface Greeter : NFObject
 - (void)greet;
@@ -1385,7 +1385,7 @@ Notes:
 
 @implementation Greeter
 - (void)greet {
-    printf("Hello, Gald!\n");
+    printf("Hello, Nopa!\n");
 }
 @end
 
@@ -1400,7 +1400,7 @@ int main() {
 
 ### Polymorphism
 
-```gald
+```nopa
 @interface Animal : NFObject
 - (void)speak;
 @end
@@ -1435,7 +1435,7 @@ int main() {
 
 ### Block + ARC
 
-```gald
+```nopa
 typedef void (^EventHandler)(int code, NFString *msg);
 
 @interface Engine : NFObject
@@ -1456,9 +1456,9 @@ int main() {
 
 ### Static Generics
 
-Gald compiles generics at compile time via **monomorphization** — each `DataPack<QuantumToken *>` becomes a standalone C struct `DataPack_QuantumToken_ptr` with concrete type substitutions. No type erasure, no boxing, no runtime overhead.
+Nopa compiles generics at compile time via **monomorphization** — each `DataPack<QuantumToken *>` becomes a standalone C struct `DataPack_QuantumToken_ptr` with concrete type substitutions. No type erasure, no boxing, no runtime overhead.
 
-```gald
+```nopa
 @interface DataPack<T> : NFObject {
     @public
     int _count;
@@ -1479,7 +1479,7 @@ Gald compiles generics at compile time via **monomorphization** — each `DataPa
         _count--;
         T item = _storage[_count];
         _storage[_count] = 0;
-        return gald_autorelease(item);
+        return nopa_autorelease(item);
     }
     return 0;
 }
@@ -1519,11 +1519,11 @@ ObjC's runtime is powerful, but I don't want to depend on it. Make all decisions
 
 ### 2. Generate Human-Readable C
 
-Gald's "backend" is **human-readable C99**, not LLVM IR. This means:
+Nopa's "backend" is **human-readable C99**, not LLVM IR. This means:
 
 - Debug with standard Clang/LLDB tools
 - Generated C can be reviewed, modified, embedded in other projects
-- No LLVM backend lock-in — wherever Clang runs, Gald runs
+- No LLVM backend lock-in — wherever Clang runs, Nopa runs
 
 ### 3. Incremental
 
@@ -1535,7 +1535,7 @@ Start from a class system, add things gradually:
 - ✅ @selector / VTable polymorphism
 - ✅ @namespace
 - ✅ Exception handling (`@try`/`@catch`/`@finally`/`@throw`) — **default backend is `-eh checked`** (flag + guard lowering, unwind-safe ARC: a cross-function throw releases every frame's owned locals; no `setjmp`/`longjmp`, so it works on bare metal)
-  - `-eh legacy` (alias `-eh sjlj`) selects the old `setjmp`/`longjmp` backend. ⚠️ Its documented limit (verified with ASan): an object owned by an **intermediate frame** leaks on a **cross-function throw** — `longjmp` skips its scope-end `gald_release`. That limit does not apply to the default backend.
+  - `-eh legacy` (alias `-eh sjlj`) selects the old `setjmp`/`longjmp` backend. ⚠️ Its documented limit (verified with ASan): an object owned by an **intermediate frame** leaks on a **cross-function throw** — `longjmp` skips its scope-end `nopa_release`. That limit does not apply to the default backend.
 - ⏳ Foundation standard library
 - ⏳ Compiler self-hosting
 
@@ -1622,9 +1622,9 @@ Generated C should be as clear as handwritten C:
 
 Not yet. But it is **real** - it compiles, it runs, and it is designed with growth in mind. If you find syntax appealing and want to contributem, you are welcome.
 
-### What can Gald do?
+### What can Nopa do?
 
-Write small games, tools, toys. The snake game, Flappy Bird, space shooter, tic-tac-toe in this repo are all written in Gald, running in the terminal.
+Write small games, tools, toys. The snake game, Flappy Bird, space shooter, tic-tac-toe in this repo are all written in Nopa, running in the terminal.
 
 ### What's missing compared to ObjC?
 

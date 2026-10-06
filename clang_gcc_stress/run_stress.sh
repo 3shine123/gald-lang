@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
 # run_stress.sh — clang/gcc 编译器扩展极端压测
-#   round 1: clang (galdc -backend clang + 系统 clang 编译 + 运行)
-#   round 2: gcc   (galdc -backend gcc 门禁 + clang 编译运行 — 本机无真 gcc)
-#   round 3: 缺口清单 — 逐个转译 gaps/*.gm,分类上报
+#   round 1: clang (nopac -backend clang + 系统 clang 编译 + 运行)
+#   round 2: gcc   (nopac -backend gcc 门禁 + clang 编译运行 — 本机无真 gcc)
+#   round 3: 缺口清单 — 逐个转译 gaps/*.np,分类上报
 set -uo pipefail
 cd "$(dirname "$0")/.."
 
-GALDC="${GALDC:-target/debug/galdc}"
+NOPAC="${NOPAC:-target/debug/nopac}"
 ROOT="$(pwd)"
 INC="$ROOT/include"
-RUNTIME="$INC/gald/runtime.c"
+RUNTIME="$INC/nopa/runtime.c"
 STRA="$ROOT/clang_gcc_stress"
 PASS=0; FAIL=0
 
@@ -19,7 +19,7 @@ bad()  { FAIL=$((FAIL+1)); printf '  ❌ %s\n' "$*"; }
 
 # ── round 1: clang ──
 note "== round 1: clang =="
-if "$GALDC" -rewrite-gald -backend clang "$STRA/clang_stress.gm" -o /tmp/nsc.c 2>/tmp/nsc.err; then
+if "$NOPAC" -rewrite-nopa -backend clang "$STRA/clang_stress.np" -o /tmp/nsc.c 2>/tmp/nsc.err; then
     ok "clang transpile (-backend clang)"
 else
     bad "clang transpile: $(tail -1 /tmp/nsc.err)"
@@ -37,7 +37,7 @@ fi
 
 # ── round 2: gcc ──
 note "== round 2: gcc =="
-if "$GALDC" -rewrite-gald -backend gcc "$STRA/gcc_stress.gm" -o /tmp/nsg.c 2>/tmp/nsg.err; then
+if "$NOPAC" -rewrite-nopa -backend gcc "$STRA/gcc_stress.np" -o /tmp/nsg.c 2>/tmp/nsg.err; then
     ok "gcc transpile (-backend gcc 门禁)"
 else
     bad "gcc transpile: $(tail -1 /tmp/nsg.err)"
@@ -55,9 +55,9 @@ fi
 
 # ── round 3: 缺口清单 ──
 note "== round 3: 原缺口清单 — 现已全部修复 (gaps/) =="
-for f in "$STRA"/gaps/*.gm; do
+for f in "$STRA"/gaps/*.np; do
     name="$(basename "$f")"
-    if "$GALDC" -rewrite-gald -backend clang "$f" -o /tmp/nsc_gap.c 2>/tmp/nsc_gap.err; then
+    if "$NOPAC" -rewrite-nopa -backend clang "$f" -o /tmp/nsc_gap.c 2>/tmp/nsc_gap.err; then
         # 转译过了 → 看 C 编译 + 运行
         if clang -I "$INC" -o /tmp/nsc_gap /tmp/nsc_gap.c "$RUNTIME" 2>/tmp/nsc_gap.cc >/dev/null; then
             if grep -q 'warning:' /tmp/nsc_gap.cc; then

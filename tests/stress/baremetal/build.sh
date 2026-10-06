@@ -1,27 +1,27 @@
 #!/usr/bin/env bash
 # tests/stress/baremetal/build.sh
 # Full-syntax freestanding stress: transpile with -ffreestanding, compile on the
-# host per golden/25 methodology (-include gald/runtime.h → libc setjmp),
+# host per golden/25 methodology (-include nopa/runtime.h → libc setjmp),
 # link runtime_freestanding.c + helpers.c + real ARM64 asm_ext.s.
 set -euo pipefail
 cd "$(dirname "$0")"
 
-GALDC=../../../target/debug/galdc
+NOPAC=../../../target/debug/nopac
 BUILD=build
 mkdir -p "$BUILD"
 
 echo "== transpile (-ffreestanding) =="
-"$GALDC" -rewrite-gald -ffreestanding -o "$BUILD/baremetal_test.c" baremetal_test.gm
+"$NOPAC" -rewrite-nopa -ffreestanding -o "$BUILD/baremetal_test.c" baremetal_test.np
 
 echo "== compile generated C (golden/25 host methodology) =="
-# The generated file has `#define __GALD_FREESTANDING 1` + #include
-# <gald/runtime.h>: runtime.h is DUAL-MODE (no separate bare-metal header).
+# The generated file has `#define __NOPA_FREESTANDING 1` + #include
+# <nopa/runtime.h>: runtime.h is DUAL-MODE (no separate bare-metal header).
 # On a real bare-metal target (soma-kernel i386) that selects the
 # freestanding branch. On THIS host we deliberately pre-load the HOSTED
 # branch via -include (it wins the include guard): __builtin_setjmp/longjmp
 # is NOT supported on arm64-apple-darwin, and the exception globals must
 # match runtime_freestanding.c's compilation mode (both hosted -> __thread).
-clang -I../../../include -include gald/runtime.h \
+clang -I../../../include -include nopa/runtime.h \
     -D_FORTIFY_SOURCE=0 -Wno-unused-variable \
     -c "$BUILD/baremetal_test.c" -o "$BUILD/bm.o"
 
@@ -29,7 +29,7 @@ echo "== compile helpers (host console stubs) + bare-metal runtime =="
 # Same mode as the generated C above (hosted) so the exception globals
 # (__thread) and setjmp semantics match across TUs.
 clang -I../../../include -D_FORTIFY_SOURCE=0 \
-    -c ../../../include/gald/runtime_freestanding.c -o "$BUILD/bare_rt.o"
+    -c ../../../include/nopa/runtime_freestanding.c -o "$BUILD/bare_rt.o"
 clang -D_FORTIFY_SOURCE=0 -c helpers.c -o "$BUILD/helpers.o"
 
 echo "== assemble asm_ext.s (ARM64) =="

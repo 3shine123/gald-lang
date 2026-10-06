@@ -1,0 +1,53 @@
+#include <stdio.h>
+#import <Foundation/Foundation.np>
+
+int main() {
+    @autoreleasepool {
+        // 1. initWithUTF8String
+        NFMutableString *m = [NFMutableString stringWithUTF8String:"Hello"];
+        printf("1 initial: %s\n", [m UTF8String]);
+
+        // 2. appendUTF8String
+        [m appendUTF8String:", world"];
+        printf("2 append: %s (len %zu)\n", [m UTF8String], [m length]);
+
+        // 3. appendString
+        NFMutableString *suffix = [NFMutableString stringWithUTF8String:"! again"];
+        [m appendString:suffix];
+        printf("3 appendString: %s\n", [m UTF8String]);
+
+        // 4. insertString:atIndex:
+        NFMutableString *ins = [NFMutableString stringWithUTF8String:"BIG "];
+        [m insertString:ins atIndex:6];
+        printf("4 insert: %s\n", [m UTF8String]);
+
+        // 5. deleteCharactersInRange:
+        [m deleteCharactersInRange:(NFRange){6, 4}];
+        printf("5 delete: %s\n", [m UTF8String]);
+
+        // 6. replaceCharactersInRange:withString:
+        NFMutableString *rep = [NFMutableString stringWithUTF8String:"HELLO"];
+        [m replaceCharactersInRange:(NFRange){0, 5} withString:rep];
+        printf("6 replace: %s\n", [m UTF8String]);
+
+        // 7. setString:
+        [m setString:[NFMutableString stringWithUTF8String:"final"]];
+        printf("7 setString: %s\n", [m UTF8String]);
+
+        // 8. inherited methods still work
+        printf("8 length=%zu hash=%u upper=%s\n",
+            [m length], [m hash], [[m uppercaseString] UTF8String]);
+
+        // 9. mutable append then inherited substring
+        [m appendUTF8String:"-done"];
+        NFString *sub = [m substringFromIndex:5];
+        printf("9 substring: %s\n", [sub UTF8String]);
+
+        // 10. empty initial
+        NFMutableString *empty = [NFMutableString stringWithUTF8String:""];
+        [empty appendUTF8String:"filled"];
+        printf("10 empty->: %s\n", [empty UTF8String]);
+    }
+    printf("NFMutableString tests done\n");
+    return 0;
+}

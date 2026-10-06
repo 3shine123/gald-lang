@@ -1,9 +1,9 @@
-#include "gald/layout.h"
-#include "gald/parser.h"
-#include "gald/lexer.h"
-#include "gald/cst.h"
-#include "gald/symbol.h"
-#include "gald/binder.h"
+#include "nopa/layout.h"
+#include "nopa/parser.h"
+#include "nopa/lexer.h"
+#include "nopa/cst.h"
+#include "nopa/symbol.h"
+#include "nopa/binder.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -27,7 +27,7 @@ int main(void) {
         "@end";
 
     lexer_t lexer;
-    lexer_init(&lexer, src, strlen(src), "test.gm");
+    lexer_init(&lexer, src, strlen(src), "test.np");
     parser_t *p = parser_create(&lexer);
     translation_unit_t *unit = parser_parse_translation_unit(p);
     printf("unit->decl_count = %d\n", unit->decl_count);

@@ -1,8 +1,8 @@
 [package]
-name = "gald-preprocessor"
+name = "nopa-preprocessor"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-gald-cst = { path = "../cst" }
-gald-cpp = { path = "../cpp" }
+nopa-cst = { path = "../cst" }
+nopa-cpp = { path = "../cpp" }

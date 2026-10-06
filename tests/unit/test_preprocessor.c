@@ -1,4 +1,4 @@
-#include "gald/preprocessor.h"
+#include "nopa/preprocessor.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -12,15 +12,15 @@ static int passed = 0;
 
 static void test_basic_pass_through(void) {
     TEST("pass-through without directives");
-    gald_pp_state_t *s = pp_state_create();
+    nopa_pp_state_t *s = pp_state_create();
 
     // Write a temp file
-    FILE *f = fopen("/tmp/gald_test_simple.gm", "w");
+    FILE *f = fopen("/tmp/nopa_test_simple.np", "w");
     fputs("int x = 42;\n", f);
     fputs("int y = x + 1;\n", f);
     fclose(f);
 
-    int r = pp_process_file(s, "/tmp/gald_test_simple.gm");
+    int r = pp_process_file(s, "/tmp/nopa_test_simple.np");
     if (r != 0) { FAIL("process_file failed"); }
 
     const char *out = pp_get_output(s);
@@ -33,14 +33,14 @@ static void test_basic_pass_through(void) {
 
 static void test_define(void) {
     TEST("#define + macro expansion");
-    gald_pp_state_t *s = pp_state_create();
+    nopa_pp_state_t *s = pp_state_create();
 
-    FILE *f = fopen("/tmp/gald_test_define.gm", "w");
+    FILE *f = fopen("/tmp/nopa_test_define.np", "w");
     fputs("#define FOO 42\n", f);
     fputs("int x = FOO;\n", f);
     fclose(f);
 
-    pp_process_file(s, "/tmp/gald_test_define.gm");
+    pp_process_file(s, "/tmp/nopa_test_define.np");
     const char *out = pp_get_output(s);
 
     // The macro is removed from output, FOO is not expanded (simple placeholder)
@@ -54,17 +54,17 @@ static void test_define(void) {
 
 static void test_ifdef(void) {
     TEST("#ifdef / #endif");
-    gald_pp_state_t *s = pp_state_create();
+    nopa_pp_state_t *s = pp_state_create();
     pp_add_macro(s, "DEBUG", "1");
 
-    FILE *f = fopen("/tmp/gald_test_ifdef.gm", "w");
+    FILE *f = fopen("/tmp/nopa_test_ifdef.np", "w");
     fputs("#ifdef DEBUG\n", f);
     fputs("int debug = 1;\n", f);
     fputs("#endif\n", f);
     fputs("int normal = 0;\n", f);
     fclose(f);
 
-    pp_process_file(s, "/tmp/gald_test_ifdef.gm");
+    pp_process_file(s, "/tmp/nopa_test_ifdef.np");
     const char *out = pp_get_output(s);
 
     if (strstr(out, "int debug = 1;") == NULL) { FAIL("expected debug block"); }
@@ -76,15 +76,15 @@ static void test_ifdef(void) {
 
 static void test_ifndef(void) {
     TEST("#ifndef / #endif");
-    gald_pp_state_t *s = pp_state_create();
+    nopa_pp_state_t *s = pp_state_create();
 
-    FILE *f = fopen("/tmp/gald_test_ifndef.gm", "w");
+    FILE *f = fopen("/tmp/nopa_test_ifndef.np", "w");
     fputs("#ifndef DEBUG\n", f);
     fputs("int fallback = 1;\n", f);
     fputs("#endif\n", f);
     fclose(f);
 
-    pp_process_file(s, "/tmp/gald_test_ifndef.gm");
+    pp_process_file(s, "/tmp/nopa_test_ifndef.np");
     const char *out = pp_get_output(s);
 
     if (strstr(out, "int fallback = 1;") == NULL) { FAIL("expected fallback block"); }
@@ -95,9 +95,9 @@ static void test_ifndef(void) {
 
 static void test_else(void) {
     TEST("#ifdef / #else / #endif");
-    gald_pp_state_t *s = pp_state_create();
+    nopa_pp_state_t *s = pp_state_create();
 
-    FILE *f = fopen("/tmp/gald_test_else.gm", "w");
+    FILE *f = fopen("/tmp/nopa_test_else.np", "w");
     fputs("#ifdef UNDEFINED\n", f);
     fputs("int a = 1;\n", f);
     fputs("#else\n", f);
@@ -105,7 +105,7 @@ static void test_else(void) {
     fputs("#endif\n", f);
     fclose(f);
 
-    pp_process_file(s, "/tmp/gald_test_else.gm");
+    pp_process_file(s, "/tmp/nopa_test_else.np");
     const char *out = pp_get_output(s);
 
     if (strstr(out, "int a = 1;") != NULL) { FAIL("expected 'a' to be skipped"); }
@@ -117,20 +117,20 @@ static void test_else(void) {
 
 static void test_import_no_cycle(void) {
     TEST("#import (no cycle)");
-    gald_pp_state_t *s = pp_state_create();
+    nopa_pp_state_t *s = pp_state_create();
 
-    FILE *h = fopen("/tmp/gald_test_imported.h", "w");
+    FILE *h = fopen("/tmp/nopa_test_imported.h", "w");
     fputs("int imported_var;\n", h);
     fclose(h);
 
-    FILE *f = fopen("/tmp/gald_test_import_main.gm", "w");
-    fputs("#import \"gald_test_imported.gh\"\n", f);
+    FILE *f = fopen("/tmp/nopa_test_import_main.np", "w");
+    fputs("#import \"nopa_test_imported.nh\"\n", f);
     fputs("int main_var;\n", f);
     fclose(f);
 
     // add search path for /tmp
     pp_add_search_path(s, "/tmp");
-    pp_process_file(s, "/tmp/gald_test_import_main.gm");
+    pp_process_file(s, "/tmp/nopa_test_import_main.np");
     const char *out = pp_get_output(s);
 
     if (strstr(out, "int imported_var;") == NULL) { FAIL("expected imported header content"); }
@@ -142,8 +142,8 @@ static void test_import_no_cycle(void) {
 
 static void test_error_nonexistent(void) {
     TEST("error on nonexistent file");
-    gald_pp_state_t *s = pp_state_create();
-    int r = pp_process_file(s, "/tmp/gald_nonexistent_file.gm");
+    nopa_pp_state_t *s = pp_state_create();
+    int r = pp_process_file(s, "/tmp/nopa_nonexistent_file.np");
     if (r == 0) { FAIL("expected error"); }
     if (!pp_has_errors(s)) { FAIL("expected has_errors"); }
 

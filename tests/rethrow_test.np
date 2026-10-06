@@ -1,0 +1,25 @@
+#import <Foundation/Foundation.np>
+@interface Boom : NFObject
+@end
+@implementation Boom
+@end
+
+@interface Outer : NFObject
+@end
+@implementation Outer
++ (void)run {
+    @try {
+        @try {
+            @throw [[Boom alloc] init];
+        } @catch (Boom *e) {
+            NFLog(@"inner caught, rethrowing");
+            @throw e;
+        }
+    } @catch (Boom *e) {
+        NFLog(@"outer caught (correct)");
+    }
+    NFLog(@"done");
+}
+@end
+
+int main() { [Outer run]; return 0; }

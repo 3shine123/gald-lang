@@ -18,21 +18,21 @@
 //! }
 //! /* lowered */
 //! {
-//!     __auto_type __gald_sw = value;               /* evaluated once */
-//!     if (__gald_sw > 10) goto __gald_case_0;      /* Cond */
-//!     if (gald_isKindOfClass((NFObject *)__gald_sw, &GALD_CLASS_$_NSString)
-//!         && __gald_s_len_guard) goto __gald_case_1;   /* Bind + when */
-//!     if ([__gald_sw isEqual:@"hello"]) goto __gald_case_2;  /* literal */
-//!     goto __gald_case_d;                          /* default */
-//!     goto __gald_sw_end;                          /* no default: skip */
-//! __gald_case_0:;
+//!     __auto_type __nopa_sw = value;               /* evaluated once */
+//!     if (__nopa_sw > 10) goto __nopa_case_0;      /* Cond */
+//!     if (nopa_isKindOfClass((NFObject *)__nopa_sw, &NOPA_CLASS_$_NSString)
+//!         && __nopa_s_len_guard) goto __nopa_case_1;   /* Bind + when */
+//!     if ([__nopa_sw isEqual:@"hello"]) goto __nopa_case_2;  /* literal */
+//!     goto __nopa_case_d;                          /* default */
+//!     goto __nopa_sw_end;                          /* no default: skip */
+//! __nopa_case_0:;
 //!     big();
-//!     goto __gald_sw_end;
-//! __gald_case_1:;
+//!     goto __nopa_sw_end;
+//! __nopa_case_1:;
 //!     /* binding alias declared in the arm body scope */
-//!     goto __gald_sw_end;
+//!     goto __nopa_sw_end;
 //! ...
-//! __gald_sw_end:;
+//! __nopa_sw_end:;
 //! }
 //! ```
 //!
@@ -43,15 +43,15 @@
 //! would bind to the enclosing `if`'s loop context wrongly (or escape the
 //! switch entirely). So every `break` that belongs to THIS switch (i.e. seen
 //! while no deeper loop/switch has been entered) is rewritten to
-//! `goto __gald_sw_end`. `break`s inside nested loops/switches are left
+//! `goto __nopa_sw_end`. `break`s inside nested loops/switches are left
 //! untouched — the same two-set discipline the defer pass uses (`pending` vs
 //! `jump`).
 //!
 //! ## Fallthrough
 //!
 //! Without `break`, control falls from one arm into the next — the C
-//! semantics, preserved by the `goto __gald_case_{i+1}` chain: each arm's
-//! body ends with `goto __gald_sw_end` ONLY if the original body already
+//! semantics, preserved by the `goto __nopa_case_{i+1}` chain: each arm's
+//! body ends with `goto __nopa_sw_end` ONLY if the original body already
 //! ended in break-like flow... actually simpler: each label block falls
 //! through to the next label block naturally (labels are adjacent), and a
 //! rewritten `break` jumps to the end. This reproduces C fallthrough
@@ -63,15 +63,15 @@
 //! - Return/throw inside arms work naturally (plain C statements).
 //! - Object-literal equality is `isEqual:` (value semantics); nil subject
 //!   short-circuits to "no match" (messaging nil yields 0).
-use gald_ast::{AstArm, AstDecl, AstDeclData, AstDeclKind, AstExpr, AstExprData, AstExprKind,
+use nopa_ast::{AstArm, AstDecl, AstDeclData, AstDeclKind, AstExpr, AstExprData, AstExprKind,
               AstPattern, AstStmt, AstStmtData, AstStmtKind, AstType};
-use gald_cst::TypePrim;
+use nopa_cst::TypePrim;
 
 /// Unit-level entry: lower every `SwitchPat` under every decl (methods,
 /// functions, namespaces, class method lists). Same traversal shape as
-/// `gald_defer::desugar_unit` — namespaces must recurse or their switches
+/// `nopa_defer::desugar_unit` — namespaces must recurse or their switches
 /// would reach codegen's catch-all and be silently dropped.
-pub fn desugar_unit(unit: &mut gald_ast::AstUnit) {
+pub fn desugar_unit(unit: &mut nopa_ast::AstUnit) {
     for decl in &mut unit.decls {
         lower_decl(decl);
     }
@@ -162,11 +162,11 @@ fn lower_switch_pat(sw: AstStmt) -> AstStmt {
     };
     // Every lowered switch gets its own label namespace: C labels are
     // function-scoped, so nested pattern switches would otherwise emit
-    // duplicate `__gald_sw_end` / `__gald_case_0` names (hard C error).
+    // duplicate `__nopa_sw_end` / `__nopa_case_0` names (hard C error).
     let id = SWITCH_SEQ.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
-    let subj = "__gald_sw".to_string();
-    let end_label = format!("__gald_sw{}_end", id);
-    let default_label = format!("__gald_case_{}_d", id);
+    let subj = "__nopa_sw".to_string();
+    let end_label = format!("__nopa_sw{}_end", id);
+    let default_label = format!("__nopa_case_{}_d", id);
     let mut out: Vec<AstStmt> = Vec::new();
 
     // 1. Materialize the subject exactly once. This pass runs BEFORE the
@@ -299,7 +299,7 @@ fn lower_switch_pat(sw: AstStmt) -> AstStmt {
 /// Unique tag source for one lowered switch (see `lower_switch_pat`).
 static SWITCH_SEQ: std::sync::atomic::AtomicUsize = std::sync::atomic::AtomicUsize::new(0);
 
-fn case_label(id: usize, i: usize) -> String { format!("__gald_case_{}_{}", id, i) }
+fn case_label(id: usize, i: usize) -> String { format!("__nopa_case_{}_{}", id, i) }
 
 /// The if-test for one arm, splicing the subject where the pattern needs it.
 fn arm_test(arm: &AstArm, subj: &str) -> AstExpr {
@@ -334,19 +334,19 @@ fn arm_test(arm: &AstArm, subj: &str) -> AstExpr {
         }
         AstPattern::Cond(e) => splice_subject(e, subj),
         AstPattern::Bind { ty, .. } => {
-            // gald_isKindOfClass((NFObject *)subj, &GALD_CLASS_$_<Flat>)
+            // nopa_isKindOfClass((NFObject *)subj, &NOPA_CLASS_$_<Flat>)
             let flat = flat_type_name(ty);
             AstExpr {
                 kind: AstExprKind::FuncCall, expr_type: None, line, col,
                 data: AstExprData::FuncCall {
                     func: None,
-                    name: "gald_isKindOfClass".to_string(),
+                    name: "nopa_isKindOfClass".to_string(),
                     callee: None,
                     args: vec![
                         cast_to_nfobject(ident(subj, line, col)),
                         AstExpr {
                             kind: AstExprKind::VarRef, expr_type: None, line, col,
-                            data: AstExprData::VarRef { sym: None, name: format!("&GALD_CLASS_$_{}", flat) },
+                            data: AstExprData::VarRef { sym: None, name: format!("&NOPA_CLASS_$_{}", flat) },
                         },
                     ],
                 },
@@ -424,7 +424,7 @@ fn ident(name: &str, line: usize, col: usize) -> AstExpr {
     }
 }
 
-/// `NFObject *` — the erased type every gald object shares (subject and
+/// `NFObject *` — the erased type every nopa object shares (subject and
 /// binding casts both go through it).
 fn nfobject_type() -> AstType {
     let mut t = AstType::new(TypePrim::Named);
@@ -468,7 +468,7 @@ fn var_decl(name: &str, ty: AstType, init: Option<AstExpr>, line: usize, col: us
     }
 }
 
-/// Bind-arm alias: `T *name = (T *)(NFObject *)__gald_sw;` — declared inside
+/// Bind-arm alias: `T *name = (T *)(NFObject *)__nopa_sw;` — declared inside
 /// the arm body so scoping stays block-local (no cross-arm leakage).
 fn bind_alias_decl(ty: &AstType, name: &str, subj: &str, line: usize, col: usize) -> AstStmt {
     let mut t = ty.clone();

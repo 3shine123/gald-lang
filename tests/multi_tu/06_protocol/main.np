@@ -1,0 +1,12 @@
+#import "model.nh"
+#include <stdio.h>
+
+/* client TU: drives a protocol-typed object created in the lib TU */
+int main() {
+    Rude *r = [[Rude alloc] init];
+    id<Greeter> g = r;
+    printf("%s\n", GreetVia(g, "you"));
+    printf("mood=%s\n", [r mood]);
+    nopa_release(r);
+    return 0;
+}

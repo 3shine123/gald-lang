@@ -1,4 +1,4 @@
-#include "gald/symbol.h"
+#include "nopa/symbol.h"
 #include <stdio.h>
 #include <string.h>
 

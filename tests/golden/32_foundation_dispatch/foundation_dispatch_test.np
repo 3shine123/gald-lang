@@ -1,0 +1,56 @@
+#import <Foundation/Foundation.np>
+
+// ObjC type-introspection dispatch trio on the root class:
+//   isKindOfClass:      — isa-chain walk (official ObjC spelling)
+//   respondsToSelector: — uniform vtable NULL-slot check (compiler pseudo-method)
+//   isEqual:            — identity on nopa_root; NFString/NFNumber override with VALUE equality
+
+@interface Dog : NFObject
+- (void)speak;
+@end
+
+@implementation Dog
+- (void)speak { printf("woof\n"); }
+@end
+
+@interface Cat : NFObject
+@end
+
+@implementation Cat
+@end
+
+int main() {
+    @autoreleasepool {
+        Dog *d = [[Dog alloc] init];
+        NFObject *o = d;
+
+        // isKindOfClass: walks the isa chain; nil receiver is safe (and warns)
+        printf("kind Dog=%d kind NFObject=%d kind Cat=%d kind nil=%d\n",
+               [o isKindOfClass:[Dog class]],
+               [o isKindOfClass:[NFObject class]],
+               [o isKindOfClass:[Cat class]],
+               [nil isKindOfClass:[Dog class]]);
+
+        // respondsToSelector: static dispatch — speak exists (vtable slot), noSuchMethod does not
+        printf("respond speak=%d respond missing=%d respond nil=%d\n",
+               [o respondsToSelector:@selector(speak)],
+               [o respondsToSelector:@selector(noSuchMethod)],
+               [nil respondsToSelector:@selector(speak)]);
+
+        // isEqual: on NFString is VALUE equality (as in ObjC's NSString), so two
+        // distinct @"abc" objects compare equal; isEqualToString: agrees.
+        NFString *a = @"abc";
+        NFString *b = @"abc";
+        printf("eq same=%d eq other=%d eq str-content=%d\n",
+               [a isEqual:a], [a isEqual:b], [a isEqualToString:b]);
+
+        // the guarded idiom this trio enables
+        if ([o respondsToSelector:@selector(speak)]) {
+            [o speak];
+        }
+        if ([o isKindOfClass:[Dog class]]) {
+            printf("dispatch via isKindOfClass OK\n");
+        }
+    }
+    return 0;
+}

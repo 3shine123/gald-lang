@@ -1,30 +1,30 @@
 
 === SOMA KERNEL (i686, 32-bit protected mode) ===
-built: clang + nasm + galdc transpile, ran under qemu-system-i386
-[gald] soma_core_boot()
+built: clang + nasm + nopac transpile, ran under qemu-system-i386
+[nopa] soma_core_boot()
        fib(10)=55
        gcd(1071,462)=21
        fnv1a("soma-kernel")=0x51b97b15
        rotl(12345678,8)=0x34567812
        xorshift: 87985aa5 155b24a3 4820f4c4 81b3ac98 703a0788
-[gald] class method [SomaCore::Calculator compute:21] = 43
-[gald] instance methods on C-created obj: add:7 -> 7, add:35 -> 42, value = 42
-[gald] @try/@catch demo:
+[nopa] class method [SomaCore::Calculator compute:21] = 43
+[nopa] instance methods on C-created obj: add:7 -> 7, add:35 -> 42, value = 42
+[nopa] @try/@catch demo:
        try body, throwing...
        caught [e errorCode] = 42
        finally always runs
        after-try continues
-[gald] alloc+init (bump allocator):
+[nopa] alloc+init (bump allocator):
        [c add:10]=10 [c add:20]=30 [c value]=30
-[gald] @protocol + @property + @synthesize + @public:
+[nopa] @protocol + @property + @synthesize + @public:
        priority = 3, id = 7
        task id=7 priority=3 running
-[c] call Gald: fib(15)=610 gcd(1071,462)=21
-[c] call Gald: rotl(0x12345678,4)=0x23456781
-[c] call Gald: fnv1a("gald")=0x944c9dcf
+[c] call Nopa: fib(15)=610 gcd(1071,462)=21
+[c] call Nopa: rotl(0x12345678,4)=0x23456781
+[c] call Nopa: fnv1a("nopa")=0x944c9dcf
 [c] interrupts on; waiting for PIT ticks...
 [c] timer reached tick=50 (IRQ0+PIT ok)
-[gald] keyboard demo: type, use <- -> to move cursor, Enter to finish
+[nopa] keyboard demo: type, use <- -> to move cursor, Enter to finish
        (times out after ~6s in headless mode)
 
        [timeout] no keyboard input

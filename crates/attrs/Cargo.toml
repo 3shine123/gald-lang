@@ -2,6 +2,6 @@
 name = "attrs"
 version = "0.1.0"
 edition = "2021"
-description = "Attribute capability matrix for galdc --backend selection"
+description = "Attribute capability matrix for nopac --backend selection"
 
 [dependencies]

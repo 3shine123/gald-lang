@@ -1,0 +1,243 @@
+#import <Foundation/NFString.nh>
+#import <Foundation/NFObject.np>
+#include <string.h>
+#include <ctype.h>
+#include <stdlib.h>
+
+@implementation NFString
+
+- (NFString *)initWithUTF8String:(const char *)cstr {
+    self = [super init];
+    if (self && cstr) {
+        _length = strlen(cstr);
+        _cstr = (char *)malloc(_length + 1);
+        if (_cstr) {
+            strcpy(_cstr, cstr);
+        }
+        _hash = 0;
+        _hashIsValid = NO;
+    }
+    return self;
+}
+
+- (NFString *)initWithString:(NFString *)str {
+    self = [super init];
+    if (self && str) {
+        const char *src = [str UTF8String];
+        if (src) {
+            _length = strlen(src);
+            _cstr = (char *)malloc(_length + 1);
+            if (_cstr) {
+                strcpy(_cstr, src);
+            }
+        }
+        _hash = 0;
+        _hashIsValid = NO;
+    }
+    return self;
+}
+
+- (void)dealloc {
+    if (_cstr) {
+        free(_cstr);
+        _cstr = NULL;
+    }
+    _length = 0;
+    [super dealloc];
+}
+
++ (NFString *)stringWithUTF8String:(const char *)cstr {
+    @noarc {
+        return [[[self alloc] initWithUTF8String:cstr] autorelease];
+    }
+}
+
++ (NFString *)stringWithString:(NFString *)str {
+    @noarc {
+        return [[[self alloc] initWithString:str] autorelease];
+    }
+}
+
+- (size_t)length {
+    return _length;
+}
+
+- (const char *)UTF8String {
+    return _cstr ? _cstr : "";
+}
+
+- (char)characterAtIndex:(size_t)index {
+    if (_cstr && index < _length) {
+        return _cstr[index];
+    }
+    return '\0';
+}
+
+- (BOOL)isEqual:(id)object {
+    if (self == (NFObject *)object) return YES;
+    if (!object) return NO;
+    if ([object isKindOfClass:[NFString class]]) {
+        return [self isEqualToString:(NFString *)object];
+    }
+    return [super isEqual:object];
+}
+
+- (int)isEqualToString:(NFString *)other {
+    if (self == (NFObject *)other) return YES;
+    if (!self || !other) return NO;
+    const char *s1 = [self UTF8String];
+    const char *s2 = [other UTF8String];
+    if (!s1 || !s2) return s1 == s2;
+    return strcmp(s1, s2) == 0;
+}
+
+- (int)compare:(NFString *)other {
+    if (!other) return 1;
+    const char *s1 = [self UTF8String];
+    const char *s2 = [other UTF8String];
+    if (!s1) return s2 ? -1 : 0;
+    if (!s2) return 1;
+    return strcmp(s1, s2);
+}
+
+- (int)hasPrefix:(NFString *)prefix {
+    if (!self || !prefix) return NO;
+    const char *pre = [prefix UTF8String];
+    const char *str = [self UTF8String];
+    if (!pre || !str) return NO;
+    size_t preLen = strlen(pre);
+    return strncmp(str, pre, preLen) == 0;
+}
+
+- (int)hasSuffix:(NFString *)suffix {
+    if (!self || !suffix) return NO;
+    const char *suf = [suffix UTF8String];
+    const char *str = [self UTF8String];
+    if (!suf || !str) return NO;
+    size_t sufLen = strlen(suf);
+    size_t strLen = strlen(str);
+    if (sufLen > strLen) return NO;
+    return strcmp(str + strLen - sufLen, suf) == 0;
+}
+
+- (NFRange)rangeOfString:(NFString *)substring {
+    NFRange range = {0, 0};
+    if (!substring || !_cstr) return range;
+    const char *sub = [substring UTF8String];
+    if (!sub) return range;
+    const char *found = strstr(_cstr, sub);
+    if (found) {
+        range.location = (size_t)(found - _cstr);
+        range.length = strlen(sub);
+    } else {
+        range.location = (size_t)-1;
+        range.length = 0;
+    }
+    return range;
+}
+
+- (NFString *)substringFromIndex:(size_t)from {
+    if (!_cstr || from > _length) return NULL;
+    return [NFString stringWithUTF8String:_cstr + from];
+}
+
+- (NFString *)substringToIndex:(size_t)to {
+    if (!_cstr) return NULL;
+    if (to > _length) to = _length;
+    char *buf = (char *)malloc(to + 1);
+    strncpy(buf, _cstr, to);
+    buf[to] = '\0';
+    NFString *result = [NFString stringWithUTF8String:buf];
+    free(buf);
+    return result;
+}
+
+- (NFString *)substringWithRange:(NFRange)range {
+    if (!_cstr) return NULL;
+    if (range.location > _length || range.location + range.length > _length) {
+        return NULL;
+    }
+    char *buf = (char *)malloc(range.length + 1);
+    strncpy(buf, _cstr + range.location, range.length);
+    buf[range.length] = '\0';
+    NFString *result = [NFString stringWithUTF8String:buf];
+    free(buf);
+    return result;
+}
+
+- (NFString *)stringByAppendingString:(NFString *)other {
+    if (!self) return [NFString stringWithString:other];
+    if (!other) return [NFString stringWithString:self];
+    const char *s1 = [self UTF8String];
+    const char *s2 = [other UTF8String];
+    if (!s1 || !s2) return [NFString stringWithString:s1 ? self : other];
+    size_t len1 = strlen(s1);
+    size_t len2 = strlen(s2);
+    char *buf = (char *)malloc(len1 + len2 + 1);
+    strcpy(buf, s1);
+    strcat(buf, s2);
+    NFString *result = [NFString stringWithUTF8String:buf];
+    free(buf);
+    return result;
+}
+
+- (NFString *)stringByAppendingUTF8String:(const char *)cstr {
+    if (!self || !cstr) return [NFString stringWithString:self];
+    const char *s1 = [self UTF8String];
+    if (!s1) return [NFString stringWithString:self];
+    size_t len1 = strlen(s1);
+    size_t len2 = strlen(cstr);
+    char *buf = (char *)malloc(len1 + len2 + 1);
+    strcpy(buf, s1);
+    strcat(buf, cstr);
+    NFString *result = [NFString stringWithUTF8String:buf];
+    free(buf);
+    return result;
+}
+
+- (NFString *)uppercaseString {
+    if (!_cstr) return NULL;
+    char *buf = (char *)malloc(_length + 1);
+    for (unsigned long i = 0; i <= _length; i++) {
+        buf[i] = (char)toupper((unsigned char)_cstr[i]);
+    }
+    NFString *result = [NFString stringWithUTF8String:buf];
+    free(buf);
+    return result;
+}
+
+- (NFString *)lowercaseString {
+    if (!_cstr) return NULL;
+    char *buf = (char *)malloc(_length + 1);
+    for (unsigned long i = 0; i <= _length; i++) {
+        buf[i] = (char)tolower((unsigned char)_cstr[i]);
+    }
+    NFString *result = [NFString stringWithUTF8String:buf];
+    free(buf);
+    return result;
+}
+
+- (uint32_t)hash {
+    if (_hashIsValid) return _hash;
+    uint32_t h = 2166136261U;
+    if (_cstr) {
+        for (unsigned long i = 0; i < _length; i++) {
+            h ^= (uint8_t)_cstr[i];
+            h *= 16777619U;
+        }
+    }
+    _hash = h;
+    _hashIsValid = YES;
+    return h;
+}
+
+- (NFString *)description {
+    return [NFString stringWithString:self];
+}
+
+// `-copy` honors the ObjC convention: the caller owns the result (+1).
+- (NFString *)copy {
+    return [[NFString alloc] initWithString:self];
+}
+
+@end

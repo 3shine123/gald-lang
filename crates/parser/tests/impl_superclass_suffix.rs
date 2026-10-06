@@ -5,7 +5,7 @@
 //
 // Fix: parse_class_implementation now consumes the optional `: Super` suffix
 // (and records it in the CST), matching parse_class_interface.
-use gald_parser::Parser;
+use nopa_parser::Parser;
 
 fn decl_classes(src: &str) -> Vec<(String, String)> {
     let mut p = Parser::new(src);
@@ -14,9 +14,9 @@ fn decl_classes(src: &str) -> Vec<(String, String)> {
     for d in &unit.decls {
         if matches!(
             d.kind,
-            gald_cst::CstDeclKind::ClassInterface | gald_cst::CstDeclKind::ClassImplementation
+            nopa_cst::CstDeclKind::ClassInterface | nopa_cst::CstDeclKind::ClassImplementation
         ) {
-            let kind = if d.kind == gald_cst::CstDeclKind::ClassInterface {
+            let kind = if d.kind == nopa_cst::CstDeclKind::ClassInterface {
                 "interface"
             } else {
                 "implementation"
@@ -98,5 +98,5 @@ int main() { return 0; }
     assert!(unit
         .decls
         .iter()
-        .any(|d| matches!(d.kind, gald_cst::CstDeclKind::Function)));
+        .any(|d| matches!(d.kind, nopa_cst::CstDeclKind::Function)));
 }

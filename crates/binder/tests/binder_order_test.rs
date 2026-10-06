@@ -1,5 +1,5 @@
-use gald_binder::Binder;
-use gald_parser::Parser;
+use nopa_binder::Binder;
+use nopa_parser::Parser;
 
 #[test]
 fn subclass_impl_after_empty_base_impl_is_found() {
@@ -22,7 +22,7 @@ int main() { return 0; }
 "#;
     let mut p = Parser::new(src);
     let mut unit = p.parse_translation_unit().expect("parse");
-    let mut binder = Binder::new(gald_symbol::SymbolTable::new());
+    let mut binder = Binder::new(nopa_symbol::SymbolTable::new());
     let rc = binder.bind(&mut unit);
     assert_eq!(rc, 0, "binder errors: {}", binder.last_error());
 }

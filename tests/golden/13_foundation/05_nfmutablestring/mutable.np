@@ -1,0 +1,30 @@
+#include <stdio.h>
+#import <Foundation/Foundation.np>
+
+int main() {
+    @autoreleasepool {
+        NFMutableString *m = [NFMutableString stringWithUTF8String:"Hello"];
+        [m appendUTF8String:", world"];
+        printf("%s\n", [m UTF8String]);
+
+        NFMutableString *ins = [NFMutableString stringWithUTF8String:"BIG "];
+        [m insertString:ins atIndex:6];
+        printf("%s\n", [m UTF8String]);
+
+        [m deleteCharactersInRange:(NFRange){6, 4}];
+        printf("%s\n", [m UTF8String]);
+
+        NFMutableString *rep = [NFMutableString stringWithUTF8String:"HELLO"];
+        [m replaceCharactersInRange:(NFRange){0, 5} withString:rep];
+        printf("%s\n", [m UTF8String]);
+
+        [m setString:[NFMutableString stringWithUTF8String:"final"]];
+        [m appendUTF8String:"-done"];
+        printf("%s %zu %u\n", [m UTF8String], [m length], [m hash]);
+
+        NFMutableString *empty = [NFMutableString stringWithUTF8String:""];
+        [empty appendUTF8String:"filled"];
+        printf("%s\n", [empty UTF8String]);
+    }
+    return 0;
+}

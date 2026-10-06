@@ -1,5 +1,5 @@
-#include "gald/parser.h"
-#include "gald/lexer.h"
+#include "nopa/parser.h"
+#include "nopa/lexer.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -13,7 +13,7 @@ static int passed = 0;
 
 static translation_unit_t *parse_string(const char *src) {
     lexer_t lexer;
-    lexer_init(&lexer, src, strlen(src), "test.gm");
+    lexer_init(&lexer, src, strlen(src), "test.np");
     parser_t *p = parser_create(&lexer);
     translation_unit_t *unit = parser_parse_translation_unit(p);
     parser_destroy(p);
@@ -610,7 +610,7 @@ static void test_stmt_throw(void) {
 // ── combined / realistic ───────────────────────────────────────────────────
 
 static void test_realistic_class(void) {
-    TEST("realistic Gald class with multiple methods");
+    TEST("realistic Nopa class with multiple methods");
     const char *src =
         "@interface MyClass : NSObject <MyProtocol> {\n"
         "    int count;\n"

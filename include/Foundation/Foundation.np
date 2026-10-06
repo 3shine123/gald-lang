@@ -1,0 +1,31 @@
+// Foundation —— 自包含实现伞头（self-contained umbrella）。
+//
+// 同时导入全部 Foundation 类的声明与实现，单 TU 构建无需任何库：
+//
+//     #import <Foundation/Foundation.np>
+//
+// 按 `.nh`/`.np` 约定，纯声明伞头是 `Foundation.nh` —— 配合预编译库
+// （tools/build-foundation-lib.sh）使用，让 Foundation 的实现只存一份。
+#include <stdint.h>
+#include <stddef.h>
+
+#include "nopa/runtime.h"
+
+#import "NFObject.nh"
+#import "NFObject.np"
+#import "NFString.nh"
+#import "NFString.np"
+#import "NFMutableString.nh"
+#import "NFMutableString.np"
+#import "NFArray.nh"
+#import "NFArray.np"
+#import "NFMutableArray.nh"
+#import "NFMutableArray.np"
+#import "NFDictionary.nh"
+#import "NFDictionary.np"
+#import "NFMutableDictionary.nh"
+#import "NFMutableDictionary.np"
+#import "NFNumber.nh"
+#import "NFNumber.np"
+#import "NFError.nh"
+#import "NFError.np"

@@ -1,0 +1,138 @@
+#import <Foundation/NFDictionary.nh>
+#import <Foundation/NFString.nh>
+#include <string.h>
+#include <stdlib.h>
+
+@implementation NFDictionary
+
+- (void)dealloc {
+    for (size_t i = 0; i < _count; i++) {
+        if (_keys[i]) {
+            nopa_release(_keys[i]);
+        }
+        if (_values[i]) {
+            nopa_release(_values[i]);
+        }
+    }
+    free(_keys);
+    free(_values);
+    _keys = NULL;
+    _values = NULL;
+    _count = 0;
+    _capacity = 0;
+    [super dealloc];
+}
+
++ (NFDictionary *)dictionary {
+    return [self dictionaryWithObjects:NULL forKeys:NULL count:0];
+}
+
++ (NFDictionary *)dictionaryWithObject:(V)value forKey:(K)key {
+    return [self dictionaryWithObjects:&value forKeys:&key count:1];
+}
+
++ (NFDictionary *)dictionaryWithObjects:(id *)values forKeys:(id *)keys count:(size_t)n {
+    @noarc {
+        NFDictionary *dict = [[self alloc] init];
+        if (!dict) return nil;
+        if (n > 0 && values && keys) {
+            NFObject **ks = (NFObject **)calloc(n, sizeof(NFObject *));
+            NFObject **vs = (NFObject **)calloc(n, sizeof(NFObject *));
+            if (ks && vs) {
+                size_t stored = 0;
+                for (size_t i = 0; i < n; i++) {
+                    // A nil key names no entry; skipping it keeps `_count`
+                    // honest instead of leaving a hole the scan would step
+                    // through.
+                    if (!keys[i]) {
+                        continue;
+                    }
+                    ks[stored] = nopa_retain(keys[i]);
+                    vs[stored] = values[i] ? nopa_retain(values[i]) : NULL;
+                    stored++;
+                }
+                dict->_keys = ks;
+                dict->_values = vs;
+                dict->_count = stored;
+                dict->_capacity = n;
+            } else {
+                free(ks);
+                free(vs);
+            }
+        }
+        return [dict autorelease];
+    }
+}
+
+- (size_t)count {
+    return _count;
+}
+
+// Linear scan with `isEqual:` — value semantics for NFString/NFNumber keys
+// (see their `isEqual:` overrides). `_keys[i]` may be NULL only if a caller
+// built the arrays by hand; guard anyway.
+- (V)objectForKey:(K)key {
+    if (!key) return NULL;
+    for (size_t i = 0; i < _count; i++) {
+        if (_keys[i] && [_keys[i] isEqual:key]) {
+            return _values[i];
+        }
+    }
+    return NULL;
+}
+
+- (BOOL)isEqual:(id)object {
+    if (self == (NFObject *)object) return YES;
+    if (!object) return NO;
+    if (![object isKindOfClass:[NFDictionary class]]) {
+        return [super isEqual:object];
+    }
+    NFDictionary *other = (NFDictionary *)object;
+    if ([other count] != _count) return NO;
+    for (size_t i = 0; i < _count; i++) {
+        NFObject *mine = _values[i];
+        NFObject *theirs = [other objectForKey:_keys[i]];
+        if (mine == theirs) continue;
+        if (!mine || !theirs) return NO;
+        if (![mine isEqual:theirs]) return NO;
+    }
+    return YES;
+}
+
+- (NFArray *)allKeys {
+    return [NFArray arrayWithObjects:_keys count:_count];
+}
+
+- (NFArray *)allValues {
+    return [NFArray arrayWithObjects:_values count:_count];
+}
+
+// `-copy` honors the ObjC convention: the caller owns the result (+1).
+// Returns an immutable NFDictionary even when invoked on a mutable subclass.
+- (id)copy {
+    return nopa_retain([NFDictionary dictionaryWithObjects:_values forKeys:_keys count:_count]);
+}
+
+- (NFString *)description {
+    NFString *result = [NFString stringWithUTF8String:"{"];
+    for (size_t i = 0; i < _count; i++) {
+        if (i > 0) {
+            result = [result stringByAppendingUTF8String:", "];
+        }
+        if (_keys[i]) {
+            result = [result stringByAppendingString:[_keys[i] description]];
+        } else {
+            result = [result stringByAppendingUTF8String:"(null)"];
+        }
+        result = [result stringByAppendingUTF8String:" = "];
+        if (_values[i]) {
+            result = [result stringByAppendingString:[_values[i] description]];
+        } else {
+            result = [result stringByAppendingUTF8String:"(null)"];
+        }
+    }
+    result = [result stringByAppendingUTF8String:"}"];
+    return result;
+}
+
+@end

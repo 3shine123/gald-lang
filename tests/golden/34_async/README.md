@@ -4,10 +4,10 @@
 
 | 文件 | 期望 |
 |------|------|
-| `async_test.gm` | 编译通过，stdout 见 `.out`（async void 入口 + 跨调用链双 await，`result=18`） |
+| `async_test.np` | 编译通过，stdout 见 `.out`（async void 入口 + 跨调用链双 await，`result=18`） |
 
 ```bash
-./target/debug/galdc run tests/golden/34_async/async_test.gm
+./target/debug/nopac run tests/golden/34_async/async_test.np
 ```
 
 ## 已定设计（用户拍板，2026-09）
@@ -23,25 +23,25 @@
 
 ```c
 /* int r = await n;  → */ 
-NFTask * __gald_task = (NFTask *)(gald_task_create(0, self, 0));
-int r = (gald_task_resume(__gald_task), n);
-gald_task_join(__gald_task);
+NFTask * __nopa_task = (NFTask *)(nopa_task_create(0, self, 0));
+int r = (nopa_task_resume(__nopa_task), n);
+nopa_task_join(__nopa_task);
 ```
 
-- `await e` → `(gald_task_resume(task), e)`：Comma 求值，先推进状态机（M1 entry=NULL，resume 即完成返回 1——纯 API 契约钩子），后取 e 的值。
-- 方法体首尾包 `gald_task_create` / `gald_task_join`（真实 task 生命周期：calloc 分配、join 后释放）。
-- **检查层**（`gald_async::check_unit`，desugar 前跑原始 AST）：
+- `await e` → `(nopa_task_resume(task), e)`：Comma 求值，先推进状态机（M1 entry=NULL，resume 即完成返回 1——纯 API 契约钩子），后取 e 的值。
+- 方法体首尾包 `nopa_task_create` / `nopa_task_join`（真实 task 生命周期：calloc 分配、join 后释放）。
+- **检查层**（`nopa_async::check_unit`，desugar 前跑原始 AST）：
   - `@try` 跨 await → error（try/catch/finally 任一含 await 即报）
   - 同步上下文（非 async 方法 + **顶层函数含 main**）调非 void async → error + 提示
-- runtime（`include/gald/runtime.{h,c}`）：`NFTask{state,finished,entry,self_obj,frame,result,parent}` + create/resume/finish/join 四个 API（host 用 calloc/free；freestanding 用户提供分配器后可用）。
+- runtime（`include/nopa/runtime.{h,c}`）：`NFTask{state,finished,entry,self_obj,frame,result,parent}` + create/resume/finish/join 四个 API（host 用 calloc/free；freestanding 用户提供分配器后可用）。
 
 ## 里程碑路线
 
 - **M1（本目录）**：task 驱动 + await 钩子 + 检查层，行为=同步执行，API 契约就位
 - **M2**：真状态机——`@await` 拆段进 `switch(t->state)`、活过挂起点的局部提升进 frame（仿 @try 的 TRY_LIFT 提升先例）、break/continue → 状态跳转、ARC 在任务退出汇合点统一结算、bridge header wrapper
-- **M3**：调度器 `gald_run_all` + 任务图（`parent` 字段已预留）/ I/O
+- **M3**：调度器 `nopa_run_all` + 任务图（`parent` 字段已预留）/ I/O
 
-## 负例（tests/negative/ 见 async_sync_call.gm）
+## 负例（tests/negative/ 见 async_sync_call.np）
 
 `main` 里 `[f compute:1]`（compute 是非 void async）→ 
 ```

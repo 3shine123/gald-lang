@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # install.sh — 本平台安装脚本（由 build-all.sh 自动复制到每个平台的 target/<triple>/release/ 下）
 # 用法：./install.sh [PREFIX] [SYSTEM_INC]
-#   默认目录：Linux/Darwin → /opt/gald ；系统头文件 → /usr/local/include
+#   默认目录：Linux/Darwin → /opt/nopa ；系统头文件 → /usr/local/include
 # 检测系统语言，中文环境显示中文，其他环境显示英语
 set -euo pipefail
 
@@ -16,19 +16,19 @@ else
 fi
 
 # ── 二进制名 ──
-BIN="galdc"
+BIN="nopac"
 
 # ── 默认安装前缀 ──
-PREFIX="${1:-/opt/gald}"
+PREFIX="${1:-/opt/nopa}"
 SYSTEM_INC="${2:-/usr/local/include}"
 
 # ── 文案 ──
 if [ "$I18N" = "zh" ]; then
-    MSG_TITLE="Gald 安装包"
+    MSG_TITLE="Nopa 安装包"
     MSG_INSTALL_DIR="安装目录"
     MSG_LIB="静态库"
     MSG_INC="头文件"
-    MSG_SYS_INC="系统头文件（Foundation / gald runtime）"
+    MSG_SYS_INC="系统头文件（Foundation / nopa runtime）"
     MSG_SYS_INC_SKIP="无写入权限，跳过系统头文件安装（可用 sudo 重试）"
     MSG_DONE="安装完成"
     MSG_PATH="如需在 PATH 使用"
@@ -41,11 +41,11 @@ if [ "$I18N" = "zh" ]; then
     MSG_AUTOCOMP="自动安装 Shell 补全"
     MSG_COMP_SKIP="跳过补全安装"
 else
-    MSG_TITLE="Gald Installer"
+    MSG_TITLE="Nopa Installer"
     MSG_INSTALL_DIR="Install directory"
     MSG_LIB="library"
     MSG_INC="headers"
-    MSG_SYS_INC="System headers (Foundation / gald runtime)"
+    MSG_SYS_INC="System headers (Foundation / nopa runtime)"
     MSG_SYS_INC_SKIP="no write permission, skipped (retry with sudo)"
     MSG_DONE="Installation complete"
     MSG_PATH="To use from PATH, run"
@@ -67,24 +67,24 @@ echo ""
 install -d "$PREFIX/bin" "$PREFIX/lib" "$PREFIX/include"
 
 # 二进制
-install -m 755 "$BUNDLE/$BIN" "$PREFIX/bin/galdc"
+install -m 755 "$BUNDLE/$BIN" "$PREFIX/bin/nopac"
 
 # 静态库
-if [ -f "$BUNDLE/libgald.a" ]; then
-    install -m 644 "$BUNDLE/libgald.a" "$PREFIX/lib/libgald.a"
-    echo "    ${MSG_LIB}:  $PREFIX/lib/libgald.a"
+if [ -f "$BUNDLE/libnopa.a" ]; then
+    install -m 644 "$BUNDLE/libnopa.a" "$PREFIX/lib/libnopa.a"
+    echo "    ${MSG_LIB}:  $PREFIX/lib/libnopa.a"
 fi
 
 # 头文件（libVec<...>、runtime.h 等）
 cp -r "$BUNDLE/include/." "$PREFIX/include/"
 echo "    ${MSG_INC}:   $PREFIX/include/"
 
-# 系统头文件：Foundation + gald runtime → 系统 include 目录
-if [ -d "$BUNDLE/include/Foundation" ] && [ -d "$BUNDLE/include/gald" ]; then
-    if mkdir -p "$SYSTEM_INC/Foundation" "$SYSTEM_INC/gald" 2>/dev/null; then
+# 系统头文件：Foundation + nopa runtime → 系统 include 目录
+if [ -d "$BUNDLE/include/Foundation" ] && [ -d "$BUNDLE/include/nopa" ]; then
+    if mkdir -p "$SYSTEM_INC/Foundation" "$SYSTEM_INC/nopa" 2>/dev/null; then
         cp -r "$BUNDLE/include/Foundation/." "$SYSTEM_INC/Foundation/"
-        cp -r "$BUNDLE/include/gald/." "$SYSTEM_INC/gald/"
-        echo "    ${MSG_SYS_INC}: $SYSTEM_INC/{Foundation,gald}/"
+        cp -r "$BUNDLE/include/nopa/." "$SYSTEM_INC/nopa/"
+        echo "    ${MSG_SYS_INC}: $SYSTEM_INC/{Foundation,nopa}/"
     else
         echo "    ${MSG_SYS_INC}: ${MSG_SYS_INC_SKIP}"
     fi
@@ -92,20 +92,20 @@ fi
 
 echo ""
 echo "========== ${MSG_DONE} =========="
-echo "  binary:  $PREFIX/bin/galdc"
+echo "  binary:  $PREFIX/bin/nopac"
 echo "  headers: $PREFIX/include/"
-echo "  system:  $SYSTEM_INC/{Foundation,gald}/"
+echo "  system:  $SYSTEM_INC/{Foundation,nopa}/"
 
-# ── Shell 补全：复制到 $PREFIX/share/galdc/completions/ ──
+# ── Shell 补全：复制到 $PREFIX/share/nopac/completions/ ──
 if [ -d "$BUNDLE/completions" ]; then
-    install -d "$PREFIX/share/galdc/completions"
-    cp -r "$BUNDLE/completions/." "$PREFIX/share/galdc/completions/"
-    echo "  ${MSG_COMP}: $PREFIX/share/galdc/completions/"
+    install -d "$PREFIX/share/nopac/completions"
+    cp -r "$BUNDLE/completions/." "$PREFIX/share/nopac/completions/"
+    echo "  ${MSG_COMP}: $PREFIX/share/nopac/completions/"
 fi
 
 # ── 自动把补全脚本装进当前用户的 shell 并注册 ──
-if [ -d "$PREFIX/share/galdc/completions" ]; then
-    COMP_DIR="$PREFIX/share/galdc/completions"
+if [ -d "$PREFIX/share/nopac/completions" ]; then
+    COMP_DIR="$PREFIX/share/nopac/completions"
     printf "\n==> %s\n" "$MSG_AUTOCOMP"
     if [ "$I18N" = "zh" ]; then
         printf "  是否自动安装补全到你的 shell？[Y/n] "
@@ -120,40 +120,40 @@ if [ -d "$PREFIX/share/galdc/completions" ]; then
         if command -v zsh >/dev/null 2>&1; then
             ZCOMP="$HOME/.zsh/completions"
             mkdir -p "$ZCOMP"
-            cp -f "$COMP_DIR/_galdc" "$ZCOMP/_galdc"
+            cp -f "$COMP_DIR/_nopac" "$ZCOMP/_nopac"
             # 在 ~/.zshrc 里注册 fpath（若未注册）
             if [ -f "$HOME/.zshrc" ]; then
                 LINE="fpath=($ZCOMP \$fpath)"
                 if ! grep -qF "$ZCOMP" "$HOME/.zshrc"; then
                     {
                         echo ""
-                        echo "# galdc completion (install.sh auto-added)"
+                        echo "# nopac completion (install.sh auto-added)"
                         echo "$LINE"
                     } >> "$HOME/.zshrc"
                 fi
             fi
-            echo "  zsh: $ZCOMP/_galdc  (restart zsh or run: source ~/.zshrc)"
+            echo "  zsh: $ZCOMP/_nopac  (restart zsh or run: source ~/.zshrc)"
         fi
 
         # fish
         if command -v fish >/dev/null 2>&1; then
             FDIR="$HOME/.config/fish/completions.d"
             mkdir -p "$FDIR"
-            cp -f "$COMP_DIR/galdc.fish" "$FDIR/galdc.fish"
-            echo "  fish: $FDIR/galdc.fish"
+            cp -f "$COMP_DIR/nopac.fish" "$FDIR/nopac.fish"
+            echo "  fish: $FDIR/nopac.fish"
         fi
 
         # bash
         if [ -n "${BASH_VERSION:-}" ] || command -v bash >/dev/null 2>&1; then
             BCOMP="$HOME/.bash_completion"
             mkdir -p "$BCOMP"
-            cp -f "$COMP_DIR/galdc.bash" "$BCOMP/galdc.bash"
+            cp -f "$COMP_DIR/nopac.bash" "$BCOMP/nopac.bash"
             if [ -f "$HOME/.bashrc" ]; then
-                if ! grep -qF "galdc.bash" "$HOME/.bashrc"; then
-                    echo "source \"$BCOMP/galdc.bash\"" >> "$HOME/.bashrc"
+                if ! grep -qF "nopac.bash" "$HOME/.bashrc"; then
+                    echo "source \"$BCOMP/nopac.bash\"" >> "$HOME/.bashrc"
                 fi
             fi
-            echo "  bash: $BCOMP/galdc.bash"
+            echo "  bash: $BCOMP/nopac.bash"
         fi
         ;;
     *) echo "  ${MSG_COMP_SKIP}" ;;

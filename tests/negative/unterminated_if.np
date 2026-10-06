@@ -1,0 +1,9 @@
+// negative — `#if` without `#endif` must be rejected.
+//
+// The guard directives themselves never reach clang (nopac consumes them), so an
+// unclosed conditional would silently swallow the rest of the file and the only
+// visible symptom would be a confusing "no main" / "unknown type" further down.
+// nopac reports the real cause instead:
+//   t.np: unterminated conditional directive — 1 #if without #endif
+#if 0
+int main() { return 0; }

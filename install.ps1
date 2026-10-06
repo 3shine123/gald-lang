@@ -1,20 +1,20 @@
-# install.ps1 — Gald installer for Windows (PowerShell)
+# install.ps1 — Nopa installer for Windows (PowerShell)
 #
 # Usage (from the extracted bundle directory):
-#   .\install.ps1                     # per-user: %LOCALAPPDATA%\Programs\galdc
-#   .\install.ps1 -Prefix C:\gald     # custom install prefix
-#   .\install.ps1 -System             # machine-wide: %ProgramFiles%\galdc (admin)
+#   .\install.ps1                     # per-user: %LOCALAPPDATA%\Programs\nopac
+#   .\install.ps1 -Prefix C:\nopa     # custom install prefix
+#   .\install.ps1 -System             # machine-wide: %ProgramFiles%\nopac (admin)
 #   .\install.ps1 -NoPath             # do not modify PATH
 #
 # Layout installed under <Prefix> (mirrors the Unix install.sh):
-#   <Prefix>\bin\galdc.exe
-#   <Prefix>\lib\libgald.a
-#   <Prefix>\include\{gald,Foundation}\...
-#   <Prefix>\share\galdc\completions\galdc.ps1
+#   <Prefix>\bin\nopac.exe
+#   <Prefix>\lib\libnopa.a
+#   <Prefix>\include\{nopa,Foundation}\...
+#   <Prefix>\share\nopac\completions\nopac.ps1
 #
-# `galdc.exe` locates its bundled headers via `resolve_bundle_root()`:
-# it checks <exe-dir>\.. for `include\gald\runtime.h`, so `bin\galdc.exe` +
-# `include\` at the prefix root works out of the box. We also set GALD_HOME.
+# `nopac.exe` locates its bundled headers via `resolve_bundle_root()`:
+# it checks <exe-dir>\.. for `include\nopa\runtime.h`, so `bin\nopac.exe` +
+# `include\` at the prefix root works out of the box. We also set NOPA_HOME.
 
 [CmdletBinding()]
 param(
@@ -38,36 +38,36 @@ function T([string]$z, [string]$e) { if ($zh) { $z } else { $e } }
 # ── Default install prefix ──
 if (-not $Prefix) {
     if ($System) {
-        $Prefix = Join-Path $env:ProgramFiles "galdc"
+        $Prefix = Join-Path $env:ProgramFiles "nopac"
     } else {
-        $Prefix = Join-Path $env:LOCALAPPDATA "Programs\galdc"
+        $Prefix = Join-Path $env:LOCALAPPDATA "Programs\nopac"
     }
 }
 
 $BinDir  = Join-Path $Prefix "bin"
 $LibDir  = Join-Path $Prefix "lib"
 $IncDir  = Join-Path $Prefix "include"
-$CompDir = Join-Path $Prefix "share\galdc\completions"
+$CompDir = Join-Path $Prefix "share\nopac\completions"
 
-Write-Host "==> $(T 'Gald 安装包' 'Gald Installer') (galdc)"
+Write-Host "==> $(T 'Nopa 安装包' 'Nopa Installer') (nopac)"
 Write-Host "    $(T '安装目录' 'Install directory'): $Prefix"
 Write-Host ""
 
 New-Item -ItemType Directory -Force -Path $BinDir, $LibDir, $IncDir, $CompDir | Out-Null
 
 # ── Binary ──
-$srcExe = Join-Path $Bundle "galdc.exe"
+$srcExe = Join-Path $Bundle "nopac.exe"
 if (-not (Test-Path $srcExe)) {
-    Write-Error "$(T '包内找不到 galdc.exe' 'galdc.exe not found in bundle'): $srcExe"
+    Write-Error "$(T '包内找不到 nopac.exe' 'nopac.exe not found in bundle'): $srcExe"
 }
-Copy-Item -Force $srcExe (Join-Path $BinDir "galdc.exe")
-Write-Host "    galdc.exe    -> $(Join-Path $BinDir 'galdc.exe')"
+Copy-Item -Force $srcExe (Join-Path $BinDir "nopac.exe")
+Write-Host "    nopac.exe    -> $(Join-Path $BinDir 'nopac.exe')"
 
 # ── Static runtime library ──
-$srcLib = Join-Path $Bundle "libgald.a"
+$srcLib = Join-Path $Bundle "libnopa.a"
 if (Test-Path $srcLib) {
-    Copy-Item -Force $srcLib (Join-Path $LibDir "libgald.a")
-    Write-Host "    libgald.a    -> $(Join-Path $LibDir 'libgald.a')"
+    Copy-Item -Force $srcLib (Join-Path $LibDir "libnopa.a")
+    Write-Host "    libnopa.a    -> $(Join-Path $LibDir 'libnopa.a')"
 }
 
 # ── Headers ──
@@ -82,10 +82,10 @@ $srcComp = Join-Path $Bundle "completions"
 if (Test-Path $srcComp) {
     Copy-Item -Force (Join-Path $srcComp "*") $CompDir
 }
-$galdcExe = Join-Path $BinDir "galdc.exe"
-$compPs1 = Join-Path $CompDir "galdc.ps1"
+$nopacExe = Join-Path $BinDir "nopac.exe"
+$compPs1 = Join-Path $CompDir "nopac.ps1"
 try {
-    & $galdcExe --gen-completions powershell | Out-File -Encoding utf8 $compPs1
+    & $nopacExe --gen-completions powershell | Out-File -Encoding utf8 $compPs1
     Write-Host "    completions  -> $compPs1"
 } catch {
     Write-Host "    $(T '跳过补全生成' 'completion generation skipped')"
@@ -107,14 +107,14 @@ if (-not $NoPath) {
     if (($env:Path -split ';') -notcontains $BinDir) { $env:Path = "$env:Path;$BinDir" }
 }
 
-# ── GALD_HOME (robust bundle-root resolution) ──
-[Environment]::SetEnvironmentVariable("GALD_HOME", $Prefix, "User")
-$env:GALD_HOME = $Prefix
-Write-Host "    GALD_HOME    = $Prefix"
+# ── NOPA_HOME (robust bundle-root resolution) ──
+[Environment]::SetEnvironmentVariable("NOPA_HOME", $Prefix, "User")
+$env:NOPA_HOME = $Prefix
+Write-Host "    NOPA_HOME    = $Prefix"
 
 # ── Register the PowerShell completion in the user profile (idempotent) ──
 if (Test-Path $compPs1) {
-    $marker = "# galdc completion (install.ps1 auto-added)"
+    $marker = "# nopac completion (install.ps1 auto-added)"
     $profilePath = $PROFILE.CurrentUserAllHosts
     $profDir = Split-Path -Parent $profilePath
     if ($profDir -and -not (Test-Path $profDir)) { New-Item -ItemType Directory -Force -Path $profDir | Out-Null }
@@ -131,9 +131,9 @@ if (Test-Path $compPs1) {
 
 Write-Host ""
 Write-Host "========== $(T '安装完成' 'Installation complete') =========="
-Write-Host "  binary:  $BinDir\galdc.exe"
+Write-Host "  binary:  $BinDir\nopac.exe"
 Write-Host "  headers: $IncDir\"
-Write-Host "  lib:     $LibDir\libgald.a"
+Write-Host "  lib:     $LibDir\libnopa.a"
 Write-Host ""
-Write-Host "  $(T '新开一个终端即可使用' 'Open a new terminal, then run'): galdc --version"
+Write-Host "  $(T '新开一个终端即可使用' 'Open a new terminal, then run'): nopac --version"
 Write-Host "  $(T '卸载' 'Uninstall'): Remove-Item -Recurse -Force `"$Prefix`""

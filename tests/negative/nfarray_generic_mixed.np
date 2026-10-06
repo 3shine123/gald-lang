@@ -1,0 +1,8 @@
+// Negative: inserting a boxed scalar into a typed container must be rejected.
+#import <Foundation/Foundation.np>
+
+int main() {
+    NFMutableArray<NFString *> *m = [[NFMutableArray<NFString *> alloc] init];
+    [m addObject:@42];
+    return 0;
+}

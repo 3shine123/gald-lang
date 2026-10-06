@@ -1,6 +1,6 @@
 // helpers.c — minimal console output for the stress test.
 #include <stdio.h>
-#include <gald/runtime.h>
+#include <nopa/runtime.h>
 
 void kputs(const char *s) { fputs(s, stdout); }
 void kputdec(int v)        { fprintf(stdout, "%d", v); }

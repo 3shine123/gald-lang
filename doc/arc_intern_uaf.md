@@ -9,8 +9,8 @@
 
 ## Symptom
 
-`tests/full_syntax_test.gm` ran fine most of the time but intermittently died
-with **no stdout at all** and a signal exit — `galdc run` reported exit 1
+`tests/full_syntax_test.np` ran fine most of the time but intermittently died
+with **no stdout at all** and a signal exit — `nopac run` reported exit 1
 because `.code()` is `None` for a signal; the raw binary exited 139. It looked
 like a startup crash.
 
@@ -20,34 +20,34 @@ far enough to print, and the real defect surfaced.
 
 ## Root cause
 
-`gald_stringFromCstr` interns `@"..."` literals into a static table. Before the
+`nopa_stringFromCstr` interns `@"..."` literals into a static table. Before the
 fix it **aliased** the object's initial `+1` instead of taking a reference of
 its own, despite the comment claiming *"The table owns its +1 forever"*:
 
 ```c
-NFObject *obj = gald_alloc(&GALD_CLASS_$_NFString);   /* refcount 1 */
+NFObject *obj = nopa_alloc(&NOPA_CLASS_$_NFString);   /* refcount 1 */
 ...
-if (gald_intern_count < 256) {
-    gald_intern_table[gald_intern_count].cstr = str->_cstr;
-    gald_intern_table[gald_intern_count].obj  = obj;   /* <-- no retain */
-    gald_intern_count++;
+if (nopa_intern_count < 256) {
+    nopa_intern_table[nopa_intern_count].cstr = str->_cstr;
+    nopa_intern_table[nopa_intern_count].obj  = obj;   /* <-- no retain */
+    nopa_intern_count++;
 }
 ```
 
 Now consider a **direct ivar assignment** of a literal:
 
-```gald
-sp->_tag = @"t";          /* emitted: sp->_tag = gald_stringFromCstr("t"); */
+```nopa
+sp->_tag = @"t";          /* emitted: sp->_tag = nopa_stringFromCstr("t"); */
 ```
 
 ARC does **not** retain here (the RHS is treated as borrowed/`+0`), but the
 synthesised ARC dealloc **does** release every owned object ivar:
 
 ```c
-static void FsSprite__gald_arc_dealloc(NFObject *self, SEL _cmd) {
+static void FsSprite__nopa_arc_dealloc(NFObject *self, SEL _cmd) {
     NFObject_dealloc(self, _cmd);
-    gald_release(((struct FsSprite *)self)->_tag);     /* 1 -> 0 */
-    gald_release(((struct FsSprite *)self)->_label);
+    nopa_release(((struct FsSprite *)self)->_tag);     /* 1 -> 0 */
+    nopa_release(((struct FsSprite *)self)->_label);
 }
 ```
 
@@ -56,8 +56,8 @@ So the release consumed the *intern table's* reference, `NFString_dealloc` freed
 interning lookup walked that table and `strcmp()`d freed memory:
 
 ```c
-for (int i = 0; i < gald_intern_count; i++)
-    if (gald_intern_table[i].cstr == cstr || strcmp(gald_intern_table[i].cstr, cstr) == 0)
+for (int i = 0; i < nopa_intern_count; i++)
+    if (nopa_intern_table[i].cstr == cstr || strcmp(nopa_intern_table[i].cstr, cstr) == 0)
 ```
 
 A second, broader reading: the same imbalance would over-release *any* `+0`
@@ -70,38 +70,38 @@ the ivar is the sole reference, which is why they were where it detonated.
 ```text
 ==ERROR: AddressSanitizer: heap-use-after-free ... READ of size 2
     #0 strcmp
-    #1 gald_stringFromCstr
+    #1 nopa_stringFromCstr
     #2 main
 freed by:
     #1 NFString_dealloc
-    #2 gald_release
-    #3 Holder__gald_arc_dealloc
-    #4 gald_release
+    #2 nopa_release
+    #3 Holder__nopa_arc_dealloc
+    #4 nopa_release
     #5 main
 previously allocated by:
-    #1 gald_stringFromCstr
+    #1 nopa_stringFromCstr
     #2 main
-SUMMARY: AddressSanitizer: heap-use-after-free in gald_stringFromCstr
+SUMMARY: AddressSanitizer: heap-use-after-free in nopa_stringFromCstr
 ```
 
-`tests/full_syntax_test.gm` showed the identical stack with `sec2_objects` /
+`tests/full_syntax_test.np` showed the identical stack with `sec2_objects` /
 `sec3_expressions` in place of `main`.
 
 ## Fix
 
-`crates/codegen/src/codegen.rs`, the hosted branch of `gald_stringFromCstr`,
+`crates/codegen/src/codegen.rs`, the hosted branch of `nopa_stringFromCstr`,
 immediately before the table store:
 
 ```c
-gald_retain(obj);   /* the table owns its +1 forever */
+nopa_retain(obj);   /* the table owns its +1 forever */
 ```
 
 ## Verification
 
-* `tests/full_syntax_test.gm` under ASan (`GALD_CC="clang -fsanitize=address -g -O0"`):
+* `tests/full_syntax_test.np` under ASan (`NOPA_CC="clang -fsanitize=address -g -O0"`):
   runs to `ALL SECTIONS DONE`, exit 0, **zero** AddressSanitizer reports
   (previously: heap-use-after-free, exit 134).
-* `galdc run tests/full_syntax_test.gm -asm tests/full_syntax_test.s -I tests`:
+* `nopac run tests/full_syntax_test.np -asm tests/full_syntax_test.s -I tests`:
   exit 0 with all 86 lines (previously exit 1 and zero output).
 * `test_all` ARC→MRC `SUSPECT` count: **1 → 0**.
 * `tests/arc_intern/run_arc_intern_test.sh` asserts the defect stays away.

@@ -1,0 +1,33 @@
+#include <stdio.h>
+#import <Foundation/Foundation.np>
+
+@interface Mini : NFObject
+- (void)ping;
+@end
+
+@implementation Mini
+- (void)ping {
+    printf("ping\n");
+}
+@end
+
+int main() {
+    // Case 1: single-statement for body (no braces) — object used in body
+    Mini *a = [[Mini alloc] init];
+    for (int i = 0; i < 3; i++) [a ping];
+
+    // Case 2: object declared in for-init — must be hoisted out of the for
+    // header (the header can't hold a temp + var declaration) and released
+    // at scope end by ARC.
+    int seen = 0;
+    for (Mini *o = [[Mini alloc] init]; o != 0; ) {
+        seen++;
+        [o ping];
+        o = 0;
+    }
+    printf("seen=%d\n", seen);
+
+    [a release];
+    printf("done\n");
+    return 0;
+}

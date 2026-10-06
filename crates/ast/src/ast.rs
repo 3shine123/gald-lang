@@ -1,4 +1,4 @@
-use gald_cst::{CstParam, CstType, Nullability, TagKind, TypePrim};
+use nopa_cst::{CstParam, CstType, Nullability, TagKind, TypePrim};
 
 // ─── Type node ───────────────────────────────────────────────────────────────
 

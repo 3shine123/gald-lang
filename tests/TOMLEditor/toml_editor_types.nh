@@ -1,0 +1,128 @@
+// toml_editor_types.nh — Nopa 全特性 TOML 编辑器 · 类型声明
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+#include <termios.h>
+#include <unistd.h>
+#include <errno.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <time.h>
+#include <setjmp.h>
+
+@namespace TOML
+
+    @protocol Value
+    - (const char *)typeName;
+    - (void)printOn:(int)indent;
+    - (id)copyValue;
+    @end
+
+    @interface String : NFObject <Value> {
+        char *_value;
+    }
+    - (instancetype)initWithString:(const char *)val;
+    - (void)dealloc;
+    @property (assign) const char *value;
+    @end
+
+    @interface Integer : NFObject <Value> {
+        long long _value;
+    }
+    - (instancetype)initWithLong:(long long)val;
+    @property long long value;
+    @end
+
+    @interface Float : NFObject <Value> {
+        double _value;
+    }
+    - (instancetype)initWithDouble:(double)val;
+    @property double value;
+    @end
+
+    @interface Bool : NFObject <Value> {
+        BOOL _value;
+    }
+    - (instancetype)initWithBool:(BOOL)val;
+    @property BOOL value;
+    @end
+
+    @interface Array : NFObject <Value> {
+        @public
+        id *_items; int _count; int _capacity;
+    }
+    - (instancetype)init;
+    - (void)dealloc;
+    - (int)count;
+    - (id)at:(int)idx;
+    - (void)add:(id)val;
+    - (void)removeAt:(int)idx;
+    - (void)each:(void (^)(int idx, id val))block;
+    @end
+
+    @interface Table : NFObject <Value> {
+        @public
+        char **_keys; id *_values; int _count; int _capacity;
+    }
+    - (instancetype)init;
+    - (void)dealloc;
+    - (int)count;
+    - (id)get:(const char *)key;
+    - (void)set:(id)val forKey:(const char *)key;
+    - (void)remove:(const char *)key;
+    - (const char *)atKey:(int)idx;
+    - (id)atVal:(int)idx;
+    - (void)each:(void (^)(int idx, id val))block;
+    - (void)setString:(const char *)val forKey:(const char *)key;
+    - (void)setInteger:(long long)val forKey:(const char *)key;
+    - (void)setFloat:(double)val forKey:(const char *)key;
+    - (void)setBool:(BOOL)val forKey:(const char *)key;
+    @end
+
+    @interface Parser : NFObject
+    + (id)parse:(const char *)input;
+    + (void)emit:(id)root into:(char *)buf size:(int)size;
+    + (char *)parseKey:(const char **)p;
+    + (id)parseValue:(const char *)p;
+    @end
+
+    @interface Editor : NFObject {
+        @public
+        id _root; BOOL _running;
+        char _inputBuf[8192]; char _filePath[1024];
+        char _editBuf[16384]; int _cursorLine;
+    }
+    - (instancetype)initWithPath:(const char *)path;
+    - (void)dealloc;
+    - (void)run;
+    - (void)loadFile;
+    - (void)saveFile;
+    - (void)refresh;
+    - (int)handleCommand:(const char *)cmd current:(Table **)current;
+    @end
+
+    // Category: 给 Table 添加调试能力
+    @interface Table (Debug)
+    - (void)dump;
+    - (int)keyCount;
+    @end
+
+@endnamespace // @namespace TOML
+
+// 泛型 + Watcher（不在 namespace 内，全局可用）
+@interface Buffer<T> : NFObject {
+    T _storage[16]; int _count;
+}
+- (instancetype)init;
+- (void)push:(T)item;
+- (T)get:(int)index;
+- (int)count;
+@end
+
+@interface Watcher : NFObject {
+    @public (weak) id _target;
+}
+- (instancetype)initWithTarget:(id)t;
+@property (weak) id target;
+@end

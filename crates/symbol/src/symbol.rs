@@ -1,4 +1,4 @@
-use gald_cst::{CstType, TypePrim};
+use nopa_cst::{CstType, TypePrim};
 
 // ─── Symbol kinds ───────────────────────────────────────────────────────────
 

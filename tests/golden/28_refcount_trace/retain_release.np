@@ -1,0 +1,31 @@
+#include "nopa/runtime.h"
+#import "Foundation/NFObject.nh"
+#import "Foundation/NFObject.np"
+
+@interface Item : NFObject {
+    int _tag;
+}
+- (int)tag;
+@end
+
+@implementation Item
+
+- (int)tag {
+    return _tag;
+}
+
+@end
+
+int main() {
+    @noarc {
+        Item *a = [Item new];
+        [a retain];
+        [a retain];
+        [a retain];
+        [a release];
+        [a release];
+        [a release];
+        [a release];
+    }
+    return 0;
+}

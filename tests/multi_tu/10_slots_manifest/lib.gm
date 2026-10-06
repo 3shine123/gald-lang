@@ -1,7 +1,0 @@
-#import "extra.gh"
-#include <stdio.h>
-// lib TU defines an EXTRA method `mul` that main TU never sees.
-@implementation Calc
-- (int)add:(int)a to:(int)b { return a + b; }
-- (int)mul:(int)a by:(int)b { return a * b; }
-@end

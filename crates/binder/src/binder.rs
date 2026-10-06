@@ -1,5 +1,5 @@
-use gald_cst::*;
-use gald_symbol::symbol::*;
+use nopa_cst::*;
+use nopa_symbol::symbol::*;
 
 // Strip trailing `*` from a type expression, return (stripped, ptr_level)
 fn strip_ptr(fqn: &str) -> (String, usize) {
@@ -34,8 +34,8 @@ pub struct Binder {
 impl Binder {
     pub fn new(symtab: SymbolTable) -> Self {
         let mut binder = Binder { symtab, current_class: None, has_error: false, err_msg: String::new(), ns_prefix: String::new() };
-        // Register built-in implicit root class gald_root
-        binder.symtab.declare(Symbol::new(SymbolKind::Class, "gald_root"));
+        // Register built-in implicit root class nopa_root
+        binder.symtab.declare(Symbol::new(SymbolKind::Class, "nopa_root"));
         binder
     }
 

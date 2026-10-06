@@ -1,0 +1,30 @@
+#import "model.nh"
+
+/* Nopa monomorphises generics by *usage*: codegen scans for type references
+   carrying type args (`Stack<int *>`) and clones the generic implementation
+   under the mangled name. So the lib TU has to actually MENTION the
+   instantiation, or no specialised struct/vtable is emitted and the client's
+   `NOPA_VTABLE_$_Stack_int_ptr` points at methods that were never generated.
+
+   Note the reference is inside a method BODY here, not in a class-method
+   return type — the scanner walks statements and variable declarations. */
+@implementation Stack : NFObject
+- (void)push:(int *)item {
+    if (_count < 4) _storage[_count++] = item;
+}
+- (int *)pop {
+    if (_count > 0) { _count--; return _storage[_count]; }
+    return 0;
+}
+- (int)size { return _count; }
+@end
+
+/* This body mentions Stack<int *>, which is what forces the specialisation. */
+int StackHelper(void) {
+    Stack<int *> *s = [[Stack<int *> alloc] init];
+    int v = 1234;
+    [s push:&v];
+    int *top = [s pop];
+    nopa_release(s);
+    return *top;
+}

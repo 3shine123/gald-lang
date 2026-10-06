@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
-#include <gald/runtime.h>
+#include <nopa/runtime.h>
 #include "kernel.h"
 
 /* ================= freestanding libc bits ================= */
@@ -357,7 +357,7 @@ void kprintf(const char *fmt, ...) {
     va_end(ap);
 }
 
-/* ================= Gald module exports ================= */
+/* ================= Nopa module exports ================= */
 
 void soma_core_boot(void);
 void soma_io_wait(void);
@@ -367,31 +367,31 @@ unsigned int soma_xorshift(unsigned int seed);
 unsigned int soma_fnv1a(const char *s);
 unsigned int soma_rotl(unsigned int v, int sh);
 
-/* Gald @namespace SomaCore + @interface Calculator (implicit root class) */
+/* Nopa @namespace SomaCore + @interface Calculator (implicit root class) */
 struct SomaCore__Calculator {
     struct NFClass *isa;
     uint32_t retain_count;
     int total;
 };
-extern NFClass gald_SomaCore__Calculator_class;
-extern void gald_meta_init(void);
+extern NFClass nopa_SomaCore__Calculator_class;
+extern void nopa_meta_init(void);
 void soma_class_demo(void);
 void soma_instance_demo(struct SomaCore__Calculator *acc);
 
-/* Gald @interface NFIoError — exception object for @try/@catch */
+/* Nopa @interface NFIoError — exception object for @try/@catch */
 struct SomaCore__NFIoError {
     struct NFClass *isa;
     uint32_t retain_count;
     int code;
 };
-extern NFClass gald_SomaCore__NFIoError_class;
+extern NFClass nopa_SomaCore__NFIoError_class;
 void soma_exc_demo(id err);
 void soma_heap_demo(void);
 void soma_advanced_demo(void);
 void soma_kbd_demo(void);
 
-/* Runtime globals (gald___gald_root_class, __gald_exception_buf,
- * __gald_exception_value, memcpy) are provided by runtime_freestanding.c. */
+/* Runtime globals (nopa___nopa_root_class, __nopa_exception_buf,
+ * __nopa_exception_value, memcpy) are provided by runtime_freestanding.c. */
 void kmain(void) {
     extern volatile uint32_t tick;
 
@@ -402,26 +402,26 @@ void kmain(void) {
     pit_init(100);
 
     kputs("\n=== SOMA KERNEL (i686, 32-bit protected mode) ===\n");
-    kputs("built: clang + nasm + galdc transpile, ran under qemu-system-i386\n");
+    kputs("built: clang + nasm + nopac transpile, ran under qemu-system-i386\n");
 
-    /* Gald -> C : the Gald module prints via kputs/kputdec/kputhex */
+    /* Nopa -> C : the Nopa module prints via kputs/kputdec/kputhex */
     soma_core_boot();
 
-    /* Gald advanced features: @namespace + @interface (implicit root class).
-     * gald_meta_init() (emitted weak by the transpiler) fills in class
+    /* Nopa advanced features: @namespace + @interface (implicit root class).
+     * nopa_meta_init() (emitted weak by the transpiler) fills in class
      * metadata; the implicit root class metadata is defined above. */
-    gald_meta_init();
+    nopa_meta_init();
     soma_class_demo();
 
     struct SomaCore__Calculator acc;
     memset(&acc, 0, sizeof(acc));
-    acc.isa = &gald_SomaCore__Calculator_class;   /* hand-built instance */
+    acc.isa = &nopa_SomaCore__Calculator_class;   /* hand-built instance */
     soma_instance_demo(&acc);
 
     /* @try/@catch/@finally on bare metal: throw a hand-built NFIoError */
     struct SomaCore__NFIoError err;
     memset(&err, 0, sizeof(err));
-    err.isa = &gald_SomaCore__NFIoError_class;
+    err.isa = &nopa_SomaCore__NFIoError_class;
     err.code = 42;
     soma_exc_demo((id)&err);
 
@@ -431,13 +431,13 @@ void kmain(void) {
     /* @protocol + @property + @synthesize + @public ivar access */
     soma_advanced_demo();
 
-    /* C -> Gald : kernel calls Gald math functions directly */
-    kprintf("[c] call Gald: fib(15)=%d gcd(1071,462)=%d\n",
+    /* C -> Nopa : kernel calls Nopa math functions directly */
+    kprintf("[c] call Nopa: fib(15)=%d gcd(1071,462)=%d\n",
             soma_fib(15), soma_gcd(1071, 462));
-    kprintf("[c] call Gald: rotl(0x12345678,4)=0x%x\n", soma_rotl(0x12345678u, 4));
-    kprintf("[c] call Gald: fnv1a(\"gald\")=0x%x\n", soma_fnv1a("gald"));
+    kprintf("[c] call Nopa: rotl(0x12345678,4)=0x%x\n", soma_rotl(0x12345678u, 4));
+    kprintf("[c] call Nopa: fnv1a(\"nopa\")=0x%x\n", soma_fnv1a("nopa"));
 
-    /* Gald inline asm io_wait (outb to 0x80) used from C */
+    /* Nopa inline asm io_wait (outb to 0x80) used from C */
     for (int i = 0; i < 16; i++) soma_io_wait();
 
     asm volatile("sti");

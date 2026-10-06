@@ -1,0 +1,65 @@
+#import <Foundation/NFError.nh>
+#import <Foundation/NFObject.np>
+#import <Foundation/NFString.np>
+#include <stdio.h>
+
+@implementation NFError
+
+- (NFError *)initWithCode:(int)code domain:(NFString *)domain
+                 userInfo:(nullable NFDictionary *)userInfo {
+    self = [super init];
+    if (self) {
+        _code = code;
+        // The domain is a required argument here, so store the reference
+        // without retaining: a string literal / constant outlives any error.
+        // ARC injects no release for it (see golden/45's ARC notes), matching
+        // how the rest of Foundation treats literal-backed strings.
+        _domain = domain;
+        _userInfo = userInfo;
+    }
+    return self;
+}
+
++ (NFError *)errorWithCode:(int)code domain:(NFString *)domain {
+    return [self errorWithCode:code domain:domain userInfo:nil];
+}
+
++ (NFError *)errorWithCode:(int)code domain:(NFString *)domain
+                  userInfo:(nullable NFDictionary *)userInfo {
+    return [[self alloc] initWithCode:code domain:domain userInfo:userInfo];
+}
+
++ (NFError *)parseErrorWithMessage:(NFString *)message {
+    NFDictionary *info = @{ @"NSLocalizedDescription": message };
+    return [self errorWithCode:1 domain:NFErrorParse userInfo:info];
+}
+
++ (NFError *)fileIOErrorWithMessage:(NFString *)message {
+    NFDictionary *info = @{ @"NSLocalizedDescription": message };
+    return [self errorWithCode:2 domain:NFErrorFileIO userInfo:info];
+}
+
+- (int)code { return _code; }
+
+- (NFString *)domain { return _domain ? _domain : @""; }
+
+- (nullable NFDictionary *)userInfo { return _userInfo; }
+
+- (NFString *)localizedDescription {
+    if (_userInfo) {
+        NFString *msg = [_userInfo objectForKey:@"NSLocalizedDescription"];
+        if (msg) return msg;
+    }
+    char buf[128];
+    snprintf(buf, sizeof(buf), "%s error %d", [[self domain] UTF8String], _code);
+    return [NFString stringWithUTF8String:buf];
+}
+
+- (NFString *)description {
+    char buf[160];
+    snprintf(buf, sizeof(buf), "Error %d in %s: %s", _code,
+             [[self domain] UTF8String], [[self localizedDescription] UTF8String]);
+    return [NFString stringWithUTF8String:buf];
+}
+
+@end

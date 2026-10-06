@@ -1,0 +1,24 @@
+#include "nopa/runtime.h"
+#import "Foundation/NFObject.nh"
+#import "Foundation/NFObject.np"
+
+@interface Item : NFObject {
+    int _tag;
+}
+- (int)tag;
+@end
+
+@implementation Item
+
+- (int)tag {
+    return _tag;
+}
+
+@end
+
+int main() {
+    for (int i = 0; i < 3; i++) {
+        Item *tmp = [Item new];
+    }
+    return 0;
+}

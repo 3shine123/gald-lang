@@ -1,4 +1,4 @@
-#include "gald/ast.h"
+#include "nopa/ast.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -43,7 +43,7 @@ static void test_stmt_compound(void) {
 
 static void test_unit(void) {
     TEST("ast_unit_alloc + free");
-    ast_unit_t *u = ast_unit_alloc("test.gm");
+    ast_unit_t *u = ast_unit_alloc("test.np");
     if (!u) { FAIL("alloc failed"); return; }
     ast_unit_free(u);
     PASS();
@@ -51,7 +51,7 @@ static void test_unit(void) {
 
 static void test_print(void) {
     TEST("ast_print (no crash)");
-    ast_unit_t *u = ast_unit_alloc("test.gm");
+    ast_unit_t *u = ast_unit_alloc("test.np");
     ast_decl_t *d = ast_decl_alloc(AST_DECL_FUNCTION, "main");
     u->decls = malloc(sizeof(ast_decl_t *));
     u->decls[0] = d;

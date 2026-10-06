@@ -1,9 +1,9 @@
 [package]
-name = "gald-checker"
+name = "nopa-checker"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-gald-cst = { path = "../cst" }
-gald-ast = { path = "../ast" }
-gald-symbol = { path = "../symbol" }
+nopa-cst = { path = "../cst" }
+nopa-ast = { path = "../ast" }
+nopa-symbol = { path = "../symbol" }
