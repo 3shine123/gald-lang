@@ -11,7 +11,7 @@
 struct nopa_vtable;
 struct NOPA_META_VTABLE_$_BareMetal__Calculator;
 struct NOPA_META_VTABLE_$_BareMetal__Counter;
-struct NOPA_META_VTABLE_$_BareMetal__NFIoError;
+struct NOPA_META_VTABLE_$_BareMetal__NPIoError;
 
 /* ----------------- Section 3 · SEL constants ----------------- */
 static const SEL __nopa_sel_compute_ = {.name = "compute:", .hash = 0xE951A1C0};
@@ -26,31 +26,31 @@ struct BareMetal__Calculator;
 typedef struct BareMetal__Calculator BareMetal__Calculator;
 struct BareMetal__Counter;
 typedef struct BareMetal__Counter BareMetal__Counter;
-struct BareMetal__NFIoError;
-typedef struct BareMetal__NFIoError BareMetal__NFIoError;
+struct BareMetal__NPIoError;
+typedef struct BareMetal__NPIoError BareMetal__NPIoError;
 
 /* -------------- Section 5 · Struct definitions --------------- */
 /* -------------- Section 6 · Function prototypes -------------- */
-int BareMetal__Calculator_compute_(NFClass * self, SEL _cmd, int x);
-int BareMetal__Calculator_add_(NFObject * self, SEL _cmd, int x);
-int BareMetal__Calculator_value(NFObject * self, SEL _cmd);
-int BareMetal__NFIoError_errorCode(NFObject * self, SEL _cmd);
-NFObject * BareMetal__Counter_alloc(NFClass * self, SEL _cmd);
-NFObject * BareMetal__Counter_init(NFObject * self, SEL _cmd);
-int BareMetal__Counter_add_(NFObject * self, SEL _cmd, int x);
-int BareMetal__Counter_value(NFObject * self, SEL _cmd);
+int BareMetal__Calculator_compute_(NPClass * self, SEL _cmd, int x);
+int BareMetal__Calculator_add_(NPObject * self, SEL _cmd, int x);
+int BareMetal__Calculator_value(NPObject * self, SEL _cmd);
+int BareMetal__NPIoError_errorCode(NPObject * self, SEL _cmd);
+NPObject * BareMetal__Counter_alloc(NPClass * self, SEL _cmd);
+NPObject * BareMetal__Counter_init(NPObject * self, SEL _cmd);
+int BareMetal__Counter_add_(NPObject * self, SEL _cmd, int x);
+int BareMetal__Counter_value(NPObject * self, SEL _cmd);
 void kputs(const char * s);
 void kputdec(int v);
 void kputhex(unsigned v);
 BareMetal__Calculator * create_calculator(void );
-BareMetal__NFIoError * create_error(int code);
+BareMetal__NPIoError * create_error(int code);
 int main(void);
 
 /* ------------- Section 7 · File-level variables -------------- */
 /* ------------ Section 8 · VTable & class layouts ------------- */
-NFClass * NOPA_GETCLASS_$_BareMetal__Calculator(NFClass * self, SEL _cmd);
-NFClass * NOPA_GETCLASS_$_BareMetal__Counter(NFClass * self, SEL _cmd);
-NFClass * NOPA_GETCLASS_$_BareMetal__NFIoError(NFClass * self, SEL _cmd);
+NPClass * NOPA_GETCLASS_$_BareMetal__Calculator(NPClass * self, SEL _cmd);
+NPClass * NOPA_GETCLASS_$_BareMetal__Counter(NPClass * self, SEL _cmd);
+NPClass * NOPA_GETCLASS_$_BareMetal__NPIoError(NPClass * self, SEL _cmd);
 
 /* vtable layout signature: 6885d9edd6606f27 (methods: 4) */
 __attribute__((weak)) void nopa_verify_vtable_sig(unsigned long long winner, unsigned long long mine, const char *method_list) {
@@ -62,27 +62,27 @@ __attribute__((weak)) void nopa_verify_vtable_sig(unsigned long long winner, uns
 
 struct nopa_vtable {
     unsigned long long __sig;
-    int (*add_)(NFObject *, SEL, int);
-    int (*errorCode)(NFObject *, SEL);
-    NFObject * (*init)(NFObject *, SEL);
-    int (*value)(NFObject *, SEL);
+    int (*add_)(NPObject *, SEL, int);
+    int (*errorCode)(NPObject *, SEL);
+    NPObject * (*init)(NPObject *, SEL);
+    int (*value)(NPObject *, SEL);
 };
 
 struct NOPA_META_VTABLE_$_BareMetal__Calculator {
-    int (*compute_)(NFClass *, SEL, int);
-    NFClass * (*class)(NFClass *, SEL);
+    int (*compute_)(NPClass *, SEL, int);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct NOPA_META_VTABLE_$_BareMetal__Counter {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
-struct NOPA_META_VTABLE_$_BareMetal__NFIoError {
-    NFClass * (*class)(NFClass *, SEL);
+struct NOPA_META_VTABLE_$_BareMetal__NPIoError {
+    NPClass * (*class)(NPClass *, SEL);
 };
 
 /* Class layout: BareMetal::Calculator (super: nopa_root) */
 struct BareMetal__Calculator {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     int total;
 };
@@ -90,50 +90,50 @@ typedef struct BareMetal__Calculator BareMetal__Calculator;
 
 /* Class layout: BareMetal::Counter (super: nopa_root) */
 struct BareMetal__Counter {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     int total;
 };
 typedef struct BareMetal__Counter BareMetal__Counter;
 
-/* Class layout: BareMetal::NFIoError (super: nopa_root) */
-struct BareMetal__NFIoError {
-    struct NFClass *isa;
+/* Class layout: BareMetal::NPIoError (super: nopa_root) */
+struct BareMetal__NPIoError {
+    struct NPClass *isa;
     uint32_t retain_count;
     int code;
 };
-typedef struct BareMetal__NFIoError BareMetal__NFIoError;
+typedef struct BareMetal__NPIoError BareMetal__NPIoError;
 
 /* --------- Section 9 · Class metadata infrastructure --------- */
-extern NFClass NOPA_CLASS_$_BareMetal__Calculator;
-extern NFClass NOPA_CLASS_$_BareMetal__Counter;
-extern NFClass NOPA_CLASS_$_BareMetal__NFIoError;
+extern NPClass NOPA_CLASS_$_BareMetal__Calculator;
+extern NPClass NOPA_CLASS_$_BareMetal__Counter;
+extern NPClass NOPA_CLASS_$_BareMetal__NPIoError;
 void nopa_metaInit(void);
 
 /* --------- Section 10 · Vtable & metadata instances ---------- */
 /* VTable instance: BareMetal::Calculator */
 __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_BareMetal__Calculator = {
     .__sig = 0x6885d9edd6606f27ULL,
-    .add_ = (int (*)(NFObject *, SEL, int))BareMetal__Calculator_add_,
+    .add_ = (int (*)(NPObject *, SEL, int))BareMetal__Calculator_add_,
     .errorCode = NULL,
     .init = NULL,
-    .value = (int (*)(NFObject *, SEL))BareMetal__Calculator_value,
+    .value = (int (*)(NPObject *, SEL))BareMetal__Calculator_value,
 };
 
 /* VTable instance: BareMetal::Counter */
 __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_BareMetal__Counter = {
     .__sig = 0x6885d9edd6606f27ULL,
-    .add_ = (int (*)(NFObject *, SEL, int))BareMetal__Counter_add_,
+    .add_ = (int (*)(NPObject *, SEL, int))BareMetal__Counter_add_,
     .errorCode = NULL,
-    .init = (NFObject * (*)(NFObject *, SEL))BareMetal__Counter_init,
-    .value = (int (*)(NFObject *, SEL))BareMetal__Counter_value,
+    .init = (NPObject * (*)(NPObject *, SEL))BareMetal__Counter_init,
+    .value = (int (*)(NPObject *, SEL))BareMetal__Counter_value,
 };
 
-/* VTable instance: BareMetal::NFIoError */
-__attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_BareMetal__NFIoError = {
+/* VTable instance: BareMetal::NPIoError */
+__attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_BareMetal__NPIoError = {
     .__sig = 0x6885d9edd6606f27ULL,
     .add_ = NULL,
-    .errorCode = (int (*)(NFObject *, SEL))BareMetal__NFIoError_errorCode,
+    .errorCode = (int (*)(NPObject *, SEL))BareMetal__NPIoError_errorCode,
     .init = NULL,
     .value = NULL,
 };
@@ -150,42 +150,42 @@ __attribute__((weak)) struct NOPA_META_VTABLE_$_BareMetal__Counter NOPA_META_VTA
     .class = NOPA_GETCLASS_$_BareMetal__Counter,
 };
 
-/* Meta vtable instance: BareMetal::NFIoError */
-__attribute__((weak)) struct NOPA_META_VTABLE_$_BareMetal__NFIoError NOPA_META_VTABLE_$_BareMetal__NFIoError_inst = {
-    .class = NOPA_GETCLASS_$_BareMetal__NFIoError,
+/* Meta vtable instance: BareMetal::NPIoError */
+__attribute__((weak)) struct NOPA_META_VTABLE_$_BareMetal__NPIoError NOPA_META_VTABLE_$_BareMetal__NPIoError_inst = {
+    .class = NOPA_GETCLASS_$_BareMetal__NPIoError,
 };
 
 /* +getClass for BareMetal::Calculator */
-__attribute__((weak)) NFClass * NOPA_GETCLASS_$_BareMetal__Calculator(NFClass * self, SEL _cmd) {
+__attribute__((weak)) NPClass * NOPA_GETCLASS_$_BareMetal__Calculator(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
 /* +getClass for BareMetal::Counter */
-__attribute__((weak)) NFClass * NOPA_GETCLASS_$_BareMetal__Counter(NFClass * self, SEL _cmd) {
+__attribute__((weak)) NPClass * NOPA_GETCLASS_$_BareMetal__Counter(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
-/* +getClass for BareMetal::NFIoError */
-__attribute__((weak)) NFClass * NOPA_GETCLASS_$_BareMetal__NFIoError(NFClass * self, SEL _cmd) {
+/* +getClass for BareMetal::NPIoError */
+__attribute__((weak)) NPClass * NOPA_GETCLASS_$_BareMetal__NPIoError(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
 /* -------- Section 11 · Class metadata initialization --------- */
-NFClass NOPA_CLASS_$_BareMetal__Calculator;
-NFClass NOPA_CLASS_$_BareMetal__Counter;
-NFClass NOPA_CLASS_$_BareMetal__NFIoError;
+NPClass NOPA_CLASS_$_BareMetal__Calculator;
+NPClass NOPA_CLASS_$_BareMetal__Counter;
+NPClass NOPA_CLASS_$_BareMetal__NPIoError;
 
 __attribute__((constructor)) static void __nopa_vtable_layout_check(void) {
     nopa_verify_vtable_sig((&NOPA_VTABLE_$_BareMetal__Calculator)->__sig, 0x6885d9edd6606f27ULL, "add_ errorCode init value | class BareMetal::Calculator | tu freestanding.np");
     nopa_verify_vtable_sig((&NOPA_VTABLE_$_BareMetal__Counter)->__sig, 0x6885d9edd6606f27ULL, "add_ errorCode init value | class BareMetal::Counter | tu freestanding.np");
-    nopa_verify_vtable_sig((&NOPA_VTABLE_$_BareMetal__NFIoError)->__sig, 0x6885d9edd6606f27ULL, "add_ errorCode init value | class BareMetal::NFIoError | tu freestanding.np");
+    nopa_verify_vtable_sig((&NOPA_VTABLE_$_BareMetal__NPIoError)->__sig, 0x6885d9edd6606f27ULL, "add_ errorCode init value | class BareMetal::NPIoError | tu freestanding.np");
 }
 
 __attribute__((weak)) void nopa_metaInit(void) {
-    NOPA_CLASS_$_BareMetal__Calculator = (NFClass){
+    NOPA_CLASS_$_BareMetal__Calculator = (NPClass){
         .name = "BareMetal::Calculator",
         .superclass = &NOPA_CLASS_$_nopa_root,
         .instance_size = sizeof(struct BareMetal__Calculator),
@@ -194,7 +194,7 @@ __attribute__((weak)) void nopa_metaInit(void) {
         .protocol_count = 0,
         .dealloc = NULL,
     };
-    NOPA_CLASS_$_BareMetal__Counter = (NFClass){
+    NOPA_CLASS_$_BareMetal__Counter = (NPClass){
         .name = "BareMetal::Counter",
         .superclass = &NOPA_CLASS_$_nopa_root,
         .instance_size = sizeof(struct BareMetal__Counter),
@@ -203,12 +203,12 @@ __attribute__((weak)) void nopa_metaInit(void) {
         .protocol_count = 0,
         .dealloc = NULL,
     };
-    NOPA_CLASS_$_BareMetal__NFIoError = (NFClass){
-        .name = "BareMetal::NFIoError",
+    NOPA_CLASS_$_BareMetal__NPIoError = (NPClass){
+        .name = "BareMetal::NPIoError",
         .superclass = &NOPA_CLASS_$_nopa_root,
-        .instance_size = sizeof(struct BareMetal__NFIoError),
-        .vtable = &NOPA_VTABLE_$_BareMetal__NFIoError,
-        .class_vtable = &NOPA_META_VTABLE_$_BareMetal__NFIoError_inst,
+        .instance_size = sizeof(struct BareMetal__NPIoError),
+        .vtable = &NOPA_VTABLE_$_BareMetal__NPIoError,
+        .class_vtable = &NOPA_META_VTABLE_$_BareMetal__NPIoError_inst,
         .protocol_count = 0,
         .dealloc = NULL,
     };
@@ -219,44 +219,44 @@ __attribute__((weak)) void nopa_meta_init(void) { nopa_metaInit(); }
 /* --------------- Section 12 · Runtime support ---------------- */
 /* --------------- Section 13 · Function bodies ---------------- */
 /* +[Calculator compute:] */
-__attribute__((weak)) int BareMetal__Calculator_compute_(NFClass * self, SEL _cmd, int x) {
+__attribute__((weak)) int BareMetal__Calculator_compute_(NPClass * self, SEL _cmd, int x) {
     return ((x * 2) + 1);
 }
 
 /* -[Calculator add:] */
-__attribute__((weak)) int BareMetal__Calculator_add_(NFObject * self, SEL _cmd, int x) {
+__attribute__((weak)) int BareMetal__Calculator_add_(NPObject * self, SEL _cmd, int x) {
     (((struct BareMetal__Calculator *)self)->total += x);
     return ((struct BareMetal__Calculator *)self)->total;
 }
 
 /* -[Calculator value] */
-__attribute__((weak)) int BareMetal__Calculator_value(NFObject * self, SEL _cmd) {
+__attribute__((weak)) int BareMetal__Calculator_value(NPObject * self, SEL _cmd) {
     return ((struct BareMetal__Calculator *)self)->total;
 }
 
-/* -[NFIoError errorCode] */
-__attribute__((weak)) int BareMetal__NFIoError_errorCode(NFObject * self, SEL _cmd) {
-    return ((struct BareMetal__NFIoError *)self)->code;
+/* -[NPIoError errorCode] */
+__attribute__((weak)) int BareMetal__NPIoError_errorCode(NPObject * self, SEL _cmd) {
+    return ((struct BareMetal__NPIoError *)self)->code;
 }
 
 /* +[Counter alloc] */
-__attribute__((weak)) NFObject * BareMetal__Counter_alloc(NFClass * self, SEL _cmd) {
+__attribute__((weak)) NPObject * BareMetal__Counter_alloc(NPClass * self, SEL _cmd) {
     return nopa_alloc(self);
 }
 
 /* -[Counter init] */
-__attribute__((weak)) NFObject * BareMetal__Counter_init(NFObject * self, SEL _cmd) {
+__attribute__((weak)) NPObject * BareMetal__Counter_init(NPObject * self, SEL _cmd) {
     return self;
 }
 
 /* -[Counter add:] */
-__attribute__((weak)) int BareMetal__Counter_add_(NFObject * self, SEL _cmd, int x) {
+__attribute__((weak)) int BareMetal__Counter_add_(NPObject * self, SEL _cmd, int x) {
     (((struct BareMetal__Counter *)self)->total += x);
     return ((struct BareMetal__Counter *)self)->total;
 }
 
 /* -[Counter value] */
-__attribute__((weak)) int BareMetal__Counter_value(NFObject * self, SEL _cmd) {
+__attribute__((weak)) int BareMetal__Counter_value(NPObject * self, SEL _cmd) {
     return ((struct BareMetal__Counter *)self)->total;
 }
 
@@ -268,7 +268,7 @@ void kputhex(unsigned v);
 
 BareMetal__Calculator * create_calculator(void );
 
-BareMetal__NFIoError * create_error(int code);
+BareMetal__NPIoError * create_error(int code);
 
 __attribute__((weak)) int main(void) {
     nopa_metaInit();
@@ -280,23 +280,23 @@ __attribute__((weak)) int main(void) {
     kputs("\n");
     BareMetal__Calculator * acc = (BareMetal__Calculator *)(create_calculator());
     kputs("    instance: add:7=");
-    kputdec(({ NFObject *__nopa_tmp_0 = ((NFObject *)(acc)); __nopa_tmp_0 ? ((int (*)(NFObject *, SEL, int))((struct nopa_vtable *)__nopa_tmp_0->isa->vtable)->add_)(__nopa_tmp_0, __nopa_sel_add_, 7) : (int){0}; }));
+    kputdec(({ NPObject *__nopa_tmp_0 = ((NPObject *)(acc)); __nopa_tmp_0 ? ((int (*)(NPObject *, SEL, int))((struct nopa_vtable *)__nopa_tmp_0->isa->vtable)->add_)(__nopa_tmp_0, __nopa_sel_add_, 7) : (int){0}; }));
     kputs(" add:35=");
-    kputdec(({ NFObject *__nopa_tmp_1 = ((NFObject *)(acc)); __nopa_tmp_1 ? ((int (*)(NFObject *, SEL, int))((struct nopa_vtable *)__nopa_tmp_1->isa->vtable)->add_)(__nopa_tmp_1, __nopa_sel_add_, 35) : (int){0}; }));
+    kputdec(({ NPObject *__nopa_tmp_1 = ((NPObject *)(acc)); __nopa_tmp_1 ? ((int (*)(NPObject *, SEL, int))((struct nopa_vtable *)__nopa_tmp_1->isa->vtable)->add_)(__nopa_tmp_1, __nopa_sel_add_, 35) : (int){0}; }));
     kputs(" value=");
-    kputdec(({ NFObject *__nopa_tmp_2 = ((NFObject *)(acc)); __nopa_tmp_2 ? ((int (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_2->isa->vtable)->value)(__nopa_tmp_2, __nopa_sel_value) : (int){0}; }));
+    kputdec(({ NPObject *__nopa_tmp_2 = ((NPObject *)(acc)); __nopa_tmp_2 ? ((int (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_2->isa->vtable)->value)(__nopa_tmp_2, __nopa_sel_value) : (int){0}; }));
     kputs("\n");
-    NFObject *__nopa_tmp_3 = (BareMetal__Counter_alloc(&NOPA_CLASS_$_BareMetal__Counter, __nopa_sel_alloc));
+    NPObject *__nopa_tmp_3 = (BareMetal__Counter_alloc(&NOPA_CLASS_$_BareMetal__Counter, __nopa_sel_alloc));
     BareMetal__Counter * c = (BareMetal__Counter *)(__nopa_tmp_3 ? ((struct nopa_vtable *)__nopa_tmp_3->isa->vtable)->init(__nopa_tmp_3, __nopa_sel_init) : 0);
     kputs("[2] alloc+init (bump allocator):\n");
     kputs("    [c add:10]=");
-    kputdec(({ NFObject *__nopa_tmp_4 = ((NFObject *)(c)); __nopa_tmp_4 ? ((int (*)(NFObject *, SEL, int))((struct nopa_vtable *)__nopa_tmp_4->isa->vtable)->add_)(__nopa_tmp_4, __nopa_sel_add_, 10) : (int){0}; }));
+    kputdec(({ NPObject *__nopa_tmp_4 = ((NPObject *)(c)); __nopa_tmp_4 ? ((int (*)(NPObject *, SEL, int))((struct nopa_vtable *)__nopa_tmp_4->isa->vtable)->add_)(__nopa_tmp_4, __nopa_sel_add_, 10) : (int){0}; }));
     kputs(" [c add:20]=");
-    kputdec(({ NFObject *__nopa_tmp_5 = ((NFObject *)(c)); __nopa_tmp_5 ? ((int (*)(NFObject *, SEL, int))((struct nopa_vtable *)__nopa_tmp_5->isa->vtable)->add_)(__nopa_tmp_5, __nopa_sel_add_, 20) : (int){0}; }));
+    kputdec(({ NPObject *__nopa_tmp_5 = ((NPObject *)(c)); __nopa_tmp_5 ? ((int (*)(NPObject *, SEL, int))((struct nopa_vtable *)__nopa_tmp_5->isa->vtable)->add_)(__nopa_tmp_5, __nopa_sel_add_, 20) : (int){0}; }));
     kputs(" [c value]=");
-    kputdec(({ NFObject *__nopa_tmp_6 = ((NFObject *)(c)); __nopa_tmp_6 ? ((int (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_6->isa->vtable)->value)(__nopa_tmp_6, __nopa_sel_value) : (int){0}; }));
+    kputdec(({ NPObject *__nopa_tmp_6 = ((NPObject *)(c)); __nopa_tmp_6 ? ((int (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_6->isa->vtable)->value)(__nopa_tmp_6, __nopa_sel_value) : (int){0}; }));
     kputs("\n");
-    BareMetal__NFIoError * err = (BareMetal__NFIoError *)(create_error(42));
+    BareMetal__NPIoError * err = (BareMetal__NPIoError *)(create_error(42));
     kputs("[3] @try/@catch/@finally:\n");
     kputs("    try body, throwing...\n");
     {
@@ -315,10 +315,10 @@ __attribute__((weak)) int main(void) {
         memcpy(__nopa_exception_buf, __nopa_saved, sizeof(jmp_buf));
         if ((__nopa_state == 1)) {
             __nopa_state = 2;
-            NFObject * e = (NFObject *)__nopa_exception_value;
+            NPObject * e = (NPObject *)__nopa_exception_value;
             {
                 kputs("    caught [e errorCode] = ");
-                kputdec(({ NFObject *__nopa_tmp_7 = ((NFObject *)(e)); __nopa_tmp_7 ? ((int (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_7->isa->vtable)->errorCode)(__nopa_tmp_7, __nopa_sel_errorCode) : (int){0}; }));
+                kputdec(({ NPObject *__nopa_tmp_7 = ((NPObject *)(e)); __nopa_tmp_7 ? ((int (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_7->isa->vtable)->errorCode)(__nopa_tmp_7, __nopa_sel_errorCode) : (int){0}; }));
                 kputs("\n");
             }
         }

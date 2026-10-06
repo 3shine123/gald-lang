@@ -4,15 +4,15 @@
 #import <Foundation/Foundation.np>
 
 // 定义一个 Block 类型：接收一个 id 类型的参数（触发事件时携带的数据）
-typedef void (^NFEventBlock)(id data);
+typedef void (^NPEventBlock)(id data);
 
 // ==========================================
-// @interface: NFEventEmitter
+// @interface: NPEventEmitter
 // ==========================================
-@interface NFEventEmitter : NFObject {
+@interface NPEventEmitter : NPObject {
 @private
     // 静态分配一个简易的槽位数组，用来存放注册的监听器
-    NFEventBlock _listeners[10];
+    NPEventBlock _listeners[10];
     unsigned int _eventIds[10];
     int _listenerCount;
 }
@@ -21,15 +21,15 @@ typedef void (^NFEventBlock)(id data);
 - (void)dealloc;
 
 // 核心工具方法
-- (void)onEvent:(unsigned int)selectorId doAction:(NFEventBlock)block;
+- (void)onEvent:(unsigned int)selectorId doAction:(NPEventBlock)block;
 - (void)emitEvent:(unsigned int)selectorId withData:(id)data;
 
 @end
 
 // ==========================================
-// @implementation: NFEventEmitter
+// @implementation: NPEventEmitter
 // ==========================================
-@implementation NFEventEmitter
+@implementation NPEventEmitter
 
 - (instancetype)init {
     self = [super init];
@@ -47,11 +47,11 @@ typedef void (^NFEventBlock)(id data);
     // 释放所有持有的 Block
     // 注意：在标准 Clang Blocks 中，如果 Block 复制到了堆上，需要 Block_release
     // 在 Micrit 的纯静态架构中，此处主要用于观察对象自身的生命周期周期
-    printf("[Tool Log] NFEventEmitter is destroying, breaking all event pipelines.\n");
+    printf("[Tool Log] NPEventEmitter is destroying, breaking all event pipelines.\n");
 }
 
 // 注册监听器：这里测试了 Micrit 对 C 数组下标 `_listeners[i]` 与 ObjC 方括号的精确分流
-- (void)onEvent:(unsigned int)selectorId doAction:(NFEventBlock)block {
+- (void)onEvent:(unsigned int)selectorId doAction:(NPEventBlock)block {
     if (self->_listenerCount >= 10) {
         printf("[Error] Listener pool full!\n");
         return;
@@ -70,7 +70,7 @@ typedef void (^NFEventBlock)(id data);
     
     for (int i = 0; i < self->_listenerCount; i++) {
         if (self->_eventIds[i] == selectorId) {
-            NFEventBlock action = self->_listeners[i];
+            NPEventBlock action = self->_listeners[i];
             if (action) {
                 // 执行 Block 回调
                 action(data);
@@ -92,7 +92,7 @@ int main() {
     printf("=== Micrit Tooling Test: Event Emitter with Blocks ===\n\n");
 
     // 1. 初始化事件中心工具
-    NFEventEmitter *emitter = [[NFEventEmitter alloc] init];
+    NPEventEmitter *emitter = [[NPEventEmitter alloc] init];
 
     // 2. 模拟局部上下文中需要被 Block 捕获的变量
     int __block_captured_counter = 100; 

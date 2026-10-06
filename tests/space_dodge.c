@@ -13,12 +13,12 @@
 
 #include <string.h>
 
-struct nopa_NFObject_vtable;
+struct nopa_NPObject_vtable;
 struct nopa_Obstacle_vtable;
 struct nopa_SpaceEngine_vtable;
 
-#define nopa_NFObject_vtable_index_init 2
-#define nopa_NFObject_vtable_index_dealloc 3
+#define nopa_NPObject_vtable_index_init 2
+#define nopa_NPObject_vtable_index_dealloc 3
 #define nopa_Obstacle_vtable_index_init 2
 #define nopa_Obstacle_vtable_index_x 4
 #define nopa_Obstacle_vtable_index_setX_ 5
@@ -50,57 +50,57 @@ static const SEL __nopa_sel_processInfut_ = {.name = "processInfut_", .hash = 0x
 static const SEL __nopa_sel_update = {.name = "update", .hash = 0x280F9474};
 static const SEL __nopa_sel_score = {.name = "score", .hash = 0xD22F9095};
 
-typedef struct NFObject NFObject;
+typedef struct NPObject NPObject;
 typedef struct Obstacle Obstacle;
 typedef struct SpaceEngine SpaceEngine;
 
 
 
-NFObject * NFObject_alloc(NFClass * self, SEL _cmd);
-NFObject * NFObject_new(NFClass * self, SEL _cmd);
-NFObject * NFObject_init(NFObject * self, SEL _cmd);
-void NFObject_dealloc(NFObject * self, SEL _cmd);
-NFClass * NFObject_getClass(NFClass * self, SEL _cmd);
+NPObject * NPObject_alloc(NPClass * self, SEL _cmd);
+NPObject * NPObject_new(NPClass * self, SEL _cmd);
+NPObject * NPObject_init(NPObject * self, SEL _cmd);
+void NPObject_dealloc(NPObject * self, SEL _cmd);
+NPClass * NPObject_getClass(NPClass * self, SEL _cmd);
 void disableRawMode();
 void enableRawMode();
 int kbhit();
-NFObject * Obstacle_init(NFObject * self, SEL _cmd);
-int Obstacle_x(NFObject * self, SEL _cmd);
-void Obstacle_setX_(NFObject * self, SEL _cmd, int x);
-int Obstacle_y(NFObject * self, SEL _cmd);
-void Obstacle_setY_(NFObject * self, SEL _cmd, int y);
-_Bool Obstacle_active(NFObject * self, SEL _cmd);
-void Obstacle_setActive_(NFObject * self, SEL _cmd, _Bool active);
-void Obstacle_resetWithWidth_(NFObject * self, SEL _cmd, int width);
-NFClass * Obstacle_getClass(NFClass * self, SEL _cmd);
-NFObject * SpaceEngine_initWithWidth_height_(NFObject * self, SEL _cmd, int w, int h);
-_Bool SpaceEngine_gameOver(NFObject * self, SEL _cmd);
-int SpaceEngine_score(NFObject * self, SEL _cmd);
-void SpaceEngine_processInfut_(NFObject * self, SEL _cmd, char ch);
-void SpaceEngine_update(NFObject * self, SEL _cmd);
-void SpaceEngine_renderWithScoreBlock_(NFObject * self, SEL _cmd, int (^scoreBlock)(int));
-void SpaceEngine_dealloc(NFObject * self, SEL _cmd);
-NFClass * SpaceEngine_getClass(NFClass * self, SEL _cmd);
+NPObject * Obstacle_init(NPObject * self, SEL _cmd);
+int Obstacle_x(NPObject * self, SEL _cmd);
+void Obstacle_setX_(NPObject * self, SEL _cmd, int x);
+int Obstacle_y(NPObject * self, SEL _cmd);
+void Obstacle_setY_(NPObject * self, SEL _cmd, int y);
+_Bool Obstacle_active(NPObject * self, SEL _cmd);
+void Obstacle_setActive_(NPObject * self, SEL _cmd, _Bool active);
+void Obstacle_resetWithWidth_(NPObject * self, SEL _cmd, int width);
+NPClass * Obstacle_getClass(NPClass * self, SEL _cmd);
+NPObject * SpaceEngine_initWithWidth_height_(NPObject * self, SEL _cmd, int w, int h);
+_Bool SpaceEngine_gameOver(NPObject * self, SEL _cmd);
+int SpaceEngine_score(NPObject * self, SEL _cmd);
+void SpaceEngine_processInfut_(NPObject * self, SEL _cmd, char ch);
+void SpaceEngine_update(NPObject * self, SEL _cmd);
+void SpaceEngine_renderWithScoreBlock_(NPObject * self, SEL _cmd, int (^scoreBlock)(int));
+void SpaceEngine_dealloc(NPObject * self, SEL _cmd);
+NPClass * SpaceEngine_getClass(NPClass * self, SEL _cmd);
 int main();
 
-extern NFClass nopa_NFObject_class;
-extern NFClass nopa_Obstacle_class;
-extern NFClass nopa_SpaceEngine_class;
+extern NPClass nopa_NPObject_class;
+extern NPClass nopa_Obstacle_class;
+extern NPClass nopa_SpaceEngine_class;
 void nopa_meta_init(void);
 
-// struct NFClass defined in runtime.h
-// struct NFObject defined in runtime.h
-struct nopa_NFObject_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
+// struct NPClass defined in runtime.h
+// struct NPObject defined in runtime.h
+struct nopa_NPObject_vtable {
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
 };
-struct nopa_NFObject_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+struct nopa_NPObject_meta_vtable {
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct Obstacle {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     int _x;
     int _y;
@@ -108,21 +108,21 @@ struct Obstacle {
 };
 typedef struct Obstacle Obstacle;
 struct nopa_Obstacle_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    int (*x)(NFObject *, SEL);
-    void (*setX_)(NFObject *, SEL, int);
-    int (*y)(NFObject *, SEL);
-    void (*setY_)(NFObject *, SEL, int);
-    _Bool (*active)(NFObject *, SEL);
-    void (*setActive_)(NFObject *, SEL, _Bool);
-    void (*resetWithWidth_)(NFObject *, SEL, int);
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    int (*x)(NPObject *, SEL);
+    void (*setX_)(NPObject *, SEL, int);
+    int (*y)(NPObject *, SEL);
+    void (*setY_)(NPObject *, SEL, int);
+    _Bool (*active)(NPObject *, SEL);
+    void (*setActive_)(NPObject *, SEL, _Bool);
+    void (*resetWithWidth_)(NPObject *, SEL, int);
 };
 struct nopa_Obstacle_meta_vtable {
-    NFClass * (*class)(NFClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct SpaceEngine {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     int _width;
     int _height;
@@ -135,47 +135,47 @@ struct SpaceEngine {
 };
 typedef struct SpaceEngine SpaceEngine;
 struct nopa_SpaceEngine_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    NFObject * (*initWithWidth_height_)(NFObject *, SEL, int, int);
-    _Bool (*gameOver)(NFObject *, SEL);
-    int (*score)(NFObject *, SEL);
-    void (*processInfut_)(NFObject *, SEL, char);
-    void (*update)(NFObject *, SEL);
-    void (*renderWithScoreBlock_)(NFObject *, SEL, int (^)(int));
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    NPObject * (*initWithWidth_height_)(NPObject *, SEL, int, int);
+    _Bool (*gameOver)(NPObject *, SEL);
+    int (*score)(NPObject *, SEL);
+    void (*processInfut_)(NPObject *, SEL, char);
+    void (*update)(NPObject *, SEL);
+    void (*renderWithScoreBlock_)(NPObject *, SEL, int (^)(int));
 };
 struct nopa_SpaceEngine_meta_vtable {
-    NFClass * (*class)(NFClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
-NFObject * NFObject_alloc(NFClass * self, SEL _cmd) {
+NPObject * NPObject_alloc(NPClass * self, SEL _cmd) {
     return nopa_alloc(self);
 }
 
-NFObject * NFObject_new(NFClass * self, SEL _cmd) {
-    NFObject * obj = nopa_alloc(self);
+NPObject * NPObject_new(NPClass * self, SEL _cmd) {
+    NPObject * obj = nopa_alloc(self);
     return nopa_init(obj);
 }
 
-NFObject * NFObject_init(NFObject * self, SEL _cmd) {
-    struct NFObject * _self = ((struct NFObject *)(self));
+NPObject * NPObject_init(NPObject * self, SEL _cmd) {
+    struct NPObject * _self = ((struct NPObject *)(self));
     {
         return nopa_init(self);
     }
 }
 
-void NFObject_dealloc(NFObject * self, SEL _cmd) {
-    struct NFObject * _self = ((struct NFObject *)(self));
+void NPObject_dealloc(NPObject * self, SEL _cmd) {
+    struct NPObject * _self = ((struct NPObject *)(self));
     {
         return;
     }
 }
 
-NFClass * NFObject_getClass(NFClass * self, SEL _cmd) {
-    return &nopa_NFObject_class;
+NPClass * NPObject_getClass(NPClass * self, SEL _cmd) {
+    return &nopa_NPObject_class;
 }
 
-NFObject * nopa_alloc(struct NFClass * cls);
-NFObject * nopa_init(NFObject * );
+NPObject * nopa_alloc(struct NPClass * cls);
+NPObject * nopa_init(NPObject * );
 struct termios orig_termios;
 void disableRawMode() {
     tcsetattr(STDIN_FILENO, TCSAFLUSH, &orig_termios);
@@ -201,10 +201,10 @@ int kbhit() {
     return select(STDIN_FILENO + 1, &fds, NULL, NULL, &tv);
 }
 
-NFObject * Obstacle_init(NFObject * self, SEL _cmd) {
+NPObject * Obstacle_init(NPObject * self, SEL _cmd) {
     struct Obstacle * _self = ((struct Obstacle *)(self));
     {
-        self = NFObject_init(self, __nopa_sel_init);
+        self = NPObject_init(self, __nopa_sel_init);
         if (self) {
             {
                 ((struct Obstacle *)(self))->_x = 0;
@@ -216,49 +216,49 @@ NFObject * Obstacle_init(NFObject * self, SEL _cmd) {
     }
 }
 
-int Obstacle_x(NFObject * self, SEL _cmd) {
+int Obstacle_x(NPObject * self, SEL _cmd) {
     struct Obstacle * _self = ((struct Obstacle *)(self));
     {
         return ((struct Obstacle *)(self))->_x;
     }
 }
 
-void Obstacle_setX_(NFObject * self, SEL _cmd, int x) {
+void Obstacle_setX_(NPObject * self, SEL _cmd, int x) {
     struct Obstacle * _self = ((struct Obstacle *)(self));
     {
         ((struct Obstacle *)(self))->_x = x;
     }
 }
 
-int Obstacle_y(NFObject * self, SEL _cmd) {
+int Obstacle_y(NPObject * self, SEL _cmd) {
     struct Obstacle * _self = ((struct Obstacle *)(self));
     {
         return ((struct Obstacle *)(self))->_y;
     }
 }
 
-void Obstacle_setY_(NFObject * self, SEL _cmd, int y) {
+void Obstacle_setY_(NPObject * self, SEL _cmd, int y) {
     struct Obstacle * _self = ((struct Obstacle *)(self));
     {
         ((struct Obstacle *)(self))->_y = y;
     }
 }
 
-_Bool Obstacle_active(NFObject * self, SEL _cmd) {
+_Bool Obstacle_active(NPObject * self, SEL _cmd) {
     struct Obstacle * _self = ((struct Obstacle *)(self));
     {
         return ((struct Obstacle *)(self))->_active;
     }
 }
 
-void Obstacle_setActive_(NFObject * self, SEL _cmd, _Bool active) {
+void Obstacle_setActive_(NPObject * self, SEL _cmd, _Bool active) {
     struct Obstacle * _self = ((struct Obstacle *)(self));
     {
         ((struct Obstacle *)(self))->_active = active;
     }
 }
 
-void Obstacle_resetWithWidth_(NFObject * self, SEL _cmd, int width) {
+void Obstacle_resetWithWidth_(NPObject * self, SEL _cmd, int width) {
     struct Obstacle * _self = ((struct Obstacle *)(self));
     {
         ((struct Obstacle *)(self))->_x = rand() % width - 2 + 1;
@@ -267,14 +267,14 @@ void Obstacle_resetWithWidth_(NFObject * self, SEL _cmd, int width) {
     }
 }
 
-NFClass * Obstacle_getClass(NFClass * self, SEL _cmd) {
+NPClass * Obstacle_getClass(NPClass * self, SEL _cmd) {
     return &nopa_Obstacle_class;
 }
 
-NFObject * SpaceEngine_initWithWidth_height_(NFObject * self, SEL _cmd, int w, int h) {
+NPObject * SpaceEngine_initWithWidth_height_(NPObject * self, SEL _cmd, int w, int h) {
     struct SpaceEngine * _self = ((struct SpaceEngine *)(self));
     {
-        self = NFObject_init(self, __nopa_sel_init);
+        self = NPObject_init(self, __nopa_sel_init);
         if (self) {
             {
                 ((struct SpaceEngine *)(self))->_width = w;
@@ -282,13 +282,13 @@ NFObject * SpaceEngine_initWithWidth_height_(NFObject * self, SEL _cmd, int w, i
                 ((struct SpaceEngine *)(self))->_playerX = w / 2;
                 ((struct SpaceEngine *)(self))->_score = 0;
                 ((struct SpaceEngine *)(self))->_gameOver = 0;
-                ((struct SpaceEngine *)(self))->_obs1 = ({ NFObject *__nopa_tmp_0 = (NFObject_alloc(&nopa_Obstacle_class, __nopa_sel_alloc)); ((struct nopa_Obstacle_vtable *)__nopa_tmp_0->isa->vtable)->init(__nopa_tmp_0, __nopa_sel_init); });
+                ((struct SpaceEngine *)(self))->_obs1 = ({ NPObject *__nopa_tmp_0 = (NPObject_alloc(&nopa_Obstacle_class, __nopa_sel_alloc)); ((struct nopa_Obstacle_vtable *)__nopa_tmp_0->isa->vtable)->init(__nopa_tmp_0, __nopa_sel_init); });
                 ((struct nopa_Obstacle_vtable *)((struct SpaceEngine *)(self))->_obs1->isa->vtable)->resetWithWidth_(((struct SpaceEngine *)(self))->_obs1, __nopa_sel_resetWithWidth_, ((struct SpaceEngine *)(self))->_width);
-                ((struct SpaceEngine *)(self))->_obs2 = ({ NFObject *__nopa_tmp_1 = (NFObject_alloc(&nopa_Obstacle_class, __nopa_sel_alloc)); ((struct nopa_Obstacle_vtable *)__nopa_tmp_1->isa->vtable)->init(__nopa_tmp_1, __nopa_sel_init); });
+                ((struct SpaceEngine *)(self))->_obs2 = ({ NPObject *__nopa_tmp_1 = (NPObject_alloc(&nopa_Obstacle_class, __nopa_sel_alloc)); ((struct nopa_Obstacle_vtable *)__nopa_tmp_1->isa->vtable)->init(__nopa_tmp_1, __nopa_sel_init); });
                 ((struct nopa_Obstacle_vtable *)((struct SpaceEngine *)(self))->_obs2->isa->vtable)->resetWithWidth_(((struct SpaceEngine *)(self))->_obs2, __nopa_sel_resetWithWidth_, ((struct SpaceEngine *)(self))->_width);
                 ((struct nopa_Obstacle_vtable *)((struct SpaceEngine *)(self))->_obs2->isa->vtable)->setY_(((struct SpaceEngine *)(self))->_obs2, __nopa_sel_setY_, -4);
                 ((struct nopa_Obstacle_vtable *)((struct SpaceEngine *)(self))->_obs2->isa->vtable)->setActive_(((struct SpaceEngine *)(self))->_obs2, __nopa_sel_setActive_, 1);
-                ((struct SpaceEngine *)(self))->_obs3 = ({ NFObject *__nopa_tmp_2 = (NFObject_alloc(&nopa_Obstacle_class, __nopa_sel_alloc)); ((struct nopa_Obstacle_vtable *)__nopa_tmp_2->isa->vtable)->init(__nopa_tmp_2, __nopa_sel_init); });
+                ((struct SpaceEngine *)(self))->_obs3 = ({ NPObject *__nopa_tmp_2 = (NPObject_alloc(&nopa_Obstacle_class, __nopa_sel_alloc)); ((struct nopa_Obstacle_vtable *)__nopa_tmp_2->isa->vtable)->init(__nopa_tmp_2, __nopa_sel_init); });
                 ((struct nopa_Obstacle_vtable *)((struct SpaceEngine *)(self))->_obs3->isa->vtable)->resetWithWidth_(((struct SpaceEngine *)(self))->_obs3, __nopa_sel_resetWithWidth_, ((struct SpaceEngine *)(self))->_width);
                 ((struct nopa_Obstacle_vtable *)((struct SpaceEngine *)(self))->_obs3->isa->vtable)->setY_(((struct SpaceEngine *)(self))->_obs3, __nopa_sel_setY_, -8);
                 ((struct nopa_Obstacle_vtable *)((struct SpaceEngine *)(self))->_obs3->isa->vtable)->setActive_(((struct SpaceEngine *)(self))->_obs3, __nopa_sel_setActive_, 1);
@@ -298,21 +298,21 @@ NFObject * SpaceEngine_initWithWidth_height_(NFObject * self, SEL _cmd, int w, i
     }
 }
 
-_Bool SpaceEngine_gameOver(NFObject * self, SEL _cmd) {
+_Bool SpaceEngine_gameOver(NPObject * self, SEL _cmd) {
     struct SpaceEngine * _self = ((struct SpaceEngine *)(self));
     {
         return ((struct SpaceEngine *)(self))->_gameOver;
     }
 }
 
-int SpaceEngine_score(NFObject * self, SEL _cmd) {
+int SpaceEngine_score(NPObject * self, SEL _cmd) {
     struct SpaceEngine * _self = ((struct SpaceEngine *)(self));
     {
         return ((struct SpaceEngine *)(self))->_score;
     }
 }
 
-void SpaceEngine_processInfut_(NFObject * self, SEL _cmd, char ch) {
+void SpaceEngine_processInfut_(NPObject * self, SEL _cmd, char ch) {
     struct SpaceEngine * _self = ((struct SpaceEngine *)(self));
     {
         if (ch == 97 || ch == 65) {
@@ -339,7 +339,7 @@ void SpaceEngine_processInfut_(NFObject * self, SEL _cmd, char ch) {
     }
 }
 
-void SpaceEngine_update(NFObject * self, SEL _cmd) {
+void SpaceEngine_update(NPObject * self, SEL _cmd) {
     struct SpaceEngine * _self = ((struct SpaceEngine *)(self));
     {
         if (((struct SpaceEngine *)(self))->_gameOver) {
@@ -396,7 +396,7 @@ void SpaceEngine_update(NFObject * self, SEL _cmd) {
     }
 }
 
-void SpaceEngine_renderWithScoreBlock_(NFObject * self, SEL _cmd, int (^scoreBlock)(int)) {
+void SpaceEngine_renderWithScoreBlock_(NPObject * self, SEL _cmd, int (^scoreBlock)(int)) {
     struct SpaceEngine * _self = ((struct SpaceEngine *)(self));
     {
         printf("\033[H");
@@ -451,23 +451,23 @@ void SpaceEngine_renderWithScoreBlock_(NFObject * self, SEL _cmd, int (^scoreBlo
     }
 }
 
-void SpaceEngine_dealloc(NFObject * self, SEL _cmd) {
+void SpaceEngine_dealloc(NPObject * self, SEL _cmd) {
     struct SpaceEngine * _self = ((struct SpaceEngine *)(self));
     {
         if (((struct SpaceEngine *)(self))->_obs1) {
-            NFObject_release(((struct SpaceEngine *)(self))->_obs1);
+            NPObject_release(((struct SpaceEngine *)(self))->_obs1);
         }
         if (((struct SpaceEngine *)(self))->_obs2) {
-            NFObject_release(((struct SpaceEngine *)(self))->_obs2);
+            NPObject_release(((struct SpaceEngine *)(self))->_obs2);
         }
         if (((struct SpaceEngine *)(self))->_obs3) {
-            NFObject_release(((struct SpaceEngine *)(self))->_obs3);
+            NPObject_release(((struct SpaceEngine *)(self))->_obs3);
         }
         nopa_object_dealloc(self);
     }
 }
 
-NFClass * SpaceEngine_getClass(NFClass * self, SEL _cmd) {
+NPClass * SpaceEngine_getClass(NPClass * self, SEL _cmd) {
     return &nopa_SpaceEngine_class;
 }
 
@@ -480,7 +480,7 @@ int main() {
             srand(time(NULL));
             enableRawMode();
             printf("\033[2J\033[H");
-            NFObject *__nopa_tmp_3 = (NFObject_alloc(&nopa_SpaceEngine_class, __nopa_sel_alloc));
+            NPObject *__nopa_tmp_3 = (NPObject_alloc(&nopa_SpaceEngine_class, __nopa_sel_alloc));
             SpaceEngine * engine = ((struct nopa_SpaceEngine_vtable *)__nopa_tmp_3->isa->vtable)->initWithWidth_height_(__nopa_tmp_3, __nopa_sel_initWithWidth_height_, 24, 16);
             int multiplier = 5;
             int (^hyperScoreCalculator)(int baseScore) = ^int(int baseScore) {
@@ -511,7 +511,7 @@ int main() {
             printf(" 最终星际狂暴得分 (Bonus x5): %d 点！\n", ((struct nopa_SpaceEngine_vtable *)engine->isa->vtable)->score(engine, __nopa_sel_score) * multiplier);
             printf("======================================================\n");
             if (engine) {
-                NFObject_release(engine);
+                NPObject_release(engine);
             }
         }
         nopa_autoreleasepool_pop(__pool);
@@ -523,14 +523,14 @@ int main() {
 
 // ─── Class metadata ─────────────────────────────────────
 
-struct nopa_NFObject_vtable nopa_NFObject_vtable_inst = {
-    .init = NFObject_init,
-    .dealloc = NFObject_dealloc,
+struct nopa_NPObject_vtable nopa_NPObject_vtable_inst = {
+    .init = NPObject_init,
+    .dealloc = NPObject_dealloc,
 };
 
 struct nopa_Obstacle_vtable nopa_Obstacle_vtable_inst = {
     .init = Obstacle_init,
-    .dealloc = NFObject_dealloc,
+    .dealloc = NPObject_dealloc,
     .x = Obstacle_x,
     .setX_ = Obstacle_setX_,
     .y = Obstacle_y,
@@ -541,7 +541,7 @@ struct nopa_Obstacle_vtable nopa_Obstacle_vtable_inst = {
 };
 
 struct nopa_SpaceEngine_vtable nopa_SpaceEngine_vtable_inst = {
-    .init = NFObject_init,
+    .init = NPObject_init,
     .dealloc = SpaceEngine_dealloc,
     .initWithWidth_height_ = SpaceEngine_initWithWidth_height_,
     .gameOver = SpaceEngine_gameOver,
@@ -551,10 +551,10 @@ struct nopa_SpaceEngine_vtable nopa_SpaceEngine_vtable_inst = {
     .renderWithScoreBlock_ = SpaceEngine_renderWithScoreBlock_,
 };
 
-struct nopa_NFObject_meta_vtable nopa_NFObject_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
-    .class = NFObject_getClass,
+struct nopa_NPObject_meta_vtable nopa_NPObject_meta_vtable_inst = {
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
+    .class = NPObject_getClass,
 };
 
 struct nopa_Obstacle_meta_vtable nopa_Obstacle_meta_vtable_inst = {
@@ -565,30 +565,30 @@ struct nopa_SpaceEngine_meta_vtable nopa_SpaceEngine_meta_vtable_inst = {
     .class = SpaceEngine_getClass,
 };
 
-NFClass nopa_NFObject_class;
-NFClass nopa_Obstacle_class;
-NFClass nopa_SpaceEngine_class;
+NPClass nopa_NPObject_class;
+NPClass nopa_Obstacle_class;
+NPClass nopa_SpaceEngine_class;
 
 void nopa_meta_init(void) {
-    nopa_NFObject_class = (NFClass){
-        .name = "NFObject",
+    nopa_NPObject_class = (NPClass){
+        .name = "NPObject",
         .superclass = NULL,
-        .instance_size = sizeof(struct NFObject),
-        .vtable = &nopa_NFObject_vtable_inst,
-        .class_vtable = &nopa_NFObject_meta_vtable_inst,
+        .instance_size = sizeof(struct NPObject),
+        .vtable = &nopa_NPObject_vtable_inst,
+        .class_vtable = &nopa_NPObject_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_Obstacle_class = (NFClass){
+    nopa_Obstacle_class = (NPClass){
         .name = "Obstacle",
-        .superclass = &nopa_NFObject_class,
+        .superclass = &nopa_NPObject_class,
         .instance_size = sizeof(struct Obstacle),
         .vtable = &nopa_Obstacle_vtable_inst,
         .class_vtable = &nopa_Obstacle_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_SpaceEngine_class = (NFClass){
+    nopa_SpaceEngine_class = (NPClass){
         .name = "SpaceEngine",
-        .superclass = &nopa_NFObject_class,
+        .superclass = &nopa_NPObject_class,
         .instance_size = sizeof(struct SpaceEngine),
         .vtable = &nopa_SpaceEngine_vtable_inst,
         .class_vtable = &nopa_SpaceEngine_meta_vtable_inst,

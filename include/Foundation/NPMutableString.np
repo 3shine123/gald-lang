@@ -1,0 +1,108 @@
+#import <Foundation/NPMutableString.nh>
+#include <string.h>
+#include <stdlib.h>
+
+@implementation NPMutableString
+
+- (NPMutableString *)initWithUTF8String:(const char *)cstr {
+    self = [super initWithUTF8String:cstr];
+    return self;
+}
+
+- (NPMutableString *)initWithString:(NPString *)str {
+    self = [super initWithString:str];
+    return self;
+}
+
++ (NPMutableString *)stringWithUTF8String:(const char *)cstr {
+    @noarc {
+        return [[[self alloc] initWithUTF8String:cstr] autorelease];
+    }
+}
+
++ (NPMutableString *)stringWithString:(NPString *)str {
+    @noarc {
+        return [[[self alloc] initWithString:str] autorelease];
+    }
+}
+
+- (void)appendString:(NPString *)str {
+    if (!str) return;
+    const char *src = [str UTF8String];
+    if (!src) return;
+    [self appendUTF8String:src];
+}
+
+- (void)appendUTF8String:(const char *)cstr {
+    if (!cstr) return;
+    size_t add = strlen(cstr);
+    if (add == 0) return;
+    char *nbuf = (char *)realloc(_cstr, _length + add + 1);
+    if (!nbuf) return;
+    _cstr = nbuf;
+    memcpy(_cstr + _length, cstr, add + 1);
+    _length += add;
+    _hashIsValid = NO;
+}
+
+- (void)insertString:(NPString *)str atIndex:(size_t)idx {
+    if (!str) return;
+    const char *src = [str UTF8String];
+    if (!src) return;
+    if (idx > _length) idx = _length;
+    size_t add = strlen(src);
+    if (add == 0) return;
+    char *nbuf = (char *)realloc(_cstr, _length + add + 1);
+    if (!nbuf) return;
+    _cstr = nbuf;
+    memmove(_cstr + idx + add, _cstr + idx, _length - idx + 1);
+    memcpy(_cstr + idx, src, add);
+    _length += add;
+    _hashIsValid = NO;
+}
+
+- (void)deleteCharactersInRange:(NPRange)range {
+    if (!_cstr) return;
+    if (range.location > _length) return;
+    if (range.location + range.length > _length) {
+        range.length = _length - range.location;
+    }
+    if (range.length == 0) return;
+    memmove(_cstr + range.location, _cstr + range.location + range.length,
+            _length - range.location - range.length + 1);
+    _length -= range.length;
+    _hashIsValid = NO;
+}
+
+- (void)replaceCharactersInRange:(NPRange)range withString:(NPString *)str {
+    if (!str) return;
+    const char *src = [str UTF8String];
+    if (!src) return;
+    if (range.location > _length) return;
+    if (range.location + range.length > _length) {
+        range.length = _length - range.location;
+    }
+    size_t nlen = strlen(src);
+    size_t tail = _length - range.location - range.length;
+    size_t newlen = range.location + nlen + tail;
+    char *nbuf = (char *)realloc(_cstr, newlen + 1);
+    if (!nbuf) return;
+    _cstr = nbuf;
+    memmove(_cstr + range.location + nlen, _cstr + range.location + range.length, tail + 1);
+    memcpy(_cstr + range.location, src, nlen);
+    _length = newlen;
+    _hashIsValid = NO;
+}
+
+- (void)setString:(NPString *)str {
+    const char *src = str ? [str UTF8String] : "";
+    size_t nlen = strlen(src);
+    char *nbuf = (char *)realloc(_cstr, nlen + 1);
+    if (!nbuf) return;
+    _cstr = nbuf;
+    memcpy(_cstr, src, nlen + 1);
+    _length = nlen;
+    _hashIsValid = NO;
+}
+
+@end

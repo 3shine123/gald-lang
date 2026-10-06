@@ -26,8 +26,8 @@ int main() {
     printf("[%s]\n", XSTR(MK(Log, tag)));  // [Log Logtag]
     printf("[%s]\n", XSTR(MK(, tag)));     // [Log tag]
     // `##` in a declarator position (macro call where a name is expected).
-    int CAT(nf_, count) = 7;             // nf_count
-    printf("[%d]\n", nf_count);          // [7]
+    int CAT(np_, count) = 7;             // np_count
+    printf("[%d]\n", np_count);          // [7]
     // GNU `,##__VA_ARGS__` — the comma is swallowed when the varargs are empty,
     // so `ARR(bare)` initialises one element and `ARR(full, 1, 2)` three.
     ARR(bare);

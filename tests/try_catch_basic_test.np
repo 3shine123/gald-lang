@@ -1,7 +1,7 @@
 #include <stdio.h>
 #import <Foundation/Foundation.np>
 
-@interface ExceptionThrower : NFObject
+@interface ExceptionThrower : NPObject
 - (void)throwIfNegative:(int)val @throws;
 @end
 
@@ -10,7 +10,7 @@
     printf("  checking %d...\n", val);
     if (val < 0) {
         printf("  throwing!\n");
-        @throw [NFObject alloc];
+        @throw [NPObject alloc];
     }
     printf("  OK\n");
 }

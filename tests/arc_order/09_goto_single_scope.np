@@ -4,12 +4,12 @@
 // C labels are function-scoped, so jumping out of a nested block used to leak
 // everything declared inside it.
 
-@interface AO09Item : NFObject
+@interface AO09Item : NPObject
 @end
 
 @implementation AO09Item
 - (void)dealloc {
-    NFLog(@"ao09 dealloc");
+    NPLog(@"ao09 dealloc");
     [super dealloc];
 }
 @end
@@ -17,12 +17,12 @@
 int main() {
     {
         AO09Item *x = [[AO09Item alloc] init];
-        NFLog(@"ao09 in block");
+        NPLog(@"ao09 in block");
         goto out;
     }
-    NFLog(@"ao09 unreachable");
+    NPLog(@"ao09 unreachable");
 
 out:
-    NFLog(@"ao09 done");
+    NPLog(@"ao09 done");
     return 0;
 }

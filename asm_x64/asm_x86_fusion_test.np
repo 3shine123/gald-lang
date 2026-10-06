@@ -25,7 +25,7 @@ typedef struct {
 @end
 
 // ---- 类（含继承 + VTable 多态 + 属性） ----
-@interface X86_NS : NFObject <IMixed> {
+@interface X86_NS : NPObject <IMixed> {
     @public
     int _acc;
     int _steps;
@@ -82,7 +82,7 @@ typedef struct {
 
 - (void)corrupt {
     printf("    [%s] 抛异常\n", _tag);
-    @throw [NFObject alloc];
+    @throw [NPObject alloc];
 }
 @end
 

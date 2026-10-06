@@ -3,11 +3,11 @@
 
 @class ForwardDeclared;
 
-@interface Container : NFObject
+@interface Container : NPObject
 @property ForwardDeclared *item;
 @end
 
-@interface ForwardDeclared : NFObject
+@interface ForwardDeclared : NPObject
 @property int value;
 @end
 

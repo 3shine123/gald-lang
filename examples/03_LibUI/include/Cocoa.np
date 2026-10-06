@@ -41,11 +41,11 @@
         nk_msgSendC = (void *(*)(void *, void *, char))send;
         nk_realSel  = (void *(*)(const char *))dlsym(objc, "sel_registerName");
     }
-    @interface NSApp : NFObject
+    @interface NSApp : NPObject
         + (void)activateApp;
     @end
 
-    @implementation NSApp : NFObject
+    @implementation NSApp : NPObject
     /* [NSApp setActivationPolicy:NSApplicationActivationPolicyRegular]
      * [NSApp activateIgnoringOtherApps:YES] */
     + (void)activateApp {

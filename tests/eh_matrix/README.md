@@ -45,7 +45,7 @@ NOPAC=target/release/nopac ./tests/eh_matrix/gen_quality.sh
 | 08 | MRC | 同上 + `-fno-nopa-arc` | 无 `.out` 参照（MRC 不打印 dealloc） |
 | 09 | `@autoreleasepool` | `golden/05_autoreleasepool/nested_pool.np` | |
 | 10 | 多文件 Nopa | `tests/multi_tu/run_multi_tu.sh`（全部用例） | 跨 TU 布局 + Foundation 内联大 TU |
-| 11 | Foundation 大文件 | `golden/13_foundation/04_nfstring/nfstring_test.np` | |
+| 11 | Foundation 大文件 | `golden/13_foundation/04_npstring/npstring_test.np` | |
 | 12 | 纯 C 超集 | `golden/22_c_superset/c_superset.np` | 无 Foundation/无 block 的生成 C 也须含 EH 声明 |
 | 13 | `-ffreestanding` | `golden/25_freestanding/`（golden/25 方法论） | 裸机转译 + host 编译链接运行 |
 | 14 | ARM64 裸机 | `tests/stress/baremetal/` | `-ffreestanding` + 真 `asm_ext.s` + `helpers.c` |
@@ -100,7 +100,7 @@ NOPAC=target/release/nopac ./tests/eh_matrix/gen_quality.sh
 
 2. **Foundation 内联会带来守卫**：`no_try` / `foundation` 的 checked 输出有 45 处
    旗标引用。这些**不是**无意义守卫——它们落在 Foundation 里真实会 `@throw` 的
-   方法及其（传递闭包上的）调用者，例如 `NFString` 的越界 `@throw`。零守卫只在
+   方法及其（传递闭包上的）调用者，例如 `NPString` 的越界 `@throw`。零守卫只在
    「无 `@try` + 无 `@throw` + 不内联任何抛异常方法」时成立，见 `no_throw_plain`。
    若要让带 Foundation 的程序也归零，需要一条「整 TU 无 catch ⇒ 无需任何守卫」的
    全局快速路径（当前未做）。
@@ -111,7 +111,7 @@ NOPAC=target/release/nopac ./tests/eh_matrix/gen_quality.sh
 
    ```nopa
    #import <Foundation/Foundation.nh>
-   // Holder 持有 NFString *_s；- (NFString *)text { return _s; }
+   // Holder 持有 NPString *_s；- (NPString *)text { return _s; }
    int main() {
        Holder *h = [[Holder alloc] init];
        return [[h text] length] - 5;   // default/legacy: 错误结果；checked: 正确

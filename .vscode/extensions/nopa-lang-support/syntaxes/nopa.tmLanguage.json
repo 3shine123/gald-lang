@@ -386,7 +386,7 @@
       "patterns": [
         {
           "name": "storage.type.id.objc",
-          "match": "\\b(?:id|Class|SEL|BOOL|IMP|instancetype|NFZone|IBOutlet|IBAction|unichar)\\b"
+          "match": "\\b(?:id|Class|SEL|BOOL|IMP|instancetype|NPZone|IBOutlet|IBAction|unichar)\\b"
         }
       ]
     },

@@ -8,7 +8,7 @@
 // point), so the try/catch below is a same-body, post-await region. The
 // async chain itself is untouched by -eh: it is a separate lowering pass.
 
-@interface EhBoom : NFObject
+@interface EhBoom : NPObject
 - (void)fire @throws;
 @end
 
@@ -18,7 +18,7 @@
 }
 @end
 
-@interface EhFetcher : NFObject
+@interface EhFetcher : NPObject
 - (int)compute:(int)n;
 - (void)runAll;
 @end
@@ -34,15 +34,15 @@
     @try {                               // does not span the @await above
         EhBoom *b = [[EhBoom alloc] init];
         [b fire];
-        NFLog(@"never runs");
+        NPLog(@"never runs");
     }
-    @catch (NFString *e) {
-        NFLog(@"caught: %@", e);
+    @catch (NPString *e) {
+        NPLog(@"caught: %@", e);
     }
     @finally {
-        NFLog(@"finally runs");
+        NPLog(@"finally runs");
     }
-    NFLog(@"result=%d", x);
+    NPLog(@"result=%d", x);
 }
 @end
 

@@ -19,7 +19,7 @@
 /* ── Counter: a tiny model object. The button blocks capture `self`,
  * exactly like a target/action pattern — no context struct. ── */
 
-@interface Counter : NFObject {
+@interface Counter : NPObject {
     @protected
     int _value;
 }
@@ -29,7 +29,7 @@
 - (void)reset;
 @end
 
-@implementation Counter : NFObject
+@implementation Counter : NPObject
 - (int)value { return _value; }
 - (void)increment { _value = _value + 1; }
 - (void)decrement { _value = _value - 1; }
@@ -72,10 +72,10 @@ int main() {
 
         Button *greet = [Button buttonWithTitle:"Say Hello"];
         [greet onClicked:^{
-            NFString *msg = [NFString stringWithUTF8String:"Hello, "];
+            NPString *msg = [NPString stringWithUTF8String:"Hello, "];
             const char *who = [name text];
             if (who && who[0])
-                msg = [msg stringByAppendingString:[NFString stringWithUTF8String:who]];
+                msg = [msg stringByAppendingString:[NPString stringWithUTF8String:who]];
             msg = [msg stringByAppendingString:@"! — written in Nopa"];
             [greeting setText:[msg UTF8String]];
         }];

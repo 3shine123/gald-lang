@@ -1,6 +1,6 @@
 #import <Foundation/Foundation.np>
 
-@interface Box<T> : NFObject
+@interface Box<T> : NPObject
 - (instancetype)initWithValue:(T)v;
 - (T)value;
 @end
@@ -14,21 +14,21 @@
 @end
 
 @namespace Metal
-@interface Wrapped : NFObject
-+ (NFString *)unbox;
+@interface Wrapped : NPObject
++ (NPString *)unbox;
 @end
 
 @implementation Wrapped
-+ (NFString *)unbox {
-    Box<NFString *> *b = [[Box<NFString *> alloc] initWithValue:@"ns"];
++ (NPString *)unbox {
+    Box<NPString *> *b = [[Box<NPString *> alloc] initWithValue:@"ns"];
     return [b value];
 }
 @endnamespace
 
 int main() {
-    NFLog(@"ns=%@", [Metal::Wrapped unbox]);
+    NPLog(@"ns=%@", [Metal::Wrapped unbox]);
     // 顶层泛型（回归确认）
-    Box<NFString *> *sb = [[Box<NFString *> alloc] initWithValue:@"top"];
-    NFLog(@"top=%@", [sb value]);
+    Box<NPString *> *sb = [[Box<NPString *> alloc] initWithValue:@"top"];
+    NPLog(@"top=%@", [sb value]);
     return 0;
 }

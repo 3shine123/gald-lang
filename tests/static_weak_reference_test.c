@@ -5,8 +5,8 @@
 #include <stdint.h>
 #include <stddef.h>
 #include "nopa/runtime.h"
-struct nopa_NFObject_vtable;
-struct nopa_NFObject_meta_vtable;
+struct nopa_NPObject_vtable;
+struct nopa_NPObject_meta_vtable;
 struct nopa_MaintenanceDrone_vtable;
 struct nopa_MaintenanceDrone_meta_vtable;
 struct nopa_SpaceStationCore_vtable;
@@ -32,90 +32,90 @@ static const SEL __nopa_sel_setDroneId_ = {.name = "setDroneId_", .hash = 0x1288
 static const SEL __nopa_sel_parentStation = {.name = "parentStation", .hash = 0xA310FAEB};
 static const SEL __nopa_sel_setParentStation_ = {.name = "setParentStation_", .hash = 0xE4E5F69A};
 
-typedef struct NFObject NFObject;
+typedef struct NPObject NPObject;
 typedef struct MaintenanceDrone MaintenanceDrone;
 typedef struct SpaceStationCore SpaceStationCore;
 
-NFObject * NFObject_alloc(NFClass * self, SEL _cmd);
-NFObject * NFObject_new(NFClass * self, SEL _cmd);
-NFObject * NFObject_init(NFObject * self, SEL _cmd);
-void NFObject_dealloc(NFObject * self, SEL _cmd);
-void NFObject_release(NFObject * self, SEL _cmd);
-NFObject * NFObject_retain(NFObject * self, SEL _cmd);
-NFObject * SpaceStationCore_initWithId_name_(NFObject * self, SEL _cmd, int sid, const char * name);
-void SpaceStationCore_triggerDeallocManually(NFObject * self, SEL _cmd);
-int SpaceStationCore_stationId(NFObject * self, SEL _cmd);
-void SpaceStationCore_setStationId_(NFObject * self, SEL _cmd, int value);
-const char * SpaceStationCore_stationName(NFObject * self, SEL _cmd);
-MaintenanceDrone * SpaceStationCore_activeDrone(NFObject * self, SEL _cmd);
-void SpaceStationCore_setActiveDrone_(NFObject * self, SEL _cmd, MaintenanceDrone * value);
-NFObject * MaintenanceDrone_initWithDroneId_(NFObject * self, SEL _cmd, int did);
-void MaintenanceDrone_performTelemetryCheck(NFObject * self, SEL _cmd);
-int MaintenanceDrone_droneId(NFObject * self, SEL _cmd);
-void MaintenanceDrone_setDroneId_(NFObject * self, SEL _cmd, int value);
-SpaceStationCore * MaintenanceDrone_parentStation(NFObject * self, SEL _cmd);
-void MaintenanceDrone_setParentStation_(NFObject * self, SEL _cmd, SpaceStationCore * value);
-void SpaceStationCore_dealloc(NFObject * self, SEL _cmd);
-void MaintenanceDrone_dealloc(NFObject * self, SEL _cmd);
-NFObject * nopa_alloc(struct NFClass * cls);
-NFObject * nopa_init(NFObject * self);
-void nopa_release(NFObject * obj);
-NFObject * nopa_retain(NFObject * obj);
+NPObject * NPObject_alloc(NPClass * self, SEL _cmd);
+NPObject * NPObject_new(NPClass * self, SEL _cmd);
+NPObject * NPObject_init(NPObject * self, SEL _cmd);
+void NPObject_dealloc(NPObject * self, SEL _cmd);
+void NPObject_release(NPObject * self, SEL _cmd);
+NPObject * NPObject_retain(NPObject * self, SEL _cmd);
+NPObject * SpaceStationCore_initWithId_name_(NPObject * self, SEL _cmd, int sid, const char * name);
+void SpaceStationCore_triggerDeallocManually(NPObject * self, SEL _cmd);
+int SpaceStationCore_stationId(NPObject * self, SEL _cmd);
+void SpaceStationCore_setStationId_(NPObject * self, SEL _cmd, int value);
+const char * SpaceStationCore_stationName(NPObject * self, SEL _cmd);
+MaintenanceDrone * SpaceStationCore_activeDrone(NPObject * self, SEL _cmd);
+void SpaceStationCore_setActiveDrone_(NPObject * self, SEL _cmd, MaintenanceDrone * value);
+NPObject * MaintenanceDrone_initWithDroneId_(NPObject * self, SEL _cmd, int did);
+void MaintenanceDrone_performTelemetryCheck(NPObject * self, SEL _cmd);
+int MaintenanceDrone_droneId(NPObject * self, SEL _cmd);
+void MaintenanceDrone_setDroneId_(NPObject * self, SEL _cmd, int value);
+SpaceStationCore * MaintenanceDrone_parentStation(NPObject * self, SEL _cmd);
+void MaintenanceDrone_setParentStation_(NPObject * self, SEL _cmd, SpaceStationCore * value);
+void SpaceStationCore_dealloc(NPObject * self, SEL _cmd);
+void MaintenanceDrone_dealloc(NPObject * self, SEL _cmd);
+NPObject * nopa_alloc(struct NPClass * cls);
+NPObject * nopa_init(NPObject * self);
+void nopa_release(NPObject * obj);
+NPObject * nopa_retain(NPObject * obj);
 int main(int argc, const char * argv[]);
 
-NFClass * NFObject_getClass(NFClass * self, SEL _cmd);
-NFClass * MaintenanceDrone_getClass(NFClass * self, SEL _cmd);
-NFClass * SpaceStationCore_getClass(NFClass * self, SEL _cmd);
+NPClass * NPObject_getClass(NPClass * self, SEL _cmd);
+NPClass * MaintenanceDrone_getClass(NPClass * self, SEL _cmd);
+NPClass * SpaceStationCore_getClass(NPClass * self, SEL _cmd);
 
-struct nopa_NFObject_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    void (*release)(NFObject *, SEL);
-    NFObject * (*retain)(NFObject *, SEL);
+struct nopa_NPObject_vtable {
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    void (*release)(NPObject *, SEL);
+    NPObject * (*retain)(NPObject *, SEL);
 };
-struct nopa_NFObject_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+struct nopa_NPObject_meta_vtable {
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct nopa_MaintenanceDrone_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    void (*release)(NFObject *, SEL);
-    NFObject * (*retain)(NFObject *, SEL);
-    NFObject * (*initWithDroneId_)(NFObject *, SEL, int);
-    void (*performTelemetryCheck)(NFObject *, SEL);
-    int (*droneId)(NFObject *, SEL);
-    void (*setDroneId_)(NFObject *, SEL, int);
-    SpaceStationCore * (*parentStation)(NFObject *, SEL);
-    void (*setParentStation_)(NFObject *, SEL, SpaceStationCore *);
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    void (*release)(NPObject *, SEL);
+    NPObject * (*retain)(NPObject *, SEL);
+    NPObject * (*initWithDroneId_)(NPObject *, SEL, int);
+    void (*performTelemetryCheck)(NPObject *, SEL);
+    int (*droneId)(NPObject *, SEL);
+    void (*setDroneId_)(NPObject *, SEL, int);
+    SpaceStationCore * (*parentStation)(NPObject *, SEL);
+    void (*setParentStation_)(NPObject *, SEL, SpaceStationCore *);
 };
 struct nopa_MaintenanceDrone_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct nopa_SpaceStationCore_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    void (*release)(NFObject *, SEL);
-    NFObject * (*retain)(NFObject *, SEL);
-    NFObject * (*initWithId_name_)(NFObject *, SEL, int, const char *);
-    void (*triggerDeallocManually)(NFObject *, SEL);
-    int (*stationId)(NFObject *, SEL);
-    void (*setStationId_)(NFObject *, SEL, int);
-    const char * (*stationName)(NFObject *, SEL);
-    MaintenanceDrone * (*activeDrone)(NFObject *, SEL);
-    void (*setActiveDrone_)(NFObject *, SEL, MaintenanceDrone *);
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    void (*release)(NPObject *, SEL);
+    NPObject * (*retain)(NPObject *, SEL);
+    NPObject * (*initWithId_name_)(NPObject *, SEL, int, const char *);
+    void (*triggerDeallocManually)(NPObject *, SEL);
+    int (*stationId)(NPObject *, SEL);
+    void (*setStationId_)(NPObject *, SEL, int);
+    const char * (*stationName)(NPObject *, SEL);
+    MaintenanceDrone * (*activeDrone)(NPObject *, SEL);
+    void (*setActiveDrone_)(NPObject *, SEL, MaintenanceDrone *);
 };
 struct nopa_SpaceStationCore_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 
 struct MaintenanceDrone {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     int _droneId;
     SpaceStationCore * _parentStation;
@@ -123,7 +123,7 @@ struct MaintenanceDrone {
 typedef struct MaintenanceDrone MaintenanceDrone;
 
 struct SpaceStationCore {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     int _stationId;
     const char * _stationName;
@@ -131,23 +131,23 @@ struct SpaceStationCore {
 };
 typedef struct SpaceStationCore SpaceStationCore;
 
-extern NFClass nopa_NFObject_class;
-extern NFClass nopa_MaintenanceDrone_class;
-extern NFClass nopa_SpaceStationCore_class;
+extern NPClass nopa_NPObject_class;
+extern NPClass nopa_MaintenanceDrone_class;
+extern NPClass nopa_SpaceStationCore_class;
 void nopa_meta_init(void);
 
-struct nopa_NFObject_vtable nopa_NFObject_vtable_inst = {
-    .init = NFObject_init,
-    .dealloc = NFObject_dealloc,
-    .release = NFObject_release,
-    .retain = NFObject_retain,
+struct nopa_NPObject_vtable nopa_NPObject_vtable_inst = {
+    .init = NPObject_init,
+    .dealloc = NPObject_dealloc,
+    .release = NPObject_release,
+    .retain = NPObject_retain,
 };
 
 struct nopa_MaintenanceDrone_vtable nopa_MaintenanceDrone_vtable_inst = {
-    .init = NFObject_init,
+    .init = NPObject_init,
     .dealloc = MaintenanceDrone_dealloc,
-    .release = NFObject_release,
-    .retain = NFObject_retain,
+    .release = NPObject_release,
+    .retain = NPObject_retain,
     .initWithDroneId_ = MaintenanceDrone_initWithDroneId_,
     .performTelemetryCheck = MaintenanceDrone_performTelemetryCheck,
     .droneId = MaintenanceDrone_droneId,
@@ -157,10 +157,10 @@ struct nopa_MaintenanceDrone_vtable nopa_MaintenanceDrone_vtable_inst = {
 };
 
 struct nopa_SpaceStationCore_vtable nopa_SpaceStationCore_vtable_inst = {
-    .init = NFObject_init,
+    .init = NPObject_init,
     .dealloc = SpaceStationCore_dealloc,
-    .release = NFObject_release,
-    .retain = NFObject_retain,
+    .release = NPObject_release,
+    .retain = NPObject_retain,
     .initWithId_name_ = SpaceStationCore_initWithId_name_,
     .triggerDeallocManually = SpaceStationCore_triggerDeallocManually,
     .stationId = SpaceStationCore_stationId,
@@ -170,110 +170,110 @@ struct nopa_SpaceStationCore_vtable nopa_SpaceStationCore_vtable_inst = {
     .setActiveDrone_ = SpaceStationCore_setActiveDrone_,
 };
 
-struct nopa_NFObject_meta_vtable nopa_NFObject_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
-    .class = NFObject_getClass,
+struct nopa_NPObject_meta_vtable nopa_NPObject_meta_vtable_inst = {
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
+    .class = NPObject_getClass,
 };
 
 struct nopa_MaintenanceDrone_meta_vtable nopa_MaintenanceDrone_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
     .class = MaintenanceDrone_getClass,
 };
 
 struct nopa_SpaceStationCore_meta_vtable nopa_SpaceStationCore_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
     .class = SpaceStationCore_getClass,
 };
 
-NFClass * NFObject_getClass(NFClass * self, SEL _cmd) {
+NPClass * NPObject_getClass(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
-NFClass * MaintenanceDrone_getClass(NFClass * self, SEL _cmd) {
+NPClass * MaintenanceDrone_getClass(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
-NFClass * SpaceStationCore_getClass(NFClass * self, SEL _cmd) {
+NPClass * SpaceStationCore_getClass(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
-NFClass nopa_NFObject_class;
-NFClass nopa_MaintenanceDrone_class;
-NFClass nopa_SpaceStationCore_class;
+NPClass nopa_NPObject_class;
+NPClass nopa_MaintenanceDrone_class;
+NPClass nopa_SpaceStationCore_class;
 
 void nopa_meta_init(void) {
-    nopa_NFObject_class = (NFClass){
-        .name = "NFObject",
+    nopa_NPObject_class = (NPClass){
+        .name = "NPObject",
         .superclass = NULL,
-        .instance_size = sizeof(struct NFObject),
-        .vtable = &nopa_NFObject_vtable_inst,
-        .class_vtable = &nopa_NFObject_meta_vtable_inst,
+        .instance_size = sizeof(struct NPObject),
+        .vtable = &nopa_NPObject_vtable_inst,
+        .class_vtable = &nopa_NPObject_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_MaintenanceDrone_class = (NFClass){
+    nopa_MaintenanceDrone_class = (NPClass){
         .name = "MaintenanceDrone",
-        .superclass = &nopa_NFObject_class,
+        .superclass = &nopa_NPObject_class,
         .instance_size = sizeof(struct MaintenanceDrone),
         .vtable = &nopa_MaintenanceDrone_vtable_inst,
         .class_vtable = &nopa_MaintenanceDrone_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_SpaceStationCore_class = (NFClass){
+    nopa_SpaceStationCore_class = (NPClass){
         .name = "SpaceStationCore",
-        .superclass = &nopa_NFObject_class,
+        .superclass = &nopa_NPObject_class,
         .instance_size = sizeof(struct SpaceStationCore),
         .vtable = &nopa_SpaceStationCore_vtable_inst,
         .class_vtable = &nopa_SpaceStationCore_meta_vtable_inst,
         .protocol_count = 0,
     };
 }
-NFObject * NFObject_alloc(NFClass * self, SEL _cmd) {
+NPObject * NPObject_alloc(NPClass * self, SEL _cmd) {
   return nopa_alloc(self);
 }
 
-NFObject * NFObject_new(NFClass * self, SEL _cmd) {
-  NFObject * obj = nopa_alloc(self);
+NPObject * NPObject_new(NPClass * self, SEL _cmd) {
+  NPObject * obj = nopa_alloc(self);
   return nopa_init(obj);
 }
 
-NFObject * NFObject_init(NFObject * self, SEL _cmd) {
-  struct NFObject * _self = (struct NFObject *)self;
+NPObject * NPObject_init(NPObject * self, SEL _cmd) {
+  struct NPObject * _self = (struct NPObject *)self;
   {
     return nopa_init(self);
   }
 }
 
-void NFObject_dealloc(NFObject * self, SEL _cmd) {
-  struct NFObject * _self = (struct NFObject *)self;
+void NPObject_dealloc(NPObject * self, SEL _cmd) {
+  struct NPObject * _self = (struct NPObject *)self;
   {
     return;
   }
 }
 
-void NFObject_release(NFObject * self, SEL _cmd) {
-  struct NFObject * _self = (struct NFObject *)self;
+void NPObject_release(NPObject * self, SEL _cmd) {
+  struct NPObject * _self = (struct NPObject *)self;
   {
     nopa_release(self);
   }
 }
 
-NFObject * NFObject_retain(NFObject * self, SEL _cmd) {
-  struct NFObject * _self = (struct NFObject *)self;
+NPObject * NPObject_retain(NPObject * self, SEL _cmd) {
+  struct NPObject * _self = (struct NPObject *)self;
   {
     return nopa_retain(self);
   }
 }
 
-NFObject * SpaceStationCore_initWithId_name_(NFObject * self, SEL _cmd, int sid, const char * name) {
+NPObject * SpaceStationCore_initWithId_name_(NPObject * self, SEL _cmd, int sid, const char * name) {
   struct SpaceStationCore * _self = (struct SpaceStationCore *)self;
   {
-    self = NFObject_init(self, sel_registerName("init"));
+    self = NPObject_init(self, sel_registerName("init"));
     if (self)     {
       _self->_stationId = sid;
       _self->_stationName = name;
@@ -283,37 +283,37 @@ NFObject * SpaceStationCore_initWithId_name_(NFObject * self, SEL _cmd, int sid,
   }
 }
 
-void SpaceStationCore_triggerDeallocManually(NFObject * self, SEL _cmd) {
+void SpaceStationCore_triggerDeallocManually(NPObject * self, SEL _cmd) {
   struct SpaceStationCore * _self = (struct SpaceStationCore *)self;
   {
     printf("[主控系统] 正在关闭空间站能源核心...\n");
   }
 }
 
-int SpaceStationCore_stationId(NFObject * self, SEL _cmd) {
+int SpaceStationCore_stationId(NPObject * self, SEL _cmd) {
   return ((struct SpaceStationCore *)self)->_stationId;
 }
 
-void SpaceStationCore_setStationId_(NFObject * self, SEL _cmd, int value) {
+void SpaceStationCore_setStationId_(NPObject * self, SEL _cmd, int value) {
   ((struct SpaceStationCore *)self)->_stationId = value;
 }
 
-const char * SpaceStationCore_stationName(NFObject * self, SEL _cmd) {
+const char * SpaceStationCore_stationName(NPObject * self, SEL _cmd) {
   return ((struct SpaceStationCore *)self)->_stationName;
 }
 
-MaintenanceDrone * SpaceStationCore_activeDrone(NFObject * self, SEL _cmd) {
+MaintenanceDrone * SpaceStationCore_activeDrone(NPObject * self, SEL _cmd) {
   return ((struct SpaceStationCore *)self)->_activeDrone;
 }
 
-void SpaceStationCore_setActiveDrone_(NFObject * self, SEL _cmd, MaintenanceDrone * value) {
+void SpaceStationCore_setActiveDrone_(NPObject * self, SEL _cmd, MaintenanceDrone * value) {
   ((struct SpaceStationCore *)self)->_activeDrone = value;
 }
 
-NFObject * MaintenanceDrone_initWithDroneId_(NFObject * self, SEL _cmd, int did) {
+NPObject * MaintenanceDrone_initWithDroneId_(NPObject * self, SEL _cmd, int did) {
   struct MaintenanceDrone * _self = (struct MaintenanceDrone *)self;
   {
-    self = NFObject_init(self, sel_registerName("init"));
+    self = NPObject_init(self, sel_registerName("init"));
     if (self)     {
       _self->_droneId = did;
       _self->_parentStation = NULL;
@@ -322,11 +322,11 @@ NFObject * MaintenanceDrone_initWithDroneId_(NFObject * self, SEL _cmd, int did)
   }
 }
 
-void MaintenanceDrone_performTelemetryCheck(NFObject * self, SEL _cmd) {
+void MaintenanceDrone_performTelemetryCheck(NPObject * self, SEL _cmd) {
   struct MaintenanceDrone * _self = (struct MaintenanceDrone *)self;
   {
     if (_self->_parentStation)     {
-      printf("[无人机-%d] 遥测正常，当前弱引用母站依然存活: %s\n", _self->_droneId, ({ NFObject *__nopa_tmp_1 = (_self->_parentStation); __nopa_tmp_1 ? ((struct nopa_SpaceStationCore_vtable *)__nopa_tmp_1->isa->vtable)->stationName(__nopa_tmp_1, sel_registerName("stationName")) : 0; }));
+      printf("[无人机-%d] 遥测正常，当前弱引用母站依然存活: %s\n", _self->_droneId, ({ NPObject *__nopa_tmp_1 = (_self->_parentStation); __nopa_tmp_1 ? ((struct nopa_SpaceStationCore_vtable *)__nopa_tmp_1->isa->vtable)->stationName(__nopa_tmp_1, sel_registerName("stationName")) : 0; }));
     }
     else     {
       printf("[无人机-%d] 警告！监测到弱引用母站已静态析构，弱指针自动清零(nil)！\n", _self->_droneId);
@@ -334,50 +334,50 @@ void MaintenanceDrone_performTelemetryCheck(NFObject * self, SEL _cmd) {
   }
 }
 
-int MaintenanceDrone_droneId(NFObject * self, SEL _cmd) {
+int MaintenanceDrone_droneId(NPObject * self, SEL _cmd) {
   return ((struct MaintenanceDrone *)self)->_droneId;
 }
 
-void MaintenanceDrone_setDroneId_(NFObject * self, SEL _cmd, int value) {
+void MaintenanceDrone_setDroneId_(NPObject * self, SEL _cmd, int value) {
   ((struct MaintenanceDrone *)self)->_droneId = value;
 }
 
-SpaceStationCore * MaintenanceDrone_parentStation(NFObject * self, SEL _cmd) {
+SpaceStationCore * MaintenanceDrone_parentStation(NPObject * self, SEL _cmd) {
   return ((struct MaintenanceDrone *)self)->_parentStation;
 }
 
-void MaintenanceDrone_setParentStation_(NFObject * self, SEL _cmd, SpaceStationCore * value) {
-  nopa_weak_unregister((NFObject **)&((struct MaintenanceDrone *)self)->_parentStation);
+void MaintenanceDrone_setParentStation_(NPObject * self, SEL _cmd, SpaceStationCore * value) {
+  nopa_weak_unregister((NPObject **)&((struct MaintenanceDrone *)self)->_parentStation);
   ((struct MaintenanceDrone *)self)->_parentStation = value;
-  nopa_weak_register((NFObject **)&((struct MaintenanceDrone *)self)->_parentStation, (NFObject *)value);
+  nopa_weak_register((NPObject **)&((struct MaintenanceDrone *)self)->_parentStation, (NPObject *)value);
 }
 
-void SpaceStationCore_dealloc(NFObject * self, SEL _cmd) {
+void SpaceStationCore_dealloc(NPObject * self, SEL _cmd) {
   struct SpaceStationCore * _self = (struct SpaceStationCore *)self;
   {
     printf("[核心销毁] 空间站「%s」正在静态释放物理资源...\n", _self->_stationName);
     if (_self->_activeDrone)     {
-      ({ NFObject *__nopa_tmp_2 = (_self->_activeDrone); __nopa_tmp_2 ? ((struct nopa_NFObject_vtable *)__nopa_tmp_2->isa->vtable)->release(__nopa_tmp_2, sel_registerName("release")) : 0; });
+      ({ NPObject *__nopa_tmp_2 = (_self->_activeDrone); __nopa_tmp_2 ? ((struct nopa_NPObject_vtable *)__nopa_tmp_2->isa->vtable)->release(__nopa_tmp_2, sel_registerName("release")) : 0; });
     }
-    NFObject_dealloc(self, sel_registerName("dealloc"));
+    NPObject_dealloc(self, sel_registerName("dealloc"));
   }
 }
 
-void MaintenanceDrone_dealloc(NFObject * self, SEL _cmd) {
+void MaintenanceDrone_dealloc(NPObject * self, SEL _cmd) {
   struct MaintenanceDrone * _self = (struct MaintenanceDrone *)self;
   {
     printf("[无人机销毁] 无人机-%d 退出序列。\n", _self->_droneId);
-    NFObject_dealloc(self, sel_registerName("dealloc"));
+    NPObject_dealloc(self, sel_registerName("dealloc"));
   }
 }
 
-NFObject * nopa_alloc(struct NFClass * cls);
+NPObject * nopa_alloc(struct NPClass * cls);
 
-NFObject * nopa_init(NFObject * self);
+NPObject * nopa_init(NPObject * self);
 
-void nopa_release(NFObject * obj);
+void nopa_release(NPObject * obj);
 
-NFObject * nopa_retain(NFObject * obj);
+NPObject * nopa_retain(NPObject * obj);
 
 int main(int argc, const char * argv[]) {
   nopa_meta_init();
@@ -386,18 +386,18 @@ int main(int argc, const char * argv[]) {
     printf(">>>        nopac 编译器「静态弱引用 __weak 与零污染」全新压测       <<<\n");
     printf("====================================================================\n\n");
     printf("--- 1. 建立空间站与无人机的强弱错综引用 ---\n");
-    NFObject *__nopa_tmp_3 = (NFObject_alloc(&nopa_SpaceStationCore_class, sel_registerName("alloc")));
+    NPObject *__nopa_tmp_3 = (NPObject_alloc(&nopa_SpaceStationCore_class, sel_registerName("alloc")));
     SpaceStationCore * tianheCore = ((struct nopa_SpaceStationCore_vtable *)__nopa_tmp_3->isa->vtable)->initWithId_name_(__nopa_tmp_3, sel_registerName("initWithId:name:"), 1001, "天和核心舱");
-    NFObject *__nopa_tmp_4 = (NFObject_alloc(&nopa_MaintenanceDrone_class, sel_registerName("alloc")));
+    NPObject *__nopa_tmp_4 = (NPObject_alloc(&nopa_MaintenanceDrone_class, sel_registerName("alloc")));
     MaintenanceDrone * hunterDrone = ((struct nopa_MaintenanceDrone_vtable *)__nopa_tmp_4->isa->vtable)->initWithDroneId_(__nopa_tmp_4, sel_registerName("initWithDroneId:"), 77);
     ((struct nopa_SpaceStationCore_vtable *)(tianheCore)->isa->vtable)->setActiveDrone_(tianheCore, sel_registerName("setActiveDrone:"), hunterDrone);
     ((struct nopa_MaintenanceDrone_vtable *)(hunterDrone)->isa->vtable)->setParentStation_(hunterDrone, sel_registerName("setParentStation:"), tianheCore);
     ((struct nopa_MaintenanceDrone_vtable *)(hunterDrone)->isa->vtable)->performTelemetryCheck(hunterDrone, sel_registerName("performTelemetryCheck"));
     printf("\n--- 2. 验证多重局部变量 __weak 指针指向同一个强对象 ---\n");
     __block SpaceStationCore * __attribute__((cleanup(nopa_weak_auto_cleanup))) weakMonitorA = tianheCore;
-    nopa_weak_register((NFObject**)&weakMonitorA, (NFObject*)tianheCore);
+    nopa_weak_register((NPObject**)&weakMonitorA, (NPObject*)tianheCore);
     __block SpaceStationCore * __attribute__((cleanup(nopa_weak_auto_cleanup))) weakMonitorB = tianheCore;
-    nopa_weak_register((NFObject**)&weakMonitorB, (NFObject*)tianheCore);
+    nopa_weak_register((NPObject**)&weakMonitorB, (NPObject*)tianheCore);
     printf("[初始弱指针状态]：\n");
     printf("          -> weakMonitorA 指针地址有效性: %s\n", weakMonitorA ? "有效" : "nil");
     printf("          -> weakMonitorB 指针地址有效性: %s\n", weakMonitorB ? "有效" : "nil");
@@ -416,7 +416,7 @@ int main(int argc, const char * argv[]) {
     dockingStatusBlock();
     printf("\n--- 4. 核心压测：彻底销毁强引用对象，验证所有相关弱引用静态自动清零 ---\n");
     ((struct nopa_SpaceStationCore_vtable *)(tianheCore)->isa->vtable)->triggerDeallocManually(tianheCore, sel_registerName("triggerDeallocManually"));
-    ((struct nopa_NFObject_vtable *)(tianheCore)->isa->vtable)->release(tianheCore, sel_registerName("release"));
+    ((struct nopa_NPObject_vtable *)(tianheCore)->isa->vtable)->release(tianheCore, sel_registerName("release"));
     tianheCore = NULL;
     printf("\n[静态度量清除断言]：\n");
     ((struct nopa_MaintenanceDrone_vtable *)(hunterDrone)->isa->vtable)->performTelemetryCheck(hunterDrone, sel_registerName("performTelemetryCheck"));
@@ -427,12 +427,12 @@ int main(int argc, const char * argv[]) {
     printf("\n--- 5. 混合边界守门员：三元表达式内包含带副作用的弱指针置空逻辑判定 ---\n");
     int isTelemetryNetworkOnline = 1;
     int weakStepCounter = 12345;
-    char * finalStationReport = (isTelemetryNetworkOnline > 0) ? ({ NFObject *__nopa_tmp_5 = ((weakStepCounter++, weakMonitorB)); __nopa_tmp_5 ? ((struct nopa_SpaceStationCore_vtable *)__nopa_tmp_5->isa->vtable)->stationName(__nopa_tmp_5, sel_registerName("stationName")) : 0; }) : "OFFLINE";
+    char * finalStationReport = (isTelemetryNetworkOnline > 0) ? ({ NPObject *__nopa_tmp_5 = ((weakStepCounter++, weakMonitorB)); __nopa_tmp_5 ? ((struct nopa_SpaceStationCore_vtable *)__nopa_tmp_5->isa->vtable)->stationName(__nopa_tmp_5, sel_registerName("stationName")) : 0; }) : "OFFLINE";
     printf("[终极弱引用边界断言] 弱指针安全机制与自增副作用完美结合！\n");
     printf("          -> 副作用自增计数器: %d (预期: 12346)\n", weakStepCounter);
     printf("          -> 弱引用置空后的安全返回报告: %s (预期: (null) 或 空指针安全值)\n", finalStationReport ? finalStationReport : "nil安全拦截");
     printf("\n--- 6. 正在释放无人机实体... ---\n");
-    ((struct nopa_NFObject_vtable *)(hunterDrone)->isa->vtable)->release(hunterDrone, sel_registerName("release"));
+    ((struct nopa_NPObject_vtable *)(hunterDrone)->isa->vtable)->release(hunterDrone, sel_registerName("release"));
     printf("\n====================================================================\n");
     printf(">>> 奇迹！静态弱引用 __weak 零污染清理全新特性高压测试结束！      <<<\n");
     printf("====================================================================\n");

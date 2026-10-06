@@ -1,7 +1,7 @@
 #import "model.nh"
 #include <stdio.h>
 
-@implementation Rude : NFObject
+@implementation Rude : NPObject
 - (const char *)greet:(const char *)who {
     static char buf[128];
     snprintf(buf, sizeof(buf), "go away, %s", who);

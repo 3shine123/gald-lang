@@ -9,11 +9,11 @@
 
 #include <string.h>
 
-struct nopa_NFObject_vtable;
+struct nopa_NPObject_vtable;
 struct nopa_BioGeneSequencer_vtable;
 
-#define nopa_NFObject_vtable_index_init 2
-#define nopa_NFObject_vtable_index_dealloc 3
+#define nopa_NPObject_vtable_index_init 2
+#define nopa_NPObject_vtable_index_dealloc 3
 #define nopa_BioGeneSequencer_vtable_index_initWithId_source_ 4
 #define nopa_BioGeneSequencer_vtable_index_printSequencerInfo 5
 #define nopa_BioGeneSequencer_vtable_index_initializeNeuralBridgeWithLog_ 6
@@ -35,103 +35,103 @@ static const SEL __nopa_sel_setInterfaceProtocol_ = {.name = "setInterfaceProtoc
 static const SEL __nopa_sel_initializeNeuralBridgeWithLog_ = {.name = "initializeNeuralBridgeWithLog_", .hash = 0xFE48F762};
 static const SEL __nopa_sel_injectSyntheticDNA_withMultiplier_ = {.name = "injectSyntheticDNA_withMultiplier_", .hash = 0x54D4F1E3};
 
-typedef struct NFObject NFObject;
+typedef struct NPObject NPObject;
 typedef struct BioGeneSequencer BioGeneSequencer;
 
 
 
-NFObject * NFObject_alloc(NFClass * self, SEL _cmd);
-NFObject * NFObject_new(NFClass * self, SEL _cmd);
-NFObject * NFObject_init(NFObject * self, SEL _cmd);
-void NFObject_dealloc(NFObject * self, SEL _cmd);
-NFClass * NFObject_getClass(NFClass * self, SEL _cmd);
-NFObject * BioGeneSequencer_initWithId_source_(NFObject * self, SEL _cmd, int sid, const char * src);
-void BioGeneSequencer_printSequencerInfo(NFObject * self, SEL _cmd);
-void BioGeneSequencer_initializeNeuralBridgeWithLog_(NFObject * self, SEL _cmd, void (^logBlock)(const char *));
-double BioGeneSequencer_neuralSyncRate(NFObject * self, SEL _cmd);
-void BioGeneSequencer_setNeuralSyncRate_(NFObject * self, SEL _cmd, double newRate);
-const char * BioGeneSequencer_interfaceProtocol(NFObject * self, SEL _cmd);
-void BioGeneSequencer_setInterfaceProtocol_(NFObject * self, SEL _cmd, const char * newProto);
-int BioGeneSequencer_injectSyntheticDNA_withMultiplier_(NFObject * self, SEL _cmd, const char * dnaChain, int mult);
-int BioGeneSequencer_sequencerId(NFObject * self, SEL _cmd);
-void BioGeneSequencer_setSequencerId_(NFObject * self, SEL _cmd, int value);
-const char * BioGeneSequencer_genomeSource(NFObject * self, SEL _cmd);
-NFClass * BioGeneSequencer_getClass(NFClass * self, SEL _cmd);
+NPObject * NPObject_alloc(NPClass * self, SEL _cmd);
+NPObject * NPObject_new(NPClass * self, SEL _cmd);
+NPObject * NPObject_init(NPObject * self, SEL _cmd);
+void NPObject_dealloc(NPObject * self, SEL _cmd);
+NPClass * NPObject_getClass(NPClass * self, SEL _cmd);
+NPObject * BioGeneSequencer_initWithId_source_(NPObject * self, SEL _cmd, int sid, const char * src);
+void BioGeneSequencer_printSequencerInfo(NPObject * self, SEL _cmd);
+void BioGeneSequencer_initializeNeuralBridgeWithLog_(NPObject * self, SEL _cmd, void (^logBlock)(const char *));
+double BioGeneSequencer_neuralSyncRate(NPObject * self, SEL _cmd);
+void BioGeneSequencer_setNeuralSyncRate_(NPObject * self, SEL _cmd, double newRate);
+const char * BioGeneSequencer_interfaceProtocol(NPObject * self, SEL _cmd);
+void BioGeneSequencer_setInterfaceProtocol_(NPObject * self, SEL _cmd, const char * newProto);
+int BioGeneSequencer_injectSyntheticDNA_withMultiplier_(NPObject * self, SEL _cmd, const char * dnaChain, int mult);
+int BioGeneSequencer_sequencerId(NPObject * self, SEL _cmd);
+void BioGeneSequencer_setSequencerId_(NPObject * self, SEL _cmd, int value);
+const char * BioGeneSequencer_genomeSource(NPObject * self, SEL _cmd);
+NPClass * BioGeneSequencer_getClass(NPClass * self, SEL _cmd);
 int main(int argc, const char * * argv);
 
-extern NFClass nopa_NFObject_class;
-extern NFClass nopa_BioGeneSequencer_class;
+extern NPClass nopa_NPObject_class;
+extern NPClass nopa_BioGeneSequencer_class;
 void nopa_meta_init(void);
 
-// struct NFClass defined in runtime.h
-// struct NFObject defined in runtime.h
-struct nopa_NFObject_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
+// struct NPClass defined in runtime.h
+// struct NPObject defined in runtime.h
+struct nopa_NPObject_vtable {
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
 };
-struct nopa_NFObject_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+struct nopa_NPObject_meta_vtable {
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct BioGeneSequencer {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     int _sequencerId;
     const char * _genomeSource;
 };
 typedef struct BioGeneSequencer BioGeneSequencer;
 struct nopa_BioGeneSequencer_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    NFObject * (*initWithId_source_)(NFObject *, SEL, int, const char *);
-    void (*printSequencerInfo)(NFObject *, SEL);
-    void (*initializeNeuralBridgeWithLog_)(NFObject *, SEL, void (^)(const char *));
-    double (*neuralSyncRate)(NFObject *, SEL);
-    void (*setNeuralSyncRate_)(NFObject *, SEL, double);
-    const char * (*interfaceProtocol)(NFObject *, SEL);
-    void (*setInterfaceProtocol_)(NFObject *, SEL, const char *);
-    int (*injectSyntheticDNA_withMultiplier_)(NFObject *, SEL, const char *, int);
-    int (*sequencerId)(NFObject *, SEL);
-    void (*setSequencerId_)(NFObject *, SEL, int);
-    const char * (*genomeSource)(NFObject *, SEL);
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    NPObject * (*initWithId_source_)(NPObject *, SEL, int, const char *);
+    void (*printSequencerInfo)(NPObject *, SEL);
+    void (*initializeNeuralBridgeWithLog_)(NPObject *, SEL, void (^)(const char *));
+    double (*neuralSyncRate)(NPObject *, SEL);
+    void (*setNeuralSyncRate_)(NPObject *, SEL, double);
+    const char * (*interfaceProtocol)(NPObject *, SEL);
+    void (*setInterfaceProtocol_)(NPObject *, SEL, const char *);
+    int (*injectSyntheticDNA_withMultiplier_)(NPObject *, SEL, const char *, int);
+    int (*sequencerId)(NPObject *, SEL);
+    void (*setSequencerId_)(NPObject *, SEL, int);
+    const char * (*genomeSource)(NPObject *, SEL);
 };
 struct nopa_BioGeneSequencer_meta_vtable {
-    NFClass * (*class)(NFClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
-NFObject * NFObject_alloc(NFClass * self, SEL _cmd) {
+NPObject * NPObject_alloc(NPClass * self, SEL _cmd) {
     return nopa_alloc(self);
 }
 
-NFObject * NFObject_new(NFClass * self, SEL _cmd) {
-    NFObject * obj = nopa_alloc(self);
+NPObject * NPObject_new(NPClass * self, SEL _cmd) {
+    NPObject * obj = nopa_alloc(self);
     return nopa_init(obj);
 }
 
-NFObject * NFObject_init(NFObject * self, SEL _cmd) {
-    struct NFObject * _self = ((struct NFObject *)(self));
+NPObject * NPObject_init(NPObject * self, SEL _cmd) {
+    struct NPObject * _self = ((struct NPObject *)(self));
     {
         return nopa_init(self);
     }
 }
 
-void NFObject_dealloc(NFObject * self, SEL _cmd) {
-    struct NFObject * _self = ((struct NFObject *)(self));
+void NPObject_dealloc(NPObject * self, SEL _cmd) {
+    struct NPObject * _self = ((struct NPObject *)(self));
     {
         return;
     }
 }
 
-NFClass * NFObject_getClass(NFClass * self, SEL _cmd) {
-    return &nopa_NFObject_class;
+NPClass * NPObject_getClass(NPClass * self, SEL _cmd) {
+    return &nopa_NPObject_class;
 }
 
-NFObject * nopa_alloc(struct NFClass * cls);
-NFObject * nopa_init(NFObject * );
-NFObject * BioGeneSequencer_initWithId_source_(NFObject * self, SEL _cmd, int sid, const char * src) {
+NPObject * nopa_alloc(struct NPClass * cls);
+NPObject * nopa_init(NPObject * );
+NPObject * BioGeneSequencer_initWithId_source_(NPObject * self, SEL _cmd, int sid, const char * src) {
     struct BioGeneSequencer * _self = ((struct BioGeneSequencer *)(self));
     {
-        self = NFObject_init(self, __nopa_sel_init);
+        self = NPObject_init(self, __nopa_sel_init);
         if (self) {
             {
                 ((struct BioGeneSequencer *)(self))->_sequencerId = sid;
@@ -142,14 +142,14 @@ NFObject * BioGeneSequencer_initWithId_source_(NFObject * self, SEL _cmd, int si
     }
 }
 
-void BioGeneSequencer_printSequencerInfo(NFObject * self, SEL _cmd) {
+void BioGeneSequencer_printSequencerInfo(NPObject * self, SEL _cmd) {
     struct BioGeneSequencer * _self = ((struct BioGeneSequencer *)(self));
     {
         printf("[仪器物理层] 测序仪芯片ID: %d | 样本物理来源: %s\n", ((struct BioGeneSequencer *)(self))->_sequencerId, ((struct BioGeneSequencer *)(self))->_genomeSource);
     }
 }
 
-void BioGeneSequencer_initializeNeuralBridgeWithLog_(NFObject * self, SEL _cmd, void (^logBlock)(const char *)) {
+void BioGeneSequencer_initializeNeuralBridgeWithLog_(NPObject * self, SEL _cmd, void (^logBlock)(const char *)) {
     struct BioGeneSequencer * _self = ((struct BioGeneSequencer *)(self));
     {
         printf("[神经扩展] 正在针对样本 [%s] 建立突触桥接协议...\n", ((struct BioGeneSequencer *)(self))->_genomeSource);
@@ -165,35 +165,35 @@ void BioGeneSequencer_initializeNeuralBridgeWithLog_(NFObject * self, SEL _cmd, 
     }
 }
 
-double BioGeneSequencer_neuralSyncRate(NFObject * self, SEL _cmd) {
+double BioGeneSequencer_neuralSyncRate(NPObject * self, SEL _cmd) {
     struct BioGeneSequencer * _self = ((struct BioGeneSequencer *)(self));
     {
         return g_Assoc_NeuralSyncRate;
     }
 }
 
-void BioGeneSequencer_setNeuralSyncRate_(NFObject * self, SEL _cmd, double newRate) {
+void BioGeneSequencer_setNeuralSyncRate_(NPObject * self, SEL _cmd, double newRate) {
     struct BioGeneSequencer * _self = ((struct BioGeneSequencer *)(self));
     {
         g_Assoc_NeuralSyncRate = newRate;
     }
 }
 
-const char * BioGeneSequencer_interfaceProtocol(NFObject * self, SEL _cmd) {
+const char * BioGeneSequencer_interfaceProtocol(NPObject * self, SEL _cmd) {
     struct BioGeneSequencer * _self = ((struct BioGeneSequencer *)(self));
     {
         return g_Assoc_InterfaceProtocol;
     }
 }
 
-void BioGeneSequencer_setInterfaceProtocol_(NFObject * self, SEL _cmd, const char * newProto) {
+void BioGeneSequencer_setInterfaceProtocol_(NPObject * self, SEL _cmd, const char * newProto) {
     struct BioGeneSequencer * _self = ((struct BioGeneSequencer *)(self));
     {
         g_Assoc_InterfaceProtocol = newProto;
     }
 }
 
-int BioGeneSequencer_injectSyntheticDNA_withMultiplier_(NFObject * self, SEL _cmd, const char * dnaChain, int mult) {
+int BioGeneSequencer_injectSyntheticDNA_withMultiplier_(NPObject * self, SEL _cmd, const char * dnaChain, int mult) {
     struct BioGeneSequencer * _self = ((struct BioGeneSequencer *)(self));
     {
         int chainLength = ((int)(strlen(dnaChain)));
@@ -203,19 +203,19 @@ int BioGeneSequencer_injectSyntheticDNA_withMultiplier_(NFObject * self, SEL _cm
     }
 }
 
-int BioGeneSequencer_sequencerId(NFObject * self, SEL _cmd) {
+int BioGeneSequencer_sequencerId(NPObject * self, SEL _cmd) {
     return ((struct BioGeneSequencer *)(self))->_sequencerId;
 }
 
-void BioGeneSequencer_setSequencerId_(NFObject * self, SEL _cmd, int value) {
+void BioGeneSequencer_setSequencerId_(NPObject * self, SEL _cmd, int value) {
     ((struct BioGeneSequencer *)(self))->_sequencerId = value;
 }
 
-const char * BioGeneSequencer_genomeSource(NFObject * self, SEL _cmd) {
+const char * BioGeneSequencer_genomeSource(NPObject * self, SEL _cmd) {
     return ((struct BioGeneSequencer *)(self))->_genomeSource;
 }
 
-NFClass * BioGeneSequencer_getClass(NFClass * self, SEL _cmd) {
+NPClass * BioGeneSequencer_getClass(NPClass * self, SEL _cmd) {
     return &nopa_BioGeneSequencer_class;
 }
 
@@ -231,7 +231,7 @@ int main(int argc, const char * * argv) {
             printf(">>>    nopac 编译器「静态 Category & 模拟关联属性」镜像健壮性压测   <<<\n");
             printf("====================================================================\n\n");
             printf("--- 1. 验证基础类原生成员变量与方法的编译期决议 ---\n");
-            NFObject *__nopa_tmp_0 = (NFObject_alloc(&nopa_BioGeneSequencer_class, __nopa_sel_alloc));
+            NPObject *__nopa_tmp_0 = (NPObject_alloc(&nopa_BioGeneSequencer_class, __nopa_sel_alloc));
             BioGeneSequencer * mySequencer = ((struct nopa_BioGeneSequencer_vtable *)__nopa_tmp_0->isa->vtable)->initWithId_source_(__nopa_tmp_0, __nopa_sel_initWithId_source_, 8899, "Homo-Sapiens-Decoded");
             ((struct nopa_BioGeneSequencer_vtable *)mySequencer->isa->vtable)->printSequencerInfo(mySequencer, __nopa_sel_printSequencerInfo);
             printf("\n--- 2. 验证第一个 Category (NeuralInterfaceExtension) 的静态属性注入 ---\n");
@@ -258,7 +258,7 @@ int main(int argc, const char * * argv) {
             printf("\n--- 5. 镜像边界回归守门员：三元表达式内包含带自增副作用的 Category 属性调用 ---\n");
             int isSyncActive = 1;
             int sequencingStep = 6666;
-            double verifiedRate = isSyncActive > 0 ? ({ NFObject *__nopa_tmp_1 = (sequencingStep++, mySequencer); ((struct nopa_BioGeneSequencer_vtable *)__nopa_tmp_1->isa->vtable)->neuralSyncRate(__nopa_tmp_1, __nopa_sel_neuralSyncRate); }) : 0;
+            double verifiedRate = isSyncActive > 0 ? ({ NPObject *__nopa_tmp_1 = (sequencingStep++, mySequencer); ((struct nopa_BioGeneSequencer_vtable *)__nopa_tmp_1->isa->vtable)->neuralSyncRate(__nopa_tmp_1, __nopa_sel_neuralSyncRate); }) : 0;
             printf("[收官边界断言] 镜像 Category 浮点属性与修好的优先级 Bug 融合完美！\n");
             printf("          -> 副作用自增计数器: %d (预期: 6667)\n", sequencingStep);
             printf("          -> 动态抓取的扩展同步率: %.3f (预期: 0.985)\n", verifiedRate);
@@ -277,14 +277,14 @@ int main(int argc, const char * * argv) {
 
 // ─── Class metadata ─────────────────────────────────────
 
-struct nopa_NFObject_vtable nopa_NFObject_vtable_inst = {
-    .init = NFObject_init,
-    .dealloc = NFObject_dealloc,
+struct nopa_NPObject_vtable nopa_NPObject_vtable_inst = {
+    .init = NPObject_init,
+    .dealloc = NPObject_dealloc,
 };
 
 struct nopa_BioGeneSequencer_vtable nopa_BioGeneSequencer_vtable_inst = {
-    .init = NFObject_init,
-    .dealloc = NFObject_dealloc,
+    .init = NPObject_init,
+    .dealloc = NPObject_dealloc,
     .initWithId_source_ = BioGeneSequencer_initWithId_source_,
     .printSequencerInfo = BioGeneSequencer_printSequencerInfo,
     .initializeNeuralBridgeWithLog_ = BioGeneSequencer_initializeNeuralBridgeWithLog_,
@@ -298,31 +298,31 @@ struct nopa_BioGeneSequencer_vtable nopa_BioGeneSequencer_vtable_inst = {
     .genomeSource = BioGeneSequencer_genomeSource,
 };
 
-struct nopa_NFObject_meta_vtable nopa_NFObject_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
-    .class = NFObject_getClass,
+struct nopa_NPObject_meta_vtable nopa_NPObject_meta_vtable_inst = {
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
+    .class = NPObject_getClass,
 };
 
 struct nopa_BioGeneSequencer_meta_vtable nopa_BioGeneSequencer_meta_vtable_inst = {
     .class = BioGeneSequencer_getClass,
 };
 
-NFClass nopa_NFObject_class;
-NFClass nopa_BioGeneSequencer_class;
+NPClass nopa_NPObject_class;
+NPClass nopa_BioGeneSequencer_class;
 
 void nopa_meta_init(void) {
-    nopa_NFObject_class = (NFClass){
-        .name = "NFObject",
+    nopa_NPObject_class = (NPClass){
+        .name = "NPObject",
         .superclass = NULL,
-        .instance_size = sizeof(struct NFObject),
-        .vtable = &nopa_NFObject_vtable_inst,
-        .class_vtable = &nopa_NFObject_meta_vtable_inst,
+        .instance_size = sizeof(struct NPObject),
+        .vtable = &nopa_NPObject_vtable_inst,
+        .class_vtable = &nopa_NPObject_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_BioGeneSequencer_class = (NFClass){
+    nopa_BioGeneSequencer_class = (NPClass){
         .name = "BioGeneSequencer",
-        .superclass = &nopa_NFObject_class,
+        .superclass = &nopa_NPObject_class,
         .instance_size = sizeof(struct BioGeneSequencer),
         .vtable = &nopa_BioGeneSequencer_vtable_inst,
         .class_vtable = &nopa_BioGeneSequencer_meta_vtable_inst,

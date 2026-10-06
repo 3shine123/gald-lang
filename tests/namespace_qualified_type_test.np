@@ -11,7 +11,7 @@
 // ============================================================================
 @namespace Extreme::Engine::Graphics
 
-    @interface TextureHandle : NFObject {
+    @interface TextureHandle : NPObject {
         @public
         int _textureId;
         int _width;
@@ -61,7 +61,7 @@
 // ============================================================================
 @namespace Extreme::Container
 
-    @interface List<T> : NFObject {
+    @interface List<T> : NPObject {
         @public
         T _element;
     }
@@ -93,7 +93,7 @@
 // ============================================================================
 @namespace Extreme::Engine
 
-    @interface RenderPipeline : NFObject {
+    @interface RenderPipeline : NPObject {
         @public
         Extreme::Engine::Graphics::TextureHandle* _activeTexture;
     }
@@ -214,7 +214,7 @@ int main(int argc, const char* argv[])
         // 压测 4：显式类型转换中的 (Xxx::Yyy::Zzz *) 解析
         printf("\n--- 4. 压测项：显式类型转换中的 (Xxx::Yyy::Zzz *) 解析 ---\n");
 
-        NFObject* rawObj = tex1;
+        NPObject* rawObj = tex1;
         Extreme::Engine::Graphics::TextureHandle* castedTex = (Extreme::Engine::Graphics::TextureHandle*)rawObj;
         printf("[类型转换校验] 转换后纹理 ID: %d\n", [castedTex textureId]);
 

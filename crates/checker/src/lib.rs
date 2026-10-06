@@ -12,7 +12,7 @@ use std::collections::HashMap;
 /// the `Checker` format helpers can return it.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum FormatArgKind {
-    /// `%@` — an NFString / object pointer.
+    /// `%@` — an NPString / object pointer.
     Object,
     /// `%d/%i/%u/%x/%X/%o/%c` — an integer (any width/signedness; width
     /// mismatches like `long` into `%d` are not judged).
@@ -33,7 +33,7 @@ pub struct Checker {
     pub current_class: Option<String>,
     pub current_method: Option<String>,
     /// True while checking the body of a class method (`+`). In a class method
-    /// `self` is the class object (NFClass *), so instance ivars can't be used.
+    /// `self` is the class object (NPClass *), so instance ivars can't be used.
     pub current_method_is_class: bool,
     pub has_error: bool,
     pub error_count: i32,
@@ -55,10 +55,10 @@ pub struct Checker {
     pub method_params: HashMap<String, Vec<Option<AstType>>>,
     /// Class name → (selector → param types). Receiver-class-aware signature
     /// lookup: two classes may declare the same selector with different param
-    /// types (tt.np's `objectForKey:(const char *)` vs NFDictionary's
+    /// types (tt.np's `objectForKey:(const char *)` vs NPDictionary's
     /// `objectForKey:(K)key`); the global selector-keyed `method_params` is
     /// last-writer-wins and clobbers one of them, turning a valid send into a
-    /// false positive (probe: NFError.np `[_userInfo objectForKey:@"…"]`).
+    /// false positive (probe: NPError.np `[_userInfo objectForKey:@"…"]`).
     /// The MsgSend arm consults this table first and only falls back to the
     /// global one when the receiver's class is unknown.
     pub method_params_by_class: HashMap<String, HashMap<String, Vec<Option<AstType>>>>,
@@ -203,8 +203,8 @@ impl Checker {
     }
 
     /// Is this a Foundation/object pointer type (id, instancetype, or a named
-    /// class pointer like `NFString *`)? Used to reject bare C-string literals
-    /// (`"..."`) where an NFString/object is expected — mirroring ObjC, where
+    /// class pointer like `NPString *`)? Used to reject bare C-string literals
+    /// (`"..."`) where an NPString/object is expected — mirroring ObjC, where
     /// `NSLog(NSString *, ...)` rejects `const char *` at the C type level.
     fn is_object_type(t: &AstType) -> bool {
         t.prim == TypePrim::Id
@@ -212,8 +212,8 @@ impl Checker {
             || (t.prim == TypePrim::Named && t.is_pointer)
     }
 
-    /// The class name behind an object-pointer type (`NFDictionary *` →
-    /// "NFDictionary", generic args stripped). `id`/instancetype → None.
+    /// The class name behind an object-pointer type (`NPDictionary *` →
+    /// "NPDictionary", generic args stripped). `id`/instancetype → None.
     fn named_class_of(t: &AstType) -> Option<String> {
         if !t.is_pointer || t.prim != TypePrim::Named {
             return None;
@@ -250,7 +250,7 @@ impl Checker {
     /// (`char *` pointer) parameter at position `idx`? False when any
     /// declaration disagrees or has no such param — the conservative
     /// direction: mixed declarations (tt.np's `objectForKey:(const char *)`
-    /// vs NFDictionary's `objectForKey:(K)key`) must not turn a valid send
+    /// vs NPDictionary's `objectForKey:(K)key`) must not turn a valid send
     /// into a false positive, same discipline as `method_kinds`.
     fn selector_param_all_cstr(&self, selector: &str, idx: usize) -> bool {
         match self.method_param_decls.get(selector) {
@@ -265,7 +265,7 @@ impl Checker {
 
     /// Reverse of the bare-C-string check: an `@"..."` object literal passed
     /// where a plain C string (`char *` / `const char *`) is expected compiles
-    /// (the pointer just flows through) but reads the NFString object header
+    /// (the pointer just flows through) but reads the NPString object header
     /// as character data — silent garbage at runtime (probe:
     /// `stringWithUTF8String:@"bad"` printed junk). Mirrors clang's
     /// "incompatible pointer types sending 'NSString *' to parameter of type
@@ -305,9 +305,9 @@ impl Checker {
             TypePrim::Instancetype => "instancetype".to_string(),
             _ => t.name.clone().unwrap_or_else(|| format!("{:?}", t.prim)),
         };
-        // Show type_args in diagnostics: `NFArray<NFString *> *` instead of a
-        // bare `NFArray *` — otherwise generic-mismatch errors read as
-        // "NFArray * from NFArray *" and the user can't see the difference.
+        // Show type_args in diagnostics: `NPArray<NPString *> *` instead of a
+        // bare `NPArray *` — otherwise generic-mismatch errors read as
+        // "NPArray * from NPArray *" and the user can't see the difference.
         if !t.type_args.is_empty() {
             let args = t.type_args.iter()
                 .map(Self::type_display)
@@ -528,7 +528,7 @@ impl Checker {
         }
     }
 
-    /// The class a pointer type names (`NFError *` -> `NFError`).
+    /// The class a pointer type names (`NPError *` -> `NPError`).
     fn class_name_of(t: &AstType) -> Option<String> {
         t.class_ref.clone().or_else(|| t.name.clone())
     }
@@ -674,9 +674,9 @@ impl Checker {
 
     // ─── printf-style format checking (-Wformat, step 1: %@) ───────────
 
-    /// Selectors whose first argument is an NFString format literal followed by
+    /// Selectors whose first argument is an NPString format literal followed by
     /// printf-style variadic args (the `%@` family). Only this whitelist is
-    /// scanned — a random method that happens to take an NFString is not a
+    /// scanned — a random method that happens to take an NPString is not a
     /// format consumer, and scanning it would false-positive.
     const FORMAT_MSGSENDS: &[&str] = &[
         "stringWithFormat:",
@@ -870,7 +870,7 @@ impl Checker {
                 if spec == FormatArgKind::Object {
                     msg.push_str(" — use %d/%s/%f for scalars");
                 } else if arg == FormatArgKind::Object {
-                    msg.push_str(" — use %@ for NFString objects");
+                    msg.push_str(" — use %@ for NPString objects");
                 }
                 self.check_warning(a.line, a.col, &msg);
             }
@@ -1010,7 +1010,7 @@ impl Checker {
     fn init_generic_erasure_warning(&self, vt: &AstType, it: &AstType) -> Option<String> {
         if vt.prim != TypePrim::Named || it.prim != TypePrim::Named { return None; }
         // Generic-ness lives in type_args OR in the name itself: direct
-        // spellings (`NFArray<NFString *>`) carry type_args, while `@using`
+        // spellings (`NPArray<NPString *>`) carry type_args, while `@using`
         // alias expansion bakes `<...>` into the resolved name with
         // type_args left empty. Cover both.
         let name_is_gen = |n: &str| n.contains('<');
@@ -1018,7 +1018,7 @@ impl Checker {
         let i_gen = !it.type_args.is_empty() || it.name.as_deref().map(name_is_gen).unwrap_or(false);
         if !v_gen || i_gen { return None; } // only bare (declared) ← specialized (expr)
         let (Some(vn), Some(iname)) = (&vt.name, &it.name) else { return None };
-        // Same base class (bare NFArray vs NFArray<X>), ignoring subclass
+        // Same base class (bare NPArray vs NPArray<X>), ignoring subclass
         // relations — those take the normal compatibility path.
         let v_base = vn.split('<').next().unwrap_or(vn);
         let i_base = iname.split('<').next().unwrap_or(iname);
@@ -1042,7 +1042,7 @@ impl Checker {
         let i_ptr = Self::is_object_type(it) || it.is_pointer;
         if v_ptr == i_ptr {
             // Both object-typed: two *named* class pointers must be name-equal
-            // or superclass-related (`NFNumber *bad = [strArray
+            // or superclass-related (`NPNumber *bad = [strArray
             // objectAtIndex:0]` is the generic-mismatch bug this catches).
             if v_ptr && vt.prim == TypePrim::Named && it.prim == TypePrim::Named {
                 if !self.named_types_compatible(vt, it) {
@@ -1080,7 +1080,7 @@ impl Checker {
     /// expected. Object-kind looseness follows the established rules: `id`
     /// accepts anything object-shaped; two *named* class pointers must be
     /// name-equal or related by the superclass chain (substitution makes T
-    /// concrete — `NFNumber *` into an `NFString *` container is exactly the
+    /// concrete — `NPNumber *` into an `NPString *` container is exactly the
     /// bug this check exists to catch). Scalars must match non-pointer scalars.
     fn arg_type_ok(&self, param: &AstType, actual: &AstType) -> bool {
         let param_obj = Self::is_object_type(param) || param.prim == TypePrim::Param;
@@ -1108,7 +1108,7 @@ impl Checker {
         let (Some(an), Some(bn)) = (&a.name, &b.name) else { return true };
         // A bare generic template and its specialization are layout-identical
         // (monomorphization only rewrites T positions; verified byte-for-byte
-        // for NFArray), so `VectorBuffer *` ↔ `VectorBuffer<X> *` assign fine
+        // for NPArray), so `VectorBuffer *` ↔ `VectorBuffer<X> *` assign fine
         // in both directions. Names differ only by the `<...>` suffix.
         let a_base = an.split('<').next().unwrap_or(an);
         let b_base = bn.split('<').next().unwrap_or(bn);
@@ -1119,8 +1119,8 @@ impl Checker {
                 && (self.is_subclass_of(st, an, bn) || self.is_subclass_of(st, bn, an));
         }
         // Same base class: element type_args must match too (invariant,
-        // user-decided). `@[ @1 ]` infers NFArray<NFNumber *> — assigning it
-        // to NFArray<NFString *> must fail even though the names are equal.
+        // user-decided). `@[ @1 ]` infers NPArray<NPNumber *> — assigning it
+        // to NPArray<NPString *> must fail even though the names are equal.
         // Recurse through arg_type_ok so subclasses stay acceptable.
         if a.type_args.len() != b.type_args.len() {
             // One side bare, one specialized: layout-identical, allowed.
@@ -1137,14 +1137,14 @@ impl Checker {
         let result = self.check_expr_inner(e);
         e.expr_type = result.clone().map(Box::new);
         // `a[i]` on an object receiver is not C indexing — C rejects it outright
-        // ("operand of type 'NFArray' where arithmetic or pointer type is
+        // ("operand of type 'NPArray' where arithmetic or pointer type is
         // required"), and the error surfaces in the generated C with no trace
         // back to the source line. Rewrite it to `[a objectAtIndex:i]` here,
         // where the receiver's declared type is known.
         if let Some(new_ty) = self.maybe_rewrite_object_subscript(e) {
             return Some(new_ty);
         }
-        // `@(x + 1)` — the NFNumber factory depends on the operand's static
+        // `@(x + 1)` — the NPNumber factory depends on the operand's static
         // type, which only exists here; C99 has no `_Generic` to fall back on.
         if let Some(new_ty) = self.maybe_rewrite_boxed_expr(e) {
             return Some(new_ty);
@@ -1158,24 +1158,24 @@ impl Checker {
 
     /// Warn when a type carries type arguments but names a class that declares
     /// no type parameters. Nopa's monomorphization is driven by *declaration*,
-    /// so `NFArray<NFString *> *` parses and type-checks but never
-    /// monomorphizes: the generated C contains no `NFArray_NFString` at all
-    /// and `objectAtIndex:` still returns `NFObject *`. That silent erasure is
+    /// so `NPArray<NPString *> *` parses and type-checks but never
+    /// monomorphizes: the generated C contains no `NPArray_NPString` at all
+    /// and `objectAtIndex:` still returns `NPObject *`. That silent erasure is
     /// a usability trap — the reader reasonably expects element type checking.
     /// The user-declared generic containers (e.g. `Box<T>`) are exempt because
     /// those DO monomorphize.
-    /// `NFAsync<T>` is a return-type-position marker only (AGENTS.md
-    /// `NFAsync<T>` section): the parser unwraps it in method/function return
+    /// `NPAsync<T>` is a return-type-position marker only (AGENTS.md
+    /// `NPAsync<T>` section): the parser unwraps it in method/function return
     /// types, so the checker never sees it there. Anywhere else it cannot do
-    /// anything sensible — a "value" of type NFAsync does not exist (calling
+    /// anything sensible — a "value" of type NPAsync does not exist (calling
     /// code `@await`s and gets `T` directly). Reject with the design's
     /// diagnostic.
-    fn reject_nfasync_type(&mut self, t: &AstType, line: usize, col: usize, ctx: &str) {
-        let is_marker = t.name.as_deref() == Some("NFAsync")
-            || t.class_ref.as_deref() == Some("NFAsync");
+    fn reject_npasync_type(&mut self, t: &AstType, line: usize, col: usize, ctx: &str) {
+        let is_marker = t.name.as_deref() == Some("NPAsync")
+            || t.class_ref.as_deref() == Some("NPAsync");
         if is_marker {
             self.check_error(line, col,
-                &format!("'NFAsync<T>' is a declaration marker, not a value type ({}) — '@await' the async call instead", ctx));
+                &format!("'NPAsync<T>' is a declaration marker, not a value type ({}) — '@await' the async call instead", ctx));
         }
     }
 
@@ -1221,7 +1221,7 @@ impl Checker {
         false
     }
 
-    /// Rewrite `@(expr)` into the `NFNumber` factory matching the operand's
+    /// Rewrite `@(expr)` into the `NPNumber` factory matching the operand's
     /// static type. The parser cannot make this choice (it has no types) and the
     /// C99 backend has no `_Generic`, so it is made here, where `expr_type` is
     /// known. Non-arithmetic operands are rejected instead of silently boxed:
@@ -1256,15 +1256,15 @@ impl Checker {
             _ => unreachable!("matched Boxed above"),
         };
         let mut nt = AstType::new(TypePrim::Named);
-        nt.name = Some("NFNumber".to_string());
-        nt.class_ref = Some("NFNumber".to_string());
+        nt.name = Some("NPNumber".to_string());
+        nt.class_ref = Some("NPNumber".to_string());
         nt.is_pointer = true;
         e.kind = AstExprKind::MsgSend;
         e.expr_type = Some(Box::new(nt.clone()));
         e.data = AstExprData::MsgSend {
             receiver: Box::new(AstExpr {
                 kind: AstExprKind::VarRef, expr_type: None, line, col,
-                data: AstExprData::VarRef { sym: None, name: "NFNumber".to_string() },
+                data: AstExprData::VarRef { sym: None, name: "NPNumber".to_string() },
             }),
             method: None,
             vtable_index: -1,
@@ -1295,7 +1295,7 @@ impl Checker {
     /// the node carries no `expr_type`: the `Assign` arm type-checks its target
     /// through a *clone* (`check_expr(&mut *target.clone())`), so the real
     /// target node never gets annotated. Without this fallback the write-side
-    /// rewrite cannot see that `m` is an `NFMutableArray`.
+    /// rewrite cannot see that `m` is an `NPMutableArray`.
     ///
     /// Returns an owned type because the fallback is a fresh lookup.
     fn receiver_static_type(&self, object: &AstExpr) -> Option<AstType> {
@@ -1343,10 +1343,10 @@ impl Checker {
 
     /// Rewrite `recv[i] = v` into `[recv setObject:v atIndex:i]` when the
     /// receiver is a mutable object. The read rewrite alone would emit
-    /// `recv[i] = v` verbatim, which C rejects ("assigning to 'NFMutableArray'
+    /// `recv[i] = v` verbatim, which C rejects ("assigning to 'NPMutableArray'
     /// from incompatible type"). Nopa containers spell this
     /// `setObject:atIndex:`, so reuse that; the receiver must declare it,
-    /// otherwise an immutable `NFArray` keeps the loud C error.
+    /// otherwise an immutable `NPArray` keeps the loud C error.
     fn maybe_rewrite_object_assign(&mut self, e: &mut AstExpr) -> Option<AstType> {
         if !matches!(&e.data, AstExprData::Assign { .. }) { return None; }
         {
@@ -1355,7 +1355,7 @@ impl Checker {
             if !is_sub { return None; }
             let AstExprData::Subscript { object, .. } = &target.data else { return None };
             // Must be an object that *also* offers a setter — this is what
-            // separates NFMutableArray from an immutable NFArray.
+            // separates NPMutableArray from an immutable NPArray.
             let t = self.receiver_static_type(object)?;
             if t.prim != TypePrim::Named || !t.is_pointer || t.is_array { return None; }
             let cls = Self::class_name_of(&t)?;
@@ -1529,7 +1529,7 @@ impl Checker {
                 // `__nopa_eh_tmp_N` hoist temporaries in scope_vars (their
                 // `__auto_type` init derives the true type). The `__` builtin
                 // fallback below must not shadow them — it made the generic
-                // argument check see `int` for an `NFMutableString *` temp
+                // argument check see `int` for an `NPMutableString *` temp
                 // (0:0, "does not match the container's declared element
                 // type"). Builtin macros (__FILE__/__LINE__) are never in
                 // scope, so this reordering cannot change their result.
@@ -1644,7 +1644,7 @@ impl Checker {
                 // Receiver-class-aware signature lookup: the global
                 // selector-keyed table is last-writer-wins, and two classes may
                 // declare the same selector with different param types (tt.np's
-                // `objectForKey:(const char *)` clobbered NFDictionary's
+                // `objectForKey:(const char *)` clobbered NPDictionary's
                 // `objectForKey:(K)key`), turning valid sends into false
                 // positives. Prefer the receiver's own class chain; fall back
                 // to the global table only when the receiver's class is
@@ -1666,11 +1666,11 @@ impl Checker {
                     if let Some(Some(ref pt)) = param_types.get(i) {
                         if Self::is_object_type(pt) && matches!(a.data, AstExprData::String(_)) {
                             self.check_warning(a.line, a.col,
-                                "argument as a bare C string is not an object; use @\"...\" for an NFString");
+                                "argument as a bare C string is not an object; use @\"...\" for an NPString");
                         }
                         // Reverse direction: an @"..." object literal passed where a
                         // plain C string (`const char *`/`char *`) is expected reads
-                        // the NFString object header as character data — silent
+                        // the NPString object header as character data — silent
                         // garbage at runtime (probe: stringWithUTF8String:@"bad").
                         // Enforced only when every declaration of this selector
                         // agrees on the char* param (method_kinds discipline) —
@@ -1682,7 +1682,7 @@ impl Checker {
                     }
                 }
                 // Specialized generic container: the receiver's type carries
-                // type_args (e.g. `NFMutableArray<NFString *>`). The write-side
+                // type_args (e.g. `NPMutableArray<NPString *>`). The write-side
                 // selectors take the ELEMENT type T — a provably scalar arg
                 // (int/float/char literal) is a type error the erased spelling
                 // would silently pass through.
@@ -1703,13 +1703,13 @@ impl Checker {
                             let idx = if first_arg_idx == usize::MAX { 0 } else { first_arg_idx };
                             // Provably-not-T args: scalar literals AND boxed
                             // number literals (`@42` desugars to
-                            // `[NFNumber numberWithInt:]` before the checker
+                            // `[NPNumber numberWithInt:]` before the checker
                             // sees it, so it is a MsgSend — classify it here).
                             let scalar = args.get(idx).map(|a| match &a.data {
                                 AstExprData::Int(_) | AstExprData::Float(_) | AstExprData::FloatRaw(_)
                                 | AstExprData::Bool(_) | AstExprData::Char(_) | AstExprData::String(_) => true,
                                 AstExprData::MsgSend { receiver, selector: sel, .. } => {
-                                    matches!(&receiver.data, AstExprData::VarRef { name, .. } if name == "NFNumber")
+                                    matches!(&receiver.data, AstExprData::VarRef { name, .. } if name == "NPNumber")
                                         && (sel.starts_with("numberWithInt")
                                             || sel.starts_with("numberWithDouble")
                                             || sel.starts_with("numberWithLongLong")
@@ -1728,10 +1728,10 @@ impl Checker {
                     }
                 }
                 // Generic signature substitution: a specialized receiver
-                // (`NFArray<NFString *> *`) carries type_args on its static
+                // (`NPArray<NPString *> *`) carries type_args on its static
                 // type. Substitute them into the method signature at Param (T)
                 // positions, then check each argument and the result type.
-                // Bare spellings (`NFArray *`) have no type_args — full
+                // Bare spellings (`NPArray *`) have no type_args — full
                 // erasure, zero migration.
                 let recv_ty: Option<AstType> = receiver.expr_type.as_ref()
                     .map(|t| (**t).clone())
@@ -1806,23 +1806,23 @@ impl Checker {
                     }
                 }
                 // Result type: substitute type_args into the declared return
-                // type so `NFString *s = [m objectAtIndex:0]` sees `NFString *`
+                // type so `NPString *s = [m objectAtIndex:0]` sees `NPString *`
                 // instead of erased `id`. Bare receivers fall back to the
                 // declared return type (`count` → `size_t`) when known —
                 // strictly more precise than the old blanket `id`.
                 let result_ty = if recv_args.is_empty() {
-                    // NFNumber factory family: unambiguous known returns (no
+                    // NPNumber factory family: unambiguous known returns (no
                     // subclass, no cross-class selector collision). Whitelisted
-                    // so `@42` / `@(expr)` infer as `NFNumber *` — required for
+                    // so `@42` / `@(expr)` infer as `NPNumber *` — required for
                     // array-literal element inference (`@[ @1, @2 ]`).
-                    const NFNUMBER_FACTORIES: [&str; 5] = [
+                    const NPNUMBER_FACTORIES: [&str; 5] = [
                         "numberWithInt:", "numberWithLongLong:", "numberWithDouble:",
                         "numberWithBool:", "numberWithChar:",
                     ];
-                    if NFNUMBER_FACTORIES.contains(&selector.as_str()) {
+                    if NPNUMBER_FACTORIES.contains(&selector.as_str()) {
                         let mut t = AstType::new(TypePrim::Named);
-                        t.name = Some("NFNumber".to_string());
-                        t.class_ref = Some("NFNumber".to_string());
+                        t.name = Some("NPNumber".to_string());
+                        t.class_ref = Some("NPNumber".to_string());
                         t.is_pointer = true;
                         return Some(t);
                     }
@@ -1831,7 +1831,7 @@ impl Checker {
                         .map(|rt| {
                             // `method_returns` is keyed by selector globally, so a
                             // shared selector resolves to whichever class declared
-                            // it last (`-init` in NFMutableDictionary poisons every
+                            // it last (`-init` in NPMutableDictionary poisons every
                             // `[x init]`). Object-kind returns therefore stay `id`
                             // for bare receivers — only scalar returns (count →
                             // size_t) keep their declared precision.
@@ -1844,8 +1844,8 @@ impl Checker {
                 } else {
                     // copy/mutableCopy: the result is the receiver's own
                     // (substituted) element type, not erased `id`. `[m copy]`
-                    // on NFMutableArray<NFString *> is NFArray-shaped with
-                    // element NFString * — without this rule the result
+                    // on NPMutableArray<NPString *> is NPArray-shaped with
+                    // element NPString * — without this rule the result
                     // carries no type info and `int bad = [m copy]` slips
                     // through the scalar checks. Bare receivers (no
                     // type_args) keep the old `id` — zero migration.
@@ -1862,13 +1862,13 @@ impl Checker {
                 Some(result_ty)
             }
             AstExprData::FuncCall { name, args, .. } => {
-                if name == "NFLog" {
+                if name == "NPLog" {
                     match args.first().map(|a| &a.data) {
                         Some(AstExprData::AtString(fmt)) => {
-                            self.check_format_args(fmt, &args[1..], e.line, e.col, "NFLog");
+                            self.check_format_args(fmt, &args[1..], e.line, e.col, "NPLog");
                         }
                         Some(_) => {
-                            self.check_warning(args[0].line, args[0].col, "NFLog first argument should be an NFString literal (@\"...\")");
+                            self.check_warning(args[0].line, args[0].col, "NPLog first argument should be an NPString literal (@\"...\")");
                         }
                         None => {}
                     }
@@ -1880,7 +1880,7 @@ impl Checker {
                     if let Some(Some(ref pt)) = param_types.get(i) {
                         if Self::is_object_type(pt) && matches!(a.data, AstExprData::String(_)) {
                             self.check_warning(a.line, a.col,
-                                "argument as a bare C string is not an object; use @\"...\" for an NFString");
+                                "argument as a bare C string is not an object; use @\"...\" for an NPString");
                         }
                         // Same check as the MsgSend arm: @"..." object into a
                         // `char *` param is a silent-garbage bug.
@@ -1906,7 +1906,7 @@ impl Checker {
                 // signature lives in the *variable's* block type. So read the
                 // callee's declared type from scope and check its `block_params`.
                 //
-                // A typedef'd block (`typedef void (^Sink)(nonnull NFString *);`
+                // A typedef'd block (`typedef void (^Sink)(nonnull NPString *);`
                 // — the form Foundation and essentially all real code uses) has
                 // to go through `typedef_blocks` first: the variable's declared
                 // type is just the alias name, with no `is_block` or params on
@@ -1980,7 +1980,7 @@ AstExprData::Subscript { object, key, .. } => {
             AstExprData::IvarRef { obj, ivar, .. } => {
                 self.check_expr(&mut *obj);
                 // Instance variables cannot be used in class methods (`+`): `self`
-                // there is the class object (NFClass *), not an instance. Mirrors
+                // there is the class object (NPClass *), not an instance. Mirrors
                 // ObjC's "instance variable '_x' accessed in class method".
                 // EXCEPT when `self` is shadowed by a local variable/parameter —
                 // e.g. the factory pattern `+ (W *)withTitle:... { W *self =
@@ -2016,9 +2016,9 @@ AstExprData::Subscript { object, key, .. } => {
                 }
                 // Element-type inference (ObjC-style, user-decided): when
                 // every element has the same concrete named class type, the
-                // literal infers `NFArray<X>` so assignment to a typed
+                // literal infers `NPArray<X>` so assignment to a typed
                 // container checks. Mixed elements or non-class types fall
-                // back to the bare erased `NFArray` — zero change for
+                // back to the bare erased `NPArray` — zero change for
                 // existing code.
                 let mut inferred: Option<AstType> = None;
                 let mut all_same = !items.is_empty();
@@ -2039,8 +2039,8 @@ AstExprData::Subscript { object, key, .. } => {
                 if all_same {
                     if let Some(elem) = inferred {
                         let mut t = AstType::new(TypePrim::Named);
-                        t.name = Some("NFArray".to_string());
-                        t.class_ref = Some("NFArray".to_string());
+                        t.name = Some("NPArray".to_string());
+                        t.class_ref = Some("NPArray".to_string());
                         t.is_pointer = true;
                         t.type_args = vec![elem];
                         return Some(t);
@@ -2445,12 +2445,12 @@ AstExprData::Subscript { object, key, .. } => {
         }
         let mut p = params.as_ref().map(|b| &**b);
         while let Some(param) = p {
-            // `NFAsync<T>` is a return-type marker only — a parameter can
+            // `NPAsync<T>` is a return-type marker only — a parameter can
             // never be "async" (CstParam carries no position, so report at
             // the enclosing declaration).
-            if param.par_type.as_ref().map_or(false, |ct| ct.name.as_deref() == Some("NFAsync")) {
+            if param.par_type.as_ref().map_or(false, |ct| ct.name.as_deref() == Some("NPAsync")) {
                 self.check_error(line, col,
-                    "'NFAsync<T>' is a declaration marker, not a value type (parameter) — '@await' the async call instead");
+                    "'NPAsync<T>' is a declaration marker, not a value type (parameter) — '@await' the async call instead");
             }
             if let Some(ref name) = param.name {
                 if let Some(scope) = self.scope_vars.last_mut() {
@@ -2492,7 +2492,7 @@ AstExprData::Subscript { object, key, .. } => {
                 // erased (no monomorphization, no element type checking).
                 if let Some(ref t) = head_type {
                     self.warn_if_erased_generics(t, d.line, d.col);
-                    self.reject_nfasync_type(t, d.line, d.col, "variable");
+                    self.reject_npasync_type(t, d.line, d.col, "variable");
                 }
                 if let Some(ref name) = d.name {
                     // Reserved compiler/runtime names the -eh desugar assigns
@@ -2582,7 +2582,7 @@ AstExprData::Subscript { object, key, .. } => {
                             }
                         }
                         if let Some(vt_t) = vt.as_deref() {
-                            self.reject_nfasync_type(vt_t, nd.line, nd.col, "variable");
+                            self.reject_npasync_type(vt_t, nd.line, nd.col, "variable");
                         }
                         if let Some(ref mut i) = ni { self.check_expr(i); }
                         tail = nn.as_deref_mut();
@@ -2592,23 +2592,23 @@ AstExprData::Subscript { object, key, .. } => {
             }
             AstDeclData::Class { methods, ivars, properties, .. } => {
                 let old = self.current_class.clone();
-                // Reserved marker name: a class named `NFAsync` would collide
+                // Reserved marker name: a class named `NPAsync` would collide
                 // with the return-type marker the parser unwraps.
-                if d.name.as_deref() == Some("NFAsync") {
+                if d.name.as_deref() == Some("NPAsync") {
                     self.check_error(d.line, d.col,
-                        "'NFAsync' is reserved for the async return-type marker — pick a different class name");
+                        "'NPAsync' is reserved for the async return-type marker — pick a different class name");
                 }
                 for iv in ivars.iter() {
                     if let AstDeclData::Ivar { ref ivar_type, .. } = iv.data {
                         if let Some(ref it) = ivar_type {
-                            self.reject_nfasync_type(it, iv.line, iv.col, "ivar");
+                            self.reject_npasync_type(it, iv.line, iv.col, "ivar");
                         }
                     }
                 }
                 for pr in properties.iter() {
                     if let AstDeclData::Property { ref prop_type, .. } = pr.data {
                         if let Some(ref t) = prop_type {
-                            self.reject_nfasync_type(t, pr.line, pr.col, "property");
+                            self.reject_npasync_type(t, pr.line, pr.col, "property");
                         }
                     }
                 }
@@ -2671,7 +2671,7 @@ AstExprData::Subscript { object, key, .. } => {
                             self.struct_alias_tags.insert(alias.clone(), tag.clone());
                         }
                     }
-                    // `typedef void (^Sink)(nonnull NFString *);` → keep the
+                    // `typedef void (^Sink)(nonnull NPString *);` → keep the
                     // block type so a variable declared `Sink sink = …;` can
                     // have its parameters (and their annotations) checked at
                     // the call site. Deliberately a separate arm: a block type
@@ -2855,20 +2855,20 @@ mod tests {
     /// those names up must return the type the initializer produced — the
     /// `__`-prefix builtin fallback (`__FILE__`/`__LINE__` → int) used to run
     /// FIRST and shadow the real binding, so the generic-argument check read
-    /// `int` for an `NFMutableString *` temp and rejected valid code.
+    /// `int` for an `NPMutableString *` temp and rejected valid code.
     #[test]
     fn eh_hoist_temp_resolves_to_declared_type_not_the_int_fallback() {
         let mut c = Checker::new(None);
-        let mut nfstring_ptr = AstType::new(TypePrim::Named);
-        nfstring_ptr.name = Some("NFString".into());
-        nfstring_ptr.is_pointer = true;
-        c.scope_vars.push(vec![("__nopa_eh_tmp_0".to_string(), nfstring_ptr)]);
+        let mut npstring_ptr = AstType::new(TypePrim::Named);
+        npstring_ptr.name = Some("NPString".into());
+        npstring_ptr.is_pointer = true;
+        c.scope_vars.push(vec![("__nopa_eh_tmp_0".to_string(), npstring_ptr)]);
         let mut e = AstExpr {
             kind: AstExprKind::VarRef, expr_type: None, line: 1, col: 1,
             data: AstExprData::VarRef { sym: None, name: "__nopa_eh_tmp_0".into() },
         };
         let got = c.check_expr(&mut e).expect("hoisted temp must have a type");
-        assert_eq!(got.name.as_deref(), Some("NFString"),
+        assert_eq!(got.name.as_deref(), Some("NPString"),
             "the `__` builtin fallback must not shadow the hoisted temp's real type");
         assert!(got.is_pointer, "hoisted object temp stays a pointer");
     }
@@ -2888,9 +2888,9 @@ mod tests {
             "__LINE__ outside scope still takes the int fallback");
     }
 
-    /// Check `NFLog(fmt, …args)` as a one-statement method body.
+    /// Check `NPLog(fmt, …args)` as a one-statement method body.
     /// Returns (checker result, warnings).
-    fn check_nflog(fmt: &str, args: Vec<AstExpr>) -> (i32, Vec<String>) {
+    fn check_nplog(fmt: &str, args: Vec<AstExpr>) -> (i32, Vec<String>) {
         let mut call_args = vec![AstExpr {
             kind: AstExprKind::AtString, expr_type: None, line: 1, col: 1,
             data: AstExprData::AtString(fmt.into()),
@@ -2899,7 +2899,7 @@ mod tests {
         let call = AstExpr {
             kind: AstExprKind::FuncCall, expr_type: None, line: 1, col: 1,
             data: AstExprData::FuncCall {
-                func: None, name: "NFLog".into(), callee: None, args: call_args,
+                func: None, name: "NPLog".into(), callee: None, args: call_args,
             },
         };
         let body = AstStmt {
@@ -2933,28 +2933,28 @@ mod tests {
     }
 
     #[test]
-    fn nflog_percent_at_with_int_warns() {
-        let (r, w) = check_nflog("count %@", vec![lit_int(42)]);
+    fn nplog_percent_at_with_int_warns() {
+        let (r, w) = check_nplog("count %@", vec![lit_int(42)]);
         assert_eq!(r, 0, "format mismatch is a warning, not an error");
         assert_eq!(w.len(), 1, "expected exactly one warning: {:?}", w);
         assert!(w[0].contains("%@"), "warning should name the specifier: {:?}", w);
     }
 
     #[test]
-    fn nflog_percent_at_with_object_ok() {
-        let (_, w) = check_nflog("obj %@", vec![lit_atstr("fine")]);
+    fn nplog_percent_at_with_object_ok() {
+        let (_, w) = check_nplog("obj %@", vec![lit_atstr("fine")]);
         assert!(w.is_empty(), "%@ with an object must not warn: {:?}", w);
     }
 
     #[test]
-    fn nflog_scalar_format_ok() {
-        let (_, w) = check_nflog("n %d", vec![lit_int(7)]);
+    fn nplog_scalar_format_ok() {
+        let (_, w) = check_nplog("n %d", vec![lit_int(7)]);
         assert!(w.is_empty(), "%d with int must not warn: {:?}", w);
     }
 
     #[test]
-    fn nflog_percent_at_count_mismatch_warns() {
-        let (_, w) = check_nflog("%@ %@", vec![lit_atstr("only")]);
+    fn nplog_percent_at_count_mismatch_warns() {
+        let (_, w) = check_nplog("%@ %@", vec![lit_atstr("only")]);
         assert_eq!(w.len(), 1, "more %@ slots than args should warn once: {:?}", w);
     }
 }

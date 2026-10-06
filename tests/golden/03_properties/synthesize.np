@@ -1,7 +1,7 @@
 #include <stdio.h>
 #import <Foundation/Foundation.np>
 
-@interface Person : NFObject
+@interface Person : NPObject
 @property int age;
 @property int score;
 @end

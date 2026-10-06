@@ -15,7 +15,7 @@
 // dispatch is correct: vtable member access is compile-time, by name, and
 // the SEL hash is only ever stored, never compared.
 
-@interface Collider : NFObject {
+@interface Collider : NPObject {
     @public
     int callsA;
     int callsB;

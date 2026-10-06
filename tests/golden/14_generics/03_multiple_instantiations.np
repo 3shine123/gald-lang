@@ -2,7 +2,7 @@
 #import <Foundation/Foundation.np>
 
 // Test: a single generic class instantiated with two different types
-@interface Buffer<T> : NFObject {
+@interface Buffer<T> : NPObject {
     @public
     T _data[2];
     int _len;
@@ -26,10 +26,10 @@
 }
 @end
 
-@interface A : NFObject @end
+@interface A : NPObject @end
 @implementation A @end
 
-@interface B : NFObject @end
+@interface B : NPObject @end
 @implementation B @end
 
 int main() {

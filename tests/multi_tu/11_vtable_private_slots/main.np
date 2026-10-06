@@ -4,11 +4,11 @@
 // Client TU: calls `Widget` through the public header only, and defines its own
 // unrelated class. Nothing here disagrees with `lib.np` about `Widget`, yet the
 // two TUs see different method sets, so they build different uniform vtables.
-@interface App : NFObject
+@interface App : NPObject
 - (int)run;
 @end
 
-@implementation App : NFObject
+@implementation App : NPObject
 - (int)run { return 42; }
 @end
 

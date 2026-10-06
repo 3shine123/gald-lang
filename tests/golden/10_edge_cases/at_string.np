@@ -4,7 +4,7 @@
 
 int main() {
     @autoreleasepool {
-        NFString *s = @"Hello from Micrit!";
+        NPString *s = @"Hello from Micrit!";
         printf("%s\n", [s UTF8String]);
     }
     return 0;

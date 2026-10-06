@@ -10,25 +10,25 @@
 // memory happens to be untouched: a prematurely released holder makes
 // `[h text]` yield nil, `[nil length]` 0, and main returns -5.
 
-@interface AO01Holder : NFObject {
+@interface AO01Holder : NPObject {
 @public
-    NFString *_s;
+    NPString *_s;
 }
-- (NFString *)text;
+- (NPString *)text;
 @end
 
 @implementation AO01Holder
 - (instancetype)init {
     self = [super init];
-    if (self) { _s = [[NFString alloc] initWithUTF8String:"hello"]; }
+    if (self) { _s = [[NPString alloc] initWithUTF8String:"hello"]; }
     return self;
 }
 - (void)dealloc {
     _s = nil;
-    NFLog(@"ao01 dealloc");
+    NPLog(@"ao01 dealloc");
     [super dealloc];
 }
-- (NFString *)text { return _s; }
+- (NPString *)text { return _s; }
 @end
 
 int main() {

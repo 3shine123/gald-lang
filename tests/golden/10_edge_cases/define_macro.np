@@ -4,7 +4,7 @@
 #define DOUBLE(x) ((x) * 2)
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 
-@interface Calculator : NFObject
+@interface Calculator : NPObject
 + (int)compute;
 @end
 

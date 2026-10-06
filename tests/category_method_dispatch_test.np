@@ -1,19 +1,19 @@
 #include <stdio.h>
 #import <Foundation/Foundation.np>
 
-// Category on NFObject itself - adding a class method to all objects
-@interface NFObject (Debug)
+// Category on NPObject itself - adding a class method to all objects
+@interface NPObject (Debug)
 - (const char *)objectTag;
 @end
 
-@implementation NFObject (Debug)
+@implementation NPObject (Debug)
 - (const char *)objectTag {
-    return "NFObject";
+    return "NPObject";
 }
 @end
 
 // Test that a category on a subclass also works
-@interface MyWidget : NFObject
+@interface MyWidget : NPObject
 - (int)value;
 @end
 
@@ -35,8 +35,8 @@
 
 int main() {
     @autoreleasepool {
-        // Call category method on NFObject
-        NFObject *base = [[NFObject alloc] init];
+        // Call category method on NPObject
+        NPObject *base = [[NPObject alloc] init];
         printf("base tag: %s\n", [base objectTag]);
 
         // Call category method on subclass
@@ -44,7 +44,7 @@ int main() {
         printf("widget value: %d\n", [w value]);
         printf("widget double: %d\n", [w doubleValue]);
 
-        // Also test that NFObject category method works on subclass
+        // Also test that NPObject category method works on subclass
         printf("widget tag: %s\n", [w objectTag]);
     }
     return 0;

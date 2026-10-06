@@ -2,13 +2,13 @@
 #import <Foundation/Foundation.np>
 
 // Minimal NSObject-like class for ARC weak ref test
-@interface MyObject : NFObject
+@interface MyObject : NPObject
 @end
 
 @implementation MyObject
 @end
 
-@interface Watcher : NFObject {
+@interface Watcher : NPObject {
     @public (weak) id _target;
 }
 @property (weak) id target;

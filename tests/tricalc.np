@@ -5,7 +5,7 @@
 #define PI 3.14159265358979323846
 
 @namespace TC
-    @interface TriCalc : NFObject
+    @interface TriCalc : NPObject
     // 角度转弧度
 
     + (double)degreeToRadian:(double)degree;

@@ -127,7 +127,7 @@ A+B 完成后动手做 C，试了两条路，都只走到一半：
 **方向性发现（重要）**：本计划原以为"3b 是 P3 的地基"，但 C 的尝试说明**依赖可能是反的**：
 
 * 在**自包含模式**下，Foundation 的实现被每个 TU 展开，于是"这个类归谁实现"根本无从判断
-  （每个 TU 都"实现"了 NFString）——这正是 C 卡住的根源；
+  （每个 TU 都"实现"了 NPString）——这正是 C 卡住的根源；
 * 若先做 **P3（预编译库 + 纯声明头）**，用户 TU 里就**只有自己的 `@implementation`**，
   "实例归属"就退化成简单的"用户 vs 库"两分，C 会容易得多。
 
@@ -169,7 +169,7 @@ A+B 完成后动手做 C，试了两条路，都只走到一半：
 
 ### 剩余一步 —— 已完成 ✅（2026-10-02，第二趟）
 
-**问题**：用户 TU 只看到声明，所以它仍然生成 `NOPA_VTABLE_$_NFString` 之类的**空桩**；
+**问题**：用户 TU 只看到声明，所以它仍然生成 `NOPA_VTABLE_$_NPString` 之类的**空桩**；
 链接器的 weak 合并可能选中空桩而不是库里的真表，于是 `[s length]` 走空指针 → 段错误（rc=139）。
 
 **实现**：
@@ -190,7 +190,7 @@ A+B 完成后动手做 C，试了两条路，都只走到一半：
    * **保留了「来自导入文件」的过滤**：若一并去掉，主文件自己的 `@interface`（如
      `11_vtable_private_slots` 里的 `App`）会挤进公共段，反而把公共方法错位。文档原话
      「不依赖 source_map」不准确，实测必须两者同时成立。
-   * 原先两侧布局不一致的真正来源是 `NFError.localizedDescription`：它只在导入的
+   * 原先两侧布局不一致的真正来源是 `NPError.localizedDescription`：它只在导入的
      `@implementation`（`.np`）里出现，库 TU 当成公共、客户 TU 当成私有 → 布局分叉。
      改判后两侧的公共集完全一致（sig 相等）。
 
@@ -229,7 +229,7 @@ sig：库 TU == 客户 TU（0xbe99f65a63e20021）
 ### 为什么判据必须是「main 文件」而不是「本 TU 里有 @implementation」
 
 自包含模式下 `#import <Foundation/Foundation.nh>` 会把 Foundation 的 `.np` 内联进
-**每一个** TU。若「有 `@implementation` 就算拥有」，则每个 TU 都拥有 `NFString`，两边都发
+**每一个** TU。若「有 `@implementation` 就算拥有」，则每个 TU 都拥有 `NPString`，两边都发
 强符号 → `duplicate symbol`，现有 01–08 会全部链接失败（**实测如此**）。
 
 限定「main 文件」后：`#import` 带进来的实现不授予归属，自包含模式行为**完全不变**；
@@ -255,7 +255,7 @@ sig：库 TU == 客户 TU（0xbe99f65a63e20021）
 作为 main 文件 → 各自拥有自己的类），但该形态目前**不受支持**：
 
 1. ~~**生成 C 自我冲突**~~ ✅ **已修复（2026-10-03，同日第二轮）**：直接编译
-   `include/Foundation/NFObject.np` 时 `struct nopa_root` / `struct NFObject` 曾在 Section 4
+   `include/Foundation/NPObject.np` 时 `struct nopa_root` / `struct NPObject` 曾在 Section 4
    （带 `#ifndef` 的兜底定义）与类布局节各出现一次（后者无保护）。修法：Section 4 发射兜底体后
    把 tag 登记进 `header_structs`，类布局节既有的 `header_structs.contains` 跳过自然生效——
    同一生成文件每个根结构体恰好定义一次；runtime.h 在场时其定义胜出、跳过同样正确（无条件登记
@@ -286,7 +286,7 @@ sig：库 TU == 客户 TU（0xbe99f65a63e20021）
   `-rewrite-nopa`；评审设想的 `nopac -c main.np → 自动 strong` 对应的现实命令即上表第二行。
 - ~~「仍未做」清单收窄为仅库侧~~ **同日再收窄**：阻塞点 1「生成 C 自我冲突」已修复（见 §9
   「仍未做」第 1 条），按 `.np` 分 TU 只剩 `nopa_metaInit` 弱合并漏初始化——且对 R2 归属类
-  已被 §10 的静态初始化强 `NFClass` 大幅缓解（归属类的元数据加载期即完成，不再依赖 metaInit
+  已被 §10 的静态初始化强 `NPClass` 大幅缓解（归属类的元数据加载期即完成，不再依赖 metaInit
   跑到）。Foundation 库构建仍需旗标：`#import` 不授 ownership 是语义事实，不是缺陷。
 
 ## 10. R3 落地：`__sig` 只覆盖公共段（2026-10-03）
@@ -337,7 +337,7 @@ P3+自有类端到端             rc=0（len=5 s=hello run=42；App 为客户端
 | # | 缺口 | 修法 |
 |---|------|------|
 | 1 | **manifest 模式 creator/follower 指纹不一致**（case 10）：creator 先编译时 manifest 文件尚不存在 → 按"自己名字 ∩ 公共段"算；follower 读到 manifest → 按"manifest 全量"算（含 creator 的私有尾部）→ 误中止 | `vtable_sig_segment` 的 manifest 分支同样过公共段过滤——creator 与 follower 对同一公共集取交集，天然相等 |
-| 2 | **败方 TU 独有类从未初始化**（case 11）：`nopa_metaInit` 弱合并只跑一个 TU 的副本，且只初始化该 TU 见得到的类 → 只存在于 main 的 `App` 的 `NFClass` 恒为零值 → `[[App alloc] init]` 解引用 NULL vtable（§9 阻塞点 2 的运行期形态） | 归属类（R2 集合或 `-fstrong-metadata`）发**完整初始化的强 `NFClass` 定义**（静态初始化，加载期完成，与构造函数顺序无关，裸机可用）；`nopa_metaInit` 本体零改动（自包含模式行为不变）；ARC dealloc wrapper 发射点相应上移到 Section 11 之前（static 定义须先于引用） |
+| 2 | **败方 TU 独有类从未初始化**（case 11）：`nopa_metaInit` 弱合并只跑一个 TU 的副本，且只初始化该 TU 见得到的类 → 只存在于 main 的 `App` 的 `NPClass` 恒为零值 → `[[App alloc] init]` 解引用 NULL vtable（§9 阻塞点 2 的运行期形态） | 归属类（R2 集合或 `-fstrong-metadata`）发**完整初始化的强 `NPClass` 定义**（静态初始化，加载期完成，与构造函数顺序无关，裸机可用）；`nopa_metaInit` 本体零改动（自包含模式行为不变）；ARC dealloc wrapper 发射点相应上移到 Section 11 之前（static 定义须先于引用） |
 | 3 | **仅声明 TU 的继承槽位为 NULL**（P3+自有类）：实例 vtable 对"本 TU 未发射的方法"一律填 NULL → 客户端自有类继承自库类的 `init/retain/...` 槽位全空 → 首次派发 segfault（自包含模式因 Foundation 实现总是内联而不暴露） | 槽位按 owner 分派：本 TU 已发射→引用；**继承槽位（owner 是父类）→ 一律引用 `Owner_method`**（定义在归属 TU 或预编译库，原型已存在）；仅本类协议存根（owner=本类且无实现）保持 NULL——槽位保留语义不变 |
 
 ## 11. 方案定案：Foundation 按 `.np` 分 TU 用 A——owner 静态初始化（2026-10-03）
@@ -348,8 +348,8 @@ P3+自有类端到端             rc=0（len=5 s=hello run=42；App 为客户端
 
 9 个 Foundation `.np` 逐个当主文件编译（`nopac -rewrite-nopa <f>.np -I include` + `clang -c`）：
 
-- **9/9 独立编译通过**——NFObject（§9 修复解锁）之外，其余 8 个（NFArray / NFDictionary / NFError / NFMutableArray / NFMutableDictionary / NFMutableString / NFNumber / NFString）全部直接通过，无需逐个清理，好于预期。
-- import 链（实现经 `#import "*.np"` 内联为**非 owner 弱副本**，R2 语义不变、链接期正确合并）：NFError → NFObject+NFString；NFMutableArray → NFArray；NFMutableDictionary → NFDictionary；NFNumber → NFObject；NFString → NFObject；NFArray / NFDictionary / NFMutableString / NFObject 无 `.np` import。
+- **9/9 独立编译通过**——NPObject（§9 修复解锁）之外，其余 8 个（NPArray / NPDictionary / NPError / NPMutableArray / NPMutableDictionary / NPMutableString / NPNumber / NPString）全部直接通过，无需逐个清理，好于预期。
+- import 链（实现经 `#import "*.np"` 内联为**非 owner 弱副本**，R2 语义不变、链接期正确合并）：NPError → NPObject+NPString；NPMutableArray → NPArray；NPMutableDictionary → NPDictionary；NPNumber → NPObject；NPString → NPObject；NPArray / NPDictionary / NPMutableString / NPObject 无 `.np` import。
 
 ### A vs B（按本项目实际约束）
 
@@ -359,10 +359,10 @@ P3+自有类端到端             rc=0（len=5 s=hello run=42；App 为客户端
 | 裸机 `-ffreestanding` | 纯静态数据，零运行时依赖 | `.init_array` crt0 不跑，每个内核自行接线 |
 | 多平台 | 普通 C 全局定义，链接器机制 | section 遍历 API 三平台三样（ELF `__start_/__stop_` / Mach-O `getsectiondata` / PE 另一套） |
 | 漏注册失败模式 | **链接期响亮**（undefined / duplicate symbol） | **运行期静默**（段错误）——正是 stable-slots 工程消灭的那类错误 |
-| `--gc-sections` | 存活（NFClass 被分配点引用） | fragment 无静态引用会被丢弃（需每平台 `KEEP()`） |
+| `--gc-sections` | 存活（NPClass 被分配点引用） | fragment 无静态引用会被丢弃（需每平台 `KEEP()`） |
 | "谁赢" | 链接期定死：owner 强 / 客户端弱（R2 已实证） | 注册顺序随链接序，first/last-wins 不可移植 |
 
-决定性论据：① Nopa 元数据全是编译期常量（FNV 哈希、`sizeof`、extern 地址——case 11 跨 TU 静态初始化已实证），B 的运行时遍历**没有活干**，而"纯静态"是语言身份；② A 不是新方案——§10 的静态初始化强 `NFClass` 已落地全量验证，Foundation 分 TU 后每个 `.np` 恰好是自己类的 owner，A 只是把既有路径铺满。
+决定性论据：① Nopa 元数据全是编译期常量（FNV 哈希、`sizeof`、extern 地址——case 11 跨 TU 静态初始化已实证），B 的运行时遍历**没有活干**，而"纯静态"是语言身份；② A 不是新方案——§10 的静态初始化强 `NPClass` 已落地全量验证，Foundation 分 TU 后每个 `.np` 恰好是自己类的 owner，A 只是把既有路径铺满。
 
 ### B 的复活条件（存档，勿轻易捡回）
 
@@ -381,17 +381,17 @@ P3+自有类端到端             rc=0（len=5 s=hello run=42；App 为客户端
 
 **`-fstrong-metadata` 删除**（能删就删，无过渡期）：CLI 参数、clap Arg、`DOUBLE_TO_SINGLE`、flag 表、手动 help、两处解析点、pipeline 赋值、`Pipeline.strong_metadata` 字段、`CgUnit.strong_metadata` 字段、codegen 全部 `unit.strong_metadata ||` 合取（R2 独占判定）、multi-input 转发注释与提示。旧拼写两种参数位置都响亮失败（`Unknown argument` / `cannot read`），check 3 双序断言守护。
 
-**metaInit 退役实证**：客户端 TU 的 9 个 `NFClass` 全部走 §10 静态初始化（`__data` 段，非 BSS）；用 `.o` 位置参数直链强空 `nopa_metaInit` 覆盖弱合并副本 → 客户端全程正常（`[metaInit: strong-empty override ran]`，输出逐字节不变）——metaInit 在 R2 归属世界只剩幂等回填，仅对 `#import "*.np"` 的库构建路径仍有意义。
+**metaInit 退役实证**：客户端 TU 的 9 个 `NPClass` 全部走 §10 静态初始化（`__data` 段，非 BSS）；用 `.o` 位置参数直链强空 `nopa_metaInit` 覆盖弱合并副本 → 客户端全程正常（`[metaInit: strong-empty override ran]`，输出逐字节不变）——metaInit 在 R2 归属世界只剩幂等回填，仅对 `#import "*.np"` 的库构建路径仍有意义。
 
 **P3 端到端**：`Foundation.decl.nh` + `-lnopafoundation` 客户端探针全绿（string/array/for-in/dict/isEqual，exit=0）。
 
 **实施中挖出并修掉的两个真 bug（探针实证，勿重蹈）**：
 
-1. **meta-vtable 对"声明可见但本 TU 未实现"的类方法无条件引用函数符号** → 链接 undefined（`NFError_errorWithCode_domain_` 等）。实例 vtable 在多 TU 会话已立"槽位保留、引用不发"的 EMITTED_METHODS 规则，meta-vtable 实例循环漏镜像。修法：同款 `method_is_emitted(owner, mname) || owner != 本类` 判定，own 未实现槽位 NULL（codegen.rs Meta vtable instances 循环）。decl-only 客户端 TU 现在完全不产生兄弟类的 undefined 引用。
-2. **给 9 个 `.np` 源文件直接补 decl.nh import 是方向性错误**（已回退，`git diff` 归零）：`#import` 链让声明面泄漏进所有内联方——自包含 TU（如 trace golden 只 import NFObject）突然"看见" NFString/NFArray 的声明 → 桩 vtable 继承槽位引用 `NFArray_count` 等库符号 → 无库链接 undefined（7 个 test_all 失败）。正确形态是**wrapper TU 只存在于库构建时**：声明面扩大不污染源文件，自包含 TU 保持它要求的声明面。
+1. **meta-vtable 对"声明可见但本 TU 未实现"的类方法无条件引用函数符号** → 链接 undefined（`NPError_errorWithCode_domain_` 等）。实例 vtable 在多 TU 会话已立"槽位保留、引用不发"的 EMITTED_METHODS 规则，meta-vtable 实例循环漏镜像。修法：同款 `method_is_emitted(owner, mname) || owner != 本类` 判定，own 未实现槽位 NULL（codegen.rs Meta vtable instances 循环）。decl-only 客户端 TU 现在完全不产生兄弟类的 undefined 引用。
+2. **给 9 个 `.np` 源文件直接补 decl.nh import 是方向性错误**（已回退，`git diff` 归零）：`#import` 链让声明面泄漏进所有内联方——自包含 TU（如 trace golden 只 import NPObject）突然"看见" NPString/NPArray 的声明 → 桩 vtable 继承槽位引用 `NPArray_count` 等库符号 → 无库链接 undefined（7 个 test_all 失败）。正确形态是**wrapper TU 只存在于库构建时**：声明面扩大不污染源文件，自包含 TU 保持它要求的声明面。
 
 **回归门槛（全部实测）**：cargo 153/0、multi_tu 12/12、strong_metadata 10/10（check 3 已改测旗标删除的响亮拒绝）、arc_intern ASan PASS、test_all **347/355, 0 failed**（6 canceled 交互式、2 个 `-F` 既有基线、SUSPECT=0）——与基线精确一致。
 
-**残留挂账**：`nopa_metaInit` 弱合并漏初始化对 R2 归属类已被静态强 `NFClass` 缓解；`#import "*.np"` 的库构建路径（Foundation.nh 单 TU）仍需 metaInit 真身——已在构建脚本注释与 AGENTS 中如实声明。
+**残留挂账**：`nopa_metaInit` 弱合并漏初始化对 R2 归属类已被静态强 `NPClass` 缓解；`#import "*.np"` 的库构建路径（Foundation.nh 单 TU）仍需 metaInit 真身——已在构建脚本注释与 AGENTS 中如实声明。
 
 > **追记（2026-10-03）——伞头交换**：用户拍板 `Foundation.decl.nh` 命名太怪，按 `.nh`/`.np` 约定交换：**`Foundation.nh` 现为纯声明伞头**（本文 136–152 行等处写的 `Foundation.decl.nh` 一律读作它），**`Foundation.np` 为自包含伞头**（原 `Foundation.nh` 的实现内联形态），`Foundation.decl.nh` 与 `tools/make-decl-headers.sh` 已删除。`build-foundation-lib.sh` 的 wrapper 前置行相应换为 `Foundation.nh`。上文历史记录保留原样，仅作对照。

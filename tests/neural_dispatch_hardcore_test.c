@@ -9,12 +9,12 @@
 
 #include <string.h>
 
-struct nopa_NFObject_vtable;
+struct nopa_NPObject_vtable;
 struct nopa_AI__Compute__TensorMatrix_vtable;
 struct nopa_Network__Pipeline__ModelDispatcher_vtable;
 
-#define nopa_NFObject_vtable_index_init 2
-#define nopa_NFObject_vtable_index_dealloc 3
+#define nopa_NPObject_vtable_index_init 2
+#define nopa_NPObject_vtable_index_dealloc 3
 #define nopa_AI__Compute__TensorMatrix_vtable_index_initWithLabel_dimension_ 6
 #define nopa_AI__Compute__TensorMatrix_vtable_index_evaluateLossWithBlock_ 7
 #define nopa_Network__Pipeline__ModelDispatcher_vtable_index_initPipelineWithId_ 4
@@ -35,77 +35,77 @@ static const SEL __nopa_sel_inputLayer = {.name = "inputLayer", .hash = 0x4CCFB3
 static const SEL __nopa_sel_outputLayer = {.name = "outputLayer", .hash = 0x6AEA6591};
 static const SEL __nopa_sel_dispatchForwardPassWithGlobalLoss_ = {.name = "dispatchForwardPassWithGlobalLoss_", .hash = 0x7F5E3862};
 
-typedef struct NFObject NFObject;
+typedef struct NPObject NPObject;
 typedef struct AI__Compute__TensorMatrix AI__Compute__TensorMatrix;
 typedef struct Network__Pipeline__ModelDispatcher Network__Pipeline__ModelDispatcher;
 
 
 typedef int (^LossCalculatorBlock)(int);
 
-NFObject * NFObject_alloc(NFClass * self, SEL _cmd);
-NFObject * NFObject_new(NFClass * self, SEL _cmd);
-NFObject * NFObject_init(NFObject * self, SEL _cmd);
-void NFObject_dealloc(NFObject * self, SEL _cmd);
-NFClass * NFObject_getClass(NFClass * self, SEL _cmd);
-AI__Compute__TensorMatrix * AI__Compute__TensorMatrix_createStandardMatrix(NFClass * self, SEL _cmd);
-AI__Compute__TensorMatrix * AI__Compute__TensorMatrix_createDeepQuantumMatrix(NFClass * self, SEL _cmd);
-NFObject * AI__Compute__TensorMatrix_initWithLabel_dimension_(NFObject * self, SEL _cmd, const char * label, int dim);
-int AI__Compute__TensorMatrix_evaluateLossWithBlock_(NFObject * self, SEL _cmd, AI__Compute__LossCalculatorBlock lossBlock);
-int AI__Compute__TensorMatrix_matrixDim(NFObject * self, SEL _cmd);
-void AI__Compute__TensorMatrix_setMatrixDim_(NFObject * self, SEL _cmd, int value);
-const char * AI__Compute__TensorMatrix_tensorLabel(NFObject * self, SEL _cmd);
-NFClass * AI__Compute__TensorMatrix_getClass(NFClass * self, SEL _cmd);
-NFObject * Network__Pipeline__ModelDispatcher_initPipelineWithId_(NFObject * self, SEL _cmd, const char * pid);
-void Network__Pipeline__ModelDispatcher_dispatchForwardPassWithGlobalLoss_(NFObject * self, SEL _cmd, AI__Compute__LossCalculatorBlock globalLoss);
-void Network__Pipeline__ModelDispatcher_dealloc(NFObject * self, SEL _cmd);
-const char * Network__Pipeline__ModelDispatcher_pipelineId(NFObject * self, SEL _cmd);
-AI__Compute__TensorMatrix * Network__Pipeline__ModelDispatcher_inputLayer(NFObject * self, SEL _cmd);
-void Network__Pipeline__ModelDispatcher_setInputLayer_(NFObject * self, SEL _cmd, AI__Compute__TensorMatrix * value);
-AI__Compute__TensorMatrix * Network__Pipeline__ModelDispatcher_outputLayer(NFObject * self, SEL _cmd);
-void Network__Pipeline__ModelDispatcher_setOutputLayer_(NFObject * self, SEL _cmd, AI__Compute__TensorMatrix * value);
-NFClass * Network__Pipeline__ModelDispatcher_getClass(NFClass * self, SEL _cmd);
+NPObject * NPObject_alloc(NPClass * self, SEL _cmd);
+NPObject * NPObject_new(NPClass * self, SEL _cmd);
+NPObject * NPObject_init(NPObject * self, SEL _cmd);
+void NPObject_dealloc(NPObject * self, SEL _cmd);
+NPClass * NPObject_getClass(NPClass * self, SEL _cmd);
+AI__Compute__TensorMatrix * AI__Compute__TensorMatrix_createStandardMatrix(NPClass * self, SEL _cmd);
+AI__Compute__TensorMatrix * AI__Compute__TensorMatrix_createDeepQuantumMatrix(NPClass * self, SEL _cmd);
+NPObject * AI__Compute__TensorMatrix_initWithLabel_dimension_(NPObject * self, SEL _cmd, const char * label, int dim);
+int AI__Compute__TensorMatrix_evaluateLossWithBlock_(NPObject * self, SEL _cmd, AI__Compute__LossCalculatorBlock lossBlock);
+int AI__Compute__TensorMatrix_matrixDim(NPObject * self, SEL _cmd);
+void AI__Compute__TensorMatrix_setMatrixDim_(NPObject * self, SEL _cmd, int value);
+const char * AI__Compute__TensorMatrix_tensorLabel(NPObject * self, SEL _cmd);
+NPClass * AI__Compute__TensorMatrix_getClass(NPClass * self, SEL _cmd);
+NPObject * Network__Pipeline__ModelDispatcher_initPipelineWithId_(NPObject * self, SEL _cmd, const char * pid);
+void Network__Pipeline__ModelDispatcher_dispatchForwardPassWithGlobalLoss_(NPObject * self, SEL _cmd, AI__Compute__LossCalculatorBlock globalLoss);
+void Network__Pipeline__ModelDispatcher_dealloc(NPObject * self, SEL _cmd);
+const char * Network__Pipeline__ModelDispatcher_pipelineId(NPObject * self, SEL _cmd);
+AI__Compute__TensorMatrix * Network__Pipeline__ModelDispatcher_inputLayer(NPObject * self, SEL _cmd);
+void Network__Pipeline__ModelDispatcher_setInputLayer_(NPObject * self, SEL _cmd, AI__Compute__TensorMatrix * value);
+AI__Compute__TensorMatrix * Network__Pipeline__ModelDispatcher_outputLayer(NPObject * self, SEL _cmd);
+void Network__Pipeline__ModelDispatcher_setOutputLayer_(NPObject * self, SEL _cmd, AI__Compute__TensorMatrix * value);
+NPClass * Network__Pipeline__ModelDispatcher_getClass(NPClass * self, SEL _cmd);
 int main(int argc, const char * * argv);
 
-extern NFClass nopa_NFObject_class;
-extern NFClass nopa_AI__Compute__TensorMatrix_class;
-extern NFClass nopa_Network__Pipeline__ModelDispatcher_class;
+extern NPClass nopa_NPObject_class;
+extern NPClass nopa_AI__Compute__TensorMatrix_class;
+extern NPClass nopa_Network__Pipeline__ModelDispatcher_class;
 void nopa_meta_init(void);
 
-// struct NFClass defined in runtime.h
-// struct NFObject defined in runtime.h
-struct nopa_NFObject_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
+// struct NPClass defined in runtime.h
+// struct NPObject defined in runtime.h
+struct nopa_NPObject_vtable {
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
 };
-struct nopa_NFObject_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+struct nopa_NPObject_meta_vtable {
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 typedef int (^LossCalculatorBlock)(int);
 struct AI__Compute__TensorMatrix {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     int _matrixDim;
     const char * _tensorLabel;
 };
 typedef struct AI__Compute__TensorMatrix AI__Compute__TensorMatrix;
 struct nopa_AI__Compute__TensorMatrix_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    NFObject * (*initWithLabel_dimension_)(NFObject *, SEL, const char *, int);
-    int (*evaluateLossWithBlock_)(NFObject *, SEL, AI__Compute__LossCalculatorBlock);
-    int (*matrixDim)(NFObject *, SEL);
-    void (*setMatrixDim_)(NFObject *, SEL, int);
-    const char * (*tensorLabel)(NFObject *, SEL);
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    NPObject * (*initWithLabel_dimension_)(NPObject *, SEL, const char *, int);
+    int (*evaluateLossWithBlock_)(NPObject *, SEL, AI__Compute__LossCalculatorBlock);
+    int (*matrixDim)(NPObject *, SEL);
+    void (*setMatrixDim_)(NPObject *, SEL, int);
+    const char * (*tensorLabel)(NPObject *, SEL);
 };
 struct nopa_AI__Compute__TensorMatrix_meta_vtable {
-    AI__Compute__TensorMatrix * (*createStandardMatrix)(NFClass *, SEL);
-    AI__Compute__TensorMatrix * (*createDeepQuantumMatrix)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+    AI__Compute__TensorMatrix * (*createStandardMatrix)(NPClass *, SEL);
+    AI__Compute__TensorMatrix * (*createDeepQuantumMatrix)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct Network__Pipeline__ModelDispatcher {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     const char * _pipelineId;
     AI__Compute__TensorMatrix * _inputLayer;
@@ -113,60 +113,60 @@ struct Network__Pipeline__ModelDispatcher {
 };
 typedef struct Network__Pipeline__ModelDispatcher Network__Pipeline__ModelDispatcher;
 struct nopa_Network__Pipeline__ModelDispatcher_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    NFObject * (*initPipelineWithId_)(NFObject *, SEL, const char *);
-    void (*dispatchForwardPassWithGlobalLoss_)(NFObject *, SEL, AI__Compute__LossCalculatorBlock);
-    const char * (*pipelineId)(NFObject *, SEL);
-    AI__Compute__TensorMatrix * (*inputLayer)(NFObject *, SEL);
-    void (*setInputLayer_)(NFObject *, SEL, AI__Compute__TensorMatrix *);
-    AI__Compute__TensorMatrix * (*outputLayer)(NFObject *, SEL);
-    void (*setOutputLayer_)(NFObject *, SEL, AI__Compute__TensorMatrix *);
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    NPObject * (*initPipelineWithId_)(NPObject *, SEL, const char *);
+    void (*dispatchForwardPassWithGlobalLoss_)(NPObject *, SEL, AI__Compute__LossCalculatorBlock);
+    const char * (*pipelineId)(NPObject *, SEL);
+    AI__Compute__TensorMatrix * (*inputLayer)(NPObject *, SEL);
+    void (*setInputLayer_)(NPObject *, SEL, AI__Compute__TensorMatrix *);
+    AI__Compute__TensorMatrix * (*outputLayer)(NPObject *, SEL);
+    void (*setOutputLayer_)(NPObject *, SEL, AI__Compute__TensorMatrix *);
 };
 struct nopa_Network__Pipeline__ModelDispatcher_meta_vtable {
-    NFClass * (*class)(NFClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
-NFObject * NFObject_alloc(NFClass * self, SEL _cmd) {
+NPObject * NPObject_alloc(NPClass * self, SEL _cmd) {
     return nopa_alloc(self);
 }
 
-NFObject * NFObject_new(NFClass * self, SEL _cmd) {
-    NFObject * obj = nopa_alloc(self);
+NPObject * NPObject_new(NPClass * self, SEL _cmd) {
+    NPObject * obj = nopa_alloc(self);
     return nopa_init(obj);
 }
 
-NFObject * NFObject_init(NFObject * self, SEL _cmd) {
-    struct NFObject * _self = ((struct NFObject *)(self));
+NPObject * NPObject_init(NPObject * self, SEL _cmd) {
+    struct NPObject * _self = ((struct NPObject *)(self));
     {
         return nopa_init(self);
     }
 }
 
-void NFObject_dealloc(NFObject * self, SEL _cmd) {
-    struct NFObject * _self = ((struct NFObject *)(self));
+void NPObject_dealloc(NPObject * self, SEL _cmd) {
+    struct NPObject * _self = ((struct NPObject *)(self));
     {
         return;
     }
 }
 
-NFClass * NFObject_getClass(NFClass * self, SEL _cmd) {
-    return &nopa_NFObject_class;
+NPClass * NPObject_getClass(NPClass * self, SEL _cmd) {
+    return &nopa_NPObject_class;
 }
 
-NFObject * nopa_alloc(struct NFClass * cls);
-NFObject * nopa_init(NFObject * );
-AI__Compute__TensorMatrix * AI__Compute__TensorMatrix_createStandardMatrix(NFClass * self, SEL _cmd) {
-    return ({ NFObject *__nopa_tmp_0 = (NFObject_alloc(&nopa_AI__Compute__TensorMatrix_class, __nopa_sel_alloc)); ((struct nopa_AI__Compute__TensorMatrix_vtable *)__nopa_tmp_0->isa->vtable)->initWithLabel_dimension_(__nopa_tmp_0, __nopa_sel_initWithLabel_dimension_, "Dense_Layer_Tensor", 128); });
+NPObject * nopa_alloc(struct NPClass * cls);
+NPObject * nopa_init(NPObject * );
+AI__Compute__TensorMatrix * AI__Compute__TensorMatrix_createStandardMatrix(NPClass * self, SEL _cmd) {
+    return ({ NPObject *__nopa_tmp_0 = (NPObject_alloc(&nopa_AI__Compute__TensorMatrix_class, __nopa_sel_alloc)); ((struct nopa_AI__Compute__TensorMatrix_vtable *)__nopa_tmp_0->isa->vtable)->initWithLabel_dimension_(__nopa_tmp_0, __nopa_sel_initWithLabel_dimension_, "Dense_Layer_Tensor", 128); });
 }
 
-AI__Compute__TensorMatrix * AI__Compute__TensorMatrix_createDeepQuantumMatrix(NFClass * self, SEL _cmd) {
-    return ({ NFObject *__nopa_tmp_1 = (NFObject_alloc(&nopa_AI__Compute__TensorMatrix_class, __nopa_sel_alloc)); ((struct nopa_AI__Compute__TensorMatrix_vtable *)__nopa_tmp_1->isa->vtable)->initWithLabel_dimension_(__nopa_tmp_1, __nopa_sel_initWithLabel_dimension_, "Quantum_Attention_Tensor", 1024); });
+AI__Compute__TensorMatrix * AI__Compute__TensorMatrix_createDeepQuantumMatrix(NPClass * self, SEL _cmd) {
+    return ({ NPObject *__nopa_tmp_1 = (NPObject_alloc(&nopa_AI__Compute__TensorMatrix_class, __nopa_sel_alloc)); ((struct nopa_AI__Compute__TensorMatrix_vtable *)__nopa_tmp_1->isa->vtable)->initWithLabel_dimension_(__nopa_tmp_1, __nopa_sel_initWithLabel_dimension_, "Quantum_Attention_Tensor", 1024); });
 }
 
-NFObject * AI__Compute__TensorMatrix_initWithLabel_dimension_(NFObject * self, SEL _cmd, const char * label, int dim) {
+NPObject * AI__Compute__TensorMatrix_initWithLabel_dimension_(NPObject * self, SEL _cmd, const char * label, int dim) {
     struct AI__Compute__TensorMatrix * _self = ((struct AI__Compute__TensorMatrix *)(self));
     {
-        self = NFObject_init(self, __nopa_sel_init);
+        self = NPObject_init(self, __nopa_sel_init);
         if (self) {
             {
                 ((struct AI__Compute__TensorMatrix *)(self))->_tensorLabel = label;
@@ -177,7 +177,7 @@ NFObject * AI__Compute__TensorMatrix_initWithLabel_dimension_(NFObject * self, S
     }
 }
 
-int AI__Compute__TensorMatrix_evaluateLossWithBlock_(NFObject * self, SEL _cmd, AI__Compute__LossCalculatorBlock lossBlock) {
+int AI__Compute__TensorMatrix_evaluateLossWithBlock_(NPObject * self, SEL _cmd, AI__Compute__LossCalculatorBlock lossBlock) {
     struct AI__Compute__TensorMatrix * _self = ((struct AI__Compute__TensorMatrix *)(self));
     {
         if (lossBlock) {
@@ -189,26 +189,26 @@ int AI__Compute__TensorMatrix_evaluateLossWithBlock_(NFObject * self, SEL _cmd, 
     }
 }
 
-int AI__Compute__TensorMatrix_matrixDim(NFObject * self, SEL _cmd) {
+int AI__Compute__TensorMatrix_matrixDim(NPObject * self, SEL _cmd) {
     return ((struct AI::Compute::TensorMatrix *)(self))->_matrixDim;
 }
 
-void AI__Compute__TensorMatrix_setMatrixDim_(NFObject * self, SEL _cmd, int value) {
+void AI__Compute__TensorMatrix_setMatrixDim_(NPObject * self, SEL _cmd, int value) {
     ((struct AI__Compute__TensorMatrix *)(self))->_matrixDim = value;
 }
 
-const char * AI__Compute__TensorMatrix_tensorLabel(NFObject * self, SEL _cmd) {
+const char * AI__Compute__TensorMatrix_tensorLabel(NPObject * self, SEL _cmd) {
     return ((struct AI::Compute::TensorMatrix *)(self))->_tensorLabel;
 }
 
-NFClass * AI__Compute__TensorMatrix_getClass(NFClass * self, SEL _cmd) {
+NPClass * AI__Compute__TensorMatrix_getClass(NPClass * self, SEL _cmd) {
     return &nopa_AI__Compute__TensorMatrix_class;
 }
 
-NFObject * Network__Pipeline__ModelDispatcher_initPipelineWithId_(NFObject * self, SEL _cmd, const char * pid) {
+NPObject * Network__Pipeline__ModelDispatcher_initPipelineWithId_(NPObject * self, SEL _cmd, const char * pid) {
     struct Network__Pipeline__ModelDispatcher * _self = ((struct Network__Pipeline__ModelDispatcher *)(self));
     {
-        self = NFObject_init(self, __nopa_sel_init);
+        self = NPObject_init(self, __nopa_sel_init);
         if (self) {
             {
                 ((struct Network__Pipeline__ModelDispatcher *)(self))->_pipelineId = pid;
@@ -220,7 +220,7 @@ NFObject * Network__Pipeline__ModelDispatcher_initPipelineWithId_(NFObject * sel
     }
 }
 
-void Network__Pipeline__ModelDispatcher_dispatchForwardPassWithGlobalLoss_(NFObject * self, SEL _cmd, AI__Compute__LossCalculatorBlock globalLoss) {
+void Network__Pipeline__ModelDispatcher_dispatchForwardPassWithGlobalLoss_(NPObject * self, SEL _cmd, AI__Compute__LossCalculatorBlock globalLoss) {
     struct Network__Pipeline__ModelDispatcher * _self = ((struct Network__Pipeline__ModelDispatcher *)(self));
     {
         printf("[管线调度] 模型流水线「%s」前向传播激活：\n", ((struct Network__Pipeline__ModelDispatcher *)(self))->_pipelineId);
@@ -232,7 +232,7 @@ void Network__Pipeline__ModelDispatcher_dispatchForwardPassWithGlobalLoss_(NFObj
     }
 }
 
-void Network__Pipeline__ModelDispatcher_dealloc(NFObject * self, SEL _cmd) {
+void Network__Pipeline__ModelDispatcher_dealloc(NPObject * self, SEL _cmd) {
     struct Network__Pipeline__ModelDispatcher * _self = ((struct Network__Pipeline__ModelDispatcher *)(self));
     {
         nopa_release(((struct Network__Pipeline__ModelDispatcher *)(self))->_inputLayer);
@@ -241,27 +241,27 @@ void Network__Pipeline__ModelDispatcher_dealloc(NFObject * self, SEL _cmd) {
     }
 }
 
-const char * Network__Pipeline__ModelDispatcher_pipelineId(NFObject * self, SEL _cmd) {
+const char * Network__Pipeline__ModelDispatcher_pipelineId(NPObject * self, SEL _cmd) {
     return ((struct Network::Pipeline::ModelDispatcher *)(self))->_pipelineId;
 }
 
-AI__Compute__TensorMatrix * Network__Pipeline__ModelDispatcher_inputLayer(NFObject * self, SEL _cmd) {
+AI__Compute__TensorMatrix * Network__Pipeline__ModelDispatcher_inputLayer(NPObject * self, SEL _cmd) {
     return ((struct Network::Pipeline::ModelDispatcher *)(self))->_inputLayer;
 }
 
-void Network__Pipeline__ModelDispatcher_setInputLayer_(NFObject * self, SEL _cmd, AI__Compute__TensorMatrix * value) {
+void Network__Pipeline__ModelDispatcher_setInputLayer_(NPObject * self, SEL _cmd, AI__Compute__TensorMatrix * value) {
     ((struct Network__Pipeline__ModelDispatcher *)(self))->_inputLayer = value;
 }
 
-AI__Compute__TensorMatrix * Network__Pipeline__ModelDispatcher_outputLayer(NFObject * self, SEL _cmd) {
+AI__Compute__TensorMatrix * Network__Pipeline__ModelDispatcher_outputLayer(NPObject * self, SEL _cmd) {
     return ((struct Network::Pipeline::ModelDispatcher *)(self))->_outputLayer;
 }
 
-void Network__Pipeline__ModelDispatcher_setOutputLayer_(NFObject * self, SEL _cmd, AI__Compute__TensorMatrix * value) {
+void Network__Pipeline__ModelDispatcher_setOutputLayer_(NPObject * self, SEL _cmd, AI__Compute__TensorMatrix * value) {
     ((struct Network__Pipeline__ModelDispatcher *)(self))->_outputLayer = value;
 }
 
-NFClass * Network__Pipeline__ModelDispatcher_getClass(NFClass * self, SEL _cmd) {
+NPClass * Network__Pipeline__ModelDispatcher_getClass(NPClass * self, SEL _cmd) {
     return &nopa_Network__Pipeline__ModelDispatcher_class;
 }
 
@@ -278,11 +278,11 @@ int main(int argc, const char * * argv) {
             AI__Compute__TensorMatrix * orphanTensor = AI__Compute__TensorMatrix_createStandardMatrix(&nopa_AI__Compute__TensorMatrix_class, __nopa_sel_createStandardMatrix);
             printf("[张量工厂断言] 独立制造张量成功: %s, 维度: %d\n", ((struct nopa_AI__Compute__TensorMatrix_vtable *)orphanTensor->isa->vtable)->tensorLabel(orphanTensor, __nopa_sel_tensorLabel), ((struct nopa_AI__Compute__TensorMatrix_vtable *)orphanTensor->isa->vtable)->matrixDim(orphanTensor, __nopa_sel_matrixDim));
             printf("\n--- 2. 测试内部级联类方法的对象初始化（Dispatcher 内部装配 Tensor） ---\n");
-            NFObject *__nopa_tmp_2 = (NFObject_alloc(&nopa_Network__Pipeline__ModelDispatcher_class, __nopa_sel_alloc));
+            NPObject *__nopa_tmp_2 = (NPObject_alloc(&nopa_Network__Pipeline__ModelDispatcher_class, __nopa_sel_alloc));
             Network__Pipeline__ModelDispatcher * neuralPipeline = ((struct nopa_Network__Pipeline__ModelDispatcher_vtable *)__nopa_tmp_2->isa->vtable)->initPipelineWithId_(__nopa_tmp_2, __nopa_sel_initPipelineWithId_, "GPT-Nopa-Core-V3");
             printf("[调度报告] 管线ID: %s\n", ((struct nopa_Network__Pipeline__ModelDispatcher_vtable *)neuralPipeline->isa->vtable)->pipelineId(neuralPipeline, __nopa_sel_pipelineId));
-            printf("[调度报告] 自动初始化输入节点: %s\n", ({ NFObject *__nopa_tmp_3 = (((struct nopa_Network__Pipeline__ModelDispatcher_vtable *)neuralPipeline->isa->vtable)->inputLayer(neuralPipeline, __nopa_sel_inputLayer)); ((struct nopa_AI__Compute__TensorMatrix_vtable *)__nopa_tmp_3->isa->vtable)->tensorLabel(__nopa_tmp_3, __nopa_sel_tensorLabel); }));
-            printf("[调度报告] 自动初始化输出节点: %s\n", ({ NFObject *__nopa_tmp_4 = (((struct nopa_Network__Pipeline__ModelDispatcher_vtable *)neuralPipeline->isa->vtable)->outputLayer(neuralPipeline, __nopa_sel_outputLayer)); ((struct nopa_AI__Compute__TensorMatrix_vtable *)__nopa_tmp_4->isa->vtable)->tensorLabel(__nopa_tmp_4, __nopa_sel_tensorLabel); }));
+            printf("[调度报告] 自动初始化输入节点: %s\n", ({ NPObject *__nopa_tmp_3 = (((struct nopa_Network__Pipeline__ModelDispatcher_vtable *)neuralPipeline->isa->vtable)->inputLayer(neuralPipeline, __nopa_sel_inputLayer)); ((struct nopa_AI__Compute__TensorMatrix_vtable *)__nopa_tmp_3->isa->vtable)->tensorLabel(__nopa_tmp_3, __nopa_sel_tensorLabel); }));
+            printf("[调度报告] 自动初始化输出节点: %s\n", ({ NPObject *__nopa_tmp_4 = (((struct nopa_Network__Pipeline__ModelDispatcher_vtable *)neuralPipeline->isa->vtable)->outputLayer(neuralPipeline, __nopa_sel_outputLayer)); ((struct nopa_AI__Compute__TensorMatrix_vtable *)__nopa_tmp_4->isa->vtable)->tensorLabel(__nopa_tmp_4, __nopa_sel_tensorLabel); }));
             printf("\n--- 3. 测试 Block 进行跨空间多层拓扑投递 ---\n");
             AI__Compute__LossCalculatorBlock optimizerBlock = ^int(int dim) {
     if (dim > 500) {
@@ -321,14 +321,14 @@ int main(int argc, const char * * argv) {
 
 // ─── Class metadata ─────────────────────────────────────
 
-struct nopa_NFObject_vtable nopa_NFObject_vtable_inst = {
-    .init = NFObject_init,
-    .dealloc = NFObject_dealloc,
+struct nopa_NPObject_vtable nopa_NPObject_vtable_inst = {
+    .init = NPObject_init,
+    .dealloc = NPObject_dealloc,
 };
 
 struct nopa_AI__Compute__TensorMatrix_vtable nopa_AI__Compute__TensorMatrix_vtable_inst = {
-    .init = NFObject_init,
-    .dealloc = NFObject_dealloc,
+    .init = NPObject_init,
+    .dealloc = NPObject_dealloc,
     .initWithLabel_dimension_ = AI__Compute__TensorMatrix_initWithLabel_dimension_,
     .evaluateLossWithBlock_ = AI__Compute__TensorMatrix_evaluateLossWithBlock_,
     .matrixDim = AI__Compute__TensorMatrix_matrixDim,
@@ -337,7 +337,7 @@ struct nopa_AI__Compute__TensorMatrix_vtable nopa_AI__Compute__TensorMatrix_vtab
 };
 
 struct nopa_Network__Pipeline__ModelDispatcher_vtable nopa_Network__Pipeline__ModelDispatcher_vtable_inst = {
-    .init = NFObject_init,
+    .init = NPObject_init,
     .dealloc = Network__Pipeline__ModelDispatcher_dealloc,
     .initPipelineWithId_ = Network__Pipeline__ModelDispatcher_initPipelineWithId_,
     .dispatchForwardPassWithGlobalLoss_ = Network__Pipeline__ModelDispatcher_dispatchForwardPassWithGlobalLoss_,
@@ -348,10 +348,10 @@ struct nopa_Network__Pipeline__ModelDispatcher_vtable nopa_Network__Pipeline__Mo
     .setOutputLayer_ = Network__Pipeline__ModelDispatcher_setOutputLayer_,
 };
 
-struct nopa_NFObject_meta_vtable nopa_NFObject_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
-    .class = NFObject_getClass,
+struct nopa_NPObject_meta_vtable nopa_NPObject_meta_vtable_inst = {
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
+    .class = NPObject_getClass,
 };
 
 struct nopa_AI__Compute__TensorMatrix_meta_vtable nopa_AI__Compute__TensorMatrix_meta_vtable_inst = {
@@ -364,30 +364,30 @@ struct nopa_Network__Pipeline__ModelDispatcher_meta_vtable nopa_Network__Pipelin
     .class = Network__Pipeline__ModelDispatcher_getClass,
 };
 
-NFClass nopa_NFObject_class;
-NFClass nopa_AI__Compute__TensorMatrix_class;
-NFClass nopa_Network__Pipeline__ModelDispatcher_class;
+NPClass nopa_NPObject_class;
+NPClass nopa_AI__Compute__TensorMatrix_class;
+NPClass nopa_Network__Pipeline__ModelDispatcher_class;
 
 void nopa_meta_init(void) {
-    nopa_NFObject_class = (NFClass){
-        .name = "NFObject",
+    nopa_NPObject_class = (NPClass){
+        .name = "NPObject",
         .superclass = NULL,
-        .instance_size = sizeof(struct NFObject),
-        .vtable = &nopa_NFObject_vtable_inst,
-        .class_vtable = &nopa_NFObject_meta_vtable_inst,
+        .instance_size = sizeof(struct NPObject),
+        .vtable = &nopa_NPObject_vtable_inst,
+        .class_vtable = &nopa_NPObject_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_AI__Compute__TensorMatrix_class = (NFClass){
+    nopa_AI__Compute__TensorMatrix_class = (NPClass){
         .name = "AI__Compute__TensorMatrix",
-        .superclass = &nopa_NFObject_class,
+        .superclass = &nopa_NPObject_class,
         .instance_size = sizeof(struct AI__Compute__TensorMatrix),
         .vtable = &nopa_AI__Compute__TensorMatrix_vtable_inst,
         .class_vtable = &nopa_AI__Compute__TensorMatrix_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_Network__Pipeline__ModelDispatcher_class = (NFClass){
+    nopa_Network__Pipeline__ModelDispatcher_class = (NPClass){
         .name = "Network__Pipeline__ModelDispatcher",
-        .superclass = &nopa_NFObject_class,
+        .superclass = &nopa_NPObject_class,
         .instance_size = sizeof(struct Network__Pipeline__ModelDispatcher),
         .vtable = &nopa_Network__Pipeline__ModelDispatcher_vtable_inst,
         .class_vtable = &nopa_Network__Pipeline__ModelDispatcher_meta_vtable_inst,

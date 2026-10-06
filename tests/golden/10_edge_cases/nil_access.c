@@ -7,92 +7,92 @@
 
 #include <string.h>
 
-struct nopa_NFObject_vtable;
+struct nopa_NPObject_vtable;
 struct nopa_Obj_vtable;
 
-#define nopa_NFObject_vtable_index_init 2
-#define nopa_NFObject_vtable_index_dealloc 3
+#define nopa_NPObject_vtable_index_init 2
+#define nopa_NPObject_vtable_index_dealloc 3
 #define nopa_Obj_vtable_index_sayHi 4
 
-typedef struct NFObject NFObject;
+typedef struct NPObject NPObject;
 typedef struct Obj Obj;
 
 
 
-NFObject * NFObject_alloc(NFClass * self, SEL _cmd);
-NFObject * NFObject_new(NFClass * self, SEL _cmd);
-NFObject * NFObject_init(NFObject * self, SEL _cmd);
-void NFObject_dealloc(NFObject * self, SEL _cmd);
-NFClass * NFObject_getClass(NFClass * self, SEL _cmd);
-void Obj_sayHi(NFObject * self, SEL _cmd);
-NFClass * Obj_getClass(NFClass * self, SEL _cmd);
+NPObject * NPObject_alloc(NPClass * self, SEL _cmd);
+NPObject * NPObject_new(NPClass * self, SEL _cmd);
+NPObject * NPObject_init(NPObject * self, SEL _cmd);
+void NPObject_dealloc(NPObject * self, SEL _cmd);
+NPClass * NPObject_getClass(NPClass * self, SEL _cmd);
+void Obj_sayHi(NPObject * self, SEL _cmd);
+NPClass * Obj_getClass(NPClass * self, SEL _cmd);
 int main();
 
-extern NFClass nopa_NFObject_class;
-extern NFClass nopa_Obj_class;
+extern NPClass nopa_NPObject_class;
+extern NPClass nopa_Obj_class;
 void nopa_meta_init(void);
 
-// struct NFClass defined in runtime.h
-// struct NFObject defined in runtime.h
-struct nopa_NFObject_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
+// struct NPClass defined in runtime.h
+// struct NPObject defined in runtime.h
+struct nopa_NPObject_vtable {
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
 };
-struct nopa_NFObject_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+struct nopa_NPObject_meta_vtable {
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct Obj {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
 };
 typedef struct Obj Obj;
 struct nopa_Obj_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    void (*sayHi)(NFObject *, SEL);
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    void (*sayHi)(NPObject *, SEL);
 };
 struct nopa_Obj_meta_vtable {
-    NFClass * (*class)(NFClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
-NFObject * NFObject_alloc(NFClass * self, SEL _cmd) {
+NPObject * NPObject_alloc(NPClass * self, SEL _cmd) {
     return nopa_alloc(self);
 }
 
-NFObject * NFObject_new(NFClass * self, SEL _cmd) {
-    NFObject * obj = nopa_alloc(self);
+NPObject * NPObject_new(NPClass * self, SEL _cmd) {
+    NPObject * obj = nopa_alloc(self);
     return nopa_init(obj);
 }
 
-NFObject * NFObject_init(NFObject * self, SEL _cmd) {
-    struct NFObject * _self = ((struct NFObject *)(self));
+NPObject * NPObject_init(NPObject * self, SEL _cmd) {
+    struct NPObject * _self = ((struct NPObject *)(self));
     {
         return nopa_init(self);
     }
 }
 
-void NFObject_dealloc(NFObject * self, SEL _cmd) {
-    struct NFObject * _self = ((struct NFObject *)(self));
+void NPObject_dealloc(NPObject * self, SEL _cmd) {
+    struct NPObject * _self = ((struct NPObject *)(self));
     {
         return;
     }
 }
 
-NFClass * NFObject_getClass(NFClass * self, SEL _cmd) {
-    return &nopa_NFObject_class;
+NPClass * NPObject_getClass(NPClass * self, SEL _cmd) {
+    return &nopa_NPObject_class;
 }
 
-NFObject * nopa_alloc(struct NFClass * cls);
-NFObject * nopa_init(NFObject * );
-void Obj_sayHi(NFObject * self, SEL _cmd) {
+NPObject * nopa_alloc(struct NPClass * cls);
+NPObject * nopa_init(NPObject * );
+void Obj_sayHi(NPObject * self, SEL _cmd) {
     struct Obj * _self = ((struct Obj *)(self));
     {
         printf("hi\n");
     }
 }
 
-NFClass * Obj_getClass(NFClass * self, SEL _cmd) {
+NPClass * Obj_getClass(NPClass * self, SEL _cmd) {
     return &nopa_Obj_class;
 }
 
@@ -112,42 +112,42 @@ int main() {
 
 // ─── Class metadata ─────────────────────────────────────
 
-struct nopa_NFObject_vtable nopa_NFObject_vtable_inst = {
-    .init = NFObject_init,
-    .dealloc = NFObject_dealloc,
+struct nopa_NPObject_vtable nopa_NPObject_vtable_inst = {
+    .init = NPObject_init,
+    .dealloc = NPObject_dealloc,
 };
 
 struct nopa_Obj_vtable nopa_Obj_vtable_inst = {
-    .init = NFObject_init,
-    .dealloc = NFObject_dealloc,
+    .init = NPObject_init,
+    .dealloc = NPObject_dealloc,
     .sayHi = Obj_sayHi,
 };
 
-struct nopa_NFObject_meta_vtable nopa_NFObject_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
-    .class = NFObject_getClass,
+struct nopa_NPObject_meta_vtable nopa_NPObject_meta_vtable_inst = {
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
+    .class = NPObject_getClass,
 };
 
 struct nopa_Obj_meta_vtable nopa_Obj_meta_vtable_inst = {
     .class = Obj_getClass,
 };
 
-NFClass nopa_NFObject_class;
-NFClass nopa_Obj_class;
+NPClass nopa_NPObject_class;
+NPClass nopa_Obj_class;
 
 void nopa_meta_init(void) {
-    nopa_NFObject_class = (NFClass){
-        .name = "NFObject",
+    nopa_NPObject_class = (NPClass){
+        .name = "NPObject",
         .superclass = NULL,
-        .instance_size = sizeof(struct NFObject),
-        .vtable = &nopa_NFObject_vtable_inst,
-        .class_vtable = &nopa_NFObject_meta_vtable_inst,
+        .instance_size = sizeof(struct NPObject),
+        .vtable = &nopa_NPObject_vtable_inst,
+        .class_vtable = &nopa_NPObject_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_Obj_class = (NFClass){
+    nopa_Obj_class = (NPClass){
         .name = "Obj",
-        .superclass = &nopa_NFObject_class,
+        .superclass = &nopa_NPObject_class,
         .instance_size = sizeof(struct Obj),
         .vtable = &nopa_Obj_vtable_inst,
         .class_vtable = &nopa_Obj_meta_vtable_inst,

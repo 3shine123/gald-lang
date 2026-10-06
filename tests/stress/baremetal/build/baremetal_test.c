@@ -126,60 +126,60 @@ static int nopa_struct_eq_Ops(struct Ops a, struct Ops b) {
 }
 
 /* -------------- Section 6 · Function prototypes -------------- */
-NFObject * Metal__Err_alloc(NFClass * self, SEL _cmd);
-NFObject * Metal__Err_init(NFObject * self, SEL _cmd);
-int Metal__Err_tag(NFObject * self, SEL _cmd);
-int Metal__Err_heart(NFObject * self, SEL _cmd);
-int Metal__Err_errorCode(NFObject * self, SEL _cmd);
-void Metal__Err_setCode_(NFObject * self, SEL _cmd, int c);
-NFObject * Metal__OtherErr_alloc(NFClass * self, SEL _cmd);
-NFObject * Metal__OtherErr_init(NFObject * self, SEL _cmd);
-int Metal__OtherErr_errorCode(NFObject * self, SEL _cmd);
-NFObject * Metal__SubErr_alloc(NFClass * self, SEL _cmd);
-NFObject * Metal__SubErr_init(NFObject * self, SEL _cmd);
-int Metal__Widget_make_plus_(NFClass * self, SEL _cmd, int b, int delta);
-NFObject * Metal__Widget_alloc(NFClass * self, SEL _cmd);
-NFObject * Metal__Widget_init(NFObject * self, SEL _cmd);
-NFObject * Metal__Widget_initWithUid_weight_(NFObject * self, SEL _cmd, int u, int w);
-int Metal__Widget_tag(NFObject * self, SEL _cmd);
-int Metal__Widget_heart(NFObject * self, SEL _cmd);
-int Metal__Widget_weight(NFObject * self, SEL _cmd);
-void Metal__Widget_setWeight_(NFObject * self, SEL _cmd, int w);
-int Metal__Widget_addTo_times_(NFObject * self, SEL _cmd, int v, int k);
-int Metal__Widget_sumAsync_(NFObject * self, SEL _cmd, int v);
-void Metal__Widget_awaitMake(NFClass * self, SEL _cmd);
-void Metal__Widget_awaitSum_(NFClass * self, SEL _cmd, Metal__Widget * ww);
-NFObject * Metal__Widget_retain(NFObject * self, SEL _cmd);
-void Metal__Widget_release(NFObject * self, SEL _cmd);
-NFObject * Metal__Widget_autorelease(NFObject * self, SEL _cmd);
-void Metal__Widget_dealloc(NFObject * self, SEL _cmd);
-_Bool Metal__Widget_isKindOfClass_(NFObject * self, SEL _cmd, NFClass * cls);
-_Bool Metal__Widget_isEqual_(NFObject * self, SEL _cmd, NFObject * object);
-NFObject * Metal__TurboWidget_alloc(NFClass * self, SEL _cmd);
-NFObject * Metal__TurboWidget_init(NFObject * self, SEL _cmd);
-int Metal__TurboWidget_tag(NFObject * self, SEL _cmd);
-int Metal__TurboWidget_boost(NFObject * self, SEL _cmd);
-void Metal__TurboWidget_setBoost_(NFObject * self, SEL _cmd, int b);
-NFObject * Metal__Array_alloc(NFClass * self, SEL _cmd);
-NFObject * Metal__Array_init(NFObject * self, SEL _cmd);
-void Metal__Array_add_(NFObject * self, SEL _cmd, NFObject * obj);
-unsigned Metal__Array_count(NFObject * self, SEL _cmd);
-NFObject * Metal__Array_objectAtIndex_(NFObject * self, SEL _cmd, unsigned i);
-NFObject * Box_alloc(NFClass * self, SEL _cmd);
-NFObject * Box_init(NFObject * self, SEL _cmd);
-void Box_set_(NFObject * self, SEL _cmd, NFObject * v);
-NFObject * Box_value(NFObject * self, SEL _cmd);
-NFObject * Animal_alloc(NFClass * self, SEL _cmd);
-NFObject * Animal_init(NFObject * self, SEL _cmd);
-int Animal_speak(NFObject * self, SEL _cmd);
-void Animal_setVoice_(NFObject * self, SEL _cmd, int v);
-NFObject * Dog_alloc(NFClass * self, SEL _cmd);
-NFObject * Dog_init(NFObject * self, SEL _cmd);
-int Dog_speak(NFObject * self, SEL _cmd);
-void Dog_setLeash_(NFObject * self, SEL _cmd, int l);
-int nopa_async_state_sumAsync_(NFTask * t);
-int nopa_async_state_awaitMake(NFTask * t);
-int nopa_async_state_awaitSum_(NFTask * t);
+NPObject * Metal__Err_alloc(NPClass * self, SEL _cmd);
+NPObject * Metal__Err_init(NPObject * self, SEL _cmd);
+int Metal__Err_tag(NPObject * self, SEL _cmd);
+int Metal__Err_heart(NPObject * self, SEL _cmd);
+int Metal__Err_errorCode(NPObject * self, SEL _cmd);
+void Metal__Err_setCode_(NPObject * self, SEL _cmd, int c);
+NPObject * Metal__OtherErr_alloc(NPClass * self, SEL _cmd);
+NPObject * Metal__OtherErr_init(NPObject * self, SEL _cmd);
+int Metal__OtherErr_errorCode(NPObject * self, SEL _cmd);
+NPObject * Metal__SubErr_alloc(NPClass * self, SEL _cmd);
+NPObject * Metal__SubErr_init(NPObject * self, SEL _cmd);
+int Metal__Widget_make_plus_(NPClass * self, SEL _cmd, int b, int delta);
+NPObject * Metal__Widget_alloc(NPClass * self, SEL _cmd);
+NPObject * Metal__Widget_init(NPObject * self, SEL _cmd);
+NPObject * Metal__Widget_initWithUid_weight_(NPObject * self, SEL _cmd, int u, int w);
+int Metal__Widget_tag(NPObject * self, SEL _cmd);
+int Metal__Widget_heart(NPObject * self, SEL _cmd);
+int Metal__Widget_weight(NPObject * self, SEL _cmd);
+void Metal__Widget_setWeight_(NPObject * self, SEL _cmd, int w);
+int Metal__Widget_addTo_times_(NPObject * self, SEL _cmd, int v, int k);
+int Metal__Widget_sumAsync_(NPObject * self, SEL _cmd, int v);
+void Metal__Widget_awaitMake(NPClass * self, SEL _cmd);
+void Metal__Widget_awaitSum_(NPClass * self, SEL _cmd, Metal__Widget * ww);
+NPObject * Metal__Widget_retain(NPObject * self, SEL _cmd);
+void Metal__Widget_release(NPObject * self, SEL _cmd);
+NPObject * Metal__Widget_autorelease(NPObject * self, SEL _cmd);
+void Metal__Widget_dealloc(NPObject * self, SEL _cmd);
+_Bool Metal__Widget_isKindOfClass_(NPObject * self, SEL _cmd, NPClass * cls);
+_Bool Metal__Widget_isEqual_(NPObject * self, SEL _cmd, NPObject * object);
+NPObject * Metal__TurboWidget_alloc(NPClass * self, SEL _cmd);
+NPObject * Metal__TurboWidget_init(NPObject * self, SEL _cmd);
+int Metal__TurboWidget_tag(NPObject * self, SEL _cmd);
+int Metal__TurboWidget_boost(NPObject * self, SEL _cmd);
+void Metal__TurboWidget_setBoost_(NPObject * self, SEL _cmd, int b);
+NPObject * Metal__Array_alloc(NPClass * self, SEL _cmd);
+NPObject * Metal__Array_init(NPObject * self, SEL _cmd);
+void Metal__Array_add_(NPObject * self, SEL _cmd, NPObject * obj);
+unsigned Metal__Array_count(NPObject * self, SEL _cmd);
+NPObject * Metal__Array_objectAtIndex_(NPObject * self, SEL _cmd, unsigned i);
+NPObject * Box_alloc(NPClass * self, SEL _cmd);
+NPObject * Box_init(NPObject * self, SEL _cmd);
+void Box_set_(NPObject * self, SEL _cmd, NPObject * v);
+NPObject * Box_value(NPObject * self, SEL _cmd);
+NPObject * Animal_alloc(NPClass * self, SEL _cmd);
+NPObject * Animal_init(NPObject * self, SEL _cmd);
+int Animal_speak(NPObject * self, SEL _cmd);
+void Animal_setVoice_(NPObject * self, SEL _cmd, int v);
+NPObject * Dog_alloc(NPClass * self, SEL _cmd);
+NPObject * Dog_init(NPObject * self, SEL _cmd);
+int Dog_speak(NPObject * self, SEL _cmd);
+void Dog_setLeash_(NPObject * self, SEL _cmd, int l);
+int nopa_async_state_sumAsync_(NPTask * t);
+int nopa_async_state_awaitMake(NPTask * t);
+int nopa_async_state_awaitSum_(NPTask * t);
 void kputs(const char * s);
 void kputdec(int v);
 void kputhex(unsigned v);
@@ -191,37 +191,37 @@ void check_struct_eq(void );
 char * mode_name(int m);
 unsigned loopsum(int n);
 int poke_tag(Metal__Widget * w);
-int poke_id_proto(NFObject * t);
+int poke_id_proto(NPObject * t);
 void rethrow_err(Metal__Err * e);
 void bare_rethrow_err(Metal__Err * e);
 int local_catch(int n, Metal__Err * e);
 void defer_order(void );
 int defer_return(int n);
 void pattern_scalar(int pv);
-void pattern_obj(NFObject * obj);
+void pattern_obj(NPObject * obj);
 int nn_sum(const int * a, const int * b);
 char * mode_name2(enum Mode m);
 int sync_early(Metal__Widget * w);
 int main(void);
-NFObject * Box_int_ptr_alloc(NFClass * self, SEL _cmd);
-NFObject * Box_int_ptr_init(NFObject * self, SEL _cmd);
-void Box_int_ptr_set_(NFObject * self, SEL _cmd, int * v);
-int * Box_int_ptr_value(NFObject * self, SEL _cmd);
+NPObject * Box_int_ptr_alloc(NPClass * self, SEL _cmd);
+NPObject * Box_int_ptr_init(NPObject * self, SEL _cmd);
+void Box_int_ptr_set_(NPObject * self, SEL _cmd, int * v);
+int * Box_int_ptr_value(NPObject * self, SEL _cmd);
 
 /* ------------- Section 7 · File-level variables -------------- */
 static int g_hits = 0;
 
 /* ------------ Section 8 · VTable & class layouts ------------- */
-NFClass * NOPA_GETCLASS_$_Animal(NFClass * self, SEL _cmd);
-NFClass * NOPA_GETCLASS_$_Box(NFClass * self, SEL _cmd);
-NFClass * NOPA_GETCLASS_$_Box_int_ptr(NFClass * self, SEL _cmd);
-NFClass * NOPA_GETCLASS_$_Metal__Array(NFClass * self, SEL _cmd);
-NFClass * NOPA_GETCLASS_$_Metal__Err(NFClass * self, SEL _cmd);
-NFClass * NOPA_GETCLASS_$_Metal__OtherErr(NFClass * self, SEL _cmd);
-NFClass * NOPA_GETCLASS_$_Metal__Widget(NFClass * self, SEL _cmd);
-NFClass * NOPA_GETCLASS_$_Metal__SubErr(NFClass * self, SEL _cmd);
-NFClass * NOPA_GETCLASS_$_Metal__TurboWidget(NFClass * self, SEL _cmd);
-NFClass * NOPA_GETCLASS_$_Dog(NFClass * self, SEL _cmd);
+NPClass * NOPA_GETCLASS_$_Animal(NPClass * self, SEL _cmd);
+NPClass * NOPA_GETCLASS_$_Box(NPClass * self, SEL _cmd);
+NPClass * NOPA_GETCLASS_$_Box_int_ptr(NPClass * self, SEL _cmd);
+NPClass * NOPA_GETCLASS_$_Metal__Array(NPClass * self, SEL _cmd);
+NPClass * NOPA_GETCLASS_$_Metal__Err(NPClass * self, SEL _cmd);
+NPClass * NOPA_GETCLASS_$_Metal__OtherErr(NPClass * self, SEL _cmd);
+NPClass * NOPA_GETCLASS_$_Metal__Widget(NPClass * self, SEL _cmd);
+NPClass * NOPA_GETCLASS_$_Metal__SubErr(NPClass * self, SEL _cmd);
+NPClass * NOPA_GETCLASS_$_Metal__TurboWidget(NPClass * self, SEL _cmd);
+NPClass * NOPA_GETCLASS_$_Dog(NPClass * self, SEL _cmd);
 
 /* vtable layout signature: 9b6d5cb88d6b546c (methods: 26) */
 __attribute__((weak)) void nopa_verify_vtable_sig(unsigned long long winner, unsigned long long mine, const char *method_list) {
@@ -233,89 +233,89 @@ __attribute__((weak)) void nopa_verify_vtable_sig(unsigned long long winner, uns
 
 struct nopa_vtable {
     unsigned long long __sig;
-    int (*addTo_times_)(NFObject *, SEL, int, int);
-    void (*add_)(NFObject *, SEL, NFObject *);
-    NFObject * (*autorelease)(NFObject *, SEL);
-    int (*boost)(NFObject *, SEL);
-    unsigned (*count)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    int (*errorCode)(NFObject *, SEL);
-    int (*heart)(NFObject *, SEL);
-    NFObject * (*init)(NFObject *, SEL);
-    NFObject * (*initWithUid_weight_)(NFObject *, SEL, int, int);
-    _Bool (*isEqual_)(NFObject *, SEL, NFObject *);
-    _Bool (*isKindOfClass_)(NFObject *, SEL, NFClass *);
-    NFObject * (*objectAtIndex_)(NFObject *, SEL, unsigned);
-    void (*release)(NFObject *, SEL);
-    NFObject * (*retain)(NFObject *, SEL);
-    void (*setBoost_)(NFObject *, SEL, int);
-    void (*setCode_)(NFObject *, SEL, int);
-    void (*setLeash_)(NFObject *, SEL, int);
-    void (*setVoice_)(NFObject *, SEL, int);
-    void (*setWeight_)(NFObject *, SEL, int);
-    void (*set_)(NFObject *, SEL, NFObject *);
-    int (*speak)(NFObject *, SEL);
-    int (*sumAsync_)(NFObject *, SEL, int);
-    int (*tag)(NFObject *, SEL);
-    NFObject * (*value)(NFObject *, SEL);
-    int (*weight)(NFObject *, SEL);
+    int (*addTo_times_)(NPObject *, SEL, int, int);
+    void (*add_)(NPObject *, SEL, NPObject *);
+    NPObject * (*autorelease)(NPObject *, SEL);
+    int (*boost)(NPObject *, SEL);
+    unsigned (*count)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    int (*errorCode)(NPObject *, SEL);
+    int (*heart)(NPObject *, SEL);
+    NPObject * (*init)(NPObject *, SEL);
+    NPObject * (*initWithUid_weight_)(NPObject *, SEL, int, int);
+    _Bool (*isEqual_)(NPObject *, SEL, NPObject *);
+    _Bool (*isKindOfClass_)(NPObject *, SEL, NPClass *);
+    NPObject * (*objectAtIndex_)(NPObject *, SEL, unsigned);
+    void (*release)(NPObject *, SEL);
+    NPObject * (*retain)(NPObject *, SEL);
+    void (*setBoost_)(NPObject *, SEL, int);
+    void (*setCode_)(NPObject *, SEL, int);
+    void (*setLeash_)(NPObject *, SEL, int);
+    void (*setVoice_)(NPObject *, SEL, int);
+    void (*setWeight_)(NPObject *, SEL, int);
+    void (*set_)(NPObject *, SEL, NPObject *);
+    int (*speak)(NPObject *, SEL);
+    int (*sumAsync_)(NPObject *, SEL, int);
+    int (*tag)(NPObject *, SEL);
+    NPObject * (*value)(NPObject *, SEL);
+    int (*weight)(NPObject *, SEL);
 };
 
 /* respondsToSelector: helper for selector member 'tag' */
-static BOOL nopa_resp_tag(NFObject *__o) {
+static BOOL nopa_resp_tag(NPObject *__o) {
 return __o && ((struct nopa_vtable *)__o->isa->vtable)->tag != 0;
 }
 
 struct NOPA_META_VTABLE_$_Animal {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct NOPA_META_VTABLE_$_Box {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct NOPA_META_VTABLE_$_Box_int_ptr {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct NOPA_META_VTABLE_$_Metal__Array {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct NOPA_META_VTABLE_$_Metal__Err {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct NOPA_META_VTABLE_$_Metal__OtherErr {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct NOPA_META_VTABLE_$_Metal__Widget {
-    int (*make_plus_)(NFClass *, SEL, int, int);
-    NFObject * (*alloc)(NFClass *, SEL);
-    void (*awaitMake)(NFClass *, SEL);
-    void (*awaitSum_)(NFClass *, SEL, Metal__Widget *);
-    NFClass * (*class)(NFClass *, SEL);
+    int (*make_plus_)(NPClass *, SEL, int, int);
+    NPObject * (*alloc)(NPClass *, SEL);
+    void (*awaitMake)(NPClass *, SEL);
+    void (*awaitSum_)(NPClass *, SEL, Metal__Widget *);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct NOPA_META_VTABLE_$_Metal__SubErr {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct NOPA_META_VTABLE_$_Metal__TurboWidget {
-    int (*make_plus_)(NFClass *, SEL, int, int);
-    NFObject * (*alloc)(NFClass *, SEL);
-    void (*awaitMake)(NFClass *, SEL);
-    void (*awaitSum_)(NFClass *, SEL, Metal__Widget *);
-    NFClass * (*class)(NFClass *, SEL);
+    int (*make_plus_)(NPClass *, SEL, int, int);
+    NPObject * (*alloc)(NPClass *, SEL);
+    void (*awaitMake)(NPClass *, SEL);
+    void (*awaitSum_)(NPClass *, SEL, Metal__Widget *);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct NOPA_META_VTABLE_$_Dog {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 
 /* Class layout: Animal (super: nopa_root) */
 struct Animal {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     int voice;
 };
@@ -323,15 +323,15 @@ typedef struct Animal Animal;
 
 /* Class layout: Box (super: nopa_root) */
 struct Box {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
-    NFObject * _v;
+    NPObject * _v;
 };
 typedef struct Box Box;
 
 /* Class layout: Box<int *> (super: nopa_root) */
 struct Box_int_ptr {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     int * _v;
 };
@@ -339,16 +339,16 @@ typedef struct Box_int_ptr Box_int_ptr;
 
 /* Class layout: Metal::Array (super: nopa_root) */
 struct Metal__Array {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
-    NFObject * _items[8];
+    NPObject * _items[8];
     int _n;
 };
 typedef struct Metal__Array Metal__Array;
 
 /* Class layout: Metal::Err (super: nopa_root) */
 struct Metal__Err {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     int code;
 };
@@ -356,7 +356,7 @@ typedef struct Metal__Err Metal__Err;
 
 /* Class layout: Metal::OtherErr (super: nopa_root) */
 struct Metal__OtherErr {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     int code;
 };
@@ -364,7 +364,7 @@ typedef struct Metal__OtherErr Metal__OtherErr;
 
 /* Class layout: Metal::Widget (super: nopa_root) */
 struct Metal__Widget {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     int uid;
     int weight;
@@ -373,7 +373,7 @@ typedef struct Metal__Widget Metal__Widget;
 
 /* Class layout: Metal::SubErr (super: Metal::Err) */
 struct Metal__SubErr {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     int code;
     int spare;
@@ -382,7 +382,7 @@ typedef struct Metal__SubErr Metal__SubErr;
 
 /* Class layout: Metal::TurboWidget (super: Metal::Widget) */
 struct Metal__TurboWidget {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     int uid;
     int weight;
@@ -392,7 +392,7 @@ typedef struct Metal__TurboWidget Metal__TurboWidget;
 
 /* Class layout: Dog (super: Animal) */
 struct Dog {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     int voice;
     int leash;
@@ -400,16 +400,16 @@ struct Dog {
 typedef struct Dog Dog;
 
 /* --------- Section 9 · Class metadata infrastructure --------- */
-extern NFClass NOPA_CLASS_$_Animal;
-extern NFClass NOPA_CLASS_$_Box;
-extern NFClass NOPA_CLASS_$_Box_int_ptr;
-extern NFClass NOPA_CLASS_$_Metal__Array;
-extern NFClass NOPA_CLASS_$_Metal__Err;
-extern NFClass NOPA_CLASS_$_Metal__OtherErr;
-extern NFClass NOPA_CLASS_$_Metal__Widget;
-extern NFClass NOPA_CLASS_$_Metal__SubErr;
-extern NFClass NOPA_CLASS_$_Metal__TurboWidget;
-extern NFClass NOPA_CLASS_$_Dog;
+extern NPClass NOPA_CLASS_$_Animal;
+extern NPClass NOPA_CLASS_$_Box;
+extern NPClass NOPA_CLASS_$_Box_int_ptr;
+extern NPClass NOPA_CLASS_$_Metal__Array;
+extern NPClass NOPA_CLASS_$_Metal__Err;
+extern NPClass NOPA_CLASS_$_Metal__OtherErr;
+extern NPClass NOPA_CLASS_$_Metal__Widget;
+extern NPClass NOPA_CLASS_$_Metal__SubErr;
+extern NPClass NOPA_CLASS_$_Metal__TurboWidget;
+extern NPClass NOPA_CLASS_$_Dog;
 void nopa_metaInit(void);
 
 /* --------- Section 10 · Vtable & metadata instances ---------- */
@@ -424,7 +424,7 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_Animal = {
     .dealloc = NULL,
     .errorCode = NULL,
     .heart = NULL,
-    .init = (NFObject * (*)(NFObject *, SEL))Animal_init,
+    .init = (NPObject * (*)(NPObject *, SEL))Animal_init,
     .initWithUid_weight_ = NULL,
     .isEqual_ = NULL,
     .isKindOfClass_ = NULL,
@@ -434,10 +434,10 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_Animal = {
     .setBoost_ = NULL,
     .setCode_ = NULL,
     .setLeash_ = NULL,
-    .setVoice_ = (void (*)(NFObject *, SEL, int))Animal_setVoice_,
+    .setVoice_ = (void (*)(NPObject *, SEL, int))Animal_setVoice_,
     .setWeight_ = NULL,
     .set_ = NULL,
-    .speak = (int (*)(NFObject *, SEL))Animal_speak,
+    .speak = (int (*)(NPObject *, SEL))Animal_speak,
     .sumAsync_ = NULL,
     .tag = NULL,
     .value = NULL,
@@ -455,7 +455,7 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_Box = {
     .dealloc = NULL,
     .errorCode = NULL,
     .heart = NULL,
-    .init = (NFObject * (*)(NFObject *, SEL))Box_init,
+    .init = (NPObject * (*)(NPObject *, SEL))Box_init,
     .initWithUid_weight_ = NULL,
     .isEqual_ = NULL,
     .isKindOfClass_ = NULL,
@@ -467,11 +467,11 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_Box = {
     .setLeash_ = NULL,
     .setVoice_ = NULL,
     .setWeight_ = NULL,
-    .set_ = (void (*)(NFObject *, SEL, NFObject *))Box_set_,
+    .set_ = (void (*)(NPObject *, SEL, NPObject *))Box_set_,
     .speak = NULL,
     .sumAsync_ = NULL,
     .tag = NULL,
-    .value = (NFObject * (*)(NFObject *, SEL))Box_value,
+    .value = (NPObject * (*)(NPObject *, SEL))Box_value,
     .weight = NULL,
 };
 
@@ -486,7 +486,7 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_Box_int_ptr = {
     .dealloc = NULL,
     .errorCode = NULL,
     .heart = NULL,
-    .init = (NFObject * (*)(NFObject *, SEL))Box_int_ptr_init,
+    .init = (NPObject * (*)(NPObject *, SEL))Box_int_ptr_init,
     .initWithUid_weight_ = NULL,
     .isEqual_ = NULL,
     .isKindOfClass_ = NULL,
@@ -498,11 +498,11 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_Box_int_ptr = {
     .setLeash_ = NULL,
     .setVoice_ = NULL,
     .setWeight_ = NULL,
-    .set_ = (void (*)(NFObject *, SEL, NFObject *))Box_int_ptr_set_,
+    .set_ = (void (*)(NPObject *, SEL, NPObject *))Box_int_ptr_set_,
     .speak = NULL,
     .sumAsync_ = NULL,
     .tag = NULL,
-    .value = (NFObject * (*)(NFObject *, SEL))Box_int_ptr_value,
+    .value = (NPObject * (*)(NPObject *, SEL))Box_int_ptr_value,
     .weight = NULL,
 };
 
@@ -510,18 +510,18 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_Box_int_ptr = {
 __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_Metal__Array = {
     .__sig = 0x9b6d5cb88d6b546cULL,
     .addTo_times_ = NULL,
-    .add_ = (void (*)(NFObject *, SEL, NFObject *))Metal__Array_add_,
+    .add_ = (void (*)(NPObject *, SEL, NPObject *))Metal__Array_add_,
     .autorelease = NULL,
     .boost = NULL,
-    .count = (unsigned (*)(NFObject *, SEL))Metal__Array_count,
+    .count = (unsigned (*)(NPObject *, SEL))Metal__Array_count,
     .dealloc = NULL,
     .errorCode = NULL,
     .heart = NULL,
-    .init = (NFObject * (*)(NFObject *, SEL))Metal__Array_init,
+    .init = (NPObject * (*)(NPObject *, SEL))Metal__Array_init,
     .initWithUid_weight_ = NULL,
     .isEqual_ = NULL,
     .isKindOfClass_ = NULL,
-    .objectAtIndex_ = (NFObject * (*)(NFObject *, SEL, unsigned))Metal__Array_objectAtIndex_,
+    .objectAtIndex_ = (NPObject * (*)(NPObject *, SEL, unsigned))Metal__Array_objectAtIndex_,
     .release = NULL,
     .retain = NULL,
     .setBoost_ = NULL,
@@ -546,9 +546,9 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_Metal__Err = {
     .boost = NULL,
     .count = NULL,
     .dealloc = NULL,
-    .errorCode = (int (*)(NFObject *, SEL))Metal__Err_errorCode,
-    .heart = (int (*)(NFObject *, SEL))Metal__Err_heart,
-    .init = (NFObject * (*)(NFObject *, SEL))Metal__Err_init,
+    .errorCode = (int (*)(NPObject *, SEL))Metal__Err_errorCode,
+    .heart = (int (*)(NPObject *, SEL))Metal__Err_heart,
+    .init = (NPObject * (*)(NPObject *, SEL))Metal__Err_init,
     .initWithUid_weight_ = NULL,
     .isEqual_ = NULL,
     .isKindOfClass_ = NULL,
@@ -556,14 +556,14 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_Metal__Err = {
     .release = NULL,
     .retain = NULL,
     .setBoost_ = NULL,
-    .setCode_ = (void (*)(NFObject *, SEL, int))Metal__Err_setCode_,
+    .setCode_ = (void (*)(NPObject *, SEL, int))Metal__Err_setCode_,
     .setLeash_ = NULL,
     .setVoice_ = NULL,
     .setWeight_ = NULL,
     .set_ = NULL,
     .speak = NULL,
     .sumAsync_ = NULL,
-    .tag = (int (*)(NFObject *, SEL))Metal__Err_tag,
+    .tag = (int (*)(NPObject *, SEL))Metal__Err_tag,
     .value = NULL,
     .weight = NULL,
 };
@@ -577,9 +577,9 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_Metal__OtherErr = {
     .boost = NULL,
     .count = NULL,
     .dealloc = NULL,
-    .errorCode = (int (*)(NFObject *, SEL))Metal__OtherErr_errorCode,
+    .errorCode = (int (*)(NPObject *, SEL))Metal__OtherErr_errorCode,
     .heart = NULL,
-    .init = (NFObject * (*)(NFObject *, SEL))Metal__OtherErr_init,
+    .init = (NPObject * (*)(NPObject *, SEL))Metal__OtherErr_init,
     .initWithUid_weight_ = NULL,
     .isEqual_ = NULL,
     .isKindOfClass_ = NULL,
@@ -602,32 +602,32 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_Metal__OtherErr = {
 /* VTable instance: Metal::Widget */
 __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_Metal__Widget = {
     .__sig = 0x9b6d5cb88d6b546cULL,
-    .addTo_times_ = (int (*)(NFObject *, SEL, int, int))Metal__Widget_addTo_times_,
+    .addTo_times_ = (int (*)(NPObject *, SEL, int, int))Metal__Widget_addTo_times_,
     .add_ = NULL,
-    .autorelease = (NFObject * (*)(NFObject *, SEL))Metal__Widget_autorelease,
+    .autorelease = (NPObject * (*)(NPObject *, SEL))Metal__Widget_autorelease,
     .boost = NULL,
     .count = NULL,
-    .dealloc = (void (*)(NFObject *, SEL))Metal__Widget_dealloc,
+    .dealloc = (void (*)(NPObject *, SEL))Metal__Widget_dealloc,
     .errorCode = NULL,
-    .heart = (int (*)(NFObject *, SEL))Metal__Widget_heart,
-    .init = (NFObject * (*)(NFObject *, SEL))Metal__Widget_init,
-    .initWithUid_weight_ = (NFObject * (*)(NFObject *, SEL, int, int))Metal__Widget_initWithUid_weight_,
-    .isEqual_ = (_Bool (*)(NFObject *, SEL, NFObject *))Metal__Widget_isEqual_,
-    .isKindOfClass_ = (_Bool (*)(NFObject *, SEL, NFClass *))Metal__Widget_isKindOfClass_,
+    .heart = (int (*)(NPObject *, SEL))Metal__Widget_heart,
+    .init = (NPObject * (*)(NPObject *, SEL))Metal__Widget_init,
+    .initWithUid_weight_ = (NPObject * (*)(NPObject *, SEL, int, int))Metal__Widget_initWithUid_weight_,
+    .isEqual_ = (_Bool (*)(NPObject *, SEL, NPObject *))Metal__Widget_isEqual_,
+    .isKindOfClass_ = (_Bool (*)(NPObject *, SEL, NPClass *))Metal__Widget_isKindOfClass_,
     .objectAtIndex_ = NULL,
-    .release = (void (*)(NFObject *, SEL))Metal__Widget_release,
-    .retain = (NFObject * (*)(NFObject *, SEL))Metal__Widget_retain,
+    .release = (void (*)(NPObject *, SEL))Metal__Widget_release,
+    .retain = (NPObject * (*)(NPObject *, SEL))Metal__Widget_retain,
     .setBoost_ = NULL,
     .setCode_ = NULL,
     .setLeash_ = NULL,
     .setVoice_ = NULL,
-    .setWeight_ = (void (*)(NFObject *, SEL, int))Metal__Widget_setWeight_,
+    .setWeight_ = (void (*)(NPObject *, SEL, int))Metal__Widget_setWeight_,
     .set_ = NULL,
     .speak = NULL,
-    .sumAsync_ = (int (*)(NFObject *, SEL, int))Metal__Widget_sumAsync_,
-    .tag = (int (*)(NFObject *, SEL))Metal__Widget_tag,
+    .sumAsync_ = (int (*)(NPObject *, SEL, int))Metal__Widget_sumAsync_,
+    .tag = (int (*)(NPObject *, SEL))Metal__Widget_tag,
     .value = NULL,
-    .weight = (int (*)(NFObject *, SEL))Metal__Widget_weight,
+    .weight = (int (*)(NPObject *, SEL))Metal__Widget_weight,
 };
 
 /* VTable instance: Metal::SubErr */
@@ -639,9 +639,9 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_Metal__SubErr = {
     .boost = NULL,
     .count = NULL,
     .dealloc = NULL,
-    .errorCode = (int (*)(NFObject *, SEL))Metal__Err_errorCode,
-    .heart = (int (*)(NFObject *, SEL))Metal__Err_heart,
-    .init = (NFObject * (*)(NFObject *, SEL))Metal__SubErr_init,
+    .errorCode = (int (*)(NPObject *, SEL))Metal__Err_errorCode,
+    .heart = (int (*)(NPObject *, SEL))Metal__Err_heart,
+    .init = (NPObject * (*)(NPObject *, SEL))Metal__SubErr_init,
     .initWithUid_weight_ = NULL,
     .isEqual_ = NULL,
     .isKindOfClass_ = NULL,
@@ -649,14 +649,14 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_Metal__SubErr = {
     .release = NULL,
     .retain = NULL,
     .setBoost_ = NULL,
-    .setCode_ = (void (*)(NFObject *, SEL, int))Metal__Err_setCode_,
+    .setCode_ = (void (*)(NPObject *, SEL, int))Metal__Err_setCode_,
     .setLeash_ = NULL,
     .setVoice_ = NULL,
     .setWeight_ = NULL,
     .set_ = NULL,
     .speak = NULL,
     .sumAsync_ = NULL,
-    .tag = (int (*)(NFObject *, SEL))Metal__Err_tag,
+    .tag = (int (*)(NPObject *, SEL))Metal__Err_tag,
     .value = NULL,
     .weight = NULL,
 };
@@ -664,32 +664,32 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_Metal__SubErr = {
 /* VTable instance: Metal::TurboWidget */
 __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_Metal__TurboWidget = {
     .__sig = 0x9b6d5cb88d6b546cULL,
-    .addTo_times_ = (int (*)(NFObject *, SEL, int, int))Metal__Widget_addTo_times_,
+    .addTo_times_ = (int (*)(NPObject *, SEL, int, int))Metal__Widget_addTo_times_,
     .add_ = NULL,
-    .autorelease = (NFObject * (*)(NFObject *, SEL))Metal__Widget_autorelease,
-    .boost = (int (*)(NFObject *, SEL))Metal__TurboWidget_boost,
+    .autorelease = (NPObject * (*)(NPObject *, SEL))Metal__Widget_autorelease,
+    .boost = (int (*)(NPObject *, SEL))Metal__TurboWidget_boost,
     .count = NULL,
-    .dealloc = (void (*)(NFObject *, SEL))Metal__Widget_dealloc,
+    .dealloc = (void (*)(NPObject *, SEL))Metal__Widget_dealloc,
     .errorCode = NULL,
-    .heart = (int (*)(NFObject *, SEL))Metal__Widget_heart,
-    .init = (NFObject * (*)(NFObject *, SEL))Metal__TurboWidget_init,
-    .initWithUid_weight_ = (NFObject * (*)(NFObject *, SEL, int, int))Metal__Widget_initWithUid_weight_,
-    .isEqual_ = (_Bool (*)(NFObject *, SEL, NFObject *))Metal__Widget_isEqual_,
-    .isKindOfClass_ = (_Bool (*)(NFObject *, SEL, NFClass *))Metal__Widget_isKindOfClass_,
+    .heart = (int (*)(NPObject *, SEL))Metal__Widget_heart,
+    .init = (NPObject * (*)(NPObject *, SEL))Metal__TurboWidget_init,
+    .initWithUid_weight_ = (NPObject * (*)(NPObject *, SEL, int, int))Metal__Widget_initWithUid_weight_,
+    .isEqual_ = (_Bool (*)(NPObject *, SEL, NPObject *))Metal__Widget_isEqual_,
+    .isKindOfClass_ = (_Bool (*)(NPObject *, SEL, NPClass *))Metal__Widget_isKindOfClass_,
     .objectAtIndex_ = NULL,
-    .release = (void (*)(NFObject *, SEL))Metal__Widget_release,
-    .retain = (NFObject * (*)(NFObject *, SEL))Metal__Widget_retain,
-    .setBoost_ = (void (*)(NFObject *, SEL, int))Metal__TurboWidget_setBoost_,
+    .release = (void (*)(NPObject *, SEL))Metal__Widget_release,
+    .retain = (NPObject * (*)(NPObject *, SEL))Metal__Widget_retain,
+    .setBoost_ = (void (*)(NPObject *, SEL, int))Metal__TurboWidget_setBoost_,
     .setCode_ = NULL,
     .setLeash_ = NULL,
     .setVoice_ = NULL,
-    .setWeight_ = (void (*)(NFObject *, SEL, int))Metal__Widget_setWeight_,
+    .setWeight_ = (void (*)(NPObject *, SEL, int))Metal__Widget_setWeight_,
     .set_ = NULL,
     .speak = NULL,
-    .sumAsync_ = (int (*)(NFObject *, SEL, int))Metal__Widget_sumAsync_,
-    .tag = (int (*)(NFObject *, SEL))Metal__TurboWidget_tag,
+    .sumAsync_ = (int (*)(NPObject *, SEL, int))Metal__Widget_sumAsync_,
+    .tag = (int (*)(NPObject *, SEL))Metal__TurboWidget_tag,
     .value = NULL,
-    .weight = (int (*)(NFObject *, SEL))Metal__Widget_weight,
+    .weight = (int (*)(NPObject *, SEL))Metal__Widget_weight,
 };
 
 /* VTable instance: Dog */
@@ -703,7 +703,7 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_Dog = {
     .dealloc = NULL,
     .errorCode = NULL,
     .heart = NULL,
-    .init = (NFObject * (*)(NFObject *, SEL))Dog_init,
+    .init = (NPObject * (*)(NPObject *, SEL))Dog_init,
     .initWithUid_weight_ = NULL,
     .isEqual_ = NULL,
     .isKindOfClass_ = NULL,
@@ -712,11 +712,11 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_Dog = {
     .retain = NULL,
     .setBoost_ = NULL,
     .setCode_ = NULL,
-    .setLeash_ = (void (*)(NFObject *, SEL, int))Dog_setLeash_,
-    .setVoice_ = (void (*)(NFObject *, SEL, int))Animal_setVoice_,
+    .setLeash_ = (void (*)(NPObject *, SEL, int))Dog_setLeash_,
+    .setVoice_ = (void (*)(NPObject *, SEL, int))Animal_setVoice_,
     .setWeight_ = NULL,
     .set_ = NULL,
-    .speak = (int (*)(NFObject *, SEL))Dog_speak,
+    .speak = (int (*)(NPObject *, SEL))Dog_speak,
     .sumAsync_ = NULL,
     .tag = NULL,
     .value = NULL,
@@ -790,76 +790,76 @@ __attribute__((weak)) struct NOPA_META_VTABLE_$_Dog NOPA_META_VTABLE_$_Dog_inst 
 };
 
 /* +getClass for Animal */
-__attribute__((weak)) NFClass * NOPA_GETCLASS_$_Animal(NFClass * self, SEL _cmd) {
+__attribute__((weak)) NPClass * NOPA_GETCLASS_$_Animal(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
 /* +getClass for Box */
-__attribute__((weak)) NFClass * NOPA_GETCLASS_$_Box(NFClass * self, SEL _cmd) {
+__attribute__((weak)) NPClass * NOPA_GETCLASS_$_Box(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
 /* +getClass for Box<int *> */
-__attribute__((weak)) NFClass * NOPA_GETCLASS_$_Box_int_ptr(NFClass * self, SEL _cmd) {
+__attribute__((weak)) NPClass * NOPA_GETCLASS_$_Box_int_ptr(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
 /* +getClass for Metal::Array */
-__attribute__((weak)) NFClass * NOPA_GETCLASS_$_Metal__Array(NFClass * self, SEL _cmd) {
+__attribute__((weak)) NPClass * NOPA_GETCLASS_$_Metal__Array(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
 /* +getClass for Metal::Err */
-__attribute__((weak)) NFClass * NOPA_GETCLASS_$_Metal__Err(NFClass * self, SEL _cmd) {
+__attribute__((weak)) NPClass * NOPA_GETCLASS_$_Metal__Err(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
 /* +getClass for Metal::OtherErr */
-__attribute__((weak)) NFClass * NOPA_GETCLASS_$_Metal__OtherErr(NFClass * self, SEL _cmd) {
+__attribute__((weak)) NPClass * NOPA_GETCLASS_$_Metal__OtherErr(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
 /* +getClass for Metal::Widget */
-__attribute__((weak)) NFClass * NOPA_GETCLASS_$_Metal__Widget(NFClass * self, SEL _cmd) {
+__attribute__((weak)) NPClass * NOPA_GETCLASS_$_Metal__Widget(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
 /* +getClass for Metal::SubErr */
-__attribute__((weak)) NFClass * NOPA_GETCLASS_$_Metal__SubErr(NFClass * self, SEL _cmd) {
+__attribute__((weak)) NPClass * NOPA_GETCLASS_$_Metal__SubErr(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
 /* +getClass for Metal::TurboWidget */
-__attribute__((weak)) NFClass * NOPA_GETCLASS_$_Metal__TurboWidget(NFClass * self, SEL _cmd) {
+__attribute__((weak)) NPClass * NOPA_GETCLASS_$_Metal__TurboWidget(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
 /* +getClass for Dog */
-__attribute__((weak)) NFClass * NOPA_GETCLASS_$_Dog(NFClass * self, SEL _cmd) {
+__attribute__((weak)) NPClass * NOPA_GETCLASS_$_Dog(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
 /* -------- Section 11 · Class metadata initialization --------- */
-NFClass NOPA_CLASS_$_Animal;
-NFClass NOPA_CLASS_$_Box;
-NFClass NOPA_CLASS_$_Box_int_ptr;
-NFClass NOPA_CLASS_$_Metal__Array;
-NFClass NOPA_CLASS_$_Metal__Err;
-NFClass NOPA_CLASS_$_Metal__OtherErr;
-NFClass NOPA_CLASS_$_Metal__Widget;
-NFClass NOPA_CLASS_$_Metal__SubErr;
-NFClass NOPA_CLASS_$_Metal__TurboWidget;
-NFClass NOPA_CLASS_$_Dog;
+NPClass NOPA_CLASS_$_Animal;
+NPClass NOPA_CLASS_$_Box;
+NPClass NOPA_CLASS_$_Box_int_ptr;
+NPClass NOPA_CLASS_$_Metal__Array;
+NPClass NOPA_CLASS_$_Metal__Err;
+NPClass NOPA_CLASS_$_Metal__OtherErr;
+NPClass NOPA_CLASS_$_Metal__Widget;
+NPClass NOPA_CLASS_$_Metal__SubErr;
+NPClass NOPA_CLASS_$_Metal__TurboWidget;
+NPClass NOPA_CLASS_$_Dog;
 
 __attribute__((constructor)) static void __nopa_vtable_layout_check(void) {
     nopa_verify_vtable_sig((&NOPA_VTABLE_$_Animal)->__sig, 0x9b6d5cb88d6b546cULL, "addTo_times_ add_ autorelease boost count dealloc errorCode heart init initWithUid_weight_ isEqual_ isKindOfClass_ objectAtIndex_ release retain setBoost_ setCode_ setLeash_ setVoice_ setWeight_ set_ speak sumAsync_ tag value weight | class Animal | tu baremetal_test.np");
@@ -875,7 +875,7 @@ __attribute__((constructor)) static void __nopa_vtable_layout_check(void) {
 }
 
 __attribute__((weak)) void nopa_metaInit(void) {
-    NOPA_CLASS_$_Animal = (NFClass){
+    NOPA_CLASS_$_Animal = (NPClass){
         .name = "Animal",
         .superclass = &NOPA_CLASS_$_nopa_root,
         .instance_size = sizeof(struct Animal),
@@ -884,7 +884,7 @@ __attribute__((weak)) void nopa_metaInit(void) {
         .protocol_count = 0,
         .dealloc = NULL,
     };
-    NOPA_CLASS_$_Box = (NFClass){
+    NOPA_CLASS_$_Box = (NPClass){
         .name = "Box",
         .superclass = &NOPA_CLASS_$_nopa_root,
         .instance_size = sizeof(struct Box),
@@ -893,7 +893,7 @@ __attribute__((weak)) void nopa_metaInit(void) {
         .protocol_count = 0,
         .dealloc = NULL,
     };
-    NOPA_CLASS_$_Box_int_ptr = (NFClass){
+    NOPA_CLASS_$_Box_int_ptr = (NPClass){
         .name = "Box<int *>",
         .superclass = &NOPA_CLASS_$_nopa_root,
         .instance_size = sizeof(struct Box_int_ptr),
@@ -902,7 +902,7 @@ __attribute__((weak)) void nopa_metaInit(void) {
         .protocol_count = 0,
         .dealloc = NULL,
     };
-    NOPA_CLASS_$_Metal__Array = (NFClass){
+    NOPA_CLASS_$_Metal__Array = (NPClass){
         .name = "Metal::Array",
         .superclass = &NOPA_CLASS_$_nopa_root,
         .instance_size = sizeof(struct Metal__Array),
@@ -911,7 +911,7 @@ __attribute__((weak)) void nopa_metaInit(void) {
         .protocol_count = 0,
         .dealloc = NULL,
     };
-    NOPA_CLASS_$_Metal__Err = (NFClass){
+    NOPA_CLASS_$_Metal__Err = (NPClass){
         .name = "Metal::Err",
         .superclass = &NOPA_CLASS_$_nopa_root,
         .instance_size = sizeof(struct Metal__Err),
@@ -920,7 +920,7 @@ __attribute__((weak)) void nopa_metaInit(void) {
         .protocol_count = 0,
         .dealloc = NULL,
     };
-    NOPA_CLASS_$_Metal__OtherErr = (NFClass){
+    NOPA_CLASS_$_Metal__OtherErr = (NPClass){
         .name = "Metal::OtherErr",
         .superclass = &NOPA_CLASS_$_nopa_root,
         .instance_size = sizeof(struct Metal__OtherErr),
@@ -929,16 +929,16 @@ __attribute__((weak)) void nopa_metaInit(void) {
         .protocol_count = 0,
         .dealloc = NULL,
     };
-    NOPA_CLASS_$_Metal__Widget = (NFClass){
+    NOPA_CLASS_$_Metal__Widget = (NPClass){
         .name = "Metal::Widget",
         .superclass = &NOPA_CLASS_$_nopa_root,
         .instance_size = sizeof(struct Metal__Widget),
         .vtable = &NOPA_VTABLE_$_Metal__Widget,
         .class_vtable = &NOPA_META_VTABLE_$_Metal__Widget_inst,
         .protocol_count = 0,
-        .dealloc = (void (*)(NFObject *, SEL))Metal__Widget_dealloc,
+        .dealloc = (void (*)(NPObject *, SEL))Metal__Widget_dealloc,
     };
-    NOPA_CLASS_$_Metal__SubErr = (NFClass){
+    NOPA_CLASS_$_Metal__SubErr = (NPClass){
         .name = "Metal::SubErr",
         .superclass = &NOPA_CLASS_$_Metal__Err,
         .instance_size = sizeof(struct Metal__SubErr),
@@ -947,16 +947,16 @@ __attribute__((weak)) void nopa_metaInit(void) {
         .protocol_count = 0,
         .dealloc = NULL,
     };
-    NOPA_CLASS_$_Metal__TurboWidget = (NFClass){
+    NOPA_CLASS_$_Metal__TurboWidget = (NPClass){
         .name = "Metal::TurboWidget",
         .superclass = &NOPA_CLASS_$_Metal__Widget,
         .instance_size = sizeof(struct Metal__TurboWidget),
         .vtable = &NOPA_VTABLE_$_Metal__TurboWidget,
         .class_vtable = &NOPA_META_VTABLE_$_Metal__TurboWidget_inst,
         .protocol_count = 0,
-        .dealloc = (void (*)(NFObject *, SEL))Metal__Widget_dealloc,
+        .dealloc = (void (*)(NPObject *, SEL))Metal__Widget_dealloc,
     };
-    NOPA_CLASS_$_Dog = (NFClass){
+    NOPA_CLASS_$_Dog = (NPClass){
         .name = "Dog",
         .superclass = &NOPA_CLASS_$_Animal,
         .instance_size = sizeof(struct Dog),
@@ -972,195 +972,195 @@ __attribute__((weak)) void nopa_meta_init(void) { nopa_metaInit(); }
 /* --------------- Section 12 · Runtime support ---------------- */
 /* --------------- Section 13 · Function bodies ---------------- */
 /* +[Err alloc] */
-__attribute__((weak)) NFObject * Metal__Err_alloc(NFClass * self, SEL _cmd) {
+__attribute__((weak)) NPObject * Metal__Err_alloc(NPClass * self, SEL _cmd) {
     return nopa_alloc(self);
 }
 
 /* -[Err init] */
-__attribute__((weak)) NFObject * Metal__Err_init(NFObject * self, SEL _cmd) {
+__attribute__((weak)) NPObject * Metal__Err_init(NPObject * self, SEL _cmd) {
     return self;
 }
 
 /* -[Err tag] */
-__attribute__((weak)) int Metal__Err_tag(NFObject * self, SEL _cmd) {
+__attribute__((weak)) int Metal__Err_tag(NPObject * self, SEL _cmd) {
     return 100;
 }
 
 /* -[Err heart] */
-__attribute__((weak)) int Metal__Err_heart(NFObject * self, SEL _cmd) {
+__attribute__((weak)) int Metal__Err_heart(NPObject * self, SEL _cmd) {
     return 1;
 }
 
 /* -[Err errorCode] */
-__attribute__((weak)) int Metal__Err_errorCode(NFObject * self, SEL _cmd) {
+__attribute__((weak)) int Metal__Err_errorCode(NPObject * self, SEL _cmd) {
     return ((struct Metal__Err *)self)->code;
 }
 
 /* -[Err setCode:] */
-__attribute__((weak)) void Metal__Err_setCode_(NFObject * self, SEL _cmd, int c) {
+__attribute__((weak)) void Metal__Err_setCode_(NPObject * self, SEL _cmd, int c) {
     ((struct Metal__Err *)self)->code = c;
 }
 
 /* +[OtherErr alloc] */
-__attribute__((weak)) NFObject * Metal__OtherErr_alloc(NFClass * self, SEL _cmd) {
+__attribute__((weak)) NPObject * Metal__OtherErr_alloc(NPClass * self, SEL _cmd) {
     return nopa_alloc(self);
 }
 
 /* -[OtherErr init] */
-__attribute__((weak)) NFObject * Metal__OtherErr_init(NFObject * self, SEL _cmd) {
+__attribute__((weak)) NPObject * Metal__OtherErr_init(NPObject * self, SEL _cmd) {
     return self;
 }
 
 /* -[OtherErr errorCode] */
-__attribute__((weak)) int Metal__OtherErr_errorCode(NFObject * self, SEL _cmd) {
+__attribute__((weak)) int Metal__OtherErr_errorCode(NPObject * self, SEL _cmd) {
     return ((struct Metal__OtherErr *)self)->code;
 }
 
 /* +[SubErr alloc] */
-__attribute__((weak)) NFObject * Metal__SubErr_alloc(NFClass * self, SEL _cmd) {
+__attribute__((weak)) NPObject * Metal__SubErr_alloc(NPClass * self, SEL _cmd) {
     return nopa_alloc(self);
 }
 
 /* -[SubErr init] */
-__attribute__((weak)) NFObject * Metal__SubErr_init(NFObject * self, SEL _cmd) {
+__attribute__((weak)) NPObject * Metal__SubErr_init(NPObject * self, SEL _cmd) {
     return self;
 }
 
 /* +[Widget make:plus:] */
-__attribute__((weak)) int Metal__Widget_make_plus_(NFClass * self, SEL _cmd, int b, int delta) {
+__attribute__((weak)) int Metal__Widget_make_plus_(NPClass * self, SEL _cmd, int b, int delta) {
     return ((b * 2) + delta);
 }
 
 /* +[Widget alloc] */
-__attribute__((weak)) NFObject * Metal__Widget_alloc(NFClass * self, SEL _cmd) {
+__attribute__((weak)) NPObject * Metal__Widget_alloc(NPClass * self, SEL _cmd) {
     return nopa_alloc(self);
 }
 
 /* -[Widget init] */
-__attribute__((weak)) NFObject * Metal__Widget_init(NFObject * self, SEL _cmd) {
+__attribute__((weak)) NPObject * Metal__Widget_init(NPObject * self, SEL _cmd) {
     return self;
 }
 
 /* -[Widget initWithUid:weight:] */
-__attribute__((weak)) NFObject * Metal__Widget_initWithUid_weight_(NFObject * self, SEL _cmd, int u, int w) {
+__attribute__((weak)) NPObject * Metal__Widget_initWithUid_weight_(NPObject * self, SEL _cmd, int u, int w) {
     ((struct Metal__Widget *)self)->uid = u;
     ((struct Metal__Widget *)self)->weight = w;
     return self;
 }
 
 /* -[Widget tag] */
-__attribute__((weak)) int Metal__Widget_tag(NFObject * self, SEL _cmd) {
+__attribute__((weak)) int Metal__Widget_tag(NPObject * self, SEL _cmd) {
     return ((struct Metal__Widget *)self)->uid;
 }
 
 /* -[Widget heart] */
-__attribute__((weak)) int Metal__Widget_heart(NFObject * self, SEL _cmd) {
+__attribute__((weak)) int Metal__Widget_heart(NPObject * self, SEL _cmd) {
     return (((struct Metal__Widget *)self)->weight > 0) ? 1 : 0;
 }
 
 /* -[Widget weight] */
-__attribute__((weak)) int Metal__Widget_weight(NFObject * self, SEL _cmd) {
+__attribute__((weak)) int Metal__Widget_weight(NPObject * self, SEL _cmd) {
     return ((struct Metal__Widget *)self)->weight;
 }
 
 /* -[Widget setWeight:] */
-__attribute__((weak)) void Metal__Widget_setWeight_(NFObject * self, SEL _cmd, int w) {
+__attribute__((weak)) void Metal__Widget_setWeight_(NPObject * self, SEL _cmd, int w) {
     ((struct Metal__Widget *)self)->weight = w;
 }
 
 /* -[Widget addTo:times:] */
-__attribute__((weak)) int Metal__Widget_addTo_times_(NFObject * self, SEL _cmd, int v, int k) {
+__attribute__((weak)) int Metal__Widget_addTo_times_(NPObject * self, SEL _cmd, int v, int k) {
     return (v + (k * ((struct Metal__Widget *)self)->uid));
 }
 
 /* -[Widget sumAsync:] */
-__attribute__((weak)) int Metal__Widget_sumAsync_(NFObject * self, SEL _cmd, int v) {
-    NFTask * __nopa_task = (NFTask *)(nopa_task_create(nopa_async_state_sumAsync_, self, sizeof(struct sumAsync__frame)));
+__attribute__((weak)) int Metal__Widget_sumAsync_(NPObject * self, SEL _cmd, int v) {
+    NPTask * __nopa_task = (NPTask *)(nopa_task_create(nopa_async_state_sumAsync_, self, sizeof(struct sumAsync__frame)));
     ((struct sumAsync__frame *)__nopa_task->frame)->v = v;
     long __nopa_r = (long)nopa_task_join(__nopa_task);
     return (int)__nopa_r;
 }
 
 /* +[Widget awaitMake] */
-__attribute__((weak)) void Metal__Widget_awaitMake(NFClass * self, SEL _cmd) {
-    NFTask * __nopa_task = (NFTask *)(nopa_task_create(nopa_async_state_awaitMake, self, sizeof(struct awaitMake_frame)));
+__attribute__((weak)) void Metal__Widget_awaitMake(NPClass * self, SEL _cmd) {
+    NPTask * __nopa_task = (NPTask *)(nopa_task_create(nopa_async_state_awaitMake, self, sizeof(struct awaitMake_frame)));
     nopa_task_join(__nopa_task);
 }
 
 /* +[Widget awaitSum:] */
-__attribute__((weak)) void Metal__Widget_awaitSum_(NFClass * self, SEL _cmd, Metal__Widget * ww) {
-    NFTask * __nopa_task = (NFTask *)(nopa_task_create(nopa_async_state_awaitSum_, self, sizeof(struct awaitSum__frame)));
+__attribute__((weak)) void Metal__Widget_awaitSum_(NPClass * self, SEL _cmd, Metal__Widget * ww) {
+    NPTask * __nopa_task = (NPTask *)(nopa_task_create(nopa_async_state_awaitSum_, self, sizeof(struct awaitSum__frame)));
     ((struct awaitSum__frame *)__nopa_task->frame)->ww = ww;
     nopa_task_join(__nopa_task);
 }
 
 /* -[Widget retain] */
-__attribute__((weak)) NFObject * Metal__Widget_retain(NFObject * self, SEL _cmd) {
+__attribute__((weak)) NPObject * Metal__Widget_retain(NPObject * self, SEL _cmd) {
     nopa_retain(self);
     return self;
 }
 
 /* -[Widget release] */
-__attribute__((weak)) void Metal__Widget_release(NFObject * self, SEL _cmd) {
+__attribute__((weak)) void Metal__Widget_release(NPObject * self, SEL _cmd) {
     nopa_release(self);
 }
 
 /* -[Widget autorelease] */
-__attribute__((weak)) NFObject * Metal__Widget_autorelease(NFObject * self, SEL _cmd) {
+__attribute__((weak)) NPObject * Metal__Widget_autorelease(NPObject * self, SEL _cmd) {
     return nopa_autorelease(self);
 }
 
 /* -[Widget dealloc] */
-__attribute__((weak)) void Metal__Widget_dealloc(NFObject * self, SEL _cmd) {
+__attribute__((weak)) void Metal__Widget_dealloc(NPObject * self, SEL _cmd) {
 }
 
 /* -[Widget isKindOfClass:] */
-__attribute__((weak)) _Bool Metal__Widget_isKindOfClass_(NFObject * self, SEL _cmd, NFClass * cls) {
+__attribute__((weak)) _Bool Metal__Widget_isKindOfClass_(NPObject * self, SEL _cmd, NPClass * cls) {
     return nopa_isKindOfClass(self, cls);
 }
 
 /* -[Widget isEqual:] */
-__attribute__((weak)) _Bool Metal__Widget_isEqual_(NFObject * self, SEL _cmd, NFObject * object) {
+__attribute__((weak)) _Bool Metal__Widget_isEqual_(NPObject * self, SEL _cmd, NPObject * object) {
     return (self == object);
 }
 
 /* +[TurboWidget init] */
-__attribute__((weak)) NFObject * Metal__TurboWidget_alloc(NFClass * self, SEL _cmd) {
+__attribute__((weak)) NPObject * Metal__TurboWidget_alloc(NPClass * self, SEL _cmd) {
     return nopa_alloc(self);
 }
 
 /* -[TurboWidget tag] */
-__attribute__((weak)) NFObject * Metal__TurboWidget_init(NFObject * self, SEL _cmd) {
+__attribute__((weak)) NPObject * Metal__TurboWidget_init(NPObject * self, SEL _cmd) {
     return self;
 }
 
 /* -[TurboWidget setBoost:] */
-__attribute__((weak)) int Metal__TurboWidget_tag(NFObject * self, SEL _cmd) {
+__attribute__((weak)) int Metal__TurboWidget_tag(NPObject * self, SEL _cmd) {
     return ((&NOPA_VTABLE_$_Metal__Widget)->tag(self, __nopa_sel_tag) + ((struct Metal__TurboWidget *)self)->boost);
 }
 
 /* -[TurboWidget boost] */
-__attribute__((weak)) int Metal__TurboWidget_boost(NFObject * self, SEL _cmd) {
+__attribute__((weak)) int Metal__TurboWidget_boost(NPObject * self, SEL _cmd) {
     return ((struct Metal__TurboWidget *)self)->boost;
 }
 
 /* -[TurboWidget setBoost_] */
-__attribute__((weak)) void Metal__TurboWidget_setBoost_(NFObject * self, SEL _cmd, int b) {
+__attribute__((weak)) void Metal__TurboWidget_setBoost_(NPObject * self, SEL _cmd, int b) {
     ((struct Metal__TurboWidget *)self)->boost = b;
 }
 
 /* +[Array alloc] */
-__attribute__((weak)) NFObject * Metal__Array_alloc(NFClass * self, SEL _cmd) {
+__attribute__((weak)) NPObject * Metal__Array_alloc(NPClass * self, SEL _cmd) {
     return nopa_alloc(self);
 }
 
 /* -[Array init] */
-__attribute__((weak)) NFObject * Metal__Array_init(NFObject * self, SEL _cmd) {
+__attribute__((weak)) NPObject * Metal__Array_init(NPObject * self, SEL _cmd) {
     return self;
 }
 
 /* -[Array add:] */
-__attribute__((weak)) void Metal__Array_add_(NFObject * self, SEL _cmd, NFObject * obj) {
+__attribute__((weak)) void Metal__Array_add_(NPObject * self, SEL _cmd, NPObject * obj) {
     if ((((struct Metal__Array *)self)->_n < 8)) {
         ((struct Metal__Array *)self)->_items[((struct Metal__Array *)self)->_n] = obj;
         (((struct Metal__Array *)self)->_n)++;
@@ -1168,81 +1168,81 @@ __attribute__((weak)) void Metal__Array_add_(NFObject * self, SEL _cmd, NFObject
 }
 
 /* -[Array count] */
-__attribute__((weak)) unsigned Metal__Array_count(NFObject * self, SEL _cmd) {
+__attribute__((weak)) unsigned Metal__Array_count(NPObject * self, SEL _cmd) {
     return (unsigned)((struct Metal__Array *)self)->_n;
 }
 
 /* -[Array objectAtIndex:] */
-__attribute__((weak)) NFObject * Metal__Array_objectAtIndex_(NFObject * self, SEL _cmd, unsigned i) {
+__attribute__((weak)) NPObject * Metal__Array_objectAtIndex_(NPObject * self, SEL _cmd, unsigned i) {
     return ((struct Metal__Array *)self)->_items[i];
 }
 
 /* +[Box alloc] */
-__attribute__((weak)) NFObject * Box_alloc(NFClass * self, SEL _cmd) {
+__attribute__((weak)) NPObject * Box_alloc(NPClass * self, SEL _cmd) {
     return nopa_alloc(self);
 }
 
 /* -[Box init] */
-__attribute__((weak)) NFObject * Box_init(NFObject * self, SEL _cmd) {
+__attribute__((weak)) NPObject * Box_init(NPObject * self, SEL _cmd) {
     return self;
 }
 
 /* -[Box set:] */
-__attribute__((weak)) void Box_set_(NFObject * self, SEL _cmd, NFObject * v) {
+__attribute__((weak)) void Box_set_(NPObject * self, SEL _cmd, NPObject * v) {
     ((struct Box *)self)->_v = v;
 }
 
 /* -[Box value] */
-__attribute__((weak)) NFObject * Box_value(NFObject * self, SEL _cmd) {
+__attribute__((weak)) NPObject * Box_value(NPObject * self, SEL _cmd) {
     return ((struct Box *)self)->_v;
 }
 
 /* +[Animal alloc] */
-__attribute__((weak)) NFObject * Animal_alloc(NFClass * self, SEL _cmd) {
+__attribute__((weak)) NPObject * Animal_alloc(NPClass * self, SEL _cmd) {
     return nopa_alloc(self);
 }
 
 /* -[Animal init] */
-__attribute__((weak)) NFObject * Animal_init(NFObject * self, SEL _cmd) {
+__attribute__((weak)) NPObject * Animal_init(NPObject * self, SEL _cmd) {
     return self;
 }
 
 /* -[Animal speak] */
-__attribute__((weak)) int Animal_speak(NFObject * self, SEL _cmd) {
+__attribute__((weak)) int Animal_speak(NPObject * self, SEL _cmd) {
     return ((struct Animal *)self)->voice;
 }
 
 /* -[Animal setVoice:] */
-__attribute__((weak)) void Animal_setVoice_(NFObject * self, SEL _cmd, int v) {
+__attribute__((weak)) void Animal_setVoice_(NPObject * self, SEL _cmd, int v) {
     ((struct Animal *)self)->voice = v;
 }
 
 /* +[Dog alloc] */
-__attribute__((weak)) NFObject * Dog_alloc(NFClass * self, SEL _cmd) {
+__attribute__((weak)) NPObject * Dog_alloc(NPClass * self, SEL _cmd) {
     return nopa_alloc(self);
 }
 
 /* -[Dog init] */
-__attribute__((weak)) NFObject * Dog_init(NFObject * self, SEL _cmd) {
+__attribute__((weak)) NPObject * Dog_init(NPObject * self, SEL _cmd) {
     return self;
 }
 
 /* -[Dog speak] */
-__attribute__((weak)) int Dog_speak(NFObject * self, SEL _cmd) {
+__attribute__((weak)) int Dog_speak(NPObject * self, SEL _cmd) {
     return ((&NOPA_VTABLE_$_Animal)->speak(self, __nopa_sel_speak) + ((struct Dog *)self)->leash);
 }
 
 /* -[Dog setLeash_] */
-__attribute__((weak)) void Dog_setLeash_(NFObject * self, SEL _cmd, int l) {
+__attribute__((weak)) void Dog_setLeash_(NPObject * self, SEL _cmd, int l) {
     ((struct Dog *)self)->leash = l;
 }
 
-__attribute__((weak)) int nopa_async_state_sumAsync_(NFTask * t) {
+__attribute__((weak)) int nopa_async_state_sumAsync_(NPTask * t) {
     switch (t->state) {
         case 1:
             {
                 struct sumAsync__frame * __nopa_f = (struct sumAsync__frame *)t->frame;
-                int r = (t->state = 2, ({ NFObject *__nopa_tmp_4 = ((NFObject *)(t->self_obj)); __nopa_tmp_4 ? ((int (*)(NFObject *, SEL, int, int))((struct nopa_vtable *)__nopa_tmp_4->isa->vtable)->addTo_times_)(__nopa_tmp_4, __nopa_sel_addTo_times_, __nopa_f->v, 2) : (int){0}; }));
+                int r = (t->state = 2, ({ NPObject *__nopa_tmp_4 = ((NPObject *)(t->self_obj)); __nopa_tmp_4 ? ((int (*)(NPObject *, SEL, int, int))((struct nopa_vtable *)__nopa_tmp_4->isa->vtable)->addTo_times_)(__nopa_tmp_4, __nopa_sel_addTo_times_, __nopa_f->v, 2) : (int){0}; }));
                 {
                     t->result = (void *)(unsigned)(r + __nopa_f->v);
                     t->state = -1;
@@ -1261,7 +1261,7 @@ __attribute__((weak)) int nopa_async_state_sumAsync_(NFTask * t) {
     return 1;
 }
 
-__attribute__((weak)) int nopa_async_state_awaitMake(NFTask * t) {
+__attribute__((weak)) int nopa_async_state_awaitMake(NPTask * t) {
     switch (t->state) {
         case 1:
             {
@@ -1283,12 +1283,12 @@ __attribute__((weak)) int nopa_async_state_awaitMake(NFTask * t) {
     return 1;
 }
 
-__attribute__((weak)) int nopa_async_state_awaitSum_(NFTask * t) {
+__attribute__((weak)) int nopa_async_state_awaitSum_(NPTask * t) {
     switch (t->state) {
         case 1:
             {
                 struct awaitSum__frame * __nopa_f = (struct awaitSum__frame *)t->frame;
-                int av = (t->state = 2, ({ NFObject *__nopa_tmp_5 = ((NFObject *)(__nopa_f->ww)); __nopa_tmp_5 ? ((int (*)(NFObject *, SEL, int))((struct nopa_vtable *)__nopa_tmp_5->isa->vtable)->sumAsync_)(__nopa_tmp_5, __nopa_sel_sumAsync_, 5) : (int){0}; }));
+                int av = (t->state = 2, ({ NPObject *__nopa_tmp_5 = ((NPObject *)(__nopa_f->ww)); __nopa_tmp_5 ? ((int (*)(NPObject *, SEL, int))((struct nopa_vtable *)__nopa_tmp_5->isa->vtable)->sumAsync_)(__nopa_tmp_5, __nopa_sel_sumAsync_, 5) : (int){0}; }));
                 kputs("[R8] async marker sum=");
                 kputdec(av);
                 kputs("\n");
@@ -1425,11 +1425,11 @@ __attribute__((weak)) unsigned loopsum(int n) {
 
 
 __attribute__((weak)) int poke_tag(Metal__Widget * w) {
-    return ({ NFObject *__nopa_tmp_6 = ((NFObject *)(w)); __nopa_tmp_6 ? ((int (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_6->isa->vtable)->tag)(__nopa_tmp_6, __nopa_sel_tag) : (int){0}; });
+    return ({ NPObject *__nopa_tmp_6 = ((NPObject *)(w)); __nopa_tmp_6 ? ((int (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_6->isa->vtable)->tag)(__nopa_tmp_6, __nopa_sel_tag) : (int){0}; });
 }
 
-__attribute__((weak)) int poke_id_proto(NFObject * t) {
-    return ({ NFObject *__nopa_tmp_7 = ((NFObject *)(t)); __nopa_tmp_7 ? ((int (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_7->isa->vtable)->tag)(__nopa_tmp_7, __nopa_sel_tag) : (int){0}; });
+__attribute__((weak)) int poke_id_proto(NPObject * t) {
+    return ({ NPObject *__nopa_tmp_7 = ((NPObject *)(t)); __nopa_tmp_7 ? ((int (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_7->isa->vtable)->tag)(__nopa_tmp_7, __nopa_sel_tag) : (int){0}; });
 }
 
 __attribute__((weak)) void rethrow_err(Metal__Err * e) {
@@ -1462,7 +1462,7 @@ __attribute__((weak)) int local_catch(int n, Metal__Err * e) {
             return (n * 3);
         }
         memcpy(__nopa_exception_buf, __nopa_saved, sizeof(jmp_buf));
-        if ((__nopa_state == 1))         if (__nopa_eh_isa((NFObject *)__nopa_exception_value, &NOPA_CLASS_$_Metal__Err)) {
+        if ((__nopa_state == 1))         if (__nopa_eh_isa((NPObject *)__nopa_exception_value, &NOPA_CLASS_$_Metal__Err)) {
             __nopa_state = 2;
             Metal__Err * caught;
             (void)caught;
@@ -1555,15 +1555,15 @@ __nopa_sw0_end:
     }
 }
 
-__attribute__((weak)) void pattern_obj(NFObject * obj) {
+__attribute__((weak)) void pattern_obj(NPObject * obj) {
     {
-        NFObject * __nopa_sw = (NFObject *)obj;
-        Dog * d = (Dog *)(NFObject *)__nopa_sw;
-        Animal * a = (Animal *)(NFObject *)__nopa_sw;
-        if (nopa_isKindOfClass((NFObject *)__nopa_sw, &NOPA_CLASS_$_Dog)) {
+        NPObject * __nopa_sw = (NPObject *)obj;
+        Dog * d = (Dog *)(NPObject *)__nopa_sw;
+        Animal * a = (Animal *)(NPObject *)__nopa_sw;
+        if (nopa_isKindOfClass((NPObject *)__nopa_sw, &NOPA_CLASS_$_Dog)) {
             goto __nopa_case_1_0;
         }
-        if (nopa_isKindOfClass((NFObject *)__nopa_sw, &NOPA_CLASS_$_Animal)) {
+        if (nopa_isKindOfClass((NPObject *)__nopa_sw, &NOPA_CLASS_$_Animal)) {
             goto __nopa_case_1_1;
         }
         goto __nopa_case_1_d;
@@ -1571,7 +1571,7 @@ __attribute__((weak)) void pattern_obj(NFObject * obj) {
 __nopa_case_1_0:
             {
                 kputs("[P2] dog arm speak=");
-                kputdec(({ NFObject *__nopa_tmp_8 = ((NFObject *)(d)); __nopa_tmp_8 ? ((int (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_8->isa->vtable)->speak)(__nopa_tmp_8, __nopa_sel_speak) : (int){0}; }));
+                kputdec(({ NPObject *__nopa_tmp_8 = ((NPObject *)(d)); __nopa_tmp_8 ? ((int (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_8->isa->vtable)->speak)(__nopa_tmp_8, __nopa_sel_speak) : (int){0}; }));
                 kputs("\n");
                 goto __nopa_sw1_end;
             }
@@ -1580,7 +1580,7 @@ __nopa_case_1_0:
 __nopa_case_1_1:
             {
                 kputs("[P2] animal arm speak=");
-                kputdec(({ NFObject *__nopa_tmp_9 = ((NFObject *)(a)); __nopa_tmp_9 ? ((int (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_9->isa->vtable)->speak)(__nopa_tmp_9, __nopa_sel_speak) : (int){0}; }));
+                kputdec(({ NPObject *__nopa_tmp_9 = ((NPObject *)(a)); __nopa_tmp_9 ? ((int (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_9->isa->vtable)->speak)(__nopa_tmp_9, __nopa_sel_speak) : (int){0}; }));
                 kputs("\n");
                 goto __nopa_sw1_end;
             }
@@ -1634,48 +1634,48 @@ __attribute__((weak)) int main(void) {
     kputs("[N1] +make:plus: = ");
     kputdec(Metal__Widget_make_plus_(&NOPA_CLASS_$_Metal__Widget, __nopa_sel_make_plus_, 20, 1));
     kputs("\n");
-    NFObject *__nopa_tmp_10 = (Metal__Widget_alloc(&NOPA_CLASS_$_Metal__Widget, __nopa_sel_alloc));
+    NPObject *__nopa_tmp_10 = (Metal__Widget_alloc(&NOPA_CLASS_$_Metal__Widget, __nopa_sel_alloc));
     Metal__Widget * w = (Metal__Widget *)(__nopa_tmp_10 ? ((struct nopa_vtable *)__nopa_tmp_10->isa->vtable)->initWithUid_weight_(__nopa_tmp_10, __nopa_sel_initWithUid_weight_, 7, 30) : 0);
     kputs("[N2] tag=");
-    kputdec(({ NFObject *__nopa_tmp_11 = ((NFObject *)(w)); __nopa_tmp_11 ? ((int (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_11->isa->vtable)->tag)(__nopa_tmp_11, __nopa_sel_tag) : (int){0}; }));
+    kputdec(({ NPObject *__nopa_tmp_11 = ((NPObject *)(w)); __nopa_tmp_11 ? ((int (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_11->isa->vtable)->tag)(__nopa_tmp_11, __nopa_sel_tag) : (int){0}; }));
     kputs(" weight=");
-    kputdec(({ NFObject *__nopa_tmp_12 = ((NFObject *)(w)); __nopa_tmp_12 ? ((int (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_12->isa->vtable)->weight)(__nopa_tmp_12, __nopa_sel_weight) : (int){0}; }));
+    kputdec(({ NPObject *__nopa_tmp_12 = ((NPObject *)(w)); __nopa_tmp_12 ? ((int (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_12->isa->vtable)->weight)(__nopa_tmp_12, __nopa_sel_weight) : (int){0}; }));
     kputs(" addTo:10 times:3=");
-    kputdec(({ NFObject *__nopa_tmp_13 = ((NFObject *)(w)); __nopa_tmp_13 ? ((int (*)(NFObject *, SEL, int, int))((struct nopa_vtable *)__nopa_tmp_13->isa->vtable)->addTo_times_)(__nopa_tmp_13, __nopa_sel_addTo_times_, 10, 3) : (int){0}; }));
+    kputdec(({ NPObject *__nopa_tmp_13 = ((NPObject *)(w)); __nopa_tmp_13 ? ((int (*)(NPObject *, SEL, int, int))((struct nopa_vtable *)__nopa_tmp_13->isa->vtable)->addTo_times_)(__nopa_tmp_13, __nopa_sel_addTo_times_, 10, 3) : (int){0}; }));
     kputs("\n");
-    ({ NFObject *__nopa_tmp_14 = ((NFObject *)(w)); __nopa_tmp_14 ? ((void (*)(NFObject *, SEL, int))((struct nopa_vtable *)__nopa_tmp_14->isa->vtable)->setWeight_)(__nopa_tmp_14, __nopa_sel_setWeight_, 99) : 0; });
+    ({ NPObject *__nopa_tmp_14 = ((NPObject *)(w)); __nopa_tmp_14 ? ((void (*)(NPObject *, SEL, int))((struct nopa_vtable *)__nopa_tmp_14->isa->vtable)->setWeight_)(__nopa_tmp_14, __nopa_sel_setWeight_, 99) : 0; });
     kputs("[N3] setWeight→");
-    kputdec(({ NFObject *__nopa_tmp_15 = ((NFObject *)(w)); __nopa_tmp_15 ? ((int (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_15->isa->vtable)->weight)(__nopa_tmp_15, __nopa_sel_weight) : (int){0}; }));
+    kputdec(({ NPObject *__nopa_tmp_15 = ((NPObject *)(w)); __nopa_tmp_15 ? ((int (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_15->isa->vtable)->weight)(__nopa_tmp_15, __nopa_sel_weight) : (int){0}; }));
     kputs(" uid(arrow public)=");
     kputdec(w->uid);
     kputs("\n");
-    NFObject *__nopa_tmp_16 = (Metal__TurboWidget_alloc(&NOPA_CLASS_$_Metal__TurboWidget, __nopa_sel_alloc));
+    NPObject *__nopa_tmp_16 = (Metal__TurboWidget_alloc(&NOPA_CLASS_$_Metal__TurboWidget, __nopa_sel_alloc));
     Metal__TurboWidget * tw = (Metal__TurboWidget *)(__nopa_tmp_16 ? ((struct nopa_vtable *)__nopa_tmp_16->isa->vtable)->init(__nopa_tmp_16, __nopa_sel_init) : 0);
-    ({ NFObject *__nopa_tmp_17 = ((NFObject *)(tw)); __nopa_tmp_17 ? ((void (*)(NFObject *, SEL, int))((struct nopa_vtable *)__nopa_tmp_17->isa->vtable)->setBoost_)(__nopa_tmp_17, __nopa_sel_setBoost_, 1000) : 0; });
-    ({ NFObject *__nopa_tmp_18 = ((NFObject *)(tw)); __nopa_tmp_18 ? ((void (*)(NFObject *, SEL, int))((struct nopa_vtable *)__nopa_tmp_18->isa->vtable)->setWeight_)(__nopa_tmp_18, __nopa_sel_setWeight_, 5) : 0; });
+    ({ NPObject *__nopa_tmp_17 = ((NPObject *)(tw)); __nopa_tmp_17 ? ((void (*)(NPObject *, SEL, int))((struct nopa_vtable *)__nopa_tmp_17->isa->vtable)->setBoost_)(__nopa_tmp_17, __nopa_sel_setBoost_, 1000) : 0; });
+    ({ NPObject *__nopa_tmp_18 = ((NPObject *)(tw)); __nopa_tmp_18 ? ((void (*)(NPObject *, SEL, int))((struct nopa_vtable *)__nopa_tmp_18->isa->vtable)->setWeight_)(__nopa_tmp_18, __nopa_sel_setWeight_, 5) : 0; });
     kputs("[N4] TurboWidget tag(super+boost)=");
-    kputdec(({ NFObject *__nopa_tmp_19 = ((NFObject *)(tw)); __nopa_tmp_19 ? ((int (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_19->isa->vtable)->tag)(__nopa_tmp_19, __nopa_sel_tag) : (int){0}; }));
+    kputdec(({ NPObject *__nopa_tmp_19 = ((NPObject *)(tw)); __nopa_tmp_19 ? ((int (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_19->isa->vtable)->tag)(__nopa_tmp_19, __nopa_sel_tag) : (int){0}; }));
     kputs("\n");
     kputs("[N5] poke id<Tagged>=");
     kputdec(poke_id_proto(w));
     kputs("\n");
-    NFObject *__nopa_tmp_20 = (Metal__Array_alloc(&NOPA_CLASS_$_Metal__Array, __nopa_sel_alloc));
+    NPObject *__nopa_tmp_20 = (Metal__Array_alloc(&NOPA_CLASS_$_Metal__Array, __nopa_sel_alloc));
     Metal__Array * arr = (Metal__Array *)(__nopa_tmp_20 ? ((struct nopa_vtable *)__nopa_tmp_20->isa->vtable)->init(__nopa_tmp_20, __nopa_sel_init) : 0);
-    ({ NFObject *__nopa_tmp_21 = ((NFObject *)(arr)); __nopa_tmp_21 ? ((void (*)(NFObject *, SEL, NFObject *))((struct nopa_vtable *)__nopa_tmp_21->isa->vtable)->add_)(__nopa_tmp_21, __nopa_sel_add_, (NFObject *)(w)) : 0; });
-    ({ NFObject *__nopa_tmp_22 = ((NFObject *)(arr)); __nopa_tmp_22 ? ((void (*)(NFObject *, SEL, NFObject *))((struct nopa_vtable *)__nopa_tmp_22->isa->vtable)->add_)(__nopa_tmp_22, __nopa_sel_add_, (NFObject *)(tw)) : 0; });
+    ({ NPObject *__nopa_tmp_21 = ((NPObject *)(arr)); __nopa_tmp_21 ? ((void (*)(NPObject *, SEL, NPObject *))((struct nopa_vtable *)__nopa_tmp_21->isa->vtable)->add_)(__nopa_tmp_21, __nopa_sel_add_, (NPObject *)(w)) : 0; });
+    ({ NPObject *__nopa_tmp_22 = ((NPObject *)(arr)); __nopa_tmp_22 ? ((void (*)(NPObject *, SEL, NPObject *))((struct nopa_vtable *)__nopa_tmp_22->isa->vtable)->add_)(__nopa_tmp_22, __nopa_sel_add_, (NPObject *)(tw)) : 0; });
     kputs("[N6] for-in custom:");
     {
-        NFObject * __nopa_fi = (NFObject *)(arr);
-        for (unsigned long __nopa_fi_i = 0;  (__nopa_fi_i < ({ NFObject *__nopa_tmp_23 = ((NFObject *)(__nopa_fi)); __nopa_tmp_23 ? ((unsigned (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_23->isa->vtable)->count)(__nopa_tmp_23, __nopa_sel_count) : (unsigned){0}; })); (__nopa_fi_i)++) {
-            NFObject * x = ({ NFObject *__nopa_tmp_24 = ((NFObject *)(__nopa_fi)); __nopa_tmp_24 ? ((NFObject * (*)(NFObject *, SEL, unsigned))((struct nopa_vtable *)__nopa_tmp_24->isa->vtable)->objectAtIndex_)(__nopa_tmp_24, __nopa_sel_objectAtIndex_, __nopa_fi_i) : 0; });
-            kputdec(({ NFObject *__nopa_tmp_25 = ((NFObject *)(x)); __nopa_tmp_25 ? ((int (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_25->isa->vtable)->tag)(__nopa_tmp_25, __nopa_sel_tag) : (int){0}; }));
+        NPObject * __nopa_fi = (NPObject *)(arr);
+        for (unsigned long __nopa_fi_i = 0;  (__nopa_fi_i < ({ NPObject *__nopa_tmp_23 = ((NPObject *)(__nopa_fi)); __nopa_tmp_23 ? ((unsigned (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_23->isa->vtable)->count)(__nopa_tmp_23, __nopa_sel_count) : (unsigned){0}; })); (__nopa_fi_i)++) {
+            NPObject * x = ({ NPObject *__nopa_tmp_24 = ((NPObject *)(__nopa_fi)); __nopa_tmp_24 ? ((NPObject * (*)(NPObject *, SEL, unsigned))((struct nopa_vtable *)__nopa_tmp_24->isa->vtable)->objectAtIndex_)(__nopa_tmp_24, __nopa_sel_objectAtIndex_, __nopa_fi_i) : 0; });
+            kputdec(({ NPObject *__nopa_tmp_25 = ((NPObject *)(x)); __nopa_tmp_25 ? ((int (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_25->isa->vtable)->tag)(__nopa_tmp_25, __nopa_sel_tag) : (int){0}; }));
             kputs(" ");
         }
     }
     kputs("\n");
-    NFObject *__nopa_tmp_26 = (Metal__Err_alloc(&NOPA_CLASS_$_Metal__Err, __nopa_sel_alloc));
+    NPObject *__nopa_tmp_26 = (Metal__Err_alloc(&NOPA_CLASS_$_Metal__Err, __nopa_sel_alloc));
     Metal__Err * e = (Metal__Err *)(__nopa_tmp_26 ? ((struct nopa_vtable *)__nopa_tmp_26->isa->vtable)->init(__nopa_tmp_26, __nopa_sel_init) : 0);
-    ({ NFObject *__nopa_tmp_27 = ((NFObject *)(e)); __nopa_tmp_27 ? ((void (*)(NFObject *, SEL, int))((struct nopa_vtable *)__nopa_tmp_27->isa->vtable)->setCode_)(__nopa_tmp_27, __nopa_sel_setCode_, 42) : 0; });
+    ({ NPObject *__nopa_tmp_27 = ((NPObject *)(e)); __nopa_tmp_27 ? ((void (*)(NPObject *, SEL, int))((struct nopa_vtable *)__nopa_tmp_27->isa->vtable)->setCode_)(__nopa_tmp_27, __nopa_sel_setCode_, 42) : 0; });
     {
         jmp_buf __nopa_saved;
         memcpy(__nopa_saved, __nopa_exception_buf, sizeof(jmp_buf));
@@ -1693,16 +1693,16 @@ __attribute__((weak)) int main(void) {
             kputs("[N7] unreachable\n");
         }
         memcpy(__nopa_exception_buf, __nopa_saved, sizeof(jmp_buf));
-        if ((__nopa_state == 1))         if (__nopa_eh_isa((NFObject *)__nopa_exception_value, &NOPA_CLASS_$_Metal__Err)) {
+        if ((__nopa_state == 1))         if (__nopa_eh_isa((NPObject *)__nopa_exception_value, &NOPA_CLASS_$_Metal__Err)) {
             __nopa_state = 2;
             Metal__Err * err = (Metal__Err *)__nopa_exception_value;
             {
                 kputs("[N7] caught Err code=");
-                kputdec(({ NFObject *__nopa_tmp_28 = ((NFObject *)(err)); __nopa_tmp_28 ? ((int (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_28->isa->vtable)->errorCode)(__nopa_tmp_28, __nopa_sel_errorCode) : (int){0}; }));
+                kputdec(({ NPObject *__nopa_tmp_28 = ((NPObject *)(err)); __nopa_tmp_28 ? ((int (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_28->isa->vtable)->errorCode)(__nopa_tmp_28, __nopa_sel_errorCode) : (int){0}; }));
                 kputs("\n");
             }
         }
-        if ((__nopa_state == 1))         if (__nopa_eh_isa((NFObject *)__nopa_exception_value, &NOPA_CLASS_$_Metal__OtherErr)) {
+        if ((__nopa_state == 1))         if (__nopa_eh_isa((NPObject *)__nopa_exception_value, &NOPA_CLASS_$_Metal__OtherErr)) {
             __nopa_state = 2;
             Metal__OtherErr * oe;
             (void)oe;
@@ -1731,12 +1731,12 @@ __attribute__((weak)) int main(void) {
             kputs("[N7b] unreachable\n");
         }
         memcpy(__nopa_exception_buf, __nopa_saved, sizeof(jmp_buf));
-        if ((__nopa_state == 1))         if (__nopa_eh_isa((NFObject *)__nopa_exception_value, &NOPA_CLASS_$_Metal__Err)) {
+        if ((__nopa_state == 1))         if (__nopa_eh_isa((NPObject *)__nopa_exception_value, &NOPA_CLASS_$_Metal__Err)) {
             __nopa_state = 2;
             Metal__Err * err2 = (Metal__Err *)__nopa_exception_value;
             {
                 kputs("[N7b] typed rethrow caught code=");
-                kputdec(({ NFObject *__nopa_tmp_29 = ((NFObject *)(err2)); __nopa_tmp_29 ? ((int (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_29->isa->vtable)->errorCode)(__nopa_tmp_29, __nopa_sel_errorCode) : (int){0}; }));
+                kputdec(({ NPObject *__nopa_tmp_29 = ((NPObject *)(err2)); __nopa_tmp_29 ? ((int (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_29->isa->vtable)->errorCode)(__nopa_tmp_29, __nopa_sel_errorCode) : (int){0}; }));
                 kputs("\n");
             }
         }
@@ -1752,7 +1752,7 @@ __attribute__((weak)) int main(void) {
             bare_rethrow_err(e);
         }
         memcpy(__nopa_exception_buf, __nopa_saved, sizeof(jmp_buf));
-        if ((__nopa_state == 1))         if (__nopa_eh_isa((NFObject *)__nopa_exception_value, &NOPA_CLASS_$_Metal__Err)) {
+        if ((__nopa_state == 1))         if (__nopa_eh_isa((NPObject *)__nopa_exception_value, &NOPA_CLASS_$_Metal__Err)) {
             __nopa_state = 2;
             Metal__Err * err3;
             (void)err3;
@@ -1765,7 +1765,7 @@ __attribute__((weak)) int main(void) {
     }
     SEL s = __nopa_sel_setWeight_;
     kputs("[N8] @selector built, tag via send=");
-    kputdec(({ NFObject *__nopa_tmp_30 = ((NFObject *)(w)); __nopa_tmp_30 ? ((int (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_30->isa->vtable)->tag)(__nopa_tmp_30, __nopa_sel_tag) : (int){0}; }));
+    kputdec(({ NPObject *__nopa_tmp_30 = ((NPObject *)(w)); __nopa_tmp_30 ? ((int (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_30->isa->vtable)->tag)(__nopa_tmp_30, __nopa_sel_tag) : (int){0}; }));
     kputs(" (sel non-null: ");
     kputdec((s.name != 0) ? 1 : 0);
     kputs(")\n");
@@ -1787,11 +1787,11 @@ __attribute__((weak)) int main(void) {
     kputdec(base.__forwarding->__value);
     kputs("\n");
     int stored = 555;
-    NFObject *__nopa_tmp_31 = (Animal_alloc(&NOPA_CLASS_$_Box_int_ptr, __nopa_sel_alloc));
+    NPObject *__nopa_tmp_31 = (Animal_alloc(&NOPA_CLASS_$_Box_int_ptr, __nopa_sel_alloc));
     Box * box = (Box *)(__nopa_tmp_31 ? ((struct nopa_vtable *)__nopa_tmp_31->isa->vtable)->init(__nopa_tmp_31, __nopa_sel_init) : 0);
-    ({ NFObject *__nopa_tmp_32 = ((NFObject *)(box)); __nopa_tmp_32 ? ((void (*)(NFObject *, SEL, NFObject *))((struct nopa_vtable *)__nopa_tmp_32->isa->vtable)->set_)(__nopa_tmp_32, __nopa_sel_set_, &stored) : 0; });
+    ({ NPObject *__nopa_tmp_32 = ((NPObject *)(box)); __nopa_tmp_32 ? ((void (*)(NPObject *, SEL, NPObject *))((struct nopa_vtable *)__nopa_tmp_32->isa->vtable)->set_)(__nopa_tmp_32, __nopa_sel_set_, &stored) : 0; });
     kputs("[N10] box value=");
-    kputdec(*(int *)({ NFObject *__nopa_tmp_33 = ((NFObject *)(box)); __nopa_tmp_33 ? ((NFObject * (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_33->isa->vtable)->value)(__nopa_tmp_33, __nopa_sel_value) : (NFObject *){0}; }));
+    kputdec(*(int *)({ NPObject *__nopa_tmp_33 = ((NPObject *)(box)); __nopa_tmp_33 ? ((NPObject * (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_33->isa->vtable)->value)(__nopa_tmp_33, __nopa_sel_value) : (NPObject *){0}; }));
     kputs("\n");
     unsigned in1 = 21;
     unsigned out1 = 0;
@@ -1824,35 +1824,35 @@ skip_hit:
     kputs("\n");
     {
         __attribute__((cleanup(nopa_syncAutoCleanup)))         long __nopa_sync_2 = nopa_syncLock((void *)w);
-        ({ NFObject *__nopa_tmp_34 = ((NFObject *)(w)); __nopa_tmp_34 ? ((void (*)(NFObject *, SEL, int))((struct nopa_vtable *)__nopa_tmp_34->isa->vtable)->setWeight_)(__nopa_tmp_34, __nopa_sel_setWeight_, (({ NFObject *__nopa_tmp_35 = ((NFObject *)(w)); __nopa_tmp_35 ? ((int (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_35->isa->vtable)->weight)(__nopa_tmp_35, __nopa_sel_weight) : (int){0}; }) + 1)) : 0; });
+        ({ NPObject *__nopa_tmp_34 = ((NPObject *)(w)); __nopa_tmp_34 ? ((void (*)(NPObject *, SEL, int))((struct nopa_vtable *)__nopa_tmp_34->isa->vtable)->setWeight_)(__nopa_tmp_34, __nopa_sel_setWeight_, (({ NPObject *__nopa_tmp_35 = ((NPObject *)(w)); __nopa_tmp_35 ? ((int (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_35->isa->vtable)->weight)(__nopa_tmp_35, __nopa_sel_weight) : (int){0}; }) + 1)) : 0; });
     }
     kputs("[M1] synchronized weight=");
-    kputdec(({ NFObject *__nopa_tmp_36 = ((NFObject *)(w)); __nopa_tmp_36 ? ((int (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_36->isa->vtable)->weight)(__nopa_tmp_36, __nopa_sel_weight) : (int){0}; }));
+    kputdec(({ NPObject *__nopa_tmp_36 = ((NPObject *)(w)); __nopa_tmp_36 ? ((int (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_36->isa->vtable)->weight)(__nopa_tmp_36, __nopa_sel_weight) : (int){0}; }));
     kputs("\n");
     {
-        NFObject *__nopa_tmp_37 = (Metal__Widget_alloc(&NOPA_CLASS_$_Metal__Widget, __nopa_sel_alloc));
+        NPObject *__nopa_tmp_37 = (Metal__Widget_alloc(&NOPA_CLASS_$_Metal__Widget, __nopa_sel_alloc));
         Metal__Widget * m = (Metal__Widget *)(__nopa_tmp_37 ? ((struct nopa_vtable *)__nopa_tmp_37->isa->vtable)->init(__nopa_tmp_37, __nopa_sel_init) : 0);
-        ({ NFObject *__nopa_tmp_38 = ((NFObject *)(m)); __nopa_tmp_38 ? ((NFObject * (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_38->isa->vtable)->retain)(__nopa_tmp_38, __nopa_sel_retain) : 0; });
+        ({ NPObject *__nopa_tmp_38 = ((NPObject *)(m)); __nopa_tmp_38 ? ((NPObject * (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_38->isa->vtable)->retain)(__nopa_tmp_38, __nopa_sel_retain) : 0; });
         kputs("[M2] noarc manual rc=");
         kputdec((((int)m->uid * 0) + 1));
         kputs(" (alive)\n");
-        ({ NFObject *__nopa_tmp_39 = ((NFObject *)(m)); __nopa_tmp_39 ? ((void (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_39->isa->vtable)->release)(__nopa_tmp_39, __nopa_sel_release) : 0; });
-        ({ NFObject *__nopa_tmp_40 = ((NFObject *)(m)); __nopa_tmp_40 ? ((void (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_40->isa->vtable)->release)(__nopa_tmp_40, __nopa_sel_release) : 0; });
+        ({ NPObject *__nopa_tmp_39 = ((NPObject *)(m)); __nopa_tmp_39 ? ((void (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_39->isa->vtable)->release)(__nopa_tmp_39, __nopa_sel_release) : 0; });
+        ({ NPObject *__nopa_tmp_40 = ((NPObject *)(m)); __nopa_tmp_40 ? ((void (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_40->isa->vtable)->release)(__nopa_tmp_40, __nopa_sel_release) : 0; });
     }
     kputs("[M2] noarc survived\n");
     {
         nopa_autoreleasepool_t * __nopa_pool = nopa_autoreleasepoolPush();
         {
-            NFObject *__nopa_tmp_41 = (Metal__Widget_alloc(&NOPA_CLASS_$_Metal__Widget, __nopa_sel_alloc));
+            NPObject *__nopa_tmp_41 = (Metal__Widget_alloc(&NOPA_CLASS_$_Metal__Widget, __nopa_sel_alloc));
             Metal__Widget * tmp = (Metal__Widget *)(__nopa_tmp_41 ? ((struct nopa_vtable *)__nopa_tmp_41->isa->vtable)->init(__nopa_tmp_41, __nopa_sel_init) : 0);
-            ({ NFObject *__nopa_tmp_42 = ((NFObject *)(tmp)); __nopa_tmp_42 ? ((NFObject * (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_42->isa->vtable)->autorelease)(__nopa_tmp_42, __nopa_sel_autorelease) : 0; });
+            ({ NPObject *__nopa_tmp_42 = ((NPObject *)(tmp)); __nopa_tmp_42 ? ((NPObject * (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_42->isa->vtable)->autorelease)(__nopa_tmp_42, __nopa_sel_autorelease) : 0; });
             kputs("[M3] autoreleased obj in pool\n");
         }
         nopa_autoreleasepoolPop(__nopa_pool);
     }
     kputs("[M3] pool popped\n");
     Metal__Ghost * ghost = (Metal__Ghost *)0;
-    int dead = ({ NFObject *__nopa_tmp_43 = ((NFObject *)(ghost)); __nopa_tmp_43 ? ((int (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_43->isa->vtable)->tag)(__nopa_tmp_43, __nopa_sel_tag) : (int){0}; });
+    int dead = ({ NPObject *__nopa_tmp_43 = ((NPObject *)(ghost)); __nopa_tmp_43 ? ((int (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_43->isa->vtable)->tag)(__nopa_tmp_43, __nopa_sel_tag) : (int){0}; });
     kputs("[N8b] msg to nil →");
     kputdec(dead);
     kputs("\n");
@@ -1877,26 +1877,26 @@ skip_hit:
     kputs("[N11] poke_tag(w)=");
     kputdec(poke_tag(w));
     kputs("\n");
-    if (({ NFObject *__nopa_tmp_44 = ((NFObject *)(w)); __nopa_tmp_44 ? ((_Bool (*)(NFObject *, SEL, NFClass *))((struct nopa_vtable *)__nopa_tmp_44->isa->vtable)->isKindOfClass_)(__nopa_tmp_44, __nopa_sel_isKindOfClass_, (NFClass *)(&NOPA_CLASS_$_Metal__Widget)) : (_Bool){0}; })) {
+    if (({ NPObject *__nopa_tmp_44 = ((NPObject *)(w)); __nopa_tmp_44 ? ((_Bool (*)(NPObject *, SEL, NPClass *))((struct nopa_vtable *)__nopa_tmp_44->isa->vtable)->isKindOfClass_)(__nopa_tmp_44, __nopa_sel_isKindOfClass_, (NPClass *)(&NOPA_CLASS_$_Metal__Widget)) : (_Bool){0}; })) {
         kputs("[R1] isKindOfClass OK\n");
     }
     else {
         kputs("[R1] isKindOfClass FAIL\n");
     }
-    if (({ NFObject *__nopa_tmp_45 = ((NFObject *)(w)); __nopa_tmp_45 ? ((_Bool (*)(NFObject *, SEL, NFClass *))((struct nopa_vtable *)__nopa_tmp_45->isa->vtable)->isKindOfClass_)(__nopa_tmp_45, __nopa_sel_isKindOfClass_, (NFClass *)(&NOPA_CLASS_$_Metal__TurboWidget)) : (_Bool){0}; })) {
+    if (({ NPObject *__nopa_tmp_45 = ((NPObject *)(w)); __nopa_tmp_45 ? ((_Bool (*)(NPObject *, SEL, NPClass *))((struct nopa_vtable *)__nopa_tmp_45->isa->vtable)->isKindOfClass_)(__nopa_tmp_45, __nopa_sel_isKindOfClass_, (NPClass *)(&NOPA_CLASS_$_Metal__TurboWidget)) : (_Bool){0}; })) {
         kputs("[R2] isKindOfClass(sub) FAIL\n");
     }
     else {
         kputs("[R2] isKindOfClass(sub) correctly NO\n");
     }
-    if (({ NFObject *__nopa_tmp_46 = ((NFObject *)(w)); __nopa_tmp_46 ? ((_Bool (*)(NFObject *, SEL, NFObject *))((struct nopa_vtable *)__nopa_tmp_46->isa->vtable)->isEqual_)(__nopa_tmp_46, __nopa_sel_isEqual_, (NFObject *)(w)) : (_Bool){0}; })) {
+    if (({ NPObject *__nopa_tmp_46 = ((NPObject *)(w)); __nopa_tmp_46 ? ((_Bool (*)(NPObject *, SEL, NPObject *))((struct nopa_vtable *)__nopa_tmp_46->isa->vtable)->isEqual_)(__nopa_tmp_46, __nopa_sel_isEqual_, (NPObject *)(w)) : (_Bool){0}; })) {
         kputs("[R3] isEqual self OK\n");
     }
     else {
         kputs("[R3] isEqual FAIL\n");
     }
     __block Metal__Widget * __attribute__((cleanup(nopa_weakAutoCleanup))) wweak = w;
-    nopa_weakRegister((NFObject **)&wweak, (NFObject *)w);
+    nopa_weakRegister((NPObject **)&wweak, (NPObject *)w);
     if (wweak) {
         kputs("[R4] __weak alias OK\n");
     }
@@ -1932,21 +1932,21 @@ skip_hit:
     pattern_scalar(42);
     pattern_scalar(7);
     pattern_scalar(999);
-    NFObject *__nopa_tmp_47 = (Animal_alloc(&NOPA_CLASS_$_Animal, __nopa_sel_alloc));
+    NPObject *__nopa_tmp_47 = (Animal_alloc(&NOPA_CLASS_$_Animal, __nopa_sel_alloc));
     Animal * pet = (Animal *)(__nopa_tmp_47 ? ((struct nopa_vtable *)__nopa_tmp_47->isa->vtable)->init(__nopa_tmp_47, __nopa_sel_init) : 0);
-    ({ NFObject *__nopa_tmp_48 = ((NFObject *)(pet)); __nopa_tmp_48 ? ((void (*)(NFObject *, SEL, int))((struct nopa_vtable *)__nopa_tmp_48->isa->vtable)->setVoice_)(__nopa_tmp_48, __nopa_sel_setVoice_, 5) : 0; });
-    NFObject *__nopa_tmp_49 = (Dog_alloc(&NOPA_CLASS_$_Dog, __nopa_sel_alloc));
+    ({ NPObject *__nopa_tmp_48 = ((NPObject *)(pet)); __nopa_tmp_48 ? ((void (*)(NPObject *, SEL, int))((struct nopa_vtable *)__nopa_tmp_48->isa->vtable)->setVoice_)(__nopa_tmp_48, __nopa_sel_setVoice_, 5) : 0; });
+    NPObject *__nopa_tmp_49 = (Dog_alloc(&NOPA_CLASS_$_Dog, __nopa_sel_alloc));
     Dog * rex = (Dog *)(__nopa_tmp_49 ? ((struct nopa_vtable *)__nopa_tmp_49->isa->vtable)->init(__nopa_tmp_49, __nopa_sel_init) : 0);
-    ({ NFObject *__nopa_tmp_50 = ((NFObject *)(rex)); __nopa_tmp_50 ? ((void (*)(NFObject *, SEL, int))((struct nopa_vtable *)__nopa_tmp_50->isa->vtable)->setVoice_)(__nopa_tmp_50, __nopa_sel_setVoice_, 11) : 0; });
+    ({ NPObject *__nopa_tmp_50 = ((NPObject *)(rex)); __nopa_tmp_50 ? ((void (*)(NPObject *, SEL, int))((struct nopa_vtable *)__nopa_tmp_50->isa->vtable)->setVoice_)(__nopa_tmp_50, __nopa_sel_setVoice_, 11) : 0; });
     pattern_obj(rex);
     pattern_obj(pet);
     pattern_obj(w);
     kputs("[N12] for-in typed:");
     {
-        NFObject * __nopa_fi = (NFObject *)(arr);
-        for (unsigned long __nopa_fi_i = 0;  (__nopa_fi_i < ({ NFObject *__nopa_tmp_51 = ((NFObject *)(__nopa_fi)); __nopa_tmp_51 ? ((unsigned (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_51->isa->vtable)->count)(__nopa_tmp_51, __nopa_sel_count) : (unsigned){0}; })); (__nopa_fi_i)++) {
-            Metal__Widget * item = (Metal__Widget *)(({ NFObject *__nopa_tmp_52 = ((NFObject *)(__nopa_fi)); __nopa_tmp_52 ? ((NFObject * (*)(NFObject *, SEL, unsigned))((struct nopa_vtable *)__nopa_tmp_52->isa->vtable)->objectAtIndex_)(__nopa_tmp_52, __nopa_sel_objectAtIndex_, __nopa_fi_i) : 0; }));
-            kputdec(({ NFObject *__nopa_tmp_53 = ((NFObject *)(item)); __nopa_tmp_53 ? ((int (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_53->isa->vtable)->tag)(__nopa_tmp_53, __nopa_sel_tag) : (int){0}; }));
+        NPObject * __nopa_fi = (NPObject *)(arr);
+        for (unsigned long __nopa_fi_i = 0;  (__nopa_fi_i < ({ NPObject *__nopa_tmp_51 = ((NPObject *)(__nopa_fi)); __nopa_tmp_51 ? ((unsigned (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_51->isa->vtable)->count)(__nopa_tmp_51, __nopa_sel_count) : (unsigned){0}; })); (__nopa_fi_i)++) {
+            Metal__Widget * item = (Metal__Widget *)(({ NPObject *__nopa_tmp_52 = ((NPObject *)(__nopa_fi)); __nopa_tmp_52 ? ((NPObject * (*)(NPObject *, SEL, unsigned))((struct nopa_vtable *)__nopa_tmp_52->isa->vtable)->objectAtIndex_)(__nopa_tmp_52, __nopa_sel_objectAtIndex_, __nopa_fi_i) : 0; }));
+            kputdec(({ NPObject *__nopa_tmp_53 = ((NPObject *)(item)); __nopa_tmp_53 ? ((int (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_53->isa->vtable)->tag)(__nopa_tmp_53, __nopa_sel_tag) : (int){0}; }));
             kputs(" ");
         }
     }
@@ -1955,9 +1955,9 @@ skip_hit:
     kputdec(sync_early(w));
     kputdec(sync_early(w));
     kputs(" (relock survived)\n");
-    NFObject *__nopa_tmp_54 = (Metal__SubErr_alloc(&NOPA_CLASS_$_Metal__SubErr, __nopa_sel_alloc));
+    NPObject *__nopa_tmp_54 = (Metal__SubErr_alloc(&NOPA_CLASS_$_Metal__SubErr, __nopa_sel_alloc));
     Metal__SubErr * se = (Metal__SubErr *)(__nopa_tmp_54 ? ((struct nopa_vtable *)__nopa_tmp_54->isa->vtable)->init(__nopa_tmp_54, __nopa_sel_init) : 0);
-    ({ NFObject *__nopa_tmp_55 = ((NFObject *)(se)); __nopa_tmp_55 ? ((void (*)(NFObject *, SEL, int))((struct nopa_vtable *)__nopa_tmp_55->isa->vtable)->setCode_)(__nopa_tmp_55, __nopa_sel_setCode_, 99) : 0; });
+    ({ NPObject *__nopa_tmp_55 = ((NPObject *)(se)); __nopa_tmp_55 ? ((void (*)(NPObject *, SEL, int))((struct nopa_vtable *)__nopa_tmp_55->isa->vtable)->setCode_)(__nopa_tmp_55, __nopa_sel_setCode_, 99) : 0; });
     {
         jmp_buf __nopa_saved;
         memcpy(__nopa_saved, __nopa_exception_buf, sizeof(jmp_buf));
@@ -1974,12 +1974,12 @@ skip_hit:
             kputs("[N13] unreachable\n");
         }
         memcpy(__nopa_exception_buf, __nopa_saved, sizeof(jmp_buf));
-        if ((__nopa_state == 1))         if (__nopa_eh_isa((NFObject *)__nopa_exception_value, &NOPA_CLASS_$_Metal__Err)) {
+        if ((__nopa_state == 1))         if (__nopa_eh_isa((NPObject *)__nopa_exception_value, &NOPA_CLASS_$_Metal__Err)) {
             __nopa_state = 2;
             Metal__Err * err4 = (Metal__Err *)__nopa_exception_value;
             {
                 kputs("[N13] parent catch code=");
-                kputdec(({ NFObject *__nopa_tmp_56 = ((NFObject *)(err4)); __nopa_tmp_56 ? ((int (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_56->isa->vtable)->errorCode)(__nopa_tmp_56, __nopa_sel_errorCode) : (int){0}; }));
+                kputdec(({ NPObject *__nopa_tmp_56 = ((NPObject *)(err4)); __nopa_tmp_56 ? ((int (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_56->isa->vtable)->errorCode)(__nopa_tmp_56, __nopa_sel_errorCode) : (int){0}; }));
                 kputs("\n");
             }
         }
@@ -1988,18 +1988,18 @@ skip_hit:
     }
     Metal__Widget_awaitSum_(&NOPA_CLASS_$_Metal__Widget, __nopa_sel_awaitSum_, w);
     {
-        NFObject *__nopa_tmp_57 = (Metal__Widget_alloc(&NOPA_CLASS_$_Metal__Widget, __nopa_sel_alloc));
+        NPObject *__nopa_tmp_57 = (Metal__Widget_alloc(&NOPA_CLASS_$_Metal__Widget, __nopa_sel_alloc));
         Metal__Widget * src = (Metal__Widget *)(__nopa_tmp_57 ? ((struct nopa_vtable *)__nopa_tmp_57->isa->vtable)->init(__nopa_tmp_57, __nopa_sel_init) : 0);
         __block Metal__Widget * __attribute__((cleanup(nopa_weakAutoCleanup))) wz;
         {
             __auto_type __nopa_weak_val_3 = src;
-            nopa_weakUnregister((NFObject **)&wz);
+            nopa_weakUnregister((NPObject **)&wz);
             wz = __nopa_weak_val_3;
-            nopa_weakRegister((NFObject **)&wz, (NFObject *)__nopa_weak_val_3);
+            nopa_weakRegister((NPObject **)&wz, (NPObject *)__nopa_weak_val_3);
         }
         if (wz)         kputs("[R6] weak assign alias OK\n");
         else         kputs("[R6] weak assign FAIL\n");
-        ({ NFObject *__nopa_tmp_58 = ((NFObject *)(src)); __nopa_tmp_58 ? ((void (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_58->isa->vtable)->release)(__nopa_tmp_58, __nopa_sel_release) : 0; });
+        ({ NPObject *__nopa_tmp_58 = ((NPObject *)(src)); __nopa_tmp_58 ? ((void (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_58->isa->vtable)->release)(__nopa_tmp_58, __nopa_sel_release) : 0; });
         if (!wz)         kputs("[R7] weak zeroed OK\n");
         else         kputs("[R7] weak zero FAIL\n");
     }
@@ -2008,22 +2008,22 @@ skip_hit:
 }
 
 /* +[Box<int *> alloc] */
-__attribute__((weak)) NFObject * Box_int_ptr_alloc(NFClass * self, SEL _cmd) {
+__attribute__((weak)) NPObject * Box_int_ptr_alloc(NPClass * self, SEL _cmd) {
     return nopa_alloc(self);
 }
 
 /* -[Box<int *> init] */
-__attribute__((weak)) NFObject * Box_int_ptr_init(NFObject * self, SEL _cmd) {
+__attribute__((weak)) NPObject * Box_int_ptr_init(NPObject * self, SEL _cmd) {
     return self;
 }
 
 /* -[Box<int *> set:] */
-__attribute__((weak)) void Box_int_ptr_set_(NFObject * self, SEL _cmd, int * v) {
+__attribute__((weak)) void Box_int_ptr_set_(NPObject * self, SEL _cmd, int * v) {
     ((struct Box_int_ptr *)self)->_v = v;
 }
 
 /* -[Box<int *> value] */
-__attribute__((weak)) int * Box_int_ptr_value(NFObject * self, SEL _cmd) {
+__attribute__((weak)) int * Box_int_ptr_value(NPObject * self, SEL _cmd) {
     return ((struct Box_int_ptr *)self)->_v;
 }
 

@@ -14,7 +14,7 @@ static int total = 0, passed = 0;
 
 static symbol_t *make_func(const char *name) {
     symbol_t *s = sym_alloc(SYM_FUNCTION, name);
-    s->data.func.return_type = nf_type_from_cst(NULL);
+    s->data.func.return_type = np_type_from_cst(NULL);
     if (!s->data.func.return_type) {
         s->data.func.return_type = calloc(1, sizeof(nopa_type_t));
     }
@@ -54,7 +54,7 @@ static void test_type_id(void) {
     TEST("type_str id");
     ast_type_t *t = ast_type_alloc(); t->prim = TYPE_ID;
     char *s = ast_type_to_c_str(t);
-    ASSERT(strcmp(s, "NFObject *") == 0, "expected NFObject *");
+    ASSERT(strcmp(s, "NPObject *") == 0, "expected NPObject *");
     free(s); ast_type_free(t);
     PASS();
 }

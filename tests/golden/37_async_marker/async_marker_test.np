@@ -1,9 +1,9 @@
 #import <Foundation/Foundation.np>
 
-// NFAsync<T> declaration marker (AGENTS.md `NFAsync<T>` section):
-// - `- (NFAsync<T>)m` marks a suspending method. The parser unwraps the
+// NPAsync<T> declaration marker (AGENTS.md `NPAsync<T>` section):
+// - `- (NPAsync<T>)m` marks a suspending method. The parser unwraps the
 //   marker to `T` + an async_marker flag — pure compile-time metadata: the
-//   emitted C signature is just `T` (verified: `NFAsync` appears 0 times in
+//   emitted C signature is just `T` (verified: `NPAsync` appears 0 times in
 //   the generated C).
 // - Reconciliation (nopa_async::check_unit, pre-desugar):
 //     marked + @await    → ok
@@ -14,18 +14,18 @@
 //   method signature.
 // Negative cases live in tests/negative/async_marker_*.np
 
-@interface Fetcher : NFObject
-- (NFAsync<int>)compute:(int)n;
-+ (NFAsync<void>)runAll;
+@interface Fetcher : NPObject
+- (NPAsync<int>)compute:(int)n;
++ (NPAsync<void>)runAll;
 - (int)plain:(int)n;             // unmarked + no @await → ok
 @end
 
 @implementation Fetcher
-- (NFAsync<int>)compute:(int)n {
+- (NPAsync<int>)compute:(int)n {
     int raw = @await n;          // suspension point
     return raw * 2;
 }
-+ (NFAsync<void>)runAll {
++ (NPAsync<void>)runAll {
     Fetcher *f = [[Fetcher alloc] init];
     int x = @await [f compute:21];   // await across a call chain
     int y = [f plain:5];             // plain sync call, no marker involved

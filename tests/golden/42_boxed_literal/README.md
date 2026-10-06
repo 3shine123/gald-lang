@@ -11,7 +11,7 @@
 | 3 | `@YES` / `@NO` | BOOL 归一化成 0/1 |
 | 4 | `@'A'` 与 `@(c)` | `charValue` / `intValue` 往返 |
 | 5 | `[@(i * 2) intValue]` | 装箱结果直接作接收者（链式派发） |
-| 6 | `@[ @1, @(i + 1), @YES ]` | 字面量数组；`(NFNumber *)[arr objectAtIndex:0]` 强转接消息发送 |
+| 6 | `@[ @1, @(i + 1), @YES ]` | 字面量数组；`(NPNumber *)[arr objectAtIndex:0]` 强转接消息发送 |
 | 7 | `isEqualToNumber:` | `@(i+1)` 与 `@42`、`@YES` 与 `@(1==1)` 值相等 |
 
 **为什么改写落在 checker 而不是 parser**：parser 没有类型；后端是 C99，没有 `_Generic` 可用。checker 按操作数静态类型选工厂（`double`/`float` → `numberWithDouble:`、`BOOL` → `numberWithBool:`、`char` → `numberWithChar:`、`long`/`long long` → `numberWithLongLong:`、其余整数 → `numberWithInt:`），复用普通消息发送节点——下游静态派发、nil 守卫、SEL 常量**零特判**（与对象下标、struct `==` 同一套机制）。
@@ -19,7 +19,7 @@
 **非算术类型拒绝装箱**（负例 `tests/negative/boxed_illegal_type.np`）：
 
 ```
-illegal type 'NFString *' in a boxed expression — '@(...)' accepts arithmetic and BOOL values only
+illegal type 'NPString *' in a boxed expression — '@(...)' accepts arithmetic and BOOL values only
 ```
 
 ObjC 也有这条 "illegal type in boxed expression"；Nopa 无字符串装箱，静默把指针当数值发出去会掩盖错误。

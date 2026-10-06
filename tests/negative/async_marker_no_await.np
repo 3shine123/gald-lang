@@ -1,15 +1,15 @@
-// Negative: marked `NFAsync<T>` but the body never suspends — the marker
+// Negative: marked `NPAsync<T>` but the body never suspends — the marker
 // must not lie (same philosophy as bare `@throws` requiring a real throw).
-// Expected error: 'compute:' is marked 'NFAsync<T>' but its body never
+// Expected error: 'compute:' is marked 'NPAsync<T>' but its body never
 // suspends — remove the marker or add an '@await'
 #import <Foundation/Foundation.np>
 
-@interface F : NFObject
-- (NFAsync<int>)compute:(int)n;
+@interface F : NPObject
+- (NPAsync<int>)compute:(int)n;
 @end
 
 @implementation F
-- (NFAsync<int>)compute:(int)n {
+- (NPAsync<int>)compute:(int)n {
     return n * 2;
 }
 @end

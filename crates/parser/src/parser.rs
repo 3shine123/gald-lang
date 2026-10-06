@@ -29,7 +29,7 @@ pub struct Parser<'a> {
     /// rather than guessed, so a declaration whose *name* is `nullable` is
     /// never misread.
     annotating: bool,
-    /// Inside an `NF_ASSUME_NONNULL_BEGIN` … `_END` region: an unannotated
+    /// Inside an `NP_ASSUME_NONNULL_BEGIN` … `_END` region: an unannotated
     /// pointer type defaults to `Nonnull` (ObjC's audit-cost-O(1) trick).
     /// Toggled by the two marker identifiers in `parse_declaration`.
     nonnull_region: bool,
@@ -79,15 +79,15 @@ impl<'a> Parser<'a> {
                 "key_t".into(), "fsblkcnt_t".into(), "fsfilcnt_t".into(), "blkcnt_t".into(),
                 "blksize_t".into(), "dev_t".into(), "id_t".into(), "ino_t".into(),
                 "nlink_t".into(), "uid_t".into(), "gid_t".into(),
-                // `NFAsync<T>` — reserved return-type marker (not a real class).
-                // Registered so `NFAsync<int>` parses as a type with type args;
+                // `NPAsync<T>` — reserved return-type marker (not a real class).
+                // Registered so `NPAsync<int>` parses as a type with type args;
                 // parse_function_decl_or_definition / parse_method unwrap it to
-                // `T` + an async_marker flag. See AGENTS.md `NFAsync<T>` section.
-                "NFAsync".into(),
+                // `T` + an async_marker flag. See AGENTS.md `NPAsync<T>` section.
+                "NPAsync".into(),
             ],
             type_table_complete: false,
             type_params: Vec::new(),
-            generic_class_names: vec!["NFAsync".into()],
+            generic_class_names: vec!["NPAsync".into()],
             annotating: false,
             nonnull_region: false,
             region_file: None,
@@ -95,7 +95,7 @@ impl<'a> Parser<'a> {
         }
     }
 
-    /// Give the parser the pipeline's line→file map so an `NF_ASSUME_NONNULL`
+    /// Give the parser the pipeline's line→file map so an `NP_ASSUME_NONNULL`
     /// region can be scoped to the file that opened it.
     pub fn set_source_map(&mut self, sm: nopa_cst::SourceMap) {
         self.source_map = Some(sm);
@@ -633,7 +633,7 @@ impl<'a> Parser<'a> {
     /// even on the early-return path, so a variable declaration nested inside
     /// (impossible today, but cheap to keep true) cannot leak the mode.
     ///
-    /// Also applies the `NF_ASSUME_NONNULL` region default: inside the region an
+    /// Also applies the `NP_ASSUME_NONNULL` region default: inside the region an
     /// *unannotated pointer* becomes `Nonnull`. Applied here rather than in
     /// `parse_type_name` so the region can never annotate a non-pointer, and so
     /// an explicit `_Null_unspecified` opt-out survives the default.
@@ -895,10 +895,10 @@ else if self.match_keyword(KeywordKind::Typeof) {
                         //
                         // Speculative, so it MUST rewind on failure: the
                         // generic-args path below re-reads the same tokens.
-                        // `NFArray<NFString *> *a` is not a protocol list (the
+                        // `NPArray<NPString *> *a` is not a protocol list (the
                         // `*` fails the `>` lookahead); without a rewind the
                         // args path would start at `*`, produce no args, and
-                        // silently erase `<NFString *>`.
+                        // silently erase `<NPString *>`.
                         let saved_lex = self.lexer.save_pos();
                         let saved_tok = self.current.clone();
                         let mut protocols = Vec::new();
@@ -955,7 +955,7 @@ else if self.match_keyword(KeywordKind::Typeof) {
             }
         }
 
-        // A prefix annotation (`nullable NFString *s`) parsed onto the base by
+        // A prefix annotation (`nullable NPString *s`) parsed onto the base by
         // the qualifier loop is lifted off here and re-applied after the star
         // loop. Leaving it on the base would mark the INNER pointer level.
         let prefix_nulls = t.nulls;
@@ -974,8 +974,8 @@ else if self.match_keyword(KeywordKind::Typeof) {
             ptr.subtype = Some(Box::new(t));
             t = ptr;
             // Postfix annotation directly after this star annotates THIS level:
-            // `NFError * _Nullable *` marks the middle pointer, while `NFError *
-            // * _Nullable` and the plain one-star `NFString * _Nonnull` mark the
+            // `NPError * _Nullable *` marks the middle pointer, while `NPError *
+            // * _Nullable` and the plain one-star `NPString * _Nonnull` mark the
             // outermost (the last star has just been wrapped). That is C's
             // declarator reading order. The check must live INSIDE the loop —
             // after it, the interleaved `* _Nullable *` form would leave the
@@ -1000,7 +1000,7 @@ else if self.match_keyword(KeywordKind::Typeof) {
             if star_count > 1 {
                 let tn = t.name.clone().unwrap_or_else(|| "id".into());
                 self.error(&format!(
-                    "nullability specifier cannot be applied to non-pointer type '{}' — for a multi-level pointer, annotate the level you mean with the postfix spelling (NFError * _Nullable *)",
+                    "nullability specifier cannot be applied to non-pointer type '{}' — for a multi-level pointer, annotate the level you mean with the postfix spelling (NPError * _Nullable *)",
                     tn));
             } else if t.nulls == Nullability::Unspecified {
                 t.nulls = prefix_nulls;
@@ -1203,16 +1203,16 @@ else if self.match_keyword(KeywordKind::Typeof) {
     // ─── Expression parsing ──────────────────────────────────────────────
 
     /// Desugar a boxing literal (`@123`, `@YES`, `@'c'`) into a normal
-    /// `[NFNumber <selector> <arg>]` class-method send, so the whole
+    /// `[NPNumber <selector> <arg>]` class-method send, so the whole
     /// downstream chain (binder resolution, checker, vtable dispatch) is the
     /// same one a hand-written message send goes through.
-    fn mk_nfnumber_send(&self, selector: &str, arg: CstExpr, line: usize, col: usize) -> CstExpr {
+    fn mk_npnumber_send(&self, selector: &str, arg: CstExpr, line: usize, col: usize) -> CstExpr {
         CstExpr {
             kind: CstExprKind::MessageSend, expr_type: None, line, col,
             data: CstExprData::Message {
                 receiver: Box::new(CstExpr {
                     kind: CstExprKind::Ident, expr_type: None, line, col,
-                    data: CstExprData::Ident("NFNumber".into()),
+                    data: CstExprData::Ident("NPNumber".into()),
                 }),
                 selector: selector.to_string(),
                 args: vec![arg],
@@ -1366,8 +1366,8 @@ else if self.match_keyword(KeywordKind::Typeof) {
                 data: CstExprData::AtString(text),
             });
         }
-        // `@123` / `@1.5` — NFNumber boxing literal. Desugared to a normal
-        // class-method send `[NFNumber numberWithInt:123]` so all downstream
+        // `@123` / `@1.5` — NPNumber boxing literal. Desugared to a normal
+        // class-method send `[NPNumber numberWithInt:123]` so all downstream
         // resolution (binder/checker/codegen) reuses the message-send path.
         if self.match_token(TokenKind::AtNumber) {
             let text = self.previous_text().to_string();
@@ -1385,7 +1385,7 @@ else if self.match_keyword(KeywordKind::Typeof) {
                     data: CstExprData::Integer(text.trim_end_matches(|c: char| c == 'u' || c == 'U' || c == 'l' || c == 'L').parse::<i64>().unwrap_or(0)),
                 }
             };
-            return Some(self.mk_nfnumber_send(
+            return Some(self.mk_npnumber_send(
                 if is_float { "numberWithDouble:" } else { "numberWithInt:" },
                 number_expr, line, col));
         }
@@ -1398,7 +1398,7 @@ else if self.match_keyword(KeywordKind::Typeof) {
                 kind: CstExprKind::Integer, expr_type: None, line, col,
                 data: CstExprData::Integer(val),
             };
-            return Some(self.mk_nfnumber_send("numberWithBool:", arg, line, col));
+            return Some(self.mk_npnumber_send("numberWithBool:", arg, line, col));
         }
         // `@'c'` — boxed character literal.
         if self.match_token(TokenKind::AtChar) {
@@ -1409,10 +1409,10 @@ else if self.match_keyword(KeywordKind::Typeof) {
                 kind: CstExprKind::Char, expr_type: None, line, col,
                 data: CstExprData::Char(val),
             };
-            return Some(self.mk_nfnumber_send("numberWithChar:", arg, line, col));
+            return Some(self.mk_npnumber_send("numberWithChar:", arg, line, col));
         }
         // `@(expr)` — boxed expression. The parser has no types, so the
-        // NFNumber factory is picked by the checker from the expression's
+        // NPNumber factory is picked by the checker from the expression's
         // static type; carry the node through as `Boxed`.
         if self.match_token(TokenKind::AtLParen) {
             let line = self.previous.line;
@@ -1614,7 +1614,7 @@ else if self.match_keyword(KeywordKind::Typeof) {
                     if (!t.type_args.is_empty() || !t.protocols.is_empty())
                         && self.current.kind == TokenKind::Identifier {
                         // Type receiver confirmed — build ident expr from rendered type.
-                        // For protocols-only (e.g. NFObject<P>), use base class name
+                        // For protocols-only (e.g. NPObject<P>), use base class name
                         // to avoid codegen interpreting <P> as generic args.
                         let rstr = if !t.type_args.is_empty() {
                             Self::type_to_fqn(&t)
@@ -1713,7 +1713,7 @@ else if self.match_keyword(KeywordKind::Typeof) {
             self.consume(TokenKind::RBracket, "expected ']' after message send");
 
             // Variadic Foundation collection constructor:
-            //   [NFArray arrayWithObjects:a, b, c, nil]  →  @[a, b, c]
+            //   [NPArray arrayWithObjects:a, b, c, nil]  →  @[a, b, c]
             // ObjC variadic methods don't exist in Nopa; the array literal
             // already lowers to the `nopa_array_create` runtime helper, so
             // desugar to it (dropping the trailing `nil` terminator).
@@ -2883,7 +2883,7 @@ else if self.match_keyword(KeywordKind::Typeof) {
         if self.match_keyword(KeywordKind::For) {
             self.consume(TokenKind::LParen, "expected '(' after for");
             // For-in: `for (Type var in collection)` — desugared here (like
-            // `@42` → `[NFNumber numberWithInt:]`) into a plain C for loop so
+            // `@42` → `[NPNumber numberWithInt:]`) into a plain C for loop so
             // downstream (checker/ARC/codegen) only ever sees For+Decl+MsgSend.
             // Detection is a token scan (no parser rewind): if a depth-0 `in`
             // keyword appears before the matching `)` (and no depth-0 `;`),
@@ -2939,15 +2939,15 @@ else if self.match_keyword(KeywordKind::Typeof) {
                 };
                 let coll_ident = || mk_ident(fi, coll_line, coll_col);
                 // { id __nopa_fi = <collection>;    (borrowed alias — no ARC;
-                //   `id` already renders as `NFObject *` — do NOT set
-                //   is_pointer here, that emitted `NFObject * * __nopa_fi`)
+                //   `id` already renders as `NPObject *` — do NOT set
+                //   is_pointer here, that emitted `NPObject * * __nopa_fi`)
                 // The alias is typed `id`, NOT the element type: the collection
-                // is whatever object the user passed (NFArray, or any type
+                // is whatever object the user passed (NPArray, or any type
                 // providing `count`/`objectAtIndex:`), which is unrelated to the
                 // loop variable's declared type. Using the element type here
-                // emitted `NFString * __nopa_fi = arr;` — the checker then
+                // emitted `NPString * __nopa_fi = arr;` — the checker then
                 // rejected every for-in whose element type was more specific
-                // than the collection's (e.g. `for (NFString *item in npArray)`).
+                // than the collection's (e.g. `for (NPString *item in npArray)`).
                 let coll_decl = CstStmt {
                     kind: CstStmtKind::Decl, line: coll_line, column: coll_col,
                     data: CstStmtData::Decl(CstDecl {
@@ -3132,7 +3132,7 @@ else if self.match_keyword(KeywordKind::Typeof) {
                 // A dangling-comparison arm (`case > 10:`) is lowered to
                 // `subject > 10`. When another arm needs the subject as an
                 // object (type binding or object literal) the subject is
-                // materialized as `NFObject *` instead of `__auto_type`, so the
+                // materialized as `NPObject *` instead of `__auto_type`, so the
                 // comparison degenerates to a *pointer* vs integer compare —
                 // always true, silently, with no diagnostic anywhere. Reject the
                 // combination instead of emitting the always-true test.
@@ -3520,16 +3520,16 @@ else if self.match_keyword(KeywordKind::Typeof) {
         Some(name)
     }
 
-    /// `NFAsync<T>` return-type marker (AGENTS.md `NFAsync<T>` section):
+    /// `NPAsync<T>` return-type marker (AGENTS.md `NPAsync<T>` section):
     /// unwrap the marker type to its single type argument and report the
     /// marker flag. Misuses (zero / multiple type args) error out and keep
     /// the raw type so parsing can continue.
     fn unwrap_async_marker(&mut self, rt: CstType) -> (CstType, bool) {
-        if rt.name.as_deref() != Some("NFAsync") {
+        if rt.name.as_deref() != Some("NPAsync") {
             return (rt, false);
         }
         if rt.type_args.len() != 1 {
-            self.error("'NFAsync' marker requires exactly one type argument: 'NFAsync<T>' — it is a return-type marker, not a value type");
+            self.error("'NPAsync' marker requires exactly one type argument: 'NPAsync<T>' — it is a return-type marker, not a value type");
             return (rt, false);
         }
         let inner = rt.type_args.into_iter().next().unwrap();
@@ -3537,7 +3537,7 @@ else if self.match_keyword(KeywordKind::Typeof) {
     }
 
     fn parse_function_decl_or_definition(&mut self, return_type: CstType, name: String, prefix_attrs: Vec<String>) -> Option<CstDecl> {
-        // `NFAsync<T>` marker → unwrap to `T` + flag (compile-time metadata;
+        // `NPAsync<T>` marker → unwrap to `T` + flag (compile-time metadata;
         // the emitted C signature is just `T`).
         let (return_type, async_marker) = self.unwrap_async_marker(return_type);
         let mut params = Vec::new();
@@ -3671,7 +3671,7 @@ else if self.match_keyword(KeywordKind::Typeof) {
     }
 
     fn parse_declaration(&mut self) -> Option<CstDecl> {
-        // `NF_ASSUME_NONNULL_BEGIN` / `NF_ASSUME_NONNULL_END` — true syntax,
+        // `NP_ASSUME_NONNULL_BEGIN` / `NP_ASSUME_NONNULL_END` — true syntax,
         // NOT macros. ObjC's spelling is a macro wrapping
         // `_Pragma("clang assume_nonnull begin")`, which nopac cannot use: it
         // refuses `_Pragma` inside a macro body (crates/cpp — a source-level
@@ -3685,18 +3685,18 @@ else if self.match_keyword(KeywordKind::Typeof) {
         // with an undeclared identifier.
         if self.current.kind == TokenKind::Identifier {
             let marker = self.current_text();
-            if marker == "NF_ASSUME_NONNULL_BEGIN" || marker == "NF_ASSUME_NONNULL_END" {
+            if marker == "NP_ASSUME_NONNULL_BEGIN" || marker == "NP_ASSUME_NONNULL_END" {
                 let line = self.current.line;
                 let column = self.current.column;
-                let opening = marker == "NF_ASSUME_NONNULL_BEGIN";
+                let opening = marker == "NP_ASSUME_NONNULL_BEGIN";
                 if self.nonnull_region == opening {
                     // BEGIN inside BEGIN, or END with no BEGIN. Both mean the
                     // author's intent is not what they think it is, so say so
                     // rather than silently flipping the flag.
                     self.error(if opening {
-                        "NF_ASSUME_NONNULL_BEGIN inside an existing nonnull region"
+                        "NP_ASSUME_NONNULL_BEGIN inside an existing nonnull region"
                     } else {
-                        "NF_ASSUME_NONNULL_END without a matching NF_ASSUME_NONNULL_BEGIN"
+                        "NP_ASSUME_NONNULL_END without a matching NP_ASSUME_NONNULL_BEGIN"
                     });
                 }
                 self.nonnull_region = opening;
@@ -4015,7 +4015,7 @@ else if self.match_keyword(KeywordKind::Typeof) {
         // Regular declaration: type name = ...; or type name(params) { ... }
         let qualifiers = self.parse_decl_qualifiers();
         // Annotated: a top-level function's return type is a nullability
-        // position (`nullable NFString *f(void)` / `NFString * _Nullable f(void)`).
+        // position (`nullable NPString *f(void)` / `NPString * _Nullable f(void)`).
         // Without this the annotation landed nowhere and the return direction of
         // the diagnostic could never fire.
         let return_type = match self.parse_type_annotated() {
@@ -4364,7 +4364,7 @@ if self.current.kind == TokenKind::Identifier {
 
         // typedef type name;
         // Annotated: a block typedef's result type is a nullability position —
-        // `typedef nullable NFString * (^Getter)(void);` is the block equivalent
+        // `typedef nullable NPString * (^Getter)(void);` is the block equivalent
         // of a nullable return type. Without this the leading annotation landed
         // nowhere and the typedef failed to parse.
         let alias_type = self.parse_type_annotated();
@@ -4936,9 +4936,9 @@ if self.current.kind == TokenKind::Identifier {
 
         let mut methods = Vec::new();
         let mut impl_vars = Vec::new();
-        // Superclass suffix: `@implementation Base : NFObject` — ObjC allows
+        // Superclass suffix: `@implementation Base : NPObject` — ObjC allows
         // repeating the superclass on @implementation. Without consuming it,
-        // an empty implementation body would leave `: NFObject` dangling and
+        // an empty implementation body would leave `: NPObject` dangling and
         // the fallback token-skip would swallow the following `@interface`.
         let mut superclass = None;
         if self.match_token(TokenKind::Colon) {
@@ -5087,7 +5087,7 @@ if self.current.kind == TokenKind::Identifier {
         // Done here — after the type is parsed, before any array wrapping or
         // Property construction — so every one of the three construction sites
         // below inherits it with no per-site plumbing. An explicit annotation in
-        // the type itself (`@property (nullable) nullable NFString *x`) would be
+        // the type itself (`@property (nullable) nullable NPString *x`) would be
         // contradictory; the attribute wins because it is written later and is
         // the more specific of the two.
         if let (Some(n), Some(t)) = (attr_nulls, prop_type.as_mut()) {
@@ -5198,7 +5198,7 @@ if self.current.kind == TokenKind::Identifier {
         } else {
             self.parse_type_annotated()
         };
-        // `NFAsync<T>` marker → unwrap to `T` + flag (interface/impl/protocol
+        // `NPAsync<T>` marker → unwrap to `T` + flag (interface/impl/protocol
         // declarations all flow through here).
         let (return_type, async_marker) = match return_type {
             Some(rt) => { let (u, m) = self.unwrap_async_marker(rt); (Some(u), m) }
@@ -5626,7 +5626,7 @@ if self.current.kind == TokenKind::Identifier {
         // letting it ride. (ObjC's macro form catches this too — clang warns on
         // an unterminated `assume_nonnull` region.)
         if self.nonnull_region {
-            self.error("NF_ASSUME_NONNULL_BEGIN without a matching NF_ASSUME_NONNULL_END — every later pointer in this file would be treated as nonnull");
+            self.error("NP_ASSUME_NONNULL_BEGIN without a matching NP_ASSUME_NONNULL_END — every later pointer in this file would be treated as nonnull");
         }
         Some(TranslationUnit {
             decls,
@@ -5657,12 +5657,12 @@ const CASE_NON_CONSTANT_MSG: &str = "case label is not a constant expression —
 /// True when the expression is an ObjC object literal — a *pattern* compared
 /// with `isEqual:`, never a valid C case label: `@"..."` (AtString kind),
 /// `@(expr)` (the Boxed marker the checker rewrites by type), `@N`/`@YES`/
-/// `@'c'` (desugared by `mk_nfnumber_send` into a message send on NFNumber),
+/// `@'c'` (desugared by `mk_npnumber_send` into a message send on NPNumber),
 /// or an explicit call to one of those factories.
 ///
 /// The boxed-scalar clauses matter: without them `case @42:` was classified as
 /// a plain constant arm, so an all-literal switch stayed on the C path and
-/// emitted `case [NFNumber numberWithInt:42]:` — invalid C, reported against
+/// emitted `case [NPNumber numberWithInt:42]:` — invalid C, reported against
 /// the generated code with no source correspondence.
 fn is_object_literal(e: &CstExpr) -> bool {
     if matches!(
@@ -5720,7 +5720,7 @@ fn expr_is_non_constant(e: &CstExpr) -> bool {
 ///
 /// Deliberately narrow — only shapes that are objects by construction:
 /// object literals (`@"..."`, `@N`, `@YES`, `@'c'`, `@(expr)`), a cast to a
-/// pointer type, `nil`, and an explicit `NFObject *`/`id` cast. A bare
+/// pointer type, `nil`, and an explicit `NPObject *`/`id` cast. A bare
 /// identifier is **not** flagged: `switch (o)` where `o` holds an `int` is
 /// perfectly valid, and M1 has no type information to tell the two apart. That
 /// residual case is a documented M1 limit, not silent-wrong by construction.
@@ -5758,7 +5758,7 @@ struct PatternArms {
     has_cond_arm: bool,
     /// At least one arm that needs the subject as an *object* (type binding or
     /// object literal). Its presence is what forces the subject to be
-    /// materialized as `NFObject *`, which is what makes a coexisting
+    /// materialized as `NPObject *`, which is what makes a coexisting
     /// `has_cond_arm` arm degenerate into a pointer comparison.
     has_object_arm: bool,
 }
@@ -5930,7 +5930,7 @@ mod tests {
 
     #[test]
     fn test_debug_nopa_alloc() {
-        let source = r#"id nopa_alloc(struct NFClass *cls);"#;
+        let source = r#"id nopa_alloc(struct NPClass *cls);"#;
         let mut p = Parser::new(source);
         let unit = p.parse_translation_unit().unwrap();
         println!("decls: {}", unit.decls.len());

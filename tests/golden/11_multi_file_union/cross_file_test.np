@@ -15,8 +15,8 @@ int main(int argc, const char* argv[])
 
         // 1. 测试跨文件前置声明与双向循环互锁对象的实例化
         printf("--- 测试点 1: 跨文件前置声明与双向互锁依赖 ---\n");
-        NFShipSystem* system = [[NFShipSystem alloc] initWithId:2026];
-        NFCraftPilot* pilot = [[NFCraftPilot alloc] initWithName:"指挥官凯克特斯"];
+        NPShipSystem* system = [[NPShipSystem alloc] initWithId:2026];
+        NPCraftPilot* pilot = [[NPCraftPilot alloc] initWithName:"指挥官凯克特斯"];
 
         // 双向绑定
         [system linkPilot:pilot];
@@ -27,7 +27,7 @@ int main(int argc, const char* argv[])
 
         // 2. 测试菱形协议网络符号汇聚
         printf("\n--- 测试点 2: 菱形协议树多重挂载与符号分发 ---\n");
-        NFDiamondAbuser* abuser = [[NFDiamondAbuser alloc] init];
+        NPDiamondAbuser* abuser = [[NPDiamondAbuser alloc] init];
 
         // 依次调用来自不同层级协议的方法
         [abuser leftBranchAction];

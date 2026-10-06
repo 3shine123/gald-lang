@@ -17,7 +17,7 @@
 10_edge_cases/      边界情况（nil、instancetype、@class、@selector 等）
 11_multi_file_union/多文件 #import 联合（故意失败样本用 -F 后缀标记）
 12_namespace/       @namespace / @using
-13_foundation/      Foundation 容器（NFString / NFArray / NFMutableArray / NFLog / description）
+13_foundation/      Foundation 容器（NPString / NPArray / NPMutableArray / NPLog / description）
 14_generics/        泛型单态化
 15_exceptions/      @try / @catch / @finally / @throw
 16_control_flow/    控制流（if / while / for / switch）
@@ -39,10 +39,10 @@
 34_async/           @await 状态机（里程碑 1+2）
 35_variadic_method/ 真 variadic 方法（va_list）
 36_defer/           @defer 作用域退出执行
-37_async_marker/    NFAsync<T> 声明式 async 标记
+37_async_marker/    NPAsync<T> 声明式 async 标记
 38_macros/          nopa 语法宏展开（双轨 #define）
 39_complex/         C99 _Complex 透传
-40_nfarray_generic/ NFArray<T> / NFDictionary<K,V> 真单态化 + 元素类型检查
+40_nparray_generic/ NPArray<T> / NPDictionary<K,V> 真单态化 + 元素类型检查
 41_switch_pat/      switch 模式匹配（case T *x / case > 10 / when 守卫）
 42_boxed_literal/   装箱字面量 @(expr) / @YES / @NO / @'c'
 43_dict_literal/    字典字面量 @{ key: value }

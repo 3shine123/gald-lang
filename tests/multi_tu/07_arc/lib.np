@@ -1,6 +1,6 @@
 #import "model.nh"
 
-@implementation Vault : NFObject {
+@implementation Vault : NPObject {
     @public
     int _total;
 }
@@ -8,8 +8,8 @@
 @end
 
 /* Convenience-style return: the caller does NOT own it. */
-NFString *VaultToken(void) {
-    return [NFString stringWithUTF8String:"s3cret"];
+NPString *VaultToken(void) {
+    return [NPString stringWithUTF8String:"s3cret"];
 }
 
 int VaultHelper(void) { return 64; }

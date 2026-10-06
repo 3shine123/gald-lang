@@ -97,14 +97,14 @@ nopac app.np -I include -L target/foundation -lnopafoundation -o app
 
 ## 6. class metadata：静态初始化
 
-- owner TU 通过**静态 `NFClass` 定义初始化**类元数据（编译期常量，`__data` 段），不依赖运行期构造调用。
+- owner TU 通过**静态 `NPClass` 定义初始化**类元数据（编译期常量，`__data` 段），不依赖运行期构造调用。
 - `nopa_metaInit` 保留为**兼容路径的幂等回填**：仅 self-contained 单 TU 构建（`#import "*.np"` 伞形内联）中，弱合并后真正被执行的那份会补齐静态初始化没覆盖的部分。正常 owner / multi-TU 路径**不依赖**它。
 
 ## 7. Foundation 构建方式
 
 预编译库由 `tools/build-foundation-lib.sh` 以**逐 TU wrapper** 方式构建：
 
-1. 对每个 Foundation 类实现（`NFObject.np` … `NFError.np`），脚本生成一个 wrapper TU = `#import <Foundation/Foundation.nh>`（声明面）+ 该 `.np` 全文（实现）；
+1. 对每个 Foundation 类实现（`NPObject.np` … `NPError.np`），脚本生成一个 wrapper TU = `#import <Foundation/Foundation.nh>`（声明面）+ 该 `.np` 全文（实现）；
 2. 逐个转译、C 编译成 `.o`——每个 wrapper 的 main 文件就是该 `.np` 本身，所以 R2 判定每个类都是 owner，元数据为**强符号**；
 3. `ar` 归档为 `libnopafoundation.a`，`nm` 校验强符号（9/9）。
 
@@ -112,9 +112,9 @@ nopac app.np -I include -L target/foundation -lnopafoundation -o app
 
 ## 8. 泛型：单态化为主，裸拼写擦除兼容
 
-- **主模型是编译期单态化**：`Box<T>` / `NFArray<T>` / `NFDictionary<K,V>` 等泛型类按使用点实例化（专属结构体、方法副本、vtable/元数据，`T` 以 `TypePrim::Param` 哨兵按参数名替换）；checker 把接收者的 `type_args` 代入方法签名做元素类型检查。
-- **裸容器拼写保留擦除兼容行为**：不带实参的 `NFArray`（无 `<...>`）按 `id` 擦除处理，行为与历史版本一致、零迁移；裸 → 特化赋值会发 warning（`-Werror` 可升级），特化 → 裸静默。
-- `@[...]` 字面量全元素同型时推断为 `NFArray<X>`，混合回退裸 `NFArray`。
+- **主模型是编译期单态化**：`Box<T>` / `NPArray<T>` / `NPDictionary<K,V>` 等泛型类按使用点实例化（专属结构体、方法副本、vtable/元数据，`T` 以 `TypePrim::Param` 哨兵按参数名替换）；checker 把接收者的 `type_args` 代入方法签名做元素类型检查。
+- **裸容器拼写保留擦除兼容行为**：不带实参的 `NPArray`（无 `<...>`）按 `id` 擦除处理，行为与历史版本一致、零迁移；裸 → 特化赋值会发 warning（`-Werror` 可升级），特化 → 裸静默。
+- `@[...]` 字面量全元素同型时推断为 `NPArray<X>`，混合回退裸 `NPArray`。
 
 ## 9. 异常处理：checked 默认，legacy 回退
 

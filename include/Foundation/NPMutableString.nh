@@ -1,0 +1,26 @@
+#ifndef NPMUTABLESTRING_NH
+#define NPMUTABLESTRING_NH
+
+#import <Foundation/NPString.nh>
+
+@interface NPMutableString : NPString {
+@public
+    // inherits NPString ivars: _cstr, _length, _hash, _hashIsValid
+}
+
++ (NPMutableString *)stringWithUTF8String:(const char *)cstr;
++ (NPMutableString *)stringWithString:(NPString *)str;
+
+- (NPMutableString *)initWithUTF8String:(const char *)cstr;
+- (NPMutableString *)initWithString:(NPString *)str;
+
+- (void)appendString:(NPString *)str;
+- (void)appendUTF8String:(const char *)cstr;
+- (void)insertString:(NPString *)str atIndex:(size_t)idx;
+- (void)deleteCharactersInRange:(NPRange)range;
+- (void)replaceCharactersInRange:(NPRange)range withString:(NPString *)str;
+- (void)setString:(NPString *)str;
+
+@end
+
+#endif

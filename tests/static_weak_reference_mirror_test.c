@@ -5,8 +5,8 @@
 #include <stdint.h>
 #include <stddef.h>
 #include "nopa/runtime.h"
-struct nopa_NFObject_vtable;
-struct nopa_NFObject_meta_vtable;
+struct nopa_NPObject_vtable;
+struct nopa_NPObject_meta_vtable;
 struct nopa_CarrierCommandCenter_vtable;
 struct nopa_CarrierCommandCenter_meta_vtable;
 struct nopa_TacticalMechEntity_vtable;
@@ -32,90 +32,90 @@ static const SEL __nopa_sel_setMechId_ = {.name = "setMechId_", .hash = 0xA47819
 static const SEL __nopa_sel_masterCarrier = {.name = "masterCarrier", .hash = 0xD2B35CC9};
 static const SEL __nopa_sel_setMasterCarrier_ = {.name = "setMasterCarrier_", .hash = 0x37CE0F64};
 
-typedef struct NFObject NFObject;
+typedef struct NPObject NPObject;
 typedef struct CarrierCommandCenter CarrierCommandCenter;
 typedef struct TacticalMechEntity TacticalMechEntity;
 
-NFObject * NFObject_alloc(NFClass * self, SEL _cmd);
-NFObject * NFObject_new(NFClass * self, SEL _cmd);
-NFObject * NFObject_init(NFObject * self, SEL _cmd);
-void NFObject_dealloc(NFObject * self, SEL _cmd);
-void NFObject_release(NFObject * self, SEL _cmd);
-NFObject * NFObject_retain(NFObject * self, SEL _cmd);
-NFObject * CarrierCommandCenter_initWithId_fleet_(NFObject * self, SEL _cmd, int cid, const char * code);
-void CarrierCommandCenter_shutdownCarrierShields(NFObject * self, SEL _cmd);
-int CarrierCommandCenter_carrierId(NFObject * self, SEL _cmd);
-void CarrierCommandCenter_setCarrierId_(NFObject * self, SEL _cmd, int value);
-const char * CarrierCommandCenter_fleetCode(NFObject * self, SEL _cmd);
-TacticalMechEntity * CarrierCommandCenter_assignedMech(NFObject * self, SEL _cmd);
-void CarrierCommandCenter_setAssignedMech_(NFObject * self, SEL _cmd, TacticalMechEntity * value);
-NFObject * TacticalMechEntity_initWithMechId_(NFObject * self, SEL _cmd, int mid);
-void TacticalMechEntity_queryTacticalUplink(NFObject * self, SEL _cmd);
-int TacticalMechEntity_mechId(NFObject * self, SEL _cmd);
-void TacticalMechEntity_setMechId_(NFObject * self, SEL _cmd, int value);
-CarrierCommandCenter * TacticalMechEntity_masterCarrier(NFObject * self, SEL _cmd);
-void TacticalMechEntity_setMasterCarrier_(NFObject * self, SEL _cmd, CarrierCommandCenter * value);
-void CarrierCommandCenter_dealloc(NFObject * self, SEL _cmd);
-void TacticalMechEntity_dealloc(NFObject * self, SEL _cmd);
-NFObject * nopa_alloc(struct NFClass * cls);
-NFObject * nopa_init(NFObject * self);
-void nopa_release(NFObject * obj);
-NFObject * nopa_retain(NFObject * obj);
+NPObject * NPObject_alloc(NPClass * self, SEL _cmd);
+NPObject * NPObject_new(NPClass * self, SEL _cmd);
+NPObject * NPObject_init(NPObject * self, SEL _cmd);
+void NPObject_dealloc(NPObject * self, SEL _cmd);
+void NPObject_release(NPObject * self, SEL _cmd);
+NPObject * NPObject_retain(NPObject * self, SEL _cmd);
+NPObject * CarrierCommandCenter_initWithId_fleet_(NPObject * self, SEL _cmd, int cid, const char * code);
+void CarrierCommandCenter_shutdownCarrierShields(NPObject * self, SEL _cmd);
+int CarrierCommandCenter_carrierId(NPObject * self, SEL _cmd);
+void CarrierCommandCenter_setCarrierId_(NPObject * self, SEL _cmd, int value);
+const char * CarrierCommandCenter_fleetCode(NPObject * self, SEL _cmd);
+TacticalMechEntity * CarrierCommandCenter_assignedMech(NPObject * self, SEL _cmd);
+void CarrierCommandCenter_setAssignedMech_(NPObject * self, SEL _cmd, TacticalMechEntity * value);
+NPObject * TacticalMechEntity_initWithMechId_(NPObject * self, SEL _cmd, int mid);
+void TacticalMechEntity_queryTacticalUplink(NPObject * self, SEL _cmd);
+int TacticalMechEntity_mechId(NPObject * self, SEL _cmd);
+void TacticalMechEntity_setMechId_(NPObject * self, SEL _cmd, int value);
+CarrierCommandCenter * TacticalMechEntity_masterCarrier(NPObject * self, SEL _cmd);
+void TacticalMechEntity_setMasterCarrier_(NPObject * self, SEL _cmd, CarrierCommandCenter * value);
+void CarrierCommandCenter_dealloc(NPObject * self, SEL _cmd);
+void TacticalMechEntity_dealloc(NPObject * self, SEL _cmd);
+NPObject * nopa_alloc(struct NPClass * cls);
+NPObject * nopa_init(NPObject * self);
+void nopa_release(NPObject * obj);
+NPObject * nopa_retain(NPObject * obj);
 int main(int argc, const char * argv[]);
 
-NFClass * NFObject_getClass(NFClass * self, SEL _cmd);
-NFClass * CarrierCommandCenter_getClass(NFClass * self, SEL _cmd);
-NFClass * TacticalMechEntity_getClass(NFClass * self, SEL _cmd);
+NPClass * NPObject_getClass(NPClass * self, SEL _cmd);
+NPClass * CarrierCommandCenter_getClass(NPClass * self, SEL _cmd);
+NPClass * TacticalMechEntity_getClass(NPClass * self, SEL _cmd);
 
-struct nopa_NFObject_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    void (*release)(NFObject *, SEL);
-    NFObject * (*retain)(NFObject *, SEL);
+struct nopa_NPObject_vtable {
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    void (*release)(NPObject *, SEL);
+    NPObject * (*retain)(NPObject *, SEL);
 };
-struct nopa_NFObject_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+struct nopa_NPObject_meta_vtable {
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct nopa_CarrierCommandCenter_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    void (*release)(NFObject *, SEL);
-    NFObject * (*retain)(NFObject *, SEL);
-    NFObject * (*initWithId_fleet_)(NFObject *, SEL, int, const char *);
-    void (*shutdownCarrierShields)(NFObject *, SEL);
-    int (*carrierId)(NFObject *, SEL);
-    void (*setCarrierId_)(NFObject *, SEL, int);
-    const char * (*fleetCode)(NFObject *, SEL);
-    TacticalMechEntity * (*assignedMech)(NFObject *, SEL);
-    void (*setAssignedMech_)(NFObject *, SEL, TacticalMechEntity *);
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    void (*release)(NPObject *, SEL);
+    NPObject * (*retain)(NPObject *, SEL);
+    NPObject * (*initWithId_fleet_)(NPObject *, SEL, int, const char *);
+    void (*shutdownCarrierShields)(NPObject *, SEL);
+    int (*carrierId)(NPObject *, SEL);
+    void (*setCarrierId_)(NPObject *, SEL, int);
+    const char * (*fleetCode)(NPObject *, SEL);
+    TacticalMechEntity * (*assignedMech)(NPObject *, SEL);
+    void (*setAssignedMech_)(NPObject *, SEL, TacticalMechEntity *);
 };
 struct nopa_CarrierCommandCenter_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct nopa_TacticalMechEntity_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    void (*release)(NFObject *, SEL);
-    NFObject * (*retain)(NFObject *, SEL);
-    NFObject * (*initWithMechId_)(NFObject *, SEL, int);
-    void (*queryTacticalUplink)(NFObject *, SEL);
-    int (*mechId)(NFObject *, SEL);
-    void (*setMechId_)(NFObject *, SEL, int);
-    CarrierCommandCenter * (*masterCarrier)(NFObject *, SEL);
-    void (*setMasterCarrier_)(NFObject *, SEL, CarrierCommandCenter *);
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    void (*release)(NPObject *, SEL);
+    NPObject * (*retain)(NPObject *, SEL);
+    NPObject * (*initWithMechId_)(NPObject *, SEL, int);
+    void (*queryTacticalUplink)(NPObject *, SEL);
+    int (*mechId)(NPObject *, SEL);
+    void (*setMechId_)(NPObject *, SEL, int);
+    CarrierCommandCenter * (*masterCarrier)(NPObject *, SEL);
+    void (*setMasterCarrier_)(NPObject *, SEL, CarrierCommandCenter *);
 };
 struct nopa_TacticalMechEntity_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 
 struct CarrierCommandCenter {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     int _carrierId;
     const char * _fleetCode;
@@ -124,30 +124,30 @@ struct CarrierCommandCenter {
 typedef struct CarrierCommandCenter CarrierCommandCenter;
 
 struct TacticalMechEntity {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     int _mechId;
     CarrierCommandCenter * _masterCarrier;
 };
 typedef struct TacticalMechEntity TacticalMechEntity;
 
-extern NFClass nopa_NFObject_class;
-extern NFClass nopa_CarrierCommandCenter_class;
-extern NFClass nopa_TacticalMechEntity_class;
+extern NPClass nopa_NPObject_class;
+extern NPClass nopa_CarrierCommandCenter_class;
+extern NPClass nopa_TacticalMechEntity_class;
 void nopa_meta_init(void);
 
-struct nopa_NFObject_vtable nopa_NFObject_vtable_inst = {
-    .init = NFObject_init,
-    .dealloc = NFObject_dealloc,
-    .release = NFObject_release,
-    .retain = NFObject_retain,
+struct nopa_NPObject_vtable nopa_NPObject_vtable_inst = {
+    .init = NPObject_init,
+    .dealloc = NPObject_dealloc,
+    .release = NPObject_release,
+    .retain = NPObject_retain,
 };
 
 struct nopa_CarrierCommandCenter_vtable nopa_CarrierCommandCenter_vtable_inst = {
-    .init = NFObject_init,
+    .init = NPObject_init,
     .dealloc = CarrierCommandCenter_dealloc,
-    .release = NFObject_release,
-    .retain = NFObject_retain,
+    .release = NPObject_release,
+    .retain = NPObject_retain,
     .initWithId_fleet_ = CarrierCommandCenter_initWithId_fleet_,
     .shutdownCarrierShields = CarrierCommandCenter_shutdownCarrierShields,
     .carrierId = CarrierCommandCenter_carrierId,
@@ -158,10 +158,10 @@ struct nopa_CarrierCommandCenter_vtable nopa_CarrierCommandCenter_vtable_inst = 
 };
 
 struct nopa_TacticalMechEntity_vtable nopa_TacticalMechEntity_vtable_inst = {
-    .init = NFObject_init,
+    .init = NPObject_init,
     .dealloc = TacticalMechEntity_dealloc,
-    .release = NFObject_release,
-    .retain = NFObject_retain,
+    .release = NPObject_release,
+    .retain = NPObject_retain,
     .initWithMechId_ = TacticalMechEntity_initWithMechId_,
     .queryTacticalUplink = TacticalMechEntity_queryTacticalUplink,
     .mechId = TacticalMechEntity_mechId,
@@ -170,110 +170,110 @@ struct nopa_TacticalMechEntity_vtable nopa_TacticalMechEntity_vtable_inst = {
     .setMasterCarrier_ = TacticalMechEntity_setMasterCarrier_,
 };
 
-struct nopa_NFObject_meta_vtable nopa_NFObject_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
-    .class = NFObject_getClass,
+struct nopa_NPObject_meta_vtable nopa_NPObject_meta_vtable_inst = {
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
+    .class = NPObject_getClass,
 };
 
 struct nopa_CarrierCommandCenter_meta_vtable nopa_CarrierCommandCenter_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
     .class = CarrierCommandCenter_getClass,
 };
 
 struct nopa_TacticalMechEntity_meta_vtable nopa_TacticalMechEntity_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
     .class = TacticalMechEntity_getClass,
 };
 
-NFClass * NFObject_getClass(NFClass * self, SEL _cmd) {
+NPClass * NPObject_getClass(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
-NFClass * CarrierCommandCenter_getClass(NFClass * self, SEL _cmd) {
+NPClass * CarrierCommandCenter_getClass(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
-NFClass * TacticalMechEntity_getClass(NFClass * self, SEL _cmd) {
+NPClass * TacticalMechEntity_getClass(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
-NFClass nopa_NFObject_class;
-NFClass nopa_CarrierCommandCenter_class;
-NFClass nopa_TacticalMechEntity_class;
+NPClass nopa_NPObject_class;
+NPClass nopa_CarrierCommandCenter_class;
+NPClass nopa_TacticalMechEntity_class;
 
 void nopa_meta_init(void) {
-    nopa_NFObject_class = (NFClass){
-        .name = "NFObject",
+    nopa_NPObject_class = (NPClass){
+        .name = "NPObject",
         .superclass = NULL,
-        .instance_size = sizeof(struct NFObject),
-        .vtable = &nopa_NFObject_vtable_inst,
-        .class_vtable = &nopa_NFObject_meta_vtable_inst,
+        .instance_size = sizeof(struct NPObject),
+        .vtable = &nopa_NPObject_vtable_inst,
+        .class_vtable = &nopa_NPObject_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_CarrierCommandCenter_class = (NFClass){
+    nopa_CarrierCommandCenter_class = (NPClass){
         .name = "CarrierCommandCenter",
-        .superclass = &nopa_NFObject_class,
+        .superclass = &nopa_NPObject_class,
         .instance_size = sizeof(struct CarrierCommandCenter),
         .vtable = &nopa_CarrierCommandCenter_vtable_inst,
         .class_vtable = &nopa_CarrierCommandCenter_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_TacticalMechEntity_class = (NFClass){
+    nopa_TacticalMechEntity_class = (NPClass){
         .name = "TacticalMechEntity",
-        .superclass = &nopa_NFObject_class,
+        .superclass = &nopa_NPObject_class,
         .instance_size = sizeof(struct TacticalMechEntity),
         .vtable = &nopa_TacticalMechEntity_vtable_inst,
         .class_vtable = &nopa_TacticalMechEntity_meta_vtable_inst,
         .protocol_count = 0,
     };
 }
-NFObject * NFObject_alloc(NFClass * self, SEL _cmd) {
+NPObject * NPObject_alloc(NPClass * self, SEL _cmd) {
   return nopa_alloc(self);
 }
 
-NFObject * NFObject_new(NFClass * self, SEL _cmd) {
-  NFObject * obj = nopa_alloc(self);
+NPObject * NPObject_new(NPClass * self, SEL _cmd) {
+  NPObject * obj = nopa_alloc(self);
   return nopa_init(obj);
 }
 
-NFObject * NFObject_init(NFObject * self, SEL _cmd) {
-  struct NFObject * _self = (struct NFObject *)self;
+NPObject * NPObject_init(NPObject * self, SEL _cmd) {
+  struct NPObject * _self = (struct NPObject *)self;
   {
     return nopa_init(self);
   }
 }
 
-void NFObject_dealloc(NFObject * self, SEL _cmd) {
-  struct NFObject * _self = (struct NFObject *)self;
+void NPObject_dealloc(NPObject * self, SEL _cmd) {
+  struct NPObject * _self = (struct NPObject *)self;
   {
     return;
   }
 }
 
-void NFObject_release(NFObject * self, SEL _cmd) {
-  struct NFObject * _self = (struct NFObject *)self;
+void NPObject_release(NPObject * self, SEL _cmd) {
+  struct NPObject * _self = (struct NPObject *)self;
   {
     nopa_release(self);
   }
 }
 
-NFObject * NFObject_retain(NFObject * self, SEL _cmd) {
-  struct NFObject * _self = (struct NFObject *)self;
+NPObject * NPObject_retain(NPObject * self, SEL _cmd) {
+  struct NPObject * _self = (struct NPObject *)self;
   {
     return nopa_retain(self);
   }
 }
 
-NFObject * CarrierCommandCenter_initWithId_fleet_(NFObject * self, SEL _cmd, int cid, const char * code) {
+NPObject * CarrierCommandCenter_initWithId_fleet_(NPObject * self, SEL _cmd, int cid, const char * code) {
   struct CarrierCommandCenter * _self = (struct CarrierCommandCenter *)self;
   {
-    self = NFObject_init(self, sel_registerName("init"));
+    self = NPObject_init(self, sel_registerName("init"));
     if (self)     {
       _self->_carrierId = cid;
       _self->_fleetCode = code;
@@ -283,37 +283,37 @@ NFObject * CarrierCommandCenter_initWithId_fleet_(NFObject * self, SEL _cmd, int
   }
 }
 
-void CarrierCommandCenter_shutdownCarrierShields(NFObject * self, SEL _cmd) {
+void CarrierCommandCenter_shutdownCarrierShields(NPObject * self, SEL _cmd) {
   struct CarrierCommandCenter * _self = (struct CarrierCommandCenter *)self;
   {
     printf("[战术控制] 正在下线母舰反应堆，准备触发静态 ARC 释放流...\n");
   }
 }
 
-int CarrierCommandCenter_carrierId(NFObject * self, SEL _cmd) {
+int CarrierCommandCenter_carrierId(NPObject * self, SEL _cmd) {
   return ((struct CarrierCommandCenter *)self)->_carrierId;
 }
 
-void CarrierCommandCenter_setCarrierId_(NFObject * self, SEL _cmd, int value) {
+void CarrierCommandCenter_setCarrierId_(NPObject * self, SEL _cmd, int value) {
   ((struct CarrierCommandCenter *)self)->_carrierId = value;
 }
 
-const char * CarrierCommandCenter_fleetCode(NFObject * self, SEL _cmd) {
+const char * CarrierCommandCenter_fleetCode(NPObject * self, SEL _cmd) {
   return ((struct CarrierCommandCenter *)self)->_fleetCode;
 }
 
-TacticalMechEntity * CarrierCommandCenter_assignedMech(NFObject * self, SEL _cmd) {
+TacticalMechEntity * CarrierCommandCenter_assignedMech(NPObject * self, SEL _cmd) {
   return ((struct CarrierCommandCenter *)self)->_assignedMech;
 }
 
-void CarrierCommandCenter_setAssignedMech_(NFObject * self, SEL _cmd, TacticalMechEntity * value) {
+void CarrierCommandCenter_setAssignedMech_(NPObject * self, SEL _cmd, TacticalMechEntity * value) {
   ((struct CarrierCommandCenter *)self)->_assignedMech = value;
 }
 
-NFObject * TacticalMechEntity_initWithMechId_(NFObject * self, SEL _cmd, int mid) {
+NPObject * TacticalMechEntity_initWithMechId_(NPObject * self, SEL _cmd, int mid) {
   struct TacticalMechEntity * _self = (struct TacticalMechEntity *)self;
   {
-    self = NFObject_init(self, sel_registerName("init"));
+    self = NPObject_init(self, sel_registerName("init"));
     if (self)     {
       _self->_mechId = mid;
       _self->_masterCarrier = NULL;
@@ -322,11 +322,11 @@ NFObject * TacticalMechEntity_initWithMechId_(NFObject * self, SEL _cmd, int mid
   }
 }
 
-void TacticalMechEntity_queryTacticalUplink(NFObject * self, SEL _cmd) {
+void TacticalMechEntity_queryTacticalUplink(NPObject * self, SEL _cmd) {
   struct TacticalMechEntity * _self = (struct TacticalMechEntity *)self;
   {
     if (_self->_masterCarrier)     {
-      printf("[机甲-%d] 链路正常，当前弱引用母舰仍然在线: 舰队编号=%s\n", _self->_mechId, ({ NFObject *__nopa_tmp_1 = (_self->_masterCarrier); __nopa_tmp_1 ? ((struct nopa_CarrierCommandCenter_vtable *)__nopa_tmp_1->isa->vtable)->fleetCode(__nopa_tmp_1, sel_registerName("fleetCode")) : 0; }));
+      printf("[机甲-%d] 链路正常，当前弱引用母舰仍然在线: 舰队编号=%s\n", _self->_mechId, ({ NPObject *__nopa_tmp_1 = (_self->_masterCarrier); __nopa_tmp_1 ? ((struct nopa_CarrierCommandCenter_vtable *)__nopa_tmp_1->isa->vtable)->fleetCode(__nopa_tmp_1, sel_registerName("fleetCode")) : 0; }));
     }
     else     {
       printf("[机甲-%d] 警报！弱引用母舰已静态析构，该 __weak 指针已自动清零(nil)！\n", _self->_mechId);
@@ -334,50 +334,50 @@ void TacticalMechEntity_queryTacticalUplink(NFObject * self, SEL _cmd) {
   }
 }
 
-int TacticalMechEntity_mechId(NFObject * self, SEL _cmd) {
+int TacticalMechEntity_mechId(NPObject * self, SEL _cmd) {
   return ((struct TacticalMechEntity *)self)->_mechId;
 }
 
-void TacticalMechEntity_setMechId_(NFObject * self, SEL _cmd, int value) {
+void TacticalMechEntity_setMechId_(NPObject * self, SEL _cmd, int value) {
   ((struct TacticalMechEntity *)self)->_mechId = value;
 }
 
-CarrierCommandCenter * TacticalMechEntity_masterCarrier(NFObject * self, SEL _cmd) {
+CarrierCommandCenter * TacticalMechEntity_masterCarrier(NPObject * self, SEL _cmd) {
   return ((struct TacticalMechEntity *)self)->_masterCarrier;
 }
 
-void TacticalMechEntity_setMasterCarrier_(NFObject * self, SEL _cmd, CarrierCommandCenter * value) {
-  nopa_weak_unregister((NFObject **)&((struct TacticalMechEntity *)self)->_masterCarrier);
+void TacticalMechEntity_setMasterCarrier_(NPObject * self, SEL _cmd, CarrierCommandCenter * value) {
+  nopa_weak_unregister((NPObject **)&((struct TacticalMechEntity *)self)->_masterCarrier);
   ((struct TacticalMechEntity *)self)->_masterCarrier = value;
-  nopa_weak_register((NFObject **)&((struct TacticalMechEntity *)self)->_masterCarrier, (NFObject *)value);
+  nopa_weak_register((NPObject **)&((struct TacticalMechEntity *)self)->_masterCarrier, (NPObject *)value);
 }
 
-void CarrierCommandCenter_dealloc(NFObject * self, SEL _cmd) {
+void CarrierCommandCenter_dealloc(NPObject * self, SEL _cmd) {
   struct CarrierCommandCenter * _self = (struct CarrierCommandCenter *)self;
   {
     printf("[母舰析构] 指挥母舰 [%s] 正在静态断开所有物理链路并释放资源...\n", _self->_fleetCode);
     if (_self->_assignedMech)     {
-      ({ NFObject *__nopa_tmp_2 = (_self->_assignedMech); __nopa_tmp_2 ? ((struct nopa_NFObject_vtable *)__nopa_tmp_2->isa->vtable)->release(__nopa_tmp_2, sel_registerName("release")) : 0; });
+      ({ NPObject *__nopa_tmp_2 = (_self->_assignedMech); __nopa_tmp_2 ? ((struct nopa_NPObject_vtable *)__nopa_tmp_2->isa->vtable)->release(__nopa_tmp_2, sel_registerName("release")) : 0; });
     }
-    NFObject_dealloc(self, sel_registerName("dealloc"));
+    NPObject_dealloc(self, sel_registerName("dealloc"));
   }
 }
 
-void TacticalMechEntity_dealloc(NFObject * self, SEL _cmd) {
+void TacticalMechEntity_dealloc(NPObject * self, SEL _cmd) {
   struct TacticalMechEntity * _self = (struct TacticalMechEntity *)self;
   {
     printf("[机甲销毁] 战术机甲-%d 物理框架已安全拆卸。\n", _self->_mechId);
-    NFObject_dealloc(self, sel_registerName("dealloc"));
+    NPObject_dealloc(self, sel_registerName("dealloc"));
   }
 }
 
-NFObject * nopa_alloc(struct NFClass * cls);
+NPObject * nopa_alloc(struct NPClass * cls);
 
-NFObject * nopa_init(NFObject * self);
+NPObject * nopa_init(NPObject * self);
 
-void nopa_release(NFObject * obj);
+void nopa_release(NPObject * obj);
 
-NFObject * nopa_retain(NFObject * obj);
+NPObject * nopa_retain(NPObject * obj);
 
 int main(int argc, const char * argv[]) {
   nopa_meta_init();
@@ -386,18 +386,18 @@ int main(int argc, const char * argv[]) {
     printf(">>>    nopac 编译器「静态弱引用 __weak 与零污染」镜像健壮性压测   <<<\n");
     printf("====================================================================\n\n");
     printf("--- 1. 建立指挥母舰与战术机甲的交叉强弱引用 ---\n");
-    NFObject *__nopa_tmp_3 = (NFObject_alloc(&nopa_CarrierCommandCenter_class, sel_registerName("alloc")));
+    NPObject *__nopa_tmp_3 = (NPObject_alloc(&nopa_CarrierCommandCenter_class, sel_registerName("alloc")));
     CarrierCommandCenter * alphaCarrier = ((struct nopa_CarrierCommandCenter_vtable *)__nopa_tmp_3->isa->vtable)->initWithId_fleet_(__nopa_tmp_3, sel_registerName("initWithId:fleet:"), 8008, "Hyperion-XII");
-    NFObject *__nopa_tmp_4 = (NFObject_alloc(&nopa_TacticalMechEntity_class, sel_registerName("alloc")));
+    NPObject *__nopa_tmp_4 = (NPObject_alloc(&nopa_TacticalMechEntity_class, sel_registerName("alloc")));
     TacticalMechEntity * gundamMech = ((struct nopa_TacticalMechEntity_vtable *)__nopa_tmp_4->isa->vtable)->initWithMechId_(__nopa_tmp_4, sel_registerName("initWithMechId:"), 3);
     ((struct nopa_CarrierCommandCenter_vtable *)(alphaCarrier)->isa->vtable)->setAssignedMech_(alphaCarrier, sel_registerName("setAssignedMech:"), gundamMech);
     ((struct nopa_TacticalMechEntity_vtable *)(gundamMech)->isa->vtable)->setMasterCarrier_(gundamMech, sel_registerName("setMasterCarrier:"), alphaCarrier);
     ((struct nopa_TacticalMechEntity_vtable *)(gundamMech)->isa->vtable)->queryTacticalUplink(gundamMech, sel_registerName("queryTacticalUplink"));
     printf("\n--- 2. 验证多个局部 __weak 指针同时指向同一个强对象 ---\n");
     __block CarrierCommandCenter * __attribute__((cleanup(nopa_weak_auto_cleanup))) tacticalMonitor1 = alphaCarrier;
-    nopa_weak_register((NFObject**)&tacticalMonitor1, (NFObject*)alphaCarrier);
+    nopa_weak_register((NPObject**)&tacticalMonitor1, (NPObject*)alphaCarrier);
     __block CarrierCommandCenter * __attribute__((cleanup(nopa_weak_auto_cleanup))) tacticalMonitor2 = alphaCarrier;
-    nopa_weak_register((NFObject**)&tacticalMonitor2, (NFObject*)alphaCarrier);
+    nopa_weak_register((NPObject**)&tacticalMonitor2, (NPObject*)alphaCarrier);
     printf("[初始弱指针快照]：\n");
     printf("          -> tacticalMonitor1 状态: %s\n", tacticalMonitor1 ? "有效指针" : "nil");
     printf("          -> tacticalMonitor2 状态: %s\n", tacticalMonitor2 ? "有效指针" : "nil");
@@ -416,7 +416,7 @@ int main(int argc, const char * argv[]) {
     combatUplinkBlock();
     printf("\n--- 4. 核心压测：彻底释放强引用母舰，验证所有衍生弱指针静态全归零 ---\n");
     ((struct nopa_CarrierCommandCenter_vtable *)(alphaCarrier)->isa->vtable)->shutdownCarrierShields(alphaCarrier, sel_registerName("shutdownCarrierShields"));
-    ((struct nopa_NFObject_vtable *)(alphaCarrier)->isa->vtable)->release(alphaCarrier, sel_registerName("release"));
+    ((struct nopa_NPObject_vtable *)(alphaCarrier)->isa->vtable)->release(alphaCarrier, sel_registerName("release"));
     alphaCarrier = NULL;
     printf("\n[静态度量清除断言]：\n");
     ((struct nopa_TacticalMechEntity_vtable *)(gundamMech)->isa->vtable)->queryTacticalUplink(gundamMech, sel_registerName("queryTacticalUplink"));
@@ -427,12 +427,12 @@ int main(int argc, const char * argv[]) {
     printf("\n--- 5. 混合边界守门员：三元表达式内包含带副作用的已置空弱指针消息发送 ---\n");
     int isTacticalNetOnline = 1;
     int carrierStepCounter = 88888;
-    char * finalFleetReport = (isTacticalNetOnline > 0) ? ({ NFObject *__nopa_tmp_5 = ((carrierStepCounter++, tacticalMonitor2)); __nopa_tmp_5 ? ((struct nopa_CarrierCommandCenter_vtable *)__nopa_tmp_5->isa->vtable)->fleetCode(__nopa_tmp_5, sel_registerName("fleetCode")) : 0; }) : "OFFLINE";
+    char * finalFleetReport = (isTacticalNetOnline > 0) ? ({ NPObject *__nopa_tmp_5 = ((carrierStepCounter++, tacticalMonitor2)); __nopa_tmp_5 ? ((struct nopa_CarrierCommandCenter_vtable *)__nopa_tmp_5->isa->vtable)->fleetCode(__nopa_tmp_5, sel_registerName("fleetCode")) : 0; }) : "OFFLINE";
     printf("[终极弱引用收网断言] 弱指针置空机制与自增优先级语法树完全融合！\n");
     printf("          -> 副作用自增计数器最终值: %d (预期: 88889)\n", carrierStepCounter);
     printf("          -> 弱引用置空后的安全返回报告: %s (预期: (null) 或 空指针安全值)\n", finalFleetReport ? finalFleetReport : "nil安全拦截");
     printf("\n--- 6. 正在释放战术机甲实体... ---\n");
-    ((struct nopa_NFObject_vtable *)(gundamMech)->isa->vtable)->release(gundamMech, sel_registerName("release"));
+    ((struct nopa_NPObject_vtable *)(gundamMech)->isa->vtable)->release(gundamMech, sel_registerName("release"));
     printf("\n====================================================================\n");
     printf(">>> 奇迹！静态弱引用机制镜像高压稳定性测试 100% 完美通关！       <<<\n");
     printf("====================================================================\n");

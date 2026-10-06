@@ -1,5 +1,5 @@
 #import <Foundation/Foundation.np>
 // Shared declarations: both TUs see this method set via the header.
-@interface Calc : NFObject
+@interface Calc : NPObject
 - (int)add:(int)a to:(int)b;
 @end

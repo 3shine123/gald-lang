@@ -23,7 +23,7 @@
 
 ```c
 /* int r = await n;  → */ 
-NFTask * __nopa_task = (NFTask *)(nopa_task_create(0, self, 0));
+NPTask * __nopa_task = (NPTask *)(nopa_task_create(0, self, 0));
 int r = (nopa_task_resume(__nopa_task), n);
 nopa_task_join(__nopa_task);
 ```
@@ -33,7 +33,7 @@ nopa_task_join(__nopa_task);
 - **检查层**（`nopa_async::check_unit`，desugar 前跑原始 AST）：
   - `@try` 跨 await → error（try/catch/finally 任一含 await 即报）
   - 同步上下文（非 async 方法 + **顶层函数含 main**）调非 void async → error + 提示
-- runtime（`include/nopa/runtime.{h,c}`）：`NFTask{state,finished,entry,self_obj,frame,result,parent}` + create/resume/finish/join 四个 API（host 用 calloc/free；freestanding 用户提供分配器后可用）。
+- runtime（`include/nopa/runtime.{h,c}`）：`NPTask{state,finished,entry,self_obj,frame,result,parent}` + create/resume/finish/join 四个 API（host 用 calloc/free；freestanding 用户提供分配器后可用）。
 
 ## 里程碑路线
 

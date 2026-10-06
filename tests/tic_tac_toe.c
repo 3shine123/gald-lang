@@ -13,11 +13,11 @@
 
 #include <string.h>
 
-struct nopa_NFObject_vtable;
+struct nopa_NPObject_vtable;
 struct nopa_TicTacToeEngine_vtable;
 
-#define nopa_NFObject_vtable_index_init 2
-#define nopa_NFObject_vtable_index_dealloc 3
+#define nopa_NPObject_vtable_index_init 2
+#define nopa_NPObject_vtable_index_dealloc 3
 #define nopa_TicTacToeEngine_vtable_index_init 2
 #define nopa_TicTacToeEngine_vtable_index_gameOver 4
 #define nopa_TicTacToeEngine_vtable_index_winner 5
@@ -32,45 +32,45 @@ static const SEL __nopa_sel_render = {.name = "render", .hash = 0xEEF97A0D};
 static const SEL __nopa_sel_processInfut_ = {.name = "processInfut_", .hash = 0xB4C50C83};
 static const SEL __nopa_sel_updateAndCheckWinWithBlock_ = {.name = "updateAndCheckWinWithBlock_", .hash = 0xE3BBA5C5};
 
-typedef struct NFObject NFObject;
+typedef struct NPObject NPObject;
 typedef struct TicTacToeEngine TicTacToeEngine;
 
 
 
-NFObject * NFObject_alloc(NFClass * self, SEL _cmd);
-NFObject * NFObject_new(NFClass * self, SEL _cmd);
-NFObject * NFObject_init(NFObject * self, SEL _cmd);
-void NFObject_dealloc(NFObject * self, SEL _cmd);
-NFClass * NFObject_getClass(NFClass * self, SEL _cmd);
+NPObject * NPObject_alloc(NPClass * self, SEL _cmd);
+NPObject * NPObject_new(NPClass * self, SEL _cmd);
+NPObject * NPObject_init(NPObject * self, SEL _cmd);
+void NPObject_dealloc(NPObject * self, SEL _cmd);
+NPClass * NPObject_getClass(NPClass * self, SEL _cmd);
 void disableRawMode();
 void enableRawMode();
 int kbhit();
-NFObject * TicTacToeEngine_init(NFObject * self, SEL _cmd);
-_Bool TicTacToeEngine_gameOver(NFObject * self, SEL _cmd);
-char TicTacToeEngine_winner(NFObject * self, SEL _cmd);
-void TicTacToeEngine_processInfut_(NFObject * self, SEL _cmd, char ch);
-void TicTacToeEngine_updateAndCheckWinWithBlock_(NFObject * self, SEL _cmd, void (^resultBlock)(char));
-void TicTacToeEngine_render(NFObject * self, SEL _cmd);
-NFClass * TicTacToeEngine_getClass(NFClass * self, SEL _cmd);
+NPObject * TicTacToeEngine_init(NPObject * self, SEL _cmd);
+_Bool TicTacToeEngine_gameOver(NPObject * self, SEL _cmd);
+char TicTacToeEngine_winner(NPObject * self, SEL _cmd);
+void TicTacToeEngine_processInfut_(NPObject * self, SEL _cmd, char ch);
+void TicTacToeEngine_updateAndCheckWinWithBlock_(NPObject * self, SEL _cmd, void (^resultBlock)(char));
+void TicTacToeEngine_render(NPObject * self, SEL _cmd);
+NPClass * TicTacToeEngine_getClass(NPClass * self, SEL _cmd);
 int main();
 
-extern NFClass nopa_NFObject_class;
-extern NFClass nopa_TicTacToeEngine_class;
+extern NPClass nopa_NPObject_class;
+extern NPClass nopa_TicTacToeEngine_class;
 void nopa_meta_init(void);
 
-// struct NFClass defined in runtime.h
-// struct NFObject defined in runtime.h
-struct nopa_NFObject_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
+// struct NPClass defined in runtime.h
+// struct NPObject defined in runtime.h
+struct nopa_NPObject_vtable {
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
 };
-struct nopa_NFObject_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+struct nopa_NPObject_meta_vtable {
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct TicTacToeEngine {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     char _board[9];
     int _cursorX;
@@ -82,46 +82,46 @@ struct TicTacToeEngine {
 };
 typedef struct TicTacToeEngine TicTacToeEngine;
 struct nopa_TicTacToeEngine_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    _Bool (*gameOver)(NFObject *, SEL);
-    char (*winner)(NFObject *, SEL);
-    void (*processInfut_)(NFObject *, SEL, char);
-    void (*updateAndCheckWinWithBlock_)(NFObject *, SEL, void (^)(char));
-    void (*render)(NFObject *, SEL);
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    _Bool (*gameOver)(NPObject *, SEL);
+    char (*winner)(NPObject *, SEL);
+    void (*processInfut_)(NPObject *, SEL, char);
+    void (*updateAndCheckWinWithBlock_)(NPObject *, SEL, void (^)(char));
+    void (*render)(NPObject *, SEL);
 };
 struct nopa_TicTacToeEngine_meta_vtable {
-    NFClass * (*class)(NFClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
-NFObject * NFObject_alloc(NFClass * self, SEL _cmd) {
+NPObject * NPObject_alloc(NPClass * self, SEL _cmd) {
     return nopa_alloc(self);
 }
 
-NFObject * NFObject_new(NFClass * self, SEL _cmd) {
-    NFObject * obj = nopa_alloc(self);
+NPObject * NPObject_new(NPClass * self, SEL _cmd) {
+    NPObject * obj = nopa_alloc(self);
     return nopa_init(obj);
 }
 
-NFObject * NFObject_init(NFObject * self, SEL _cmd) {
-    struct NFObject * _self = ((struct NFObject *)(self));
+NPObject * NPObject_init(NPObject * self, SEL _cmd) {
+    struct NPObject * _self = ((struct NPObject *)(self));
     {
         return nopa_init(self);
     }
 }
 
-void NFObject_dealloc(NFObject * self, SEL _cmd) {
-    struct NFObject * _self = ((struct NFObject *)(self));
+void NPObject_dealloc(NPObject * self, SEL _cmd) {
+    struct NPObject * _self = ((struct NPObject *)(self));
     {
         return;
     }
 }
 
-NFClass * NFObject_getClass(NFClass * self, SEL _cmd) {
-    return &nopa_NFObject_class;
+NPClass * NPObject_getClass(NPClass * self, SEL _cmd) {
+    return &nopa_NPObject_class;
 }
 
-NFObject * nopa_alloc(struct NFClass * cls);
-NFObject * nopa_init(NFObject * );
+NPObject * nopa_alloc(struct NPClass * cls);
+NPObject * nopa_init(NPObject * );
 struct termios orig_termios;
 void disableRawMode() {
     tcsetattr(STDIN_FILENO, TCSAFLUSH, &orig_termios);
@@ -147,10 +147,10 @@ int kbhit() {
     return select(STDIN_FILENO + 1, &fds, NULL, NULL, &tv);
 }
 
-NFObject * TicTacToeEngine_init(NFObject * self, SEL _cmd) {
+NPObject * TicTacToeEngine_init(NPObject * self, SEL _cmd) {
     struct TicTacToeEngine * _self = ((struct TicTacToeEngine *)(self));
     {
-        self = NFObject_init(self, __nopa_sel_init);
+        self = NPObject_init(self, __nopa_sel_init);
         if (self) {
             {
                 for (int i = 0; i < 9; i++) {
@@ -170,21 +170,21 @@ NFObject * TicTacToeEngine_init(NFObject * self, SEL _cmd) {
     }
 }
 
-_Bool TicTacToeEngine_gameOver(NFObject * self, SEL _cmd) {
+_Bool TicTacToeEngine_gameOver(NPObject * self, SEL _cmd) {
     struct TicTacToeEngine * _self = ((struct TicTacToeEngine *)(self));
     {
         return ((struct TicTacToeEngine *)(self))->_gameOver;
     }
 }
 
-char TicTacToeEngine_winner(NFObject * self, SEL _cmd) {
+char TicTacToeEngine_winner(NPObject * self, SEL _cmd) {
     struct TicTacToeEngine * _self = ((struct TicTacToeEngine *)(self));
     {
         return ((struct TicTacToeEngine *)(self))->_winner;
     }
 }
 
-void TicTacToeEngine_processInfut_(NFObject * self, SEL _cmd, char ch) {
+void TicTacToeEngine_processInfut_(NPObject * self, SEL _cmd, char ch) {
     struct TicTacToeEngine * _self = ((struct TicTacToeEngine *)(self));
     {
         if (((struct TicTacToeEngine *)(self))->_gameOver) {
@@ -241,7 +241,7 @@ void TicTacToeEngine_processInfut_(NFObject * self, SEL _cmd, char ch) {
     }
 }
 
-void TicTacToeEngine_updateAndCheckWinWithBlock_(NFObject * self, SEL _cmd, void (^resultBlock)(char)) {
+void TicTacToeEngine_updateAndCheckWinWithBlock_(NPObject * self, SEL _cmd, void (^resultBlock)(char)) {
     struct TicTacToeEngine * _self = ((struct TicTacToeEngine *)(self));
     {
         if (((struct TicTacToeEngine *)(self))->_gameOver) {
@@ -301,7 +301,7 @@ void TicTacToeEngine_updateAndCheckWinWithBlock_(NFObject * self, SEL _cmd, void
     }
 }
 
-void TicTacToeEngine_render(NFObject * self, SEL _cmd) {
+void TicTacToeEngine_render(NPObject * self, SEL _cmd) {
     struct TicTacToeEngine * _self = ((struct TicTacToeEngine *)(self));
     {
         printf("\033[H");
@@ -366,7 +366,7 @@ void TicTacToeEngine_render(NFObject * self, SEL _cmd) {
     }
 }
 
-NFClass * TicTacToeEngine_getClass(NFClass * self, SEL _cmd) {
+NPClass * TicTacToeEngine_getClass(NPClass * self, SEL _cmd) {
     return &nopa_TicTacToeEngine_class;
 }
 
@@ -379,7 +379,7 @@ int main() {
             srand(time(NULL));
             enableRawMode();
             printf("\033[2J\033[H");
-            NFObject *__nopa_tmp_0 = (NFObject_alloc(&nopa_TicTacToeEngine_class, __nopa_sel_alloc));
+            NPObject *__nopa_tmp_0 = (NPObject_alloc(&nopa_TicTacToeEngine_class, __nopa_sel_alloc));
             TicTacToeEngine * engine = ((struct nopa_TicTacToeEngine_vtable *)__nopa_tmp_0->isa->vtable)->init(__nopa_tmp_0, __nopa_sel_init);
             int matchId = 101;
             int rewardScore = 500;
@@ -422,7 +422,7 @@ int main() {
             printf(" 🏁 终端棋局结束。Micrit 语言高级闭包与一维映射测试完毕！\n");
             printf("===================================================\n");
             if (engine) {
-                NFObject_release(engine);
+                NPObject_release(engine);
             }
         }
         nopa_autoreleasepool_pop(__pool);
@@ -434,14 +434,14 @@ int main() {
 
 // ─── Class metadata ─────────────────────────────────────
 
-struct nopa_NFObject_vtable nopa_NFObject_vtable_inst = {
-    .init = NFObject_init,
-    .dealloc = NFObject_dealloc,
+struct nopa_NPObject_vtable nopa_NPObject_vtable_inst = {
+    .init = NPObject_init,
+    .dealloc = NPObject_dealloc,
 };
 
 struct nopa_TicTacToeEngine_vtable nopa_TicTacToeEngine_vtable_inst = {
     .init = TicTacToeEngine_init,
-    .dealloc = NFObject_dealloc,
+    .dealloc = NPObject_dealloc,
     .gameOver = TicTacToeEngine_gameOver,
     .winner = TicTacToeEngine_winner,
     .processInfut_ = TicTacToeEngine_processInfut_,
@@ -449,31 +449,31 @@ struct nopa_TicTacToeEngine_vtable nopa_TicTacToeEngine_vtable_inst = {
     .render = TicTacToeEngine_render,
 };
 
-struct nopa_NFObject_meta_vtable nopa_NFObject_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
-    .class = NFObject_getClass,
+struct nopa_NPObject_meta_vtable nopa_NPObject_meta_vtable_inst = {
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
+    .class = NPObject_getClass,
 };
 
 struct nopa_TicTacToeEngine_meta_vtable nopa_TicTacToeEngine_meta_vtable_inst = {
     .class = TicTacToeEngine_getClass,
 };
 
-NFClass nopa_NFObject_class;
-NFClass nopa_TicTacToeEngine_class;
+NPClass nopa_NPObject_class;
+NPClass nopa_TicTacToeEngine_class;
 
 void nopa_meta_init(void) {
-    nopa_NFObject_class = (NFClass){
-        .name = "NFObject",
+    nopa_NPObject_class = (NPClass){
+        .name = "NPObject",
         .superclass = NULL,
-        .instance_size = sizeof(struct NFObject),
-        .vtable = &nopa_NFObject_vtable_inst,
-        .class_vtable = &nopa_NFObject_meta_vtable_inst,
+        .instance_size = sizeof(struct NPObject),
+        .vtable = &nopa_NPObject_vtable_inst,
+        .class_vtable = &nopa_NPObject_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_TicTacToeEngine_class = (NFClass){
+    nopa_TicTacToeEngine_class = (NPClass){
         .name = "TicTacToeEngine",
-        .superclass = &nopa_NFObject_class,
+        .superclass = &nopa_NPObject_class,
         .instance_size = sizeof(struct TicTacToeEngine),
         .vtable = &nopa_TicTacToeEngine_vtable_inst,
         .class_vtable = &nopa_TicTacToeEngine_meta_vtable_inst,

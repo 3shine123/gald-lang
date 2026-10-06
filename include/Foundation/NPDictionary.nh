@@ -1,0 +1,46 @@
+#ifndef NPDICTIONARY_NH
+#define NPDICTIONARY_NH
+
+#import <Foundation/NPObject.nh>
+#import <Foundation/NPArray.nh>
+
+// Immutable key→value map — the object behind the `@{ k: v, ... }` literal.
+//
+// Storage mirrors NPArray: two parallel object arrays plus a count. Lookup is
+// a linear scan that compares keys with `isEqual:`, so NPString/NPNumber keys
+// have *value* semantics (a fresh `@"key"` literal finds an entry stored under
+// a different-but-equal string) — matching ObjC's NSDictionary, which also
+// compares keys by equality rather than identity. There is no hash table:
+// these dictionaries are small, and a hash table would need `hash`/`isEqual:`
+// pairing across every key class to be correct.
+@interface NPDictionary<K, V> : NPObject {
+@public
+    NPObject **_keys;
+    NPObject **_values;
+    size_t _count;
+    size_t _capacity;
+}
+
+// Class-side factories keep erased `id` params (the specialization still
+// rewrites K/V positions in instance methods; factories stay bare to avoid
+// nested-generic-in-template return types like NPArray<K>).
++ (NPDictionary *)dictionary;
++ (NPDictionary *)dictionaryWithObject:(V)value forKey:(K)key;
++ (NPDictionary *)dictionaryWithObjects:(id *)values forKeys:(id *)keys count:(size_t)n;
+
+- (size_t)count;
+- (V)objectForKey:(K)key;
+- (NPArray *)allKeys;
+- (NPArray *)allValues;
+
+// Content equality, as in ObjC's NSDictionary: same count, and every key maps
+// to a value that is itself `isEqual:`. Non-dictionary operands fall back to
+// NSObject's identity comparison.
+- (BOOL)isEqual:(id)object;
+
+- (id)copy;
+- (NPString *)description;
+
+@end
+
+#endif

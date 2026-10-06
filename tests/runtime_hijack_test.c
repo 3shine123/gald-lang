@@ -9,21 +9,21 @@
 
 #include <string.h>
 
-struct nopa_NFObject_vtable;
-struct nopa_NFShipKernel_vtable;
-struct nopa_NFAlienTech_vtable;
-struct nopa_NFRuntimetHijacker_vtable;
+struct nopa_NPObject_vtable;
+struct nopa_NPShipKernel_vtable;
+struct nopa_NPAlienTech_vtable;
+struct nopa_NPRuntimetHijacker_vtable;
 
-#define nopa_NFObject_vtable_index_init 2
-#define nopa_NFObject_vtable_index_dealloc 3
-#define nopa_NFShipKernel_vtable_index_init 2
-#define nopa_NFShipKernel_vtable_index_executeCommandChain_ 4
-#define nopa_NFShipKernel_vtable_index_getRating 5
-#define nopa_NFAlienTech_vtable_index_init 2
-#define nopa_NFAlienTech_vtable_index_executeCommandChain_ 4
-#define nopa_NFRuntimetHijacker_vtable_index_initWithTarget_ 4
-#define nopa_NFRuntimetHijacker_vtable_index_forceExecute_ 5
-#define nopa_NFRuntimetHijacker_vtable_index_hijackAlienMemory_ 6
+#define nopa_NPObject_vtable_index_init 2
+#define nopa_NPObject_vtable_index_dealloc 3
+#define nopa_NPShipKernel_vtable_index_init 2
+#define nopa_NPShipKernel_vtable_index_executeCommandChain_ 4
+#define nopa_NPShipKernel_vtable_index_getRating 5
+#define nopa_NPAlienTech_vtable_index_init 2
+#define nopa_NPAlienTech_vtable_index_executeCommandChain_ 4
+#define nopa_NPRuntimetHijacker_vtable_index_initWithTarget_ 4
+#define nopa_NPRuntimetHijacker_vtable_index_forceExecute_ 5
+#define nopa_NPRuntimetHijacker_vtable_index_hijackAlienMemory_ 6
 
 static const SEL __nopa_sel_init = {.name = "init", .hash = 0x16B1D373};
 static const SEL __nopa_sel_executeCommandChain_ = {.name = "executeCommandChain_", .hash = 0x7EE70427};
@@ -33,210 +33,210 @@ static const SEL __nopa_sel_forceExecute_ = {.name = "forceExecute_", .hash = 0x
 static const SEL __nopa_sel_hijackAlienMemory_ = {.name = "hijackAlienMemory_", .hash = 0x7EEEE40C};
 static const SEL __nopa_sel_getRating = {.name = "getRating", .hash = 0x3DA68C16};
 
-typedef struct NFObject NFObject;
-typedef struct NFShipKernel NFShipKernel;
-typedef struct NFAlienTech NFAlienTech;
-typedef struct NFRuntimetHijacker NFRuntimetHijacker;
+typedef struct NPObject NPObject;
+typedef struct NPShipKernel NPShipKernel;
+typedef struct NPAlienTech NPAlienTech;
+typedef struct NPRuntimetHijacker NPRuntimetHijacker;
 
 
 
-NFObject * NFObject_alloc(NFClass * self, SEL _cmd);
-NFObject * NFObject_new(NFClass * self, SEL _cmd);
-NFObject * NFObject_init(NFObject * self, SEL _cmd);
-void NFObject_dealloc(NFObject * self, SEL _cmd);
-NFClass * NFObject_getClass(NFClass * self, SEL _cmd);
-NFObject * NFShipKernel_init(NFObject * self, SEL _cmd);
-void NFShipKernel_executeCommandChain_(NFObject * self, SEL _cmd, int code);
-int NFShipKernel_getRating(NFObject * self, SEL _cmd);
-NFClass * NFShipKernel_getClass(NFClass * self, SEL _cmd);
-NFObject * NFAlienTech_init(NFObject * self, SEL _cmd);
-void NFAlienTech_executeCommandChain_(NFObject * self, SEL _cmd, int code);
-NFClass * NFAlienTech_getClass(NFClass * self, SEL _cmd);
-NFObject * NFRuntimetHijacker_initWithTarget_(NFObject * self, SEL _cmd, NFObject * target);
-void NFRuntimetHijacker_forceExecute_(NFObject * self, SEL _cmd, int val);
-void NFRuntimetHijacker_hijackAlienMemory_(NFObject * self, SEL _cmd, NFObject * alienObj);
-NFClass * NFRuntimetHijacker_getClass(NFClass * self, SEL _cmd);
+NPObject * NPObject_alloc(NPClass * self, SEL _cmd);
+NPObject * NPObject_new(NPClass * self, SEL _cmd);
+NPObject * NPObject_init(NPObject * self, SEL _cmd);
+void NPObject_dealloc(NPObject * self, SEL _cmd);
+NPClass * NPObject_getClass(NPClass * self, SEL _cmd);
+NPObject * NPShipKernel_init(NPObject * self, SEL _cmd);
+void NPShipKernel_executeCommandChain_(NPObject * self, SEL _cmd, int code);
+int NPShipKernel_getRating(NPObject * self, SEL _cmd);
+NPClass * NPShipKernel_getClass(NPClass * self, SEL _cmd);
+NPObject * NPAlienTech_init(NPObject * self, SEL _cmd);
+void NPAlienTech_executeCommandChain_(NPObject * self, SEL _cmd, int code);
+NPClass * NPAlienTech_getClass(NPClass * self, SEL _cmd);
+NPObject * NPRuntimetHijacker_initWithTarget_(NPObject * self, SEL _cmd, NPObject * target);
+void NPRuntimetHijacker_forceExecute_(NPObject * self, SEL _cmd, int val);
+void NPRuntimetHijacker_hijackAlienMemory_(NPObject * self, SEL _cmd, NPObject * alienObj);
+NPClass * NPRuntimetHijacker_getClass(NPClass * self, SEL _cmd);
 int main(int argc, const char * * argv);
 
-extern NFClass nopa_NFObject_class;
-extern NFClass nopa_NFShipKernel_class;
-extern NFClass nopa_NFAlienTech_class;
-extern NFClass nopa_NFRuntimetHijacker_class;
+extern NPClass nopa_NPObject_class;
+extern NPClass nopa_NPShipKernel_class;
+extern NPClass nopa_NPAlienTech_class;
+extern NPClass nopa_NPRuntimetHijacker_class;
 void nopa_meta_init(void);
 
-// struct NFClass defined in runtime.h
-// struct NFObject defined in runtime.h
-struct nopa_NFObject_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
+// struct NPClass defined in runtime.h
+// struct NPObject defined in runtime.h
+struct nopa_NPObject_vtable {
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
 };
-struct nopa_NFObject_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+struct nopa_NPObject_meta_vtable {
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
-struct NFShipKernel {
-    struct NFClass *isa;
+struct NPShipKernel {
+    struct NPClass *isa;
     uint32_t retain_count;
     int _safetyRating;
 };
-typedef struct NFShipKernel NFShipKernel;
-struct nopa_NFShipKernel_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    void (*executeCommandChain_)(NFObject *, SEL, int);
-    int (*getRating)(NFObject *, SEL);
+typedef struct NPShipKernel NPShipKernel;
+struct nopa_NPShipKernel_vtable {
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    void (*executeCommandChain_)(NPObject *, SEL, int);
+    int (*getRating)(NPObject *, SEL);
 };
-struct nopa_NFShipKernel_meta_vtable {
-    NFClass * (*class)(NFClass *, SEL);
+struct nopa_NPShipKernel_meta_vtable {
+    NPClass * (*class)(NPClass *, SEL);
 };
-struct NFAlienTech {
-    struct NFClass *isa;
+struct NPAlienTech {
+    struct NPClass *isa;
     uint32_t retain_count;
     int _alienEnergyCells;
 };
-typedef struct NFAlienTech NFAlienTech;
-struct nopa_NFAlienTech_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    void (*executeCommandChain_)(NFObject *, SEL, int);
+typedef struct NPAlienTech NPAlienTech;
+struct nopa_NPAlienTech_vtable {
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    void (*executeCommandChain_)(NPObject *, SEL, int);
 };
-struct nopa_NFAlienTech_meta_vtable {
-    NFClass * (*class)(NFClass *, SEL);
+struct nopa_NPAlienTech_meta_vtable {
+    NPClass * (*class)(NPClass *, SEL);
 };
-struct NFRuntimetHijacker {
-    struct NFClass *isa;
+struct NPRuntimetHijacker {
+    struct NPClass *isa;
     uint32_t retain_count;
-    NFObject * _anonymousTarget;
+    NPObject * _anonymousTarget;
 };
-typedef struct NFRuntimetHijacker NFRuntimetHijacker;
-struct nopa_NFRuntimetHijacker_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    NFObject * (*initWithTarget_)(NFObject *, SEL, NFObject *);
-    void (*forceExecute_)(NFObject *, SEL, int);
-    void (*hijackAlienMemory_)(NFObject *, SEL, NFObject *);
+typedef struct NPRuntimetHijacker NPRuntimetHijacker;
+struct nopa_NPRuntimetHijacker_vtable {
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    NPObject * (*initWithTarget_)(NPObject *, SEL, NPObject *);
+    void (*forceExecute_)(NPObject *, SEL, int);
+    void (*hijackAlienMemory_)(NPObject *, SEL, NPObject *);
 };
-struct nopa_NFRuntimetHijacker_meta_vtable {
-    NFClass * (*class)(NFClass *, SEL);
+struct nopa_NPRuntimetHijacker_meta_vtable {
+    NPClass * (*class)(NPClass *, SEL);
 };
-NFObject * NFObject_alloc(NFClass * self, SEL _cmd) {
+NPObject * NPObject_alloc(NPClass * self, SEL _cmd) {
     return nopa_alloc(self);
 }
 
-NFObject * NFObject_new(NFClass * self, SEL _cmd) {
-    NFObject * obj = nopa_alloc(self);
+NPObject * NPObject_new(NPClass * self, SEL _cmd) {
+    NPObject * obj = nopa_alloc(self);
     return nopa_init(obj);
 }
 
-NFObject * NFObject_init(NFObject * self, SEL _cmd) {
-    struct NFObject * _self = ((struct NFObject *)(self));
+NPObject * NPObject_init(NPObject * self, SEL _cmd) {
+    struct NPObject * _self = ((struct NPObject *)(self));
     {
         return nopa_init(self);
     }
 }
 
-void NFObject_dealloc(NFObject * self, SEL _cmd) {
-    struct NFObject * _self = ((struct NFObject *)(self));
+void NPObject_dealloc(NPObject * self, SEL _cmd) {
+    struct NPObject * _self = ((struct NPObject *)(self));
     {
         return;
     }
 }
 
-NFClass * NFObject_getClass(NFClass * self, SEL _cmd) {
-    return &nopa_NFObject_class;
+NPClass * NPObject_getClass(NPClass * self, SEL _cmd) {
+    return &nopa_NPObject_class;
 }
 
-NFObject * nopa_alloc(struct NFClass * cls);
-NFObject * nopa_init(NFObject * );
-NFObject * NFShipKernel_init(NFObject * self, SEL _cmd) {
-    struct NFShipKernel * _self = ((struct NFShipKernel *)(self));
+NPObject * nopa_alloc(struct NPClass * cls);
+NPObject * nopa_init(NPObject * );
+NPObject * NPShipKernel_init(NPObject * self, SEL _cmd) {
+    struct NPShipKernel * _self = ((struct NPShipKernel *)(self));
     {
-        self = NFObject_init(self, __nopa_sel_init);
+        self = NPObject_init(self, __nopa_sel_init);
         if (self) {
             {
-                ((struct NFShipKernel *)(self))->_safetyRating = 100;
+                ((struct NPShipKernel *)(self))->_safetyRating = 100;
             }
         }
         return self;
     }
 }
 
-void NFShipKernel_executeCommandChain_(NFObject * self, SEL _cmd, int code) {
-    struct NFShipKernel * _self = ((struct NFShipKernel *)(self));
+void NPShipKernel_executeCommandChain_(NPObject * self, SEL _cmd, int code) {
+    struct NPShipKernel * _self = ((struct NPShipKernel *)(self));
     {
-        ((struct NFShipKernel *)(self))->_safetyRating = ((struct NFShipKernel *)(self))->_safetyRating - code;
-        printf("[地球飞船核心] 收到指令流。安全指数下降至: %d\n", ((struct NFShipKernel *)(self))->_safetyRating);
+        ((struct NPShipKernel *)(self))->_safetyRating = ((struct NPShipKernel *)(self))->_safetyRating - code;
+        printf("[地球飞船核心] 收到指令流。安全指数下降至: %d\n", ((struct NPShipKernel *)(self))->_safetyRating);
     }
 }
 
-int NFShipKernel_getRating(NFObject * self, SEL _cmd) {
-    struct NFShipKernel * _self = ((struct NFShipKernel *)(self));
+int NPShipKernel_getRating(NPObject * self, SEL _cmd) {
+    struct NPShipKernel * _self = ((struct NPShipKernel *)(self));
     {
-        return ((struct NFShipKernel *)(self))->_safetyRating;
+        return ((struct NPShipKernel *)(self))->_safetyRating;
     }
 }
 
-NFClass * NFShipKernel_getClass(NFClass * self, SEL _cmd) {
-    return &nopa_NFShipKernel_class;
+NPClass * NPShipKernel_getClass(NPClass * self, SEL _cmd) {
+    return &nopa_NPShipKernel_class;
 }
 
-NFObject * NFAlienTech_init(NFObject * self, SEL _cmd) {
-    struct NFAlienTech * _self = ((struct NFAlienTech *)(self));
+NPObject * NPAlienTech_init(NPObject * self, SEL _cmd) {
+    struct NPAlienTech * _self = ((struct NPAlienTech *)(self));
     {
-        self = NFObject_init(self, __nopa_sel_init);
+        self = NPObject_init(self, __nopa_sel_init);
         if (self) {
             {
-                ((struct NFAlienTech *)(self))->_alienEnergyCells = 999;
+                ((struct NPAlienTech *)(self))->_alienEnergyCells = 999;
             }
         }
         return self;
     }
 }
 
-void NFAlienTech_executeCommandChain_(NFObject * self, SEL _cmd, int code) {
-    struct NFAlienTech * _self = ((struct NFAlienTech *)(self));
+void NPAlienTech_executeCommandChain_(NPObject * self, SEL _cmd, int code) {
+    struct NPAlienTech * _self = ((struct NPAlienTech *)(self));
     {
-        ((struct NFAlienTech *)(self))->_alienEnergyCells = ((struct NFAlienTech *)(self))->_alienEnergyCells + code * 10;
-        printf("[外星未知科技] 捕获暗能量。晶核能量飙升至: %d\n", ((struct NFAlienTech *)(self))->_alienEnergyCells);
+        ((struct NPAlienTech *)(self))->_alienEnergyCells = ((struct NPAlienTech *)(self))->_alienEnergyCells + code * 10;
+        printf("[外星未知科技] 捕获暗能量。晶核能量飙升至: %d\n", ((struct NPAlienTech *)(self))->_alienEnergyCells);
     }
 }
 
-NFClass * NFAlienTech_getClass(NFClass * self, SEL _cmd) {
-    return &nopa_NFAlienTech_class;
+NPClass * NPAlienTech_getClass(NPClass * self, SEL _cmd) {
+    return &nopa_NPAlienTech_class;
 }
 
-NFObject * NFRuntimetHijacker_initWithTarget_(NFObject * self, SEL _cmd, NFObject * target) {
-    struct NFRuntimetHijacker * _self = ((struct NFRuntimetHijacker *)(self));
+NPObject * NPRuntimetHijacker_initWithTarget_(NPObject * self, SEL _cmd, NPObject * target) {
+    struct NPRuntimetHijacker * _self = ((struct NPRuntimetHijacker *)(self));
     {
-        self = NFObject_init(self, __nopa_sel_init);
+        self = NPObject_init(self, __nopa_sel_init);
         if (self) {
             {
-                ((struct NFRuntimetHijacker *)(self))->_anonymousTarget = target;
+                ((struct NPRuntimetHijacker *)(self))->_anonymousTarget = target;
             }
         }
         return self;
     }
 }
 
-void NFRuntimetHijacker_forceExecute_(NFObject * self, SEL _cmd, int val) {
-    struct NFRuntimetHijacker * _self = ((struct NFRuntimetHijacker *)(self));
+void NPRuntimetHijacker_forceExecute_(NPObject * self, SEL _cmd, int val) {
+    struct NPRuntimetHijacker * _self = ((struct NPRuntimetHijacker *)(self));
     {
-        ((struct nopa_NFShipKernel_vtable *)((struct NFRuntimetHijacker *)(self))->_anonymousTarget->isa->vtable)->executeCommandChain_(((struct NFRuntimetHijacker *)(self))->_anonymousTarget, __nopa_sel_executeCommandChain_, val);
+        ((struct nopa_NPShipKernel_vtable *)((struct NPRuntimetHijacker *)(self))->_anonymousTarget->isa->vtable)->executeCommandChain_(((struct NPRuntimetHijacker *)(self))->_anonymousTarget, __nopa_sel_executeCommandChain_, val);
     }
 }
 
-void NFRuntimetHijacker_hijackAlienMemory_(NFObject * self, SEL _cmd, NFObject * alienObj) {
-    struct NFRuntimetHijacker * _self = ((struct NFRuntimetHijacker *)(self));
+void NPRuntimetHijacker_hijackAlienMemory_(NPObject * self, SEL _cmd, NPObject * alienObj) {
+    struct NPRuntimetHijacker * _self = ((struct NPRuntimetHijacker *)(self));
     {
-        NFAlienTech * rawTech = ((NFAlienTech *)(alienObj));
-        ((struct NFAlienTech *)(rawTech))->_alienEnergyCells = 404;
-        printf("[劫持黑客] 成功利用指针越权强行修改外星内存！当前能量已被篡改为: %d\n", ((struct NFAlienTech *)(rawTech))->_alienEnergyCells);
+        NPAlienTech * rawTech = ((NPAlienTech *)(alienObj));
+        ((struct NPAlienTech *)(rawTech))->_alienEnergyCells = 404;
+        printf("[劫持黑客] 成功利用指针越权强行修改外星内存！当前能量已被篡改为: %d\n", ((struct NPAlienTech *)(rawTech))->_alienEnergyCells);
     }
 }
 
-NFClass * NFRuntimetHijacker_getClass(NFClass * self, SEL _cmd) {
-    return &nopa_NFRuntimetHijacker_class;
+NPClass * NPRuntimetHijacker_getClass(NPClass * self, SEL _cmd) {
+    return &nopa_NPRuntimetHijacker_class;
 }
 
 int main(int argc, const char * * argv) {
@@ -248,23 +248,23 @@ int main(int argc, const char * * argv) {
             printf("==================================================\n");
             printf(">>>    nopac 编译器「匿名多态与内存劫持」压测    <<<\n");
             printf("==================================================\n\n");
-            NFObject *__nopa_tmp_0 = (NFObject_alloc(&nopa_NFShipKernel_class, __nopa_sel_alloc));
-            NFShipKernel * earthShip = ((struct nopa_NFShipKernel_vtable *)__nopa_tmp_0->isa->vtable)->init(__nopa_tmp_0, __nopa_sel_init);
-            NFObject *__nopa_tmp_1 = (NFObject_alloc(&nopa_NFAlienTech_class, __nopa_sel_alloc));
-            NFAlienTech * alienTech = ((struct nopa_NFAlienTech_vtable *)__nopa_tmp_1->isa->vtable)->init(__nopa_tmp_1, __nopa_sel_init);
-            NFObject *__nopa_tmp_2 = (NFObject_alloc(&nopa_NFRuntimetHijacker_class, __nopa_sel_alloc));
-            NFRuntimetHijacker * hijacker1 = ((struct nopa_NFRuntimetHijacker_vtable *)__nopa_tmp_2->isa->vtable)->initWithTarget_(__nopa_tmp_2, __nopa_sel_initWithTarget_, earthShip);
-            NFObject *__nopa_tmp_3 = (NFObject_alloc(&nopa_NFRuntimetHijacker_class, __nopa_sel_alloc));
-            NFRuntimetHijacker * hijacker2 = ((struct nopa_NFRuntimetHijacker_vtable *)__nopa_tmp_3->isa->vtable)->initWithTarget_(__nopa_tmp_3, __nopa_sel_initWithTarget_, alienTech);
+            NPObject *__nopa_tmp_0 = (NPObject_alloc(&nopa_NPShipKernel_class, __nopa_sel_alloc));
+            NPShipKernel * earthShip = ((struct nopa_NPShipKernel_vtable *)__nopa_tmp_0->isa->vtable)->init(__nopa_tmp_0, __nopa_sel_init);
+            NPObject *__nopa_tmp_1 = (NPObject_alloc(&nopa_NPAlienTech_class, __nopa_sel_alloc));
+            NPAlienTech * alienTech = ((struct nopa_NPAlienTech_vtable *)__nopa_tmp_1->isa->vtable)->init(__nopa_tmp_1, __nopa_sel_init);
+            NPObject *__nopa_tmp_2 = (NPObject_alloc(&nopa_NPRuntimetHijacker_class, __nopa_sel_alloc));
+            NPRuntimetHijacker * hijacker1 = ((struct nopa_NPRuntimetHijacker_vtable *)__nopa_tmp_2->isa->vtable)->initWithTarget_(__nopa_tmp_2, __nopa_sel_initWithTarget_, earthShip);
+            NPObject *__nopa_tmp_3 = (NPObject_alloc(&nopa_NPRuntimetHijacker_class, __nopa_sel_alloc));
+            NPRuntimetHijacker * hijacker2 = ((struct nopa_NPRuntimetHijacker_vtable *)__nopa_tmp_3->isa->vtable)->initWithTarget_(__nopa_tmp_3, __nopa_sel_initWithTarget_, alienTech);
             printf("--- 测试点 1: 验证不透明指针的动态多态派发 ---\n");
-            ((struct nopa_NFRuntimetHijacker_vtable *)hijacker1->isa->vtable)->forceExecute_(hijacker1, __nopa_sel_forceExecute_, 15);
-            ((struct nopa_NFRuntimetHijacker_vtable *)hijacker2->isa->vtable)->forceExecute_(hijacker2, __nopa_sel_forceExecute_, 15);
+            ((struct nopa_NPRuntimetHijacker_vtable *)hijacker1->isa->vtable)->forceExecute_(hijacker1, __nopa_sel_forceExecute_, 15);
+            ((struct nopa_NPRuntimetHijacker_vtable *)hijacker2->isa->vtable)->forceExecute_(hijacker2, __nopa_sel_forceExecute_, 15);
             printf("\n--- 测试点 2: 验证跨对象实例变量强转劫持 ---\n");
-            ((struct nopa_NFRuntimetHijacker_vtable *)hijacker1->isa->vtable)->hijackAlienMemory_(hijacker1, __nopa_sel_hijackAlienMemory_, alienTech);
+            ((struct nopa_NPRuntimetHijacker_vtable *)hijacker1->isa->vtable)->hijackAlienMemory_(hijacker1, __nopa_sel_hijackAlienMemory_, alienTech);
             printf("\n--- 测试点 3: 恶心语法边界（C原生逗号表达式混用） ---\n");
             int dynamicCounter = 10;
-            NFObject *__nopa_tmp_4 = (dynamicCounter++, earthShip);
-            int finalRating = ((struct nopa_NFShipKernel_vtable *)__nopa_tmp_4->isa->vtable)->getRating(__nopa_tmp_4, __nopa_sel_getRating);
+            NPObject *__nopa_tmp_4 = (dynamicCounter++, earthShip);
+            int finalRating = ((struct nopa_NPShipKernel_vtable *)__nopa_tmp_4->isa->vtable)->getRating(__nopa_tmp_4, __nopa_sel_getRating);
             printf("[语法断言] 边界解析成功！副作用自增值: %d, 飞船评级: %d\n", dynamicCounter, finalRating);
             nopa_release(earthShip);
             nopa_release(alienTech);
@@ -283,86 +283,86 @@ int main(int argc, const char * * argv) {
 
 // ─── Class metadata ─────────────────────────────────────
 
-struct nopa_NFObject_vtable nopa_NFObject_vtable_inst = {
-    .init = NFObject_init,
-    .dealloc = NFObject_dealloc,
+struct nopa_NPObject_vtable nopa_NPObject_vtable_inst = {
+    .init = NPObject_init,
+    .dealloc = NPObject_dealloc,
 };
 
-struct nopa_NFShipKernel_vtable nopa_NFShipKernel_vtable_inst = {
-    .init = NFShipKernel_init,
-    .dealloc = NFObject_dealloc,
-    .executeCommandChain_ = NFShipKernel_executeCommandChain_,
-    .getRating = NFShipKernel_getRating,
+struct nopa_NPShipKernel_vtable nopa_NPShipKernel_vtable_inst = {
+    .init = NPShipKernel_init,
+    .dealloc = NPObject_dealloc,
+    .executeCommandChain_ = NPShipKernel_executeCommandChain_,
+    .getRating = NPShipKernel_getRating,
 };
 
-struct nopa_NFAlienTech_vtable nopa_NFAlienTech_vtable_inst = {
-    .init = NFAlienTech_init,
-    .dealloc = NFObject_dealloc,
-    .executeCommandChain_ = NFAlienTech_executeCommandChain_,
+struct nopa_NPAlienTech_vtable nopa_NPAlienTech_vtable_inst = {
+    .init = NPAlienTech_init,
+    .dealloc = NPObject_dealloc,
+    .executeCommandChain_ = NPAlienTech_executeCommandChain_,
 };
 
-struct nopa_NFRuntimetHijacker_vtable nopa_NFRuntimetHijacker_vtable_inst = {
-    .init = NFObject_init,
-    .dealloc = NFObject_dealloc,
-    .initWithTarget_ = NFRuntimetHijacker_initWithTarget_,
-    .forceExecute_ = NFRuntimetHijacker_forceExecute_,
-    .hijackAlienMemory_ = NFRuntimetHijacker_hijackAlienMemory_,
+struct nopa_NPRuntimetHijacker_vtable nopa_NPRuntimetHijacker_vtable_inst = {
+    .init = NPObject_init,
+    .dealloc = NPObject_dealloc,
+    .initWithTarget_ = NPRuntimetHijacker_initWithTarget_,
+    .forceExecute_ = NPRuntimetHijacker_forceExecute_,
+    .hijackAlienMemory_ = NPRuntimetHijacker_hijackAlienMemory_,
 };
 
-struct nopa_NFObject_meta_vtable nopa_NFObject_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
-    .class = NFObject_getClass,
+struct nopa_NPObject_meta_vtable nopa_NPObject_meta_vtable_inst = {
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
+    .class = NPObject_getClass,
 };
 
-struct nopa_NFShipKernel_meta_vtable nopa_NFShipKernel_meta_vtable_inst = {
-    .class = NFShipKernel_getClass,
+struct nopa_NPShipKernel_meta_vtable nopa_NPShipKernel_meta_vtable_inst = {
+    .class = NPShipKernel_getClass,
 };
 
-struct nopa_NFAlienTech_meta_vtable nopa_NFAlienTech_meta_vtable_inst = {
-    .class = NFAlienTech_getClass,
+struct nopa_NPAlienTech_meta_vtable nopa_NPAlienTech_meta_vtable_inst = {
+    .class = NPAlienTech_getClass,
 };
 
-struct nopa_NFRuntimetHijacker_meta_vtable nopa_NFRuntimetHijacker_meta_vtable_inst = {
-    .class = NFRuntimetHijacker_getClass,
+struct nopa_NPRuntimetHijacker_meta_vtable nopa_NPRuntimetHijacker_meta_vtable_inst = {
+    .class = NPRuntimetHijacker_getClass,
 };
 
-NFClass nopa_NFObject_class;
-NFClass nopa_NFShipKernel_class;
-NFClass nopa_NFAlienTech_class;
-NFClass nopa_NFRuntimetHijacker_class;
+NPClass nopa_NPObject_class;
+NPClass nopa_NPShipKernel_class;
+NPClass nopa_NPAlienTech_class;
+NPClass nopa_NPRuntimetHijacker_class;
 
 void nopa_meta_init(void) {
-    nopa_NFObject_class = (NFClass){
-        .name = "NFObject",
+    nopa_NPObject_class = (NPClass){
+        .name = "NPObject",
         .superclass = NULL,
-        .instance_size = sizeof(struct NFObject),
-        .vtable = &nopa_NFObject_vtable_inst,
-        .class_vtable = &nopa_NFObject_meta_vtable_inst,
+        .instance_size = sizeof(struct NPObject),
+        .vtable = &nopa_NPObject_vtable_inst,
+        .class_vtable = &nopa_NPObject_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_NFShipKernel_class = (NFClass){
-        .name = "NFShipKernel",
-        .superclass = &nopa_NFObject_class,
-        .instance_size = sizeof(struct NFShipKernel),
-        .vtable = &nopa_NFShipKernel_vtable_inst,
-        .class_vtable = &nopa_NFShipKernel_meta_vtable_inst,
+    nopa_NPShipKernel_class = (NPClass){
+        .name = "NPShipKernel",
+        .superclass = &nopa_NPObject_class,
+        .instance_size = sizeof(struct NPShipKernel),
+        .vtable = &nopa_NPShipKernel_vtable_inst,
+        .class_vtable = &nopa_NPShipKernel_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_NFAlienTech_class = (NFClass){
-        .name = "NFAlienTech",
-        .superclass = &nopa_NFObject_class,
-        .instance_size = sizeof(struct NFAlienTech),
-        .vtable = &nopa_NFAlienTech_vtable_inst,
-        .class_vtable = &nopa_NFAlienTech_meta_vtable_inst,
+    nopa_NPAlienTech_class = (NPClass){
+        .name = "NPAlienTech",
+        .superclass = &nopa_NPObject_class,
+        .instance_size = sizeof(struct NPAlienTech),
+        .vtable = &nopa_NPAlienTech_vtable_inst,
+        .class_vtable = &nopa_NPAlienTech_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_NFRuntimetHijacker_class = (NFClass){
-        .name = "NFRuntimetHijacker",
-        .superclass = &nopa_NFObject_class,
-        .instance_size = sizeof(struct NFRuntimetHijacker),
-        .vtable = &nopa_NFRuntimetHijacker_vtable_inst,
-        .class_vtable = &nopa_NFRuntimetHijacker_meta_vtable_inst,
+    nopa_NPRuntimetHijacker_class = (NPClass){
+        .name = "NPRuntimetHijacker",
+        .superclass = &nopa_NPObject_class,
+        .instance_size = sizeof(struct NPRuntimetHijacker),
+        .vtable = &nopa_NPRuntimetHijacker_vtable_inst,
+        .class_vtable = &nopa_NPRuntimetHijacker_meta_vtable_inst,
         .protocol_count = 0,
     };
 }

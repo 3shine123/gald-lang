@@ -366,8 +366,8 @@ def main():
                 console.print(f"       [dim]{l.strip()[:72]}[/]")
     console.print(f"\n  [bold]{unit_pass}/{unit_pass + unit_fail}[/] unit tests passed, [red]{unit_fail}[/] failed")
 
-# ── 2. NF tests ──
-    console.rule(f"[bold]NF Tests  (parallel x{JOBS})")
+# ── 2. NP tests ──
+    console.rule(f"[bold]NP Tests  (parallel x{JOBS})")
     gm_files = _gm_suite_files()
     gm_pass = 0
     gm_fail = 0

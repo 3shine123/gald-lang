@@ -11,29 +11,29 @@
 
 #include <string.h>
 
-struct nopa_NFObject_vtable;
-struct nopa_NFLayer1_vtable;
-struct nopa_NFLayer2_vtable;
-struct nopa_NFLayer3_vtable;
-struct nopa_NFLayer4_vtable;
-struct nopa_NFStressNode_vtable;
-struct nopa_NFStressTester_vtable;
+struct nopa_NPObject_vtable;
+struct nopa_NPLayer1_vtable;
+struct nopa_NPLayer2_vtable;
+struct nopa_NPLayer3_vtable;
+struct nopa_NPLayer4_vtable;
+struct nopa_NPStressNode_vtable;
+struct nopa_NPStressTester_vtable;
 
-#define nopa_NFObject_vtable_index_init 2
-#define nopa_NFObject_vtable_index_dealloc 3
-#define nopa_NFLayer1_vtable_index_init 2
-#define nopa_NFLayer2_vtable_index_init 2
-#define nopa_NFLayer3_vtable_index_init 2
-#define nopa_NFLayer4_vtable_index_init 2
-#define nopa_NFStressNode_vtable_index_initWithId_ 3
-#define nopa_NFStressNode_vtable_index_getDeepNext 4
-#define nopa_NFStressNode_vtable_index_doA 5
-#define nopa_NFStressNode_vtable_index_doB 6
-#define nopa_NFStressNode_vtable_index_doC 7
-#define nopa_NFStressNode_vtable_index_doD 8
-#define nopa_NFStressNode_vtable_index_dealloc 9
-#define nopa_NFStressTester_vtable_index_runHeavyMemoryTest 4
-#define nopa_NFStressTester_vtable_index_runCrazyBracketTest 5
+#define nopa_NPObject_vtable_index_init 2
+#define nopa_NPObject_vtable_index_dealloc 3
+#define nopa_NPLayer1_vtable_index_init 2
+#define nopa_NPLayer2_vtable_index_init 2
+#define nopa_NPLayer3_vtable_index_init 2
+#define nopa_NPLayer4_vtable_index_init 2
+#define nopa_NPStressNode_vtable_index_initWithId_ 3
+#define nopa_NPStressNode_vtable_index_getDeepNext 4
+#define nopa_NPStressNode_vtable_index_doA 5
+#define nopa_NPStressNode_vtable_index_doB 6
+#define nopa_NPStressNode_vtable_index_doC 7
+#define nopa_NPStressNode_vtable_index_doD 8
+#define nopa_NPStressNode_vtable_index_dealloc 9
+#define nopa_NPStressTester_vtable_index_runHeavyMemoryTest 4
+#define nopa_NPStressTester_vtable_index_runCrazyBracketTest 5
 
 static const SEL __nopa_sel_init = {.name = "init", .hash = 0x16B1D373};
 static const SEL __nopa_sel_doA = {.name = "doA", .hash = 0xC8688DCF};
@@ -51,410 +51,410 @@ static const SEL __nopa_sel_getDeepNext = {.name = "getDeepNext", .hash = 0x12C4
 static const SEL __nopa_sel_runHeavyMemoryTest = {.name = "runHeavyMemoryTest", .hash = 0xB862B512};
 static const SEL __nopa_sel_runCrazyBracketTest = {.name = "runCrazyBracketTest", .hash = 0xE40FDA69};
 
-typedef struct NFObject NFObject;
-typedef struct NFLayer1 NFLayer1;
-typedef struct NFLayer2 NFLayer2;
-typedef struct NFLayer3 NFLayer3;
-typedef struct NFLayer4 NFLayer4;
-typedef struct NFStressNode NFStressNode;
-typedef struct NFStressTester NFStressTester;
+typedef struct NPObject NPObject;
+typedef struct NPLayer1 NPLayer1;
+typedef struct NPLayer2 NPLayer2;
+typedef struct NPLayer3 NPLayer3;
+typedef struct NPLayer4 NPLayer4;
+typedef struct NPStressNode NPStressNode;
+typedef struct NPStressTester NPStressTester;
 
 
 
-NFObject * NFObject_alloc(NFClass * self, SEL _cmd);
-NFObject * NFObject_new(NFClass * self, SEL _cmd);
-NFObject * NFObject_init(NFObject * self, SEL _cmd);
-void NFObject_dealloc(NFObject * self, SEL _cmd);
-NFClass * NFObject_getClass(NFClass * self, SEL _cmd);
-NFObject * NFLayer1_init(NFObject * self, SEL _cmd);
-NFClass * NFLayer1_getClass(NFClass * self, SEL _cmd);
-NFObject * NFLayer2_init(NFObject * self, SEL _cmd);
-NFClass * NFLayer2_getClass(NFClass * self, SEL _cmd);
-NFObject * NFLayer3_init(NFObject * self, SEL _cmd);
-NFClass * NFLayer3_getClass(NFClass * self, SEL _cmd);
-NFObject * NFLayer4_init(NFObject * self, SEL _cmd);
-NFClass * NFLayer4_getClass(NFClass * self, SEL _cmd);
-NFObject * NFStressNode_initWithId_(NFObject * self, SEL _cmd, int nid);
-NFStressNode * NFStressNode_getDeepNext(NFObject * self, SEL _cmd);
-void NFStressNode_doA(NFObject * self, SEL _cmd);
-void NFStressNode_doB(NFObject * self, SEL _cmd);
-void NFStressNode_doC(NFObject * self, SEL _cmd);
-void NFStressNode_doD(NFObject * self, SEL _cmd);
-void NFStressNode_dealloc(NFObject * self, SEL _cmd);
-NFStressNode * NFStressNode_nextNode(NFObject * self, SEL _cmd);
-void NFStressNode_setNextNode_(NFObject * self, SEL _cmd, NFStressNode * value);
-NFStressNode * NFStressNode_prevNode(NFObject * self, SEL _cmd);
-void NFStressNode_setPrevNode_(NFObject * self, SEL _cmd, NFStressNode * value);
-NFObject * NFStressNode_payload(NFObject * self, SEL _cmd);
-void NFStressNode_setPayload_(NFObject * self, SEL _cmd, NFObject * value);
-int NFStressNode_nodeId(NFObject * self, SEL _cmd);
-void NFStressNode_setNodeId_(NFObject * self, SEL _cmd, int value);
-NFClass * NFStressNode_getClass(NFClass * self, SEL _cmd);
-void NFStressTester_runHeavyMemoryTest(NFObject * self, SEL _cmd);
-void NFStressTester_runCrazyBracketTest(NFObject * self, SEL _cmd);
-NFClass * NFStressTester_getClass(NFClass * self, SEL _cmd);
+NPObject * NPObject_alloc(NPClass * self, SEL _cmd);
+NPObject * NPObject_new(NPClass * self, SEL _cmd);
+NPObject * NPObject_init(NPObject * self, SEL _cmd);
+void NPObject_dealloc(NPObject * self, SEL _cmd);
+NPClass * NPObject_getClass(NPClass * self, SEL _cmd);
+NPObject * NPLayer1_init(NPObject * self, SEL _cmd);
+NPClass * NPLayer1_getClass(NPClass * self, SEL _cmd);
+NPObject * NPLayer2_init(NPObject * self, SEL _cmd);
+NPClass * NPLayer2_getClass(NPClass * self, SEL _cmd);
+NPObject * NPLayer3_init(NPObject * self, SEL _cmd);
+NPClass * NPLayer3_getClass(NPClass * self, SEL _cmd);
+NPObject * NPLayer4_init(NPObject * self, SEL _cmd);
+NPClass * NPLayer4_getClass(NPClass * self, SEL _cmd);
+NPObject * NPStressNode_initWithId_(NPObject * self, SEL _cmd, int nid);
+NPStressNode * NPStressNode_getDeepNext(NPObject * self, SEL _cmd);
+void NPStressNode_doA(NPObject * self, SEL _cmd);
+void NPStressNode_doB(NPObject * self, SEL _cmd);
+void NPStressNode_doC(NPObject * self, SEL _cmd);
+void NPStressNode_doD(NPObject * self, SEL _cmd);
+void NPStressNode_dealloc(NPObject * self, SEL _cmd);
+NPStressNode * NPStressNode_nextNode(NPObject * self, SEL _cmd);
+void NPStressNode_setNextNode_(NPObject * self, SEL _cmd, NPStressNode * value);
+NPStressNode * NPStressNode_prevNode(NPObject * self, SEL _cmd);
+void NPStressNode_setPrevNode_(NPObject * self, SEL _cmd, NPStressNode * value);
+NPObject * NPStressNode_payload(NPObject * self, SEL _cmd);
+void NPStressNode_setPayload_(NPObject * self, SEL _cmd, NPObject * value);
+int NPStressNode_nodeId(NPObject * self, SEL _cmd);
+void NPStressNode_setNodeId_(NPObject * self, SEL _cmd, int value);
+NPClass * NPStressNode_getClass(NPClass * self, SEL _cmd);
+void NPStressTester_runHeavyMemoryTest(NPObject * self, SEL _cmd);
+void NPStressTester_runCrazyBracketTest(NPObject * self, SEL _cmd);
+NPClass * NPStressTester_getClass(NPClass * self, SEL _cmd);
 int main(int argc, const char * * argv);
 
-extern NFClass nopa_NFObject_class;
-extern NFClass nopa_NFLayer1_class;
-extern NFClass nopa_NFLayer2_class;
-extern NFClass nopa_NFLayer3_class;
-extern NFClass nopa_NFLayer4_class;
-extern NFClass nopa_NFStressNode_class;
-extern NFClass nopa_NFStressTester_class;
+extern NPClass nopa_NPObject_class;
+extern NPClass nopa_NPLayer1_class;
+extern NPClass nopa_NPLayer2_class;
+extern NPClass nopa_NPLayer3_class;
+extern NPClass nopa_NPLayer4_class;
+extern NPClass nopa_NPStressNode_class;
+extern NPClass nopa_NPStressTester_class;
 void nopa_meta_init(void);
 
-// struct NFClass defined in runtime.h
-// struct NFObject defined in runtime.h
-struct nopa_NFObject_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
+// struct NPClass defined in runtime.h
+// struct NPObject defined in runtime.h
+struct nopa_NPObject_vtable {
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
 };
-struct nopa_NFObject_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+struct nopa_NPObject_meta_vtable {
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
-struct NFLayer1 {
-    struct NFClass *isa;
+struct NPLayer1 {
+    struct NPClass *isa;
     uint32_t retain_count;
     int v1;
 };
-typedef struct NFLayer1 NFLayer1;
-struct nopa_NFLayer1_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
+typedef struct NPLayer1 NPLayer1;
+struct nopa_NPLayer1_vtable {
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
 };
-struct nopa_NFLayer1_meta_vtable {
-    NFClass * (*class)(NFClass *, SEL);
+struct nopa_NPLayer1_meta_vtable {
+    NPClass * (*class)(NPClass *, SEL);
 };
-struct NFLayer2 {
-    struct NFClass *isa;
-    uint32_t retain_count;
-    int v1;
-    int v2;
-};
-typedef struct NFLayer2 NFLayer2;
-struct nopa_NFLayer2_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-};
-struct nopa_NFLayer2_meta_vtable {
-    NFClass * (*class)(NFClass *, SEL);
-};
-struct NFLayer3 {
-    struct NFClass *isa;
+struct NPLayer2 {
+    struct NPClass *isa;
     uint32_t retain_count;
     int v1;
     int v2;
-    int v3;
 };
-typedef struct NFLayer3 NFLayer3;
-struct nopa_NFLayer3_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
+typedef struct NPLayer2 NPLayer2;
+struct nopa_NPLayer2_vtable {
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
 };
-struct nopa_NFLayer3_meta_vtable {
-    NFClass * (*class)(NFClass *, SEL);
+struct nopa_NPLayer2_meta_vtable {
+    NPClass * (*class)(NPClass *, SEL);
 };
-struct NFLayer4 {
-    struct NFClass *isa;
+struct NPLayer3 {
+    struct NPClass *isa;
     uint32_t retain_count;
     int v1;
     int v2;
     int v3;
-    int v4;
 };
-typedef struct NFLayer4 NFLayer4;
-struct nopa_NFLayer4_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
+typedef struct NPLayer3 NPLayer3;
+struct nopa_NPLayer3_vtable {
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
 };
-struct nopa_NFLayer4_meta_vtable {
-    NFClass * (*class)(NFClass *, SEL);
+struct nopa_NPLayer3_meta_vtable {
+    NPClass * (*class)(NPClass *, SEL);
 };
-struct NFStressNode {
-    struct NFClass *isa;
+struct NPLayer4 {
+    struct NPClass *isa;
     uint32_t retain_count;
     int v1;
     int v2;
     int v3;
     int v4;
-    NFStressNode * _nextNode;
-    NFStressNode * _prevNode;
-    NFObject * _payload;
+};
+typedef struct NPLayer4 NPLayer4;
+struct nopa_NPLayer4_vtable {
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+};
+struct nopa_NPLayer4_meta_vtable {
+    NPClass * (*class)(NPClass *, SEL);
+};
+struct NPStressNode {
+    struct NPClass *isa;
+    uint32_t retain_count;
+    int v1;
+    int v2;
+    int v3;
+    int v4;
+    NPStressNode * _nextNode;
+    NPStressNode * _prevNode;
+    NPObject * _payload;
     int _nodeId;
 };
-typedef struct NFStressNode NFStressNode;
-struct nopa_NFStressNode_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    NFObject * (*initWithId_)(NFObject *, SEL, int);
-    NFStressNode * (*getDeepNext)(NFObject *, SEL);
-    void (*doA)(NFObject *, SEL);
-    void (*doB)(NFObject *, SEL);
-    void (*doC)(NFObject *, SEL);
-    void (*doD)(NFObject *, SEL);
-    NFStressNode * (*nextNode)(NFObject *, SEL);
-    void (*setNextNode_)(NFObject *, SEL, NFStressNode *);
-    NFStressNode * (*prevNode)(NFObject *, SEL);
-    void (*setPrevNode_)(NFObject *, SEL, NFStressNode *);
-    NFObject * (*payload)(NFObject *, SEL);
-    void (*setPayload_)(NFObject *, SEL, NFObject *);
-    int (*nodeId)(NFObject *, SEL);
-    void (*setNodeId_)(NFObject *, SEL, int);
+typedef struct NPStressNode NPStressNode;
+struct nopa_NPStressNode_vtable {
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    NPObject * (*initWithId_)(NPObject *, SEL, int);
+    NPStressNode * (*getDeepNext)(NPObject *, SEL);
+    void (*doA)(NPObject *, SEL);
+    void (*doB)(NPObject *, SEL);
+    void (*doC)(NPObject *, SEL);
+    void (*doD)(NPObject *, SEL);
+    NPStressNode * (*nextNode)(NPObject *, SEL);
+    void (*setNextNode_)(NPObject *, SEL, NPStressNode *);
+    NPStressNode * (*prevNode)(NPObject *, SEL);
+    void (*setPrevNode_)(NPObject *, SEL, NPStressNode *);
+    NPObject * (*payload)(NPObject *, SEL);
+    void (*setPayload_)(NPObject *, SEL, NPObject *);
+    int (*nodeId)(NPObject *, SEL);
+    void (*setNodeId_)(NPObject *, SEL, int);
 };
-struct nopa_NFStressNode_meta_vtable {
-    NFClass * (*class)(NFClass *, SEL);
+struct nopa_NPStressNode_meta_vtable {
+    NPClass * (*class)(NPClass *, SEL);
 };
-struct NFStressTester {
-    struct NFClass *isa;
+struct NPStressTester {
+    struct NPClass *isa;
     uint32_t retain_count;
 };
-typedef struct NFStressTester NFStressTester;
-struct nopa_NFStressTester_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    void (*runHeavyMemoryTest)(NFObject *, SEL);
-    void (*runCrazyBracketTest)(NFObject *, SEL);
+typedef struct NPStressTester NPStressTester;
+struct nopa_NPStressTester_vtable {
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    void (*runHeavyMemoryTest)(NPObject *, SEL);
+    void (*runCrazyBracketTest)(NPObject *, SEL);
 };
-struct nopa_NFStressTester_meta_vtable {
-    NFClass * (*class)(NFClass *, SEL);
+struct nopa_NPStressTester_meta_vtable {
+    NPClass * (*class)(NPClass *, SEL);
 };
-NFObject * NFObject_alloc(NFClass * self, SEL _cmd) {
+NPObject * NPObject_alloc(NPClass * self, SEL _cmd) {
     return nopa_alloc(self);
 }
 
-NFObject * NFObject_new(NFClass * self, SEL _cmd) {
-    NFObject * obj = nopa_alloc(self);
+NPObject * NPObject_new(NPClass * self, SEL _cmd) {
+    NPObject * obj = nopa_alloc(self);
     return nopa_init(obj);
 }
 
-NFObject * NFObject_init(NFObject * self, SEL _cmd) {
-    struct NFObject * _self = ((struct NFObject *)(self));
+NPObject * NPObject_init(NPObject * self, SEL _cmd) {
+    struct NPObject * _self = ((struct NPObject *)(self));
     {
         return nopa_init(self);
     }
 }
 
-void NFObject_dealloc(NFObject * self, SEL _cmd) {
-    struct NFObject * _self = ((struct NFObject *)(self));
+void NPObject_dealloc(NPObject * self, SEL _cmd) {
+    struct NPObject * _self = ((struct NPObject *)(self));
     {
         return;
     }
 }
 
-NFClass * NFObject_getClass(NFClass * self, SEL _cmd) {
-    return &nopa_NFObject_class;
+NPClass * NPObject_getClass(NPClass * self, SEL _cmd) {
+    return &nopa_NPObject_class;
 }
 
-NFObject * nopa_alloc(struct NFClass * cls);
-NFObject * nopa_init(NFObject * );
-NFObject * NFLayer1_init(NFObject * self, SEL _cmd) {
-    struct NFLayer1 * _self = ((struct NFLayer1 *)(self));
+NPObject * nopa_alloc(struct NPClass * cls);
+NPObject * nopa_init(NPObject * );
+NPObject * NPLayer1_init(NPObject * self, SEL _cmd) {
+    struct NPLayer1 * _self = ((struct NPLayer1 *)(self));
     {
-        self = NFObject_init(self, __nopa_sel_init);
+        self = NPObject_init(self, __nopa_sel_init);
         if (self) {
             {
-                ((struct NFLayer1 *)(self))->v1 = 1;
+                ((struct NPLayer1 *)(self))->v1 = 1;
             }
         }
         return self;
     }
 }
 
-NFClass * NFLayer1_getClass(NFClass * self, SEL _cmd) {
-    return &nopa_NFLayer1_class;
+NPClass * NPLayer1_getClass(NPClass * self, SEL _cmd) {
+    return &nopa_NPLayer1_class;
 }
 
-NFObject * NFLayer2_init(NFObject * self, SEL _cmd) {
-    struct NFLayer2 * _self = ((struct NFLayer2 *)(self));
+NPObject * NPLayer2_init(NPObject * self, SEL _cmd) {
+    struct NPLayer2 * _self = ((struct NPLayer2 *)(self));
     {
-        self = NFLayer1_init(self, __nopa_sel_init);
+        self = NPLayer1_init(self, __nopa_sel_init);
         if (self) {
             {
-                ((struct NFLayer2 *)(self))->v2 = 2;
+                ((struct NPLayer2 *)(self))->v2 = 2;
             }
         }
         return self;
     }
 }
 
-NFClass * NFLayer2_getClass(NFClass * self, SEL _cmd) {
-    return &nopa_NFLayer2_class;
+NPClass * NPLayer2_getClass(NPClass * self, SEL _cmd) {
+    return &nopa_NPLayer2_class;
 }
 
-NFObject * NFLayer3_init(NFObject * self, SEL _cmd) {
-    struct NFLayer3 * _self = ((struct NFLayer3 *)(self));
+NPObject * NPLayer3_init(NPObject * self, SEL _cmd) {
+    struct NPLayer3 * _self = ((struct NPLayer3 *)(self));
     {
-        self = NFLayer2_init(self, __nopa_sel_init);
+        self = NPLayer2_init(self, __nopa_sel_init);
         if (self) {
             {
-                ((struct NFLayer3 *)(self))->v3 = 3;
+                ((struct NPLayer3 *)(self))->v3 = 3;
             }
         }
         return self;
     }
 }
 
-NFClass * NFLayer3_getClass(NFClass * self, SEL _cmd) {
-    return &nopa_NFLayer3_class;
+NPClass * NPLayer3_getClass(NPClass * self, SEL _cmd) {
+    return &nopa_NPLayer3_class;
 }
 
-NFObject * NFLayer4_init(NFObject * self, SEL _cmd) {
-    struct NFLayer4 * _self = ((struct NFLayer4 *)(self));
+NPObject * NPLayer4_init(NPObject * self, SEL _cmd) {
+    struct NPLayer4 * _self = ((struct NPLayer4 *)(self));
     {
-        self = NFLayer3_init(self, __nopa_sel_init);
+        self = NPLayer3_init(self, __nopa_sel_init);
         if (self) {
             {
-                ((struct NFLayer4 *)(self))->v4 = 4;
+                ((struct NPLayer4 *)(self))->v4 = 4;
             }
         }
         return self;
     }
 }
 
-NFClass * NFLayer4_getClass(NFClass * self, SEL _cmd) {
-    return &nopa_NFLayer4_class;
+NPClass * NPLayer4_getClass(NPClass * self, SEL _cmd) {
+    return &nopa_NPLayer4_class;
 }
 
-NFObject * NFStressNode_initWithId_(NFObject * self, SEL _cmd, int nid) {
-    struct NFStressNode * _self = ((struct NFStressNode *)(self));
+NPObject * NPStressNode_initWithId_(NPObject * self, SEL _cmd, int nid) {
+    struct NPStressNode * _self = ((struct NPStressNode *)(self));
     {
-        self = NFLayer4_init(self, __nopa_sel_init);
+        self = NPLayer4_init(self, __nopa_sel_init);
         if (self) {
             {
-                ((struct NFStressNode *)(self))->_nodeId = nid;
-                ((struct NFStressNode *)(self))->_nextNode = NULL;
-                ((struct NFStressNode *)(self))->_prevNode = NULL;
-                ((struct NFStressNode *)(self))->_payload = NULL;
+                ((struct NPStressNode *)(self))->_nodeId = nid;
+                ((struct NPStressNode *)(self))->_nextNode = NULL;
+                ((struct NPStressNode *)(self))->_prevNode = NULL;
+                ((struct NPStressNode *)(self))->_payload = NULL;
             }
         }
         return self;
     }
 }
 
-NFStressNode * NFStressNode_getDeepNext(NFObject * self, SEL _cmd) {
-    struct NFStressNode * _self = ((struct NFStressNode *)(self));
+NPStressNode * NPStressNode_getDeepNext(NPObject * self, SEL _cmd) {
+    struct NPStressNode * _self = ((struct NPStressNode *)(self));
     {
-        return ((struct NFStressNode *)(self))->_nextNode;
+        return ((struct NPStressNode *)(self))->_nextNode;
     }
 }
 
-void NFStressNode_doA(NFObject * self, SEL _cmd) {
-    struct NFStressNode * _self = ((struct NFStressNode *)(self));
+void NPStressNode_doA(NPObject * self, SEL _cmd) {
+    struct NPStressNode * _self = ((struct NPStressNode *)(self));
     {
-        ((struct NFStressNode *)(self))->v1 = ((struct NFStressNode *)(self))->v1 + 1;
+        ((struct NPStressNode *)(self))->v1 = ((struct NPStressNode *)(self))->v1 + 1;
     }
 }
 
-void NFStressNode_doB(NFObject * self, SEL _cmd) {
-    struct NFStressNode * _self = ((struct NFStressNode *)(self));
+void NPStressNode_doB(NPObject * self, SEL _cmd) {
+    struct NPStressNode * _self = ((struct NPStressNode *)(self));
     {
-        ((struct NFStressNode *)(self))->v2 = ((struct NFStressNode *)(self))->v2 + 2;
+        ((struct NPStressNode *)(self))->v2 = ((struct NPStressNode *)(self))->v2 + 2;
     }
 }
 
-void NFStressNode_doC(NFObject * self, SEL _cmd) {
-    struct NFStressNode * _self = ((struct NFStressNode *)(self));
+void NPStressNode_doC(NPObject * self, SEL _cmd) {
+    struct NPStressNode * _self = ((struct NPStressNode *)(self));
     {
-        ((struct NFStressNode *)(self))->v3 = ((struct NFStressNode *)(self))->v3 + 3;
+        ((struct NPStressNode *)(self))->v3 = ((struct NPStressNode *)(self))->v3 + 3;
     }
 }
 
-void NFStressNode_doD(NFObject * self, SEL _cmd) {
-    struct NFStressNode * _self = ((struct NFStressNode *)(self));
+void NPStressNode_doD(NPObject * self, SEL _cmd) {
+    struct NPStressNode * _self = ((struct NPStressNode *)(self));
     {
-        ((struct nopa_NFStressNode_vtable *)self->isa->vtable)->doA(self, __nopa_sel_doA);
-        ((struct nopa_NFStressNode_vtable *)self->isa->vtable)->doB(self, __nopa_sel_doB);
-        ((struct nopa_NFStressNode_vtable *)self->isa->vtable)->doC(self, __nopa_sel_doC);
-        ((struct NFStressNode *)(self))->v4 = ((struct NFStressNode *)(self))->v4 + 4;
+        ((struct nopa_NPStressNode_vtable *)self->isa->vtable)->doA(self, __nopa_sel_doA);
+        ((struct nopa_NPStressNode_vtable *)self->isa->vtable)->doB(self, __nopa_sel_doB);
+        ((struct nopa_NPStressNode_vtable *)self->isa->vtable)->doC(self, __nopa_sel_doC);
+        ((struct NPStressNode *)(self))->v4 = ((struct NPStressNode *)(self))->v4 + 4;
     }
 }
 
-void NFStressNode_dealloc(NFObject * self, SEL _cmd) {
-    struct NFStressNode * _self = ((struct NFStressNode *)(self));
+void NPStressNode_dealloc(NPObject * self, SEL _cmd) {
+    struct NPStressNode * _self = ((struct NPStressNode *)(self));
     {
-        if (((struct NFStressNode *)(self))->_payload) {
-            nopa_release(((struct NFStressNode *)(self))->_payload);
+        if (((struct NPStressNode *)(self))->_payload) {
+            nopa_release(((struct NPStressNode *)(self))->_payload);
         }
         nopa_object_dealloc(self);
     }
 }
 
-NFStressNode * NFStressNode_nextNode(NFObject * self, SEL _cmd) {
-    return ((struct NFStressNode *)(self))->_nextNode;
+NPStressNode * NPStressNode_nextNode(NPObject * self, SEL _cmd) {
+    return ((struct NPStressNode *)(self))->_nextNode;
 }
 
-void NFStressNode_setNextNode_(NFObject * self, SEL _cmd, NFStressNode * value) {
-    ((struct NFStressNode *)(self))->_nextNode = value;
+void NPStressNode_setNextNode_(NPObject * self, SEL _cmd, NPStressNode * value) {
+    ((struct NPStressNode *)(self))->_nextNode = value;
 }
 
-NFStressNode * NFStressNode_prevNode(NFObject * self, SEL _cmd) {
-    return ((struct NFStressNode *)(self))->_prevNode;
+NPStressNode * NPStressNode_prevNode(NPObject * self, SEL _cmd) {
+    return ((struct NPStressNode *)(self))->_prevNode;
 }
 
-void NFStressNode_setPrevNode_(NFObject * self, SEL _cmd, NFStressNode * value) {
-    ((struct NFStressNode *)(self))->_prevNode = value;
+void NPStressNode_setPrevNode_(NPObject * self, SEL _cmd, NPStressNode * value) {
+    ((struct NPStressNode *)(self))->_prevNode = value;
 }
 
-NFObject * NFStressNode_payload(NFObject * self, SEL _cmd) {
-    return ((struct NFStressNode *)(self))->_payload;
+NPObject * NPStressNode_payload(NPObject * self, SEL _cmd) {
+    return ((struct NPStressNode *)(self))->_payload;
 }
 
-void NFStressNode_setPayload_(NFObject * self, SEL _cmd, NFObject * value) {
-    ((struct NFStressNode *)(self))->_payload = value;
+void NPStressNode_setPayload_(NPObject * self, SEL _cmd, NPObject * value) {
+    ((struct NPStressNode *)(self))->_payload = value;
 }
 
-int NFStressNode_nodeId(NFObject * self, SEL _cmd) {
-    return ((struct NFStressNode *)(self))->_nodeId;
+int NPStressNode_nodeId(NPObject * self, SEL _cmd) {
+    return ((struct NPStressNode *)(self))->_nodeId;
 }
 
-void NFStressNode_setNodeId_(NFObject * self, SEL _cmd, int value) {
-    ((struct NFStressNode *)(self))->_nodeId = value;
+void NPStressNode_setNodeId_(NPObject * self, SEL _cmd, int value) {
+    ((struct NPStressNode *)(self))->_nodeId = value;
 }
 
-NFClass * NFStressNode_getClass(NFClass * self, SEL _cmd) {
-    return &nopa_NFStressNode_class;
+NPClass * NPStressNode_getClass(NPClass * self, SEL _cmd) {
+    return &nopa_NPStressNode_class;
 }
 
-void NFStressTester_runHeavyMemoryTest(NFObject * self, SEL _cmd) {
-    struct NFStressTester * _self = ((struct NFStressTester *)(self));
+void NPStressTester_runHeavyMemoryTest(NPObject * self, SEL _cmd) {
+    struct NPStressTester * _self = ((struct NPStressTester *)(self));
     {
         printf("[压测] 启动第一阶段：10,000次双向链表瞬时开辟与内存释放...\n");
-        NFObject *__nopa_tmp_0 = (NFObject_alloc(&nopa_NFStressNode_class, __nopa_sel_alloc));
-        NFStressNode * root = ((struct nopa_NFStressNode_vtable *)__nopa_tmp_0->isa->vtable)->initWithId_(__nopa_tmp_0, __nopa_sel_initWithId_, 0);
-        NFStressNode * current = root;
+        NPObject *__nopa_tmp_0 = (NPObject_alloc(&nopa_NPStressNode_class, __nopa_sel_alloc));
+        NPStressNode * root = ((struct nopa_NPStressNode_vtable *)__nopa_tmp_0->isa->vtable)->initWithId_(__nopa_tmp_0, __nopa_sel_initWithId_, 0);
+        NPStressNode * current = root;
         for (int i = 1; i <= STRESS_LOOP_COUNT; i++) {
             {
                 {
                     nopa_autoreleasepool_t * __pool = nopa_autoreleasepool_push();
                     {
-                        NFObject *__nopa_tmp_1 = (NFObject_alloc(&nopa_NFStressNode_class, __nopa_sel_alloc));
-                        NFStressNode * newNode = ((struct nopa_NFStressNode_vtable *)__nopa_tmp_1->isa->vtable)->initWithId_(__nopa_tmp_1, __nopa_sel_initWithId_, i);
-                        NFObject *__nopa_tmp_2 = (NFObject_alloc(&nopa_NFObject_class, __nopa_sel_alloc));
-                        NFObject * data = ((struct nopa_NFObject_vtable *)__nopa_tmp_2->isa->vtable)->init(__nopa_tmp_2, __nopa_sel_init);
-                        ((struct nopa_NFStressNode_vtable *)newNode->isa->vtable)->setPayload_(newNode, __nopa_sel_setPayload_, data);
+                        NPObject *__nopa_tmp_1 = (NPObject_alloc(&nopa_NPStressNode_class, __nopa_sel_alloc));
+                        NPStressNode * newNode = ((struct nopa_NPStressNode_vtable *)__nopa_tmp_1->isa->vtable)->initWithId_(__nopa_tmp_1, __nopa_sel_initWithId_, i);
+                        NPObject *__nopa_tmp_2 = (NPObject_alloc(&nopa_NPObject_class, __nopa_sel_alloc));
+                        NPObject * data = ((struct nopa_NPObject_vtable *)__nopa_tmp_2->isa->vtable)->init(__nopa_tmp_2, __nopa_sel_init);
+                        ((struct nopa_NPStressNode_vtable *)newNode->isa->vtable)->setPayload_(newNode, __nopa_sel_setPayload_, data);
                         nopa_release(data);
-                        ((struct nopa_NFStressNode_vtable *)newNode->isa->vtable)->doD(newNode, __nopa_sel_doD);
-                        ((struct nopa_NFStressNode_vtable *)current->isa->vtable)->setNextNode_(current, __nopa_sel_setNextNode_, newNode);
-                        ((struct nopa_NFStressNode_vtable *)newNode->isa->vtable)->setPrevNode_(newNode, __nopa_sel_setPrevNode_, current);
+                        ((struct nopa_NPStressNode_vtable *)newNode->isa->vtable)->doD(newNode, __nopa_sel_doD);
+                        ((struct nopa_NPStressNode_vtable *)current->isa->vtable)->setNextNode_(current, __nopa_sel_setNextNode_, newNode);
+                        ((struct nopa_NPStressNode_vtable *)newNode->isa->vtable)->setPrevNode_(newNode, __nopa_sel_setPrevNode_, current);
                         current = newNode;
                     }
                     nopa_autoreleasepool_pop(__pool);
                 }
             }
         }
-        printf("[压测] 链表构建完毕，当前尾节点ID: %d\n", ((struct nopa_NFStressNode_vtable *)current->isa->vtable)->nodeId(current, __nopa_sel_nodeId));
+        printf("[压测] 链表构建完毕，当前尾节点ID: %d\n", ((struct nopa_NPStressNode_vtable *)current->isa->vtable)->nodeId(current, __nopa_sel_nodeId));
         printf("[压测] 开始逆向解构并回收到期内存...\n");
-        NFStressNode * tail = current;
+        NPStressNode * tail = current;
         int releaseCount = 0;
         while (tail != root && tail != NULL) {
             {
-                NFStressNode * parent = ((struct nopa_NFStressNode_vtable *)tail->isa->vtable)->prevNode(tail, __nopa_sel_prevNode);
+                NPStressNode * parent = ((struct nopa_NPStressNode_vtable *)tail->isa->vtable)->prevNode(tail, __nopa_sel_prevNode);
                 if (parent) {
                     {
-                        ((struct nopa_NFStressNode_vtable *)parent->isa->vtable)->setNextNode_(parent, __nopa_sel_setNextNode_, NULL);
+                        ((struct nopa_NPStressNode_vtable *)parent->isa->vtable)->setNextNode_(parent, __nopa_sel_setNextNode_, NULL);
                     }
                 }
                 nopa_release(tail);
@@ -467,23 +467,23 @@ void NFStressTester_runHeavyMemoryTest(NFObject * self, SEL _cmd) {
     }
 }
 
-void NFStressTester_runCrazyBracketTest(NFObject * self, SEL _cmd) {
-    struct NFStressTester * _self = ((struct NFStressTester *)(self));
+void NPStressTester_runCrazyBracketTest(NPObject * self, SEL _cmd) {
+    struct NPStressTester * _self = ((struct NPStressTester *)(self));
     {
         printf("[压测] 启动第二阶段：疯狂方括号嵌套语法解析测试...\n");
-        NFObject *__nopa_tmp_3 = (NFObject_alloc(&nopa_NFStressNode_class, __nopa_sel_alloc));
-        NFStressNode * n1 = ((struct nopa_NFStressNode_vtable *)__nopa_tmp_3->isa->vtable)->initWithId_(__nopa_tmp_3, __nopa_sel_initWithId_, 1);
-        NFObject *__nopa_tmp_4 = (NFObject_alloc(&nopa_NFStressNode_class, __nopa_sel_alloc));
-        NFStressNode * n2 = ((struct nopa_NFStressNode_vtable *)__nopa_tmp_4->isa->vtable)->initWithId_(__nopa_tmp_4, __nopa_sel_initWithId_, 2);
-        NFObject *__nopa_tmp_5 = (NFObject_alloc(&nopa_NFStressNode_class, __nopa_sel_alloc));
-        NFStressNode * n3 = ((struct nopa_NFStressNode_vtable *)__nopa_tmp_5->isa->vtable)->initWithId_(__nopa_tmp_5, __nopa_sel_initWithId_, 3);
-        NFObject *__nopa_tmp_6 = (NFObject_alloc(&nopa_NFStressNode_class, __nopa_sel_alloc));
-        NFStressNode * n4 = ((struct nopa_NFStressNode_vtable *)__nopa_tmp_6->isa->vtable)->initWithId_(__nopa_tmp_6, __nopa_sel_initWithId_, 4);
-        ((struct nopa_NFStressNode_vtable *)n1->isa->vtable)->setNextNode_(n1, __nopa_sel_setNextNode_, n2);
-        ((struct nopa_NFStressNode_vtable *)n2->isa->vtable)->setNextNode_(n2, __nopa_sel_setNextNode_, n3);
-        ((struct nopa_NFStressNode_vtable *)n3->isa->vtable)->setNextNode_(n3, __nopa_sel_setNextNode_, n4);
-        NFObject *__nopa_tmp_7 = (({ NFObject *__nopa_tmp_8 = (({ NFObject *__nopa_tmp_9 = (((struct nopa_NFStressNode_vtable *)n1->isa->vtable)->getDeepNext(n1, __nopa_sel_getDeepNext)); ((struct nopa_NFStressNode_vtable *)__nopa_tmp_9->isa->vtable)->getDeepNext(__nopa_tmp_9, __nopa_sel_getDeepNext); })); ((struct nopa_NFStressNode_vtable *)__nopa_tmp_8->isa->vtable)->getDeepNext(__nopa_tmp_8, __nopa_sel_getDeepNext); }));
-        int targetId = ((struct nopa_NFStressNode_vtable *)__nopa_tmp_7->isa->vtable)->nodeId(__nopa_tmp_7, __nopa_sel_nodeId);
+        NPObject *__nopa_tmp_3 = (NPObject_alloc(&nopa_NPStressNode_class, __nopa_sel_alloc));
+        NPStressNode * n1 = ((struct nopa_NPStressNode_vtable *)__nopa_tmp_3->isa->vtable)->initWithId_(__nopa_tmp_3, __nopa_sel_initWithId_, 1);
+        NPObject *__nopa_tmp_4 = (NPObject_alloc(&nopa_NPStressNode_class, __nopa_sel_alloc));
+        NPStressNode * n2 = ((struct nopa_NPStressNode_vtable *)__nopa_tmp_4->isa->vtable)->initWithId_(__nopa_tmp_4, __nopa_sel_initWithId_, 2);
+        NPObject *__nopa_tmp_5 = (NPObject_alloc(&nopa_NPStressNode_class, __nopa_sel_alloc));
+        NPStressNode * n3 = ((struct nopa_NPStressNode_vtable *)__nopa_tmp_5->isa->vtable)->initWithId_(__nopa_tmp_5, __nopa_sel_initWithId_, 3);
+        NPObject *__nopa_tmp_6 = (NPObject_alloc(&nopa_NPStressNode_class, __nopa_sel_alloc));
+        NPStressNode * n4 = ((struct nopa_NPStressNode_vtable *)__nopa_tmp_6->isa->vtable)->initWithId_(__nopa_tmp_6, __nopa_sel_initWithId_, 4);
+        ((struct nopa_NPStressNode_vtable *)n1->isa->vtable)->setNextNode_(n1, __nopa_sel_setNextNode_, n2);
+        ((struct nopa_NPStressNode_vtable *)n2->isa->vtable)->setNextNode_(n2, __nopa_sel_setNextNode_, n3);
+        ((struct nopa_NPStressNode_vtable *)n3->isa->vtable)->setNextNode_(n3, __nopa_sel_setNextNode_, n4);
+        NPObject *__nopa_tmp_7 = (({ NPObject *__nopa_tmp_8 = (({ NPObject *__nopa_tmp_9 = (((struct nopa_NPStressNode_vtable *)n1->isa->vtable)->getDeepNext(n1, __nopa_sel_getDeepNext)); ((struct nopa_NPStressNode_vtable *)__nopa_tmp_9->isa->vtable)->getDeepNext(__nopa_tmp_9, __nopa_sel_getDeepNext); })); ((struct nopa_NPStressNode_vtable *)__nopa_tmp_8->isa->vtable)->getDeepNext(__nopa_tmp_8, __nopa_sel_getDeepNext); }));
+        int targetId = ((struct nopa_NPStressNode_vtable *)__nopa_tmp_7->isa->vtable)->nodeId(__nopa_tmp_7, __nopa_sel_nodeId);
         printf("[解析断言] 7层嵌套调用成功解析！目标尾节点ID预期为 4 => 实际为: %d\n", targetId);
         nopa_release(n1);
         nopa_release(n2);
@@ -492,8 +492,8 @@ void NFStressTester_runCrazyBracketTest(NFObject * self, SEL _cmd) {
     }
 }
 
-NFClass * NFStressTester_getClass(NFClass * self, SEL _cmd) {
-    return &nopa_NFStressTester_class;
+NPClass * NPStressTester_getClass(NPClass * self, SEL _cmd) {
+    return &nopa_NPStressTester_class;
 }
 
 int main(int argc, const char * * argv) {
@@ -505,11 +505,11 @@ int main(int argc, const char * * argv) {
             printf("==================================================\n");
             printf(">>>  nopac 编译器「符号与内存」极限暴力压测开始  <<<\n");
             printf("==================================================\n\n");
-            NFObject *__nopa_tmp_10 = (NFObject_alloc(&nopa_NFStressTester_class, __nopa_sel_alloc));
-            NFStressTester * tester = ((struct nopa_NFObject_vtable *)__nopa_tmp_10->isa->vtable)->init(__nopa_tmp_10, __nopa_sel_init);
-            ((struct nopa_NFStressTester_vtable *)tester->isa->vtable)->runHeavyMemoryTest(tester, __nopa_sel_runHeavyMemoryTest);
+            NPObject *__nopa_tmp_10 = (NPObject_alloc(&nopa_NPStressTester_class, __nopa_sel_alloc));
+            NPStressTester * tester = ((struct nopa_NPObject_vtable *)__nopa_tmp_10->isa->vtable)->init(__nopa_tmp_10, __nopa_sel_init);
+            ((struct nopa_NPStressTester_vtable *)tester->isa->vtable)->runHeavyMemoryTest(tester, __nopa_sel_runHeavyMemoryTest);
             printf("\n");
-            ((struct nopa_NFStressTester_vtable *)tester->isa->vtable)->runCrazyBracketTest(tester, __nopa_sel_runCrazyBracketTest);
+            ((struct nopa_NPStressTester_vtable *)tester->isa->vtable)->runCrazyBracketTest(tester, __nopa_sel_runCrazyBracketTest);
             nopa_release(tester);
             printf("\n==================================================\n");
             printf(">>>          恭喜！暴力压测全部通关！          <<<\n");
@@ -524,56 +524,56 @@ int main(int argc, const char * * argv) {
 
 // ─── Protocol metadata ─────────────────────────────────
 
-extern NFProtocol nopa_protocol_NFProtocolA;
-extern NFProtocol nopa_protocol_NFProtocolB;
-extern NFProtocol nopa_protocol_NFProtocolC;
-extern NFProtocol nopa_protocol_NFProtocolD;
+extern NPProtocol nopa_protocol_NPProtocolA;
+extern NPProtocol nopa_protocol_NPProtocolB;
+extern NPProtocol nopa_protocol_NPProtocolC;
+extern NPProtocol nopa_protocol_NPProtocolD;
 
-NFProtocol nopa_protocol_NFProtocolA = {
-    .name = "NFProtocolA",
-    .parents = (NFProtocol *[]){
+NPProtocol nopa_protocol_NPProtocolA = {
+    .name = "NPProtocolA",
+    .parents = (NPProtocol *[]){
     },
     .parent_count = 1,
-    .required_methods = (NFProtocolMethod[]){
+    .required_methods = (NPProtocolMethod[]){
         { .name = "doA", .encoding = "@" },
     },
     .required_count = 1,
     .optional_count = 0,
 };
 
-NFProtocol nopa_protocol_NFProtocolB = {
-    .name = "NFProtocolB",
-    .parents = (NFProtocol *[]){
+NPProtocol nopa_protocol_NPProtocolB = {
+    .name = "NPProtocolB",
+    .parents = (NPProtocol *[]){
     },
     .parent_count = 1,
-    .required_methods = (NFProtocolMethod[]){
+    .required_methods = (NPProtocolMethod[]){
         { .name = "doB", .encoding = "@" },
     },
     .required_count = 1,
     .optional_count = 0,
 };
 
-NFProtocol nopa_protocol_NFProtocolC = {
-    .name = "NFProtocolC",
-    .parents = (NFProtocol *[]){
+NPProtocol nopa_protocol_NPProtocolC = {
+    .name = "NPProtocolC",
+    .parents = (NPProtocol *[]){
     },
     .parent_count = 1,
-    .required_methods = (NFProtocolMethod[]){
+    .required_methods = (NPProtocolMethod[]){
         { .name = "doC", .encoding = "@" },
     },
     .required_count = 1,
     .optional_count = 0,
 };
 
-NFProtocol nopa_protocol_NFProtocolD = {
-    .name = "NFProtocolD",
-    .parents = (NFProtocol *[]){
-        &nopa_protocol_NFProtocolA,
-        &nopa_protocol_NFProtocolB,
-        &nopa_protocol_NFProtocolC,
+NPProtocol nopa_protocol_NPProtocolD = {
+    .name = "NPProtocolD",
+    .parents = (NPProtocol *[]){
+        &nopa_protocol_NPProtocolA,
+        &nopa_protocol_NPProtocolB,
+        &nopa_protocol_NPProtocolC,
     },
     .parent_count = 3,
-    .required_methods = (NFProtocolMethod[]){
+    .required_methods = (NPProtocolMethod[]){
         { .name = "doD", .encoding = "@" },
     },
     .required_count = 1,
@@ -583,152 +583,152 @@ NFProtocol nopa_protocol_NFProtocolD = {
 
 // ─── Class metadata ─────────────────────────────────────
 
-struct nopa_NFObject_vtable nopa_NFObject_vtable_inst = {
-    .init = NFObject_init,
-    .dealloc = NFObject_dealloc,
+struct nopa_NPObject_vtable nopa_NPObject_vtable_inst = {
+    .init = NPObject_init,
+    .dealloc = NPObject_dealloc,
 };
 
-struct nopa_NFLayer1_vtable nopa_NFLayer1_vtable_inst = {
-    .init = NFLayer1_init,
-    .dealloc = NFObject_dealloc,
+struct nopa_NPLayer1_vtable nopa_NPLayer1_vtable_inst = {
+    .init = NPLayer1_init,
+    .dealloc = NPObject_dealloc,
 };
 
-struct nopa_NFLayer2_vtable nopa_NFLayer2_vtable_inst = {
-    .init = NFLayer2_init,
-    .dealloc = NFObject_dealloc,
+struct nopa_NPLayer2_vtable nopa_NPLayer2_vtable_inst = {
+    .init = NPLayer2_init,
+    .dealloc = NPObject_dealloc,
 };
 
-struct nopa_NFLayer3_vtable nopa_NFLayer3_vtable_inst = {
-    .init = NFLayer3_init,
-    .dealloc = NFObject_dealloc,
+struct nopa_NPLayer3_vtable nopa_NPLayer3_vtable_inst = {
+    .init = NPLayer3_init,
+    .dealloc = NPObject_dealloc,
 };
 
-struct nopa_NFLayer4_vtable nopa_NFLayer4_vtable_inst = {
-    .init = NFLayer4_init,
-    .dealloc = NFObject_dealloc,
+struct nopa_NPLayer4_vtable nopa_NPLayer4_vtable_inst = {
+    .init = NPLayer4_init,
+    .dealloc = NPObject_dealloc,
 };
 
-struct nopa_NFStressNode_vtable nopa_NFStressNode_vtable_inst = {
-    .init = NFLayer4_init,
-    .dealloc = NFStressNode_dealloc,
-    .initWithId_ = NFStressNode_initWithId_,
-    .getDeepNext = NFStressNode_getDeepNext,
-    .doA = NFStressNode_doA,
-    .doB = NFStressNode_doB,
-    .doC = NFStressNode_doC,
-    .doD = NFStressNode_doD,
-    .nextNode = NFStressNode_nextNode,
-    .setNextNode_ = NFStressNode_setNextNode_,
-    .prevNode = NFStressNode_prevNode,
-    .setPrevNode_ = NFStressNode_setPrevNode_,
-    .payload = NFStressNode_payload,
-    .setPayload_ = NFStressNode_setPayload_,
-    .nodeId = NFStressNode_nodeId,
-    .setNodeId_ = NFStressNode_setNodeId_,
+struct nopa_NPStressNode_vtable nopa_NPStressNode_vtable_inst = {
+    .init = NPLayer4_init,
+    .dealloc = NPStressNode_dealloc,
+    .initWithId_ = NPStressNode_initWithId_,
+    .getDeepNext = NPStressNode_getDeepNext,
+    .doA = NPStressNode_doA,
+    .doB = NPStressNode_doB,
+    .doC = NPStressNode_doC,
+    .doD = NPStressNode_doD,
+    .nextNode = NPStressNode_nextNode,
+    .setNextNode_ = NPStressNode_setNextNode_,
+    .prevNode = NPStressNode_prevNode,
+    .setPrevNode_ = NPStressNode_setPrevNode_,
+    .payload = NPStressNode_payload,
+    .setPayload_ = NPStressNode_setPayload_,
+    .nodeId = NPStressNode_nodeId,
+    .setNodeId_ = NPStressNode_setNodeId_,
 };
 
-struct nopa_NFStressTester_vtable nopa_NFStressTester_vtable_inst = {
-    .init = NFObject_init,
-    .dealloc = NFObject_dealloc,
-    .runHeavyMemoryTest = NFStressTester_runHeavyMemoryTest,
-    .runCrazyBracketTest = NFStressTester_runCrazyBracketTest,
+struct nopa_NPStressTester_vtable nopa_NPStressTester_vtable_inst = {
+    .init = NPObject_init,
+    .dealloc = NPObject_dealloc,
+    .runHeavyMemoryTest = NPStressTester_runHeavyMemoryTest,
+    .runCrazyBracketTest = NPStressTester_runCrazyBracketTest,
 };
 
-struct nopa_NFObject_meta_vtable nopa_NFObject_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
-    .class = NFObject_getClass,
+struct nopa_NPObject_meta_vtable nopa_NPObject_meta_vtable_inst = {
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
+    .class = NPObject_getClass,
 };
 
-struct nopa_NFLayer1_meta_vtable nopa_NFLayer1_meta_vtable_inst = {
-    .class = NFLayer1_getClass,
+struct nopa_NPLayer1_meta_vtable nopa_NPLayer1_meta_vtable_inst = {
+    .class = NPLayer1_getClass,
 };
 
-struct nopa_NFLayer2_meta_vtable nopa_NFLayer2_meta_vtable_inst = {
-    .class = NFLayer2_getClass,
+struct nopa_NPLayer2_meta_vtable nopa_NPLayer2_meta_vtable_inst = {
+    .class = NPLayer2_getClass,
 };
 
-struct nopa_NFLayer3_meta_vtable nopa_NFLayer3_meta_vtable_inst = {
-    .class = NFLayer3_getClass,
+struct nopa_NPLayer3_meta_vtable nopa_NPLayer3_meta_vtable_inst = {
+    .class = NPLayer3_getClass,
 };
 
-struct nopa_NFLayer4_meta_vtable nopa_NFLayer4_meta_vtable_inst = {
-    .class = NFLayer4_getClass,
+struct nopa_NPLayer4_meta_vtable nopa_NPLayer4_meta_vtable_inst = {
+    .class = NPLayer4_getClass,
 };
 
-struct nopa_NFStressNode_meta_vtable nopa_NFStressNode_meta_vtable_inst = {
-    .class = NFStressNode_getClass,
+struct nopa_NPStressNode_meta_vtable nopa_NPStressNode_meta_vtable_inst = {
+    .class = NPStressNode_getClass,
 };
 
-struct nopa_NFStressTester_meta_vtable nopa_NFStressTester_meta_vtable_inst = {
-    .class = NFStressTester_getClass,
+struct nopa_NPStressTester_meta_vtable nopa_NPStressTester_meta_vtable_inst = {
+    .class = NPStressTester_getClass,
 };
 
-NFClass nopa_NFObject_class;
-NFClass nopa_NFLayer1_class;
-NFClass nopa_NFLayer2_class;
-NFClass nopa_NFLayer3_class;
-NFClass nopa_NFLayer4_class;
-NFClass nopa_NFStressNode_class;
-NFClass nopa_NFStressTester_class;
+NPClass nopa_NPObject_class;
+NPClass nopa_NPLayer1_class;
+NPClass nopa_NPLayer2_class;
+NPClass nopa_NPLayer3_class;
+NPClass nopa_NPLayer4_class;
+NPClass nopa_NPStressNode_class;
+NPClass nopa_NPStressTester_class;
 
 void nopa_meta_init(void) {
-    nopa_NFObject_class = (NFClass){
-        .name = "NFObject",
+    nopa_NPObject_class = (NPClass){
+        .name = "NPObject",
         .superclass = NULL,
-        .instance_size = sizeof(struct NFObject),
-        .vtable = &nopa_NFObject_vtable_inst,
-        .class_vtable = &nopa_NFObject_meta_vtable_inst,
+        .instance_size = sizeof(struct NPObject),
+        .vtable = &nopa_NPObject_vtable_inst,
+        .class_vtable = &nopa_NPObject_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_NFLayer1_class = (NFClass){
-        .name = "NFLayer1",
-        .superclass = &nopa_NFObject_class,
-        .instance_size = sizeof(struct NFLayer1),
-        .vtable = &nopa_NFLayer1_vtable_inst,
-        .class_vtable = &nopa_NFLayer1_meta_vtable_inst,
+    nopa_NPLayer1_class = (NPClass){
+        .name = "NPLayer1",
+        .superclass = &nopa_NPObject_class,
+        .instance_size = sizeof(struct NPLayer1),
+        .vtable = &nopa_NPLayer1_vtable_inst,
+        .class_vtable = &nopa_NPLayer1_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_NFLayer2_class = (NFClass){
-        .name = "NFLayer2",
-        .superclass = &nopa_NFLayer1_class,
-        .instance_size = sizeof(struct NFLayer2),
-        .vtable = &nopa_NFLayer2_vtable_inst,
-        .class_vtable = &nopa_NFLayer2_meta_vtable_inst,
+    nopa_NPLayer2_class = (NPClass){
+        .name = "NPLayer2",
+        .superclass = &nopa_NPLayer1_class,
+        .instance_size = sizeof(struct NPLayer2),
+        .vtable = &nopa_NPLayer2_vtable_inst,
+        .class_vtable = &nopa_NPLayer2_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_NFLayer3_class = (NFClass){
-        .name = "NFLayer3",
-        .superclass = &nopa_NFLayer2_class,
-        .instance_size = sizeof(struct NFLayer3),
-        .vtable = &nopa_NFLayer3_vtable_inst,
-        .class_vtable = &nopa_NFLayer3_meta_vtable_inst,
+    nopa_NPLayer3_class = (NPClass){
+        .name = "NPLayer3",
+        .superclass = &nopa_NPLayer2_class,
+        .instance_size = sizeof(struct NPLayer3),
+        .vtable = &nopa_NPLayer3_vtable_inst,
+        .class_vtable = &nopa_NPLayer3_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_NFLayer4_class = (NFClass){
-        .name = "NFLayer4",
-        .superclass = &nopa_NFLayer3_class,
-        .instance_size = sizeof(struct NFLayer4),
-        .vtable = &nopa_NFLayer4_vtable_inst,
-        .class_vtable = &nopa_NFLayer4_meta_vtable_inst,
+    nopa_NPLayer4_class = (NPClass){
+        .name = "NPLayer4",
+        .superclass = &nopa_NPLayer3_class,
+        .instance_size = sizeof(struct NPLayer4),
+        .vtable = &nopa_NPLayer4_vtable_inst,
+        .class_vtable = &nopa_NPLayer4_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_NFStressNode_class = (NFClass){
-        .name = "NFStressNode",
-        .superclass = &nopa_NFLayer4_class,
-        .instance_size = sizeof(struct NFStressNode),
-        .vtable = &nopa_NFStressNode_vtable_inst,
-        .class_vtable = &nopa_NFStressNode_meta_vtable_inst,
-        .protocols = (NFProtocol *[]){
+    nopa_NPStressNode_class = (NPClass){
+        .name = "NPStressNode",
+        .superclass = &nopa_NPLayer4_class,
+        .instance_size = sizeof(struct NPStressNode),
+        .vtable = &nopa_NPStressNode_vtable_inst,
+        .class_vtable = &nopa_NPStressNode_meta_vtable_inst,
+        .protocols = (NPProtocol *[]){
         },
         .protocol_count = 1,
     };
-    nopa_NFStressTester_class = (NFClass){
-        .name = "NFStressTester",
-        .superclass = &nopa_NFObject_class,
-        .instance_size = sizeof(struct NFStressTester),
-        .vtable = &nopa_NFStressTester_vtable_inst,
-        .class_vtable = &nopa_NFStressTester_meta_vtable_inst,
+    nopa_NPStressTester_class = (NPClass){
+        .name = "NPStressTester",
+        .superclass = &nopa_NPObject_class,
+        .instance_size = sizeof(struct NPStressTester),
+        .vtable = &nopa_NPStressTester_vtable_inst,
+        .class_vtable = &nopa_NPStressTester_meta_vtable_inst,
         .protocol_count = 0,
     };
 }

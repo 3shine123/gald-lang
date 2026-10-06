@@ -4,7 +4,7 @@
 //! scope-end releases on intermediate frames are never skipped (the cross-
 //! function leak of the sjlj backend disappears by construction):
 //!
-//! - `@throw e`      -> `__nopa_eh_flag = 1; __nopa_eh_val = (NFObject *)e; return <zero>;`
+//! - `@throw e`      -> `__nopa_eh_flag = 1; __nopa_eh_val = (NPObject *)e; return <zero>;`
 //! - every call site -> call, then `if (__nopa_eh_flag) { return <zero>; }`
 //! - `@try` body     -> plain code (flag is provably clear on entry)
 //! - `@catch (T *e)` -> `if (__nopa_eh_flag) { e = (T *)__nopa_eh_val; __nopa_eh_flag = 0; ... }`
@@ -183,7 +183,7 @@ fn expr_children(e: &AstExpr) -> Vec<&AstExpr> {
 // Rewrites (only in units compiled with -eh checked):
 //
 //   @throw e            ->  __nopa_eh_flag = 1;
-//                           __nopa_eh_val = (NFObject *)(void *)(e);
+//                           __nopa_eh_val = (NPObject *)(void *)(e);
 //                           return <zero>;
 //   <call sites>        ->  call; if (__nopa_eh_flag) { return <zero>; }
 //   @try B C F          ->  B'  (guard-rewritten: statements after the first
@@ -198,10 +198,10 @@ fn expr_children(e: &AstExpr) -> Vec<&AstExpr> {
 use nopa_ast::{AstType};
 use nopa_cst::TypePrim;
 
-/// `NFObject *` type node (for the error value cast).
-fn nfobject_ptr_type() -> AstType {
+/// `NPObject *` type node (for the error value cast).
+fn npobject_ptr_type() -> AstType {
     let mut t = AstType::new(TypePrim::Named);
-    t.name = Some("NFObject".into());
+    t.name = Some("NPObject".into());
     t.is_pointer = true;
     t
 }
@@ -236,8 +236,8 @@ fn assign_stmt(target: &str, value: AstExpr) -> AstStmt {
 
 /// `return <zero-of-ret-type>;` — the throwing-early-return. `void` returns
 /// bare; scalars, pointers and `id` return 0. Everything else (a named
-/// non-pointer type, which may be an aggregate typedef — `NFRange` is
-/// `typedef struct {...} NFRange;`) gets a zeroed compound literal `(T){0}`:
+/// non-pointer type, which may be an aggregate typedef — `NPRange` is
+/// `typedef struct {...} NPRange;`) gets a zeroed compound literal `(T){0}`:
 /// `return 0;` there is a clang error ("returning 'int' from a function with
 /// incompatible result type"). Same shape codegen emits as a nil-messaging
 /// fallback.
@@ -267,7 +267,7 @@ fn return_zero(ret: &AstType) -> AstStmt {
 /// True when the return type needs `(T){0}` rather than `0`.
 ///
 /// A `Named` non-pointer type carries only a name, so there is no way to tell
-/// an aggregate typedef (`NFRange`) from a scalar one (`size_t`) here — and
+/// an aggregate typedef (`NPRange`) from a scalar one (`size_t`) here — and
 /// both take the compound literal: it is the only C99 form valid for the
 /// former, and still perfectly valid for the latter. `Sel` joins them because
 /// nopa's `SEL` is a struct, not an integer — and a bare `SEL` has NO name
@@ -664,7 +664,7 @@ const NOTHROW_C_FUNCS: &[&str] = &[
     "fwrite", "strlen", "strcmp", "strncmp", "memcpy", "memset", "memmove",
     "abort", "exit", "calloc", "malloc", "free", "realloc",
     "kputs", "kputdec", "kputhex", "kputc", "kprintf",
-    "NFLog", "__NFLogv",
+    "NPLog", "__NPLogv",
     "nopa_array_create", "nopa_dictionary_create",
     "va_start", "va_arg", "va_end", "va_copy",
 ];
@@ -1086,7 +1086,7 @@ fn rewrite_stmt(s: &mut AstStmt, zero_ret: &AstStmt, fx: &EffectTable) {
     match &mut s.data {
         AstStmtData::Throw(expr) => {
             // Ownership mirrors clang's ARC lowering of `@throw`:
-            //   NFObject *__nopa_eh_thrown_N = (NFObject *)(<e>);  /* ARC owns this temp */
+            //   NPObject *__nopa_eh_thrown_N = (NPObject *)(<e>);  /* ARC owns this temp */
             //   __nopa_eh_val = __nopa_eh_thrown_N;
             //   nopa_retain(__nopa_eh_val);      /* the in-flight exception holds one ref */
             //   nopa_autorelease(__nopa_eh_val); /* clang's objc_retainAutorelease: the
@@ -1107,12 +1107,12 @@ fn rewrite_stmt(s: &mut AstStmt, zero_ret: &AstStmt, fx: &EffectTable) {
             };
             let cast = AstExpr {
                 kind: nopa_ast::AstExprKind::Cast, expr_type: None, line: s.line, col: s.col,
-                data: AstExprData::Cast { target_type: nfobject_ptr_type(), expr: val_expr },
+                data: AstExprData::Cast { target_type: npobject_ptr_type(), expr: val_expr },
             };
             *s = AstStmt {
                 kind: nopa_ast::AstStmtKind::Compound, line: s.line, col: s.col,
                 data: AstStmtData::Compound(vec![
-                    var_decl(&tmp, nfobject_ptr_type(), Some(cast), s.line, s.col),
+                    var_decl(&tmp, npobject_ptr_type(), Some(cast), s.line, s.col),
                     assign_stmt("__nopa_eh_val", varref(&tmp)),
                     expr_stmt(func_call("nopa_retain", vec![varref("__nopa_eh_val")])),
                     expr_stmt(func_call("nopa_autorelease", vec![varref("__nopa_eh_val")])),
@@ -1266,7 +1266,7 @@ fn rewrite_try(
     //       [int __nopa_eh_done_N = 0;]               /* only when there are catches */
     //       <try body: throwing call sites arm the flag, the tail is guarded>
     //       if (__nopa_eh_flag == 1 && __nopa_eh_done_N == 0) {
-    //           if (__nopa_eh_isa((NFObject *)__nopa_eh_val, &NOPA_CLASS_$_T)) {  /* typed only */
+    //           if (__nopa_eh_isa((NPObject *)__nopa_eh_val, &NOPA_CLASS_$_T)) {  /* typed only */
     //               __nopa_eh_done_N = 1;
     //               __nopa_eh_flag = 0;
     //               T *e = (T *)__nopa_eh_val;
@@ -1314,7 +1314,7 @@ fn rewrite_try(
 
     // Catch arms. Each becomes:
     //   if (__nopa_eh_flag == 1 && __nopa_eh_done_N == 0) {
-    //       [if (__nopa_eh_isa((NFObject *)val, &class)) {]   /* typed catch only */
+    //       [if (__nopa_eh_isa((NPObject *)val, &class)) {]   /* typed catch only */
     //       __nopa_eh_done_N = 1;
     //       __nopa_eh_flag = 0;
     //       <param decl if used>
@@ -1330,7 +1330,7 @@ fn rewrite_try(
                 .map(|pt| cst_type_to_c_str(pt))
                 .unwrap_or_else(|| "id".into());
             let param_name = param.name.clone().unwrap_or_else(|| "exc".into());
-            let is_id_catch = param_type == "id" || param_type.contains("NFObject");
+            let is_id_catch = param_type == "id" || param_type.contains("NPObject");
 
             let mut arm: Vec<AstStmt> = vec![
                 assign_stmt(&done, int_expr(1)),
@@ -1493,7 +1493,7 @@ fn isolated_block(s: AstStmt, line: usize, col: usize) -> AstStmt {
 }
 
 /// isa test for a typed catch, used as the arm's condition:
-///   __nopa_eh_isa((NFObject *)__nopa_eh_val, &NOPA_CLASS_$_<Flat>)
+///   __nopa_eh_isa((NPObject *)__nopa_eh_val, &NOPA_CLASS_$_<Flat>)
 /// 1 = match, 0 = mismatch (runtime.c). A mismatch is a plain false condition:
 /// flag and the arm's `done` latch stay untouched, so the next arm — or the
 /// enclosing guard tail — keeps seeing the exception.
@@ -1503,7 +1503,7 @@ fn isa_test_expr(param_type: &str, line: usize, col: usize) -> AstExpr {
         AstExpr {
             kind: nopa_ast::AstExprKind::Cast, expr_type: None, line, col,
             data: AstExprData::Cast {
-                target_type: nfobject_ptr_type(),
+                target_type: npobject_ptr_type(),
                 expr: Box::new(varref("__nopa_eh_val")),
             },
         },
@@ -1690,7 +1690,7 @@ mod tests {
         assert!(aggregate_zero(&sel_named), "named SEL still takes (T){{0}}");
 
         let mut range = AstType::new(TypePrim::Named);
-        range.name = Some("NFRange".into());
+        range.name = Some("NPRange".into());
         assert!(aggregate_zero(&range), "named non-pointer (typedef) takes (T){{0}}");
 
         assert!(!aggregate_zero(&AstType::new(TypePrim::Int)), "int keeps return 0;");

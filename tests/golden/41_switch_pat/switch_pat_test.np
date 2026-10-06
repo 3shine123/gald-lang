@@ -5,7 +5,7 @@
 // dangling-comparison Cond arm, `default:` body, `break` -> goto end, and a
 // nested loop whose `break` must bind to the loop (not the switch).
 
-@interface PatBall : NFObject
+@interface PatBall : NPObject
 @end
 
 @implementation PatBall
@@ -13,7 +13,7 @@
 
 int main() {
     // 1. Bind arm + default + break.
-    NFObject *o = [[PatBall alloc] init];
+    NPObject *o = [[PatBall alloc] init];
     int tag = 0;
     switch (o) {
         case PatBall *b:
@@ -23,10 +23,10 @@ int main() {
             tag = 9;
             break;
     }
-    NFLog(@"bind tag=%d", tag);
+    NPLog(@"bind tag=%d", tag);
 
     // 2. Object-literal arms (value semantics via isEqual:).
-    NFString *s = @"x";
+    NPString *s = @"x";
     int t2 = 0;
     switch (s) {
         case @"x":
@@ -39,7 +39,7 @@ int main() {
             t2 = 9;
             break;
     }
-    NFLog(@"lit t2=%d", t2);
+    NPLog(@"lit t2=%d", t2);
 
     // 3. Dangling-comparison arms: first matching arm wins (source order).
     int n = 42;
@@ -54,7 +54,7 @@ int main() {
         default:
             t3 = 3;
     }
-    NFLog(@"cond t3=%d", t3);
+    NPLog(@"cond t3=%d", t3);
 
     // 4. `break` inside a nested loop binds to the loop, not the switch.
     int t4 = 0;
@@ -69,7 +69,7 @@ int main() {
         default:
             t4 = -1;
     }
-    NFLog(@"loop t4=%d", t4);
+    NPLog(@"loop t4=%d", t4);
 
     // 5. Dangling comparison inside an && chain: BOTH comparisons must get the
     //    subject spliced (placeholder is every comparison's left operand).
@@ -84,7 +84,7 @@ int main() {
         default:
             t5 = -5;
     }
-    NFLog(@"cond-and t5=%d", t5);
+    NPLog(@"cond-and t5=%d", t5);
 
     // 6. `when` guard: an arm whose guard is false must fall through to the
     //    next matching arm (the failed arm's binding must not leak).
@@ -99,7 +99,7 @@ int main() {
         default:
             t6 = -1;
     }
-    NFLog(@"guard t6=%d", t6);
+    NPLog(@"guard t6=%d", t6);
 
     // 7. Fallthrough: an arm WITHOUT `break` must run into the next arm's body
     //    (C semantics — the goto dispatch must not append an implicit jump).
@@ -114,6 +114,6 @@ int main() {
         default:
             t7 = -1;
     }
-    NFLog(@"fallthrough t7=%d", t7);
+    NPLog(@"fallthrough t7=%d", t7);
     return 0;
 }

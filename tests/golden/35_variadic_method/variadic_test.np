@@ -6,7 +6,7 @@
 #include <stdio.h>
 
 // ── 1. 单段 selector variadic：va_arg 逐个取参 ──
-@interface Summer : NFObject
+@interface Summer : NPObject
 - (int)sum:(int)first, ...;
 @end
 
@@ -27,7 +27,7 @@
 @end
 
 // ── 2. 多段 selector variadic：前两个固定参数 + 变参 ──
-@interface Formatter : NFObject
+@interface Formatter : NPObject
 - (int)format:(const char *)tag count:(int)n values:(int)first, ...;
 - (void)print:(const char *)fmt, ...;
 @end
@@ -62,18 +62,18 @@
 @end
 
 // ── 4. 返回指针的 variadic：拼接字符串实参 ──
-@interface Joiner : NFObject
-- (NFString *)join:(const char *)first, ...;
+@interface Joiner : NPObject
+- (NPString *)join:(const char *)first, ...;
 @end
 
 @implementation Joiner
-- (NFString *)join:(const char *)first, ... {
+- (NPString *)join:(const char *)first, ... {
     va_list ap;
     va_start(ap, first);
-    NFString *acc = [NFString stringWithUTF8String:first];
+    NPString *acc = [NPString stringWithUTF8String:first];
     const char *part;
     while ((part = va_arg(ap, const char *)) != 0) {
-        acc = [acc stringByAppendingString:[NFString stringWithUTF8String:part]];
+        acc = [acc stringByAppendingString:[NPString stringWithUTF8String:part]];
     }
     va_end(ap);
     return acc;
@@ -104,9 +104,9 @@ int main() {
     PowerSummer *p = [[PowerSummer alloc] init];
     printf("inherited=%d\n", [p sum:1000, 2000, 0]);     // 3000
 
-    // 对象返回值：variadic 拼接 NFString
+    // 对象返回值：variadic 拼接 NPString
     Joiner *j = [[Joiner alloc] init];
-    NFString *joined = [j join:"alpha", "-", "beta", "-", "gamma", (const char *)0];
+    NPString *joined = [j join:"alpha", "-", "beta", "-", "gamma", (const char *)0];
     printf("joined=%s\n", [joined UTF8String]);
 
     return 0;

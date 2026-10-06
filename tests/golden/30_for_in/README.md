@@ -17,8 +17,8 @@
 采用 **ObjC 规范形**：`for (T x in coll)`，其中 `T` 是循环变量的类型（`id` 亦可）。
 
 ```objc
-NFArray *arr = @[ @"one", @"two", @"three" ];
-for (NFString *s in arr) {
+NPArray *arr = @[ @"one", @"two", @"three" ];
+for (NPString *s in arr) {
     printf("%s\n", [s UTF8String]);
 }
 ```
@@ -43,7 +43,7 @@ for-in 在 **parser 阶段**就展开成普通 C for 循环：
 - 元素借用语义：循环变量是元素别名，不 retain / release，ARC 无需注入
 - 集合只求值一次（`__nopa_fi` 暂存），即使表达式有副作用也安全
 
-这也是仓库的一贯做法：先例有 `@42` → `[NFNumber numberWithInt:]`、`arrayWithObjects:` → `@[...]`。原则是**每个新特性都走 desugar，不引入新 IR 机制**。
+这也是仓库的一贯做法：先例有 `@42` → `[NPNumber numberWithInt:]`、`arrayWithObjects:` → `@[...]`。原则是**每个新特性都走 desugar，不引入新 IR 机制**。
 
 ## 检测方式
 

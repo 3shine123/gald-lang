@@ -6,12 +6,12 @@
 - (const char *)name;
 @end
 
-@interface Cat : NFObject <Speaker>
+@interface Cat : NPObject <Speaker>
 - (void)speak;
 - (const char *)name;
 @end
 
-@interface Dog : NFObject <Speaker>
+@interface Dog : NPObject <Speaker>
 - (void)speak;
 - (const char *)name;
 @end

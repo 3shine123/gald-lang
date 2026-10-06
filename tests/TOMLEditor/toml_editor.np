@@ -387,7 +387,7 @@ static void trim_leading(const char **p) {
 @namespace TOML
 
     // Exception for parse errors
-    @interface ParseError : NFObject {
+    @interface ParseError : NPObject {
         char *_msg;
     }
     - (instancetype)initWithMessage:(const char *)msg;

@@ -9,7 +9,7 @@
 #include <stddef.h>
 #include "nopa/runtime.h"
 struct nopa_vtable;
-struct nopa_NFObject_meta_vtable;
+struct nopa_NPObject_meta_vtable;
 struct nopa_JSON__Bool_meta_vtable;
 struct nopa_JSON__Editor_meta_vtable;
 struct nopa_JSON__Error_meta_vtable;
@@ -75,18 +75,18 @@ static const SEL __nopa_sel_cmdQuit = {.name = "cmdQuit", .hash = 0x094B4084};
 #ifndef __NOPA_ROOT_DEFINED
 #define __NOPA_ROOT_DEFINED
 struct __nopa_root {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
 };
 typedef struct __nopa_root __nopa_root;
 #endif
-#ifndef NFOBJECT_DEFINED
-#define NFOBJECT_DEFINED
-struct NFObject {
-    struct NFClass *isa;
+#ifndef NPOBJECT_DEFINED
+#define NPOBJECT_DEFINED
+struct NPObject {
+    struct NPClass *isa;
     uint32_t retain_count;
 };
-typedef struct NFObject NFObject;
+typedef struct NPObject NPObject;
 #endif
 struct JSON__Bool;
 typedef struct JSON__Bool JSON__Bool;
@@ -111,110 +111,110 @@ typedef struct Watcher Watcher;
 struct JSON__Array;
 typedef struct JSON__Array JSON__Array;
 
-NFObject * __nopa_root_init(NFObject * self, SEL _cmd);
-void __nopa_root_dealloc(NFObject * self, SEL _cmd);
-void __nopa_root_release(NFObject * self, SEL _cmd);
-NFObject * __nopa_root_retain(NFObject * self, SEL _cmd);
-NFObject * NFObject_alloc(NFClass * self, SEL _cmd);
-NFObject * NFObject_new(NFClass * self, SEL _cmd);
-NFObject * NFObject_init(NFObject * self, SEL _cmd);
-void NFObject_dealloc(NFObject * self, SEL _cmd);
-void NFObject_release(NFObject * self, SEL _cmd);
-NFObject * NFObject_retain(NFObject * self, SEL _cmd);
-NFObject * JSON__Error_initWithMessage_(NFObject * self, SEL _cmd, const char * msg);
-const char * JSON__Error_message(NFObject * self, SEL _cmd);
-void JSON__Error_dealloc(NFObject * self, SEL _cmd);
-NFObject * JSON__Null_sharedNull(NFClass * self, SEL _cmd);
-NFObject * JSON__Bool_initWithBool_(NFObject * self, SEL _cmd, _Bool val);
-_Bool JSON__Bool_value(NFObject * self, SEL _cmd);
-void JSON__Bool_setValue_(NFObject * self, SEL _cmd, _Bool value);
-NFObject * JSON__Number_initWithDouble_(NFObject * self, SEL _cmd, double val);
-NFObject * JSON__Number_initWithInt_(NFObject * self, SEL _cmd, int val);
-double JSON__Number_value(NFObject * self, SEL _cmd);
-void JSON__Number_setValue_(NFObject * self, SEL _cmd, double value);
-NFObject * JSON__String_initWithString_(NFObject * self, SEL _cmd, const char * val);
-void JSON__String_dealloc(NFObject * self, SEL _cmd);
-const char * JSON__String_value(NFObject * self, SEL _cmd);
-void JSON__String_setValue_(NFObject * self, SEL _cmd, const char * value);
-NFObject * JSON__Array_init(NFObject * self, SEL _cmd);
-void JSON__Array_dealloc(NFObject * self, SEL _cmd);
-int JSON__Array_count(NFObject * self, SEL _cmd);
-NFObject * JSON__Array_at_(NFObject * self, SEL _cmd, int idx);
-void JSON__Array_add_(NFObject * self, SEL _cmd, NFObject * val);
-void JSON__Array_removeAt_(NFObject * self, SEL _cmd, int idx);
-void JSON__Array_each_(NFObject * self, SEL _cmd, void (^block)(int, NFObject *));
-NFObject * JSON__Object_init(NFObject * self, SEL _cmd);
-void JSON__Object_dealloc(NFObject * self, SEL _cmd);
-int JSON__Object_count(NFObject * self, SEL _cmd);
-NFObject * JSON__Object_get_(NFObject * self, SEL _cmd, const char * key);
-void JSON__Object_set_forKey_(NFObject * self, SEL _cmd, NFObject * val, const char * key);
-void JSON__Object_remove_(NFObject * self, SEL _cmd, const char * key);
-const char * JSON__Object_atKey_(NFObject * self, SEL _cmd, int idx);
-NFObject * JSON__Object_atVal_(NFObject * self, SEL _cmd, int idx);
-void JSON__Object_each_(NFObject * self, SEL _cmd, void (^block)(int, NFObject *));
-NFObject * JSON__Parser_parse_(NFClass * self, SEL _cmd, const char * input);
-NFObject * JSON__Editor_init(NFObject * self, SEL _cmd);
-void JSON__Editor_dealloc(NFObject * self, SEL _cmd);
-void JSON__Editor_run(NFObject * self, SEL _cmd);
-NFObject * Buffer_init(NFObject * self, SEL _cmd);
-void Buffer_push_(NFObject * self, SEL _cmd, NFObject * item);
-NFObject * Buffer_get_(NFObject * self, SEL _cmd, int index);
-int Buffer_count(NFObject * self, SEL _cmd);
-NFObject * Watcher_initWithTarget_(NFObject * self, SEL _cmd, NFObject * t);
-NFObject * Watcher_target(NFObject * self, SEL _cmd);
-void Watcher_setTarget_(NFObject * self, SEL _cmd, NFObject * value);
-const char * JSON__Null_typeName(NFObject * self, SEL _cmd);
-void JSON__Null_printOn_(NFObject * self, SEL _cmd, int indent);
-NFObject * JSON__Null_copyValue(NFObject * self, SEL _cmd);
-const char * JSON__Bool_typeName(NFObject * self, SEL _cmd);
-void JSON__Bool_printOn_(NFObject * self, SEL _cmd, int indent);
-NFObject * JSON__Bool_copyValue(NFObject * self, SEL _cmd);
-const char * JSON__Number_typeName(NFObject * self, SEL _cmd);
-void JSON__Number_printOn_(NFObject * self, SEL _cmd, int indent);
-NFObject * JSON__Number_copyValue(NFObject * self, SEL _cmd);
-const char * JSON__String_typeName(NFObject * self, SEL _cmd);
-void JSON__String_printOn_(NFObject * self, SEL _cmd, int indent);
-NFObject * JSON__String_copyValue(NFObject * self, SEL _cmd);
-const char * JSON__Array_typeName(NFObject * self, SEL _cmd);
-void JSON__Array_printOn_(NFObject * self, SEL _cmd, int indent);
-NFObject * JSON__Array_copyValue(NFObject * self, SEL _cmd);
-const char * JSON__Object_typeName(NFObject * self, SEL _cmd);
-void JSON__Object_printOn_(NFObject * self, SEL _cmd, int indent);
-NFObject * JSON__Object_copyValue(NFObject * self, SEL _cmd);
-void JSON__Object_printKeys(NFObject * self, SEL _cmd);
-void JSON__Editor_refreshDisplay(NFObject * self, SEL _cmd);
-void JSON__Editor_cmdPrint(NFObject * self, SEL _cmd);
-void JSON__Editor_cmdSet_(NFObject * self, SEL _cmd, const char * arg);
-void JSON__Editor_cmdGet_(NFObject * self, SEL _cmd, const char * arg);
-void JSON__Editor_cmdDel_(NFObject * self, SEL _cmd, const char * arg);
-void JSON__Editor_cmdKeys(NFObject * self, SEL _cmd);
-void JSON__Editor_cmdType_(NFObject * self, SEL _cmd, const char * arg);
-void JSON__Editor_cmdLen(NFObject * self, SEL _cmd);
-void JSON__Editor_cmdNew(NFObject * self, SEL _cmd);
-void JSON__Editor_cmdParse_(NFObject * self, SEL _cmd, const char * arg);
-void JSON__Editor_cmdElist(NFObject * self, SEL _cmd);
-void JSON__Editor_cmdSels(NFObject * self, SEL _cmd);
-void JSON__Editor_cmdHelp(NFObject * self, SEL _cmd);
-void JSON__Editor_cmdQuit(NFObject * self, SEL _cmd);
-void Watcher_dealloc(NFObject * self, SEL _cmd);
-NFObject * nopa_alloc(struct NFClass * cls);
-NFObject * nopa_init(NFObject * self);
-void nopa_release(NFObject * obj);
-NFObject * nopa_retain(NFObject * obj);
+NPObject * __nopa_root_init(NPObject * self, SEL _cmd);
+void __nopa_root_dealloc(NPObject * self, SEL _cmd);
+void __nopa_root_release(NPObject * self, SEL _cmd);
+NPObject * __nopa_root_retain(NPObject * self, SEL _cmd);
+NPObject * NPObject_alloc(NPClass * self, SEL _cmd);
+NPObject * NPObject_new(NPClass * self, SEL _cmd);
+NPObject * NPObject_init(NPObject * self, SEL _cmd);
+void NPObject_dealloc(NPObject * self, SEL _cmd);
+void NPObject_release(NPObject * self, SEL _cmd);
+NPObject * NPObject_retain(NPObject * self, SEL _cmd);
+NPObject * JSON__Error_initWithMessage_(NPObject * self, SEL _cmd, const char * msg);
+const char * JSON__Error_message(NPObject * self, SEL _cmd);
+void JSON__Error_dealloc(NPObject * self, SEL _cmd);
+NPObject * JSON__Null_sharedNull(NPClass * self, SEL _cmd);
+NPObject * JSON__Bool_initWithBool_(NPObject * self, SEL _cmd, _Bool val);
+_Bool JSON__Bool_value(NPObject * self, SEL _cmd);
+void JSON__Bool_setValue_(NPObject * self, SEL _cmd, _Bool value);
+NPObject * JSON__Number_initWithDouble_(NPObject * self, SEL _cmd, double val);
+NPObject * JSON__Number_initWithInt_(NPObject * self, SEL _cmd, int val);
+double JSON__Number_value(NPObject * self, SEL _cmd);
+void JSON__Number_setValue_(NPObject * self, SEL _cmd, double value);
+NPObject * JSON__String_initWithString_(NPObject * self, SEL _cmd, const char * val);
+void JSON__String_dealloc(NPObject * self, SEL _cmd);
+const char * JSON__String_value(NPObject * self, SEL _cmd);
+void JSON__String_setValue_(NPObject * self, SEL _cmd, const char * value);
+NPObject * JSON__Array_init(NPObject * self, SEL _cmd);
+void JSON__Array_dealloc(NPObject * self, SEL _cmd);
+int JSON__Array_count(NPObject * self, SEL _cmd);
+NPObject * JSON__Array_at_(NPObject * self, SEL _cmd, int idx);
+void JSON__Array_add_(NPObject * self, SEL _cmd, NPObject * val);
+void JSON__Array_removeAt_(NPObject * self, SEL _cmd, int idx);
+void JSON__Array_each_(NPObject * self, SEL _cmd, void (^block)(int, NPObject *));
+NPObject * JSON__Object_init(NPObject * self, SEL _cmd);
+void JSON__Object_dealloc(NPObject * self, SEL _cmd);
+int JSON__Object_count(NPObject * self, SEL _cmd);
+NPObject * JSON__Object_get_(NPObject * self, SEL _cmd, const char * key);
+void JSON__Object_set_forKey_(NPObject * self, SEL _cmd, NPObject * val, const char * key);
+void JSON__Object_remove_(NPObject * self, SEL _cmd, const char * key);
+const char * JSON__Object_atKey_(NPObject * self, SEL _cmd, int idx);
+NPObject * JSON__Object_atVal_(NPObject * self, SEL _cmd, int idx);
+void JSON__Object_each_(NPObject * self, SEL _cmd, void (^block)(int, NPObject *));
+NPObject * JSON__Parser_parse_(NPClass * self, SEL _cmd, const char * input);
+NPObject * JSON__Editor_init(NPObject * self, SEL _cmd);
+void JSON__Editor_dealloc(NPObject * self, SEL _cmd);
+void JSON__Editor_run(NPObject * self, SEL _cmd);
+NPObject * Buffer_init(NPObject * self, SEL _cmd);
+void Buffer_push_(NPObject * self, SEL _cmd, NPObject * item);
+NPObject * Buffer_get_(NPObject * self, SEL _cmd, int index);
+int Buffer_count(NPObject * self, SEL _cmd);
+NPObject * Watcher_initWithTarget_(NPObject * self, SEL _cmd, NPObject * t);
+NPObject * Watcher_target(NPObject * self, SEL _cmd);
+void Watcher_setTarget_(NPObject * self, SEL _cmd, NPObject * value);
+const char * JSON__Null_typeName(NPObject * self, SEL _cmd);
+void JSON__Null_printOn_(NPObject * self, SEL _cmd, int indent);
+NPObject * JSON__Null_copyValue(NPObject * self, SEL _cmd);
+const char * JSON__Bool_typeName(NPObject * self, SEL _cmd);
+void JSON__Bool_printOn_(NPObject * self, SEL _cmd, int indent);
+NPObject * JSON__Bool_copyValue(NPObject * self, SEL _cmd);
+const char * JSON__Number_typeName(NPObject * self, SEL _cmd);
+void JSON__Number_printOn_(NPObject * self, SEL _cmd, int indent);
+NPObject * JSON__Number_copyValue(NPObject * self, SEL _cmd);
+const char * JSON__String_typeName(NPObject * self, SEL _cmd);
+void JSON__String_printOn_(NPObject * self, SEL _cmd, int indent);
+NPObject * JSON__String_copyValue(NPObject * self, SEL _cmd);
+const char * JSON__Array_typeName(NPObject * self, SEL _cmd);
+void JSON__Array_printOn_(NPObject * self, SEL _cmd, int indent);
+NPObject * JSON__Array_copyValue(NPObject * self, SEL _cmd);
+const char * JSON__Object_typeName(NPObject * self, SEL _cmd);
+void JSON__Object_printOn_(NPObject * self, SEL _cmd, int indent);
+NPObject * JSON__Object_copyValue(NPObject * self, SEL _cmd);
+void JSON__Object_printKeys(NPObject * self, SEL _cmd);
+void JSON__Editor_refreshDisplay(NPObject * self, SEL _cmd);
+void JSON__Editor_cmdPrint(NPObject * self, SEL _cmd);
+void JSON__Editor_cmdSet_(NPObject * self, SEL _cmd, const char * arg);
+void JSON__Editor_cmdGet_(NPObject * self, SEL _cmd, const char * arg);
+void JSON__Editor_cmdDel_(NPObject * self, SEL _cmd, const char * arg);
+void JSON__Editor_cmdKeys(NPObject * self, SEL _cmd);
+void JSON__Editor_cmdType_(NPObject * self, SEL _cmd, const char * arg);
+void JSON__Editor_cmdLen(NPObject * self, SEL _cmd);
+void JSON__Editor_cmdNew(NPObject * self, SEL _cmd);
+void JSON__Editor_cmdParse_(NPObject * self, SEL _cmd, const char * arg);
+void JSON__Editor_cmdElist(NPObject * self, SEL _cmd);
+void JSON__Editor_cmdSels(NPObject * self, SEL _cmd);
+void JSON__Editor_cmdHelp(NPObject * self, SEL _cmd);
+void JSON__Editor_cmdQuit(NPObject * self, SEL _cmd);
+void Watcher_dealloc(NPObject * self, SEL _cmd);
+NPObject * nopa_alloc(struct NPClass * cls);
+NPObject * nopa_init(NPObject * self);
+void nopa_release(NPObject * obj);
+NPObject * nopa_retain(NPObject * obj);
 int read_line(char * buf, int size);
 void skip_ws(const char * * p);
 int parse_hex4(const char * * p);
 char * parse_raw_string(const char * * p);
-NFObject * json_parse_value(const char * * p);
+NPObject * json_parse_value(const char * * p);
 void THROW(const char * msg);
-NFObject * json_parse_null(const char * * p);
-NFObject * json_parse_true(const char * * p);
-NFObject * json_parse_false(const char * * p);
-NFObject * json_parse_number(const char * * p);
-NFObject * json_parse_string(const char * * p);
-NFObject * json_parse_array(const char * * p);
-NFObject * json_parse_object(const char * * p);
-NFObject * json_parse_value(const char * * p);
+NPObject * json_parse_null(const char * * p);
+NPObject * json_parse_true(const char * * p);
+NPObject * json_parse_false(const char * * p);
+NPObject * json_parse_number(const char * * p);
+NPObject * json_parse_string(const char * * p);
+NPObject * json_parse_array(const char * * p);
+NPObject * json_parse_object(const char * * p);
+NPObject * json_parse_value(const char * * p);
 void cmdHelpPrint(void );
 void cmdHelpSet(void );
 void cmdHelpGet(void );
@@ -233,226 +233,226 @@ int main(int argc, const char * argv[]);
 
 static JSON__Null * s_sharedNull = NULL;
 
-NFClass * NFObject_getClass(NFClass * self, SEL _cmd);
-NFClass * JSON__Bool_getClass(NFClass * self, SEL _cmd);
-NFClass * JSON__Editor_getClass(NFClass * self, SEL _cmd);
-NFClass * JSON__Error_getClass(NFClass * self, SEL _cmd);
-NFClass * JSON__Null_getClass(NFClass * self, SEL _cmd);
-NFClass * JSON__Number_getClass(NFClass * self, SEL _cmd);
-NFClass * JSON__Object_getClass(NFClass * self, SEL _cmd);
-NFClass * JSON__Parser_getClass(NFClass * self, SEL _cmd);
-NFClass * JSON__String_getClass(NFClass * self, SEL _cmd);
-NFClass * Buffer_getClass(NFClass * self, SEL _cmd);
-NFClass * Watcher_getClass(NFClass * self, SEL _cmd);
-NFClass * JSON__Array_getClass(NFClass * self, SEL _cmd);
+NPClass * NPObject_getClass(NPClass * self, SEL _cmd);
+NPClass * JSON__Bool_getClass(NPClass * self, SEL _cmd);
+NPClass * JSON__Editor_getClass(NPClass * self, SEL _cmd);
+NPClass * JSON__Error_getClass(NPClass * self, SEL _cmd);
+NPClass * JSON__Null_getClass(NPClass * self, SEL _cmd);
+NPClass * JSON__Number_getClass(NPClass * self, SEL _cmd);
+NPClass * JSON__Object_getClass(NPClass * self, SEL _cmd);
+NPClass * JSON__Parser_getClass(NPClass * self, SEL _cmd);
+NPClass * JSON__String_getClass(NPClass * self, SEL _cmd);
+NPClass * Buffer_getClass(NPClass * self, SEL _cmd);
+NPClass * Watcher_getClass(NPClass * self, SEL _cmd);
+NPClass * JSON__Array_getClass(NPClass * self, SEL _cmd);
 
 struct nopa_vtable {
-    void (*add_)(NFObject *, SEL, NFObject *);
-    const char * (*atKey_)(NFObject *, SEL, int);
-    NFObject * (*atVal_)(NFObject *, SEL, int);
-    NFObject * (*at_)(NFObject *, SEL, int);
-    void (*cmdDel_)(NFObject *, SEL, const char *);
-    void (*cmdElist)(NFObject *, SEL);
-    void (*cmdGet_)(NFObject *, SEL, const char *);
-    void (*cmdHelp)(NFObject *, SEL);
-    void (*cmdKeys)(NFObject *, SEL);
-    void (*cmdLen)(NFObject *, SEL);
-    void (*cmdNew)(NFObject *, SEL);
-    void (*cmdParse_)(NFObject *, SEL, const char *);
-    void (*cmdPrint)(NFObject *, SEL);
-    void (*cmdQuit)(NFObject *, SEL);
-    void (*cmdSels)(NFObject *, SEL);
-    void (*cmdSet_)(NFObject *, SEL, const char *);
-    void (*cmdType_)(NFObject *, SEL, const char *);
-    NFObject * (*copyValue)(NFObject *, SEL);
-    int (*count)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    void (*each_)(NFObject *, SEL, void (^)(int, NFObject *));
-    NFObject * (*get_)(NFObject *, SEL, const char *);
-    NFObject * (*init)(NFObject *, SEL);
-    NFObject * (*initWithBool_)(NFObject *, SEL, _Bool);
-    NFObject * (*initWithDouble_)(NFObject *, SEL, double);
-    NFObject * (*initWithInt_)(NFObject *, SEL, int);
-    NFObject * (*initWithMessage_)(NFObject *, SEL, const char *);
-    NFObject * (*initWithString_)(NFObject *, SEL, const char *);
-    NFObject * (*initWithTarget_)(NFObject *, SEL, NFObject *);
-    const char * (*message)(NFObject *, SEL);
-    void (*printKeys)(NFObject *, SEL);
-    void (*printOn_)(NFObject *, SEL, int);
-    void (*push_)(NFObject *, SEL, NFObject *);
-    void (*refreshDisplay)(NFObject *, SEL);
-    void (*release)(NFObject *, SEL);
-    void (*removeAt_)(NFObject *, SEL, int);
-    void (*remove_)(NFObject *, SEL, const char *);
-    NFObject * (*retain)(NFObject *, SEL);
-    void (*run)(NFObject *, SEL);
-    void (*setTarget_)(NFObject *, SEL, NFObject *);
-    void (*setValue_)(NFObject *, SEL, _Bool);
-    void (*set_forKey_)(NFObject *, SEL, NFObject *, const char *);
-    NFObject * (*target)(NFObject *, SEL);
-    const char * (*typeName)(NFObject *, SEL);
-    _Bool (*value)(NFObject *, SEL);
+    void (*add_)(NPObject *, SEL, NPObject *);
+    const char * (*atKey_)(NPObject *, SEL, int);
+    NPObject * (*atVal_)(NPObject *, SEL, int);
+    NPObject * (*at_)(NPObject *, SEL, int);
+    void (*cmdDel_)(NPObject *, SEL, const char *);
+    void (*cmdElist)(NPObject *, SEL);
+    void (*cmdGet_)(NPObject *, SEL, const char *);
+    void (*cmdHelp)(NPObject *, SEL);
+    void (*cmdKeys)(NPObject *, SEL);
+    void (*cmdLen)(NPObject *, SEL);
+    void (*cmdNew)(NPObject *, SEL);
+    void (*cmdParse_)(NPObject *, SEL, const char *);
+    void (*cmdPrint)(NPObject *, SEL);
+    void (*cmdQuit)(NPObject *, SEL);
+    void (*cmdSels)(NPObject *, SEL);
+    void (*cmdSet_)(NPObject *, SEL, const char *);
+    void (*cmdType_)(NPObject *, SEL, const char *);
+    NPObject * (*copyValue)(NPObject *, SEL);
+    int (*count)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    void (*each_)(NPObject *, SEL, void (^)(int, NPObject *));
+    NPObject * (*get_)(NPObject *, SEL, const char *);
+    NPObject * (*init)(NPObject *, SEL);
+    NPObject * (*initWithBool_)(NPObject *, SEL, _Bool);
+    NPObject * (*initWithDouble_)(NPObject *, SEL, double);
+    NPObject * (*initWithInt_)(NPObject *, SEL, int);
+    NPObject * (*initWithMessage_)(NPObject *, SEL, const char *);
+    NPObject * (*initWithString_)(NPObject *, SEL, const char *);
+    NPObject * (*initWithTarget_)(NPObject *, SEL, NPObject *);
+    const char * (*message)(NPObject *, SEL);
+    void (*printKeys)(NPObject *, SEL);
+    void (*printOn_)(NPObject *, SEL, int);
+    void (*push_)(NPObject *, SEL, NPObject *);
+    void (*refreshDisplay)(NPObject *, SEL);
+    void (*release)(NPObject *, SEL);
+    void (*removeAt_)(NPObject *, SEL, int);
+    void (*remove_)(NPObject *, SEL, const char *);
+    NPObject * (*retain)(NPObject *, SEL);
+    void (*run)(NPObject *, SEL);
+    void (*setTarget_)(NPObject *, SEL, NPObject *);
+    void (*setValue_)(NPObject *, SEL, _Bool);
+    void (*set_forKey_)(NPObject *, SEL, NPObject *, const char *);
+    NPObject * (*target)(NPObject *, SEL);
+    const char * (*typeName)(NPObject *, SEL);
+    _Bool (*value)(NPObject *, SEL);
 };
 
-struct nopa_NFObject_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+struct nopa_NPObject_meta_vtable {
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct nopa_JSON__Bool_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct nopa_JSON__Editor_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct nopa_JSON__Error_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct nopa_JSON__Null_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFObject * (*sharedNull)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPObject * (*sharedNull)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct nopa_JSON__Number_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct nopa_JSON__Object_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct nopa_JSON__Parser_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFObject * (*parse_)(NFClass *, SEL, const char *);
-    NFClass * (*class)(NFClass *, SEL);
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPObject * (*parse_)(NPClass *, SEL, const char *);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct nopa_JSON__String_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct nopa_Buffer_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct nopa_Watcher_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct nopa_JSON__Array_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 
 struct JSON__Bool {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     _Bool _value;
 };
 typedef struct JSON__Bool JSON__Bool;
 
 struct JSON__Editor {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
-    NFObject * _root;
+    NPObject * _root;
     _Bool _running;
     char _inputBuf[4096];
 };
 typedef struct JSON__Editor JSON__Editor;
 
 struct JSON__Error {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     char * _message;
 };
 typedef struct JSON__Error JSON__Error;
 
 struct JSON__Null {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
 };
 typedef struct JSON__Null JSON__Null;
 
 struct JSON__Number {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     double _value;
 };
 typedef struct JSON__Number JSON__Number;
 
 struct JSON__Object {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     char * * _keys;
-    NFObject * * _values;
+    NPObject * * _values;
     int _count;
     int _capacity;
 };
 typedef struct JSON__Object JSON__Object;
 
 struct JSON__Parser {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
 };
 typedef struct JSON__Parser JSON__Parser;
 
 struct JSON__String {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     char * _value;
 };
 typedef struct JSON__String JSON__String;
 
 struct Buffer {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
-    NFObject * _storage[16];
+    NPObject * _storage[16];
     int _count;
 };
 typedef struct Buffer Buffer;
 
 struct Watcher {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
-    NFObject * _target;
+    NPObject * _target;
 };
 typedef struct Watcher Watcher;
 
 struct JSON__Array {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
-    NFObject * * _items;
+    NPObject * * _items;
     int _count;
     int _capacity;
 };
 typedef struct JSON__Array JSON__Array;
 
-extern NFClass nopa___nopa_root_class;
-extern NFClass nopa_NFObject_class;
-extern NFClass nopa_JSON__Bool_class;
-extern NFClass nopa_JSON__Editor_class;
-extern NFClass nopa_JSON__Error_class;
-extern NFClass nopa_JSON__Null_class;
-extern NFClass nopa_JSON__Number_class;
-extern NFClass nopa_JSON__Object_class;
-extern NFClass nopa_JSON__Parser_class;
-extern NFClass nopa_JSON__String_class;
-extern NFClass nopa_Buffer_class;
-extern NFClass nopa_Watcher_class;
-extern NFClass nopa_JSON__Array_class;
+extern NPClass nopa___nopa_root_class;
+extern NPClass nopa_NPObject_class;
+extern NPClass nopa_JSON__Bool_class;
+extern NPClass nopa_JSON__Editor_class;
+extern NPClass nopa_JSON__Error_class;
+extern NPClass nopa_JSON__Null_class;
+extern NPClass nopa_JSON__Number_class;
+extern NPClass nopa_JSON__Object_class;
+extern NPClass nopa_JSON__Parser_class;
+extern NPClass nopa_JSON__String_class;
+extern NPClass nopa_Buffer_class;
+extern NPClass nopa_Watcher_class;
+extern NPClass nopa_JSON__Array_class;
 void nopa_meta_init(void);
 
 struct nopa_vtable nopa___nopa_root_vtable_inst = {
@@ -475,10 +475,10 @@ struct nopa_vtable nopa___nopa_root_vtable_inst = {
     .cmdType_ = NULL,
     .copyValue = NULL,
     .count = NULL,
-    .dealloc = (void (*)(NFObject *, SEL))__nopa_root_dealloc,
+    .dealloc = (void (*)(NPObject *, SEL))__nopa_root_dealloc,
     .each_ = NULL,
     .get_ = NULL,
-    .init = (NFObject * (*)(NFObject *, SEL))__nopa_root_init,
+    .init = (NPObject * (*)(NPObject *, SEL))__nopa_root_init,
     .initWithBool_ = NULL,
     .initWithDouble_ = NULL,
     .initWithInt_ = NULL,
@@ -490,10 +490,10 @@ struct nopa_vtable nopa___nopa_root_vtable_inst = {
     .printOn_ = NULL,
     .push_ = NULL,
     .refreshDisplay = NULL,
-    .release = (void (*)(NFObject *, SEL))__nopa_root_release,
+    .release = (void (*)(NPObject *, SEL))__nopa_root_release,
     .removeAt_ = NULL,
     .remove_ = NULL,
-    .retain = (NFObject * (*)(NFObject *, SEL))__nopa_root_retain,
+    .retain = (NPObject * (*)(NPObject *, SEL))__nopa_root_retain,
     .run = NULL,
     .setTarget_ = NULL,
     .setValue_ = NULL,
@@ -503,7 +503,7 @@ struct nopa_vtable nopa___nopa_root_vtable_inst = {
     .value = NULL,
 };
 
-struct nopa_vtable nopa_NFObject_vtable_inst = {
+struct nopa_vtable nopa_NPObject_vtable_inst = {
     .add_ = NULL,
     .atKey_ = NULL,
     .atVal_ = NULL,
@@ -523,10 +523,10 @@ struct nopa_vtable nopa_NFObject_vtable_inst = {
     .cmdType_ = NULL,
     .copyValue = NULL,
     .count = NULL,
-    .dealloc = (void (*)(NFObject *, SEL))NFObject_dealloc,
+    .dealloc = (void (*)(NPObject *, SEL))NPObject_dealloc,
     .each_ = NULL,
     .get_ = NULL,
-    .init = (NFObject * (*)(NFObject *, SEL))NFObject_init,
+    .init = (NPObject * (*)(NPObject *, SEL))NPObject_init,
     .initWithBool_ = NULL,
     .initWithDouble_ = NULL,
     .initWithInt_ = NULL,
@@ -538,10 +538,10 @@ struct nopa_vtable nopa_NFObject_vtable_inst = {
     .printOn_ = NULL,
     .push_ = NULL,
     .refreshDisplay = NULL,
-    .release = (void (*)(NFObject *, SEL))NFObject_release,
+    .release = (void (*)(NPObject *, SEL))NPObject_release,
     .removeAt_ = NULL,
     .remove_ = NULL,
-    .retain = (NFObject * (*)(NFObject *, SEL))NFObject_retain,
+    .retain = (NPObject * (*)(NPObject *, SEL))NPObject_retain,
     .run = NULL,
     .setTarget_ = NULL,
     .setValue_ = NULL,
@@ -569,13 +569,13 @@ struct nopa_vtable nopa_JSON__Bool_vtable_inst = {
     .cmdSels = NULL,
     .cmdSet_ = NULL,
     .cmdType_ = NULL,
-    .copyValue = (NFObject * (*)(NFObject *, SEL))JSON__Bool_copyValue,
+    .copyValue = (NPObject * (*)(NPObject *, SEL))JSON__Bool_copyValue,
     .count = NULL,
-    .dealloc = (void (*)(NFObject *, SEL))NFObject_dealloc,
+    .dealloc = (void (*)(NPObject *, SEL))NPObject_dealloc,
     .each_ = NULL,
     .get_ = NULL,
-    .init = (NFObject * (*)(NFObject *, SEL))NFObject_init,
-    .initWithBool_ = (NFObject * (*)(NFObject *, SEL, _Bool))JSON__Bool_initWithBool_,
+    .init = (NPObject * (*)(NPObject *, SEL))NPObject_init,
+    .initWithBool_ = (NPObject * (*)(NPObject *, SEL, _Bool))JSON__Bool_initWithBool_,
     .initWithDouble_ = NULL,
     .initWithInt_ = NULL,
     .initWithMessage_ = NULL,
@@ -583,20 +583,20 @@ struct nopa_vtable nopa_JSON__Bool_vtable_inst = {
     .initWithTarget_ = NULL,
     .message = NULL,
     .printKeys = NULL,
-    .printOn_ = (void (*)(NFObject *, SEL, int))JSON__Bool_printOn_,
+    .printOn_ = (void (*)(NPObject *, SEL, int))JSON__Bool_printOn_,
     .push_ = NULL,
     .refreshDisplay = NULL,
-    .release = (void (*)(NFObject *, SEL))NFObject_release,
+    .release = (void (*)(NPObject *, SEL))NPObject_release,
     .removeAt_ = NULL,
     .remove_ = NULL,
-    .retain = (NFObject * (*)(NFObject *, SEL))NFObject_retain,
+    .retain = (NPObject * (*)(NPObject *, SEL))NPObject_retain,
     .run = NULL,
     .setTarget_ = NULL,
-    .setValue_ = (void (*)(NFObject *, SEL, _Bool))JSON__Bool_setValue_,
+    .setValue_ = (void (*)(NPObject *, SEL, _Bool))JSON__Bool_setValue_,
     .set_forKey_ = NULL,
     .target = NULL,
-    .typeName = (const char * (*)(NFObject *, SEL))JSON__Bool_typeName,
-    .value = (_Bool (*)(NFObject *, SEL))JSON__Bool_value,
+    .typeName = (const char * (*)(NPObject *, SEL))JSON__Bool_typeName,
+    .value = (_Bool (*)(NPObject *, SEL))JSON__Bool_value,
 };
 
 struct nopa_vtable nopa_JSON__Editor_vtable_inst = {
@@ -604,25 +604,25 @@ struct nopa_vtable nopa_JSON__Editor_vtable_inst = {
     .atKey_ = NULL,
     .atVal_ = NULL,
     .at_ = NULL,
-    .cmdDel_ = (void (*)(NFObject *, SEL, const char *))JSON__Editor_cmdDel_,
-    .cmdElist = (void (*)(NFObject *, SEL))JSON__Editor_cmdElist,
-    .cmdGet_ = (void (*)(NFObject *, SEL, const char *))JSON__Editor_cmdGet_,
-    .cmdHelp = (void (*)(NFObject *, SEL))JSON__Editor_cmdHelp,
-    .cmdKeys = (void (*)(NFObject *, SEL))JSON__Editor_cmdKeys,
-    .cmdLen = (void (*)(NFObject *, SEL))JSON__Editor_cmdLen,
-    .cmdNew = (void (*)(NFObject *, SEL))JSON__Editor_cmdNew,
-    .cmdParse_ = (void (*)(NFObject *, SEL, const char *))JSON__Editor_cmdParse_,
-    .cmdPrint = (void (*)(NFObject *, SEL))JSON__Editor_cmdPrint,
-    .cmdQuit = (void (*)(NFObject *, SEL))JSON__Editor_cmdQuit,
-    .cmdSels = (void (*)(NFObject *, SEL))JSON__Editor_cmdSels,
-    .cmdSet_ = (void (*)(NFObject *, SEL, const char *))JSON__Editor_cmdSet_,
-    .cmdType_ = (void (*)(NFObject *, SEL, const char *))JSON__Editor_cmdType_,
+    .cmdDel_ = (void (*)(NPObject *, SEL, const char *))JSON__Editor_cmdDel_,
+    .cmdElist = (void (*)(NPObject *, SEL))JSON__Editor_cmdElist,
+    .cmdGet_ = (void (*)(NPObject *, SEL, const char *))JSON__Editor_cmdGet_,
+    .cmdHelp = (void (*)(NPObject *, SEL))JSON__Editor_cmdHelp,
+    .cmdKeys = (void (*)(NPObject *, SEL))JSON__Editor_cmdKeys,
+    .cmdLen = (void (*)(NPObject *, SEL))JSON__Editor_cmdLen,
+    .cmdNew = (void (*)(NPObject *, SEL))JSON__Editor_cmdNew,
+    .cmdParse_ = (void (*)(NPObject *, SEL, const char *))JSON__Editor_cmdParse_,
+    .cmdPrint = (void (*)(NPObject *, SEL))JSON__Editor_cmdPrint,
+    .cmdQuit = (void (*)(NPObject *, SEL))JSON__Editor_cmdQuit,
+    .cmdSels = (void (*)(NPObject *, SEL))JSON__Editor_cmdSels,
+    .cmdSet_ = (void (*)(NPObject *, SEL, const char *))JSON__Editor_cmdSet_,
+    .cmdType_ = (void (*)(NPObject *, SEL, const char *))JSON__Editor_cmdType_,
     .copyValue = NULL,
     .count = NULL,
-    .dealloc = (void (*)(NFObject *, SEL))JSON__Editor_dealloc,
+    .dealloc = (void (*)(NPObject *, SEL))JSON__Editor_dealloc,
     .each_ = NULL,
     .get_ = NULL,
-    .init = (NFObject * (*)(NFObject *, SEL))JSON__Editor_init,
+    .init = (NPObject * (*)(NPObject *, SEL))JSON__Editor_init,
     .initWithBool_ = NULL,
     .initWithDouble_ = NULL,
     .initWithInt_ = NULL,
@@ -633,12 +633,12 @@ struct nopa_vtable nopa_JSON__Editor_vtable_inst = {
     .printKeys = NULL,
     .printOn_ = NULL,
     .push_ = NULL,
-    .refreshDisplay = (void (*)(NFObject *, SEL))JSON__Editor_refreshDisplay,
-    .release = (void (*)(NFObject *, SEL))NFObject_release,
+    .refreshDisplay = (void (*)(NPObject *, SEL))JSON__Editor_refreshDisplay,
+    .release = (void (*)(NPObject *, SEL))NPObject_release,
     .removeAt_ = NULL,
     .remove_ = NULL,
-    .retain = (NFObject * (*)(NFObject *, SEL))NFObject_retain,
-    .run = (void (*)(NFObject *, SEL))JSON__Editor_run,
+    .retain = (NPObject * (*)(NPObject *, SEL))NPObject_retain,
+    .run = (void (*)(NPObject *, SEL))JSON__Editor_run,
     .setTarget_ = NULL,
     .setValue_ = NULL,
     .set_forKey_ = NULL,
@@ -667,25 +667,25 @@ struct nopa_vtable nopa_JSON__Error_vtable_inst = {
     .cmdType_ = NULL,
     .copyValue = NULL,
     .count = NULL,
-    .dealloc = (void (*)(NFObject *, SEL))JSON__Error_dealloc,
+    .dealloc = (void (*)(NPObject *, SEL))JSON__Error_dealloc,
     .each_ = NULL,
     .get_ = NULL,
-    .init = (NFObject * (*)(NFObject *, SEL))NFObject_init,
+    .init = (NPObject * (*)(NPObject *, SEL))NPObject_init,
     .initWithBool_ = NULL,
     .initWithDouble_ = NULL,
     .initWithInt_ = NULL,
-    .initWithMessage_ = (NFObject * (*)(NFObject *, SEL, const char *))JSON__Error_initWithMessage_,
+    .initWithMessage_ = (NPObject * (*)(NPObject *, SEL, const char *))JSON__Error_initWithMessage_,
     .initWithString_ = NULL,
     .initWithTarget_ = NULL,
-    .message = (const char * (*)(NFObject *, SEL))JSON__Error_message,
+    .message = (const char * (*)(NPObject *, SEL))JSON__Error_message,
     .printKeys = NULL,
     .printOn_ = NULL,
     .push_ = NULL,
     .refreshDisplay = NULL,
-    .release = (void (*)(NFObject *, SEL))NFObject_release,
+    .release = (void (*)(NPObject *, SEL))NPObject_release,
     .removeAt_ = NULL,
     .remove_ = NULL,
-    .retain = (NFObject * (*)(NFObject *, SEL))NFObject_retain,
+    .retain = (NPObject * (*)(NPObject *, SEL))NPObject_retain,
     .run = NULL,
     .setTarget_ = NULL,
     .setValue_ = NULL,
@@ -713,12 +713,12 @@ struct nopa_vtable nopa_JSON__Null_vtable_inst = {
     .cmdSels = NULL,
     .cmdSet_ = NULL,
     .cmdType_ = NULL,
-    .copyValue = (NFObject * (*)(NFObject *, SEL))JSON__Null_copyValue,
+    .copyValue = (NPObject * (*)(NPObject *, SEL))JSON__Null_copyValue,
     .count = NULL,
-    .dealloc = (void (*)(NFObject *, SEL))NFObject_dealloc,
+    .dealloc = (void (*)(NPObject *, SEL))NPObject_dealloc,
     .each_ = NULL,
     .get_ = NULL,
-    .init = (NFObject * (*)(NFObject *, SEL))NFObject_init,
+    .init = (NPObject * (*)(NPObject *, SEL))NPObject_init,
     .initWithBool_ = NULL,
     .initWithDouble_ = NULL,
     .initWithInt_ = NULL,
@@ -727,19 +727,19 @@ struct nopa_vtable nopa_JSON__Null_vtable_inst = {
     .initWithTarget_ = NULL,
     .message = NULL,
     .printKeys = NULL,
-    .printOn_ = (void (*)(NFObject *, SEL, int))JSON__Null_printOn_,
+    .printOn_ = (void (*)(NPObject *, SEL, int))JSON__Null_printOn_,
     .push_ = NULL,
     .refreshDisplay = NULL,
-    .release = (void (*)(NFObject *, SEL))NFObject_release,
+    .release = (void (*)(NPObject *, SEL))NPObject_release,
     .removeAt_ = NULL,
     .remove_ = NULL,
-    .retain = (NFObject * (*)(NFObject *, SEL))NFObject_retain,
+    .retain = (NPObject * (*)(NPObject *, SEL))NPObject_retain,
     .run = NULL,
     .setTarget_ = NULL,
     .setValue_ = NULL,
     .set_forKey_ = NULL,
     .target = NULL,
-    .typeName = (const char * (*)(NFObject *, SEL))JSON__Null_typeName,
+    .typeName = (const char * (*)(NPObject *, SEL))JSON__Null_typeName,
     .value = NULL,
 };
 
@@ -761,40 +761,40 @@ struct nopa_vtable nopa_JSON__Number_vtable_inst = {
     .cmdSels = NULL,
     .cmdSet_ = NULL,
     .cmdType_ = NULL,
-    .copyValue = (NFObject * (*)(NFObject *, SEL))JSON__Number_copyValue,
+    .copyValue = (NPObject * (*)(NPObject *, SEL))JSON__Number_copyValue,
     .count = NULL,
-    .dealloc = (void (*)(NFObject *, SEL))NFObject_dealloc,
+    .dealloc = (void (*)(NPObject *, SEL))NPObject_dealloc,
     .each_ = NULL,
     .get_ = NULL,
-    .init = (NFObject * (*)(NFObject *, SEL))NFObject_init,
+    .init = (NPObject * (*)(NPObject *, SEL))NPObject_init,
     .initWithBool_ = NULL,
-    .initWithDouble_ = (NFObject * (*)(NFObject *, SEL, double))JSON__Number_initWithDouble_,
-    .initWithInt_ = (NFObject * (*)(NFObject *, SEL, int))JSON__Number_initWithInt_,
+    .initWithDouble_ = (NPObject * (*)(NPObject *, SEL, double))JSON__Number_initWithDouble_,
+    .initWithInt_ = (NPObject * (*)(NPObject *, SEL, int))JSON__Number_initWithInt_,
     .initWithMessage_ = NULL,
     .initWithString_ = NULL,
     .initWithTarget_ = NULL,
     .message = NULL,
     .printKeys = NULL,
-    .printOn_ = (void (*)(NFObject *, SEL, int))JSON__Number_printOn_,
+    .printOn_ = (void (*)(NPObject *, SEL, int))JSON__Number_printOn_,
     .push_ = NULL,
     .refreshDisplay = NULL,
-    .release = (void (*)(NFObject *, SEL))NFObject_release,
+    .release = (void (*)(NPObject *, SEL))NPObject_release,
     .removeAt_ = NULL,
     .remove_ = NULL,
-    .retain = (NFObject * (*)(NFObject *, SEL))NFObject_retain,
+    .retain = (NPObject * (*)(NPObject *, SEL))NPObject_retain,
     .run = NULL,
     .setTarget_ = NULL,
-    .setValue_ = (void (*)(NFObject *, SEL, _Bool))JSON__Number_setValue_,
+    .setValue_ = (void (*)(NPObject *, SEL, _Bool))JSON__Number_setValue_,
     .set_forKey_ = NULL,
     .target = NULL,
-    .typeName = (const char * (*)(NFObject *, SEL))JSON__Number_typeName,
-    .value = (_Bool (*)(NFObject *, SEL))JSON__Number_value,
+    .typeName = (const char * (*)(NPObject *, SEL))JSON__Number_typeName,
+    .value = (_Bool (*)(NPObject *, SEL))JSON__Number_value,
 };
 
 struct nopa_vtable nopa_JSON__Object_vtable_inst = {
     .add_ = NULL,
-    .atKey_ = (const char * (*)(NFObject *, SEL, int))JSON__Object_atKey_,
-    .atVal_ = (NFObject * (*)(NFObject *, SEL, int))JSON__Object_atVal_,
+    .atKey_ = (const char * (*)(NPObject *, SEL, int))JSON__Object_atKey_,
+    .atVal_ = (NPObject * (*)(NPObject *, SEL, int))JSON__Object_atVal_,
     .at_ = NULL,
     .cmdDel_ = NULL,
     .cmdElist = NULL,
@@ -809,12 +809,12 @@ struct nopa_vtable nopa_JSON__Object_vtable_inst = {
     .cmdSels = NULL,
     .cmdSet_ = NULL,
     .cmdType_ = NULL,
-    .copyValue = (NFObject * (*)(NFObject *, SEL))JSON__Object_copyValue,
-    .count = (int (*)(NFObject *, SEL))JSON__Object_count,
-    .dealloc = (void (*)(NFObject *, SEL))JSON__Object_dealloc,
-    .each_ = (void (*)(NFObject *, SEL, void (^)(int, NFObject *)))JSON__Object_each_,
-    .get_ = (NFObject * (*)(NFObject *, SEL, const char *))JSON__Object_get_,
-    .init = (NFObject * (*)(NFObject *, SEL))JSON__Object_init,
+    .copyValue = (NPObject * (*)(NPObject *, SEL))JSON__Object_copyValue,
+    .count = (int (*)(NPObject *, SEL))JSON__Object_count,
+    .dealloc = (void (*)(NPObject *, SEL))JSON__Object_dealloc,
+    .each_ = (void (*)(NPObject *, SEL, void (^)(int, NPObject *)))JSON__Object_each_,
+    .get_ = (NPObject * (*)(NPObject *, SEL, const char *))JSON__Object_get_,
+    .init = (NPObject * (*)(NPObject *, SEL))JSON__Object_init,
     .initWithBool_ = NULL,
     .initWithDouble_ = NULL,
     .initWithInt_ = NULL,
@@ -822,20 +822,20 @@ struct nopa_vtable nopa_JSON__Object_vtable_inst = {
     .initWithString_ = NULL,
     .initWithTarget_ = NULL,
     .message = NULL,
-    .printKeys = (void (*)(NFObject *, SEL))JSON__Object_printKeys,
-    .printOn_ = (void (*)(NFObject *, SEL, int))JSON__Object_printOn_,
+    .printKeys = (void (*)(NPObject *, SEL))JSON__Object_printKeys,
+    .printOn_ = (void (*)(NPObject *, SEL, int))JSON__Object_printOn_,
     .push_ = NULL,
     .refreshDisplay = NULL,
-    .release = (void (*)(NFObject *, SEL))NFObject_release,
+    .release = (void (*)(NPObject *, SEL))NPObject_release,
     .removeAt_ = NULL,
-    .remove_ = (void (*)(NFObject *, SEL, const char *))JSON__Object_remove_,
-    .retain = (NFObject * (*)(NFObject *, SEL))NFObject_retain,
+    .remove_ = (void (*)(NPObject *, SEL, const char *))JSON__Object_remove_,
+    .retain = (NPObject * (*)(NPObject *, SEL))NPObject_retain,
     .run = NULL,
     .setTarget_ = NULL,
     .setValue_ = NULL,
-    .set_forKey_ = (void (*)(NFObject *, SEL, NFObject *, const char *))JSON__Object_set_forKey_,
+    .set_forKey_ = (void (*)(NPObject *, SEL, NPObject *, const char *))JSON__Object_set_forKey_,
     .target = NULL,
-    .typeName = (const char * (*)(NFObject *, SEL))JSON__Object_typeName,
+    .typeName = (const char * (*)(NPObject *, SEL))JSON__Object_typeName,
     .value = NULL,
 };
 
@@ -859,10 +859,10 @@ struct nopa_vtable nopa_JSON__Parser_vtable_inst = {
     .cmdType_ = NULL,
     .copyValue = NULL,
     .count = NULL,
-    .dealloc = (void (*)(NFObject *, SEL))NFObject_dealloc,
+    .dealloc = (void (*)(NPObject *, SEL))NPObject_dealloc,
     .each_ = NULL,
     .get_ = NULL,
-    .init = (NFObject * (*)(NFObject *, SEL))NFObject_init,
+    .init = (NPObject * (*)(NPObject *, SEL))NPObject_init,
     .initWithBool_ = NULL,
     .initWithDouble_ = NULL,
     .initWithInt_ = NULL,
@@ -874,10 +874,10 @@ struct nopa_vtable nopa_JSON__Parser_vtable_inst = {
     .printOn_ = NULL,
     .push_ = NULL,
     .refreshDisplay = NULL,
-    .release = (void (*)(NFObject *, SEL))NFObject_release,
+    .release = (void (*)(NPObject *, SEL))NPObject_release,
     .removeAt_ = NULL,
     .remove_ = NULL,
-    .retain = (NFObject * (*)(NFObject *, SEL))NFObject_retain,
+    .retain = (NPObject * (*)(NPObject *, SEL))NPObject_retain,
     .run = NULL,
     .setTarget_ = NULL,
     .setValue_ = NULL,
@@ -905,34 +905,34 @@ struct nopa_vtable nopa_JSON__String_vtable_inst = {
     .cmdSels = NULL,
     .cmdSet_ = NULL,
     .cmdType_ = NULL,
-    .copyValue = (NFObject * (*)(NFObject *, SEL))JSON__String_copyValue,
+    .copyValue = (NPObject * (*)(NPObject *, SEL))JSON__String_copyValue,
     .count = NULL,
-    .dealloc = (void (*)(NFObject *, SEL))JSON__String_dealloc,
+    .dealloc = (void (*)(NPObject *, SEL))JSON__String_dealloc,
     .each_ = NULL,
     .get_ = NULL,
-    .init = (NFObject * (*)(NFObject *, SEL))NFObject_init,
+    .init = (NPObject * (*)(NPObject *, SEL))NPObject_init,
     .initWithBool_ = NULL,
     .initWithDouble_ = NULL,
     .initWithInt_ = NULL,
     .initWithMessage_ = NULL,
-    .initWithString_ = (NFObject * (*)(NFObject *, SEL, const char *))JSON__String_initWithString_,
+    .initWithString_ = (NPObject * (*)(NPObject *, SEL, const char *))JSON__String_initWithString_,
     .initWithTarget_ = NULL,
     .message = NULL,
     .printKeys = NULL,
-    .printOn_ = (void (*)(NFObject *, SEL, int))JSON__String_printOn_,
+    .printOn_ = (void (*)(NPObject *, SEL, int))JSON__String_printOn_,
     .push_ = NULL,
     .refreshDisplay = NULL,
-    .release = (void (*)(NFObject *, SEL))NFObject_release,
+    .release = (void (*)(NPObject *, SEL))NPObject_release,
     .removeAt_ = NULL,
     .remove_ = NULL,
-    .retain = (NFObject * (*)(NFObject *, SEL))NFObject_retain,
+    .retain = (NPObject * (*)(NPObject *, SEL))NPObject_retain,
     .run = NULL,
     .setTarget_ = NULL,
-    .setValue_ = (void (*)(NFObject *, SEL, _Bool))JSON__String_setValue_,
+    .setValue_ = (void (*)(NPObject *, SEL, _Bool))JSON__String_setValue_,
     .set_forKey_ = NULL,
     .target = NULL,
-    .typeName = (const char * (*)(NFObject *, SEL))JSON__String_typeName,
-    .value = (_Bool (*)(NFObject *, SEL))JSON__String_value,
+    .typeName = (const char * (*)(NPObject *, SEL))JSON__String_typeName,
+    .value = (_Bool (*)(NPObject *, SEL))JSON__String_value,
 };
 
 struct nopa_vtable nopa_Buffer_vtable_inst = {
@@ -954,11 +954,11 @@ struct nopa_vtable nopa_Buffer_vtable_inst = {
     .cmdSet_ = NULL,
     .cmdType_ = NULL,
     .copyValue = NULL,
-    .count = (int (*)(NFObject *, SEL))Buffer_count,
-    .dealloc = (void (*)(NFObject *, SEL))NFObject_dealloc,
+    .count = (int (*)(NPObject *, SEL))Buffer_count,
+    .dealloc = (void (*)(NPObject *, SEL))NPObject_dealloc,
     .each_ = NULL,
-    .get_ = (NFObject * (*)(NFObject *, SEL, const char *))Buffer_get_,
-    .init = (NFObject * (*)(NFObject *, SEL))Buffer_init,
+    .get_ = (NPObject * (*)(NPObject *, SEL, const char *))Buffer_get_,
+    .init = (NPObject * (*)(NPObject *, SEL))Buffer_init,
     .initWithBool_ = NULL,
     .initWithDouble_ = NULL,
     .initWithInt_ = NULL,
@@ -968,12 +968,12 @@ struct nopa_vtable nopa_Buffer_vtable_inst = {
     .message = NULL,
     .printKeys = NULL,
     .printOn_ = NULL,
-    .push_ = (void (*)(NFObject *, SEL, NFObject *))Buffer_push_,
+    .push_ = (void (*)(NPObject *, SEL, NPObject *))Buffer_push_,
     .refreshDisplay = NULL,
-    .release = (void (*)(NFObject *, SEL))NFObject_release,
+    .release = (void (*)(NPObject *, SEL))NPObject_release,
     .removeAt_ = NULL,
     .remove_ = NULL,
-    .retain = (NFObject * (*)(NFObject *, SEL))NFObject_retain,
+    .retain = (NPObject * (*)(NPObject *, SEL))NPObject_retain,
     .run = NULL,
     .setTarget_ = NULL,
     .setValue_ = NULL,
@@ -1003,39 +1003,39 @@ struct nopa_vtable nopa_Watcher_vtable_inst = {
     .cmdType_ = NULL,
     .copyValue = NULL,
     .count = NULL,
-    .dealloc = (void (*)(NFObject *, SEL))Watcher_dealloc,
+    .dealloc = (void (*)(NPObject *, SEL))Watcher_dealloc,
     .each_ = NULL,
     .get_ = NULL,
-    .init = (NFObject * (*)(NFObject *, SEL))NFObject_init,
+    .init = (NPObject * (*)(NPObject *, SEL))NPObject_init,
     .initWithBool_ = NULL,
     .initWithDouble_ = NULL,
     .initWithInt_ = NULL,
     .initWithMessage_ = NULL,
     .initWithString_ = NULL,
-    .initWithTarget_ = (NFObject * (*)(NFObject *, SEL, NFObject *))Watcher_initWithTarget_,
+    .initWithTarget_ = (NPObject * (*)(NPObject *, SEL, NPObject *))Watcher_initWithTarget_,
     .message = NULL,
     .printKeys = NULL,
     .printOn_ = NULL,
     .push_ = NULL,
     .refreshDisplay = NULL,
-    .release = (void (*)(NFObject *, SEL))NFObject_release,
+    .release = (void (*)(NPObject *, SEL))NPObject_release,
     .removeAt_ = NULL,
     .remove_ = NULL,
-    .retain = (NFObject * (*)(NFObject *, SEL))NFObject_retain,
+    .retain = (NPObject * (*)(NPObject *, SEL))NPObject_retain,
     .run = NULL,
-    .setTarget_ = (void (*)(NFObject *, SEL, NFObject *))Watcher_setTarget_,
+    .setTarget_ = (void (*)(NPObject *, SEL, NPObject *))Watcher_setTarget_,
     .setValue_ = NULL,
     .set_forKey_ = NULL,
-    .target = (NFObject * (*)(NFObject *, SEL))Watcher_target,
+    .target = (NPObject * (*)(NPObject *, SEL))Watcher_target,
     .typeName = NULL,
     .value = NULL,
 };
 
 struct nopa_vtable nopa_JSON__Array_vtable_inst = {
-    .add_ = (void (*)(NFObject *, SEL, NFObject *))JSON__Array_add_,
+    .add_ = (void (*)(NPObject *, SEL, NPObject *))JSON__Array_add_,
     .atKey_ = NULL,
     .atVal_ = NULL,
-    .at_ = (NFObject * (*)(NFObject *, SEL, int))JSON__Array_at_,
+    .at_ = (NPObject * (*)(NPObject *, SEL, int))JSON__Array_at_,
     .cmdDel_ = NULL,
     .cmdElist = NULL,
     .cmdGet_ = NULL,
@@ -1049,12 +1049,12 @@ struct nopa_vtable nopa_JSON__Array_vtable_inst = {
     .cmdSels = NULL,
     .cmdSet_ = NULL,
     .cmdType_ = NULL,
-    .copyValue = (NFObject * (*)(NFObject *, SEL))JSON__Array_copyValue,
-    .count = (int (*)(NFObject *, SEL))JSON__Array_count,
-    .dealloc = (void (*)(NFObject *, SEL))JSON__Array_dealloc,
-    .each_ = (void (*)(NFObject *, SEL, void (^)(int, NFObject *)))JSON__Array_each_,
+    .copyValue = (NPObject * (*)(NPObject *, SEL))JSON__Array_copyValue,
+    .count = (int (*)(NPObject *, SEL))JSON__Array_count,
+    .dealloc = (void (*)(NPObject *, SEL))JSON__Array_dealloc,
+    .each_ = (void (*)(NPObject *, SEL, void (^)(int, NPObject *)))JSON__Array_each_,
     .get_ = NULL,
-    .init = (NFObject * (*)(NFObject *, SEL))JSON__Array_init,
+    .init = (NPObject * (*)(NPObject *, SEL))JSON__Array_init,
     .initWithBool_ = NULL,
     .initWithDouble_ = NULL,
     .initWithInt_ = NULL,
@@ -1063,172 +1063,172 @@ struct nopa_vtable nopa_JSON__Array_vtable_inst = {
     .initWithTarget_ = NULL,
     .message = NULL,
     .printKeys = NULL,
-    .printOn_ = (void (*)(NFObject *, SEL, int))JSON__Array_printOn_,
+    .printOn_ = (void (*)(NPObject *, SEL, int))JSON__Array_printOn_,
     .push_ = NULL,
     .refreshDisplay = NULL,
-    .release = (void (*)(NFObject *, SEL))NFObject_release,
-    .removeAt_ = (void (*)(NFObject *, SEL, int))JSON__Array_removeAt_,
+    .release = (void (*)(NPObject *, SEL))NPObject_release,
+    .removeAt_ = (void (*)(NPObject *, SEL, int))JSON__Array_removeAt_,
     .remove_ = NULL,
-    .retain = (NFObject * (*)(NFObject *, SEL))NFObject_retain,
+    .retain = (NPObject * (*)(NPObject *, SEL))NPObject_retain,
     .run = NULL,
     .setTarget_ = NULL,
     .setValue_ = NULL,
     .set_forKey_ = NULL,
     .target = NULL,
-    .typeName = (const char * (*)(NFObject *, SEL))JSON__Array_typeName,
+    .typeName = (const char * (*)(NPObject *, SEL))JSON__Array_typeName,
     .value = NULL,
 };
 
-struct nopa_NFObject_meta_vtable nopa_NFObject_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
-    .class = NFObject_getClass,
+struct nopa_NPObject_meta_vtable nopa_NPObject_meta_vtable_inst = {
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
+    .class = NPObject_getClass,
 };
 
 struct nopa_JSON__Bool_meta_vtable nopa_JSON__Bool_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
     .class = JSON__Bool_getClass,
 };
 
 struct nopa_JSON__Editor_meta_vtable nopa_JSON__Editor_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
     .class = JSON__Editor_getClass,
 };
 
 struct nopa_JSON__Error_meta_vtable nopa_JSON__Error_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
     .class = JSON__Error_getClass,
 };
 
 struct nopa_JSON__Null_meta_vtable nopa_JSON__Null_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
     .sharedNull = JSON__Null_sharedNull,
     .class = JSON__Null_getClass,
 };
 
 struct nopa_JSON__Number_meta_vtable nopa_JSON__Number_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
     .class = JSON__Number_getClass,
 };
 
 struct nopa_JSON__Object_meta_vtable nopa_JSON__Object_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
     .class = JSON__Object_getClass,
 };
 
 struct nopa_JSON__Parser_meta_vtable nopa_JSON__Parser_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
     .parse_ = JSON__Parser_parse_,
     .class = JSON__Parser_getClass,
 };
 
 struct nopa_JSON__String_meta_vtable nopa_JSON__String_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
     .class = JSON__String_getClass,
 };
 
 struct nopa_Buffer_meta_vtable nopa_Buffer_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
     .class = Buffer_getClass,
 };
 
 struct nopa_Watcher_meta_vtable nopa_Watcher_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
     .class = Watcher_getClass,
 };
 
 struct nopa_JSON__Array_meta_vtable nopa_JSON__Array_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
     .class = JSON__Array_getClass,
 };
 
-NFClass * NFObject_getClass(NFClass * self, SEL _cmd) {
+NPClass * NPObject_getClass(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
-NFClass * JSON__Bool_getClass(NFClass * self, SEL _cmd) {
+NPClass * JSON__Bool_getClass(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
-NFClass * JSON__Editor_getClass(NFClass * self, SEL _cmd) {
+NPClass * JSON__Editor_getClass(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
-NFClass * JSON__Error_getClass(NFClass * self, SEL _cmd) {
+NPClass * JSON__Error_getClass(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
-NFClass * JSON__Null_getClass(NFClass * self, SEL _cmd) {
+NPClass * JSON__Null_getClass(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
-NFClass * JSON__Number_getClass(NFClass * self, SEL _cmd) {
+NPClass * JSON__Number_getClass(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
-NFClass * JSON__Object_getClass(NFClass * self, SEL _cmd) {
+NPClass * JSON__Object_getClass(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
-NFClass * JSON__Parser_getClass(NFClass * self, SEL _cmd) {
+NPClass * JSON__Parser_getClass(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
-NFClass * JSON__String_getClass(NFClass * self, SEL _cmd) {
+NPClass * JSON__String_getClass(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
-NFClass * Buffer_getClass(NFClass * self, SEL _cmd) {
+NPClass * Buffer_getClass(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
-NFClass * Watcher_getClass(NFClass * self, SEL _cmd) {
+NPClass * Watcher_getClass(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
-NFClass * JSON__Array_getClass(NFClass * self, SEL _cmd) {
+NPClass * JSON__Array_getClass(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
-NFClass nopa___nopa_root_class;
-NFClass nopa_NFObject_class;
-NFClass nopa_JSON__Bool_class;
-NFClass nopa_JSON__Editor_class;
-NFClass nopa_JSON__Error_class;
-NFClass nopa_JSON__Null_class;
-NFClass nopa_JSON__Number_class;
-NFClass nopa_JSON__Object_class;
-NFClass nopa_JSON__Parser_class;
-NFClass nopa_JSON__String_class;
-NFClass nopa_Buffer_class;
-NFClass nopa_Watcher_class;
-NFClass nopa_JSON__Array_class;
+NPClass nopa___nopa_root_class;
+NPClass nopa_NPObject_class;
+NPClass nopa_JSON__Bool_class;
+NPClass nopa_JSON__Editor_class;
+NPClass nopa_JSON__Error_class;
+NPClass nopa_JSON__Null_class;
+NPClass nopa_JSON__Number_class;
+NPClass nopa_JSON__Object_class;
+NPClass nopa_JSON__Parser_class;
+NPClass nopa_JSON__String_class;
+NPClass nopa_Buffer_class;
+NPClass nopa_Watcher_class;
+NPClass nopa_JSON__Array_class;
 
 void nopa_meta_init(void) {
-    nopa___nopa_root_class = (NFClass){
+    nopa___nopa_root_class = (NPClass){
         .name = "__nopa_root",
         .superclass = NULL,
         .instance_size = sizeof(struct __nopa_root),
@@ -1236,294 +1236,294 @@ void nopa_meta_init(void) {
         .class_vtable = NULL,
         .protocol_count = 0,
     };
-    nopa_NFObject_class = (NFClass){
-        .name = "NFObject",
+    nopa_NPObject_class = (NPClass){
+        .name = "NPObject",
         .superclass = &nopa___nopa_root_class,
-        .instance_size = sizeof(struct NFObject),
-        .vtable = &nopa_NFObject_vtable_inst,
-        .class_vtable = &nopa_NFObject_meta_vtable_inst,
+        .instance_size = sizeof(struct NPObject),
+        .vtable = &nopa_NPObject_vtable_inst,
+        .class_vtable = &nopa_NPObject_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_JSON__Bool_class = (NFClass){
+    nopa_JSON__Bool_class = (NPClass){
         .name = "JSON::Bool",
-        .superclass = &nopa_NFObject_class,
+        .superclass = &nopa_NPObject_class,
         .instance_size = sizeof(struct JSON__Bool),
         .vtable = &nopa_JSON__Bool_vtable_inst,
         .class_vtable = &nopa_JSON__Bool_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_JSON__Editor_class = (NFClass){
+    nopa_JSON__Editor_class = (NPClass){
         .name = "JSON::Editor",
-        .superclass = &nopa_NFObject_class,
+        .superclass = &nopa_NPObject_class,
         .instance_size = sizeof(struct JSON__Editor),
         .vtable = &nopa_JSON__Editor_vtable_inst,
         .class_vtable = &nopa_JSON__Editor_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_JSON__Error_class = (NFClass){
+    nopa_JSON__Error_class = (NPClass){
         .name = "JSON::Error",
-        .superclass = &nopa_NFObject_class,
+        .superclass = &nopa_NPObject_class,
         .instance_size = sizeof(struct JSON__Error),
         .vtable = &nopa_JSON__Error_vtable_inst,
         .class_vtable = &nopa_JSON__Error_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_JSON__Null_class = (NFClass){
+    nopa_JSON__Null_class = (NPClass){
         .name = "JSON::Null",
-        .superclass = &nopa_NFObject_class,
+        .superclass = &nopa_NPObject_class,
         .instance_size = sizeof(struct JSON__Null),
         .vtable = &nopa_JSON__Null_vtable_inst,
         .class_vtable = &nopa_JSON__Null_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_JSON__Number_class = (NFClass){
+    nopa_JSON__Number_class = (NPClass){
         .name = "JSON::Number",
-        .superclass = &nopa_NFObject_class,
+        .superclass = &nopa_NPObject_class,
         .instance_size = sizeof(struct JSON__Number),
         .vtable = &nopa_JSON__Number_vtable_inst,
         .class_vtable = &nopa_JSON__Number_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_JSON__Object_class = (NFClass){
+    nopa_JSON__Object_class = (NPClass){
         .name = "JSON::Object",
-        .superclass = &nopa_NFObject_class,
+        .superclass = &nopa_NPObject_class,
         .instance_size = sizeof(struct JSON__Object),
         .vtable = &nopa_JSON__Object_vtable_inst,
         .class_vtable = &nopa_JSON__Object_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_JSON__Parser_class = (NFClass){
+    nopa_JSON__Parser_class = (NPClass){
         .name = "JSON::Parser",
-        .superclass = &nopa_NFObject_class,
+        .superclass = &nopa_NPObject_class,
         .instance_size = sizeof(struct JSON__Parser),
         .vtable = &nopa_JSON__Parser_vtable_inst,
         .class_vtable = &nopa_JSON__Parser_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_JSON__String_class = (NFClass){
+    nopa_JSON__String_class = (NPClass){
         .name = "JSON::String",
-        .superclass = &nopa_NFObject_class,
+        .superclass = &nopa_NPObject_class,
         .instance_size = sizeof(struct JSON__String),
         .vtable = &nopa_JSON__String_vtable_inst,
         .class_vtable = &nopa_JSON__String_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_Buffer_class = (NFClass){
+    nopa_Buffer_class = (NPClass){
         .name = "Buffer",
-        .superclass = &nopa_NFObject_class,
+        .superclass = &nopa_NPObject_class,
         .instance_size = sizeof(struct Buffer),
         .vtable = &nopa_Buffer_vtable_inst,
         .class_vtable = &nopa_Buffer_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_Watcher_class = (NFClass){
+    nopa_Watcher_class = (NPClass){
         .name = "Watcher",
-        .superclass = &nopa_NFObject_class,
+        .superclass = &nopa_NPObject_class,
         .instance_size = sizeof(struct Watcher),
         .vtable = &nopa_Watcher_vtable_inst,
         .class_vtable = &nopa_Watcher_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_JSON__Array_class = (NFClass){
+    nopa_JSON__Array_class = (NPClass){
         .name = "JSON::Array",
-        .superclass = &nopa_NFObject_class,
+        .superclass = &nopa_NPObject_class,
         .instance_size = sizeof(struct JSON__Array),
         .vtable = &nopa_JSON__Array_vtable_inst,
         .class_vtable = &nopa_JSON__Array_meta_vtable_inst,
         .protocol_count = 0,
     };
 }
-NFObject * __nopa_root_init(NFObject * self, SEL _cmd) {
+NPObject * __nopa_root_init(NPObject * self, SEL _cmd) {
   return nopa_init(self);
 }
 
-void __nopa_root_dealloc(NFObject * self, SEL _cmd) {
+void __nopa_root_dealloc(NPObject * self, SEL _cmd) {
   return;
 }
 
-void __nopa_root_release(NFObject * self, SEL _cmd) {
+void __nopa_root_release(NPObject * self, SEL _cmd) {
   nopa_release(self);
 }
 
-NFObject * __nopa_root_retain(NFObject * self, SEL _cmd) {
+NPObject * __nopa_root_retain(NPObject * self, SEL _cmd) {
   return nopa_retain(self);
 }
 
-NFObject * NFObject_alloc(NFClass * self, SEL _cmd) {
+NPObject * NPObject_alloc(NPClass * self, SEL _cmd) {
   return nopa_alloc(self);
 }
 
-NFObject * NFObject_new(NFClass * self, SEL _cmd) {
-  NFObject * obj = nopa_alloc(self);
+NPObject * NPObject_new(NPClass * self, SEL _cmd) {
+  NPObject * obj = nopa_alloc(self);
   return nopa_init(obj);
 }
 
-NFObject * NFObject_init(NFObject * self, SEL _cmd) {
+NPObject * NPObject_init(NPObject * self, SEL _cmd) {
   return nopa_init(self);
 }
 
-void NFObject_dealloc(NFObject * self, SEL _cmd) {
+void NPObject_dealloc(NPObject * self, SEL _cmd) {
   return;
 }
 
-void NFObject_release(NFObject * self, SEL _cmd) {
+void NPObject_release(NPObject * self, SEL _cmd) {
   nopa_release(self);
 }
 
-NFObject * NFObject_retain(NFObject * self, SEL _cmd) {
+NPObject * NPObject_retain(NPObject * self, SEL _cmd) {
   return nopa_retain(self);
 }
 
-NFObject * JSON__Error_initWithMessage_(NFObject * self, SEL _cmd, const char * msg) {
-  self = (&nopa_NFObject_vtable_inst)->init(self, __nopa_sel_init);
+NPObject * JSON__Error_initWithMessage_(NPObject * self, SEL _cmd, const char * msg) {
+  self = (&nopa_NPObject_vtable_inst)->init(self, __nopa_sel_init);
   if (self)   {
     ((struct JSON__Error *)self)->_message = (char *)(strdup(msg));
   }
   return self;
 }
 
-const char * JSON__Error_message(NFObject * self, SEL _cmd) {
+const char * JSON__Error_message(NPObject * self, SEL _cmd) {
   return ((struct JSON__Error *)self)->_message;
 }
 
-void JSON__Error_dealloc(NFObject * self, SEL _cmd) {
+void JSON__Error_dealloc(NPObject * self, SEL _cmd) {
   free(((struct JSON__Error *)self)->_message);
-  (&nopa_NFObject_vtable_inst)->dealloc(self, __nopa_sel_dealloc);
+  (&nopa_NPObject_vtable_inst)->dealloc(self, __nopa_sel_dealloc);
 }
 
-NFObject * JSON__Null_sharedNull(NFClass * self, SEL _cmd) {
-  if (!s_sharedNull)   s_sharedNull = ({ NFObject *__nopa_tmp_1 = ((NFObject *)(NFObject_alloc(&nopa_JSON__Null_class, __nopa_sel_alloc))); __nopa_tmp_1 ? ((struct nopa_vtable *)__nopa_tmp_1->isa->vtable)->init(__nopa_tmp_1, __nopa_sel_init) : 0; });
+NPObject * JSON__Null_sharedNull(NPClass * self, SEL _cmd) {
+  if (!s_sharedNull)   s_sharedNull = ({ NPObject *__nopa_tmp_1 = ((NPObject *)(NPObject_alloc(&nopa_JSON__Null_class, __nopa_sel_alloc))); __nopa_tmp_1 ? ((struct nopa_vtable *)__nopa_tmp_1->isa->vtable)->init(__nopa_tmp_1, __nopa_sel_init) : 0; });
   return s_sharedNull;
 }
 
-NFObject * JSON__Bool_initWithBool_(NFObject * self, SEL _cmd, _Bool val) {
-  self = (&nopa_NFObject_vtable_inst)->init(self, __nopa_sel_init);
+NPObject * JSON__Bool_initWithBool_(NPObject * self, SEL _cmd, _Bool val) {
+  self = (&nopa_NPObject_vtable_inst)->init(self, __nopa_sel_init);
   if (self)   ((struct JSON__Bool *)self)->_value = val;
   return self;
 }
 
-_Bool JSON__Bool_value(NFObject * self, SEL _cmd) {
+_Bool JSON__Bool_value(NPObject * self, SEL _cmd) {
   return ((struct JSON__Bool *)self)->_value;
 }
 
-void JSON__Bool_setValue_(NFObject * self, SEL _cmd, _Bool value) {
+void JSON__Bool_setValue_(NPObject * self, SEL _cmd, _Bool value) {
   ((struct JSON__Bool *)self)->_value = value;
 }
 
-NFObject * JSON__Number_initWithDouble_(NFObject * self, SEL _cmd, double val) {
-  self = (&nopa_NFObject_vtable_inst)->init(self, __nopa_sel_init);
+NPObject * JSON__Number_initWithDouble_(NPObject * self, SEL _cmd, double val) {
+  self = (&nopa_NPObject_vtable_inst)->init(self, __nopa_sel_init);
   if (self)   ((struct JSON__Number *)self)->_value = val;
   return self;
 }
 
-NFObject * JSON__Number_initWithInt_(NFObject * self, SEL _cmd, int val) {
-  self = (&nopa_NFObject_vtable_inst)->init(self, __nopa_sel_init);
+NPObject * JSON__Number_initWithInt_(NPObject * self, SEL _cmd, int val) {
+  self = (&nopa_NPObject_vtable_inst)->init(self, __nopa_sel_init);
   if (self)   ((struct JSON__Number *)self)->_value = (double)val;
   return self;
 }
 
-double JSON__Number_value(NFObject * self, SEL _cmd) {
+double JSON__Number_value(NPObject * self, SEL _cmd) {
   return ((struct JSON__Number *)self)->_value;
 }
 
-void JSON__Number_setValue_(NFObject * self, SEL _cmd, double value) {
+void JSON__Number_setValue_(NPObject * self, SEL _cmd, double value) {
   ((struct JSON__Number *)self)->_value = value;
 }
 
-NFObject * JSON__String_initWithString_(NFObject * self, SEL _cmd, const char * val) {
-  self = (&nopa_NFObject_vtable_inst)->init(self, __nopa_sel_init);
+NPObject * JSON__String_initWithString_(NPObject * self, SEL _cmd, const char * val) {
+  self = (&nopa_NPObject_vtable_inst)->init(self, __nopa_sel_init);
   if (self)   ((struct JSON__String *)self)->_value = val ? strdup(val) : strdup("");
   return self;
 }
 
-void JSON__String_dealloc(NFObject * self, SEL _cmd) {
+void JSON__String_dealloc(NPObject * self, SEL _cmd) {
   free(((struct JSON__String *)self)->_value);
-  (&nopa_NFObject_vtable_inst)->dealloc(self, __nopa_sel_dealloc);
+  (&nopa_NPObject_vtable_inst)->dealloc(self, __nopa_sel_dealloc);
 }
 
-const char * JSON__String_value(NFObject * self, SEL _cmd) {
+const char * JSON__String_value(NPObject * self, SEL _cmd) {
   return ((struct JSON__String *)self)->_value;
 }
 
-void JSON__String_setValue_(NFObject * self, SEL _cmd, const char * value) {
+void JSON__String_setValue_(NPObject * self, SEL _cmd, const char * value) {
   ((struct JSON__String *)self)->_value = value;
 }
 
-NFObject * JSON__Array_init(NFObject * self, SEL _cmd) {
-  self = (&nopa_NFObject_vtable_inst)->init(self, __nopa_sel_init);
+NPObject * JSON__Array_init(NPObject * self, SEL _cmd) {
+  self = (&nopa_NPObject_vtable_inst)->init(self, __nopa_sel_init);
   if (self)   {
     ((struct JSON__Array *)self)->_capacity = 4;
     ((struct JSON__Array *)self)->_count = 0;
-    ((struct JSON__Array *)self)->_items = (NFObject * *)malloc((((struct JSON__Array *)self)->_capacity * sizeof(NFObject *)));
+    ((struct JSON__Array *)self)->_items = (NPObject * *)malloc((((struct JSON__Array *)self)->_capacity * sizeof(NPObject *)));
   }
   return self;
 }
 
-void JSON__Array_dealloc(NFObject * self, SEL _cmd) {
+void JSON__Array_dealloc(NPObject * self, SEL _cmd) {
   for (int i = 0;
-(i < ((struct JSON__Array *)self)->_count); (i)++)   ({ NFObject *__nopa_tmp_2 = ((NFObject *)(((struct JSON__Array *)self)->_items[i])); __nopa_tmp_2 ? ((struct nopa_vtable *)__nopa_tmp_2->isa->vtable)->release(__nopa_tmp_2, __nopa_sel_release) : 0; });
+(i < ((struct JSON__Array *)self)->_count); (i)++)   ({ NPObject *__nopa_tmp_2 = ((NPObject *)(((struct JSON__Array *)self)->_items[i])); __nopa_tmp_2 ? ((struct nopa_vtable *)__nopa_tmp_2->isa->vtable)->release(__nopa_tmp_2, __nopa_sel_release) : 0; });
   free(((struct JSON__Array *)self)->_items);
-  (&nopa_NFObject_vtable_inst)->dealloc(self, __nopa_sel_dealloc);
+  (&nopa_NPObject_vtable_inst)->dealloc(self, __nopa_sel_dealloc);
 }
 
-int JSON__Array_count(NFObject * self, SEL _cmd) {
+int JSON__Array_count(NPObject * self, SEL _cmd) {
   return ((struct JSON__Array *)self)->_count;
 }
 
-NFObject * JSON__Array_at_(NFObject * self, SEL _cmd, int idx) {
+NPObject * JSON__Array_at_(NPObject * self, SEL _cmd, int idx) {
   return ((idx >= 0) && (idx < ((struct JSON__Array *)self)->_count)) ? ((struct JSON__Array *)self)->_items[idx] : NULL;
 }
 
-void JSON__Array_add_(NFObject * self, SEL _cmd, NFObject * val) {
+void JSON__Array_add_(NPObject * self, SEL _cmd, NPObject * val) {
   if (!val)   return;
   if ((((struct JSON__Array *)self)->_count >= ((struct JSON__Array *)self)->_capacity))   {
     (((struct JSON__Array *)self)->_capacity *= 2);
-    ((struct JSON__Array *)self)->_items = (NFObject * *)realloc(((struct JSON__Array *)self)->_items, (((struct JSON__Array *)self)->_capacity * sizeof(NFObject *)));
+    ((struct JSON__Array *)self)->_items = (NPObject * *)realloc(((struct JSON__Array *)self)->_items, (((struct JSON__Array *)self)->_capacity * sizeof(NPObject *)));
   }
   ((struct JSON__Array *)self)->_items[(((struct JSON__Array *)self)->_count)++] = val;
-  ((struct nopa_vtable *)(val->isa->vtable))->retain((NFObject *)(val), __nopa_sel_retain);
+  ((struct nopa_vtable *)(val->isa->vtable))->retain((NPObject *)(val), __nopa_sel_retain);
 }
 
-void JSON__Array_removeAt_(NFObject * self, SEL _cmd, int idx) {
+void JSON__Array_removeAt_(NPObject * self, SEL _cmd, int idx) {
   if (((idx < 0) || (idx >= ((struct JSON__Array *)self)->_count)))   return;
-  ({ NFObject *__nopa_tmp_3 = ((NFObject *)(((struct JSON__Array *)self)->_items[idx])); __nopa_tmp_3 ? ((struct nopa_vtable *)__nopa_tmp_3->isa->vtable)->release(__nopa_tmp_3, __nopa_sel_release) : 0; });
-  memmove(&((struct JSON__Array *)self)->_items[idx], &((struct JSON__Array *)self)->_items[(idx + 1)], (((((struct JSON__Array *)self)->_count - idx) - 1) * sizeof(NFObject *)));
+  ({ NPObject *__nopa_tmp_3 = ((NPObject *)(((struct JSON__Array *)self)->_items[idx])); __nopa_tmp_3 ? ((struct nopa_vtable *)__nopa_tmp_3->isa->vtable)->release(__nopa_tmp_3, __nopa_sel_release) : 0; });
+  memmove(&((struct JSON__Array *)self)->_items[idx], &((struct JSON__Array *)self)->_items[(idx + 1)], (((((struct JSON__Array *)self)->_count - idx) - 1) * sizeof(NPObject *)));
   (((struct JSON__Array *)self)->_count)--;
 }
 
-void JSON__Array_each_(NFObject * self, SEL _cmd, void (^block)(int, NFObject *)) {
+void JSON__Array_each_(NPObject * self, SEL _cmd, void (^block)(int, NPObject *)) {
   if (!block)   return;
   for (int i = 0;
 (i < ((struct JSON__Array *)self)->_count); (i)++)   block(i, ((struct JSON__Array *)self)->_items[i]);
 }
 
-NFObject * JSON__Object_init(NFObject * self, SEL _cmd) {
-  self = (&nopa_NFObject_vtable_inst)->init(self, __nopa_sel_init);
+NPObject * JSON__Object_init(NPObject * self, SEL _cmd) {
+  self = (&nopa_NPObject_vtable_inst)->init(self, __nopa_sel_init);
   if (self)   {
     ((struct JSON__Object *)self)->_capacity = 4;
     ((struct JSON__Object *)self)->_count = 0;
     ((struct JSON__Object *)self)->_keys = (char * *)malloc((((struct JSON__Object *)self)->_capacity * sizeof(char *)));
-    ((struct JSON__Object *)self)->_values = (NFObject * *)malloc((((struct JSON__Object *)self)->_capacity * sizeof(NFObject *)));
+    ((struct JSON__Object *)self)->_values = (NPObject * *)malloc((((struct JSON__Object *)self)->_capacity * sizeof(NPObject *)));
   }
   return self;
 }
 
-void JSON__Object_dealloc(NFObject * self, SEL _cmd) {
+void JSON__Object_dealloc(NPObject * self, SEL _cmd) {
   for (int i = 0;
 (i < ((struct JSON__Object *)self)->_count); (i)++)   {
     free(((struct JSON__Object *)self)->_keys[i]);
-    ({ NFObject *__nopa_tmp_4 = ((NFObject *)(((struct JSON__Object *)self)->_values[i])); __nopa_tmp_4 ? ((struct nopa_vtable *)__nopa_tmp_4->isa->vtable)->release(__nopa_tmp_4, __nopa_sel_release) : 0; });
+    ({ NPObject *__nopa_tmp_4 = ((NPObject *)(((struct JSON__Object *)self)->_values[i])); __nopa_tmp_4 ? ((struct nopa_vtable *)__nopa_tmp_4->isa->vtable)->release(__nopa_tmp_4, __nopa_sel_release) : 0; });
   }
   free(((struct JSON__Object *)self)->_keys);
   free(((struct JSON__Object *)self)->_values);
-  (&nopa_NFObject_vtable_inst)->dealloc(self, __nopa_sel_dealloc);
+  (&nopa_NPObject_vtable_inst)->dealloc(self, __nopa_sel_dealloc);
 }
 
-int JSON__Object_count(NFObject * self, SEL _cmd) {
+int JSON__Object_count(NPObject * self, SEL _cmd) {
   return ((struct JSON__Object *)self)->_count;
 }
 
-NFObject * JSON__Object_get_(NFObject * self, SEL _cmd, const char * key) {
+NPObject * JSON__Object_get_(NPObject * self, SEL _cmd, const char * key) {
   if (!key)   return NULL;
   for (int i = 0;
 (i < ((struct JSON__Object *)self)->_count); (i)++)   {
@@ -1532,35 +1532,35 @@ NFObject * JSON__Object_get_(NFObject * self, SEL _cmd, const char * key) {
   return NULL;
 }
 
-void JSON__Object_set_forKey_(NFObject * self, SEL _cmd, NFObject * val, const char * key) {
+void JSON__Object_set_forKey_(NPObject * self, SEL _cmd, NPObject * val, const char * key) {
   if ((!key || !val))   return;
   for (int i = 0;
 (i < ((struct JSON__Object *)self)->_count); (i)++)   {
     if (strcmp(((struct JSON__Object *)self)->_keys[i], key) == 0)     {
-      ({ NFObject *__nopa_tmp_5 = ((NFObject *)(((struct JSON__Object *)self)->_values[i])); __nopa_tmp_5 ? ((struct nopa_vtable *)__nopa_tmp_5->isa->vtable)->release(__nopa_tmp_5, __nopa_sel_release) : 0; });
+      ({ NPObject *__nopa_tmp_5 = ((NPObject *)(((struct JSON__Object *)self)->_values[i])); __nopa_tmp_5 ? ((struct nopa_vtable *)__nopa_tmp_5->isa->vtable)->release(__nopa_tmp_5, __nopa_sel_release) : 0; });
       ((struct JSON__Object *)self)->_values[i] = val;
-      ((struct nopa_vtable *)(val->isa->vtable))->retain((NFObject *)(val), __nopa_sel_retain);
+      ((struct nopa_vtable *)(val->isa->vtable))->retain((NPObject *)(val), __nopa_sel_retain);
       return;
     }
   }
   if ((((struct JSON__Object *)self)->_count >= ((struct JSON__Object *)self)->_capacity))   {
     (((struct JSON__Object *)self)->_capacity *= 2);
     ((struct JSON__Object *)self)->_keys = (char * *)realloc(((struct JSON__Object *)self)->_keys, (((struct JSON__Object *)self)->_capacity * sizeof(char *)));
-    ((struct JSON__Object *)self)->_values = (NFObject * *)realloc(((struct JSON__Object *)self)->_values, (((struct JSON__Object *)self)->_capacity * sizeof(NFObject *)));
+    ((struct JSON__Object *)self)->_values = (NPObject * *)realloc(((struct JSON__Object *)self)->_values, (((struct JSON__Object *)self)->_capacity * sizeof(NPObject *)));
   }
   ((struct JSON__Object *)self)->_keys[((struct JSON__Object *)self)->_count] = strdup(key);
   ((struct JSON__Object *)self)->_values[((struct JSON__Object *)self)->_count] = val;
-  ((struct nopa_vtable *)(val->isa->vtable))->retain((NFObject *)(val), __nopa_sel_retain);
+  ((struct nopa_vtable *)(val->isa->vtable))->retain((NPObject *)(val), __nopa_sel_retain);
   (((struct JSON__Object *)self)->_count)++;
 }
 
-void JSON__Object_remove_(NFObject * self, SEL _cmd, const char * key) {
+void JSON__Object_remove_(NPObject * self, SEL _cmd, const char * key) {
   if (!key)   return;
   for (int i = 0;
 (i < ((struct JSON__Object *)self)->_count); (i)++)   {
     if (strcmp(((struct JSON__Object *)self)->_keys[i], key) == 0)     {
       free(((struct JSON__Object *)self)->_keys[i]);
-      ({ NFObject *__nopa_tmp_6 = ((NFObject *)(((struct JSON__Object *)self)->_values[i])); __nopa_tmp_6 ? ((struct nopa_vtable *)__nopa_tmp_6->isa->vtable)->release(__nopa_tmp_6, __nopa_sel_release) : 0; });
+      ({ NPObject *__nopa_tmp_6 = ((NPObject *)(((struct JSON__Object *)self)->_values[i])); __nopa_tmp_6 ? ((struct nopa_vtable *)__nopa_tmp_6->isa->vtable)->release(__nopa_tmp_6, __nopa_sel_release) : 0; });
       (((struct JSON__Object *)self)->_count)--;
       if ((i < ((struct JSON__Object *)self)->_count))       {
         ((struct JSON__Object *)self)->_keys[i] = ((struct JSON__Object *)self)->_keys[((struct JSON__Object *)self)->_count];
@@ -1571,48 +1571,48 @@ void JSON__Object_remove_(NFObject * self, SEL _cmd, const char * key) {
   }
 }
 
-const char * JSON__Object_atKey_(NFObject * self, SEL _cmd, int idx) {
+const char * JSON__Object_atKey_(NPObject * self, SEL _cmd, int idx) {
   return ((idx >= 0) && (idx < ((struct JSON__Object *)self)->_count)) ? ((struct JSON__Object *)self)->_keys[idx] : NULL;
 }
 
-NFObject * JSON__Object_atVal_(NFObject * self, SEL _cmd, int idx) {
+NPObject * JSON__Object_atVal_(NPObject * self, SEL _cmd, int idx) {
   return ((idx >= 0) && (idx < ((struct JSON__Object *)self)->_count)) ? ((struct JSON__Object *)self)->_values[idx] : NULL;
 }
 
-void JSON__Object_each_(NFObject * self, SEL _cmd, void (^block)(int, NFObject *)) {
+void JSON__Object_each_(NPObject * self, SEL _cmd, void (^block)(int, NPObject *)) {
   if (!block)   return;
   for (int i = 0;
 (i < ((struct JSON__Object *)self)->_count); (i)++)   block(i, ((struct JSON__Object *)self)->_values[i]);
 }
 
-NFObject * JSON__Parser_parse_(NFClass * self, SEL _cmd, const char * input) {
+NPObject * JSON__Parser_parse_(NPClass * self, SEL _cmd, const char * input) {
   if ((!input || !*input))   THROW("Empty input");
   char * p = input;
-  NFObject * result = json_parse_value(&p);
+  NPObject * result = json_parse_value(&p);
   if (!result)   THROW("Failed to parse");
   skip_ws(&p);
   if (*p)   {
-    ((struct nopa_vtable *)(result->isa->vtable))->release((NFObject *)(result), __nopa_sel_release);
+    ((struct nopa_vtable *)(result->isa->vtable))->release((NPObject *)(result), __nopa_sel_release);
     THROW("Trailing characters");
   }
   return result;
 }
 
-NFObject * JSON__Editor_init(NFObject * self, SEL _cmd) {
-  self = (&nopa_NFObject_vtable_inst)->init(self, __nopa_sel_init);
+NPObject * JSON__Editor_init(NPObject * self, SEL _cmd) {
+  self = (&nopa_NPObject_vtable_inst)->init(self, __nopa_sel_init);
   if (self)   {
-    ((struct JSON__Editor *)self)->_root = ({ NFObject *__nopa_tmp_7 = ((NFObject *)(NFObject_alloc(&nopa_JSON__Object_class, __nopa_sel_alloc))); __nopa_tmp_7 ? ((struct nopa_vtable *)__nopa_tmp_7->isa->vtable)->init(__nopa_tmp_7, __nopa_sel_init) : 0; });
+    ((struct JSON__Editor *)self)->_root = ({ NPObject *__nopa_tmp_7 = ((NPObject *)(NPObject_alloc(&nopa_JSON__Object_class, __nopa_sel_alloc))); __nopa_tmp_7 ? ((struct nopa_vtable *)__nopa_tmp_7->isa->vtable)->init(__nopa_tmp_7, __nopa_sel_init) : 0; });
     ((struct JSON__Editor *)self)->_running = 1;
   }
   return self;
 }
 
-void JSON__Editor_dealloc(NFObject * self, SEL _cmd) {
-  ({ NFObject *__nopa_tmp_8 = ((NFObject *)(((struct JSON__Editor *)self)->_root)); __nopa_tmp_8 ? ((struct nopa_vtable *)__nopa_tmp_8->isa->vtable)->release(__nopa_tmp_8, __nopa_sel_release) : 0; });
-  (&nopa_NFObject_vtable_inst)->dealloc(self, __nopa_sel_dealloc);
+void JSON__Editor_dealloc(NPObject * self, SEL _cmd) {
+  ({ NPObject *__nopa_tmp_8 = ((NPObject *)(((struct JSON__Editor *)self)->_root)); __nopa_tmp_8 ? ((struct nopa_vtable *)__nopa_tmp_8->isa->vtable)->release(__nopa_tmp_8, __nopa_sel_release) : 0; });
+  (&nopa_NPObject_vtable_inst)->dealloc(self, __nopa_sel_dealloc);
 }
 
-void JSON__Editor_run(NFObject * self, SEL _cmd) {
+void JSON__Editor_run(NPObject * self, SEL _cmd) {
   ((struct nopa_vtable *)(self->isa->vtable))->refreshDisplay(self, __nopa_sel_refreshDisplay);
   while (((struct JSON__Editor *)self)->_running)   {
     if ((read_line(((struct JSON__Editor *)self)->_inputBuf, sizeof(((struct JSON__Editor *)self)->_inputBuf)) <= 0))     break;
@@ -1667,82 +1667,82 @@ void JSON__Editor_run(NFObject * self, SEL _cmd) {
   }
 }
 
-NFObject * Buffer_init(NFObject * self, SEL _cmd) {
-  self = (&nopa_NFObject_vtable_inst)->init(self, __nopa_sel_init);
+NPObject * Buffer_init(NPObject * self, SEL _cmd) {
+  self = (&nopa_NPObject_vtable_inst)->init(self, __nopa_sel_init);
   if (self)   ((struct Buffer *)self)->_count = 0;
   return self;
 }
 
-void Buffer_push_(NFObject * self, SEL _cmd, NFObject * item) {
+void Buffer_push_(NPObject * self, SEL _cmd, NPObject * item) {
   if ((((struct Buffer *)self)->_count < 16))   ((struct Buffer *)self)->_storage[(((struct Buffer *)self)->_count)++] = item;
 }
 
-NFObject * Buffer_get_(NFObject * self, SEL _cmd, int index) {
-  return ((index >= 0) && (index < ((struct Buffer *)self)->_count)) ? ((struct Buffer *)self)->_storage[index] : (NFObject *)0;
+NPObject * Buffer_get_(NPObject * self, SEL _cmd, int index) {
+  return ((index >= 0) && (index < ((struct Buffer *)self)->_count)) ? ((struct Buffer *)self)->_storage[index] : (NPObject *)0;
 }
 
-int Buffer_count(NFObject * self, SEL _cmd) {
+int Buffer_count(NPObject * self, SEL _cmd) {
   return ((struct Buffer *)self)->_count;
 }
 
-NFObject * Watcher_initWithTarget_(NFObject * self, SEL _cmd, NFObject * t) {
-  self = (&nopa_NFObject_vtable_inst)->init(self, __nopa_sel_init);
+NPObject * Watcher_initWithTarget_(NPObject * self, SEL _cmd, NPObject * t) {
+  self = (&nopa_NPObject_vtable_inst)->init(self, __nopa_sel_init);
   if (self)   ((struct Watcher *)self)->_target = t;
   return self;
 }
 
-NFObject * Watcher_target(NFObject * self, SEL _cmd) {
+NPObject * Watcher_target(NPObject * self, SEL _cmd) {
   return ((struct Watcher *)self)->_target;
 }
 
-void Watcher_setTarget_(NFObject * self, SEL _cmd, NFObject * value) {
-  nopa_weak_unregister((NFObject **)&((struct Watcher *)self)->_target);
+void Watcher_setTarget_(NPObject * self, SEL _cmd, NPObject * value) {
+  nopa_weak_unregister((NPObject **)&((struct Watcher *)self)->_target);
   ((struct Watcher *)self)->_target = value;
-  nopa_weak_register((NFObject **)&((struct Watcher *)self)->_target, (NFObject *)value);
+  nopa_weak_register((NPObject **)&((struct Watcher *)self)->_target, (NPObject *)value);
 }
 
-const char * JSON__Null_typeName(NFObject * self, SEL _cmd) {
+const char * JSON__Null_typeName(NPObject * self, SEL _cmd) {
   return "null";
 }
 
-void JSON__Null_printOn_(NFObject * self, SEL _cmd, int indent) {
+void JSON__Null_printOn_(NPObject * self, SEL _cmd, int indent) {
   printf("null");
 }
 
-NFObject * JSON__Null_copyValue(NFObject * self, SEL _cmd) {
+NPObject * JSON__Null_copyValue(NPObject * self, SEL _cmd) {
   return JSON__Null_sharedNull(&nopa_JSON__Null_class, __nopa_sel_sharedNull);
 }
 
-const char * JSON__Bool_typeName(NFObject * self, SEL _cmd) {
+const char * JSON__Bool_typeName(NPObject * self, SEL _cmd) {
   return "bool";
 }
 
-void JSON__Bool_printOn_(NFObject * self, SEL _cmd, int indent) {
+void JSON__Bool_printOn_(NPObject * self, SEL _cmd, int indent) {
   printf(((struct JSON__Bool *)self)->_value ? "true" : "false");
 }
 
-NFObject * JSON__Bool_copyValue(NFObject * self, SEL _cmd) {
-  return ({ NFObject *__nopa_tmp_9 = ((NFObject *)(NFObject_alloc(&nopa_JSON__Bool_class, __nopa_sel_alloc))); __nopa_tmp_9 ? ((struct nopa_vtable *)__nopa_tmp_9->isa->vtable)->initWithBool_(__nopa_tmp_9, __nopa_sel_initWithBool_, ((struct JSON__Bool *)self)->_value) : 0; });
+NPObject * JSON__Bool_copyValue(NPObject * self, SEL _cmd) {
+  return ({ NPObject *__nopa_tmp_9 = ((NPObject *)(NPObject_alloc(&nopa_JSON__Bool_class, __nopa_sel_alloc))); __nopa_tmp_9 ? ((struct nopa_vtable *)__nopa_tmp_9->isa->vtable)->initWithBool_(__nopa_tmp_9, __nopa_sel_initWithBool_, ((struct JSON__Bool *)self)->_value) : 0; });
 }
 
-const char * JSON__Number_typeName(NFObject * self, SEL _cmd) {
+const char * JSON__Number_typeName(NPObject * self, SEL _cmd) {
   return "number";
 }
 
-void JSON__Number_printOn_(NFObject * self, SEL _cmd, int indent) {
+void JSON__Number_printOn_(NPObject * self, SEL _cmd, int indent) {
   if (((struct JSON__Number *)self)->_value == (double)(int)((struct JSON__Number *)self)->_value)   printf("%d", (int)((struct JSON__Number *)self)->_value);
   else   printf("%g", ((struct JSON__Number *)self)->_value);
 }
 
-NFObject * JSON__Number_copyValue(NFObject * self, SEL _cmd) {
-  return ({ NFObject *__nopa_tmp_10 = ((NFObject *)(NFObject_alloc(&nopa_JSON__Number_class, __nopa_sel_alloc))); __nopa_tmp_10 ? ((struct nopa_vtable *)__nopa_tmp_10->isa->vtable)->initWithDouble_(__nopa_tmp_10, __nopa_sel_initWithDouble_, ((struct JSON__Number *)self)->_value) : 0; });
+NPObject * JSON__Number_copyValue(NPObject * self, SEL _cmd) {
+  return ({ NPObject *__nopa_tmp_10 = ((NPObject *)(NPObject_alloc(&nopa_JSON__Number_class, __nopa_sel_alloc))); __nopa_tmp_10 ? ((struct nopa_vtable *)__nopa_tmp_10->isa->vtable)->initWithDouble_(__nopa_tmp_10, __nopa_sel_initWithDouble_, ((struct JSON__Number *)self)->_value) : 0; });
 }
 
-const char * JSON__String_typeName(NFObject * self, SEL _cmd) {
+const char * JSON__String_typeName(NPObject * self, SEL _cmd) {
   return "string";
 }
 
-void JSON__String_printOn_(NFObject * self, SEL _cmd, int indent) {
+void JSON__String_printOn_(NPObject * self, SEL _cmd, int indent) {
   printf("\"");
   for (char * p = ((struct JSON__String *)self)->_value;
 *p; (p)++)   {
@@ -1777,15 +1777,15 @@ void JSON__String_printOn_(NFObject * self, SEL _cmd, int indent) {
   printf("\"");
 }
 
-NFObject * JSON__String_copyValue(NFObject * self, SEL _cmd) {
-  return ({ NFObject *__nopa_tmp_11 = ((NFObject *)(NFObject_alloc(&nopa_JSON__String_class, __nopa_sel_alloc))); __nopa_tmp_11 ? ((struct nopa_vtable *)__nopa_tmp_11->isa->vtable)->initWithString_(__nopa_tmp_11, __nopa_sel_initWithString_, ((struct JSON__String *)self)->_value) : 0; });
+NPObject * JSON__String_copyValue(NPObject * self, SEL _cmd) {
+  return ({ NPObject *__nopa_tmp_11 = ((NPObject *)(NPObject_alloc(&nopa_JSON__String_class, __nopa_sel_alloc))); __nopa_tmp_11 ? ((struct nopa_vtable *)__nopa_tmp_11->isa->vtable)->initWithString_(__nopa_tmp_11, __nopa_sel_initWithString_, ((struct JSON__String *)self)->_value) : 0; });
 }
 
-const char * JSON__Array_typeName(NFObject * self, SEL _cmd) {
+const char * JSON__Array_typeName(NPObject * self, SEL _cmd) {
   return "array";
 }
 
-void JSON__Array_printOn_(NFObject * self, SEL _cmd, int indent) {
+void JSON__Array_printOn_(NPObject * self, SEL _cmd, int indent) {
   if (((struct JSON__Array *)self)->_count == 0)   {
     printf("[]");
     return;
@@ -1795,7 +1795,7 @@ void JSON__Array_printOn_(NFObject * self, SEL _cmd, int indent) {
 (i < ((struct JSON__Array *)self)->_count); (i)++)   {
     for (int j = 0;
 (j < (indent + 1)); (j)++)     printf("    ");
-    ({ NFObject *__nopa_tmp_12 = ((NFObject *)(((struct JSON__Array *)self)->_items[i])); __nopa_tmp_12 ? ((struct nopa_vtable *)__nopa_tmp_12->isa->vtable)->printOn_(__nopa_tmp_12, __nopa_sel_printOn_, (indent + 1)) : 0; });
+    ({ NPObject *__nopa_tmp_12 = ((NPObject *)(((struct JSON__Array *)self)->_items[i])); __nopa_tmp_12 ? ((struct nopa_vtable *)__nopa_tmp_12->isa->vtable)->printOn_(__nopa_tmp_12, __nopa_sel_printOn_, (indent + 1)) : 0; });
     if ((i < (((struct JSON__Array *)self)->_count - 1)))     printf(",");
     printf("\n");
   }
@@ -1804,23 +1804,23 @@ void JSON__Array_printOn_(NFObject * self, SEL _cmd, int indent) {
   printf("]");
 }
 
-NFObject * JSON__Array_copyValue(NFObject * self, SEL _cmd) {
-  NFObject *__nopa_tmp_13 = (NFObject_alloc(&nopa_JSON__Array_class, __nopa_sel_alloc));
+NPObject * JSON__Array_copyValue(NPObject * self, SEL _cmd) {
+  NPObject *__nopa_tmp_13 = (NPObject_alloc(&nopa_JSON__Array_class, __nopa_sel_alloc));
   JSON__Array * c = (JSON__Array *)(((struct nopa_vtable *)__nopa_tmp_13->isa->vtable)->init(__nopa_tmp_13, __nopa_sel_init));
   for (int i = 0;
 (i < ((struct JSON__Array *)self)->_count); (i)++)   {
-    NFObject * v = ({ NFObject *__nopa_tmp_14 = ((NFObject *)(((struct JSON__Array *)self)->_items[i])); __nopa_tmp_14 ? ((struct nopa_vtable *)__nopa_tmp_14->isa->vtable)->copyValue(__nopa_tmp_14, __nopa_sel_copyValue) : 0; });
-    ((struct nopa_vtable *)(c->isa->vtable))->add_((NFObject *)(c), __nopa_sel_add_, (NFObject *)(v));
-    ((struct nopa_vtable *)(v->isa->vtable))->release((NFObject *)(v), __nopa_sel_release);
+    NPObject * v = ({ NPObject *__nopa_tmp_14 = ((NPObject *)(((struct JSON__Array *)self)->_items[i])); __nopa_tmp_14 ? ((struct nopa_vtable *)__nopa_tmp_14->isa->vtable)->copyValue(__nopa_tmp_14, __nopa_sel_copyValue) : 0; });
+    ((struct nopa_vtable *)(c->isa->vtable))->add_((NPObject *)(c), __nopa_sel_add_, (NPObject *)(v));
+    ((struct nopa_vtable *)(v->isa->vtable))->release((NPObject *)(v), __nopa_sel_release);
   }
   return c;
 }
 
-const char * JSON__Object_typeName(NFObject * self, SEL _cmd) {
+const char * JSON__Object_typeName(NPObject * self, SEL _cmd) {
   return "object";
 }
 
-void JSON__Object_printOn_(NFObject * self, SEL _cmd, int indent) {
+void JSON__Object_printOn_(NPObject * self, SEL _cmd, int indent) {
   if (((struct JSON__Object *)self)->_count == 0)   {
     printf("{}");
     return;
@@ -1831,7 +1831,7 @@ void JSON__Object_printOn_(NFObject * self, SEL _cmd, int indent) {
     for (int j = 0;
 (j < (indent + 1)); (j)++)     printf("    ");
     printf("\"%s\": ", ((struct JSON__Object *)self)->_keys[i]);
-    ({ NFObject *__nopa_tmp_15 = ((NFObject *)(((struct JSON__Object *)self)->_values[i])); __nopa_tmp_15 ? ((struct nopa_vtable *)__nopa_tmp_15->isa->vtable)->printOn_(__nopa_tmp_15, __nopa_sel_printOn_, (indent + 1)) : 0; });
+    ({ NPObject *__nopa_tmp_15 = ((NPObject *)(((struct JSON__Object *)self)->_values[i])); __nopa_tmp_15 ? ((struct nopa_vtable *)__nopa_tmp_15->isa->vtable)->printOn_(__nopa_tmp_15, __nopa_sel_printOn_, (indent + 1)) : 0; });
     if ((i < (((struct JSON__Object *)self)->_count - 1)))     printf(",");
     printf("\n");
   }
@@ -1840,19 +1840,19 @@ void JSON__Object_printOn_(NFObject * self, SEL _cmd, int indent) {
   printf("}");
 }
 
-NFObject * JSON__Object_copyValue(NFObject * self, SEL _cmd) {
-  NFObject *__nopa_tmp_16 = (NFObject_alloc(&nopa_JSON__Object_class, __nopa_sel_alloc));
+NPObject * JSON__Object_copyValue(NPObject * self, SEL _cmd) {
+  NPObject *__nopa_tmp_16 = (NPObject_alloc(&nopa_JSON__Object_class, __nopa_sel_alloc));
   JSON__Object * c = (JSON__Object *)(((struct nopa_vtable *)__nopa_tmp_16->isa->vtable)->init(__nopa_tmp_16, __nopa_sel_init));
   for (int i = 0;
 (i < ((struct JSON__Object *)self)->_count); (i)++)   {
-    NFObject * v = ({ NFObject *__nopa_tmp_17 = ((NFObject *)(((struct JSON__Object *)self)->_values[i])); __nopa_tmp_17 ? ((struct nopa_vtable *)__nopa_tmp_17->isa->vtable)->copyValue(__nopa_tmp_17, __nopa_sel_copyValue) : 0; });
-    ((struct nopa_vtable *)(c->isa->vtable))->set_forKey_((NFObject *)(c), __nopa_sel_set_forKey_, (NFObject *)(v), ((struct JSON__Object *)self)->_keys[i]);
-    ((struct nopa_vtable *)(v->isa->vtable))->release((NFObject *)(v), __nopa_sel_release);
+    NPObject * v = ({ NPObject *__nopa_tmp_17 = ((NPObject *)(((struct JSON__Object *)self)->_values[i])); __nopa_tmp_17 ? ((struct nopa_vtable *)__nopa_tmp_17->isa->vtable)->copyValue(__nopa_tmp_17, __nopa_sel_copyValue) : 0; });
+    ((struct nopa_vtable *)(c->isa->vtable))->set_forKey_((NPObject *)(c), __nopa_sel_set_forKey_, (NPObject *)(v), ((struct JSON__Object *)self)->_keys[i]);
+    ((struct nopa_vtable *)(v->isa->vtable))->release((NPObject *)(v), __nopa_sel_release);
   }
   return c;
 }
 
-void JSON__Object_printKeys(NFObject * self, SEL _cmd) {
+void JSON__Object_printKeys(NPObject * self, SEL _cmd) {
   if (((struct JSON__Object *)self)->_count == 0)   {
     printf("(empty)\n");
     return;
@@ -1865,12 +1865,12 @@ void JSON__Object_printKeys(NFObject * self, SEL _cmd) {
   printf("\n");
 }
 
-void JSON__Editor_refreshDisplay(NFObject * self, SEL _cmd) {
+void JSON__Editor_refreshDisplay(NPObject * self, SEL _cmd) {
   printf("\033[2J\033[H");
   printf("╔══════════════════════════════════════════════╗\n");
   printf("║  JSON Preview                                ║\n");
   printf("╚══════════════════════════════════════════════╝\n");
-  ({ NFObject *__nopa_tmp_18 = ((NFObject *)(((struct JSON__Editor *)self)->_root)); __nopa_tmp_18 ? ((struct nopa_vtable *)__nopa_tmp_18->isa->vtable)->printOn_(__nopa_tmp_18, __nopa_sel_printOn_, 0) : 0; });
+  ({ NPObject *__nopa_tmp_18 = ((NPObject *)(((struct JSON__Editor *)self)->_root)); __nopa_tmp_18 ? ((struct nopa_vtable *)__nopa_tmp_18->isa->vtable)->printOn_(__nopa_tmp_18, __nopa_sel_printOn_, 0) : 0; });
   printf("\n");
   printf("╔══════════════════════════════════════════════╗\n");
   printf("║  Command                                     ║\n");
@@ -1879,12 +1879,12 @@ void JSON__Editor_refreshDisplay(NFObject * self, SEL _cmd) {
   fflush(stdout);
 }
 
-void JSON__Editor_cmdPrint(NFObject * self, SEL _cmd) {
-  ({ NFObject *__nopa_tmp_19 = ((NFObject *)(((struct JSON__Editor *)self)->_root)); __nopa_tmp_19 ? ((struct nopa_vtable *)__nopa_tmp_19->isa->vtable)->printOn_(__nopa_tmp_19, __nopa_sel_printOn_, 0) : 0; });
+void JSON__Editor_cmdPrint(NPObject * self, SEL _cmd) {
+  ({ NPObject *__nopa_tmp_19 = ((NPObject *)(((struct JSON__Editor *)self)->_root)); __nopa_tmp_19 ? ((struct nopa_vtable *)__nopa_tmp_19->isa->vtable)->printOn_(__nopa_tmp_19, __nopa_sel_printOn_, 0) : 0; });
   printf("\n");
 }
 
-void JSON__Editor_cmdSet_(NFObject * self, SEL _cmd, const char * arg) {
+void JSON__Editor_cmdSet_(NPObject * self, SEL _cmd, const char * arg) {
   if ((!arg || !*arg))   {
     printf("  Usage: set <key> <json>\n");
     return;
@@ -1905,20 +1905,20 @@ void JSON__Editor_cmdSet_(NFObject * self, SEL _cmd, const char * arg) {
     volatile int __nopa_state = 0;
     if (setjmp(__nopa_exception_buf) != 0)     __nopa_state = 1;
     if (__nopa_state == 0)     {
-      NFObject * val = JSON__Parser_parse_(&nopa_JSON__Parser_class, __nopa_sel_parse_, (space + 1));
-      ((struct nopa_vtable *)(val->isa->vtable))->retain((NFObject *)(val), __nopa_sel_retain);
-      ({ NFObject *__nopa_tmp_20 = ((NFObject *)((JSON__Object *)((struct JSON__Editor *)self)->_root)); __nopa_tmp_20 ? ((struct nopa_vtable *)__nopa_tmp_20->isa->vtable)->set_forKey_(__nopa_tmp_20, __nopa_sel_set_forKey_, (NFObject *)(val), key) : 0; });
+      NPObject * val = JSON__Parser_parse_(&nopa_JSON__Parser_class, __nopa_sel_parse_, (space + 1));
+      ((struct nopa_vtable *)(val->isa->vtable))->retain((NPObject *)(val), __nopa_sel_retain);
+      ({ NPObject *__nopa_tmp_20 = ((NPObject *)((JSON__Object *)((struct JSON__Editor *)self)->_root)); __nopa_tmp_20 ? ((struct nopa_vtable *)__nopa_tmp_20->isa->vtable)->set_forKey_(__nopa_tmp_20, __nopa_sel_set_forKey_, (NPObject *)(val), key) : 0; });
       printf("  OK: %s = ", key);
-      ((struct nopa_vtable *)(val->isa->vtable))->printOn_((NFObject *)(val), __nopa_sel_printOn_, 0);
+      ((struct nopa_vtable *)(val->isa->vtable))->printOn_((NPObject *)(val), __nopa_sel_printOn_, 0);
       printf("\n");
-      ((struct nopa_vtable *)(val->isa->vtable))->release((NFObject *)(val), __nopa_sel_release);
+      ((struct nopa_vtable *)(val->isa->vtable))->release((NPObject *)(val), __nopa_sel_release);
     }
     if (__nopa_state == 1)     {
       __nopa_state = 2;
       JSON__Error * e = __nopa_exception_value;
       {
-        printf("  Error: %s\n", ((struct nopa_vtable *)(e->isa->vtable))->message((NFObject *)(e), __nopa_sel_message));
-        ((struct nopa_vtable *)(e->isa->vtable))->release((NFObject *)(e), __nopa_sel_release);
+        printf("  Error: %s\n", ((struct nopa_vtable *)(e->isa->vtable))->message((NPObject *)(e), __nopa_sel_message));
+        ((struct nopa_vtable *)(e->isa->vtable))->release((NPObject *)(e), __nopa_sel_release);
       }
     }
     memcpy(__nopa_exception_buf, __nopa_saved, sizeof(jmp_buf));
@@ -1926,57 +1926,57 @@ void JSON__Editor_cmdSet_(NFObject * self, SEL _cmd, const char * arg) {
   }
 }
 
-void JSON__Editor_cmdGet_(NFObject * self, SEL _cmd, const char * arg) {
+void JSON__Editor_cmdGet_(NPObject * self, SEL _cmd, const char * arg) {
   if ((!arg || !*arg))   {
     printf("  Usage: get <key>\n");
     return;
   }
-  NFObject * val = ({ NFObject *__nopa_tmp_21 = ((NFObject *)((JSON__Object *)((struct JSON__Editor *)self)->_root)); __nopa_tmp_21 ? ((struct nopa_vtable *)__nopa_tmp_21->isa->vtable)->get_(__nopa_tmp_21, __nopa_sel_get_, arg) : 0; });
+  NPObject * val = ({ NPObject *__nopa_tmp_21 = ((NPObject *)((JSON__Object *)((struct JSON__Editor *)self)->_root)); __nopa_tmp_21 ? ((struct nopa_vtable *)__nopa_tmp_21->isa->vtable)->get_(__nopa_tmp_21, __nopa_sel_get_, arg) : 0; });
   if (!val)   {
     printf("  Not found: '%s'\n", arg);
     return;
   }
-  ((struct nopa_vtable *)(val->isa->vtable))->printOn_((NFObject *)(val), __nopa_sel_printOn_, 0);
+  ((struct nopa_vtable *)(val->isa->vtable))->printOn_((NPObject *)(val), __nopa_sel_printOn_, 0);
   printf("\n");
 }
 
-void JSON__Editor_cmdDel_(NFObject * self, SEL _cmd, const char * arg) {
+void JSON__Editor_cmdDel_(NPObject * self, SEL _cmd, const char * arg) {
   if ((!arg || !*arg))   {
     printf("  Usage: del <key>\n");
     return;
   }
-  ({ NFObject *__nopa_tmp_22 = ((NFObject *)((JSON__Object *)((struct JSON__Editor *)self)->_root)); __nopa_tmp_22 ? ((struct nopa_vtable *)__nopa_tmp_22->isa->vtable)->remove_(__nopa_tmp_22, __nopa_sel_remove_, arg) : 0; });
+  ({ NPObject *__nopa_tmp_22 = ((NPObject *)((JSON__Object *)((struct JSON__Editor *)self)->_root)); __nopa_tmp_22 ? ((struct nopa_vtable *)__nopa_tmp_22->isa->vtable)->remove_(__nopa_tmp_22, __nopa_sel_remove_, arg) : 0; });
   printf("  Deleted '%s'\n", arg);
 }
 
-void JSON__Editor_cmdKeys(NFObject * self, SEL _cmd) {
-  ({ NFObject *__nopa_tmp_23 = ((NFObject *)((JSON__Object *)((struct JSON__Editor *)self)->_root)); __nopa_tmp_23 ? ((struct nopa_vtable *)__nopa_tmp_23->isa->vtable)->printKeys(__nopa_tmp_23, __nopa_sel_printKeys) : 0; });
+void JSON__Editor_cmdKeys(NPObject * self, SEL _cmd) {
+  ({ NPObject *__nopa_tmp_23 = ((NPObject *)((JSON__Object *)((struct JSON__Editor *)self)->_root)); __nopa_tmp_23 ? ((struct nopa_vtable *)__nopa_tmp_23->isa->vtable)->printKeys(__nopa_tmp_23, __nopa_sel_printKeys) : 0; });
 }
 
-void JSON__Editor_cmdType_(NFObject * self, SEL _cmd, const char * arg) {
+void JSON__Editor_cmdType_(NPObject * self, SEL _cmd, const char * arg) {
   if ((!arg || !*arg))   {
-    printf("  Root: %s\n", ({ NFObject *__nopa_tmp_24 = ((NFObject *)(((struct JSON__Editor *)self)->_root)); __nopa_tmp_24 ? ((struct nopa_vtable *)__nopa_tmp_24->isa->vtable)->typeName(__nopa_tmp_24, __nopa_sel_typeName) : 0; }));
+    printf("  Root: %s\n", ({ NPObject *__nopa_tmp_24 = ((NPObject *)(((struct JSON__Editor *)self)->_root)); __nopa_tmp_24 ? ((struct nopa_vtable *)__nopa_tmp_24->isa->vtable)->typeName(__nopa_tmp_24, __nopa_sel_typeName) : 0; }));
     return;
   }
-  NFObject * val = ({ NFObject *__nopa_tmp_25 = ((NFObject *)((JSON__Object *)((struct JSON__Editor *)self)->_root)); __nopa_tmp_25 ? ((struct nopa_vtable *)__nopa_tmp_25->isa->vtable)->get_(__nopa_tmp_25, __nopa_sel_get_, arg) : 0; });
+  NPObject * val = ({ NPObject *__nopa_tmp_25 = ((NPObject *)((JSON__Object *)((struct JSON__Editor *)self)->_root)); __nopa_tmp_25 ? ((struct nopa_vtable *)__nopa_tmp_25->isa->vtable)->get_(__nopa_tmp_25, __nopa_sel_get_, arg) : 0; });
   if (!val)   {
     printf("  Not found: '%s'\n", arg);
     return;
   }
-  printf("  '%s': %s\n", arg, ((struct nopa_vtable *)(val->isa->vtable))->typeName((NFObject *)(val), __nopa_sel_typeName));
+  printf("  '%s': %s\n", arg, ((struct nopa_vtable *)(val->isa->vtable))->typeName((NPObject *)(val), __nopa_sel_typeName));
 }
 
-void JSON__Editor_cmdLen(NFObject * self, SEL _cmd) {
-  printf("  Count: %d\n", ({ NFObject *__nopa_tmp_26 = ((NFObject *)((JSON__Object *)((struct JSON__Editor *)self)->_root)); __nopa_tmp_26 ? ((struct nopa_vtable *)__nopa_tmp_26->isa->vtable)->count(__nopa_tmp_26, __nopa_sel_count) : 0; }));
+void JSON__Editor_cmdLen(NPObject * self, SEL _cmd) {
+  printf("  Count: %d\n", ({ NPObject *__nopa_tmp_26 = ((NPObject *)((JSON__Object *)((struct JSON__Editor *)self)->_root)); __nopa_tmp_26 ? ((struct nopa_vtable *)__nopa_tmp_26->isa->vtable)->count(__nopa_tmp_26, __nopa_sel_count) : 0; }));
 }
 
-void JSON__Editor_cmdNew(NFObject * self, SEL _cmd) {
-  ({ NFObject *__nopa_tmp_27 = ((NFObject *)(((struct JSON__Editor *)self)->_root)); __nopa_tmp_27 ? ((struct nopa_vtable *)__nopa_tmp_27->isa->vtable)->release(__nopa_tmp_27, __nopa_sel_release) : 0; });
-  ((struct JSON__Editor *)self)->_root = ({ NFObject *__nopa_tmp_28 = ((NFObject *)(NFObject_alloc(&nopa_JSON__Object_class, __nopa_sel_alloc))); __nopa_tmp_28 ? ((struct nopa_vtable *)__nopa_tmp_28->isa->vtable)->init(__nopa_tmp_28, __nopa_sel_init) : 0; });
+void JSON__Editor_cmdNew(NPObject * self, SEL _cmd) {
+  ({ NPObject *__nopa_tmp_27 = ((NPObject *)(((struct JSON__Editor *)self)->_root)); __nopa_tmp_27 ? ((struct nopa_vtable *)__nopa_tmp_27->isa->vtable)->release(__nopa_tmp_27, __nopa_sel_release) : 0; });
+  ((struct JSON__Editor *)self)->_root = ({ NPObject *__nopa_tmp_28 = ((NPObject *)(NPObject_alloc(&nopa_JSON__Object_class, __nopa_sel_alloc))); __nopa_tmp_28 ? ((struct nopa_vtable *)__nopa_tmp_28->isa->vtable)->init(__nopa_tmp_28, __nopa_sel_init) : 0; });
   printf("  New empty object.\n");
 }
 
-void JSON__Editor_cmdParse_(NFObject * self, SEL _cmd, const char * arg) {
+void JSON__Editor_cmdParse_(NPObject * self, SEL _cmd, const char * arg) {
   if ((!arg || !*arg))   {
     printf("  Usage: parse <json>\n");
     return;
@@ -1987,20 +1987,20 @@ void JSON__Editor_cmdParse_(NFObject * self, SEL _cmd, const char * arg) {
     volatile int __nopa_state = 0;
     if (setjmp(__nopa_exception_buf) != 0)     __nopa_state = 1;
     if (__nopa_state == 0)     {
-      NFObject * nr = JSON__Parser_parse_(&nopa_JSON__Parser_class, __nopa_sel_parse_, arg);
-      ((struct nopa_vtable *)(nr->isa->vtable))->retain((NFObject *)(nr), __nopa_sel_retain);
-      ({ NFObject *__nopa_tmp_29 = ((NFObject *)(((struct JSON__Editor *)self)->_root)); __nopa_tmp_29 ? ((struct nopa_vtable *)__nopa_tmp_29->isa->vtable)->release(__nopa_tmp_29, __nopa_sel_release) : 0; });
+      NPObject * nr = JSON__Parser_parse_(&nopa_JSON__Parser_class, __nopa_sel_parse_, arg);
+      ((struct nopa_vtable *)(nr->isa->vtable))->retain((NPObject *)(nr), __nopa_sel_retain);
+      ({ NPObject *__nopa_tmp_29 = ((NPObject *)(((struct JSON__Editor *)self)->_root)); __nopa_tmp_29 ? ((struct nopa_vtable *)__nopa_tmp_29->isa->vtable)->release(__nopa_tmp_29, __nopa_sel_release) : 0; });
       ((struct JSON__Editor *)self)->_root = nr;
       printf("  Parsed OK:\n  ");
-      ({ NFObject *__nopa_tmp_30 = ((NFObject *)(((struct JSON__Editor *)self)->_root)); __nopa_tmp_30 ? ((struct nopa_vtable *)__nopa_tmp_30->isa->vtable)->printOn_(__nopa_tmp_30, __nopa_sel_printOn_, 0) : 0; });
+      ({ NPObject *__nopa_tmp_30 = ((NPObject *)(((struct JSON__Editor *)self)->_root)); __nopa_tmp_30 ? ((struct nopa_vtable *)__nopa_tmp_30->isa->vtable)->printOn_(__nopa_tmp_30, __nopa_sel_printOn_, 0) : 0; });
       printf("\n");
     }
     if (__nopa_state == 1)     {
       __nopa_state = 2;
       JSON__Error * e = __nopa_exception_value;
       {
-        printf("  Parse error: %s\n", ((struct nopa_vtable *)(e->isa->vtable))->message((NFObject *)(e), __nopa_sel_message));
-        ((struct nopa_vtable *)(e->isa->vtable))->release((NFObject *)(e), __nopa_sel_release);
+        printf("  Parse error: %s\n", ((struct nopa_vtable *)(e->isa->vtable))->message((NPObject *)(e), __nopa_sel_message));
+        ((struct nopa_vtable *)(e->isa->vtable))->release((NPObject *)(e), __nopa_sel_release);
       }
     }
     memcpy(__nopa_exception_buf, __nopa_saved, sizeof(jmp_buf));
@@ -2008,16 +2008,16 @@ void JSON__Editor_cmdParse_(NFObject * self, SEL _cmd, const char * arg) {
   }
 }
 
-void JSON__Editor_cmdElist(NFObject * self, SEL _cmd) {
-  ({ NFObject *__nopa_tmp_31 = ((NFObject *)((JSON__Object *)((struct JSON__Editor *)self)->_root)); __nopa_tmp_31 ? ((struct nopa_vtable *)__nopa_tmp_31->isa->vtable)->each_(__nopa_tmp_31, __nopa_sel_each_, ^void(int k, NFObject * v) {
-  printf("  %s (%s): ", ((JSON__Object *)((struct JSON__Editor *)self)->_root)->_keys[k], ((struct nopa_vtable *)(v->isa->vtable))->typeName((NFObject *)(v), __nopa_sel_typeName));
-  ((struct nopa_vtable *)(v->isa->vtable))->printOn_((NFObject *)(v), __nopa_sel_printOn_, 0);
+void JSON__Editor_cmdElist(NPObject * self, SEL _cmd) {
+  ({ NPObject *__nopa_tmp_31 = ((NPObject *)((JSON__Object *)((struct JSON__Editor *)self)->_root)); __nopa_tmp_31 ? ((struct nopa_vtable *)__nopa_tmp_31->isa->vtable)->each_(__nopa_tmp_31, __nopa_sel_each_, ^void(int k, NPObject * v) {
+  printf("  %s (%s): ", ((JSON__Object *)((struct JSON__Editor *)self)->_root)->_keys[k], ((struct nopa_vtable *)(v->isa->vtable))->typeName((NPObject *)(v), __nopa_sel_typeName));
+  ((struct nopa_vtable *)(v->isa->vtable))->printOn_((NPObject *)(v), __nopa_sel_printOn_, 0);
   printf("\n");
 }
 ) : 0; });
 }
 
-void JSON__Editor_cmdSels(NFObject * self, SEL _cmd) {
+void JSON__Editor_cmdSels(NPObject * self, SEL _cmd) {
   printf("  ── Selectors ──\n");
   SEL sa[] = { __nopa_sel_alloc, __nopa_sel_init, __nopa_sel_release, __nopa_sel_retain, __nopa_sel_typeName, __nopa_sel_printOn_, __nopa_sel_copyValue, __nopa_sel_cmdPrint, __nopa_sel_cmdSet_ };
   for (int i = 0;
@@ -2026,7 +2026,7 @@ void JSON__Editor_cmdSels(NFObject * self, SEL _cmd) {
   printf("  sel_registerName: {name=\"%s\", hash=%u}\n", c.name, c.hash);
 }
 
-void JSON__Editor_cmdHelp(NFObject * self, SEL _cmd) {
+void JSON__Editor_cmdHelp(NPObject * self, SEL _cmd) {
   printf("  ── Commands ──\n");
   cmdHelpPrint();
   cmdHelpSet();
@@ -2043,23 +2043,23 @@ void JSON__Editor_cmdHelp(NFObject * self, SEL _cmd) {
   cmdHelpQuit();
 }
 
-void JSON__Editor_cmdQuit(NFObject * self, SEL _cmd) {
+void JSON__Editor_cmdQuit(NPObject * self, SEL _cmd) {
   printf("  Bye!\n");
   ((struct JSON__Editor *)self)->_running = 0;
 }
 
-void Watcher_dealloc(NFObject * self, SEL _cmd) {
+void Watcher_dealloc(NPObject * self, SEL _cmd) {
   printf("  [Watcher] dealloc. target=%p\n", (void *)((struct Watcher *)self)->_target);
-  (&nopa_NFObject_vtable_inst)->dealloc(self, __nopa_sel_dealloc);
+  (&nopa_NPObject_vtable_inst)->dealloc(self, __nopa_sel_dealloc);
 }
 
-NFObject * nopa_alloc(struct NFClass * cls);
+NPObject * nopa_alloc(struct NPClass * cls);
 
-NFObject * nopa_init(NFObject * self);
+NPObject * nopa_init(NPObject * self);
 
-void nopa_release(NFObject * obj);
+void nopa_release(NPObject * obj);
 
-NFObject * nopa_retain(NFObject * obj);
+NPObject * nopa_retain(NPObject * obj);
 
 int read_line(char * buf, int size) {
   if (!isatty(STDIN_FILENO))   {
@@ -2223,10 +2223,10 @@ char * parse_raw_string(const char * * p) {
   return buf;
 }
 
-NFObject * json_parse_value(const char * * p);
+NPObject * json_parse_value(const char * * p);
 
 void THROW(const char * msg) {
-  NFObject *__nopa_tmp_32 = (NFObject_alloc(&nopa_JSON__Error_class, __nopa_sel_alloc));
+  NPObject *__nopa_tmp_32 = (NPObject_alloc(&nopa_JSON__Error_class, __nopa_sel_alloc));
   JSON__Error * e = (JSON__Error *)(((struct nopa_vtable *)__nopa_tmp_32->isa->vtable)->initWithMessage_(__nopa_tmp_32, __nopa_sel_initWithMessage_, msg));
   {
     __nopa_exception_value = e;
@@ -2234,7 +2234,7 @@ void THROW(const char * msg) {
   }
 }
 
-NFObject * json_parse_null(const char * * p) {
+NPObject * json_parse_null(const char * * p) {
   if (strncmp(*p, "null", 4) == 0)   {
     (*p += 4);
     return JSON__Null_sharedNull(&nopa_JSON__Null_class, __nopa_sel_sharedNull);
@@ -2243,25 +2243,25 @@ NFObject * json_parse_null(const char * * p) {
   return NULL;
 }
 
-NFObject * json_parse_true(const char * * p) {
+NPObject * json_parse_true(const char * * p) {
   if (strncmp(*p, "true", 4) == 0)   {
     (*p += 4);
-    return ({ NFObject *__nopa_tmp_33 = ((NFObject *)(NFObject_alloc(&nopa_JSON__Bool_class, __nopa_sel_alloc))); __nopa_tmp_33 ? ((struct nopa_vtable *)__nopa_tmp_33->isa->vtable)->initWithBool_(__nopa_tmp_33, __nopa_sel_initWithBool_, 1) : 0; });
+    return ({ NPObject *__nopa_tmp_33 = ((NPObject *)(NPObject_alloc(&nopa_JSON__Bool_class, __nopa_sel_alloc))); __nopa_tmp_33 ? ((struct nopa_vtable *)__nopa_tmp_33->isa->vtable)->initWithBool_(__nopa_tmp_33, __nopa_sel_initWithBool_, 1) : 0; });
   }
   THROW("Expected 'true'");
   return NULL;
 }
 
-NFObject * json_parse_false(const char * * p) {
+NPObject * json_parse_false(const char * * p) {
   if (strncmp(*p, "false", 5) == 0)   {
     (*p += 5);
-    return ({ NFObject *__nopa_tmp_34 = ((NFObject *)(NFObject_alloc(&nopa_JSON__Bool_class, __nopa_sel_alloc))); __nopa_tmp_34 ? ((struct nopa_vtable *)__nopa_tmp_34->isa->vtable)->initWithBool_(__nopa_tmp_34, __nopa_sel_initWithBool_, 0) : 0; });
+    return ({ NPObject *__nopa_tmp_34 = ((NPObject *)(NPObject_alloc(&nopa_JSON__Bool_class, __nopa_sel_alloc))); __nopa_tmp_34 ? ((struct nopa_vtable *)__nopa_tmp_34->isa->vtable)->initWithBool_(__nopa_tmp_34, __nopa_sel_initWithBool_, 0) : 0; });
   }
   THROW("Expected 'false'");
   return NULL;
 }
 
-NFObject * json_parse_number(const char * * p) {
+NPObject * json_parse_number(const char * * p) {
   char * start = *p;
   if (**p == '-')   (*p)++;
   while ((**p && isdigit(**p)))   (*p)++;
@@ -2280,22 +2280,22 @@ NFObject * json_parse_number(const char * * p) {
   char buf[64];
   strncpy(buf, start, len);
   buf[len] = '\x00';
-  return ({ NFObject *__nopa_tmp_35 = ((NFObject *)(NFObject_alloc(&nopa_JSON__Number_class, __nopa_sel_alloc))); __nopa_tmp_35 ? ((struct nopa_vtable *)__nopa_tmp_35->isa->vtable)->initWithDouble_(__nopa_tmp_35, __nopa_sel_initWithDouble_, strtod(buf, NULL)) : 0; });
+  return ({ NPObject *__nopa_tmp_35 = ((NPObject *)(NPObject_alloc(&nopa_JSON__Number_class, __nopa_sel_alloc))); __nopa_tmp_35 ? ((struct nopa_vtable *)__nopa_tmp_35->isa->vtable)->initWithDouble_(__nopa_tmp_35, __nopa_sel_initWithDouble_, strtod(buf, NULL)) : 0; });
 }
 
-NFObject * json_parse_string(const char * * p) {
+NPObject * json_parse_string(const char * * p) {
   char * raw = (char *)(parse_raw_string(p));
   if (!raw)   THROW("Invalid string");
-  NFObject *__nopa_tmp_36 = (NFObject_alloc(&nopa_JSON__String_class, __nopa_sel_alloc));
-  NFObject * result = ((struct nopa_vtable *)__nopa_tmp_36->isa->vtable)->initWithString_(__nopa_tmp_36, __nopa_sel_initWithString_, raw);
+  NPObject *__nopa_tmp_36 = (NPObject_alloc(&nopa_JSON__String_class, __nopa_sel_alloc));
+  NPObject * result = ((struct nopa_vtable *)__nopa_tmp_36->isa->vtable)->initWithString_(__nopa_tmp_36, __nopa_sel_initWithString_, raw);
   free(raw);
   return result;
 }
 
-NFObject * json_parse_array(const char * * p) {
+NPObject * json_parse_array(const char * * p) {
   if (**p != '[')   THROW("Expected '['");
   (*p)++;
-  JSON__Array * arr = ({ NFObject *__nopa_tmp_37 = ((NFObject *)(NFObject_alloc(&nopa_JSON__Array_class, __nopa_sel_alloc))); __nopa_tmp_37 ? ((struct nopa_vtable *)__nopa_tmp_37->isa->vtable)->init(__nopa_tmp_37, __nopa_sel_init) : 0; });
+  JSON__Array * arr = ({ NPObject *__nopa_tmp_37 = ((NPObject *)(NPObject_alloc(&nopa_JSON__Array_class, __nopa_sel_alloc))); __nopa_tmp_37 ? ((struct nopa_vtable *)__nopa_tmp_37->isa->vtable)->init(__nopa_tmp_37, __nopa_sel_init) : 0; });
   skip_ws(p);
   if (**p == ']')   {
     (*p)++;
@@ -2303,9 +2303,9 @@ NFObject * json_parse_array(const char * * p) {
   }
   while (1)   {
     skip_ws(p);
-    NFObject * val = json_parse_value(p);
+    NPObject * val = json_parse_value(p);
     skip_ws(p);
-    if (val)     ((struct nopa_vtable *)(arr->isa->vtable))->add_((NFObject *)(arr), __nopa_sel_add_, (NFObject *)(val));
+    if (val)     ((struct nopa_vtable *)(arr->isa->vtable))->add_((NPObject *)(arr), __nopa_sel_add_, (NPObject *)(val));
     if (**p == ',')     {
       (*p)++;
       skip_ws(p);
@@ -2319,10 +2319,10 @@ NFObject * json_parse_array(const char * * p) {
   return arr;
 }
 
-NFObject * json_parse_object(const char * * p) {
+NPObject * json_parse_object(const char * * p) {
   if (**p != '{')   THROW("Expected '{'");
   (*p)++;
-  JSON__Object * obj = ({ NFObject *__nopa_tmp_38 = ((NFObject *)(NFObject_alloc(&nopa_JSON__Object_class, __nopa_sel_alloc))); __nopa_tmp_38 ? ((struct nopa_vtable *)__nopa_tmp_38->isa->vtable)->init(__nopa_tmp_38, __nopa_sel_init) : 0; });
+  JSON__Object * obj = ({ NPObject *__nopa_tmp_38 = ((NPObject *)(NPObject_alloc(&nopa_JSON__Object_class, __nopa_sel_alloc))); __nopa_tmp_38 ? ((struct nopa_vtable *)__nopa_tmp_38->isa->vtable)->init(__nopa_tmp_38, __nopa_sel_init) : 0; });
   skip_ws(p);
   if (**p == '}')   {
     (*p)++;
@@ -2339,8 +2339,8 @@ NFObject * json_parse_object(const char * * p) {
     }
     (*p)++;
     skip_ws(p);
-    NFObject * val = json_parse_value(p);
-    if ((key && val))     ((struct nopa_vtable *)(obj->isa->vtable))->set_forKey_((NFObject *)(obj), __nopa_sel_set_forKey_, (NFObject *)(val), key);
+    NPObject * val = json_parse_value(p);
+    if ((key && val))     ((struct nopa_vtable *)(obj->isa->vtable))->set_forKey_((NPObject *)(obj), __nopa_sel_set_forKey_, (NPObject *)(val), key);
     if (key)     free(key);
     skip_ws(p);
     if (**p == ',')     {
@@ -2356,7 +2356,7 @@ NFObject * json_parse_object(const char * * p) {
   return obj;
 }
 
-NFObject * json_parse_value(const char * * p) {
+NPObject * json_parse_value(const char * * p) {
   skip_ws(p);
   if (**p == '\x00')   return NULL;
   if (**p == 'n')   return json_parse_null(p);
@@ -2464,14 +2464,14 @@ int main(int argc, const char * argv[]) {
     printf("  selB: {name=\"%s\", hash=%u}\n", b.name, b.hash);
     printf("  Match: %s\n\n", a.hash == b.hash ? "YES" : "NO");
     printf("─── 2. @public (weak) ───\n");
-    NFObject *__nopa_tmp_39 = (NFObject_alloc(&nopa_JSON__Object_class, __nopa_sel_alloc));
+    NPObject *__nopa_tmp_39 = (NPObject_alloc(&nopa_JSON__Object_class, __nopa_sel_alloc));
     JSON__Object * wo = (JSON__Object *)(((struct nopa_vtable *)__nopa_tmp_39->isa->vtable)->init(__nopa_tmp_39, __nopa_sel_init));
-    NFObject *__nopa_tmp_40 = (NFObject_alloc(&nopa_Watcher_class, __nopa_sel_alloc));
+    NPObject *__nopa_tmp_40 = (NPObject_alloc(&nopa_Watcher_class, __nopa_sel_alloc));
     Watcher * wt = (Watcher *)(((struct nopa_vtable *)__nopa_tmp_40->isa->vtable)->initWithTarget_(__nopa_tmp_40, __nopa_sel_initWithTarget_, wo));
     printf("  target before release: %p\n", (void *)wt->_target);
-    ((struct nopa_vtable *)(wo->isa->vtable))->release((NFObject *)(wo), __nopa_sel_release);
+    ((struct nopa_vtable *)(wo->isa->vtable))->release((NPObject *)(wo), __nopa_sel_release);
     printf("  target after release:  %p\n", (void *)wt->_target);
-    ((struct nopa_vtable *)(wt->isa->vtable))->release((NFObject *)(wt), __nopa_sel_release);
+    ((struct nopa_vtable *)(wt->isa->vtable))->release((NPObject *)(wt), __nopa_sel_release);
     printf("\n");
     printf("─── 4. @try/@catch ───\n");
     {
@@ -2480,15 +2480,15 @@ int main(int argc, const char * argv[]) {
       volatile int __nopa_state = 0;
       if (setjmp(__nopa_exception_buf) != 0)       __nopa_state = 1;
       if (__nopa_state == 0)       {
-        NFObject * x = JSON__Parser_parse_(&nopa_JSON__Parser_class, __nopa_sel_parse_, "{bad");
-        ((struct nopa_vtable *)(x->isa->vtable))->release((NFObject *)(x), __nopa_sel_release);
+        NPObject * x = JSON__Parser_parse_(&nopa_JSON__Parser_class, __nopa_sel_parse_, "{bad");
+        ((struct nopa_vtable *)(x->isa->vtable))->release((NPObject *)(x), __nopa_sel_release);
       }
       if (__nopa_state == 1)       {
         __nopa_state = 2;
         JSON__Error * e = __nopa_exception_value;
         {
-          printf("  Caught: %s\n", ((struct nopa_vtable *)(e->isa->vtable))->message((NFObject *)(e), __nopa_sel_message));
-          ((struct nopa_vtable *)(e->isa->vtable))->release((NFObject *)(e), __nopa_sel_release);
+          printf("  Caught: %s\n", ((struct nopa_vtable *)(e->isa->vtable))->message((NPObject *)(e), __nopa_sel_message));
+          ((struct nopa_vtable *)(e->isa->vtable))->release((NPObject *)(e), __nopa_sel_release);
         }
       }
       memcpy(__nopa_exception_buf, __nopa_saved, sizeof(jmp_buf));
@@ -2496,10 +2496,10 @@ int main(int argc, const char * argv[]) {
     }
     printf("\n");
     printf("─── 5. Interactive JSON Editor ───\n");
-    NFObject *__nopa_tmp_41 = (NFObject_alloc(&nopa_JSON__Editor_class, __nopa_sel_alloc));
+    NPObject *__nopa_tmp_41 = (NPObject_alloc(&nopa_JSON__Editor_class, __nopa_sel_alloc));
     JSON__Editor * ed = (JSON__Editor *)(((struct nopa_vtable *)__nopa_tmp_41->isa->vtable)->init(__nopa_tmp_41, __nopa_sel_init));
-    ((struct nopa_vtable *)(ed->isa->vtable))->run((NFObject *)(ed), __nopa_sel_run);
-    ((struct nopa_vtable *)(ed->isa->vtable))->release((NFObject *)(ed), __nopa_sel_release);
+    ((struct nopa_vtable *)(ed->isa->vtable))->run((NPObject *)(ed), __nopa_sel_run);
+    ((struct nopa_vtable *)(ed->isa->vtable))->release((NPObject *)(ed), __nopa_sel_release);
     printf("\n═══ Done ═══\n");
     nopa_autoreleasepool_pop(__nopa_pool);
   }

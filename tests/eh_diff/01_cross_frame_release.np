@@ -2,21 +2,21 @@
 // ObjC 基准:unwind 经过 middle 时 ARC 释放 m;catch 结束后运行时释放被抛对象
 #import <Foundation/Foundation.np>
 
-@interface Item : NFObject @end
+@interface Item : NPObject @end
 @implementation Item
 - (void)dealloc {
-    NFLog(@"Item dealloc");
+    NPLog(@"Item dealloc");
 }
 @end
 
-@interface Thrower : NFObject @end
+@interface Thrower : NPObject @end
 @implementation Thrower
 + (void)boom {
     @throw [[Item alloc] init];
 }
 + (void)middle {
     Item *m = [[Item alloc] init];
-    NFLog(@"middle created m");
+    NPLog(@"middle created m");
     [Thrower boom];
 }
 @end
@@ -29,9 +29,9 @@ int main() {
             [Thrower middle];
         }
         @catch (Item *e) {
-            NFLog(@"caught");
+            NPLog(@"caught");
         }
-        NFLog(@"--- end ---");
+        NPLog(@"--- end ---");
     }
     return 0;
 }

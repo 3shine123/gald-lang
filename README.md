@@ -165,7 +165,7 @@ Foundation supports two modes. Both are fully supported; **for real projects we 
 #import <Foundation/Foundation.np>   // declarations + implementations, all inlined
 
 int main() {
-    NFLog(@"hello %@", [NFString stringWithUTF8String:"world"]);
+    NPLog(@"hello %@", [NPString stringWithUTF8String:"world"]);
     return 0;
 }
 ```
@@ -181,7 +181,7 @@ nopac run hello.np
 #import <Foundation/Foundation.nh>   // declarations only — nothing inlined
 
 int main() {
-    NFLog(@"hello %@", [NFString stringWithUTF8String:"world"]);
+    NPLog(@"hello %@", [NPString stringWithUTF8String:"world"]);
     return 0;
 }
 ```
@@ -244,17 +244,17 @@ cargo test --workspace
 ### Class System
 
 ```nopa
-@interface Animal : NFObject {
+@interface Animal : NPObject {
 @public
-    NFString *_name;
+    NPString *_name;
 }
-- (instancetype)initWithName:(NFString *)name;
+- (instancetype)initWithName:(NPString *)name;
 - (void)speak;
-@property (readonly) NFString *name;
+@property (readonly) NPString *name;
 @end
 
 @implementation Animal
-- (instancetype)initWithName:(NFString *)name {
+- (instancetype)initWithName:(NPString *)name {
     self = [super init];
     if (self) {
         _name = name;
@@ -275,17 +275,17 @@ cargo test --workspace
 - (BOOL)isVisible;
 @end
 
-@interface Shape : NFObject <Drawable>
+@interface Shape : NPObject <Drawable>
 @end
 ```
 
 ### Properties
 
 ```nopa
-@interface Person : NFObject
-@property NFString *name;
+@interface Person : NPObject
+@property NPString *name;
 @property int age;
-@property (readonly) NFString *identifier;
+@property (readonly) NPString *identifier;
 @end
 ```
 
@@ -310,7 +310,7 @@ int (^square)(int) = ^int(int x) {
     return x * x;
 };
 
-void (^logAndCall)(NFString *, void (^)(void)) = ^void(NFString *msg, void (^next)(void)) {
+void (^logAndCall)(NPString *, void (^)(void)) = ^void(NPString *msg, void (^next)(void)) {
     printf("[LOG] %s\n", msg);
     if (next) next();
 };
@@ -320,7 +320,7 @@ void (^logAndCall)(NFString *, void (^)(void)) = ^void(NFString *msg, void (^nex
 
 ```nopa
 @autoreleasepool {
-    NFString *temp = [NFString stringWithUTF8String:"hello"];
+    NPString *temp = [NPString stringWithUTF8String:"hello"];
     // temp is released when the pool pops
 }
 ```
@@ -337,7 +337,7 @@ SEL sel = @selector(doSomething:);
 #include <stdio.h>
 #include <stdlib.h>
 
-@interface Wrapper : NFObject
+@interface Wrapper : NPObject
 - (void)callCFunction;
 @end
 ```
@@ -374,7 +374,7 @@ Nopa uses **compile-time static ARC**. The compiler determines each object refer
 In MRC mode (`-fno-nopa-arc`):
 
 ```nopa
-NFObject *obj = [[NFObject alloc] init];
+NPObject *obj = [[NPObject alloc] init];
 // ... use obj ...
 [obj release]; // MRC manual release
 ```
@@ -398,25 +398,25 @@ int main(void) {
     nopa_metaInit();  // metadata back-fill — see the note below
 
     // Class method: nopa_<Class>_<method>(params...)
-    NFString *s = nopa_NFString_stringWithUTF8String_("Hello");
+    NPString *s = nopa_NPString_stringWithUTF8String_("Hello");
 
     // Instance method: nopa_<Class>_<method>(self, params...)
-    size_t len = nopa_NFString_length(s);
-    const char *cstr = nopa_NFString_UTF8String(s);
+    size_t len = nopa_NPString_length(s);
+    const char *cstr = nopa_NPString_UTF8String(s);
 
     // Nested message send (like Nopa's [[s UTF8String] ...])
-    const char *nested = nopa_NFString_UTF8String(
-        nopa_NFString_stringWithUTF8String_("nested")
+    const char *nested = nopa_NPString_UTF8String(
+        nopa_NPString_stringWithUTF8String_("nested")
     );
 
     // Multi-argument message send (like Nopa's [arr replaceObjectAtIndex:0 withObject:obj])
-    NFArray *arr = nopa_NFArray_arrayWithObject_(s);
-    nopa_NFArray_replaceObjectAtIndex_withObject_(arr, 0, s);
+    NPArray *arr = nopa_NPArray_arrayWithObject_(s);
+    nopa_NPArray_replaceObjectAtIndex_withObject_(arr, 0, s);
 
     // Each colon in the selector becomes an underscore in the function name:
     //   [obj foo:arg1 bar:arg2] → nopa_<Class>_foo_bar_(obj, arg1, arg2)
     //   [m replaceCharactersInRange:rng withString:str]
-    //   → nopa_NFMutableString_replaceCharactersInRange_withString_(m, rng, str)
+    //   → nopa_NPMutableString_replaceCharactersInRange_withString_(m, rng, str)
 }
 ```
 
@@ -446,20 +446,20 @@ int main(void) {
     nopa_autoreleasepool_t *pool = nopa_autoreleasepoolPush();
 
     // +1 (returns autoreleased convenience object); use within this pool only
-    NFString *s = nopa_NFString_stringWithUTF8String_("hello");
-    printf("%s\n", nopa_NFString_UTF8String(s));
+    NPString *s = nopa_NPString_stringWithUTF8String_("hello");
+    printf("%s\n", nopa_NPString_UTF8String(s));
 
     // If it must outlive the pool: retain now, release later
-    NFString *t = nopa_NFString_stringWithUTF8String_("world");
+    NPString *t = nopa_NPString_stringWithUTF8String_("world");
     nopa_retain(t);
     nopa_autoreleasepoolPop(pool);      // t survives (was retained)
-    printf("%s\n", nopa_NFString_UTF8String(t));
+    printf("%s\n", nopa_NPString_UTF8String(t));
     nopa_release(t);
 
     // alloc-family returns +1 → must release
-    NFString *u = nopa_NFString_alloc(nopa_NFString_stringWithUTF8String_("x") /* placeholder */);
-    // (real usage: nopa_NFString_copy(s) returns +1, release it)
-    NFString *copy = nopa_NFString_copy(s);
+    NPString *u = nopa_NPString_alloc(nopa_NPString_stringWithUTF8String_("x") /* placeholder */);
+    // (real usage: nopa_NPString_copy(s) returns +1, release it)
+    NPString *copy = nopa_NPString_copy(s);
     nopa_release(copy);
 }
 ```
@@ -484,12 +484,12 @@ Nopa adds features on top of Objective-C syntax that ObjC itself doesn't have.
 ### for-in Enumeration
 
 ```nopa
-for (NFString *s in arr) {
+for (NPString *s in arr) {
     printf("%s\n", [s UTF8String]);
 }
 ```
 
-Desugared at parse time into an index loop over `[coll count]` / `[coll objectAtIndex:]` — the collection expression is evaluated once, nil-safe (`[nil count]` is 0), and elements are borrowed (no retain/release). Plain C arrays and `NFArray` both work.
+Desugared at parse time into an index loop over `[coll count]` / `[coll objectAtIndex:]` — the collection expression is evaluated once, nil-safe (`[nil count]` is 0), and elements are borrowed (no retain/release). Plain C arrays and `NPArray` both work.
 
 ### Protocol Conformance Checking
 
@@ -528,7 +528,7 @@ for (id item in items) {
 }
 ```
 
-`isKindOfClass:` walks the isa chain, `respondsToSelector:` queries the unified vtable, and `isEqual:` defaults to pointer identity on the root class (matching `NSObject`) — while `NFString` and `NFNumber` override it with **value** equality, which is what makes dictionary keys work. The legacy `isKindOf:` remains as a compatibility alias.
+`isKindOfClass:` walks the isa chain, `respondsToSelector:` queries the unified vtable, and `isEqual:` defaults to pointer identity on the root class (matching `NSObject`) — while `NPString` and `NPNumber` override it with **value** equality, which is what makes dictionary keys work. The legacy `isKindOf:` remains as a compatibility alias.
 
 ### Struct `==` / `!=` Value Comparison
 
@@ -549,7 +549,7 @@ p == &a               // pointer comparison semantics unchanged
 A method whose body contains `@await` is async — no annotation needed, mirroring C++20's `co_await`-based coroutines (the declaration looks like a perfectly ordinary ObjC method, so vtable layout is unchanged):
 
 ```nopa
-@interface Fetcher : NFObject
+@interface Fetcher : NPObject
 - (int)compute:(int)n;
 - (void)runAll;
 @end
@@ -563,7 +563,7 @@ A method whose body contains `@await` is async — no annotation needed, mirrori
 // async void = the entry method (blocks and pumps to completion)
 - (void)runAll {
     int x = @await [self compute:21]; // awaiting a call infects this method too
-    NFLog(@"result=%d", x);
+    NPLog(@"result=%d", x);
 }
 @end
 
@@ -577,7 +577,7 @@ int main() {
 Design rules:
 
 - **Infection is chain-based** — a method calling `@await` becomes async itself; async methods with a return value may only be awaited from async contexts (compile-time rejected otherwise).
-- **`@await` lowers to a state machine** — the body is split at suspension points into a `switch(task->state)` driver over a heap `NFTask`; locals that survive a suspension are lifted into a per-method frame struct.
+- **`@await` lowers to a state machine** — the body is split at suspension points into a `switch(task->state)` driver over a heap `NPTask`; locals that survive a suspension are lifted into a per-method frame struct.
 - **`@try` spanning an `@await`** is rejected (a `jmp_buf` cannot survive a suspension point); `@noarc` across awaits is allowed; break/continue across awaits become state jumps.
 - A cooperative single-thread scheduler (`nopa_run_all`) and I/O integration are planned as the next milestone.
 
@@ -588,14 +588,14 @@ Design rules:
 ```nopa
 // Object patterns mix freely in one switch:
 switch (subject) {
-    case NFString *s:                      // type binding → isKindOfClass:
-        NFLog(@"string: %s", [s UTF8String]);
+    case NPString *s:                      // type binding → isKindOfClass:
+        NPLog(@"string: %s", [s UTF8String]);
         break;
-    case NFNumber *n when [n intValue] > 3:  // type binding + `when` guard
-        NFLog(@"number: %d", [n intValue]);
+    case NPNumber *n when [n intValue] > 3:  // type binding + `when` guard
+        NPLog(@"number: %d", [n intValue]);
         break;
     case @"literal":                       // object literal → isEqual: (value semantics)
-        NFLog(@"matched a literal");
+        NPLog(@"matched a literal");
         break;
     default:
         break;
@@ -604,10 +604,10 @@ switch (subject) {
 // Comparison patterns, on a SCALAR subject:
 switch (n) {
     case > 100:
-        NFLog(@"big");
+        NPLog(@"big");
         break;
     case > 0 && < 100:                     // range
-        NFLog(@"small");
+        NPLog(@"small");
         break;
     default:
         break;
@@ -616,7 +616,7 @@ switch (n) {
 // Plain multi-value constants stay plain C:
 switch (n) {
     case 1, 2, 3:
-        NFLog(@"one of 1-3");
+        NPLog(@"one of 1-3");
         break;
     default:
         break;
@@ -628,7 +628,7 @@ switch (n) {
 | `T *name` | `nopa_isKindOfClass(subject, &NOPA_CLASS_$_T)`; inside the arm, `name` is already bound to `(T *)subject` |
 | `> 10`, `< 10`, `>= 0`, `<= 9` | `subject > 10` (the subject is spliced into the dangling operand) |
 | `> 0 && < 100` | `subject > 0 && subject < 100` |
-| `@"lit"`, `@42`, `@YES`, `@'c'`, `@(expr)` | `[subject isEqual:<literal>]` — value semantics, so `@"lit"` matches a *different* NFString with the same contents |
+| `@"lit"`, `@42`, `@YES`, `@'c'`, `@(expr)` | `[subject isEqual:<literal>]` — value semantics, so `@"lit"` matches a *different* NPString with the same contents |
 | `T *x when <expr>` | the type test, `&&`-ed with the guard |
 | anything else | plain C constant, compared with `==` |
 
@@ -648,37 +648,37 @@ Implementation: the parser classifies each label and flattens the whole switch i
 ### Boxed Literals (`@(expr)` / `@YES` / `@NO` / `@'c'`)
 
 ```nopa
-NFNumber *a = @123;          // int
-NFNumber *b = @1.5;          // double
-NFNumber *c = @YES;          // BOOL → 1
-NFNumber *d = @'c';          // char
-NFNumber *e = @(i + 1);      // factory chosen by the operand's STATIC type
+NPNumber *a = @123;          // int
+NPNumber *b = @1.5;          // double
+NPNumber *c = @YES;          // BOOL → 1
+NPNumber *d = @'c';          // char
+NPNumber *e = @(i + 1);      // factory chosen by the operand's STATIC type
 ```
 
-Every form yields a real `NFNumber`: the literal's own type picks the factory (`numberWithInt:` / `numberWithDouble:` / `numberWithChar:`), and `@(expr)` picks by the operand's static type — `double`/`float` → `numberWithDouble:`, `BOOL` → `numberWithBool:`, `char` → `numberWithChar:`, `long`/`long long` → `numberWithLongLong:`, any other integer → `numberWithInt:`. Boxed results are ordinary objects, so they dispatch like anything else: `[@(i * 2) intValue]`.
+Every form yields a real `NPNumber`: the literal's own type picks the factory (`numberWithInt:` / `numberWithDouble:` / `numberWithChar:`), and `@(expr)` picks by the operand's static type — `double`/`float` → `numberWithDouble:`, `BOOL` → `numberWithBool:`, `char` → `numberWithChar:`, `long`/`long long` → `numberWithLongLong:`, any other integer → `numberWithInt:`. Boxed results are ordinary objects, so they dispatch like anything else: `[@(i * 2) intValue]`.
 
 `@(expr)` is rewritten in the **checker**, not the parser: the parser has no types, and the C99 backend has no `_Generic` to fall back on. The rewrite reuses ordinary message-send nodes, so static dispatch and the nil guard come for free — the same mechanism as object subscripts and struct `==`. Non-arithmetic operands are rejected rather than silently boxed:
 
 ```
-illegal type 'NFString *' in a boxed expression — '@(...)' accepts arithmetic and BOOL values only
+illegal type 'NPString *' in a boxed expression — '@(...)' accepts arithmetic and BOOL values only
 ```
 
 ### Dictionary Literals (`@{ key: value }`)
 
 ```nopa
-NFDictionary *d = @{ @"a": @1, @"b": @2, @"c": @3 };
-NFLog(@"%d", [[d objectForKey:@"b"] intValue]);   // 2
+NPDictionary *d = @{ @"a": @1, @"b": @2, @"c": @3 };
+NPLog(@"%d", [[d objectForKey:@"b"] intValue]);   // 2
 printf("%lu\n", (unsigned long)[d count]);        // 3
 
-NFMutableDictionary *m = [NFMutableDictionary dictionary];
+NPMutableDictionary *m = [NPMutableDictionary dictionary];
 [m setObject:@10 forKey:@"x"];
 [m setObject:@11 forKey:@"x"];   // equal key → replaced, not appended
 [m removeObjectForKey:@"x"];
 
-NFDictionary *empty = @{};       // `@{}` is an empty dictionary (`@[]` is the array)
+NPDictionary *empty = @{};       // `@{}` is an empty dictionary (`@[]` is the array)
 ```
 
-Keys compare with `isEqual:`, so `NFString`/`NFNumber` keys have **value** semantics. String literals are **interned** (same contents → the same object, like ObjC constant strings), and value equality remains the semantic guarantee — a lookup with a fresh `@"b"` finds the entry either way. Storage mirrors `NFArray` — two parallel object arrays with a linear scan — and `count` / `objectForKey:` / `allKeys` / `allValues` / `copy` / `description` / content-based `isEqual:` round out the API. Entries must be objects, as in ObjC:
+Keys compare with `isEqual:`, so `NPString`/`NPNumber` keys have **value** semantics. String literals are **interned** (same contents → the same object, like ObjC constant strings), and value equality remains the semantic guarantee — a lookup with a fresh `@"b"` finds the entry either way. Storage mirrors `NPArray` — two parallel object arrays with a linear scan — and `count` / `objectForKey:` / `allKeys` / `allValues` / `copy` / `description` / content-based `isEqual:` round out the API. Entries must be objects, as in ObjC:
 
 ```
 illegal type 'int' in a dictionary literal — keys and values must be Objective-C objects
@@ -689,7 +689,7 @@ illegal type 'int' in a dictionary literal — keys and values must be Objective
 Nopa's exceptions are **ObjC exceptions by value, without unwinding**. `@try`/`@catch`/`@finally`/`@throw` behave exactly like clang's `-fobjc-arc-exceptions` mode — and a differential test suite (`tests/eh_diff/run_eh_diff.sh`) locks this in by running each case under both nopac and real clang/ObjC, then diffing stderr line by line (7/7 cases pass).
 
 ```nopa
-@interface Boom : NFObject
+@interface Boom : NPObject
 - (void)fire;
 @end
 
@@ -703,13 +703,13 @@ int main() {
     @try {
         Boom *b = [[Boom alloc] init];
         [b fire];                       // execution stops HERE
-        NFLog(@"never runs");
+        NPLog(@"never runs");
     }
-    @catch (NFString *e) {
-        NFLog(@"caught: %@", e);
+    @catch (NPString *e) {
+        NPLog(@"caught: %@", e);
     }
     @finally {
-        NFLog(@"finally always runs");
+        NPLog(@"finally always runs");
     }
     return 0;
 }
@@ -722,7 +722,7 @@ The semantics you get:
 - **Typed catch chains match by isa** — an unmatched `@catch` lets the exception continue to the enclosing `@try`; a rethrow inside `@catch` propagates to the outer handler, never re-enters the same one.
 - **`@finally` ordering** — inner finally runs before the outer catch; the outer finally runs after the outer catch.
 - **Throws inside block literals** propagate to the enclosing `@try` like any other call.
-- **Uncaught exceptions abort** with ObjC's wording: `*** Terminating app due to uncaught exception of class 'NFString'`, exit code 1.
+- **Uncaught exceptions abort** with ObjC's wording: `*** Terminating app due to uncaught exception of class 'NPString'`, exit code 1.
 - **C callers can't miss an exception** — bridge-header wrappers check the error flag and abort rather than silently returning a zero value.
 
 **`-eh checked` is the default backend** — a plain `nopac run` compiles with it. `-eh legacy` (alias `-eh sjlj`) selects the old zero-overhead setjmp backend and remains a complete rollback; that backend has the classic limitation: a cross-frame throw skips intermediate frames' cleanup (documented below).
@@ -739,16 +739,16 @@ The semantics you get:
 | In generated C | yes (the setjmp/flag machinery) | **never** — no code, no vtable slot |
 
 ```nopa
-@interface Repo : NFObject
-- (NFString *)fetch:(const char *)url @throws(NFError *);   // throws NFError *
+@interface Repo : NPObject
+- (NPString *)fetch:(const char *)url @throws(NPError *);   // throws NPError *
 - (int)parse:(const char *)s @throws;                       // throws; type unstated
 - (int)count;                                              // never throws
 @end
 
 @implementation Repo
-- (NFString *)fetch:(const char *)url @throws(NFError *) {
+- (NPString *)fetch:(const char *)url @throws(NPError *) {
     if (!url) {
-        @throw [[NFError alloc] init];   // the statement
+        @throw [[NPError alloc] init];   // the statement
     }
     return @"ok";
 }
@@ -760,7 +760,7 @@ Apple has occupied exactly this slot — trailing metadata before the `;` — wi
 **What the checker enforces**
 
 - `@throws(T *)` — every `@throw` that escapes the declaration must have a static type compatible with `T` (subclasses allowed):
-  `error: '@throw' of type 'AppError *' does not match the declared '@throws(NFString *)'`
+  `error: '@throw' of type 'AppError *' does not match the declared '@throws(NPString *)'`
 - Bare `@throws` — the body must really contain an escaping `@throw`:
   `error: 'liar' is marked '@throws' but its body never executes '@throw'`
 - No annotation — an escaping `@throw` is an error:
@@ -796,19 +796,19 @@ The type check is deliberately conservative: `@"..."` literals, bare C strings, 
 
 ### Implicit Root Class (`nopa_root`)
 
-Nopa now supports user-defined root classes. You no longer need to inherit from `NFObject` — an `@interface` without a superclass automatically gets a compiler-injected implicit root class `nopa_root`, while keeping `id` type uniformity and static dispatch.
+Nopa now supports user-defined root classes. You no longer need to inherit from `NPObject` — an `@interface` without a superclass automatically gets a compiler-injected implicit root class `nopa_root`, while keeping `id` type uniformity and static dispatch.
 
 **Before:**
 
 ```nopa
-@interface Animal : NFObject   // had to inherit NFObject
+@interface Animal : NPObject   // had to inherit NPObject
 ```
 
 **After:**
 
 ```nopa
 @interface Animal              // no superclass → implicit root class
-@interface Animal : NFObject   // explicit NFObject still works
+@interface Animal : NPObject   // explicit NPObject still works
 ```
 
 Both are valid, and `id` can point to any Nopa object.
@@ -858,7 +858,7 @@ struct Animal {
 typedef struct nopa_root *nopa_id_t;
 ```
 
-`id` is no longer tied to `NFObject` — it only requires the object to start with `nopa_root`. This means:
+`id` is no longer tied to `NPObject` — it only requires the object to start with `nopa_root`. This means:
 
 ```nopa
 Animal *a = [[Animal alloc] init];
@@ -870,7 +870,7 @@ id obj = a;                    // valid: Animal inherits from nopa_root
 
 ```nopa
 @interface Dog : Animal {
-    NFString *breed;
+    NPString *breed;
 }
 @end
 ```
@@ -880,16 +880,16 @@ Generated C:
 ```c
 struct Dog {
     struct Animal __super;     // contains nopa_root → header
-    struct NFString *breed;
+    struct NPString *breed;
 };
 ```
 
-#### `NFObject` vs `nopa_root`
+#### `NPObject` vs `nopa_root`
 
 | Declaration                 | Means                             | Use Case                        |
 | --------------------------- | --------------------------------- | ------------------------------- |
 | `@interface Xxx`            | Implicit `nopa_root`, lightweight | Custom layout, kernel, embedded |
-| `@interface Xxx : NFObject` | Explicit NFObject, full runtime   | User apps, ARC, retain/release  |
+| `@interface Xxx : NPObject` | Explicit NPObject, full runtime   | User apps, ARC, retain/release  |
 
 ```nopa
 // Lightweight root class, no refcounting overhead
@@ -900,9 +900,9 @@ struct Dog {
 - (void)run;
 @end
 
-// Full NFObject with automatic memory management
-@interface UserModel : NFObject
-@property NFString *name;
+// Full NPObject with automatic memory management
+@interface UserModel : NPObject
+@property NPString *name;
 @end
 ```
 
@@ -918,7 +918,7 @@ In `-ffreestanding` mode the transpiled C:
 
 - does **not** `#include <string.h>`; instead `#include <nopa/runtime.h>` (freestanding branch)
 - implements `@try/@catch/@finally` with the default `-eh checked` backend — plain flag + guard control flow, **no `setjmp`/`longjmp` and no `jmp_buf` at all**, which is what makes the bare-metal target work. (`-eh legacy` falls back to `__builtin_setjmp/longjmp`, with plain non-`__thread` exception globals.)
-- is self-contained for `SEL`/`NFClass`/`NFObject`/`id`
+- is self-contained for `SEL`/`NPClass`/`NPObject`/`id`
 - does **not** bundle the Clang Blocks runtime — block literals reference `__NSConcreteStackBlock`/`_Block_copy`/`_Block_release`; on real bare metal, either link a Blocks runtime port or use `-backend portable`/`-backend gcc` (blocks lower to plain C functions, no ABI symbols)
 
 The user only provides: `NOPA_CLASS_$_nopa_root`, the exception globals (if using `@try`), `memcpy` (if using `@try`), and freestanding headers (`stdint.h`/`stddef.h`/`stdbool.h`).
@@ -1008,7 +1008,7 @@ Reference counting is managed by compile-time static ARC analysis, not stored in
 
 ```nopa
 @namespace Game
-    @interface Player : NFObject {
+    @interface Player : NPObject {
         int health;
     }
     - (id)init;
@@ -1026,7 +1026,7 @@ Reference counting is managed by compile-time static ARC analysis, not stored in
 @endnamespace
 
 @namespace UI
-    @interface HUD : NFObject {}
+    @interface HUD : NPObject {}
     - (void)showPlayerHealth:(Game::Player *)player;
     @end
 @endnamespace
@@ -1111,7 +1111,7 @@ Key points:
 - **No ARC injection** — the ARC analyzer skips `@noarc` blocks entirely, inserting no retain/release for objects used there.
 - **Runtime-method exemption** — the implementations of `retain`/`release`/`dealloc`/`autorelease` themselves may call these methods without `@noarc`.
 - **Whole-program analogue** — `-fno-nopa-arc` switches the whole program to MRC; `@noarc` does the same for a single block.
-- **Foundation** — the NFString/NFMutableString convenience constructors (`+stringWithUTF8String:`, `+stringWithString:`) wrap their deliberate `autorelease` in `@noarc { }`.
+- **Foundation** — the NPString/NPMutableString convenience constructors (`+stringWithUTF8String:`, `+stringWithString:`) wrap their deliberate `autorelease` in `@noarc { }`.
 
 ---
 
@@ -1158,14 +1158,14 @@ M1 limits (compile-time enforced): `@defer` must sit directly inside a block; th
 
 Implementation: pure desugar (`crates/defer`, pipeline step 3.9 — after the `-eh checked` rewrite, before ARC). Codegen, checker, and the runtime see ordinary statements — zero changes downstream. Golden: `tests/golden/36_defer/`.
 
-### `NFAsync<T>` — Declared Async Marker
+### `NPAsync<T>` — Declared Async Marker
 
-`@await` M1/M2 left one soft spot: a header cannot tell you whether a method suspends. `NFAsync<T>` promotes async-ness to a **return-type marker** that is visible in the declaration — the parser unwraps it to `T`, so it is pure compile-time metadata: `NFAsync` appears **zero times** in the generated C, and vtable layout, cross-TU linking, and the bridge header are untouched.
+`@await` M1/M2 left one soft spot: a header cannot tell you whether a method suspends. `NPAsync<T>` promotes async-ness to a **return-type marker** that is visible in the declaration — the parser unwraps it to `T`, so it is pure compile-time metadata: `NPAsync` appears **zero times** in the generated C, and vtable layout, cross-TU linking, and the bridge header are untouched.
 
 ```nopa
-@interface Fetcher : NFObject
-- (NFAsync<int>)compute:(int)n;   // suspends, yields an int
-+ (NFAsync<void>)runAll;          // entry point
+@interface Fetcher : NPObject
+- (NPAsync<int>)compute:(int)n;   // suspends, yields an int
++ (NPAsync<void>)runAll;          // entry point
 - (int)plain:(int)n;              // unmarked = promises never to suspend
 @end
 ```
@@ -1174,18 +1174,18 @@ The body's awaits decide the truth, and the checker reconciles both directions:
 
 | declaration | body | verdict |
 |-------------|------|---------|
-| `NFAsync<T>` | has `@await` | ✅ |
-| `NFAsync<T>` | no `@await` | **error** — `'compute:' is marked 'NFAsync<T>' but its body never suspends — remove the marker or add an '@await'` |
-| bare `T` | has `@await` | **warning** — `'compute:' contains '@await' but its return type is not marked 'NFAsync<T>' — mark it so callers can see it suspends` (`-Werror` escalates) |
+| `NPAsync<T>` | has `@await` | ✅ |
+| `NPAsync<T>` | no `@await` | **error** — `'compute:' is marked 'NPAsync<T>' but its body never suspends — remove the marker or add an '@await'` |
+| bare `T` | has `@await` | **warning** — `'compute:' contains '@await' but its return type is not marked 'NPAsync<T>' — mark it so callers can see it suspends` (`-Werror` escalates) |
 | bare `T` | no `@await` | ✅ |
 
-- The marker is part of the signature: `@interface` and `@implementation` must agree — `'NFAsync' marker mismatch on 'compute:': the @interface and @implementation disagree` is an error. Header-only `@interface` methods are exempt (cross-TU safety).
-- Value positions are rejected — variables, parameters, ivars, properties: `'NFAsync<T>' is a declaration marker, not a value type (variable) — '@await' the async call instead`.
-- `NFAsync` is a reserved class name.
+- The marker is part of the signature: `@interface` and `@implementation` must agree — `'NPAsync' marker mismatch on 'compute:': the @interface and @implementation disagree` is an error. Header-only `@interface` methods are exempt (cross-TU safety).
+- Value positions are rejected — variables, parameters, ivars, properties: `'NPAsync<T>' is a declaration marker, not a value type (variable) — '@await' the async call instead`.
+- `NPAsync` is a reserved class name.
 
 Golden: `tests/golden/37_async_marker/`; negatives under `tests/negative/async_marker_*.np`.
 
-### Object Subscripting (`a[0]` on NFArray)
+### Object Subscripting (`a[0]` on NPArray)
 
 `recv[i]` and `recv[i] = v` on container objects now work as sugar. The checker rewrites them — type-aware, judged by the **symbol table** (does the class, or a superclass, actually declare the methods?), not by "looks like an object":
 
@@ -1195,42 +1195,42 @@ Golden: `tests/golden/37_async_marker/`; negatives under `tests/negative/async_m
 | `recv[i] = v` | `[recv setObject:v atIndex:i]` | class also declares `setObject:atIndex:` |
 
 ```nopa
-NFArray *a = @[ @"x", @"y", @"z" ];
-NFLog(@"%@", a[0]);            // → [a objectAtIndex:0]
-NFMutableArray *m = [NFMutableArray array];
+NPArray *a = @[ @"x", @"y", @"z" ];
+NPLog(@"%@", a[0]);            // → [a objectAtIndex:0]
+NPMutableArray *m = [NPMutableArray array];
 [m addObject:@"first"];
 m[0] = @"hello";               // → [m setObject:@"hello" atIndex:0] — replaces, not appends
 ```
 
 Plain C is never touched: `int c[3]; c[1]`, `char *p; p[0]`, and `const char *s; s[2]` all pass through as raw C subscripts (probe-verified, zero false positives). The rewrite lands in the checker (not the parser — the parser has no variable types, and the emit stage has no vtable metadata), so downstream vtable dispatch, nil guards, and SEL constants work with zero special cases.
 
-Dictionary subscripting (`d[@"k"]`) is deliberately **not** part of this rewrite: the mapping is `objectAtIndex:`-only, so `NFDictionary` does not declare `objectForKeyedSubscript:` — that would advertise a spelling which the rewrite would send to the wrong selector. Use `[d objectForKey:@"k"]`.
+Dictionary subscripting (`d[@"k"]`) is deliberately **not** part of this rewrite: the mapping is `objectAtIndex:`-only, so `NPDictionary` does not declare `objectForKeyedSubscript:` — that would advertise a spelling which the rewrite would send to the wrong selector. Use `[d objectForKey:@"k"]`.
 
 ### Real Generic Checking (monomorphization + element types)
 
-Generic containers **monomorphize and are type-checked**. `NFArray<NFString *>` and `NFDictionary<NFString *, NFNumber *>` generate real specialized C (struct, vtable, class metadata, method copies with substituted types), and the checker substitutes the element types into method signatures — so the element type is enforced, not erased:
+Generic containers **monomorphize and are type-checked**. `NPArray<NPString *>` and `NPDictionary<NPString *, NPNumber *>` generate real specialized C (struct, vtable, class metadata, method copies with substituted types), and the checker substitutes the element types into method signatures — so the element type is enforced, not erased:
 
 ```nopa
-NFMutableArray<NFString *> *m = [NFMutableArray array];
+NPMutableArray<NPString *> *m = [NPMutableArray array];
 [m addObject:@"a"];
-NFString *s = [m objectAtIndex:0];      // NFString *, not id
+NPString *s = [m objectAtIndex:0];      // NPString *, not id
 
-[m addObject:@42];                      // ✗ error: NFNumber* into an NFString* container
+[m addObject:@42];                      // ✗ error: NPNumber* into an NPString* container
 int bad = [m objectAtIndex:0];          // ✗ error: pointer into scalar
 ```
 
-`@[...]` and `@{...}` literals **infer** their element types when every element agrees, so `NFArray<NFString *> *a = @[ @"x", @"y" ];` needs no annotation; a mixed array falls back to bare `NFArray`.
+`@[...]` and `@{...}` literals **infer** their element types when every element agrees, so `NPArray<NPString *> *a = @[ @"x", @"y" ];` needs no annotation; a mixed array falls back to bare `NPArray`.
 
-Both spellings coexist: bare `NFArray` stays fully supported (zero migration) and simply erases to `id`. Assigning a bare container into a specialized variable is allowed but warns, because the element type is then unverified:
+Both spellings coexist: bare `NPArray` stays fully supported (zero migration) and simply erases to `id`. Assigning a bare container into a specialized variable is allowed but warns, because the element type is then unverified:
 
 ```text
-warning: assigning a bare 'NFArray *' to a specialization of it — the bare
+warning: assigning a bare 'NPArray *' to a specialization of it — the bare
 container's element type is unchecked; add an explicit cast if the contents are known to match
 ```
 
-`-Werror` escalates it. `NFArray<A>` and `NFArray<B>` remain mutually assignable without complaint — the same permissiveness as ObjC lightweight generics (you asked for `id` back, you get `id` back).
+`-Werror` escalates it. `NPArray<A>` and `NPArray<B>` remain mutually assignable without complaint — the same permissiveness as ObjC lightweight generics (you asked for `id` back, you get `id` back).
 
-Note the cost: specialization is compile-time code, not free type safety. The same program using containers generically instead of bare compiles to ~42 KB / +41% more C — all duplicated method bodies and metadata, byte-identical layout, so zero runtime benefit. Golden: `tests/golden/40_nfarray_generic/`.
+Note the cost: specialization is compile-time code, not free type safety. The same program using containers generically instead of bare compiles to ~42 KB / +41% more C — all duplicated method bodies and metadata, byte-identical layout, so zero runtime benefit. Golden: `tests/golden/40_nparray_generic/`.
 
 ### Nopa-Syntax Macros (dual-track `#define`)
 
@@ -1239,7 +1239,7 @@ Note the cost: specialization is compile-time code, not free type safety. The sa
 ```nopa
 #define TAG(o)      [o tag]                    // nopa track: expanded by nopac
 #define BUMP(o, n)  [o addTo:n times:1]
-#define LOG(x)      NFLog(@"tag=%d", x)        // body contains an @literal
+#define LOG(x)      NPLog(@"tag=%d", x)        // body contains an @literal
 #define TWICE(x)    ((x) + (x))                // C track: expanded by clang
 
 int t = TAG(w);                                    // → [w tag]
@@ -1261,7 +1261,7 @@ struct Point p1 = { .x = 1, .y = 2 };      // 1. full designated
 struct Point p2 = { .y = 5 };               // 2. partial — omitted fields zero-filled
 struct Point p3 = { .x = 1, 7 };           // 3. designated mixed with positional
 
-NFRange r = (NFRange){ .location = 3,      // 4. compound literal + designators
+NPRange r = (NPRange){ .location = 3,      // 4. compound literal + designators
                         .length = 9 };
 
 CGPoint pts[3] = { [0].wx = 1, [2].wy = 6 };  // 5. array elements
@@ -1353,8 +1353,8 @@ Clients then import only the declaration header:
 #import <Foundation/Foundation.nh>    // declarations only — no implementations inlined
 
 int main() {
-    NFString *s = [NFString stringWithUTF8String:"hello"];
-    NFLog(@"%@", s);
+    NPString *s = [NPString stringWithUTF8String:"hello"];
+    NPLog(@"%@", s);
     return 0;
 }
 ```
@@ -1379,7 +1379,7 @@ Notes:
 #include <stdio.h>
 #import <Foundation/Foundation.np>
 
-@interface Greeter : NFObject
+@interface Greeter : NPObject
 - (void)greet;
 @end
 
@@ -1401,7 +1401,7 @@ int main() {
 ### Polymorphism
 
 ```nopa
-@interface Animal : NFObject
+@interface Animal : NPObject
 - (void)speak;
 @end
 
@@ -1436,9 +1436,9 @@ int main() {
 ### Block + ARC
 
 ```nopa
-typedef void (^EventHandler)(int code, NFString *msg);
+typedef void (^EventHandler)(int code, NPString *msg);
 
-@interface Engine : NFObject
+@interface Engine : NPObject
 - (void)onEvent:(EventHandler)handler;
 @end
 
@@ -1446,7 +1446,7 @@ int main() {
     @autoreleasepool {
         Engine *e = [[Engine alloc] init];
         int captured = 42;
-        [e onEvent:^void(int code, NFString *msg) {
+        [e onEvent:^void(int code, NPString *msg) {
             printf("code=%d msg=%s captured=%d\n", code, msg, captured);
         }];
     }
@@ -1459,7 +1459,7 @@ int main() {
 Nopa compiles generics at compile time via **monomorphization** — each `DataPack<QuantumToken *>` becomes a standalone C struct `DataPack_QuantumToken_ptr` with concrete type substitutions. No type erasure, no boxing, no runtime overhead.
 
 ```nopa
-@interface DataPack<T> : NFObject {
+@interface DataPack<T> : NPObject {
     @public
     int _count;
     T _storage[2];

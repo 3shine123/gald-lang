@@ -18,14 +18,14 @@ Nopa 通过 extern 声明直接调用内核的 `kputs/kputdec/kputhex` 输出，
 `nopa/soma_core.np` 用上了编译器的类系统，且**在裸机内核里真正跑通**：
 
 - **`@namespace SomaCore`** — 类名自动加 `SomaCore__` 前缀（`SomaCore::Calculator`）
-- **`@interface Calculator`（隐式根类）** — 不写 `: NFObject`，直接定义类；转译产物里类只有
+- **`@interface Calculator`（隐式根类）** — 不写 `: NPObject`，直接定义类；转译产物里类只有
   `isa` + `retain_count` + ivar，无任何 Foundation 依赖
 - **类方法派发** — `[SomaCore::Calculator compute:21]` 转译为直接函数调用
   `SomaCore__Calculator_compute_(&nopa_..._class, sel, 21)`
 - **实例方法派发** — `[acc add:7]` 转译为 `recv->isa->vtable->methods[INDEX]`，裸机可用
 
 为支持类系统，内核提供最小 freestanding runtime 头（`include/nopa/runtime.h`），只定义转译代码
-需要的类型（`SEL`/`NFClass`/`NFObject`/`id`）和符号（`nopa___nopa_root_class`），
+需要的类型（`SEL`/`NPClass`/`NPObject`/`id`）和符号（`nopa___nopa_root_class`），
 Makefile 用 `-include nopa/runtime.h` 注入每个编译单元；`nopa_meta_init()`（转译器弱符号生成）
 在 `kmain` 里先调用，然后 C 侧手工构造实例（`isa = &nopa_..._class`）交给 Nopa 实例方法使用。
 
@@ -91,6 +91,6 @@ examples/04_soma-kernel/
 - Nopa 模块不能用闭包；整数字面量不能带 `u` 后缀（解析器限制）。
 - 内联 asm 模板：只要带操作数 section，字面 `%` 必须写成 `%%`；`outb %b0, $0x80` 用操作数引用。
 - 类系统裸机要点：`nopa/runtime.h` 的 include guard 必须与 `crates/codegen` 生成的
-  `__NOPA_ROOT_DEFINED`/`NFOBJECT_DEFINED` 一致（否则重复定义）；`nopa___nopa_root_class`
+  `__NOPA_ROOT_DEFINED`/`NPOBJECT_DEFINED` 一致（否则重复定义）；`nopa___nopa_root_class`
   由 kernel.c 提供，`nopa_meta_init()` 先于类使用调用。
 - `tests/**/*.np` 会被 `test_all.py` 默认套件扫到，`soma-kernel` 已在套件中排除，用 `./run.sh` 独立验证。

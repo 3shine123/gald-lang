@@ -9,23 +9,23 @@
 
 #include <string.h>
 
-struct nopa_NFObject_vtable;
-struct nopa_NFCriticalException_vtable;
-struct nopa_NFRecoverableException_vtable;
-struct nopa_NFMatrixSpace_vtable;
-struct nopa_NFChaosEngine_vtable;
+struct nopa_NPObject_vtable;
+struct nopa_NPCriticalException_vtable;
+struct nopa_NPRecoverableException_vtable;
+struct nopa_NPMatrixSpace_vtable;
+struct nopa_NPChaosEngine_vtable;
 
-#define nopa_NFObject_vtable_index_init 2
-#define nopa_NFObject_vtable_index_dealloc 3
-#define nopa_NFCriticalException_vtable_index_initWithReason_ 4
-#define nopa_NFRecoverableException_vtable_index_initWithReason_ 4
-#define nopa_NFMatrixSpace_vtable_index_initWithDimension_ 4
-#define nopa_NFMatrixSpace_vtable_index_fillMatrixWithSeed_ 5
-#define nopa_NFMatrixSpace_vtable_index_getValueAtRow_col_ 6
-#define nopa_NFMatrixSpace_vtable_index_dealloc 3
-#define nopa_NFChaosEngine_vtable_index_executeChaosLoopWithLevel_ 4
-#define nopa_NFChaosEngine_vtable_index_init 2
-#define nopa_NFChaosEngine_vtable_index_dealloc 3
+#define nopa_NPObject_vtable_index_init 2
+#define nopa_NPObject_vtable_index_dealloc 3
+#define nopa_NPCriticalException_vtable_index_initWithReason_ 4
+#define nopa_NPRecoverableException_vtable_index_initWithReason_ 4
+#define nopa_NPMatrixSpace_vtable_index_initWithDimension_ 4
+#define nopa_NPMatrixSpace_vtable_index_fillMatrixWithSeed_ 5
+#define nopa_NPMatrixSpace_vtable_index_getValueAtRow_col_ 6
+#define nopa_NPMatrixSpace_vtable_index_dealloc 3
+#define nopa_NPChaosEngine_vtable_index_executeChaosLoopWithLevel_ 4
+#define nopa_NPChaosEngine_vtable_index_init 2
+#define nopa_NPChaosEngine_vtable_index_dealloc 3
 
 static const SEL __nopa_sel_init = {.name = "init", .hash = 0x16B1D373};
 static const SEL __nopa_sel_getValueAtRow_col_ = {.name = "getValueAtRow_col_", .hash = 0x2DB2A4F7};
@@ -35,185 +35,185 @@ static const SEL __nopa_sel_initWithDimension_ = {.name = "initWithDimension_", 
 static const SEL __nopa_sel_fillMatrixWithSeed_ = {.name = "fillMatrixWithSeed_", .hash = 0x27ACB6A9};
 static const SEL __nopa_sel_executeChaosLoopWithLevel_ = {.name = "executeChaosLoopWithLevel_", .hash = 0x3CD9A575};
 
-typedef struct NFObject NFObject;
-typedef struct NFCriticalException NFCriticalException;
-typedef struct NFRecoverableException NFRecoverableException;
-typedef struct NFMatrixSpace NFMatrixSpace;
-typedef struct NFChaosEngine NFChaosEngine;
+typedef struct NPObject NPObject;
+typedef struct NPCriticalException NPCriticalException;
+typedef struct NPRecoverableException NPRecoverableException;
+typedef struct NPMatrixSpace NPMatrixSpace;
+typedef struct NPChaosEngine NPChaosEngine;
 
 
 
-NFObject * NFObject_alloc(NFClass * self, SEL _cmd);
-NFObject * NFObject_new(NFClass * self, SEL _cmd);
-NFObject * NFObject_init(NFObject * self, SEL _cmd);
-void NFObject_dealloc(NFObject * self, SEL _cmd);
-NFClass * NFObject_getClass(NFClass * self, SEL _cmd);
-NFObject * NFCriticalException_initWithReason_(NFObject * self, SEL _cmd, const char * r);
-NFClass * NFCriticalException_getClass(NFClass * self, SEL _cmd);
-NFObject * NFRecoverableException_initWithReason_(NFObject * self, SEL _cmd, const char * r);
-NFClass * NFRecoverableException_getClass(NFClass * self, SEL _cmd);
-NFObject * NFMatrixSpace_initWithDimension_(NFObject * self, SEL _cmd, int dim);
-void NFMatrixSpace_fillMatrixWithSeed_(NFObject * self, SEL _cmd, int seed);
-int NFMatrixSpace_getValueAtRow_col_(NFObject * self, SEL _cmd, int r, int c);
-void NFMatrixSpace_dealloc(NFObject * self, SEL _cmd);
-NFClass * NFMatrixSpace_getClass(NFClass * self, SEL _cmd);
-void NFChaosEngine_executeChaosLoopWithLevel_(NFObject * self, SEL _cmd, int level);
-NFObject * NFChaosEngine_init(NFObject * self, SEL _cmd);
-void NFChaosEngine_dealloc(NFObject * self, SEL _cmd);
-NFClass * NFChaosEngine_getClass(NFClass * self, SEL _cmd);
+NPObject * NPObject_alloc(NPClass * self, SEL _cmd);
+NPObject * NPObject_new(NPClass * self, SEL _cmd);
+NPObject * NPObject_init(NPObject * self, SEL _cmd);
+void NPObject_dealloc(NPObject * self, SEL _cmd);
+NPClass * NPObject_getClass(NPClass * self, SEL _cmd);
+NPObject * NPCriticalException_initWithReason_(NPObject * self, SEL _cmd, const char * r);
+NPClass * NPCriticalException_getClass(NPClass * self, SEL _cmd);
+NPObject * NPRecoverableException_initWithReason_(NPObject * self, SEL _cmd, const char * r);
+NPClass * NPRecoverableException_getClass(NPClass * self, SEL _cmd);
+NPObject * NPMatrixSpace_initWithDimension_(NPObject * self, SEL _cmd, int dim);
+void NPMatrixSpace_fillMatrixWithSeed_(NPObject * self, SEL _cmd, int seed);
+int NPMatrixSpace_getValueAtRow_col_(NPObject * self, SEL _cmd, int r, int c);
+void NPMatrixSpace_dealloc(NPObject * self, SEL _cmd);
+NPClass * NPMatrixSpace_getClass(NPClass * self, SEL _cmd);
+void NPChaosEngine_executeChaosLoopWithLevel_(NPObject * self, SEL _cmd, int level);
+NPObject * NPChaosEngine_init(NPObject * self, SEL _cmd);
+void NPChaosEngine_dealloc(NPObject * self, SEL _cmd);
+NPClass * NPChaosEngine_getClass(NPClass * self, SEL _cmd);
 int main(int argc, const char * * argv);
 
-extern NFClass nopa_NFObject_class;
-extern NFClass nopa_NFCriticalException_class;
-extern NFClass nopa_NFRecoverableException_class;
-extern NFClass nopa_NFMatrixSpace_class;
-extern NFClass nopa_NFChaosEngine_class;
+extern NPClass nopa_NPObject_class;
+extern NPClass nopa_NPCriticalException_class;
+extern NPClass nopa_NPRecoverableException_class;
+extern NPClass nopa_NPMatrixSpace_class;
+extern NPClass nopa_NPChaosEngine_class;
 void nopa_meta_init(void);
 
-// struct NFClass defined in runtime.h
-// struct NFObject defined in runtime.h
-struct nopa_NFObject_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
+// struct NPClass defined in runtime.h
+// struct NPObject defined in runtime.h
+struct nopa_NPObject_vtable {
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
 };
-struct nopa_NFObject_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+struct nopa_NPObject_meta_vtable {
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
-struct NFCriticalException {
-    struct NFClass *isa;
+struct NPCriticalException {
+    struct NPClass *isa;
     uint32_t retain_count;
     const char * reason;
 };
-typedef struct NFCriticalException NFCriticalException;
-struct nopa_NFCriticalException_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    NFObject * (*initWithReason_)(NFObject *, SEL, const char *);
+typedef struct NPCriticalException NPCriticalException;
+struct nopa_NPCriticalException_vtable {
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    NPObject * (*initWithReason_)(NPObject *, SEL, const char *);
 };
-struct nopa_NFCriticalException_meta_vtable {
-    NFClass * (*class)(NFClass *, SEL);
+struct nopa_NPCriticalException_meta_vtable {
+    NPClass * (*class)(NPClass *, SEL);
 };
-struct NFRecoverableException {
-    struct NFClass *isa;
+struct NPRecoverableException {
+    struct NPClass *isa;
     uint32_t retain_count;
     const char * reason;
 };
-typedef struct NFRecoverableException NFRecoverableException;
-struct nopa_NFRecoverableException_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    NFObject * (*initWithReason_)(NFObject *, SEL, const char *);
+typedef struct NPRecoverableException NPRecoverableException;
+struct nopa_NPRecoverableException_vtable {
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    NPObject * (*initWithReason_)(NPObject *, SEL, const char *);
 };
-struct nopa_NFRecoverableException_meta_vtable {
-    NFClass * (*class)(NFClass *, SEL);
+struct nopa_NPRecoverableException_meta_vtable {
+    NPClass * (*class)(NPClass *, SEL);
 };
-struct NFMatrixSpace {
-    struct NFClass *isa;
+struct NPMatrixSpace {
+    struct NPClass *isa;
     uint32_t retain_count;
     int * * _rawGrid;
     int _dimension;
 };
-typedef struct NFMatrixSpace NFMatrixSpace;
-struct nopa_NFMatrixSpace_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    NFObject * (*initWithDimension_)(NFObject *, SEL, int);
-    void (*fillMatrixWithSeed_)(NFObject *, SEL, int);
-    int (*getValueAtRow_col_)(NFObject *, SEL, int, int);
+typedef struct NPMatrixSpace NPMatrixSpace;
+struct nopa_NPMatrixSpace_vtable {
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    NPObject * (*initWithDimension_)(NPObject *, SEL, int);
+    void (*fillMatrixWithSeed_)(NPObject *, SEL, int);
+    int (*getValueAtRow_col_)(NPObject *, SEL, int, int);
 };
-struct nopa_NFMatrixSpace_meta_vtable {
-    NFClass * (*class)(NFClass *, SEL);
+struct nopa_NPMatrixSpace_meta_vtable {
+    NPClass * (*class)(NPClass *, SEL);
 };
-struct NFChaosEngine {
-    struct NFClass *isa;
+struct NPChaosEngine {
+    struct NPClass *isa;
     uint32_t retain_count;
-    NFMatrixSpace * _space;
+    NPMatrixSpace * _space;
 };
-typedef struct NFChaosEngine NFChaosEngine;
-struct nopa_NFChaosEngine_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    void (*executeChaosLoopWithLevel_)(NFObject *, SEL, int);
+typedef struct NPChaosEngine NPChaosEngine;
+struct nopa_NPChaosEngine_vtable {
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    void (*executeChaosLoopWithLevel_)(NPObject *, SEL, int);
 };
-struct nopa_NFChaosEngine_meta_vtable {
-    NFClass * (*class)(NFClass *, SEL);
+struct nopa_NPChaosEngine_meta_vtable {
+    NPClass * (*class)(NPClass *, SEL);
 };
-NFObject * NFObject_alloc(NFClass * self, SEL _cmd) {
+NPObject * NPObject_alloc(NPClass * self, SEL _cmd) {
     return nopa_alloc(self);
 }
 
-NFObject * NFObject_new(NFClass * self, SEL _cmd) {
-    NFObject * obj = nopa_alloc(self);
+NPObject * NPObject_new(NPClass * self, SEL _cmd) {
+    NPObject * obj = nopa_alloc(self);
     return nopa_init(obj);
 }
 
-NFObject * NFObject_init(NFObject * self, SEL _cmd) {
-    struct NFObject * _self = ((struct NFObject *)(self));
+NPObject * NPObject_init(NPObject * self, SEL _cmd) {
+    struct NPObject * _self = ((struct NPObject *)(self));
     {
         return nopa_init(self);
     }
 }
 
-void NFObject_dealloc(NFObject * self, SEL _cmd) {
-    struct NFObject * _self = ((struct NFObject *)(self));
+void NPObject_dealloc(NPObject * self, SEL _cmd) {
+    struct NPObject * _self = ((struct NPObject *)(self));
     {
         return;
     }
 }
 
-NFClass * NFObject_getClass(NFClass * self, SEL _cmd) {
-    return &nopa_NFObject_class;
+NPClass * NPObject_getClass(NPClass * self, SEL _cmd) {
+    return &nopa_NPObject_class;
 }
 
-NFObject * nopa_alloc(struct NFClass * cls);
-NFObject * nopa_init(NFObject * );
-NFObject * NFCriticalException_initWithReason_(NFObject * self, SEL _cmd, const char * r) {
-    struct NFCriticalException * _self = ((struct NFCriticalException *)(self));
+NPObject * nopa_alloc(struct NPClass * cls);
+NPObject * nopa_init(NPObject * );
+NPObject * NPCriticalException_initWithReason_(NPObject * self, SEL _cmd, const char * r) {
+    struct NPCriticalException * _self = ((struct NPCriticalException *)(self));
     {
-        self = NFObject_init(self, __nopa_sel_init);
+        self = NPObject_init(self, __nopa_sel_init);
         if (self) {
             {
-                ((struct NFCriticalException *)(self))->reason = r;
+                ((struct NPCriticalException *)(self))->reason = r;
             }
         }
         return self;
     }
 }
 
-NFClass * NFCriticalException_getClass(NFClass * self, SEL _cmd) {
-    return &nopa_NFCriticalException_class;
+NPClass * NPCriticalException_getClass(NPClass * self, SEL _cmd) {
+    return &nopa_NPCriticalException_class;
 }
 
-NFObject * NFRecoverableException_initWithReason_(NFObject * self, SEL _cmd, const char * r) {
-    struct NFRecoverableException * _self = ((struct NFRecoverableException *)(self));
+NPObject * NPRecoverableException_initWithReason_(NPObject * self, SEL _cmd, const char * r) {
+    struct NPRecoverableException * _self = ((struct NPRecoverableException *)(self));
     {
-        self = NFObject_init(self, __nopa_sel_init);
+        self = NPObject_init(self, __nopa_sel_init);
         if (self) {
             {
-                ((struct NFRecoverableException *)(self))->reason = r;
+                ((struct NPRecoverableException *)(self))->reason = r;
             }
         }
         return self;
     }
 }
 
-NFClass * NFRecoverableException_getClass(NFClass * self, SEL _cmd) {
-    return &nopa_NFRecoverableException_class;
+NPClass * NPRecoverableException_getClass(NPClass * self, SEL _cmd) {
+    return &nopa_NPRecoverableException_class;
 }
 
-NFObject * NFMatrixSpace_initWithDimension_(NFObject * self, SEL _cmd, int dim) {
-    struct NFMatrixSpace * _self = ((struct NFMatrixSpace *)(self));
+NPObject * NPMatrixSpace_initWithDimension_(NPObject * self, SEL _cmd, int dim) {
+    struct NPMatrixSpace * _self = ((struct NPMatrixSpace *)(self));
     {
-        self = NFObject_init(self, __nopa_sel_init);
+        self = NPObject_init(self, __nopa_sel_init);
         if (self) {
             {
-                ((struct NFMatrixSpace *)(self))->_dimension = dim;
-                ((struct NFMatrixSpace *)(self))->_rawGrid = ((int * *)(malloc(sizeof(int *) * dim)));
+                ((struct NPMatrixSpace *)(self))->_dimension = dim;
+                ((struct NPMatrixSpace *)(self))->_rawGrid = ((int * *)(malloc(sizeof(int *) * dim)));
                 for (int i = 0; i < dim; i++) {
                     {
-                        ((struct NFMatrixSpace *)(self))->_rawGrid[i] = ((int *)(malloc(sizeof(int) * dim)));
+                        ((struct NPMatrixSpace *)(self))->_rawGrid[i] = ((int *)(malloc(sizeof(int) * dim)));
                     }
                 }
             }
@@ -222,14 +222,14 @@ NFObject * NFMatrixSpace_initWithDimension_(NFObject * self, SEL _cmd, int dim) 
     }
 }
 
-void NFMatrixSpace_fillMatrixWithSeed_(NFObject * self, SEL _cmd, int seed) {
-    struct NFMatrixSpace * _self = ((struct NFMatrixSpace *)(self));
+void NPMatrixSpace_fillMatrixWithSeed_(NPObject * self, SEL _cmd, int seed) {
+    struct NPMatrixSpace * _self = ((struct NPMatrixSpace *)(self));
     {
-        for (int i = 0; i < ((struct NFMatrixSpace *)(self))->_dimension; i++) {
+        for (int i = 0; i < ((struct NPMatrixSpace *)(self))->_dimension; i++) {
             {
-                for (int j = 0; j < ((struct NFMatrixSpace *)(self))->_dimension; j++) {
+                for (int j = 0; j < ((struct NPMatrixSpace *)(self))->_dimension; j++) {
                     {
-                        *(*(((struct NFMatrixSpace *)(self))->_rawGrid + i) + j) = i + j * seed;
+                        *(*(((struct NPMatrixSpace *)(self))->_rawGrid + i) + j) = i + j * seed;
                     }
                 }
             }
@@ -237,56 +237,56 @@ void NFMatrixSpace_fillMatrixWithSeed_(NFObject * self, SEL _cmd, int seed) {
     }
 }
 
-int NFMatrixSpace_getValueAtRow_col_(NFObject * self, SEL _cmd, int r, int c) {
-    struct NFMatrixSpace * _self = ((struct NFMatrixSpace *)(self));
+int NPMatrixSpace_getValueAtRow_col_(NPObject * self, SEL _cmd, int r, int c) {
+    struct NPMatrixSpace * _self = ((struct NPMatrixSpace *)(self));
     {
-        if (r >= ((struct NFMatrixSpace *)(self))->_dimension || c >= ((struct NFMatrixSpace *)(self))->_dimension || r < 0 || c < 0) {
+        if (r >= ((struct NPMatrixSpace *)(self))->_dimension || c >= ((struct NPMatrixSpace *)(self))->_dimension || r < 0 || c < 0) {
             {
                 return -1;
             }
         }
-        return ((struct NFMatrixSpace *)(self))->_rawGrid[r][c];
+        return ((struct NPMatrixSpace *)(self))->_rawGrid[r][c];
     }
 }
 
-void NFMatrixSpace_dealloc(NFObject * self, SEL _cmd) {
-    struct NFMatrixSpace * _self = ((struct NFMatrixSpace *)(self));
+void NPMatrixSpace_dealloc(NPObject * self, SEL _cmd) {
+    struct NPMatrixSpace * _self = ((struct NPMatrixSpace *)(self));
     {
-        for (int i = 0; i < ((struct NFMatrixSpace *)(self))->_dimension; i++) {
+        for (int i = 0; i < ((struct NPMatrixSpace *)(self))->_dimension; i++) {
             {
-                free(((struct NFMatrixSpace *)(self))->_rawGrid[i]);
+                free(((struct NPMatrixSpace *)(self))->_rawGrid[i]);
             }
         }
-        free(((struct NFMatrixSpace *)(self))->_rawGrid);
+        free(((struct NPMatrixSpace *)(self))->_rawGrid);
         nopa_object_dealloc(self);
     }
 }
 
-NFClass * NFMatrixSpace_getClass(NFClass * self, SEL _cmd) {
-    return &nopa_NFMatrixSpace_class;
+NPClass * NPMatrixSpace_getClass(NPClass * self, SEL _cmd) {
+    return &nopa_NPMatrixSpace_class;
 }
 
-void NFChaosEngine_executeChaosLoopWithLevel_(NFObject * self, SEL _cmd, int level) {
-    struct NFChaosEngine * _self = ((struct NFChaosEngine *)(self));
+void NPChaosEngine_executeChaosLoopWithLevel_(NPObject * self, SEL _cmd, int level) {
+    struct NPChaosEngine * _self = ((struct NPChaosEngine *)(self));
     {
         printf("[引擎] 进入第一层 @try 作用域...\n");
         {
             id __nopa_exception_0 = NULL;
             __nopa_try_0:
             {
-                printf("[引擎] 尝试读取合法坐标 (1,1): %d\n", ((struct nopa_NFMatrixSpace_vtable *)((struct NFChaosEngine *)(self))->_space->isa->vtable)->getValueAtRow_col_(((struct NFChaosEngine *)(self))->_space, __nopa_sel_getValueAtRow_col_, 1, 1));
+                printf("[引擎] 尝试读取合法坐标 (1,1): %d\n", ((struct nopa_NPMatrixSpace_vtable *)((struct NPChaosEngine *)(self))->_space->isa->vtable)->getValueAtRow_col_(((struct NPChaosEngine *)(self))->_space, __nopa_sel_getValueAtRow_col_, 1, 1));
                 printf("[引擎] 故意触发越界，尝试读取坐标 (5,5)...\n");
-                if (5 >= ((struct NFMatrixSpace *)(((struct NFChaosEngine *)(self))->_space))->_dimension || 5 >= ((struct NFMatrixSpace *)(((struct NFChaosEngine *)(self))->_space))->_dimension) {
+                if (5 >= ((struct NPMatrixSpace *)(((struct NPChaosEngine *)(self))->_space))->_dimension || 5 >= ((struct NPMatrixSpace *)(((struct NPChaosEngine *)(self))->_space))->_dimension) {
                     {
-                        NFObject *__nopa_tmp_0 = (NFObject_alloc(&nopa_NFRecoverableException_class, __nopa_sel_alloc));
-                        NFRecoverableException * ex = ((struct nopa_NFRecoverableException_vtable *)__nopa_tmp_0->isa->vtable)->initWithReason_(__nopa_tmp_0, __nopa_sel_initWithReason_, "矩阵索引越界(可恢复)");
+                        NPObject *__nopa_tmp_0 = (NPObject_alloc(&nopa_NPRecoverableException_class, __nopa_sel_alloc));
+                        NPRecoverableException * ex = ((struct nopa_NPRecoverableException_vtable *)__nopa_tmp_0->isa->vtable)->initWithReason_(__nopa_tmp_0, __nopa_sel_initWithReason_, "矩阵索引越界(可恢复)");
                         {
                             __nopa_exception_0 = ex;
                             goto __nopa_catch_0;
                         }
                     }
                 }
-                int dynamicBoom = ((struct nopa_NFMatrixSpace_vtable *)((struct NFChaosEngine *)(self))->_space->isa->vtable)->getValueAtRow_col_(((struct NFChaosEngine *)(self))->_space, __nopa_sel_getValueAtRow_col_, 5, 5);
+                int dynamicBoom = ((struct nopa_NPMatrixSpace_vtable *)((struct NPChaosEngine *)(self))->_space->isa->vtable)->getValueAtRow_col_(((struct NPChaosEngine *)(self))->_space, __nopa_sel_getValueAtRow_col_, 5, 5);
                 printf("[引擎] 这行代码不应该被执行！返回解: %d\n", dynamicBoom);
             }
             goto __nopa_finally_0;
@@ -294,7 +294,7 @@ void NFChaosEngine_executeChaosLoopWithLevel_(NFObject * self, SEL _cmd, int lev
             id recEx;
             recEx = __nopa_exception_0;
             {
-                printf("\n【一级 @catch 成功拦截】捕获原因: %s\n", ((struct NFRecoverableException *)(recEx))->reason);
+                printf("\n【一级 @catch 成功拦截】捕获原因: %s\n", ((struct NPRecoverableException *)(recEx))->reason);
                 printf("[引擎] 启动二级嵌套 @try，尝试内部修复流...\n");
                 {
                     id __nopa_exception_1 = NULL;
@@ -302,9 +302,9 @@ void NFChaosEngine_executeChaosLoopWithLevel_(NFObject * self, SEL _cmd, int lev
                     {
                         if (level > 0) {
                             {
-                                printf("[引擎] 内部修复失败！故意在 @catch 中再次抛出严重级别的 NFCriticalException...\n");
-                                NFObject *__nopa_tmp_1 = (NFObject_alloc(&nopa_NFCriticalException_class, __nopa_sel_alloc));
-                                NFCriticalException * critEx = ((struct nopa_NFCriticalException_vtable *)__nopa_tmp_1->isa->vtable)->initWithReason_(__nopa_tmp_1, __nopa_sel_initWithReason_, "二级嵌套引发的不可逆毁灭性异常");
+                                printf("[引擎] 内部修复失败！故意在 @catch 中再次抛出严重级别的 NPCriticalException...\n");
+                                NPObject *__nopa_tmp_1 = (NPObject_alloc(&nopa_NPCriticalException_class, __nopa_sel_alloc));
+                                NPCriticalException * critEx = ((struct nopa_NPCriticalException_vtable *)__nopa_tmp_1->isa->vtable)->initWithReason_(__nopa_tmp_1, __nopa_sel_initWithReason_, "二级嵌套引发的不可逆毁灭性异常");
                                 nopa_release(recEx);
                                 {
                                     __nopa_exception_0 = critEx;
@@ -318,7 +318,7 @@ void NFChaosEngine_executeChaosLoopWithLevel_(NFObject * self, SEL _cmd, int lev
                     id critEx;
                     critEx = __nopa_exception_1;
                     {
-                        printf("【二级嵌套 @catch 成功拦截】捕获原因: %s\n", ((struct NFCriticalException *)(critEx))->reason);
+                        printf("【二级嵌套 @catch 成功拦截】捕获原因: %s\n", ((struct NPCriticalException *)(critEx))->reason);
                         printf("[引擎] 正在做最后向上传递抛出...\n");
                         {
                             __nopa_exception_0 = critEx;
@@ -337,30 +337,30 @@ void NFChaosEngine_executeChaosLoopWithLevel_(NFObject * self, SEL _cmd, int lev
     }
 }
 
-NFObject * NFChaosEngine_init(NFObject * self, SEL _cmd) {
-    struct NFChaosEngine * _self = ((struct NFChaosEngine *)(self));
+NPObject * NPChaosEngine_init(NPObject * self, SEL _cmd) {
+    struct NPChaosEngine * _self = ((struct NPChaosEngine *)(self));
     {
-        self = NFObject_init(self, __nopa_sel_init);
+        self = NPObject_init(self, __nopa_sel_init);
         if (self) {
             {
-                ((struct NFChaosEngine *)(self))->_space = ({ NFObject *__nopa_tmp_2 = (NFObject_alloc(&nopa_NFMatrixSpace_class, __nopa_sel_alloc)); ((struct nopa_NFMatrixSpace_vtable *)__nopa_tmp_2->isa->vtable)->initWithDimension_(__nopa_tmp_2, __nopa_sel_initWithDimension_, 3); });
-                ((struct nopa_NFMatrixSpace_vtable *)((struct NFChaosEngine *)(self))->_space->isa->vtable)->fillMatrixWithSeed_(((struct NFChaosEngine *)(self))->_space, __nopa_sel_fillMatrixWithSeed_, 5);
+                ((struct NPChaosEngine *)(self))->_space = ({ NPObject *__nopa_tmp_2 = (NPObject_alloc(&nopa_NPMatrixSpace_class, __nopa_sel_alloc)); ((struct nopa_NPMatrixSpace_vtable *)__nopa_tmp_2->isa->vtable)->initWithDimension_(__nopa_tmp_2, __nopa_sel_initWithDimension_, 3); });
+                ((struct nopa_NPMatrixSpace_vtable *)((struct NPChaosEngine *)(self))->_space->isa->vtable)->fillMatrixWithSeed_(((struct NPChaosEngine *)(self))->_space, __nopa_sel_fillMatrixWithSeed_, 5);
             }
         }
         return self;
     }
 }
 
-void NFChaosEngine_dealloc(NFObject * self, SEL _cmd) {
-    struct NFChaosEngine * _self = ((struct NFChaosEngine *)(self));
+void NPChaosEngine_dealloc(NPObject * self, SEL _cmd) {
+    struct NPChaosEngine * _self = ((struct NPChaosEngine *)(self));
     {
-        nopa_release(((struct NFChaosEngine *)(self))->_space);
+        nopa_release(((struct NPChaosEngine *)(self))->_space);
         nopa_object_dealloc(self);
     }
 }
 
-NFClass * NFChaosEngine_getClass(NFClass * self, SEL _cmd) {
-    return &nopa_NFChaosEngine_class;
+NPClass * NPChaosEngine_getClass(NPClass * self, SEL _cmd) {
+    return &nopa_NPChaosEngine_class;
 }
 
 int main(int argc, const char * * argv) {
@@ -372,20 +372,20 @@ int main(int argc, const char * * argv) {
             printf("==================================================\n");
             printf(">>>     nopac 编译器「混沌交织与多重重入」压测     <<<\n");
             printf("==================================================\n\n");
-            NFObject *__nopa_tmp_3 = (NFObject_alloc(&nopa_NFChaosEngine_class, __nopa_sel_alloc));
-            NFChaosEngine * engine = ((struct nopa_NFChaosEngine_vtable *)__nopa_tmp_3->isa->vtable)->init(__nopa_tmp_3, __nopa_sel_init);
+            NPObject *__nopa_tmp_3 = (NPObject_alloc(&nopa_NPChaosEngine_class, __nopa_sel_alloc));
+            NPChaosEngine * engine = ((struct nopa_NPChaosEngine_vtable *)__nopa_tmp_3->isa->vtable)->init(__nopa_tmp_3, __nopa_sel_init);
             {
                 id __nopa_exception_2 = NULL;
                 __nopa_try_2:
                 {
-                    ((struct nopa_NFChaosEngine_vtable *)engine->isa->vtable)->executeChaosLoopWithLevel_(engine, __nopa_sel_executeChaosLoopWithLevel_, 1);
+                    ((struct nopa_NPChaosEngine_vtable *)engine->isa->vtable)->executeChaosLoopWithLevel_(engine, __nopa_sel_executeChaosLoopWithLevel_, 1);
                 }
                 goto __nopa_finally_2;
                 __nopa_catch_2:
                 id finalEx;
                 finalEx = __nopa_exception_2;
                 {
-                    printf("\n【顶层 main 成功捕获终极异常】: %s\n", ((struct NFCriticalException *)(finalEx))->reason);
+                    printf("\n【顶层 main 成功捕获终极异常】: %s\n", ((struct NPCriticalException *)(finalEx))->reason);
                     nopa_release(finalEx);
                 }
                 goto __nopa_finally_2;
@@ -406,104 +406,104 @@ int main(int argc, const char * * argv) {
 
 // ─── Class metadata ─────────────────────────────────────
 
-struct nopa_NFObject_vtable nopa_NFObject_vtable_inst = {
-    .init = NFObject_init,
-    .dealloc = NFObject_dealloc,
+struct nopa_NPObject_vtable nopa_NPObject_vtable_inst = {
+    .init = NPObject_init,
+    .dealloc = NPObject_dealloc,
 };
 
-struct nopa_NFCriticalException_vtable nopa_NFCriticalException_vtable_inst = {
-    .init = NFObject_init,
-    .dealloc = NFObject_dealloc,
-    .initWithReason_ = NFCriticalException_initWithReason_,
+struct nopa_NPCriticalException_vtable nopa_NPCriticalException_vtable_inst = {
+    .init = NPObject_init,
+    .dealloc = NPObject_dealloc,
+    .initWithReason_ = NPCriticalException_initWithReason_,
 };
 
-struct nopa_NFRecoverableException_vtable nopa_NFRecoverableException_vtable_inst = {
-    .init = NFObject_init,
-    .dealloc = NFObject_dealloc,
-    .initWithReason_ = NFRecoverableException_initWithReason_,
+struct nopa_NPRecoverableException_vtable nopa_NPRecoverableException_vtable_inst = {
+    .init = NPObject_init,
+    .dealloc = NPObject_dealloc,
+    .initWithReason_ = NPRecoverableException_initWithReason_,
 };
 
-struct nopa_NFMatrixSpace_vtable nopa_NFMatrixSpace_vtable_inst = {
-    .init = NFObject_init,
-    .dealloc = NFMatrixSpace_dealloc,
-    .initWithDimension_ = NFMatrixSpace_initWithDimension_,
-    .fillMatrixWithSeed_ = NFMatrixSpace_fillMatrixWithSeed_,
-    .getValueAtRow_col_ = NFMatrixSpace_getValueAtRow_col_,
+struct nopa_NPMatrixSpace_vtable nopa_NPMatrixSpace_vtable_inst = {
+    .init = NPObject_init,
+    .dealloc = NPMatrixSpace_dealloc,
+    .initWithDimension_ = NPMatrixSpace_initWithDimension_,
+    .fillMatrixWithSeed_ = NPMatrixSpace_fillMatrixWithSeed_,
+    .getValueAtRow_col_ = NPMatrixSpace_getValueAtRow_col_,
 };
 
-struct nopa_NFChaosEngine_vtable nopa_NFChaosEngine_vtable_inst = {
-    .init = NFChaosEngine_init,
-    .dealloc = NFChaosEngine_dealloc,
-    .executeChaosLoopWithLevel_ = NFChaosEngine_executeChaosLoopWithLevel_,
+struct nopa_NPChaosEngine_vtable nopa_NPChaosEngine_vtable_inst = {
+    .init = NPChaosEngine_init,
+    .dealloc = NPChaosEngine_dealloc,
+    .executeChaosLoopWithLevel_ = NPChaosEngine_executeChaosLoopWithLevel_,
 };
 
-struct nopa_NFObject_meta_vtable nopa_NFObject_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
-    .class = NFObject_getClass,
+struct nopa_NPObject_meta_vtable nopa_NPObject_meta_vtable_inst = {
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
+    .class = NPObject_getClass,
 };
 
-struct nopa_NFCriticalException_meta_vtable nopa_NFCriticalException_meta_vtable_inst = {
-    .class = NFCriticalException_getClass,
+struct nopa_NPCriticalException_meta_vtable nopa_NPCriticalException_meta_vtable_inst = {
+    .class = NPCriticalException_getClass,
 };
 
-struct nopa_NFRecoverableException_meta_vtable nopa_NFRecoverableException_meta_vtable_inst = {
-    .class = NFRecoverableException_getClass,
+struct nopa_NPRecoverableException_meta_vtable nopa_NPRecoverableException_meta_vtable_inst = {
+    .class = NPRecoverableException_getClass,
 };
 
-struct nopa_NFMatrixSpace_meta_vtable nopa_NFMatrixSpace_meta_vtable_inst = {
-    .class = NFMatrixSpace_getClass,
+struct nopa_NPMatrixSpace_meta_vtable nopa_NPMatrixSpace_meta_vtable_inst = {
+    .class = NPMatrixSpace_getClass,
 };
 
-struct nopa_NFChaosEngine_meta_vtable nopa_NFChaosEngine_meta_vtable_inst = {
-    .class = NFChaosEngine_getClass,
+struct nopa_NPChaosEngine_meta_vtable nopa_NPChaosEngine_meta_vtable_inst = {
+    .class = NPChaosEngine_getClass,
 };
 
-NFClass nopa_NFObject_class;
-NFClass nopa_NFCriticalException_class;
-NFClass nopa_NFRecoverableException_class;
-NFClass nopa_NFMatrixSpace_class;
-NFClass nopa_NFChaosEngine_class;
+NPClass nopa_NPObject_class;
+NPClass nopa_NPCriticalException_class;
+NPClass nopa_NPRecoverableException_class;
+NPClass nopa_NPMatrixSpace_class;
+NPClass nopa_NPChaosEngine_class;
 
 void nopa_meta_init(void) {
-    nopa_NFObject_class = (NFClass){
-        .name = "NFObject",
+    nopa_NPObject_class = (NPClass){
+        .name = "NPObject",
         .superclass = NULL,
-        .instance_size = sizeof(struct NFObject),
-        .vtable = &nopa_NFObject_vtable_inst,
-        .class_vtable = &nopa_NFObject_meta_vtable_inst,
+        .instance_size = sizeof(struct NPObject),
+        .vtable = &nopa_NPObject_vtable_inst,
+        .class_vtable = &nopa_NPObject_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_NFCriticalException_class = (NFClass){
-        .name = "NFCriticalException",
-        .superclass = &nopa_NFObject_class,
-        .instance_size = sizeof(struct NFCriticalException),
-        .vtable = &nopa_NFCriticalException_vtable_inst,
-        .class_vtable = &nopa_NFCriticalException_meta_vtable_inst,
+    nopa_NPCriticalException_class = (NPClass){
+        .name = "NPCriticalException",
+        .superclass = &nopa_NPObject_class,
+        .instance_size = sizeof(struct NPCriticalException),
+        .vtable = &nopa_NPCriticalException_vtable_inst,
+        .class_vtable = &nopa_NPCriticalException_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_NFRecoverableException_class = (NFClass){
-        .name = "NFRecoverableException",
-        .superclass = &nopa_NFObject_class,
-        .instance_size = sizeof(struct NFRecoverableException),
-        .vtable = &nopa_NFRecoverableException_vtable_inst,
-        .class_vtable = &nopa_NFRecoverableException_meta_vtable_inst,
+    nopa_NPRecoverableException_class = (NPClass){
+        .name = "NPRecoverableException",
+        .superclass = &nopa_NPObject_class,
+        .instance_size = sizeof(struct NPRecoverableException),
+        .vtable = &nopa_NPRecoverableException_vtable_inst,
+        .class_vtable = &nopa_NPRecoverableException_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_NFMatrixSpace_class = (NFClass){
-        .name = "NFMatrixSpace",
-        .superclass = &nopa_NFObject_class,
-        .instance_size = sizeof(struct NFMatrixSpace),
-        .vtable = &nopa_NFMatrixSpace_vtable_inst,
-        .class_vtable = &nopa_NFMatrixSpace_meta_vtable_inst,
+    nopa_NPMatrixSpace_class = (NPClass){
+        .name = "NPMatrixSpace",
+        .superclass = &nopa_NPObject_class,
+        .instance_size = sizeof(struct NPMatrixSpace),
+        .vtable = &nopa_NPMatrixSpace_vtable_inst,
+        .class_vtable = &nopa_NPMatrixSpace_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_NFChaosEngine_class = (NFClass){
-        .name = "NFChaosEngine",
-        .superclass = &nopa_NFObject_class,
-        .instance_size = sizeof(struct NFChaosEngine),
-        .vtable = &nopa_NFChaosEngine_vtable_inst,
-        .class_vtable = &nopa_NFChaosEngine_meta_vtable_inst,
+    nopa_NPChaosEngine_class = (NPClass){
+        .name = "NPChaosEngine",
+        .superclass = &nopa_NPObject_class,
+        .instance_size = sizeof(struct NPChaosEngine),
+        .vtable = &nopa_NPChaosEngine_vtable_inst,
+        .class_vtable = &nopa_NPChaosEngine_meta_vtable_inst,
         .protocol_count = 0,
     };
 }

@@ -6,8 +6,8 @@
 #include <stddef.h>
 #include "nopa/runtime.h"
 #define MAX_CHILDREN 16
-struct nopa_NFObject_vtable;
-struct nopa_NFObject_meta_vtable;
+struct nopa_NPObject_vtable;
+struct nopa_NPObject_meta_vtable;
 struct nopa_FSNode_vtable;
 struct nopa_FSNode_meta_vtable;
 struct nopa_FileNode_vtable;
@@ -40,137 +40,137 @@ static const SEL __nopa_sel_isSandboxCompliantWithRoot_ = {.name = "isSandboxCom
 static const SEL __nopa_sel_calculateSize = {.name = "calculateSize", .hash = 0x9A6D2366};
 static const SEL __nopa_sel_dumpMetadataWithIndent_ = {.name = "dumpMetadataWithIndent:", .hash = 0xDFDFFD2A};
 
-typedef struct NFObject NFObject;
+typedef struct NPObject NPObject;
 typedef struct FSNode FSNode;
 typedef struct FileNode FileNode;
 typedef struct DirectoryNode DirectoryNode;
 
-NFObject * NFObject_alloc(NFClass * self, SEL _cmd);
-NFObject * NFObject_new(NFClass * self, SEL _cmd);
-NFObject * NFObject_init(NFObject * self, SEL _cmd);
-void NFObject_dealloc(NFObject * self, SEL _cmd);
-void NFObject_release(NFObject * self, SEL _cmd);
-NFObject * NFObject_retain(NFObject * self, SEL _cmd);
-NFObject * FSNode_initWithName_(NFObject * self, SEL _cmd, char * name);
-char * FSNode_name(NFObject * self, SEL _cmd);
-void FSNode_setName_(NFObject * self, SEL _cmd, char * value);
-DirectoryNode * FSNode_parent(NFObject * self, SEL _cmd);
-void FSNode_setParent_(NFObject * self, SEL _cmd, DirectoryNode * value);
-NFObject * FileNode_initWithName_size_mime_(NFObject * self, SEL _cmd, char * name, int size, char * mime);
-int FileNode_fileSize(NFObject * self, SEL _cmd);
-void FileNode_setFileSize_(NFObject * self, SEL _cmd, int value);
-char * FileNode_mimeType(NFObject * self, SEL _cmd);
-void FileNode_setMimeType_(NFObject * self, SEL _cmd, char * value);
-NFObject * DirectoryNode_initWithName_(NFObject * self, SEL _cmd, char * name);
-_Bool DirectoryNode_addChildNode_(NFObject * self, SEL _cmd, FSNode * child);
-void DirectoryNode_enumerateChildrenUsingBlock_(NFObject * self, SEL _cmd, void (^block)(FSNode *, _Bool *));
-int DirectoryNode_childCount(NFObject * self, SEL _cmd);
-void DirectoryNode_setChildCount_(NFObject * self, SEL _cmd, int value);
-char * FSNode_absolutePath(NFObject * self, SEL _cmd);
-_Bool FSNode_isSandboxCompliantWithRoot_(NFObject * self, SEL _cmd, char * rootPath);
-int FSNode_calculateSize(NFObject * self, SEL _cmd);
-void FSNode_dumpMetadataWithIndent_(NFObject * self, SEL _cmd, int indent);
-void FSNode_dealloc(NFObject * self, SEL _cmd);
-int FileNode_calculateSize(NFObject * self, SEL _cmd);
-void FileNode_dumpMetadataWithIndent_(NFObject * self, SEL _cmd, int indent);
-void FileNode_dealloc(NFObject * self, SEL _cmd);
-int DirectoryNode_calculateSize(NFObject * self, SEL _cmd);
-void DirectoryNode_dumpMetadataWithIndent_(NFObject * self, SEL _cmd, int indent);
-void DirectoryNode_dealloc(NFObject * self, SEL _cmd);
-NFObject * nopa_alloc(struct NFClass * cls);
-NFObject * nopa_init(NFObject * self);
-void nopa_release(NFObject * obj);
-NFObject * nopa_retain(NFObject * obj);
+NPObject * NPObject_alloc(NPClass * self, SEL _cmd);
+NPObject * NPObject_new(NPClass * self, SEL _cmd);
+NPObject * NPObject_init(NPObject * self, SEL _cmd);
+void NPObject_dealloc(NPObject * self, SEL _cmd);
+void NPObject_release(NPObject * self, SEL _cmd);
+NPObject * NPObject_retain(NPObject * self, SEL _cmd);
+NPObject * FSNode_initWithName_(NPObject * self, SEL _cmd, char * name);
+char * FSNode_name(NPObject * self, SEL _cmd);
+void FSNode_setName_(NPObject * self, SEL _cmd, char * value);
+DirectoryNode * FSNode_parent(NPObject * self, SEL _cmd);
+void FSNode_setParent_(NPObject * self, SEL _cmd, DirectoryNode * value);
+NPObject * FileNode_initWithName_size_mime_(NPObject * self, SEL _cmd, char * name, int size, char * mime);
+int FileNode_fileSize(NPObject * self, SEL _cmd);
+void FileNode_setFileSize_(NPObject * self, SEL _cmd, int value);
+char * FileNode_mimeType(NPObject * self, SEL _cmd);
+void FileNode_setMimeType_(NPObject * self, SEL _cmd, char * value);
+NPObject * DirectoryNode_initWithName_(NPObject * self, SEL _cmd, char * name);
+_Bool DirectoryNode_addChildNode_(NPObject * self, SEL _cmd, FSNode * child);
+void DirectoryNode_enumerateChildrenUsingBlock_(NPObject * self, SEL _cmd, void (^block)(FSNode *, _Bool *));
+int DirectoryNode_childCount(NPObject * self, SEL _cmd);
+void DirectoryNode_setChildCount_(NPObject * self, SEL _cmd, int value);
+char * FSNode_absolutePath(NPObject * self, SEL _cmd);
+_Bool FSNode_isSandboxCompliantWithRoot_(NPObject * self, SEL _cmd, char * rootPath);
+int FSNode_calculateSize(NPObject * self, SEL _cmd);
+void FSNode_dumpMetadataWithIndent_(NPObject * self, SEL _cmd, int indent);
+void FSNode_dealloc(NPObject * self, SEL _cmd);
+int FileNode_calculateSize(NPObject * self, SEL _cmd);
+void FileNode_dumpMetadataWithIndent_(NPObject * self, SEL _cmd, int indent);
+void FileNode_dealloc(NPObject * self, SEL _cmd);
+int DirectoryNode_calculateSize(NPObject * self, SEL _cmd);
+void DirectoryNode_dumpMetadataWithIndent_(NPObject * self, SEL _cmd, int indent);
+void DirectoryNode_dealloc(NPObject * self, SEL _cmd);
+NPObject * nopa_alloc(struct NPClass * cls);
+NPObject * nopa_init(NPObject * self);
+void nopa_release(NPObject * obj);
+NPObject * nopa_retain(NPObject * obj);
 int main(int argc, const char * argv[]);
 
-NFClass * NFObject_getClass(NFClass * self, SEL _cmd);
-NFClass * FSNode_getClass(NFClass * self, SEL _cmd);
-NFClass * FileNode_getClass(NFClass * self, SEL _cmd);
-NFClass * DirectoryNode_getClass(NFClass * self, SEL _cmd);
+NPClass * NPObject_getClass(NPClass * self, SEL _cmd);
+NPClass * FSNode_getClass(NPClass * self, SEL _cmd);
+NPClass * FileNode_getClass(NPClass * self, SEL _cmd);
+NPClass * DirectoryNode_getClass(NPClass * self, SEL _cmd);
 
-struct nopa_NFObject_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    void (*release)(NFObject *, SEL);
-    NFObject * (*retain)(NFObject *, SEL);
+struct nopa_NPObject_vtable {
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    void (*release)(NPObject *, SEL);
+    NPObject * (*retain)(NPObject *, SEL);
 };
-struct nopa_NFObject_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+struct nopa_NPObject_meta_vtable {
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct nopa_FSNode_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    void (*release)(NFObject *, SEL);
-    NFObject * (*retain)(NFObject *, SEL);
-    NFObject * (*initWithName_)(NFObject *, SEL, char *);
-    char * (*absolutePath)(NFObject *, SEL);
-    _Bool (*isSandboxCompliantWithRoot_)(NFObject *, SEL, char *);
-    int (*calculateSize)(NFObject *, SEL);
-    void (*dumpMetadataWithIndent_)(NFObject *, SEL, int);
-    char * (*name)(NFObject *, SEL);
-    void (*setName_)(NFObject *, SEL, char *);
-    DirectoryNode * (*parent)(NFObject *, SEL);
-    void (*setParent_)(NFObject *, SEL, DirectoryNode *);
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    void (*release)(NPObject *, SEL);
+    NPObject * (*retain)(NPObject *, SEL);
+    NPObject * (*initWithName_)(NPObject *, SEL, char *);
+    char * (*absolutePath)(NPObject *, SEL);
+    _Bool (*isSandboxCompliantWithRoot_)(NPObject *, SEL, char *);
+    int (*calculateSize)(NPObject *, SEL);
+    void (*dumpMetadataWithIndent_)(NPObject *, SEL, int);
+    char * (*name)(NPObject *, SEL);
+    void (*setName_)(NPObject *, SEL, char *);
+    DirectoryNode * (*parent)(NPObject *, SEL);
+    void (*setParent_)(NPObject *, SEL, DirectoryNode *);
 };
 struct nopa_FSNode_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct nopa_FileNode_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    void (*release)(NFObject *, SEL);
-    NFObject * (*retain)(NFObject *, SEL);
-    NFObject * (*initWithName_)(NFObject *, SEL, char *);
-    char * (*absolutePath)(NFObject *, SEL);
-    _Bool (*isSandboxCompliantWithRoot_)(NFObject *, SEL, char *);
-    int (*calculateSize)(NFObject *, SEL);
-    void (*dumpMetadataWithIndent_)(NFObject *, SEL, int);
-    char * (*name)(NFObject *, SEL);
-    void (*setName_)(NFObject *, SEL, char *);
-    DirectoryNode * (*parent)(NFObject *, SEL);
-    void (*setParent_)(NFObject *, SEL, DirectoryNode *);
-    NFObject * (*initWithName_size_mime_)(NFObject *, SEL, char *, int, char *);
-    int (*fileSize)(NFObject *, SEL);
-    void (*setFileSize_)(NFObject *, SEL, int);
-    char * (*mimeType)(NFObject *, SEL);
-    void (*setMimeType_)(NFObject *, SEL, char *);
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    void (*release)(NPObject *, SEL);
+    NPObject * (*retain)(NPObject *, SEL);
+    NPObject * (*initWithName_)(NPObject *, SEL, char *);
+    char * (*absolutePath)(NPObject *, SEL);
+    _Bool (*isSandboxCompliantWithRoot_)(NPObject *, SEL, char *);
+    int (*calculateSize)(NPObject *, SEL);
+    void (*dumpMetadataWithIndent_)(NPObject *, SEL, int);
+    char * (*name)(NPObject *, SEL);
+    void (*setName_)(NPObject *, SEL, char *);
+    DirectoryNode * (*parent)(NPObject *, SEL);
+    void (*setParent_)(NPObject *, SEL, DirectoryNode *);
+    NPObject * (*initWithName_size_mime_)(NPObject *, SEL, char *, int, char *);
+    int (*fileSize)(NPObject *, SEL);
+    void (*setFileSize_)(NPObject *, SEL, int);
+    char * (*mimeType)(NPObject *, SEL);
+    void (*setMimeType_)(NPObject *, SEL, char *);
 };
 struct nopa_FileNode_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct nopa_DirectoryNode_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    void (*release)(NFObject *, SEL);
-    NFObject * (*retain)(NFObject *, SEL);
-    NFObject * (*initWithName_)(NFObject *, SEL, char *);
-    char * (*absolutePath)(NFObject *, SEL);
-    _Bool (*isSandboxCompliantWithRoot_)(NFObject *, SEL, char *);
-    int (*calculateSize)(NFObject *, SEL);
-    void (*dumpMetadataWithIndent_)(NFObject *, SEL, int);
-    char * (*name)(NFObject *, SEL);
-    void (*setName_)(NFObject *, SEL, char *);
-    DirectoryNode * (*parent)(NFObject *, SEL);
-    void (*setParent_)(NFObject *, SEL, DirectoryNode *);
-    _Bool (*addChildNode_)(NFObject *, SEL, FSNode *);
-    void (*enumerateChildrenUsingBlock_)(NFObject *, SEL, void (^)(FSNode *, _Bool *));
-    int (*childCount)(NFObject *, SEL);
-    void (*setChildCount_)(NFObject *, SEL, int);
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    void (*release)(NPObject *, SEL);
+    NPObject * (*retain)(NPObject *, SEL);
+    NPObject * (*initWithName_)(NPObject *, SEL, char *);
+    char * (*absolutePath)(NPObject *, SEL);
+    _Bool (*isSandboxCompliantWithRoot_)(NPObject *, SEL, char *);
+    int (*calculateSize)(NPObject *, SEL);
+    void (*dumpMetadataWithIndent_)(NPObject *, SEL, int);
+    char * (*name)(NPObject *, SEL);
+    void (*setName_)(NPObject *, SEL, char *);
+    DirectoryNode * (*parent)(NPObject *, SEL);
+    void (*setParent_)(NPObject *, SEL, DirectoryNode *);
+    _Bool (*addChildNode_)(NPObject *, SEL, FSNode *);
+    void (*enumerateChildrenUsingBlock_)(NPObject *, SEL, void (^)(FSNode *, _Bool *));
+    int (*childCount)(NPObject *, SEL);
+    void (*setChildCount_)(NPObject *, SEL, int);
 };
 struct nopa_DirectoryNode_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 
 struct FSNode {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     char * _name;
     DirectoryNode * _parent;
@@ -178,7 +178,7 @@ struct FSNode {
 typedef struct FSNode FSNode;
 
 struct FileNode {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     char * _name;
     DirectoryNode * _parent;
@@ -188,7 +188,7 @@ struct FileNode {
 typedef struct FileNode FileNode;
 
 struct DirectoryNode {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     char * _name;
     DirectoryNode * _parent;
@@ -197,24 +197,24 @@ struct DirectoryNode {
 };
 typedef struct DirectoryNode DirectoryNode;
 
-extern NFClass nopa_NFObject_class;
-extern NFClass nopa_FSNode_class;
-extern NFClass nopa_FileNode_class;
-extern NFClass nopa_DirectoryNode_class;
+extern NPClass nopa_NPObject_class;
+extern NPClass nopa_FSNode_class;
+extern NPClass nopa_FileNode_class;
+extern NPClass nopa_DirectoryNode_class;
 void nopa_meta_init(void);
 
-struct nopa_NFObject_vtable nopa_NFObject_vtable_inst = {
-    .init = NFObject_init,
-    .dealloc = NFObject_dealloc,
-    .release = NFObject_release,
-    .retain = NFObject_retain,
+struct nopa_NPObject_vtable nopa_NPObject_vtable_inst = {
+    .init = NPObject_init,
+    .dealloc = NPObject_dealloc,
+    .release = NPObject_release,
+    .retain = NPObject_retain,
 };
 
 struct nopa_FSNode_vtable nopa_FSNode_vtable_inst = {
-    .init = NFObject_init,
+    .init = NPObject_init,
     .dealloc = FSNode_dealloc,
-    .release = NFObject_release,
-    .retain = NFObject_retain,
+    .release = NPObject_release,
+    .retain = NPObject_retain,
     .initWithName_ = FSNode_initWithName_,
     .absolutePath = FSNode_absolutePath,
     .isSandboxCompliantWithRoot_ = FSNode_isSandboxCompliantWithRoot_,
@@ -227,10 +227,10 @@ struct nopa_FSNode_vtable nopa_FSNode_vtable_inst = {
 };
 
 struct nopa_FileNode_vtable nopa_FileNode_vtable_inst = {
-    .init = NFObject_init,
+    .init = NPObject_init,
     .dealloc = FileNode_dealloc,
-    .release = NFObject_release,
-    .retain = NFObject_retain,
+    .release = NPObject_release,
+    .retain = NPObject_retain,
     .initWithName_ = FSNode_initWithName_,
     .absolutePath = FSNode_absolutePath,
     .isSandboxCompliantWithRoot_ = FSNode_isSandboxCompliantWithRoot_,
@@ -248,10 +248,10 @@ struct nopa_FileNode_vtable nopa_FileNode_vtable_inst = {
 };
 
 struct nopa_DirectoryNode_vtable nopa_DirectoryNode_vtable_inst = {
-    .init = NFObject_init,
+    .init = NPObject_init,
     .dealloc = DirectoryNode_dealloc,
-    .release = NFObject_release,
-    .retain = NFObject_retain,
+    .release = NPObject_release,
+    .retain = NPObject_retain,
     .initWithName_ = DirectoryNode_initWithName_,
     .absolutePath = FSNode_absolutePath,
     .isSandboxCompliantWithRoot_ = FSNode_isSandboxCompliantWithRoot_,
@@ -267,73 +267,73 @@ struct nopa_DirectoryNode_vtable nopa_DirectoryNode_vtable_inst = {
     .setChildCount_ = DirectoryNode_setChildCount_,
 };
 
-struct nopa_NFObject_meta_vtable nopa_NFObject_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
-    .class = NFObject_getClass,
+struct nopa_NPObject_meta_vtable nopa_NPObject_meta_vtable_inst = {
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
+    .class = NPObject_getClass,
 };
 
 struct nopa_FSNode_meta_vtable nopa_FSNode_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
     .class = FSNode_getClass,
 };
 
 struct nopa_FileNode_meta_vtable nopa_FileNode_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
     .class = FileNode_getClass,
 };
 
 struct nopa_DirectoryNode_meta_vtable nopa_DirectoryNode_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
     .class = DirectoryNode_getClass,
 };
 
-NFClass * NFObject_getClass(NFClass * self, SEL _cmd) {
+NPClass * NPObject_getClass(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
-NFClass * FSNode_getClass(NFClass * self, SEL _cmd) {
+NPClass * FSNode_getClass(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
-NFClass * FileNode_getClass(NFClass * self, SEL _cmd) {
+NPClass * FileNode_getClass(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
-NFClass * DirectoryNode_getClass(NFClass * self, SEL _cmd) {
+NPClass * DirectoryNode_getClass(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
-NFClass nopa_NFObject_class;
-NFClass nopa_FSNode_class;
-NFClass nopa_FileNode_class;
-NFClass nopa_DirectoryNode_class;
+NPClass nopa_NPObject_class;
+NPClass nopa_FSNode_class;
+NPClass nopa_FileNode_class;
+NPClass nopa_DirectoryNode_class;
 
 void nopa_meta_init(void) {
-    nopa_NFObject_class = (NFClass){
-        .name = "NFObject",
+    nopa_NPObject_class = (NPClass){
+        .name = "NPObject",
         .superclass = NULL,
-        .instance_size = sizeof(struct NFObject),
-        .vtable = &nopa_NFObject_vtable_inst,
-        .class_vtable = &nopa_NFObject_meta_vtable_inst,
+        .instance_size = sizeof(struct NPObject),
+        .vtable = &nopa_NPObject_vtable_inst,
+        .class_vtable = &nopa_NPObject_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_FSNode_class = (NFClass){
+    nopa_FSNode_class = (NPClass){
         .name = "FSNode",
-        .superclass = &nopa_NFObject_class,
+        .superclass = &nopa_NPObject_class,
         .instance_size = sizeof(struct FSNode),
         .vtable = &nopa_FSNode_vtable_inst,
         .class_vtable = &nopa_FSNode_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_FileNode_class = (NFClass){
+    nopa_FileNode_class = (NPClass){
         .name = "FileNode",
         .superclass = &nopa_FSNode_class,
         .instance_size = sizeof(struct FileNode),
@@ -341,7 +341,7 @@ void nopa_meta_init(void) {
         .class_vtable = &nopa_FileNode_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_DirectoryNode_class = (NFClass){
+    nopa_DirectoryNode_class = (NPClass){
         .name = "DirectoryNode",
         .superclass = &nopa_FSNode_class,
         .instance_size = sizeof(struct DirectoryNode),
@@ -350,47 +350,47 @@ void nopa_meta_init(void) {
         .protocol_count = 0,
     };
 }
-NFObject * NFObject_alloc(NFClass * self, SEL _cmd) {
+NPObject * NPObject_alloc(NPClass * self, SEL _cmd) {
   return nopa_alloc(self);
 }
 
-NFObject * NFObject_new(NFClass * self, SEL _cmd) {
-  NFObject * obj = nopa_alloc(self);
+NPObject * NPObject_new(NPClass * self, SEL _cmd) {
+  NPObject * obj = nopa_alloc(self);
   return nopa_init(obj);
 }
 
-NFObject * NFObject_init(NFObject * self, SEL _cmd) {
-  struct NFObject * _self = (struct NFObject *)self;
+NPObject * NPObject_init(NPObject * self, SEL _cmd) {
+  struct NPObject * _self = (struct NPObject *)self;
   {
     return nopa_init(self);
   }
 }
 
-void NFObject_dealloc(NFObject * self, SEL _cmd) {
-  struct NFObject * _self = (struct NFObject *)self;
+void NPObject_dealloc(NPObject * self, SEL _cmd) {
+  struct NPObject * _self = (struct NPObject *)self;
   {
     return;
   }
 }
 
-void NFObject_release(NFObject * self, SEL _cmd) {
-  struct NFObject * _self = (struct NFObject *)self;
+void NPObject_release(NPObject * self, SEL _cmd) {
+  struct NPObject * _self = (struct NPObject *)self;
   {
     nopa_release(self);
   }
 }
 
-NFObject * NFObject_retain(NFObject * self, SEL _cmd) {
-  struct NFObject * _self = (struct NFObject *)self;
+NPObject * NPObject_retain(NPObject * self, SEL _cmd) {
+  struct NPObject * _self = (struct NPObject *)self;
   {
     return nopa_retain(self);
   }
 }
 
-NFObject * FSNode_initWithName_(NFObject * self, SEL _cmd, char * name) {
+NPObject * FSNode_initWithName_(NPObject * self, SEL _cmd, char * name) {
   struct FSNode * _self = (struct FSNode *)self;
   {
-    self = NFObject_init(self, sel_registerName("init"));
+    self = NPObject_init(self, sel_registerName("init"));
     if (self)     {
       _self->_name = (char *)malloc((strlen(name) + 1));
       strcpy(_self->_name, name);
@@ -400,25 +400,25 @@ NFObject * FSNode_initWithName_(NFObject * self, SEL _cmd, char * name) {
   }
 }
 
-char * FSNode_name(NFObject * self, SEL _cmd) {
+char * FSNode_name(NPObject * self, SEL _cmd) {
   return ((struct FSNode *)self)->_name;
 }
 
-void FSNode_setName_(NFObject * self, SEL _cmd, char * value) {
+void FSNode_setName_(NPObject * self, SEL _cmd, char * value) {
   ((struct FSNode *)self)->_name = value;
 }
 
-DirectoryNode * FSNode_parent(NFObject * self, SEL _cmd) {
+DirectoryNode * FSNode_parent(NPObject * self, SEL _cmd) {
   return ((struct FSNode *)self)->_parent;
 }
 
-void FSNode_setParent_(NFObject * self, SEL _cmd, DirectoryNode * value) {
-  nopa_weak_unregister((NFObject **)&((struct FSNode *)self)->_parent);
+void FSNode_setParent_(NPObject * self, SEL _cmd, DirectoryNode * value) {
+  nopa_weak_unregister((NPObject **)&((struct FSNode *)self)->_parent);
   ((struct FSNode *)self)->_parent = value;
-  nopa_weak_register((NFObject **)&((struct FSNode *)self)->_parent, (NFObject *)value);
+  nopa_weak_register((NPObject **)&((struct FSNode *)self)->_parent, (NPObject *)value);
 }
 
-NFObject * FileNode_initWithName_size_mime_(NFObject * self, SEL _cmd, char * name, int size, char * mime) {
+NPObject * FileNode_initWithName_size_mime_(NPObject * self, SEL _cmd, char * name, int size, char * mime) {
   struct FileNode * _self = (struct FileNode *)self;
   {
     self = FSNode_initWithName_(self, sel_registerName("initWithName:"), name);
@@ -431,23 +431,23 @@ NFObject * FileNode_initWithName_size_mime_(NFObject * self, SEL _cmd, char * na
   }
 }
 
-int FileNode_fileSize(NFObject * self, SEL _cmd) {
+int FileNode_fileSize(NPObject * self, SEL _cmd) {
   return ((struct FileNode *)self)->_fileSize;
 }
 
-void FileNode_setFileSize_(NFObject * self, SEL _cmd, int value) {
+void FileNode_setFileSize_(NPObject * self, SEL _cmd, int value) {
   ((struct FileNode *)self)->_fileSize = value;
 }
 
-char * FileNode_mimeType(NFObject * self, SEL _cmd) {
+char * FileNode_mimeType(NPObject * self, SEL _cmd) {
   return ((struct FileNode *)self)->_mimeType;
 }
 
-void FileNode_setMimeType_(NFObject * self, SEL _cmd, char * value) {
+void FileNode_setMimeType_(NPObject * self, SEL _cmd, char * value) {
   ((struct FileNode *)self)->_mimeType = value;
 }
 
-NFObject * DirectoryNode_initWithName_(NFObject * self, SEL _cmd, char * name) {
+NPObject * DirectoryNode_initWithName_(NPObject * self, SEL _cmd, char * name) {
   struct DirectoryNode * _self = (struct DirectoryNode *)self;
   {
     self = FSNode_initWithName_(self, sel_registerName("initWithName:"), name);
@@ -462,7 +462,7 @@ NFObject * DirectoryNode_initWithName_(NFObject * self, SEL _cmd, char * name) {
   }
 }
 
-_Bool DirectoryNode_addChildNode_(NFObject * self, SEL _cmd, FSNode * child) {
+_Bool DirectoryNode_addChildNode_(NPObject * self, SEL _cmd, FSNode * child) {
   struct DirectoryNode * _self = (struct DirectoryNode *)self;
   {
     if (((child == NULL) || (_self->_childCount >= MAX_CHILDREN)))     {
@@ -470,13 +470,13 @@ _Bool DirectoryNode_addChildNode_(NFObject * self, SEL _cmd, FSNode * child) {
     }
     ((struct nopa_FSNode_vtable *)(child)->isa->vtable)->setParent_(child, sel_registerName("setParent:"), self);
     _self->_children[_self->_childCount] = child;
-    NFObject_retain(child, sel_registerName("retain"));
+    NPObject_retain(child, sel_registerName("retain"));
     _self->_childCount++;
     return 1;
   }
 }
 
-void DirectoryNode_enumerateChildrenUsingBlock_(NFObject * self, SEL _cmd, void (^block)(FSNode *, _Bool *)) {
+void DirectoryNode_enumerateChildrenUsingBlock_(NPObject * self, SEL _cmd, void (^block)(FSNode *, _Bool *)) {
   struct DirectoryNode * _self = (struct DirectoryNode *)self;
   {
     if ((block == NULL))     return;
@@ -492,15 +492,15 @@ void DirectoryNode_enumerateChildrenUsingBlock_(NFObject * self, SEL _cmd, void 
   }
 }
 
-int DirectoryNode_childCount(NFObject * self, SEL _cmd) {
+int DirectoryNode_childCount(NPObject * self, SEL _cmd) {
   return ((struct DirectoryNode *)self)->_childCount;
 }
 
-void DirectoryNode_setChildCount_(NFObject * self, SEL _cmd, int value) {
+void DirectoryNode_setChildCount_(NPObject * self, SEL _cmd, int value) {
   ((struct DirectoryNode *)self)->_childCount = value;
 }
 
-char * FSNode_absolutePath(NFObject * self, SEL _cmd) {
+char * FSNode_absolutePath(NPObject * self, SEL _cmd) {
   struct FSNode * _self = (struct FSNode *)self;
   {
     char * parts[32];
@@ -522,7 +522,7 @@ char * FSNode_absolutePath(NFObject * self, SEL _cmd) {
   }
 }
 
-_Bool FSNode_isSandboxCompliantWithRoot_(NFObject * self, SEL _cmd, char * rootPath) {
+_Bool FSNode_isSandboxCompliantWithRoot_(NPObject * self, SEL _cmd, char * rootPath) {
   struct FSNode * _self = (struct FSNode *)self;
   {
     char * myPath = ((struct nopa_FSNode_vtable *)(self)->isa->vtable)->absolutePath(self, sel_registerName("absolutePath"));
@@ -535,20 +535,20 @@ _Bool FSNode_isSandboxCompliantWithRoot_(NFObject * self, SEL _cmd, char * rootP
   }
 }
 
-int FSNode_calculateSize(NFObject * self, SEL _cmd) {
+int FSNode_calculateSize(NPObject * self, SEL _cmd) {
   struct FSNode * _self = (struct FSNode *)self;
   {
     return 0;
   }
 }
 
-void FSNode_dumpMetadataWithIndent_(NFObject * self, SEL _cmd, int indent) {
+void FSNode_dumpMetadataWithIndent_(NPObject * self, SEL _cmd, int indent) {
   struct FSNode * _self = (struct FSNode *)self;
   {
   }
 }
 
-void FSNode_dealloc(NFObject * self, SEL _cmd) {
+void FSNode_dealloc(NPObject * self, SEL _cmd) {
   struct FSNode * _self = (struct FSNode *)self;
   {
     printf(" 🗑️ [注销节点] 物理内存清理 ➔ 基础节点 '%s' 已销毁。\n", _self->_name);
@@ -558,14 +558,14 @@ void FSNode_dealloc(NFObject * self, SEL _cmd) {
   }
 }
 
-int FileNode_calculateSize(NFObject * self, SEL _cmd) {
+int FileNode_calculateSize(NPObject * self, SEL _cmd) {
   struct FileNode * _self = (struct FileNode *)self;
   {
     return _self->_fileSize;
   }
 }
 
-void FileNode_dumpMetadataWithIndent_(NFObject * self, SEL _cmd, int indent) {
+void FileNode_dumpMetadataWithIndent_(NPObject * self, SEL _cmd, int indent) {
   struct FileNode * _self = (struct FileNode *)self;
   {
     for (int i = 0;
@@ -574,7 +574,7 @@ void FileNode_dumpMetadataWithIndent_(NFObject * self, SEL _cmd, int indent) {
   }
 }
 
-void FileNode_dealloc(NFObject * self, SEL _cmd) {
+void FileNode_dealloc(NPObject * self, SEL _cmd) {
   struct FileNode * _self = (struct FileNode *)self;
   {
     printf(" 🗑️ [注销文件] 数据区释放 ➔ 文件 '%s' 彻底销毁。\n", _self->_name);
@@ -584,52 +584,52 @@ void FileNode_dealloc(NFObject * self, SEL _cmd) {
   }
 }
 
-int DirectoryNode_calculateSize(NFObject * self, SEL _cmd) {
+int DirectoryNode_calculateSize(NPObject * self, SEL _cmd) {
   struct DirectoryNode * _self = (struct DirectoryNode *)self;
   {
     int totalSize = 0;
     for (int i = 0;
 (i < _self->_childCount); i++)     {
-      (totalSize += ({ NFObject *__nopa_tmp_1 = (_self->_children[i]); __nopa_tmp_1->isa == &nopa_DirectoryNode_class ? ((struct nopa_DirectoryNode_vtable *)__nopa_tmp_1->isa->vtable)->calculateSize(__nopa_tmp_1, sel_registerName("calculateSize")) : __nopa_tmp_1->isa == &nopa_FSNode_class ? ((struct nopa_FSNode_vtable *)__nopa_tmp_1->isa->vtable)->calculateSize(__nopa_tmp_1, sel_registerName("calculateSize")) : ((struct nopa_FileNode_vtable *)__nopa_tmp_1->isa->vtable)->calculateSize(__nopa_tmp_1, sel_registerName("calculateSize")); }));
+      (totalSize += ({ NPObject *__nopa_tmp_1 = (_self->_children[i]); __nopa_tmp_1->isa == &nopa_DirectoryNode_class ? ((struct nopa_DirectoryNode_vtable *)__nopa_tmp_1->isa->vtable)->calculateSize(__nopa_tmp_1, sel_registerName("calculateSize")) : __nopa_tmp_1->isa == &nopa_FSNode_class ? ((struct nopa_FSNode_vtable *)__nopa_tmp_1->isa->vtable)->calculateSize(__nopa_tmp_1, sel_registerName("calculateSize")) : ((struct nopa_FileNode_vtable *)__nopa_tmp_1->isa->vtable)->calculateSize(__nopa_tmp_1, sel_registerName("calculateSize")); }));
     }
     return totalSize;
   }
 }
 
-void DirectoryNode_dumpMetadataWithIndent_(NFObject * self, SEL _cmd, int indent) {
+void DirectoryNode_dumpMetadataWithIndent_(NPObject * self, SEL _cmd, int indent) {
   struct DirectoryNode * _self = (struct DirectoryNode *)self;
   {
     for (int i = 0;
 (i < indent); i++)     printf("  ");
-    printf("📁 [目录] %s/ (包含 %d 个子节点, 累计大小: %d KB)\n", _self->_name, _self->_childCount, ((NFObject *)self)->isa == &nopa_DirectoryNode_class ? ((struct nopa_DirectoryNode_vtable *)(self)->isa->vtable)->calculateSize(self, sel_registerName("calculateSize")) : ((NFObject *)self)->isa == &nopa_FSNode_class ? ((struct nopa_FSNode_vtable *)(self)->isa->vtable)->calculateSize(self, sel_registerName("calculateSize")) : ((struct nopa_FileNode_vtable *)(self)->isa->vtable)->calculateSize(self, sel_registerName("calculateSize")));
+    printf("📁 [目录] %s/ (包含 %d 个子节点, 累计大小: %d KB)\n", _self->_name, _self->_childCount, ((NPObject *)self)->isa == &nopa_DirectoryNode_class ? ((struct nopa_DirectoryNode_vtable *)(self)->isa->vtable)->calculateSize(self, sel_registerName("calculateSize")) : ((NPObject *)self)->isa == &nopa_FSNode_class ? ((struct nopa_FSNode_vtable *)(self)->isa->vtable)->calculateSize(self, sel_registerName("calculateSize")) : ((struct nopa_FileNode_vtable *)(self)->isa->vtable)->calculateSize(self, sel_registerName("calculateSize")));
     for (int i = 0;
 (i < _self->_childCount); i++)     {
-      ({ NFObject *__nopa_tmp_2 = (_self->_children[i]); __nopa_tmp_2->isa == &nopa_DirectoryNode_class ? ((struct nopa_DirectoryNode_vtable *)__nopa_tmp_2->isa->vtable)->dumpMetadataWithIndent_(__nopa_tmp_2, sel_registerName("dumpMetadataWithIndent:"), (indent + 1)) : __nopa_tmp_2->isa == &nopa_FSNode_class ? ((struct nopa_FSNode_vtable *)__nopa_tmp_2->isa->vtable)->dumpMetadataWithIndent_(__nopa_tmp_2, sel_registerName("dumpMetadataWithIndent:"), (indent + 1)) : ((struct nopa_FileNode_vtable *)__nopa_tmp_2->isa->vtable)->dumpMetadataWithIndent_(__nopa_tmp_2, sel_registerName("dumpMetadataWithIndent:"), (indent + 1)); });
+      ({ NPObject *__nopa_tmp_2 = (_self->_children[i]); __nopa_tmp_2->isa == &nopa_DirectoryNode_class ? ((struct nopa_DirectoryNode_vtable *)__nopa_tmp_2->isa->vtable)->dumpMetadataWithIndent_(__nopa_tmp_2, sel_registerName("dumpMetadataWithIndent:"), (indent + 1)) : __nopa_tmp_2->isa == &nopa_FSNode_class ? ((struct nopa_FSNode_vtable *)__nopa_tmp_2->isa->vtable)->dumpMetadataWithIndent_(__nopa_tmp_2, sel_registerName("dumpMetadataWithIndent:"), (indent + 1)) : ((struct nopa_FileNode_vtable *)__nopa_tmp_2->isa->vtable)->dumpMetadataWithIndent_(__nopa_tmp_2, sel_registerName("dumpMetadataWithIndent:"), (indent + 1)); });
     }
   }
 }
 
-void DirectoryNode_dealloc(NFObject * self, SEL _cmd) {
+void DirectoryNode_dealloc(NPObject * self, SEL _cmd) {
   struct DirectoryNode * _self = (struct DirectoryNode *)self;
   {
     printf(" 🗑️ [注销目录] 容器递归注销 ➔ 开始清退目录 '%s' 下持有的所有子树...\n", _self->_name);
     for (int i = 0;
 (i < _self->_childCount); i++)     {
       if (_self->_children[i])       {
-        NFObject_release(_self->_children[i], sel_registerName("release"));
+        NPObject_release(_self->_children[i], sel_registerName("release"));
         _self->_children[i] = NULL;
       }
     }
   }
 }
 
-NFObject * nopa_alloc(struct NFClass * cls);
+NPObject * nopa_alloc(struct NPClass * cls);
 
-NFObject * nopa_init(NFObject * self);
+NPObject * nopa_init(NPObject * self);
 
-void nopa_release(NFObject * obj);
+void nopa_release(NPObject * obj);
 
-NFObject * nopa_retain(NFObject * obj);
+NPObject * nopa_retain(NPObject * obj);
 
 int main(int argc, const char * argv[]) {
   nopa_meta_init();
@@ -637,28 +637,28 @@ int main(int argc, const char * argv[]) {
     printf("\n======================================================\n");
     printf("    💾 Micrit 静态层级虚拟文件系统(VFS)与安全沙盒 💾    \n");
     printf("======================================================\n\n");
-    NFObject *__nopa_tmp_3 = (NFObject_alloc(&nopa_DirectoryNode_class, sel_registerName("alloc")));
+    NPObject *__nopa_tmp_3 = (NPObject_alloc(&nopa_DirectoryNode_class, sel_registerName("alloc")));
     DirectoryNode * root = ((struct nopa_DirectoryNode_vtable *)__nopa_tmp_3->isa->vtable)->initWithName_(__nopa_tmp_3, sel_registerName("initWithName:"), "root");
-    NFObject *__nopa_tmp_4 = (NFObject_alloc(&nopa_DirectoryNode_class, sel_registerName("alloc")));
+    NPObject *__nopa_tmp_4 = (NPObject_alloc(&nopa_DirectoryNode_class, sel_registerName("alloc")));
     DirectoryNode * usr = ((struct nopa_DirectoryNode_vtable *)__nopa_tmp_4->isa->vtable)->initWithName_(__nopa_tmp_4, sel_registerName("initWithName:"), "usr");
-    NFObject *__nopa_tmp_5 = (NFObject_alloc(&nopa_DirectoryNode_class, sel_registerName("alloc")));
+    NPObject *__nopa_tmp_5 = (NPObject_alloc(&nopa_DirectoryNode_class, sel_registerName("alloc")));
     DirectoryNode * bin = ((struct nopa_DirectoryNode_vtable *)__nopa_tmp_5->isa->vtable)->initWithName_(__nopa_tmp_5, sel_registerName("initWithName:"), "bin");
     ((struct nopa_DirectoryNode_vtable *)(root)->isa->vtable)->addChildNode_(root, sel_registerName("addChildNode:"), (FSNode *)usr);
     ((struct nopa_DirectoryNode_vtable *)(root)->isa->vtable)->addChildNode_(root, sel_registerName("addChildNode:"), (FSNode *)bin);
-    NFObject *__nopa_tmp_6 = (NFObject_alloc(&nopa_DirectoryNode_class, sel_registerName("alloc")));
+    NPObject *__nopa_tmp_6 = (NPObject_alloc(&nopa_DirectoryNode_class, sel_registerName("alloc")));
     DirectoryNode * local = ((struct nopa_DirectoryNode_vtable *)__nopa_tmp_6->isa->vtable)->initWithName_(__nopa_tmp_6, sel_registerName("initWithName:"), "local");
-    NFObject *__nopa_tmp_7 = (NFObject_alloc(&nopa_FileNode_class, sel_registerName("alloc")));
+    NPObject *__nopa_tmp_7 = (NPObject_alloc(&nopa_FileNode_class, sel_registerName("alloc")));
     FileNode * dbFile = ((struct nopa_FileNode_vtable *)__nopa_tmp_7->isa->vtable)->initWithName_size_mime_(__nopa_tmp_7, sel_registerName("initWithName:size:mime:"), "database.db", 240, "application/sql");
     ((struct nopa_DirectoryNode_vtable *)(usr)->isa->vtable)->addChildNode_(usr, sel_registerName("addChildNode:"), (FSNode *)local);
     ((struct nopa_DirectoryNode_vtable *)(local)->isa->vtable)->addChildNode_(local, sel_registerName("addChildNode:"), (FSNode *)dbFile);
-    NFObject *__nopa_tmp_8 = (NFObject_alloc(&nopa_FileNode_class, sel_registerName("alloc")));
+    NPObject *__nopa_tmp_8 = (NPObject_alloc(&nopa_FileNode_class, sel_registerName("alloc")));
     FileNode * shFile = ((struct nopa_FileNode_vtable *)__nopa_tmp_8->isa->vtable)->initWithName_size_mime_(__nopa_tmp_8, sel_registerName("initWithName:size:mime:"), "init.sh", 4, "text/x-shellscript");
-    NFObject *__nopa_tmp_9 = (NFObject_alloc(&nopa_FileNode_class, sel_registerName("alloc")));
+    NPObject *__nopa_tmp_9 = (NPObject_alloc(&nopa_FileNode_class, sel_registerName("alloc")));
     FileNode * execFile = ((struct nopa_FileNode_vtable *)__nopa_tmp_9->isa->vtable)->initWithName_size_mime_(__nopa_tmp_9, sel_registerName("initWithName:size:mime:"), "compiler", 1024, "application/octet-stream");
     ((struct nopa_DirectoryNode_vtable *)(bin)->isa->vtable)->addChildNode_(bin, sel_registerName("addChildNode:"), (FSNode *)shFile);
     ((struct nopa_DirectoryNode_vtable *)(bin)->isa->vtable)->addChildNode_(bin, sel_registerName("addChildNode:"), (FSNode *)execFile);
     printf(" --- 📊 VFS 目录层级结构展示 ---\n");
-    ((NFObject *)root)->isa == &nopa_DirectoryNode_class ? ((struct nopa_DirectoryNode_vtable *)(root)->isa->vtable)->dumpMetadataWithIndent_(root, sel_registerName("dumpMetadataWithIndent:"), 0) : ((NFObject *)root)->isa == &nopa_FSNode_class ? ((struct nopa_FSNode_vtable *)(root)->isa->vtable)->dumpMetadataWithIndent_(root, sel_registerName("dumpMetadataWithIndent:"), 0) : ((struct nopa_FileNode_vtable *)(root)->isa->vtable)->dumpMetadataWithIndent_(root, sel_registerName("dumpMetadataWithIndent:"), 0);
+    ((NPObject *)root)->isa == &nopa_DirectoryNode_class ? ((struct nopa_DirectoryNode_vtable *)(root)->isa->vtable)->dumpMetadataWithIndent_(root, sel_registerName("dumpMetadataWithIndent:"), 0) : ((NPObject *)root)->isa == &nopa_FSNode_class ? ((struct nopa_FSNode_vtable *)(root)->isa->vtable)->dumpMetadataWithIndent_(root, sel_registerName("dumpMetadataWithIndent:"), 0) : ((struct nopa_FileNode_vtable *)(root)->isa->vtable)->dumpMetadataWithIndent_(root, sel_registerName("dumpMetadataWithIndent:"), 0);
     printf(" --------------------------------\n\n");
     char * dbPath = ((struct nopa_FSNode_vtable *)(dbFile)->isa->vtable)->absolutePath(dbFile, sel_registerName("absolutePath"));
     char * execPath = ((struct nopa_FSNode_vtable *)(execFile)->isa->vtable)->absolutePath(execFile, sel_registerName("absolutePath"));
@@ -673,7 +673,7 @@ int main(int argc, const char * argv[]) {
     printf(" --- ⚡ [高阶遍历] 扫描 'bin' 目录中的超大文件(限额 500 KB)... ---\n");
     int sizeLimit = 500;
     void (^spaceScanner)(FSNode *, _Bool *) = ^void(FSNode * item, _Bool * stop) {
-  int size = ((NFObject *)item)->isa == &nopa_DirectoryNode_class ? ((struct nopa_DirectoryNode_vtable *)(item)->isa->vtable)->calculateSize(item, sel_registerName("calculateSize")) : ((NFObject *)item)->isa == &nopa_FSNode_class ? ((struct nopa_FSNode_vtable *)(item)->isa->vtable)->calculateSize(item, sel_registerName("calculateSize")) : ((struct nopa_FileNode_vtable *)(item)->isa->vtable)->calculateSize(item, sel_registerName("calculateSize"));
+  int size = ((NPObject *)item)->isa == &nopa_DirectoryNode_class ? ((struct nopa_DirectoryNode_vtable *)(item)->isa->vtable)->calculateSize(item, sel_registerName("calculateSize")) : ((NPObject *)item)->isa == &nopa_FSNode_class ? ((struct nopa_FSNode_vtable *)(item)->isa->vtable)->calculateSize(item, sel_registerName("calculateSize")) : ((struct nopa_FileNode_vtable *)(item)->isa->vtable)->calculateSize(item, sel_registerName("calculateSize"));
   char * path = ((struct nopa_FSNode_vtable *)(item)->isa->vtable)->absolutePath(item, sel_registerName("absolutePath"));
   printf("   [扫描中...] 检查项: %s | 大小: %d KB\n", path, size);
   free(path);
@@ -690,7 +690,7 @@ int main(int argc, const char * argv[]) {
       printf("  --> 将 'database.db' 的临时弱引用传出给一个外部监控器变量...\n");
     }
     printf("  --> 主动释放 'usr' 目录...\n");
-    NFObject_release(root, sel_registerName("release"));
+    NPObject_release(root, sel_registerName("release"));
     printf("\n======================================================\n");
     printf("                    VFS 安全审计通关                    \n");
     printf("======================================================\n\n");

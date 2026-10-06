@@ -13,13 +13,13 @@
 // 1 for the *wrong* reason (the slot was never registered at all).
 #import <Foundation/Foundation.np>
 
-@interface WPThing : NFObject
+@interface WPThing : NPObject
 @end
 
 @implementation WPThing
 @end
 
-@interface WPHolder : NFObject
+@interface WPHolder : NPObject
 @property (weak) WPThing *thing;
 @end
 

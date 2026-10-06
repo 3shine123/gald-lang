@@ -10,17 +10,17 @@
 
 #include <string.h>
 
-struct nopa_NFObject_vtable;
-struct nopa_NFSecureVault_vtable;
-struct nopa_NFMemoryHacker_vtable;
+struct nopa_NPObject_vtable;
+struct nopa_NPSecureVault_vtable;
+struct nopa_NPMemoryHacker_vtable;
 
-#define nopa_NFObject_vtable_index_init 2
-#define nopa_NFObject_vtable_index_dealloc 3
-#define nopa_NFSecureVault_vtable_index_initWithA_B_ 4
-#define nopa_NFSecureVault_vtable_index_dumpVaultStatus 5
-#define nopa_NFMemoryHacker_vtable_index_getPointOffsetRef 4
-#define nopa_NFMemoryHacker_vtable_index_attackVaultMemRaw_ 5
-#define nopa_NFMemoryHacker_vtable_index_init 2
+#define nopa_NPObject_vtable_index_init 2
+#define nopa_NPObject_vtable_index_dealloc 3
+#define nopa_NPSecureVault_vtable_index_initWithA_B_ 4
+#define nopa_NPSecureVault_vtable_index_dumpVaultStatus 5
+#define nopa_NPMemoryHacker_vtable_index_getPointOffsetRef 4
+#define nopa_NPMemoryHacker_vtable_index_attackVaultMemRaw_ 5
+#define nopa_NPMemoryHacker_vtable_index_init 2
 
 static const SEL __nopa_sel_init = {.name = "init", .hash = 0x16B1D373};
 static const SEL __nopa_sel_initWithA_B_ = {.name = "initWithA_B_", .hash = 0xD0AADE04};
@@ -29,140 +29,140 @@ static const SEL __nopa_sel_dumpVaultStatus = {.name = "dumpVaultStatus", .hash 
 static const SEL __nopa_sel_attackVaultMemRaw_ = {.name = "attackVaultMemRaw_", .hash = 0x7B5CFA8F};
 static const SEL __nopa_sel_getPointOffsetRef = {.name = "getPointOffsetRef", .hash = 0xE72560C9};
 
-typedef struct NFObject NFObject;
-typedef struct NFSecureVault NFSecureVault;
-typedef struct NFMemoryHacker NFMemoryHacker;
+typedef struct NPObject NPObject;
+typedef struct NPSecureVault NPSecureVault;
+typedef struct NPMemoryHacker NPMemoryHacker;
 
 typedef struct {
     int dx;
     int dy;
-} NFPoint2D;
+} NPPoint2D;
 
 
-NFObject * NFObject_alloc(NFClass * self, SEL _cmd);
-NFObject * NFObject_new(NFClass * self, SEL _cmd);
-NFObject * NFObject_init(NFObject * self, SEL _cmd);
-void NFObject_dealloc(NFObject * self, SEL _cmd);
-NFClass * NFObject_getClass(NFClass * self, SEL _cmd);
-NFObject * NFSecureVault_initWithA_B_(NFObject * self, SEL _cmd, int a, int b);
-void NFSecureVault_dumpVaultStatus(NFObject * self, SEL _cmd);
-NFClass * NFSecureVault_getClass(NFClass * self, SEL _cmd);
-NFPoint2D * NFMemoryHacker_getPointOffsetRef(NFObject * self, SEL _cmd);
-void NFMemoryHacker_attackVaultMemRaw_(NFObject * self, SEL _cmd, NFObject * vaultObj);
-NFObject * NFMemoryHacker_init(NFObject * self, SEL _cmd);
-NFClass * NFMemoryHacker_getClass(NFClass * self, SEL _cmd);
+NPObject * NPObject_alloc(NPClass * self, SEL _cmd);
+NPObject * NPObject_new(NPClass * self, SEL _cmd);
+NPObject * NPObject_init(NPObject * self, SEL _cmd);
+void NPObject_dealloc(NPObject * self, SEL _cmd);
+NPClass * NPObject_getClass(NPClass * self, SEL _cmd);
+NPObject * NPSecureVault_initWithA_B_(NPObject * self, SEL _cmd, int a, int b);
+void NPSecureVault_dumpVaultStatus(NPObject * self, SEL _cmd);
+NPClass * NPSecureVault_getClass(NPClass * self, SEL _cmd);
+NPPoint2D * NPMemoryHacker_getPointOffsetRef(NPObject * self, SEL _cmd);
+void NPMemoryHacker_attackVaultMemRaw_(NPObject * self, SEL _cmd, NPObject * vaultObj);
+NPObject * NPMemoryHacker_init(NPObject * self, SEL _cmd);
+NPClass * NPMemoryHacker_getClass(NPClass * self, SEL _cmd);
 int main(int argc, const char * * argv);
 
-extern NFClass nopa_NFObject_class;
-extern NFClass nopa_NFSecureVault_class;
-extern NFClass nopa_NFMemoryHacker_class;
+extern NPClass nopa_NPObject_class;
+extern NPClass nopa_NPSecureVault_class;
+extern NPClass nopa_NPMemoryHacker_class;
 void nopa_meta_init(void);
 
-// struct NFClass defined in runtime.h
-// struct NFObject defined in runtime.h
-struct nopa_NFObject_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
+// struct NPClass defined in runtime.h
+// struct NPObject defined in runtime.h
+struct nopa_NPObject_vtable {
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
 };
-struct nopa_NFObject_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+struct nopa_NPObject_meta_vtable {
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
-struct NFSecureVault {
-    struct NFClass *isa;
+struct NPSecureVault {
+    struct NPClass *isa;
     uint32_t retain_count;
     int _secretKeyA;
     int _secretKeyB;
 };
-typedef struct NFSecureVault NFSecureVault;
-struct nopa_NFSecureVault_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    NFObject * (*initWithA_B_)(NFObject *, SEL, int, int);
-    void (*dumpVaultStatus)(NFObject *, SEL);
+typedef struct NPSecureVault NPSecureVault;
+struct nopa_NPSecureVault_vtable {
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    NPObject * (*initWithA_B_)(NPObject *, SEL, int, int);
+    void (*dumpVaultStatus)(NPObject *, SEL);
 };
-struct nopa_NFSecureVault_meta_vtable {
-    NFClass * (*class)(NFClass *, SEL);
+struct nopa_NPSecureVault_meta_vtable {
+    NPClass * (*class)(NPClass *, SEL);
 };
-struct NFMemoryHacker {
-    struct NFClass *isa;
+struct NPMemoryHacker {
+    struct NPClass *isa;
     uint32_t retain_count;
-    NFPoint2D _localPoint;
+    NPPoint2D _localPoint;
 };
-typedef struct NFMemoryHacker NFMemoryHacker;
-struct nopa_NFMemoryHacker_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    NFPoint2D * (*getPointOffsetRef)(NFObject *, SEL);
-    void (*attackVaultMemRaw_)(NFObject *, SEL, NFObject *);
+typedef struct NPMemoryHacker NPMemoryHacker;
+struct nopa_NPMemoryHacker_vtable {
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    NPPoint2D * (*getPointOffsetRef)(NPObject *, SEL);
+    void (*attackVaultMemRaw_)(NPObject *, SEL, NPObject *);
 };
-struct nopa_NFMemoryHacker_meta_vtable {
-    NFClass * (*class)(NFClass *, SEL);
+struct nopa_NPMemoryHacker_meta_vtable {
+    NPClass * (*class)(NPClass *, SEL);
 };
-NFObject * NFObject_alloc(NFClass * self, SEL _cmd) {
+NPObject * NPObject_alloc(NPClass * self, SEL _cmd) {
     return nopa_alloc(self);
 }
 
-NFObject * NFObject_new(NFClass * self, SEL _cmd) {
-    NFObject * obj = nopa_alloc(self);
+NPObject * NPObject_new(NPClass * self, SEL _cmd) {
+    NPObject * obj = nopa_alloc(self);
     return nopa_init(obj);
 }
 
-NFObject * NFObject_init(NFObject * self, SEL _cmd) {
-    struct NFObject * _self = ((struct NFObject *)(self));
+NPObject * NPObject_init(NPObject * self, SEL _cmd) {
+    struct NPObject * _self = ((struct NPObject *)(self));
     {
         return nopa_init(self);
     }
 }
 
-void NFObject_dealloc(NFObject * self, SEL _cmd) {
-    struct NFObject * _self = ((struct NFObject *)(self));
+void NPObject_dealloc(NPObject * self, SEL _cmd) {
+    struct NPObject * _self = ((struct NPObject *)(self));
     {
         return;
     }
 }
 
-NFClass * NFObject_getClass(NFClass * self, SEL _cmd) {
-    return &nopa_NFObject_class;
+NPClass * NPObject_getClass(NPClass * self, SEL _cmd) {
+    return &nopa_NPObject_class;
 }
 
-NFObject * nopa_alloc(struct NFClass * cls);
-NFObject * nopa_init(NFObject * );
-NFObject * NFSecureVault_initWithA_B_(NFObject * self, SEL _cmd, int a, int b) {
-    struct NFSecureVault * _self = ((struct NFSecureVault *)(self));
+NPObject * nopa_alloc(struct NPClass * cls);
+NPObject * nopa_init(NPObject * );
+NPObject * NPSecureVault_initWithA_B_(NPObject * self, SEL _cmd, int a, int b) {
+    struct NPSecureVault * _self = ((struct NPSecureVault *)(self));
     {
-        self = NFObject_init(self, __nopa_sel_init);
+        self = NPObject_init(self, __nopa_sel_init);
         if (self) {
             {
-                ((struct NFSecureVault *)(self))->_secretKeyA = a;
-                ((struct NFSecureVault *)(self))->_secretKeyB = b;
+                ((struct NPSecureVault *)(self))->_secretKeyA = a;
+                ((struct NPSecureVault *)(self))->_secretKeyB = b;
             }
         }
         return self;
     }
 }
 
-void NFSecureVault_dumpVaultStatus(NFObject * self, SEL _cmd) {
-    struct NFSecureVault * _self = ((struct NFSecureVault *)(self));
+void NPSecureVault_dumpVaultStatus(NPObject * self, SEL _cmd) {
+    struct NPSecureVault * _self = ((struct NPSecureVault *)(self));
     {
-        printf("[保险箱内部验证] KeyA: %d | KeyB: %d\n", ((struct NFSecureVault *)(self))->_secretKeyA, ((struct NFSecureVault *)(self))->_secretKeyB);
+        printf("[保险箱内部验证] KeyA: %d | KeyB: %d\n", ((struct NPSecureVault *)(self))->_secretKeyA, ((struct NPSecureVault *)(self))->_secretKeyB);
     }
 }
 
-NFClass * NFSecureVault_getClass(NFClass * self, SEL _cmd) {
-    return &nopa_NFSecureVault_class;
+NPClass * NPSecureVault_getClass(NPClass * self, SEL _cmd) {
+    return &nopa_NPSecureVault_class;
 }
 
-NFPoint2D * NFMemoryHacker_getPointOffsetRef(NFObject * self, SEL _cmd) {
-    struct NFMemoryHacker * _self = ((struct NFMemoryHacker *)(self));
+NPPoint2D * NPMemoryHacker_getPointOffsetRef(NPObject * self, SEL _cmd) {
+    struct NPMemoryHacker * _self = ((struct NPMemoryHacker *)(self));
     {
-        return &((struct NFMemoryHacker *)(self))->_localPoint;
+        return &((struct NPMemoryHacker *)(self))->_localPoint;
     }
 }
 
-void NFMemoryHacker_attackVaultMemRaw_(NFObject * self, SEL _cmd, NFObject * vaultObj) {
-    struct NFMemoryHacker * _self = ((struct NFMemoryHacker *)(self));
+void NPMemoryHacker_attackVaultMemRaw_(NPObject * self, SEL _cmd, NPObject * vaultObj) {
+    struct NPMemoryHacker * _self = ((struct NPMemoryHacker *)(self));
     {
         printf("[黑客组件] 正在对高安全对象进行物理内存布局扫描...\n");
         char * rawBytePtr = ((char *)(vaultObj));
@@ -174,22 +174,22 @@ void NFMemoryHacker_attackVaultMemRaw_(NFObject * self, SEL _cmd, NFObject * vau
     }
 }
 
-NFObject * NFMemoryHacker_init(NFObject * self, SEL _cmd) {
-    struct NFMemoryHacker * _self = ((struct NFMemoryHacker *)(self));
+NPObject * NPMemoryHacker_init(NPObject * self, SEL _cmd) {
+    struct NPMemoryHacker * _self = ((struct NPMemoryHacker *)(self));
     {
-        self = NFObject_init(self, __nopa_sel_init);
+        self = NPObject_init(self, __nopa_sel_init);
         if (self) {
             {
-                ((struct NFMemoryHacker *)(self))->_localPoint.dx = 10;
-                ((struct NFMemoryHacker *)(self))->_localPoint.dy = 20;
+                ((struct NPMemoryHacker *)(self))->_localPoint.dx = 10;
+                ((struct NPMemoryHacker *)(self))->_localPoint.dy = 20;
             }
         }
         return self;
     }
 }
 
-NFClass * NFMemoryHacker_getClass(NFClass * self, SEL _cmd) {
-    return &nopa_NFMemoryHacker_class;
+NPClass * NPMemoryHacker_getClass(NPClass * self, SEL _cmd) {
+    return &nopa_NPMemoryHacker_class;
 }
 
 int main(int argc, const char * * argv) {
@@ -201,19 +201,19 @@ int main(int argc, const char * * argv) {
             printf("==================================================\n");
             printf(">>>    nopac 编译器「物理内存肉搏与复合边界」压测  <<<\n");
             printf("==================================================\n\n");
-            NFObject *__nopa_tmp_0 = (NFObject_alloc(&nopa_NFSecureVault_class, __nopa_sel_alloc));
-            NFSecureVault * vault = ((struct nopa_NFSecureVault_vtable *)__nopa_tmp_0->isa->vtable)->initWithA_B_(__nopa_tmp_0, __nopa_sel_initWithA_B_, 1111, 2222);
-            NFObject *__nopa_tmp_1 = (NFObject_alloc(&nopa_NFMemoryHacker_class, __nopa_sel_alloc));
-            NFMemoryHacker * hacker = ((struct nopa_NFMemoryHacker_vtable *)__nopa_tmp_1->isa->vtable)->init(__nopa_tmp_1, __nopa_sel_init);
+            NPObject *__nopa_tmp_0 = (NPObject_alloc(&nopa_NPSecureVault_class, __nopa_sel_alloc));
+            NPSecureVault * vault = ((struct nopa_NPSecureVault_vtable *)__nopa_tmp_0->isa->vtable)->initWithA_B_(__nopa_tmp_0, __nopa_sel_initWithA_B_, 1111, 2222);
+            NPObject *__nopa_tmp_1 = (NPObject_alloc(&nopa_NPMemoryHacker_class, __nopa_sel_alloc));
+            NPMemoryHacker * hacker = ((struct nopa_NPMemoryHacker_vtable *)__nopa_tmp_1->isa->vtable)->init(__nopa_tmp_1, __nopa_sel_init);
             printf("--- 测试点 1: 篡改前的安全检查 ---\n");
-            ((struct nopa_NFSecureVault_vtable *)vault->isa->vtable)->dumpVaultStatus(vault, __nopa_sel_dumpVaultStatus);
+            ((struct nopa_NPSecureVault_vtable *)vault->isa->vtable)->dumpVaultStatus(vault, __nopa_sel_dumpVaultStatus);
             printf("\n--- 测试点 2: 执行底层物理内存偏移注入 ---\n");
-            ((struct nopa_NFMemoryHacker_vtable *)hacker->isa->vtable)->attackVaultMemRaw_(hacker, __nopa_sel_attackVaultMemRaw_, vault);
+            ((struct nopa_NPMemoryHacker_vtable *)hacker->isa->vtable)->attackVaultMemRaw_(hacker, __nopa_sel_attackVaultMemRaw_, vault);
             printf("\n--- 测试点 3: 篡改后的内部状态再验证 ---\n");
-            ((struct nopa_NFSecureVault_vtable *)vault->isa->vtable)->dumpVaultStatus(vault, __nopa_sel_dumpVaultStatus);
+            ((struct nopa_NPSecureVault_vtable *)vault->isa->vtable)->dumpVaultStatus(vault, __nopa_sel_dumpVaultStatus);
             printf("\n--- 测试点 4: 毁灭性复合边界三元运算符大乱斗 ---\n");
             int controlSwitch = 1;
-            int testResult = controlSwitch > 0 ? ((NFPoint2D *)(((struct nopa_NFMemoryHacker_vtable *)hacker->isa->vtable)->getPointOffsetRef(hacker, __nopa_sel_getPointOffsetRef)))->dx : (printf("Fallback\n"), 0);
+            int testResult = controlSwitch > 0 ? ((NPPoint2D *)(((struct nopa_NPMemoryHacker_vtable *)hacker->isa->vtable)->getPointOffsetRef(hacker, __nopa_sel_getPointOffsetRef)))->dx : (printf("Fallback\n"), 0);
             printf("[终极断言] 泥巴复合表达式完美解析成功！结果输出: %d (预期为 10)\n", testResult);
             nopa_release(vault);
             nopa_release(hacker);
@@ -230,66 +230,66 @@ int main(int argc, const char * * argv) {
 
 // ─── Class metadata ─────────────────────────────────────
 
-struct nopa_NFObject_vtable nopa_NFObject_vtable_inst = {
-    .init = NFObject_init,
-    .dealloc = NFObject_dealloc,
+struct nopa_NPObject_vtable nopa_NPObject_vtable_inst = {
+    .init = NPObject_init,
+    .dealloc = NPObject_dealloc,
 };
 
-struct nopa_NFSecureVault_vtable nopa_NFSecureVault_vtable_inst = {
-    .init = NFObject_init,
-    .dealloc = NFObject_dealloc,
-    .initWithA_B_ = NFSecureVault_initWithA_B_,
-    .dumpVaultStatus = NFSecureVault_dumpVaultStatus,
+struct nopa_NPSecureVault_vtable nopa_NPSecureVault_vtable_inst = {
+    .init = NPObject_init,
+    .dealloc = NPObject_dealloc,
+    .initWithA_B_ = NPSecureVault_initWithA_B_,
+    .dumpVaultStatus = NPSecureVault_dumpVaultStatus,
 };
 
-struct nopa_NFMemoryHacker_vtable nopa_NFMemoryHacker_vtable_inst = {
-    .init = NFMemoryHacker_init,
-    .dealloc = NFObject_dealloc,
-    .getPointOffsetRef = NFMemoryHacker_getPointOffsetRef,
-    .attackVaultMemRaw_ = NFMemoryHacker_attackVaultMemRaw_,
+struct nopa_NPMemoryHacker_vtable nopa_NPMemoryHacker_vtable_inst = {
+    .init = NPMemoryHacker_init,
+    .dealloc = NPObject_dealloc,
+    .getPointOffsetRef = NPMemoryHacker_getPointOffsetRef,
+    .attackVaultMemRaw_ = NPMemoryHacker_attackVaultMemRaw_,
 };
 
-struct nopa_NFObject_meta_vtable nopa_NFObject_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
-    .class = NFObject_getClass,
+struct nopa_NPObject_meta_vtable nopa_NPObject_meta_vtable_inst = {
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
+    .class = NPObject_getClass,
 };
 
-struct nopa_NFSecureVault_meta_vtable nopa_NFSecureVault_meta_vtable_inst = {
-    .class = NFSecureVault_getClass,
+struct nopa_NPSecureVault_meta_vtable nopa_NPSecureVault_meta_vtable_inst = {
+    .class = NPSecureVault_getClass,
 };
 
-struct nopa_NFMemoryHacker_meta_vtable nopa_NFMemoryHacker_meta_vtable_inst = {
-    .class = NFMemoryHacker_getClass,
+struct nopa_NPMemoryHacker_meta_vtable nopa_NPMemoryHacker_meta_vtable_inst = {
+    .class = NPMemoryHacker_getClass,
 };
 
-NFClass nopa_NFObject_class;
-NFClass nopa_NFSecureVault_class;
-NFClass nopa_NFMemoryHacker_class;
+NPClass nopa_NPObject_class;
+NPClass nopa_NPSecureVault_class;
+NPClass nopa_NPMemoryHacker_class;
 
 void nopa_meta_init(void) {
-    nopa_NFObject_class = (NFClass){
-        .name = "NFObject",
+    nopa_NPObject_class = (NPClass){
+        .name = "NPObject",
         .superclass = NULL,
-        .instance_size = sizeof(struct NFObject),
-        .vtable = &nopa_NFObject_vtable_inst,
-        .class_vtable = &nopa_NFObject_meta_vtable_inst,
+        .instance_size = sizeof(struct NPObject),
+        .vtable = &nopa_NPObject_vtable_inst,
+        .class_vtable = &nopa_NPObject_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_NFSecureVault_class = (NFClass){
-        .name = "NFSecureVault",
-        .superclass = &nopa_NFObject_class,
-        .instance_size = sizeof(struct NFSecureVault),
-        .vtable = &nopa_NFSecureVault_vtable_inst,
-        .class_vtable = &nopa_NFSecureVault_meta_vtable_inst,
+    nopa_NPSecureVault_class = (NPClass){
+        .name = "NPSecureVault",
+        .superclass = &nopa_NPObject_class,
+        .instance_size = sizeof(struct NPSecureVault),
+        .vtable = &nopa_NPSecureVault_vtable_inst,
+        .class_vtable = &nopa_NPSecureVault_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_NFMemoryHacker_class = (NFClass){
-        .name = "NFMemoryHacker",
-        .superclass = &nopa_NFObject_class,
-        .instance_size = sizeof(struct NFMemoryHacker),
-        .vtable = &nopa_NFMemoryHacker_vtable_inst,
-        .class_vtable = &nopa_NFMemoryHacker_meta_vtable_inst,
+    nopa_NPMemoryHacker_class = (NPClass){
+        .name = "NPMemoryHacker",
+        .superclass = &nopa_NPObject_class,
+        .instance_size = sizeof(struct NPMemoryHacker),
+        .vtable = &nopa_NPMemoryHacker_vtable_inst,
+        .class_vtable = &nopa_NPMemoryHacker_meta_vtable_inst,
         .protocol_count = 0,
     };
 }

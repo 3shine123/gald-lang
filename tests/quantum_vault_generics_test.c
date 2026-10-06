@@ -5,8 +5,8 @@
 #include <stdint.h>
 #include <stddef.h>
 #include "nopa/runtime.h"
-struct nopa_NFObject_vtable;
-struct nopa_NFObject_meta_vtable;
+struct nopa_NPObject_vtable;
+struct nopa_NPObject_meta_vtable;
 struct nopa_Dispatcher__HubController_vtable;
 struct nopa_Dispatcher__HubController_meta_vtable;
 struct nopa_Quantum__Core__DataCore_vtable;
@@ -47,7 +47,7 @@ static const SEL __nopa_sel_primaryPower = {.name = "primaryPower", .hash = 0x14
 static const SEL __nopa_sel_setPrimaryPower_ = {.name = "setPrimaryPower_", .hash = 0xB17B6DD1};
 static const SEL __nopa_sel_runSelfDiagnostic = {.name = "runSelfDiagnostic", .hash = 0xC186AE73};
 
-typedef struct NFObject NFObject;
+typedef struct NPObject NPObject;
 typedef struct Dispatcher__HubController Dispatcher__HubController;
 typedef struct Quantum__Core__DataCore Quantum__Core__DataCore;
 typedef struct Quantum__Core__QuantumCell Quantum__Core__QuantumCell;
@@ -55,41 +55,41 @@ typedef struct Storage__Infrastructure__StorageVault Storage__Infrastructure__St
 typedef struct Storage__Infrastructure__StorageVault_Quantum__Core__DataCore_ptr Storage__Infrastructure__StorageVault_Quantum__Core__DataCore_ptr;
 typedef struct Storage__Infrastructure__StorageVault_Quantum__Core__QuantumCell_ptr Storage__Infrastructure__StorageVault_Quantum__Core__QuantumCell_ptr;
 
-NFObject * NFObject_alloc(NFClass * self, SEL _cmd);
-NFObject * NFObject_new(NFClass * self, SEL _cmd);
-NFObject * NFObject_init(NFObject * self, SEL _cmd);
-void NFObject_dealloc(NFObject * self, SEL _cmd);
-void NFObject_release(NFObject * self, SEL _cmd);
-NFObject * NFObject_retain(NFObject * self, SEL _cmd);
-NFObject * Quantum__Core__QuantumCell_initWithSerial_charge_(NFObject * self, SEL _cmd, const char * sn, int ch);
-int Quantum__Core__QuantumCell_chargeLevel(NFObject * self, SEL _cmd);
-void Quantum__Core__QuantumCell_setChargeLevel_(NFObject * self, SEL _cmd, int value);
-const char * Quantum__Core__QuantumCell_serialNumber(NFObject * self, SEL _cmd);
-void Quantum__Core__QuantumCell_setSerialNumber_(NFObject * self, SEL _cmd, const char * value);
-int Quantum__Core__QuantumCell_outputCapacity(NFObject * self, SEL _cmd);
-void Quantum__Core__QuantumCell_dealloc(NFObject * self, SEL _cmd);
-NFObject * Quantum__Core__DataCore_initWithCode_entropy_(NFObject * self, SEL _cmd, const char * code, int e);
-const char * Quantum__Core__DataCore_coreCode(NFObject * self, SEL _cmd);
-void Quantum__Core__DataCore_setCoreCode_(NFObject * self, SEL _cmd, const char * value);
-int Quantum__Core__DataCore_quantumEntropy(NFObject * self, SEL _cmd);
-void Quantum__Core__DataCore_setQuantumEntropy_(NFObject * self, SEL _cmd, int value);
-void Quantum__Core__DataCore_dealloc(NFObject * self, SEL _cmd);
-NFObject * Storage__Infrastructure__StorageVault_init(NFObject * self, SEL _cmd);
-_Bool Storage__Infrastructure__StorageVault_pushItem_(NFObject * self, SEL _cmd, NFObject * item);
-NFObject * Storage__Infrastructure__StorageVault_popItem(NFObject * self, SEL _cmd);
-NFObject * Storage__Infrastructure__StorageVault_peekItemAtIndex_(NFObject * self, SEL _cmd, int index);
-int Storage__Infrastructure__StorageVault_count(NFObject * self, SEL _cmd);
-void Storage__Infrastructure__StorageVault_dealloc(NFObject * self, SEL _cmd);
-NFObject * Dispatcher__HubController_initWithName_(NFObject * self, SEL _cmd, const char * name);
-void Dispatcher__HubController_inspectPowerSupply(NFObject * self, SEL _cmd);
-Quantum__Core__QuantumCell * Dispatcher__HubController_primaryPower(NFObject * self, SEL _cmd);
-void Dispatcher__HubController_setPrimaryPower_(NFObject * self, SEL _cmd, Quantum__Core__QuantumCell * value);
-void Dispatcher__HubController_dealloc(NFObject * self, SEL _cmd);
-void Dispatcher__HubController_runSelfDiagnostic(NFObject * self, SEL _cmd);
-NFObject * nopa_alloc(struct NFClass * cls);
-NFObject * nopa_init(NFObject * self);
-void nopa_release(NFObject * obj);
-NFObject * nopa_retain(NFObject * obj);
+NPObject * NPObject_alloc(NPClass * self, SEL _cmd);
+NPObject * NPObject_new(NPClass * self, SEL _cmd);
+NPObject * NPObject_init(NPObject * self, SEL _cmd);
+void NPObject_dealloc(NPObject * self, SEL _cmd);
+void NPObject_release(NPObject * self, SEL _cmd);
+NPObject * NPObject_retain(NPObject * self, SEL _cmd);
+NPObject * Quantum__Core__QuantumCell_initWithSerial_charge_(NPObject * self, SEL _cmd, const char * sn, int ch);
+int Quantum__Core__QuantumCell_chargeLevel(NPObject * self, SEL _cmd);
+void Quantum__Core__QuantumCell_setChargeLevel_(NPObject * self, SEL _cmd, int value);
+const char * Quantum__Core__QuantumCell_serialNumber(NPObject * self, SEL _cmd);
+void Quantum__Core__QuantumCell_setSerialNumber_(NPObject * self, SEL _cmd, const char * value);
+int Quantum__Core__QuantumCell_outputCapacity(NPObject * self, SEL _cmd);
+void Quantum__Core__QuantumCell_dealloc(NPObject * self, SEL _cmd);
+NPObject * Quantum__Core__DataCore_initWithCode_entropy_(NPObject * self, SEL _cmd, const char * code, int e);
+const char * Quantum__Core__DataCore_coreCode(NPObject * self, SEL _cmd);
+void Quantum__Core__DataCore_setCoreCode_(NPObject * self, SEL _cmd, const char * value);
+int Quantum__Core__DataCore_quantumEntropy(NPObject * self, SEL _cmd);
+void Quantum__Core__DataCore_setQuantumEntropy_(NPObject * self, SEL _cmd, int value);
+void Quantum__Core__DataCore_dealloc(NPObject * self, SEL _cmd);
+NPObject * Storage__Infrastructure__StorageVault_init(NPObject * self, SEL _cmd);
+_Bool Storage__Infrastructure__StorageVault_pushItem_(NPObject * self, SEL _cmd, NPObject * item);
+NPObject * Storage__Infrastructure__StorageVault_popItem(NPObject * self, SEL _cmd);
+NPObject * Storage__Infrastructure__StorageVault_peekItemAtIndex_(NPObject * self, SEL _cmd, int index);
+int Storage__Infrastructure__StorageVault_count(NPObject * self, SEL _cmd);
+void Storage__Infrastructure__StorageVault_dealloc(NPObject * self, SEL _cmd);
+NPObject * Dispatcher__HubController_initWithName_(NPObject * self, SEL _cmd, const char * name);
+void Dispatcher__HubController_inspectPowerSupply(NPObject * self, SEL _cmd);
+Quantum__Core__QuantumCell * Dispatcher__HubController_primaryPower(NPObject * self, SEL _cmd);
+void Dispatcher__HubController_setPrimaryPower_(NPObject * self, SEL _cmd, Quantum__Core__QuantumCell * value);
+void Dispatcher__HubController_dealloc(NPObject * self, SEL _cmd);
+void Dispatcher__HubController_runSelfDiagnostic(NPObject * self, SEL _cmd);
+NPObject * nopa_alloc(struct NPClass * cls);
+NPObject * nopa_init(NPObject * self);
+void nopa_release(NPObject * obj);
+NPObject * nopa_retain(NPObject * obj);
 int main(int argc, const char * argv[]);
 Quantum__Core__QuantumCell * Storage__Infrastructure__StorageVault_Quantum__Core__QuantumCell_ptr_init(Quantum__Core__QuantumCell * self, SEL _cmd);
 _Bool Storage__Infrastructure__StorageVault_Quantum__Core__QuantumCell_ptr_pushItem_(Quantum__Core__QuantumCell * self, SEL _cmd, Quantum__Core__QuantumCell * item);
@@ -104,122 +104,122 @@ Quantum__Core__DataCore * Storage__Infrastructure__StorageVault_Quantum__Core__D
 void Storage__Infrastructure__StorageVault_Quantum__Core__DataCore_ptr_dealloc(Quantum__Core__DataCore * self, SEL _cmd);
 int Storage__Infrastructure__StorageVault_Quantum__Core__DataCore_ptr_count(Quantum__Core__DataCore * self, SEL _cmd);
 
-NFClass * NFObject_getClass(NFClass * self, SEL _cmd);
-NFClass * Dispatcher__HubController_getClass(NFClass * self, SEL _cmd);
-NFClass * Quantum__Core__DataCore_getClass(NFClass * self, SEL _cmd);
-NFClass * Quantum__Core__QuantumCell_getClass(NFClass * self, SEL _cmd);
-NFClass * Storage__Infrastructure__StorageVault_getClass(NFClass * self, SEL _cmd);
-NFClass * Storage__Infrastructure__StorageVault_Quantum__Core__DataCore_ptr_getClass(NFClass * self, SEL _cmd);
-NFClass * Storage__Infrastructure__StorageVault_Quantum__Core__QuantumCell_ptr_getClass(NFClass * self, SEL _cmd);
+NPClass * NPObject_getClass(NPClass * self, SEL _cmd);
+NPClass * Dispatcher__HubController_getClass(NPClass * self, SEL _cmd);
+NPClass * Quantum__Core__DataCore_getClass(NPClass * self, SEL _cmd);
+NPClass * Quantum__Core__QuantumCell_getClass(NPClass * self, SEL _cmd);
+NPClass * Storage__Infrastructure__StorageVault_getClass(NPClass * self, SEL _cmd);
+NPClass * Storage__Infrastructure__StorageVault_Quantum__Core__DataCore_ptr_getClass(NPClass * self, SEL _cmd);
+NPClass * Storage__Infrastructure__StorageVault_Quantum__Core__QuantumCell_ptr_getClass(NPClass * self, SEL _cmd);
 
-struct nopa_NFObject_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    void (*release)(NFObject *, SEL);
-    NFObject * (*retain)(NFObject *, SEL);
+struct nopa_NPObject_vtable {
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    void (*release)(NPObject *, SEL);
+    NPObject * (*retain)(NPObject *, SEL);
 };
-struct nopa_NFObject_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+struct nopa_NPObject_meta_vtable {
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct nopa_Dispatcher__HubController_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    void (*release)(NFObject *, SEL);
-    NFObject * (*retain)(NFObject *, SEL);
-    NFObject * (*initWithName_)(NFObject *, SEL, const char *);
-    void (*inspectPowerSupply)(NFObject *, SEL);
-    void (*runSelfDiagnostic)(NFObject *, SEL);
-    Quantum__Core__QuantumCell * (*primaryPower)(NFObject *, SEL);
-    void (*setPrimaryPower_)(NFObject *, SEL, Quantum__Core__QuantumCell *);
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    void (*release)(NPObject *, SEL);
+    NPObject * (*retain)(NPObject *, SEL);
+    NPObject * (*initWithName_)(NPObject *, SEL, const char *);
+    void (*inspectPowerSupply)(NPObject *, SEL);
+    void (*runSelfDiagnostic)(NPObject *, SEL);
+    Quantum__Core__QuantumCell * (*primaryPower)(NPObject *, SEL);
+    void (*setPrimaryPower_)(NPObject *, SEL, Quantum__Core__QuantumCell *);
 };
 struct nopa_Dispatcher__HubController_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct nopa_Quantum__Core__DataCore_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    void (*release)(NFObject *, SEL);
-    NFObject * (*retain)(NFObject *, SEL);
-    NFObject * (*initWithCode_entropy_)(NFObject *, SEL, const char *, int);
-    const char * (*coreCode)(NFObject *, SEL);
-    void (*setCoreCode_)(NFObject *, SEL, const char *);
-    int (*quantumEntropy)(NFObject *, SEL);
-    void (*setQuantumEntropy_)(NFObject *, SEL, int);
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    void (*release)(NPObject *, SEL);
+    NPObject * (*retain)(NPObject *, SEL);
+    NPObject * (*initWithCode_entropy_)(NPObject *, SEL, const char *, int);
+    const char * (*coreCode)(NPObject *, SEL);
+    void (*setCoreCode_)(NPObject *, SEL, const char *);
+    int (*quantumEntropy)(NPObject *, SEL);
+    void (*setQuantumEntropy_)(NPObject *, SEL, int);
 };
 struct nopa_Quantum__Core__DataCore_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct nopa_Quantum__Core__QuantumCell_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    void (*release)(NFObject *, SEL);
-    NFObject * (*retain)(NFObject *, SEL);
-    NFObject * (*initWithSerial_charge_)(NFObject *, SEL, const char *, int);
-    int (*outputCapacity)(NFObject *, SEL);
-    int (*chargeLevel)(NFObject *, SEL);
-    void (*setChargeLevel_)(NFObject *, SEL, int);
-    const char * (*serialNumber)(NFObject *, SEL);
-    void (*setSerialNumber_)(NFObject *, SEL, const char *);
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    void (*release)(NPObject *, SEL);
+    NPObject * (*retain)(NPObject *, SEL);
+    NPObject * (*initWithSerial_charge_)(NPObject *, SEL, const char *, int);
+    int (*outputCapacity)(NPObject *, SEL);
+    int (*chargeLevel)(NPObject *, SEL);
+    void (*setChargeLevel_)(NPObject *, SEL, int);
+    const char * (*serialNumber)(NPObject *, SEL);
+    void (*setSerialNumber_)(NPObject *, SEL, const char *);
 };
 struct nopa_Quantum__Core__QuantumCell_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct nopa_Storage__Infrastructure__StorageVault_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    void (*release)(NFObject *, SEL);
-    NFObject * (*retain)(NFObject *, SEL);
-    _Bool (*pushItem_)(NFObject *, SEL, NFObject *);
-    NFObject * (*popItem)(NFObject *, SEL);
-    NFObject * (*peekItemAtIndex_)(NFObject *, SEL, int);
-    int (*count)(NFObject *, SEL);
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    void (*release)(NPObject *, SEL);
+    NPObject * (*retain)(NPObject *, SEL);
+    _Bool (*pushItem_)(NPObject *, SEL, NPObject *);
+    NPObject * (*popItem)(NPObject *, SEL);
+    NPObject * (*peekItemAtIndex_)(NPObject *, SEL, int);
+    int (*count)(NPObject *, SEL);
 };
 struct nopa_Storage__Infrastructure__StorageVault_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct nopa_Storage__Infrastructure__StorageVault_Quantum__Core__DataCore_ptr_vtable {
     Quantum__Core__DataCore * (*init)(Quantum__Core__DataCore *, SEL);
     void (*dealloc)(Quantum__Core__DataCore *, SEL);
-    void (*release)(NFObject *, SEL);
-    NFObject * (*retain)(NFObject *, SEL);
+    void (*release)(NPObject *, SEL);
+    NPObject * (*retain)(NPObject *, SEL);
     _Bool (*pushItem_)(Quantum__Core__DataCore *, SEL, Quantum__Core__DataCore *);
     Quantum__Core__DataCore * (*popItem)(Quantum__Core__DataCore *, SEL);
     Quantum__Core__DataCore * (*peekItemAtIndex_)(Quantum__Core__DataCore *, SEL, int);
     int (*count)(Quantum__Core__DataCore *, SEL);
 };
 struct nopa_Storage__Infrastructure__StorageVault_Quantum__Core__DataCore_ptr_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct nopa_Storage__Infrastructure__StorageVault_Quantum__Core__QuantumCell_ptr_vtable {
     Quantum__Core__QuantumCell * (*init)(Quantum__Core__QuantumCell *, SEL);
     void (*dealloc)(Quantum__Core__QuantumCell *, SEL);
-    void (*release)(NFObject *, SEL);
-    NFObject * (*retain)(NFObject *, SEL);
+    void (*release)(NPObject *, SEL);
+    NPObject * (*retain)(NPObject *, SEL);
     _Bool (*pushItem_)(Quantum__Core__QuantumCell *, SEL, Quantum__Core__QuantumCell *);
     Quantum__Core__QuantumCell * (*popItem)(Quantum__Core__QuantumCell *, SEL);
     Quantum__Core__QuantumCell * (*peekItemAtIndex_)(Quantum__Core__QuantumCell *, SEL, int);
     int (*count)(Quantum__Core__QuantumCell *, SEL);
 };
 struct nopa_Storage__Infrastructure__StorageVault_Quantum__Core__QuantumCell_ptr_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 
 struct Dispatcher__HubController {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     const char * _hubName;
     Quantum__Core__QuantumCell * _primaryPower;
@@ -227,7 +227,7 @@ struct Dispatcher__HubController {
 typedef struct Dispatcher__HubController Dispatcher__HubController;
 
 struct Quantum__Core__DataCore {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     const char * _coreCode;
     int _quantumEntropy;
@@ -235,7 +235,7 @@ struct Quantum__Core__DataCore {
 typedef struct Quantum__Core__DataCore Quantum__Core__DataCore;
 
 struct Quantum__Core__QuantumCell {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     int _chargeLevel;
     const char * _serialNumber;
@@ -243,15 +243,15 @@ struct Quantum__Core__QuantumCell {
 typedef struct Quantum__Core__QuantumCell Quantum__Core__QuantumCell;
 
 struct Storage__Infrastructure__StorageVault {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     int _count;
-    NFObject * _slots[2];
+    NPObject * _slots[2];
 };
 typedef struct Storage__Infrastructure__StorageVault Storage__Infrastructure__StorageVault;
 
 struct Storage__Infrastructure__StorageVault_Quantum__Core__DataCore_ptr {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     int _count;
     Quantum__Core__DataCore * _slots[2];
@@ -259,34 +259,34 @@ struct Storage__Infrastructure__StorageVault_Quantum__Core__DataCore_ptr {
 typedef struct Storage__Infrastructure__StorageVault_Quantum__Core__DataCore_ptr Storage__Infrastructure__StorageVault_Quantum__Core__DataCore_ptr;
 
 struct Storage__Infrastructure__StorageVault_Quantum__Core__QuantumCell_ptr {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     int _count;
     Quantum__Core__QuantumCell * _slots[2];
 };
 typedef struct Storage__Infrastructure__StorageVault_Quantum__Core__QuantumCell_ptr Storage__Infrastructure__StorageVault_Quantum__Core__QuantumCell_ptr;
 
-extern NFClass nopa_NFObject_class;
-extern NFClass nopa_Dispatcher__HubController_class;
-extern NFClass nopa_Quantum__Core__DataCore_class;
-extern NFClass nopa_Quantum__Core__QuantumCell_class;
-extern NFClass nopa_Storage__Infrastructure__StorageVault_class;
-extern NFClass nopa_Storage__Infrastructure__StorageVault_Quantum__Core__DataCore_ptr_class;
-extern NFClass nopa_Storage__Infrastructure__StorageVault_Quantum__Core__QuantumCell_ptr_class;
+extern NPClass nopa_NPObject_class;
+extern NPClass nopa_Dispatcher__HubController_class;
+extern NPClass nopa_Quantum__Core__DataCore_class;
+extern NPClass nopa_Quantum__Core__QuantumCell_class;
+extern NPClass nopa_Storage__Infrastructure__StorageVault_class;
+extern NPClass nopa_Storage__Infrastructure__StorageVault_Quantum__Core__DataCore_ptr_class;
+extern NPClass nopa_Storage__Infrastructure__StorageVault_Quantum__Core__QuantumCell_ptr_class;
 void nopa_meta_init(void);
 
-struct nopa_NFObject_vtable nopa_NFObject_vtable_inst = {
-    .init = NFObject_init,
-    .dealloc = NFObject_dealloc,
-    .release = NFObject_release,
-    .retain = NFObject_retain,
+struct nopa_NPObject_vtable nopa_NPObject_vtable_inst = {
+    .init = NPObject_init,
+    .dealloc = NPObject_dealloc,
+    .release = NPObject_release,
+    .retain = NPObject_retain,
 };
 
 struct nopa_Dispatcher__HubController_vtable nopa_Dispatcher__HubController_vtable_inst = {
-    .init = NFObject_init,
+    .init = NPObject_init,
     .dealloc = Dispatcher__HubController_dealloc,
-    .release = NFObject_release,
-    .retain = NFObject_retain,
+    .release = NPObject_release,
+    .retain = NPObject_retain,
     .initWithName_ = Dispatcher__HubController_initWithName_,
     .inspectPowerSupply = Dispatcher__HubController_inspectPowerSupply,
     .runSelfDiagnostic = Dispatcher__HubController_runSelfDiagnostic,
@@ -295,10 +295,10 @@ struct nopa_Dispatcher__HubController_vtable nopa_Dispatcher__HubController_vtab
 };
 
 struct nopa_Quantum__Core__DataCore_vtable nopa_Quantum__Core__DataCore_vtable_inst = {
-    .init = NFObject_init,
+    .init = NPObject_init,
     .dealloc = Quantum__Core__DataCore_dealloc,
-    .release = NFObject_release,
-    .retain = NFObject_retain,
+    .release = NPObject_release,
+    .retain = NPObject_retain,
     .initWithCode_entropy_ = Quantum__Core__DataCore_initWithCode_entropy_,
     .coreCode = Quantum__Core__DataCore_coreCode,
     .setCoreCode_ = Quantum__Core__DataCore_setCoreCode_,
@@ -307,10 +307,10 @@ struct nopa_Quantum__Core__DataCore_vtable nopa_Quantum__Core__DataCore_vtable_i
 };
 
 struct nopa_Quantum__Core__QuantumCell_vtable nopa_Quantum__Core__QuantumCell_vtable_inst = {
-    .init = NFObject_init,
+    .init = NPObject_init,
     .dealloc = Quantum__Core__QuantumCell_dealloc,
-    .release = NFObject_release,
-    .retain = NFObject_retain,
+    .release = NPObject_release,
+    .retain = NPObject_retain,
     .initWithSerial_charge_ = Quantum__Core__QuantumCell_initWithSerial_charge_,
     .outputCapacity = Quantum__Core__QuantumCell_outputCapacity,
     .chargeLevel = Quantum__Core__QuantumCell_chargeLevel,
@@ -322,8 +322,8 @@ struct nopa_Quantum__Core__QuantumCell_vtable nopa_Quantum__Core__QuantumCell_vt
 struct nopa_Storage__Infrastructure__StorageVault_vtable nopa_Storage__Infrastructure__StorageVault_vtable_inst = {
     .init = Storage__Infrastructure__StorageVault_init,
     .dealloc = Storage__Infrastructure__StorageVault_dealloc,
-    .release = NFObject_release,
-    .retain = NFObject_retain,
+    .release = NPObject_release,
+    .retain = NPObject_retain,
     .pushItem_ = Storage__Infrastructure__StorageVault_pushItem_,
     .popItem = Storage__Infrastructure__StorageVault_popItem,
     .peekItemAtIndex_ = Storage__Infrastructure__StorageVault_peekItemAtIndex_,
@@ -333,8 +333,8 @@ struct nopa_Storage__Infrastructure__StorageVault_vtable nopa_Storage__Infrastru
 struct nopa_Storage__Infrastructure__StorageVault_Quantum__Core__DataCore_ptr_vtable nopa_Storage__Infrastructure__StorageVault_Quantum__Core__DataCore_ptr_vtable_inst = {
     .init = Storage__Infrastructure__StorageVault_Quantum__Core__DataCore_ptr_init,
     .dealloc = Storage__Infrastructure__StorageVault_Quantum__Core__DataCore_ptr_dealloc,
-    .release = NFObject_release,
-    .retain = NFObject_retain,
+    .release = NPObject_release,
+    .retain = NPObject_retain,
     .pushItem_ = Storage__Infrastructure__StorageVault_Quantum__Core__DataCore_ptr_pushItem_,
     .popItem = Storage__Infrastructure__StorageVault_Quantum__Core__DataCore_ptr_popItem,
     .peekItemAtIndex_ = Storage__Infrastructure__StorageVault_Quantum__Core__DataCore_ptr_peekItemAtIndex_,
@@ -344,198 +344,198 @@ struct nopa_Storage__Infrastructure__StorageVault_Quantum__Core__DataCore_ptr_vt
 struct nopa_Storage__Infrastructure__StorageVault_Quantum__Core__QuantumCell_ptr_vtable nopa_Storage__Infrastructure__StorageVault_Quantum__Core__QuantumCell_ptr_vtable_inst = {
     .init = Storage__Infrastructure__StorageVault_Quantum__Core__QuantumCell_ptr_init,
     .dealloc = Storage__Infrastructure__StorageVault_Quantum__Core__QuantumCell_ptr_dealloc,
-    .release = NFObject_release,
-    .retain = NFObject_retain,
+    .release = NPObject_release,
+    .retain = NPObject_retain,
     .pushItem_ = Storage__Infrastructure__StorageVault_Quantum__Core__QuantumCell_ptr_pushItem_,
     .popItem = Storage__Infrastructure__StorageVault_Quantum__Core__QuantumCell_ptr_popItem,
     .peekItemAtIndex_ = Storage__Infrastructure__StorageVault_Quantum__Core__QuantumCell_ptr_peekItemAtIndex_,
     .count = Storage__Infrastructure__StorageVault_Quantum__Core__QuantumCell_ptr_count,
 };
 
-struct nopa_NFObject_meta_vtable nopa_NFObject_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
-    .class = NFObject_getClass,
+struct nopa_NPObject_meta_vtable nopa_NPObject_meta_vtable_inst = {
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
+    .class = NPObject_getClass,
 };
 
 struct nopa_Dispatcher__HubController_meta_vtable nopa_Dispatcher__HubController_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
     .class = Dispatcher__HubController_getClass,
 };
 
 struct nopa_Quantum__Core__DataCore_meta_vtable nopa_Quantum__Core__DataCore_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
     .class = Quantum__Core__DataCore_getClass,
 };
 
 struct nopa_Quantum__Core__QuantumCell_meta_vtable nopa_Quantum__Core__QuantumCell_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
     .class = Quantum__Core__QuantumCell_getClass,
 };
 
 struct nopa_Storage__Infrastructure__StorageVault_meta_vtable nopa_Storage__Infrastructure__StorageVault_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
     .class = Storage__Infrastructure__StorageVault_getClass,
 };
 
 struct nopa_Storage__Infrastructure__StorageVault_Quantum__Core__DataCore_ptr_meta_vtable nopa_Storage__Infrastructure__StorageVault_Quantum__Core__DataCore_ptr_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
     .class = Storage__Infrastructure__StorageVault_Quantum__Core__DataCore_ptr_getClass,
 };
 
 struct nopa_Storage__Infrastructure__StorageVault_Quantum__Core__QuantumCell_ptr_meta_vtable nopa_Storage__Infrastructure__StorageVault_Quantum__Core__QuantumCell_ptr_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
     .class = Storage__Infrastructure__StorageVault_Quantum__Core__QuantumCell_ptr_getClass,
 };
 
-NFClass * NFObject_getClass(NFClass * self, SEL _cmd) {
+NPClass * NPObject_getClass(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
-NFClass * Dispatcher__HubController_getClass(NFClass * self, SEL _cmd) {
+NPClass * Dispatcher__HubController_getClass(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
-NFClass * Quantum__Core__DataCore_getClass(NFClass * self, SEL _cmd) {
+NPClass * Quantum__Core__DataCore_getClass(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
-NFClass * Quantum__Core__QuantumCell_getClass(NFClass * self, SEL _cmd) {
+NPClass * Quantum__Core__QuantumCell_getClass(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
-NFClass * Storage__Infrastructure__StorageVault_getClass(NFClass * self, SEL _cmd) {
+NPClass * Storage__Infrastructure__StorageVault_getClass(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
-NFClass * Storage__Infrastructure__StorageVault_Quantum__Core__DataCore_ptr_getClass(NFClass * self, SEL _cmd) {
+NPClass * Storage__Infrastructure__StorageVault_Quantum__Core__DataCore_ptr_getClass(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
-NFClass * Storage__Infrastructure__StorageVault_Quantum__Core__QuantumCell_ptr_getClass(NFClass * self, SEL _cmd) {
+NPClass * Storage__Infrastructure__StorageVault_Quantum__Core__QuantumCell_ptr_getClass(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
-NFClass nopa_NFObject_class;
-NFClass nopa_Dispatcher__HubController_class;
-NFClass nopa_Quantum__Core__DataCore_class;
-NFClass nopa_Quantum__Core__QuantumCell_class;
-NFClass nopa_Storage__Infrastructure__StorageVault_class;
-NFClass nopa_Storage__Infrastructure__StorageVault_Quantum__Core__DataCore_ptr_class;
-NFClass nopa_Storage__Infrastructure__StorageVault_Quantum__Core__QuantumCell_ptr_class;
+NPClass nopa_NPObject_class;
+NPClass nopa_Dispatcher__HubController_class;
+NPClass nopa_Quantum__Core__DataCore_class;
+NPClass nopa_Quantum__Core__QuantumCell_class;
+NPClass nopa_Storage__Infrastructure__StorageVault_class;
+NPClass nopa_Storage__Infrastructure__StorageVault_Quantum__Core__DataCore_ptr_class;
+NPClass nopa_Storage__Infrastructure__StorageVault_Quantum__Core__QuantumCell_ptr_class;
 
 void nopa_meta_init(void) {
-    nopa_NFObject_class = (NFClass){
-        .name = "NFObject",
+    nopa_NPObject_class = (NPClass){
+        .name = "NPObject",
         .superclass = NULL,
-        .instance_size = sizeof(struct NFObject),
-        .vtable = &nopa_NFObject_vtable_inst,
-        .class_vtable = &nopa_NFObject_meta_vtable_inst,
+        .instance_size = sizeof(struct NPObject),
+        .vtable = &nopa_NPObject_vtable_inst,
+        .class_vtable = &nopa_NPObject_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_Dispatcher__HubController_class = (NFClass){
+    nopa_Dispatcher__HubController_class = (NPClass){
         .name = "Dispatcher::HubController",
-        .superclass = &nopa_NFObject_class,
+        .superclass = &nopa_NPObject_class,
         .instance_size = sizeof(struct Dispatcher__HubController),
         .vtable = &nopa_Dispatcher__HubController_vtable_inst,
         .class_vtable = &nopa_Dispatcher__HubController_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_Quantum__Core__DataCore_class = (NFClass){
+    nopa_Quantum__Core__DataCore_class = (NPClass){
         .name = "Quantum::Core::DataCore",
-        .superclass = &nopa_NFObject_class,
+        .superclass = &nopa_NPObject_class,
         .instance_size = sizeof(struct Quantum__Core__DataCore),
         .vtable = &nopa_Quantum__Core__DataCore_vtable_inst,
         .class_vtable = &nopa_Quantum__Core__DataCore_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_Quantum__Core__QuantumCell_class = (NFClass){
+    nopa_Quantum__Core__QuantumCell_class = (NPClass){
         .name = "Quantum::Core::QuantumCell",
-        .superclass = &nopa_NFObject_class,
+        .superclass = &nopa_NPObject_class,
         .instance_size = sizeof(struct Quantum__Core__QuantumCell),
         .vtable = &nopa_Quantum__Core__QuantumCell_vtable_inst,
         .class_vtable = &nopa_Quantum__Core__QuantumCell_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_Storage__Infrastructure__StorageVault_class = (NFClass){
+    nopa_Storage__Infrastructure__StorageVault_class = (NPClass){
         .name = "Storage::Infrastructure::StorageVault",
-        .superclass = &nopa_NFObject_class,
+        .superclass = &nopa_NPObject_class,
         .instance_size = sizeof(struct Storage__Infrastructure__StorageVault),
         .vtable = &nopa_Storage__Infrastructure__StorageVault_vtable_inst,
         .class_vtable = &nopa_Storage__Infrastructure__StorageVault_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_Storage__Infrastructure__StorageVault_Quantum__Core__DataCore_ptr_class = (NFClass){
+    nopa_Storage__Infrastructure__StorageVault_Quantum__Core__DataCore_ptr_class = (NPClass){
         .name = "Storage::Infrastructure::StorageVault<Quantum__Core__DataCore *>",
-        .superclass = &nopa_NFObject_class,
+        .superclass = &nopa_NPObject_class,
         .instance_size = sizeof(struct Storage__Infrastructure__StorageVault_Quantum__Core__DataCore_ptr),
         .vtable = &nopa_Storage__Infrastructure__StorageVault_Quantum__Core__DataCore_ptr_vtable_inst,
         .class_vtable = &nopa_Storage__Infrastructure__StorageVault_Quantum__Core__DataCore_ptr_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_Storage__Infrastructure__StorageVault_Quantum__Core__QuantumCell_ptr_class = (NFClass){
+    nopa_Storage__Infrastructure__StorageVault_Quantum__Core__QuantumCell_ptr_class = (NPClass){
         .name = "Storage::Infrastructure::StorageVault<Quantum__Core__QuantumCell *>",
-        .superclass = &nopa_NFObject_class,
+        .superclass = &nopa_NPObject_class,
         .instance_size = sizeof(struct Storage__Infrastructure__StorageVault_Quantum__Core__QuantumCell_ptr),
         .vtable = &nopa_Storage__Infrastructure__StorageVault_Quantum__Core__QuantumCell_ptr_vtable_inst,
         .class_vtable = &nopa_Storage__Infrastructure__StorageVault_Quantum__Core__QuantumCell_ptr_meta_vtable_inst,
         .protocol_count = 0,
     };
 }
-NFObject * NFObject_alloc(NFClass * self, SEL _cmd) {
+NPObject * NPObject_alloc(NPClass * self, SEL _cmd) {
   return nopa_alloc(self);
 }
 
-NFObject * NFObject_new(NFClass * self, SEL _cmd) {
-  NFObject * obj = nopa_alloc(self);
+NPObject * NPObject_new(NPClass * self, SEL _cmd) {
+  NPObject * obj = nopa_alloc(self);
   return nopa_init(obj);
 }
 
-NFObject * NFObject_init(NFObject * self, SEL _cmd) {
-  struct NFObject * _self = (struct NFObject *)self;
+NPObject * NPObject_init(NPObject * self, SEL _cmd) {
+  struct NPObject * _self = (struct NPObject *)self;
   {
     return nopa_init(self);
   }
 }
 
-void NFObject_dealloc(NFObject * self, SEL _cmd) {
-  struct NFObject * _self = (struct NFObject *)self;
+void NPObject_dealloc(NPObject * self, SEL _cmd) {
+  struct NPObject * _self = (struct NPObject *)self;
   {
     return;
   }
 }
 
-void NFObject_release(NFObject * self, SEL _cmd) {
-  struct NFObject * _self = (struct NFObject *)self;
+void NPObject_release(NPObject * self, SEL _cmd) {
+  struct NPObject * _self = (struct NPObject *)self;
   {
     nopa_release(self);
   }
 }
 
-NFObject * NFObject_retain(NFObject * self, SEL _cmd) {
-  struct NFObject * _self = (struct NFObject *)self;
+NPObject * NPObject_retain(NPObject * self, SEL _cmd) {
+  struct NPObject * _self = (struct NPObject *)self;
   {
     return nopa_retain(self);
   }
 }
 
-NFObject * Quantum__Core__QuantumCell_initWithSerial_charge_(NFObject * self, SEL _cmd, const char * sn, int ch) {
+NPObject * Quantum__Core__QuantumCell_initWithSerial_charge_(NPObject * self, SEL _cmd, const char * sn, int ch) {
   struct Quantum__Core__QuantumCell * _self = (struct Quantum__Core__QuantumCell *)self;
   {
-    self = NFObject_init(self, sel_registerName("init"));
+    self = NPObject_init(self, sel_registerName("init"));
     if (self)     {
       _self->_serialNumber = sn;
       _self->_chargeLevel = ch;
@@ -544,41 +544,41 @@ NFObject * Quantum__Core__QuantumCell_initWithSerial_charge_(NFObject * self, SE
   }
 }
 
-int Quantum__Core__QuantumCell_chargeLevel(NFObject * self, SEL _cmd) {
+int Quantum__Core__QuantumCell_chargeLevel(NPObject * self, SEL _cmd) {
   return ((struct Quantum__Core__QuantumCell *)self)->_chargeLevel;
 }
 
-void Quantum__Core__QuantumCell_setChargeLevel_(NFObject * self, SEL _cmd, int value) {
+void Quantum__Core__QuantumCell_setChargeLevel_(NPObject * self, SEL _cmd, int value) {
   ((struct Quantum__Core__QuantumCell *)self)->_chargeLevel = value;
 }
 
-const char * Quantum__Core__QuantumCell_serialNumber(NFObject * self, SEL _cmd) {
+const char * Quantum__Core__QuantumCell_serialNumber(NPObject * self, SEL _cmd) {
   return ((struct Quantum__Core__QuantumCell *)self)->_serialNumber;
 }
 
-void Quantum__Core__QuantumCell_setSerialNumber_(NFObject * self, SEL _cmd, const char * value) {
+void Quantum__Core__QuantumCell_setSerialNumber_(NPObject * self, SEL _cmd, const char * value) {
   ((struct Quantum__Core__QuantumCell *)self)->_serialNumber = value;
 }
 
-int Quantum__Core__QuantumCell_outputCapacity(NFObject * self, SEL _cmd) {
+int Quantum__Core__QuantumCell_outputCapacity(NPObject * self, SEL _cmd) {
   struct Quantum__Core__QuantumCell * _self = (struct Quantum__Core__QuantumCell *)self;
   {
     return (_self->_chargeLevel * 10);
   }
 }
 
-void Quantum__Core__QuantumCell_dealloc(NFObject * self, SEL _cmd) {
+void Quantum__Core__QuantumCell_dealloc(NPObject * self, SEL _cmd) {
   struct Quantum__Core__QuantumCell * _self = (struct Quantum__Core__QuantumCell *)self;
   {
     printf("[量子电池] 序列号 %s 物理能芯已被安全清空并回收！\n", _self->_serialNumber);
-    NFObject_dealloc(self, sel_registerName("dealloc"));
+    NPObject_dealloc(self, sel_registerName("dealloc"));
   }
 }
 
-NFObject * Quantum__Core__DataCore_initWithCode_entropy_(NFObject * self, SEL _cmd, const char * code, int e) {
+NPObject * Quantum__Core__DataCore_initWithCode_entropy_(NPObject * self, SEL _cmd, const char * code, int e) {
   struct Quantum__Core__DataCore * _self = (struct Quantum__Core__DataCore *)self;
   {
-    self = NFObject_init(self, sel_registerName("init"));
+    self = NPObject_init(self, sel_registerName("init"));
     if (self)     {
       _self->_coreCode = code;
       _self->_quantumEntropy = e;
@@ -587,34 +587,34 @@ NFObject * Quantum__Core__DataCore_initWithCode_entropy_(NFObject * self, SEL _c
   }
 }
 
-const char * Quantum__Core__DataCore_coreCode(NFObject * self, SEL _cmd) {
+const char * Quantum__Core__DataCore_coreCode(NPObject * self, SEL _cmd) {
   return ((struct Quantum__Core__DataCore *)self)->_coreCode;
 }
 
-void Quantum__Core__DataCore_setCoreCode_(NFObject * self, SEL _cmd, const char * value) {
+void Quantum__Core__DataCore_setCoreCode_(NPObject * self, SEL _cmd, const char * value) {
   ((struct Quantum__Core__DataCore *)self)->_coreCode = value;
 }
 
-int Quantum__Core__DataCore_quantumEntropy(NFObject * self, SEL _cmd) {
+int Quantum__Core__DataCore_quantumEntropy(NPObject * self, SEL _cmd) {
   return ((struct Quantum__Core__DataCore *)self)->_quantumEntropy;
 }
 
-void Quantum__Core__DataCore_setQuantumEntropy_(NFObject * self, SEL _cmd, int value) {
+void Quantum__Core__DataCore_setQuantumEntropy_(NPObject * self, SEL _cmd, int value) {
   ((struct Quantum__Core__DataCore *)self)->_quantumEntropy = value;
 }
 
-void Quantum__Core__DataCore_dealloc(NFObject * self, SEL _cmd) {
+void Quantum__Core__DataCore_dealloc(NPObject * self, SEL _cmd) {
   struct Quantum__Core__DataCore * _self = (struct Quantum__Core__DataCore *)self;
   {
     printf("[数据核心] [%s] 量子熵已归零，节点销毁。\n", _self->_coreCode);
-    NFObject_dealloc(self, sel_registerName("dealloc"));
+    NPObject_dealloc(self, sel_registerName("dealloc"));
   }
 }
 
-NFObject * Storage__Infrastructure__StorageVault_init(NFObject * self, SEL _cmd) {
+NPObject * Storage__Infrastructure__StorageVault_init(NPObject * self, SEL _cmd) {
   struct Storage__Infrastructure__StorageVault * _self = (struct Storage__Infrastructure__StorageVault *)self;
   {
-    self = NFObject_init(self, sel_registerName("init"));
+    self = NPObject_init(self, sel_registerName("init"));
     if (self)     {
       _self->_count = 0;
       _self->_slots[0] = NULL;
@@ -624,11 +624,11 @@ NFObject * Storage__Infrastructure__StorageVault_init(NFObject * self, SEL _cmd)
   }
 }
 
-_Bool Storage__Infrastructure__StorageVault_pushItem_(NFObject * self, SEL _cmd, NFObject * item) {
+_Bool Storage__Infrastructure__StorageVault_pushItem_(NPObject * self, SEL _cmd, NPObject * item) {
   struct Storage__Infrastructure__StorageVault * _self = (struct Storage__Infrastructure__StorageVault *)self;
   {
     if ((_self->_count < 2))     {
-      _self->_slots[_self->_count] = ((struct nopa_NFObject_vtable *)(item)->isa->vtable)->retain(item, sel_registerName("retain"));
+      _self->_slots[_self->_count] = ((struct nopa_NPObject_vtable *)(item)->isa->vtable)->retain(item, sel_registerName("retain"));
       _self->_count++;
       printf("[StorageVault<T>] 泛型元素成功入库！当前压栈深度: %d\n", _self->_count);
       return 1;
@@ -638,12 +638,12 @@ _Bool Storage__Infrastructure__StorageVault_pushItem_(NFObject * self, SEL _cmd,
   }
 }
 
-NFObject * Storage__Infrastructure__StorageVault_popItem(NFObject * self, SEL _cmd) {
+NPObject * Storage__Infrastructure__StorageVault_popItem(NPObject * self, SEL _cmd) {
   struct Storage__Infrastructure__StorageVault * _self = (struct Storage__Infrastructure__StorageVault *)self;
   {
     if ((_self->_count > 0))     {
       _self->_count--;
-      NFObject * item = _self->_slots[_self->_count];
+      NPObject * item = _self->_slots[_self->_count];
       _self->_slots[_self->_count] = NULL;
       return item;
     }
@@ -651,7 +651,7 @@ NFObject * Storage__Infrastructure__StorageVault_popItem(NFObject * self, SEL _c
   }
 }
 
-NFObject * Storage__Infrastructure__StorageVault_peekItemAtIndex_(NFObject * self, SEL _cmd, int index) {
+NPObject * Storage__Infrastructure__StorageVault_peekItemAtIndex_(NPObject * self, SEL _cmd, int index) {
   struct Storage__Infrastructure__StorageVault * _self = (struct Storage__Infrastructure__StorageVault *)self;
   {
     if (((index >= 0) && (index < _self->_count)))     {
@@ -661,24 +661,24 @@ NFObject * Storage__Infrastructure__StorageVault_peekItemAtIndex_(NFObject * sel
   }
 }
 
-int Storage__Infrastructure__StorageVault_count(NFObject * self, SEL _cmd) {
+int Storage__Infrastructure__StorageVault_count(NPObject * self, SEL _cmd) {
   return ((struct Storage__Infrastructure__StorageVault *)self)->_count;
 }
 
-void Storage__Infrastructure__StorageVault_dealloc(NFObject * self, SEL _cmd) {
+void Storage__Infrastructure__StorageVault_dealloc(NPObject * self, SEL _cmd) {
   struct Storage__Infrastructure__StorageVault * _self = (struct Storage__Infrastructure__StorageVault *)self;
   {
     printf("[StorageVault<T>] 物理仓储结构解构销毁...\n");
-    if (_self->_slots[0])     ({ NFObject *__nopa_tmp_1 = (_self->_slots[0]); __nopa_tmp_1 ? ((struct nopa_NFObject_vtable *)__nopa_tmp_1->isa->vtable)->release(__nopa_tmp_1, sel_registerName("release")) : 0; });
-    if (_self->_slots[1])     ({ NFObject *__nopa_tmp_2 = (_self->_slots[1]); __nopa_tmp_2 ? ((struct nopa_NFObject_vtable *)__nopa_tmp_2->isa->vtable)->release(__nopa_tmp_2, sel_registerName("release")) : 0; });
-    NFObject_dealloc(self, sel_registerName("dealloc"));
+    if (_self->_slots[0])     ({ NPObject *__nopa_tmp_1 = (_self->_slots[0]); __nopa_tmp_1 ? ((struct nopa_NPObject_vtable *)__nopa_tmp_1->isa->vtable)->release(__nopa_tmp_1, sel_registerName("release")) : 0; });
+    if (_self->_slots[1])     ({ NPObject *__nopa_tmp_2 = (_self->_slots[1]); __nopa_tmp_2 ? ((struct nopa_NPObject_vtable *)__nopa_tmp_2->isa->vtable)->release(__nopa_tmp_2, sel_registerName("release")) : 0; });
+    NPObject_dealloc(self, sel_registerName("dealloc"));
   }
 }
 
-NFObject * Dispatcher__HubController_initWithName_(NFObject * self, SEL _cmd, const char * name) {
+NPObject * Dispatcher__HubController_initWithName_(NPObject * self, SEL _cmd, const char * name) {
   struct Dispatcher__HubController * _self = (struct Dispatcher__HubController *)self;
   {
-    self = NFObject_init(self, sel_registerName("init"));
+    self = NPObject_init(self, sel_registerName("init"));
     if (self)     {
       _self->_hubName = name;
       _self->_primaryPower = NULL;
@@ -687,11 +687,11 @@ NFObject * Dispatcher__HubController_initWithName_(NFObject * self, SEL _cmd, co
   }
 }
 
-void Dispatcher__HubController_inspectPowerSupply(NFObject * self, SEL _cmd) {
+void Dispatcher__HubController_inspectPowerSupply(NPObject * self, SEL _cmd) {
   struct Dispatcher__HubController * _self = (struct Dispatcher__HubController *)self;
   {
     if (_self->_primaryPower)     {
-      printf("[调度中心-%s] 能量链路正常，主节点电量: %d | 能够输出功率: %d kW\n", _self->_hubName, ({ NFObject *__nopa_tmp_3 = (_self->_primaryPower); __nopa_tmp_3 ? ((struct nopa_Quantum__Core__QuantumCell_vtable *)__nopa_tmp_3->isa->vtable)->chargeLevel(__nopa_tmp_3, sel_registerName("chargeLevel")) : 0; }), ({ NFObject *__nopa_tmp_4 = (_self->_primaryPower); __nopa_tmp_4 ? ((struct nopa_Quantum__Core__QuantumCell_vtable *)__nopa_tmp_4->isa->vtable)->outputCapacity(__nopa_tmp_4, sel_registerName("outputCapacity")) : 0; }));
+      printf("[调度中心-%s] 能量链路正常，主节点电量: %d | 能够输出功率: %d kW\n", _self->_hubName, ({ NPObject *__nopa_tmp_3 = (_self->_primaryPower); __nopa_tmp_3 ? ((struct nopa_Quantum__Core__QuantumCell_vtable *)__nopa_tmp_3->isa->vtable)->chargeLevel(__nopa_tmp_3, sel_registerName("chargeLevel")) : 0; }), ({ NPObject *__nopa_tmp_4 = (_self->_primaryPower); __nopa_tmp_4 ? ((struct nopa_Quantum__Core__QuantumCell_vtable *)__nopa_tmp_4->isa->vtable)->outputCapacity(__nopa_tmp_4, sel_registerName("outputCapacity")) : 0; }));
     }
     else     {
       printf("[调度中心-%s] 警告！主节点弱引用指针已自动归零 (nil)！系统切入安全模式！\n", _self->_hubName);
@@ -699,38 +699,38 @@ void Dispatcher__HubController_inspectPowerSupply(NFObject * self, SEL _cmd) {
   }
 }
 
-Quantum__Core__QuantumCell * Dispatcher__HubController_primaryPower(NFObject * self, SEL _cmd) {
+Quantum__Core__QuantumCell * Dispatcher__HubController_primaryPower(NPObject * self, SEL _cmd) {
   return ((struct Dispatcher__HubController *)self)->_primaryPower;
 }
 
-void Dispatcher__HubController_setPrimaryPower_(NFObject * self, SEL _cmd, Quantum__Core__QuantumCell * value) {
-  nopa_weak_unregister((NFObject **)&((struct Dispatcher__HubController *)self)->_primaryPower);
+void Dispatcher__HubController_setPrimaryPower_(NPObject * self, SEL _cmd, Quantum__Core__QuantumCell * value) {
+  nopa_weak_unregister((NPObject **)&((struct Dispatcher__HubController *)self)->_primaryPower);
   ((struct Dispatcher__HubController *)self)->_primaryPower = value;
-  nopa_weak_register((NFObject **)&((struct Dispatcher__HubController *)self)->_primaryPower, (NFObject *)value);
+  nopa_weak_register((NPObject **)&((struct Dispatcher__HubController *)self)->_primaryPower, (NPObject *)value);
 }
 
-void Dispatcher__HubController_dealloc(NFObject * self, SEL _cmd) {
+void Dispatcher__HubController_dealloc(NPObject * self, SEL _cmd) {
   struct Dispatcher__HubController * _self = (struct Dispatcher__HubController *)self;
   {
     printf("[调度中心-%s] 卸载完成。\n", _self->_hubName);
-    NFObject_dealloc(self, sel_registerName("dealloc"));
+    NPObject_dealloc(self, sel_registerName("dealloc"));
   }
 }
 
-void Dispatcher__HubController_runSelfDiagnostic(NFObject * self, SEL _cmd) {
+void Dispatcher__HubController_runSelfDiagnostic(NPObject * self, SEL _cmd) {
   struct Dispatcher__HubController * _self = (struct Dispatcher__HubController *)self;
   {
     printf("[Category 扩展] 枢纽 [%s] 正在由 Category 静态函数驱动，执行底层电路自我诊断...\n", _self->_hubName);
   }
 }
 
-NFObject * nopa_alloc(struct NFClass * cls);
+NPObject * nopa_alloc(struct NPClass * cls);
 
-NFObject * nopa_init(NFObject * self);
+NPObject * nopa_init(NPObject * self);
 
-void nopa_release(NFObject * obj);
+void nopa_release(NPObject * obj);
 
-NFObject * nopa_retain(NFObject * obj);
+NPObject * nopa_retain(NPObject * obj);
 
 int main(int argc, const char * argv[]) {
   nopa_meta_init();
@@ -739,31 +739,31 @@ int main(int argc, const char * argv[]) {
     printf(">>>  nopac 编译器「ObjC 泛型单态化 + 全语法组合考」测试  <<<\n");
     printf("=========================================================\n\n");
     printf("--- 1. 验证泛型单态化：同一个 Generic<T> 产生两个不同特化副本 ---\n");
-    NFObject *__nopa_tmp_5 = (NFObject_alloc(&nopa_Storage__Infrastructure__StorageVault_Quantum__Core__QuantumCell_ptr_class, sel_registerName("alloc")));
-    Storage__Infrastructure__StorageVault_Quantum__Core__QuantumCell_ptr * powerStorage = ((struct nopa_NFObject_vtable *)__nopa_tmp_5->isa->vtable)->init(__nopa_tmp_5, sel_registerName("init"));
-    NFObject *__nopa_tmp_6 = (NFObject_alloc(&nopa_Storage__Infrastructure__StorageVault_Quantum__Core__DataCore_ptr_class, sel_registerName("alloc")));
-    Storage__Infrastructure__StorageVault_Quantum__Core__DataCore_ptr * memoryStorage = ((struct nopa_NFObject_vtable *)__nopa_tmp_6->isa->vtable)->init(__nopa_tmp_6, sel_registerName("init"));
-    NFObject *__nopa_tmp_7 = (NFObject_alloc(&nopa_Quantum__Core__QuantumCell_class, sel_registerName("alloc")));
+    NPObject *__nopa_tmp_5 = (NPObject_alloc(&nopa_Storage__Infrastructure__StorageVault_Quantum__Core__QuantumCell_ptr_class, sel_registerName("alloc")));
+    Storage__Infrastructure__StorageVault_Quantum__Core__QuantumCell_ptr * powerStorage = ((struct nopa_NPObject_vtable *)__nopa_tmp_5->isa->vtable)->init(__nopa_tmp_5, sel_registerName("init"));
+    NPObject *__nopa_tmp_6 = (NPObject_alloc(&nopa_Storage__Infrastructure__StorageVault_Quantum__Core__DataCore_ptr_class, sel_registerName("alloc")));
+    Storage__Infrastructure__StorageVault_Quantum__Core__DataCore_ptr * memoryStorage = ((struct nopa_NPObject_vtable *)__nopa_tmp_6->isa->vtable)->init(__nopa_tmp_6, sel_registerName("init"));
+    NPObject *__nopa_tmp_7 = (NPObject_alloc(&nopa_Quantum__Core__QuantumCell_class, sel_registerName("alloc")));
     Quantum__Core__QuantumCell * cellA = ((struct nopa_Quantum__Core__QuantumCell_vtable *)__nopa_tmp_7->isa->vtable)->initWithSerial_charge_(__nopa_tmp_7, sel_registerName("initWithSerial:charge:"), "QC-ALPHA-01", 95);
-    NFObject *__nopa_tmp_8 = (NFObject_alloc(&nopa_Quantum__Core__QuantumCell_class, sel_registerName("alloc")));
+    NPObject *__nopa_tmp_8 = (NPObject_alloc(&nopa_Quantum__Core__QuantumCell_class, sel_registerName("alloc")));
     Quantum__Core__QuantumCell * cellB = ((struct nopa_Quantum__Core__QuantumCell_vtable *)__nopa_tmp_8->isa->vtable)->initWithSerial_charge_(__nopa_tmp_8, sel_registerName("initWithSerial:charge:"), "QC-BETA-02", 80);
-    NFObject *__nopa_tmp_9 = (NFObject_alloc(&nopa_Quantum__Core__DataCore_class, sel_registerName("alloc")));
+    NPObject *__nopa_tmp_9 = (NPObject_alloc(&nopa_Quantum__Core__DataCore_class, sel_registerName("alloc")));
     Quantum__Core__DataCore * coreX = ((struct nopa_Quantum__Core__DataCore_vtable *)__nopa_tmp_9->isa->vtable)->initWithCode_entropy_(__nopa_tmp_9, sel_registerName("initWithCode:entropy:"), "DC-NEXUS-X", 42);
     ((struct nopa_Storage__Infrastructure__StorageVault_vtable *)(powerStorage)->isa->vtable)->pushItem_(powerStorage, sel_registerName("pushItem:"), cellA);
     ((struct nopa_Storage__Infrastructure__StorageVault_vtable *)(powerStorage)->isa->vtable)->pushItem_(powerStorage, sel_registerName("pushItem:"), cellB);
     ((struct nopa_Storage__Infrastructure__StorageVault_vtable *)(memoryStorage)->isa->vtable)->pushItem_(memoryStorage, sel_registerName("pushItem:"), coreX);
-    ((struct nopa_NFObject_vtable *)(cellA)->isa->vtable)->release(cellA, sel_registerName("release"));
-    ((struct nopa_NFObject_vtable *)(cellB)->isa->vtable)->release(cellB, sel_registerName("release"));
-    ((struct nopa_NFObject_vtable *)(coreX)->isa->vtable)->release(coreX, sel_registerName("release"));
+    ((struct nopa_NPObject_vtable *)(cellA)->isa->vtable)->release(cellA, sel_registerName("release"));
+    ((struct nopa_NPObject_vtable *)(cellB)->isa->vtable)->release(cellB, sel_registerName("release"));
+    ((struct nopa_NPObject_vtable *)(coreX)->isa->vtable)->release(coreX, sel_registerName("release"));
     printf("\n--- 2. 跨命名空间 HubController 与 __weak 动态绑定 ---\n");
-    NFObject *__nopa_tmp_10 = (NFObject_alloc(&nopa_Dispatcher__HubController_class, sel_registerName("alloc")));
+    NPObject *__nopa_tmp_10 = (NPObject_alloc(&nopa_Dispatcher__HubController_class, sel_registerName("alloc")));
     Dispatcher__HubController * hub = ((struct nopa_Dispatcher__HubController_vtable *)__nopa_tmp_10->isa->vtable)->initWithName_(__nopa_tmp_10, sel_registerName("initWithName:"), "NEXUS-PRIME");
     Quantum__Core__QuantumCell * targetPowerCell = ((struct nopa_Storage__Infrastructure__StorageVault_vtable *)(powerStorage)->isa->vtable)->peekItemAtIndex_(powerStorage, sel_registerName("peekItemAtIndex:"), 0);
     ((struct nopa_Dispatcher__HubController_vtable *)(hub)->isa->vtable)->setPrimaryPower_(hub, sel_registerName("setPrimaryPower:"), targetPowerCell);
     ((struct nopa_Dispatcher__HubController_vtable *)(hub)->isa->vtable)->runSelfDiagnostic(hub, sel_registerName("runSelfDiagnostic"));
     ((struct nopa_Dispatcher__HubController_vtable *)(hub)->isa->vtable)->inspectPowerSupply(hub, sel_registerName("inspectPowerSupply"));
     __block Quantum__Core__QuantumCell * __attribute__((cleanup(nopa_weak_auto_cleanup))) weakCellHandle = targetPowerCell;
-    nopa_weak_register((NFObject**)&weakCellHandle, (NFObject*)targetPowerCell);
+    nopa_weak_register((NPObject**)&weakCellHandle, (NPObject*)targetPowerCell);
     void (^powerCheckBlock)(void) = ^void() {
   if (weakCellHandle)   {
     printf("[闭包监控] 捕获到活动电池，当前能量值: %d\n", ((struct nopa_Quantum__Core__QuantumCell_vtable *)(weakCellHandle)->isa->vtable)->chargeLevel(weakCellHandle, sel_registerName("chargeLevel")));
@@ -784,14 +784,14 @@ int main(int argc, const char * argv[]) {
     printf("\n--- 4. 复合表达式压测：泛型别名出队 + 三元运算符 + 自增副作用 ---\n");
     int modeSwitch = 1;
     int stepCounter = 500;
-    Quantum__Core__DataCore * extractedCore = (modeSwitch > 0) ? ({ NFObject *__nopa_tmp_11 = ((stepCounter++, memoryStorage)); __nopa_tmp_11 ? ((struct nopa_Storage__Infrastructure__StorageVault_vtable *)__nopa_tmp_11->isa->vtable)->popItem(__nopa_tmp_11, sel_registerName("popItem")) : 0; }) : NULL;
+    Quantum__Core__DataCore * extractedCore = (modeSwitch > 0) ? ({ NPObject *__nopa_tmp_11 = ((stepCounter++, memoryStorage)); __nopa_tmp_11 ? ((struct nopa_Storage__Infrastructure__StorageVault_vtable *)__nopa_tmp_11->isa->vtable)->popItem(__nopa_tmp_11, sel_registerName("popItem")) : 0; }) : NULL;
     printf("[复合语法断言] 状态完全收敛！\n");
     printf("          -> 复合自增计数器值: %d (预期: 501)\n", stepCounter);
     printf("          -> 提取到的数据核心代码: %s (预期: DC-NEXUS-X)\n", ((struct nopa_Quantum__Core__DataCore_vtable *)(extractedCore)->isa->vtable)->coreCode(extractedCore, sel_registerName("coreCode")));
     printf("\n--- 5. 安全销毁全局泛型仓库与控制器 ---\n");
-    ((struct nopa_NFObject_vtable *)(hub)->isa->vtable)->release(hub, sel_registerName("release"));
-    ((struct nopa_NFObject_vtable *)(powerStorage)->isa->vtable)->release(powerStorage, sel_registerName("release"));
-    ((struct nopa_NFObject_vtable *)(memoryStorage)->isa->vtable)->release(memoryStorage, sel_registerName("release"));
+    ((struct nopa_NPObject_vtable *)(hub)->isa->vtable)->release(hub, sel_registerName("release"));
+    ((struct nopa_NPObject_vtable *)(powerStorage)->isa->vtable)->release(powerStorage, sel_registerName("release"));
+    ((struct nopa_NPObject_vtable *)(memoryStorage)->isa->vtable)->release(memoryStorage, sel_registerName("release"));
     printf("\n=========================================================\n");
     printf(">>>    测试通过！ObjC 泛型单态化与全语法融合绝对收敛！  <<<\n");
     printf("=========================================================\n");
@@ -802,7 +802,7 @@ int main(int argc, const char * argv[]) {
 Quantum__Core__QuantumCell * Storage__Infrastructure__StorageVault_Quantum__Core__QuantumCell_ptr_init(Quantum__Core__QuantumCell * self, SEL _cmd) {
   struct Storage__Infrastructure__StorageVault * _self = (struct Storage__Infrastructure__StorageVault *)self;
   {
-    self = NFObject_init(self, sel_registerName("init"));
+    self = NPObject_init(self, sel_registerName("init"));
     if (self)     {
       _self->_count = 0;
       _self->_slots[0] = NULL;
@@ -816,7 +816,7 @@ _Bool Storage__Infrastructure__StorageVault_Quantum__Core__QuantumCell_ptr_pushI
   struct Storage__Infrastructure__StorageVault * _self = (struct Storage__Infrastructure__StorageVault *)self;
   {
     if ((_self->_count < 2))     {
-      _self->_slots[_self->_count] = ((struct nopa_NFObject_vtable *)(item)->isa->vtable)->retain(item, sel_registerName("retain"));
+      _self->_slots[_self->_count] = ((struct nopa_NPObject_vtable *)(item)->isa->vtable)->retain(item, sel_registerName("retain"));
       _self->_count++;
       printf("[StorageVault<T>] 泛型元素成功入库！当前压栈深度: %d\n", _self->_count);
       return 1;
@@ -831,7 +831,7 @@ Quantum__Core__QuantumCell * Storage__Infrastructure__StorageVault_Quantum__Core
   {
     if ((_self->_count > 0))     {
       _self->_count--;
-      NFObject * item = _self->_slots[_self->_count];
+      NPObject * item = _self->_slots[_self->_count];
       _self->_slots[_self->_count] = NULL;
       return item;
     }
@@ -853,9 +853,9 @@ void Storage__Infrastructure__StorageVault_Quantum__Core__QuantumCell_ptr_deallo
   struct Storage__Infrastructure__StorageVault * _self = (struct Storage__Infrastructure__StorageVault *)self;
   {
     printf("[StorageVault<T>] 物理仓储结构解构销毁...\n");
-    if (_self->_slots[0])     ({ NFObject *__nopa_tmp_12 = (_self->_slots[0]); __nopa_tmp_12 ? ((struct nopa_NFObject_vtable *)__nopa_tmp_12->isa->vtable)->release(__nopa_tmp_12, sel_registerName("release")) : 0; });
-    if (_self->_slots[1])     ({ NFObject *__nopa_tmp_13 = (_self->_slots[1]); __nopa_tmp_13 ? ((struct nopa_NFObject_vtable *)__nopa_tmp_13->isa->vtable)->release(__nopa_tmp_13, sel_registerName("release")) : 0; });
-    NFObject_dealloc(self, sel_registerName("dealloc"));
+    if (_self->_slots[0])     ({ NPObject *__nopa_tmp_12 = (_self->_slots[0]); __nopa_tmp_12 ? ((struct nopa_NPObject_vtable *)__nopa_tmp_12->isa->vtable)->release(__nopa_tmp_12, sel_registerName("release")) : 0; });
+    if (_self->_slots[1])     ({ NPObject *__nopa_tmp_13 = (_self->_slots[1]); __nopa_tmp_13 ? ((struct nopa_NPObject_vtable *)__nopa_tmp_13->isa->vtable)->release(__nopa_tmp_13, sel_registerName("release")) : 0; });
+    NPObject_dealloc(self, sel_registerName("dealloc"));
   }
 }
 
@@ -866,7 +866,7 @@ int Storage__Infrastructure__StorageVault_Quantum__Core__QuantumCell_ptr_count(Q
 Quantum__Core__DataCore * Storage__Infrastructure__StorageVault_Quantum__Core__DataCore_ptr_init(Quantum__Core__DataCore * self, SEL _cmd) {
   struct Storage__Infrastructure__StorageVault * _self = (struct Storage__Infrastructure__StorageVault *)self;
   {
-    self = NFObject_init(self, sel_registerName("init"));
+    self = NPObject_init(self, sel_registerName("init"));
     if (self)     {
       _self->_count = 0;
       _self->_slots[0] = NULL;
@@ -880,7 +880,7 @@ _Bool Storage__Infrastructure__StorageVault_Quantum__Core__DataCore_ptr_pushItem
   struct Storage__Infrastructure__StorageVault * _self = (struct Storage__Infrastructure__StorageVault *)self;
   {
     if ((_self->_count < 2))     {
-      _self->_slots[_self->_count] = ((struct nopa_NFObject_vtable *)(item)->isa->vtable)->retain(item, sel_registerName("retain"));
+      _self->_slots[_self->_count] = ((struct nopa_NPObject_vtable *)(item)->isa->vtable)->retain(item, sel_registerName("retain"));
       _self->_count++;
       printf("[StorageVault<T>] 泛型元素成功入库！当前压栈深度: %d\n", _self->_count);
       return 1;
@@ -895,7 +895,7 @@ Quantum__Core__DataCore * Storage__Infrastructure__StorageVault_Quantum__Core__D
   {
     if ((_self->_count > 0))     {
       _self->_count--;
-      NFObject * item = _self->_slots[_self->_count];
+      NPObject * item = _self->_slots[_self->_count];
       _self->_slots[_self->_count] = NULL;
       return item;
     }
@@ -917,9 +917,9 @@ void Storage__Infrastructure__StorageVault_Quantum__Core__DataCore_ptr_dealloc(Q
   struct Storage__Infrastructure__StorageVault * _self = (struct Storage__Infrastructure__StorageVault *)self;
   {
     printf("[StorageVault<T>] 物理仓储结构解构销毁...\n");
-    if (_self->_slots[0])     ({ NFObject *__nopa_tmp_14 = (_self->_slots[0]); __nopa_tmp_14 ? ((struct nopa_NFObject_vtable *)__nopa_tmp_14->isa->vtable)->release(__nopa_tmp_14, sel_registerName("release")) : 0; });
-    if (_self->_slots[1])     ({ NFObject *__nopa_tmp_15 = (_self->_slots[1]); __nopa_tmp_15 ? ((struct nopa_NFObject_vtable *)__nopa_tmp_15->isa->vtable)->release(__nopa_tmp_15, sel_registerName("release")) : 0; });
-    NFObject_dealloc(self, sel_registerName("dealloc"));
+    if (_self->_slots[0])     ({ NPObject *__nopa_tmp_14 = (_self->_slots[0]); __nopa_tmp_14 ? ((struct nopa_NPObject_vtable *)__nopa_tmp_14->isa->vtable)->release(__nopa_tmp_14, sel_registerName("release")) : 0; });
+    if (_self->_slots[1])     ({ NPObject *__nopa_tmp_15 = (_self->_slots[1]); __nopa_tmp_15 ? ((struct nopa_NPObject_vtable *)__nopa_tmp_15->isa->vtable)->release(__nopa_tmp_15, sel_registerName("release")) : 0; });
+    NPObject_dealloc(self, sel_registerName("dealloc"));
   }
 }
 

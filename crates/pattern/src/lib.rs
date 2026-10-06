@@ -20,7 +20,7 @@
 //! {
 //!     __auto_type __nopa_sw = value;               /* evaluated once */
 //!     if (__nopa_sw > 10) goto __nopa_case_0;      /* Cond */
-//!     if (nopa_isKindOfClass((NFObject *)__nopa_sw, &NOPA_CLASS_$_NSString)
+//!     if (nopa_isKindOfClass((NPObject *)__nopa_sw, &NOPA_CLASS_$_NSString)
 //!         && __nopa_s_len_guard) goto __nopa_case_1;   /* Bind + when */
 //!     if ([__nopa_sw isEqual:@"hello"]) goto __nopa_case_2;  /* literal */
 //!     goto __nopa_case_d;                          /* default */
@@ -172,7 +172,7 @@ fn lower_switch_pat(sw: AstStmt) -> AstStmt {
     // 1. Materialize the subject exactly once. This pass runs BEFORE the
     //    checker, so the static type is unknown: an object-valued subject
     //    (Bind arm, or a value-semantics @literal arm) is declared
-    //    `NFObject *` with the expression cast to it — `__auto_type` would
+    //    `NPObject *` with the expression cast to it — `__auto_type` would
     //    inherit the pointer type and the checker rejects an object
     //    initializing a scalar. Scalar subjects (plain constants / dangling
     //    comparisons) keep `__auto_type` (eh precedent).
@@ -183,7 +183,7 @@ fn lower_switch_pat(sw: AstStmt) -> AstStmt {
     });
     let init = *subject;
     let (sty, sinit) = if object_subject {
-        (nfobject_type(), cast_to_nfobject(init))
+        (npobject_type(), cast_to_npobject(init))
     } else {
         (auto_type(), init)
     };
@@ -191,7 +191,7 @@ fn lower_switch_pat(sw: AstStmt) -> AstStmt {
 
     // 1b. Hoist every type binding above the dispatch chain. A `when` guard is
     //     evaluated in the `if (...) goto ...` tests, which run BEFORE any arm
-    //     body — so `case NFNumber *n when n.intValue > 3:` referenced `n`
+    //     body — so `case NPNumber *n when n.intValue > 3:` referenced `n`
     //     before its declaration and the generated C failed to compile
     //     ("use of undeclared identifier 'n'"). Declaring the aliases here
     //     makes them visible to both the guards and the bodies. Each alias is
@@ -199,7 +199,7 @@ fn lower_switch_pat(sw: AstStmt) -> AstStmt {
     //     harmless; the type test remains the `isKindOfClass` call.
     //
     //     A name bound by more than one arm (pathological, but parseable:
-    //     `case NFString *s:` + `case NFNumber *s:`) would be a C redeclaration
+    //     `case NPString *s:` + `case NPNumber *s:`) would be a C redeclaration
     //     in this shared scope, so only the first is hoisted; the later arm
     //     keeps its own in-body declaration. `hoisted[i]` records which arms got
     //     the shared declaration, so the body pass below knows not to
@@ -334,7 +334,7 @@ fn arm_test(arm: &AstArm, subj: &str) -> AstExpr {
         }
         AstPattern::Cond(e) => splice_subject(e, subj),
         AstPattern::Bind { ty, .. } => {
-            // nopa_isKindOfClass((NFObject *)subj, &NOPA_CLASS_$_<Flat>)
+            // nopa_isKindOfClass((NPObject *)subj, &NOPA_CLASS_$_<Flat>)
             let flat = flat_type_name(ty);
             AstExpr {
                 kind: AstExprKind::FuncCall, expr_type: None, line, col,
@@ -343,7 +343,7 @@ fn arm_test(arm: &AstArm, subj: &str) -> AstExpr {
                     name: "nopa_isKindOfClass".to_string(),
                     callee: None,
                     args: vec![
-                        cast_to_nfobject(ident(subj, line, col)),
+                        cast_to_npobject(ident(subj, line, col)),
                         AstExpr {
                             kind: AstExprKind::VarRef, expr_type: None, line, col,
                             data: AstExprData::VarRef { sym: None, name: format!("&NOPA_CLASS_$_{}", flat) },
@@ -424,17 +424,17 @@ fn ident(name: &str, line: usize, col: usize) -> AstExpr {
     }
 }
 
-/// `NFObject *` — the erased type every nopa object shares (subject and
+/// `NPObject *` — the erased type every nopa object shares (subject and
 /// binding casts both go through it).
-fn nfobject_type() -> AstType {
+fn npobject_type() -> AstType {
     let mut t = AstType::new(TypePrim::Named);
-    t.name = Some("NFObject".to_string());
+    t.name = Some("NPObject".to_string());
     t.is_pointer = true;
     t
 }
 
-fn cast_to_nfobject(e: AstExpr) -> AstExpr {
-    let t = nfobject_type();
+fn cast_to_npobject(e: AstExpr) -> AstExpr {
+    let t = npobject_type();
     let (l, c) = (e.line, e.col);
     AstExpr { kind: AstExprKind::Cast, expr_type: None, line: l, col: c, data: AstExprData::Cast { target_type: t, expr: Box::new(e) } }
 }
@@ -468,7 +468,7 @@ fn var_decl(name: &str, ty: AstType, init: Option<AstExpr>, line: usize, col: us
     }
 }
 
-/// Bind-arm alias: `T *name = (T *)(NFObject *)__nopa_sw;` — declared inside
+/// Bind-arm alias: `T *name = (T *)(NPObject *)__nopa_sw;` — declared inside
 /// the arm body so scoping stays block-local (no cross-arm leakage).
 fn bind_alias_decl(ty: &AstType, name: &str, subj: &str, line: usize, col: usize) -> AstStmt {
     let mut t = ty.clone();
@@ -476,7 +476,7 @@ fn bind_alias_decl(ty: &AstType, name: &str, subj: &str, line: usize, col: usize
     let subj_e = ident(subj, line, col);
     let cast = AstExpr {
         kind: AstExprKind::Cast, expr_type: None, line, col,
-        data: AstExprData::Cast { target_type: t.clone(), expr: Box::new(cast_to_nfobject(subj_e)) },
+        data: AstExprData::Cast { target_type: t.clone(), expr: Box::new(cast_to_npobject(subj_e)) },
     };
     var_decl(name, t, Some(cast), line, col)
 }
@@ -484,7 +484,7 @@ fn bind_alias_decl(ty: &AstType, name: &str, subj: &str, line: usize, col: usize
 /// Flatten a bound type to its class-metadata symbol segment: `NSString` →
 /// `NSString`; namespaced `NS::Obj` → `NS__Obj` (codegen's name_flat rule).
 fn flat_type_name(ty: &AstType) -> String {
-    let base = ty.name.clone().unwrap_or_else(|| "NFObject".to_string());
+    let base = ty.name.clone().unwrap_or_else(|| "NPObject".to_string());
     base.replace("::", "__")
 }
 
@@ -494,14 +494,14 @@ fn flat_type_name(ty: &AstType) -> String {
 /// an all-literal switch is routed to the C path and emits `case <boxed>:`.
 ///
 /// Covers `@"..."` (AtString), `@(expr)` (Boxed, rewritten by the checker into
-/// an `NFNumber` factory) and the desugared `@N`/`@YES`/`@'c'` form (a message
-/// send on the `NFNumber` class — see the parser's `mk_nfnumber_send`).
+/// an `NPNumber` factory) and the desugared `@N`/`@YES`/`@'c'` form (a message
+/// send on the `NPNumber` class — see the parser's `mk_npnumber_send`).
 fn is_object_literal_expr(e: &AstExpr) -> bool {
     match &e.data {
         AstExprData::AtString(_) | AstExprData::Boxed(_) => true,
         AstExprData::MsgSend { receiver, .. } => {
             matches!(receiver.data, AstExprData::AtString(_))
-                || matches!(&receiver.data, AstExprData::VarRef { name, .. } if name == "NFNumber")
+                || matches!(&receiver.data, AstExprData::VarRef { name, .. } if name == "NPNumber")
         }
         _ => false,
     }

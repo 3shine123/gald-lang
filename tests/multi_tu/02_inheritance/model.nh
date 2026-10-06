@@ -3,7 +3,7 @@
 /* Inheritance across TUs: the client allocates the subclass but only knows it
    through the base pointer, so dispatch must resolve through the subclass
    vtable that lives in the lib TU. */
-@interface Shape : NFObject
+@interface Shape : NPObject
 - (int)area;
 - (const char *)name;
 @end

@@ -40,7 +40,7 @@ static int kbhit() {
 // ==========================================================
 // 2. 怪物类（压力点：多参数 Init 与状态存活判定）
 // ==========================================================
-@interface Monster : NFObject {
+@interface Monster : NPObject {
     int _x;
     int _y;
     int _hp;
@@ -97,7 +97,7 @@ static int kbhit() {
 // ==========================================================
 // 3. 玩家英雄类
 // ==========================================================
-@interface Player : NFObject {
+@interface Player : NPObject {
     int _x;
     int _y;
     int _hp;
@@ -170,7 +170,7 @@ static int kbhit() {
 // ==========================================================
 // 4. 地牢核心驱动引擎（纵向多对象治理中心）
 // ==========================================================
-@interface DungeonEngine : NFObject {
+@interface DungeonEngine : NPObject {
     int _width;
     int _height;
     int _dungeonFloor;
@@ -216,8 +216,8 @@ static int kbhit() {
 
 - (void)refreshFloor {
     // 💥 内存留存高强度测试：如果进入下一层，必须释放上一层的怪物，重新alloc！
-    if (_m1) { NFObject_release(_m1); _m1 = NULL; }
-    if (_m2) { NFObject_release(_m2); _m2 = NULL; }
+    if (_m1) { NPObject_release(_m1); _m1 = NULL; }
+    if (_m2) { NPObject_release(_m2); _m2 = NULL; }
     
     // 动态随着层数增加怪物强度
     int monsterHp = 20 + _dungeonFloor * 5;
@@ -343,9 +343,9 @@ static int kbhit() {
 }
 
 - (void)dealloc {
-    if (_player) NFObject_release(_player);
-    if (_m1) NFObject_release(_m1);
-    if (_m2) NFObject_release(_m2);
+    if (_player) NPObject_release(_player);
+    if (_m1) NPObject_release(_m1);
+    if (_m2) NPObject_release(_m2);
     [super dealloc];
 }
 @end
@@ -393,7 +393,7 @@ int main() {
         printf(" 💀 你在地牢深处耗尽了最后一点力气，不幸力竭阵亡！\n");
         printf("===================================================\n");
         
-        if (engine) NFObject_release(engine);
+        if (engine) NPObject_release(engine);
     }
     return 0;
 }

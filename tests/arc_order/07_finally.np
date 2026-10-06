@@ -4,25 +4,25 @@
 // The return expression must be evaluated (and the local's cleanup ordered
 // against it) before the finally body runs.
 
-@interface AO07Holder : NFObject {
+@interface AO07Holder : NPObject {
 @public
-    NFString *_s;
+    NPString *_s;
 }
-- (NFString *)text;
+- (NPString *)text;
 @end
 
 @implementation AO07Holder
 - (instancetype)init {
     self = [super init];
-    if (self) { _s = [[NFString alloc] initWithUTF8String:"hello"]; }
+    if (self) { _s = [[NPString alloc] initWithUTF8String:"hello"]; }
     return self;
 }
 - (void)dealloc {
     _s = nil;
-    NFLog(@"ao07 dealloc");
+    NPLog(@"ao07 dealloc");
     [super dealloc];
 }
-- (NFString *)text { return _s; }
+- (NPString *)text { return _s; }
 @end
 
 int ao07_probe(void) {
@@ -31,11 +31,11 @@ int ao07_probe(void) {
         return [[h text] length] - 5;
     }
     @finally {
-        NFLog(@"ao07 finally");
+        NPLog(@"ao07 finally");
     }
 }
 
 int main() {
-    NFLog(@"ao07 r=%d", ao07_probe());
+    NPLog(@"ao07 r=%d", ao07_probe());
     return 0;
 }

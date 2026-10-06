@@ -135,7 +135,7 @@ pub enum CstExprKind {
     /// identifier elsewhere, e.g. `int await = 1;`).
     Await,
     /// `@(expr)` — boxed-expression literal. The parser cannot pick the
-    /// `NFNumber` factory (it has no types), so the node is carried through
+    /// `NPNumber` factory (it has no types), so the node is carried through
     /// to the checker, which rewrites it by the expression's static type.
     Boxed,
 }
@@ -432,7 +432,7 @@ pub enum CstDeclData {
         /// Trailing `@throws` / `@throws(T)` annotation (declaration position).
         /// `None` = not annotated. Compile-time only — never emitted to C.
         throws: Option<Box<CstType>>,
-        /// `NFAsync<T>` return-type marker: the parser unwraps it to `T` and
+        /// `NPAsync<T>` return-type marker: the parser unwraps it to `T` and
         /// sets this flag (pure compile-time metadata, never emitted to C).
         async_marker: bool,
     },
@@ -500,7 +500,7 @@ pub enum CstDeclData {
         /// before `;` or `{`). `None` = not annotated. Compile-time only —
         /// never emitted to C. Distinct from the `@throw` statement.
         throws: Option<Box<CstType>>,
-        /// `NFAsync<T>` return-type marker (see Function).
+        /// `NPAsync<T>` return-type marker (see Function).
         async_marker: bool,
     },
     Namespace(Vec<CstDecl>),

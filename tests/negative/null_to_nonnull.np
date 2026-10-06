@@ -8,7 +8,7 @@
  *
  *     Type checking failed:
  *     [checker] tests/negative/null_to_nonnull.np:29:16: nullable value passed
- *     to nonnull parameter 'NFString' — the callee may assume it is non-nil;
+ *     to nonnull parameter 'NPString' — the callee may assume it is non-nil;
  *     guard with 'if (x)' or pass a non-null value
  *
  * (The diagnostic names the TYPE, not the parameter's spelling — the param
@@ -20,15 +20,15 @@
  */
 #import <Foundation/Foundation.np>
 
-@interface Sink : NFObject
-- (void)need:(nonnull NFString *)v;
+@interface Sink : NPObject
+- (void)need:(nonnull NPString *)v;
 @end
 
 @implementation Sink
-- (void)need:(nonnull NFString *)v { NFLog(@"%s", [v UTF8String]); }
+- (void)need:(nonnull NPString *)v { NPLog(@"%s", [v UTF8String]); }
 @end
 
-static void unguarded(nonnull Sink *sink, nullable NFString *s) {
+static void unguarded(nonnull Sink *sink, nullable NPString *s) {
     [sink need:s];
 }
 

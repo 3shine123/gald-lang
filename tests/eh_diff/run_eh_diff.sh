@@ -48,12 +48,12 @@ for np in *.np; do
 
     # nopa 侧:run 模式(与用户路径一致),捕获合并输出
     "$NOPAC" run "$np" $EH_FLAG >"$WORK/$stem.nopa.all" 2>&1; nopa_rc=$?
-    # 只取程序 stderr(NFLog 走 stderr;nopac 自身的 stdout/警告已在 all 里,按需剔除)
+    # 只取程序 stderr(NPLog 走 stderr;nopac 自身的 stdout/警告已在 all 里,按需剔除)
     grep -v '^' /dev/null >/dev/null # no-op 占位,保持结构
     cp "$WORK/$stem.nopa.all" "$WORK/$stem.nopa.out"
 
     # 07_uncaught:全栈回溯与 Foundation 内部类名(如 '__NSCFConstantString' vs
-    # 'NFString')不可复现,只比措辞前缀 "*** Terminating app due to uncaught exception of class '"
+    # 'NPString')不可复现,只比措辞前缀 "*** Terminating app due to uncaught exception of class '"
     cmp_from="$WORK/$stem.nopa.out"; cmp_to="$WORK/$stem.objc.out"
     if [ "$stem" = "07_uncaught" ]; then
         grep '^\*\*\* Terminating' "$WORK/$stem.nopa.out" | sed "s/class '[^']*'/class 'X'/" > "$WORK/$stem.nopa.f" 2>/dev/null

@@ -12,9 +12,9 @@
 #import <Foundation/Foundation.np>
 #include <stdio.h>
 
-@interface Holder : NFObject {
+@interface Holder : NPObject {
 @public
-    NFString *_s;
+    NPString *_s;
 }
 @end
 
@@ -27,7 +27,7 @@ int main() {
             Holder *h = [[Holder alloc] init];
             h->_s = @"first";   /* direct ivar assign: no retain */
         }                       /* ARC scope exit releases h -> dealloc releases _s */
-        NFString *k = @"second"; /* intern lookup strcmp()s the (now alive) "first" */
+        NPString *k = @"second"; /* intern lookup strcmp()s the (now alive) "first" */
         printf("k=%s\n", [k UTF8String]);
     }
     return 0;

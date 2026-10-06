@@ -13,13 +13,13 @@
 
 #include <string.h>
 
-struct nopa_NFObject_vtable;
+struct nopa_NPObject_vtable;
 struct nopa_Bird_vtable;
 struct nopa_Pipe_vtable;
 struct nopa_FlappyEngine_vtable;
 
-#define nopa_NFObject_vtable_index_init 2
-#define nopa_NFObject_vtable_index_dealloc 3
+#define nopa_NPObject_vtable_index_init 2
+#define nopa_NPObject_vtable_index_dealloc 3
 #define nopa_Bird_vtable_index_init 2
 #define nopa_Bird_vtable_index_y 4
 #define nopa_Bird_vtable_index_flap 5
@@ -53,77 +53,77 @@ static const SEL __nopa_sel_renderWithScoreBlock_ = {.name = "renderWithScoreBlo
 static const SEL __nopa_sel_processInfut_ = {.name = "processInfut_", .hash = 0xB4C50C83};
 static const SEL __nopa_sel_update = {.name = "update", .hash = 0x280F9474};
 
-typedef struct NFObject NFObject;
+typedef struct NPObject NPObject;
 typedef struct Bird Bird;
 typedef struct Pipe Pipe;
 typedef struct FlappyEngine FlappyEngine;
 
 
 
-NFObject * NFObject_alloc(NFClass * self, SEL _cmd);
-NFObject * NFObject_new(NFClass * self, SEL _cmd);
-NFObject * NFObject_init(NFObject * self, SEL _cmd);
-void NFObject_dealloc(NFObject * self, SEL _cmd);
-NFClass * NFObject_getClass(NFClass * self, SEL _cmd);
+NPObject * NPObject_alloc(NPClass * self, SEL _cmd);
+NPObject * NPObject_new(NPClass * self, SEL _cmd);
+NPObject * NPObject_init(NPObject * self, SEL _cmd);
+void NPObject_dealloc(NPObject * self, SEL _cmd);
+NPClass * NPObject_getClass(NPClass * self, SEL _cmd);
 void disableRawMode();
 void enableRawMode();
 int kbhit();
-NFObject * Bird_init(NFObject * self, SEL _cmd);
-int Bird_y(NFObject * self, SEL _cmd);
-void Bird_flap(NFObject * self, SEL _cmd);
-void Bird_fall(NFObject * self, SEL _cmd);
-NFClass * Bird_getClass(NFClass * self, SEL _cmd);
-NFObject * Pipe_init(NFObject * self, SEL _cmd);
-int Pipe_x(NFObject * self, SEL _cmd);
-int Pipe_gapY(NFObject * self, SEL _cmd);
-int Pipe_gapHeight(NFObject * self, SEL _cmd);
-void Pipe_moveLeft(NFObject * self, SEL _cmd);
-void Pipe_resetWithWidth_height_(NFObject * self, SEL _cmd, int width, int height);
-NFClass * Pipe_getClass(NFClass * self, SEL _cmd);
-NFObject * FlappyEngine_initWithWidth_height_(NFObject * self, SEL _cmd, int w, int h);
-_Bool FlappyEngine_gameOver(NFObject * self, SEL _cmd);
-void FlappyEngine_processInfut_(NFObject * self, SEL _cmd, char ch);
-void FlappyEngine_update(NFObject * self, SEL _cmd);
-void FlappyEngine_renderWithScoreBlock_(NFObject * self, SEL _cmd, int (^scoreBlock)(int));
-void FlappyEngine_dealloc(NFObject * self, SEL _cmd);
-NFClass * FlappyEngine_getClass(NFClass * self, SEL _cmd);
+NPObject * Bird_init(NPObject * self, SEL _cmd);
+int Bird_y(NPObject * self, SEL _cmd);
+void Bird_flap(NPObject * self, SEL _cmd);
+void Bird_fall(NPObject * self, SEL _cmd);
+NPClass * Bird_getClass(NPClass * self, SEL _cmd);
+NPObject * Pipe_init(NPObject * self, SEL _cmd);
+int Pipe_x(NPObject * self, SEL _cmd);
+int Pipe_gapY(NPObject * self, SEL _cmd);
+int Pipe_gapHeight(NPObject * self, SEL _cmd);
+void Pipe_moveLeft(NPObject * self, SEL _cmd);
+void Pipe_resetWithWidth_height_(NPObject * self, SEL _cmd, int width, int height);
+NPClass * Pipe_getClass(NPClass * self, SEL _cmd);
+NPObject * FlappyEngine_initWithWidth_height_(NPObject * self, SEL _cmd, int w, int h);
+_Bool FlappyEngine_gameOver(NPObject * self, SEL _cmd);
+void FlappyEngine_processInfut_(NPObject * self, SEL _cmd, char ch);
+void FlappyEngine_update(NPObject * self, SEL _cmd);
+void FlappyEngine_renderWithScoreBlock_(NPObject * self, SEL _cmd, int (^scoreBlock)(int));
+void FlappyEngine_dealloc(NPObject * self, SEL _cmd);
+NPClass * FlappyEngine_getClass(NPClass * self, SEL _cmd);
 int main();
 
-extern NFClass nopa_NFObject_class;
-extern NFClass nopa_Bird_class;
-extern NFClass nopa_Pipe_class;
-extern NFClass nopa_FlappyEngine_class;
+extern NPClass nopa_NPObject_class;
+extern NPClass nopa_Bird_class;
+extern NPClass nopa_Pipe_class;
+extern NPClass nopa_FlappyEngine_class;
 void nopa_meta_init(void);
 
-// struct NFClass defined in runtime.h
-// struct NFObject defined in runtime.h
-struct nopa_NFObject_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
+// struct NPClass defined in runtime.h
+// struct NPObject defined in runtime.h
+struct nopa_NPObject_vtable {
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
 };
-struct nopa_NFObject_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+struct nopa_NPObject_meta_vtable {
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct Bird {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     int _y;
 };
 typedef struct Bird Bird;
 struct nopa_Bird_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    int (*y)(NFObject *, SEL);
-    void (*flap)(NFObject *, SEL);
-    void (*fall)(NFObject *, SEL);
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    int (*y)(NPObject *, SEL);
+    void (*flap)(NPObject *, SEL);
+    void (*fall)(NPObject *, SEL);
 };
 struct nopa_Bird_meta_vtable {
-    NFClass * (*class)(NFClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct Pipe {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     int _x;
     int _gapY;
@@ -131,19 +131,19 @@ struct Pipe {
 };
 typedef struct Pipe Pipe;
 struct nopa_Pipe_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    int (*x)(NFObject *, SEL);
-    int (*gapY)(NFObject *, SEL);
-    int (*gapHeight)(NFObject *, SEL);
-    void (*moveLeft)(NFObject *, SEL);
-    void (*resetWithWidth_height_)(NFObject *, SEL, int, int);
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    int (*x)(NPObject *, SEL);
+    int (*gapY)(NPObject *, SEL);
+    int (*gapHeight)(NPObject *, SEL);
+    void (*moveLeft)(NPObject *, SEL);
+    void (*resetWithWidth_height_)(NPObject *, SEL, int, int);
 };
 struct nopa_Pipe_meta_vtable {
-    NFClass * (*class)(NFClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct FlappyEngine {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     int _width;
     int _height;
@@ -154,46 +154,46 @@ struct FlappyEngine {
 };
 typedef struct FlappyEngine FlappyEngine;
 struct nopa_FlappyEngine_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    NFObject * (*initWithWidth_height_)(NFObject *, SEL, int, int);
-    _Bool (*gameOver)(NFObject *, SEL);
-    void (*processInfut_)(NFObject *, SEL, char);
-    void (*update)(NFObject *, SEL);
-    void (*renderWithScoreBlock_)(NFObject *, SEL, int (^)(int));
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    NPObject * (*initWithWidth_height_)(NPObject *, SEL, int, int);
+    _Bool (*gameOver)(NPObject *, SEL);
+    void (*processInfut_)(NPObject *, SEL, char);
+    void (*update)(NPObject *, SEL);
+    void (*renderWithScoreBlock_)(NPObject *, SEL, int (^)(int));
 };
 struct nopa_FlappyEngine_meta_vtable {
-    NFClass * (*class)(NFClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
-NFObject * NFObject_alloc(NFClass * self, SEL _cmd) {
+NPObject * NPObject_alloc(NPClass * self, SEL _cmd) {
     return nopa_alloc(self);
 }
 
-NFObject * NFObject_new(NFClass * self, SEL _cmd) {
-    NFObject * obj = nopa_alloc(self);
+NPObject * NPObject_new(NPClass * self, SEL _cmd) {
+    NPObject * obj = nopa_alloc(self);
     return nopa_init(obj);
 }
 
-NFObject * NFObject_init(NFObject * self, SEL _cmd) {
-    struct NFObject * _self = ((struct NFObject *)(self));
+NPObject * NPObject_init(NPObject * self, SEL _cmd) {
+    struct NPObject * _self = ((struct NPObject *)(self));
     {
         return nopa_init(self);
     }
 }
 
-void NFObject_dealloc(NFObject * self, SEL _cmd) {
-    struct NFObject * _self = ((struct NFObject *)(self));
+void NPObject_dealloc(NPObject * self, SEL _cmd) {
+    struct NPObject * _self = ((struct NPObject *)(self));
     {
         return;
     }
 }
 
-NFClass * NFObject_getClass(NFClass * self, SEL _cmd) {
-    return &nopa_NFObject_class;
+NPClass * NPObject_getClass(NPClass * self, SEL _cmd) {
+    return &nopa_NPObject_class;
 }
 
-NFObject * nopa_alloc(struct NFClass * cls);
-NFObject * nopa_init(NFObject * );
+NPObject * nopa_alloc(struct NPClass * cls);
+NPObject * nopa_init(NPObject * );
 struct termios orig_termios;
 void disableRawMode() {
     tcsetattr(STDIN_FILENO, TCSAFLUSH, &orig_termios);
@@ -219,10 +219,10 @@ int kbhit() {
     return select(STDIN_FILENO + 1, &fds, NULL, NULL, &tv);
 }
 
-NFObject * Bird_init(NFObject * self, SEL _cmd) {
+NPObject * Bird_init(NPObject * self, SEL _cmd) {
     struct Bird * _self = ((struct Bird *)(self));
     {
-        self = NFObject_init(self, __nopa_sel_init);
+        self = NPObject_init(self, __nopa_sel_init);
         if (self) {
             {
                 ((struct Bird *)(self))->_y = 6;
@@ -232,14 +232,14 @@ NFObject * Bird_init(NFObject * self, SEL _cmd) {
     }
 }
 
-int Bird_y(NFObject * self, SEL _cmd) {
+int Bird_y(NPObject * self, SEL _cmd) {
     struct Bird * _self = ((struct Bird *)(self));
     {
         return ((struct Bird *)(self))->_y;
     }
 }
 
-void Bird_flap(NFObject * self, SEL _cmd) {
+void Bird_flap(NPObject * self, SEL _cmd) {
     struct Bird * _self = ((struct Bird *)(self));
     {
         ((struct Bird *)(self))->_y = ((struct Bird *)(self))->_y - 2;
@@ -249,21 +249,21 @@ void Bird_flap(NFObject * self, SEL _cmd) {
     }
 }
 
-void Bird_fall(NFObject * self, SEL _cmd) {
+void Bird_fall(NPObject * self, SEL _cmd) {
     struct Bird * _self = ((struct Bird *)(self));
     {
         ((struct Bird *)(self))->_y = ((struct Bird *)(self))->_y + 1;
     }
 }
 
-NFClass * Bird_getClass(NFClass * self, SEL _cmd) {
+NPClass * Bird_getClass(NPClass * self, SEL _cmd) {
     return &nopa_Bird_class;
 }
 
-NFObject * Pipe_init(NFObject * self, SEL _cmd) {
+NPObject * Pipe_init(NPObject * self, SEL _cmd) {
     struct Pipe * _self = ((struct Pipe *)(self));
     {
-        self = NFObject_init(self, __nopa_sel_init);
+        self = NPObject_init(self, __nopa_sel_init);
         if (self) {
             {
                 ((struct Pipe *)(self))->_x = 0;
@@ -275,35 +275,35 @@ NFObject * Pipe_init(NFObject * self, SEL _cmd) {
     }
 }
 
-int Pipe_x(NFObject * self, SEL _cmd) {
+int Pipe_x(NPObject * self, SEL _cmd) {
     struct Pipe * _self = ((struct Pipe *)(self));
     {
         return ((struct Pipe *)(self))->_x;
     }
 }
 
-int Pipe_gapY(NFObject * self, SEL _cmd) {
+int Pipe_gapY(NPObject * self, SEL _cmd) {
     struct Pipe * _self = ((struct Pipe *)(self));
     {
         return ((struct Pipe *)(self))->_gapY;
     }
 }
 
-int Pipe_gapHeight(NFObject * self, SEL _cmd) {
+int Pipe_gapHeight(NPObject * self, SEL _cmd) {
     struct Pipe * _self = ((struct Pipe *)(self));
     {
         return ((struct Pipe *)(self))->_gapHeight;
     }
 }
 
-void Pipe_moveLeft(NFObject * self, SEL _cmd) {
+void Pipe_moveLeft(NPObject * self, SEL _cmd) {
     struct Pipe * _self = ((struct Pipe *)(self));
     {
         ((struct Pipe *)(self))->_x--;
     }
 }
 
-void Pipe_resetWithWidth_height_(NFObject * self, SEL _cmd, int width, int height) {
+void Pipe_resetWithWidth_height_(NPObject * self, SEL _cmd, int width, int height) {
     struct Pipe * _self = ((struct Pipe *)(self));
     {
         ((struct Pipe *)(self))->_x = width - 2;
@@ -311,22 +311,22 @@ void Pipe_resetWithWidth_height_(NFObject * self, SEL _cmd, int width, int heigh
     }
 }
 
-NFClass * Pipe_getClass(NFClass * self, SEL _cmd) {
+NPClass * Pipe_getClass(NPClass * self, SEL _cmd) {
     return &nopa_Pipe_class;
 }
 
-NFObject * FlappyEngine_initWithWidth_height_(NFObject * self, SEL _cmd, int w, int h) {
+NPObject * FlappyEngine_initWithWidth_height_(NPObject * self, SEL _cmd, int w, int h) {
     struct FlappyEngine * _self = ((struct FlappyEngine *)(self));
     {
-        self = NFObject_init(self, __nopa_sel_init);
+        self = NPObject_init(self, __nopa_sel_init);
         if (self) {
             {
                 ((struct FlappyEngine *)(self))->_width = w;
                 ((struct FlappyEngine *)(self))->_height = h;
                 ((struct FlappyEngine *)(self))->_score = 0;
                 ((struct FlappyEngine *)(self))->_gameOver = 0;
-                ((struct FlappyEngine *)(self))->_bird = ({ NFObject *__nopa_tmp_0 = (NFObject_alloc(&nopa_Bird_class, __nopa_sel_alloc)); ((struct nopa_Bird_vtable *)__nopa_tmp_0->isa->vtable)->init(__nopa_tmp_0, __nopa_sel_init); });
-                ((struct FlappyEngine *)(self))->_pipe = ({ NFObject *__nopa_tmp_1 = (NFObject_alloc(&nopa_Pipe_class, __nopa_sel_alloc)); ((struct nopa_Pipe_vtable *)__nopa_tmp_1->isa->vtable)->init(__nopa_tmp_1, __nopa_sel_init); });
+                ((struct FlappyEngine *)(self))->_bird = ({ NPObject *__nopa_tmp_0 = (NPObject_alloc(&nopa_Bird_class, __nopa_sel_alloc)); ((struct nopa_Bird_vtable *)__nopa_tmp_0->isa->vtable)->init(__nopa_tmp_0, __nopa_sel_init); });
+                ((struct FlappyEngine *)(self))->_pipe = ({ NPObject *__nopa_tmp_1 = (NPObject_alloc(&nopa_Pipe_class, __nopa_sel_alloc)); ((struct nopa_Pipe_vtable *)__nopa_tmp_1->isa->vtable)->init(__nopa_tmp_1, __nopa_sel_init); });
                 ((struct nopa_Pipe_vtable *)((struct FlappyEngine *)(self))->_pipe->isa->vtable)->resetWithWidth_height_(((struct FlappyEngine *)(self))->_pipe, __nopa_sel_resetWithWidth_height_, ((struct FlappyEngine *)(self))->_width, ((struct FlappyEngine *)(self))->_height);
             }
         }
@@ -334,14 +334,14 @@ NFObject * FlappyEngine_initWithWidth_height_(NFObject * self, SEL _cmd, int w, 
     }
 }
 
-_Bool FlappyEngine_gameOver(NFObject * self, SEL _cmd) {
+_Bool FlappyEngine_gameOver(NPObject * self, SEL _cmd) {
     struct FlappyEngine * _self = ((struct FlappyEngine *)(self));
     {
         return ((struct FlappyEngine *)(self))->_gameOver;
     }
 }
 
-void FlappyEngine_processInfut_(NFObject * self, SEL _cmd, char ch) {
+void FlappyEngine_processInfut_(NPObject * self, SEL _cmd, char ch) {
     struct FlappyEngine * _self = ((struct FlappyEngine *)(self));
     {
         if (ch == 32 || ch == 119 || ch == 87) {
@@ -358,7 +358,7 @@ void FlappyEngine_processInfut_(NFObject * self, SEL _cmd, char ch) {
     }
 }
 
-void FlappyEngine_update(NFObject * self, SEL _cmd) {
+void FlappyEngine_update(NPObject * self, SEL _cmd) {
     struct FlappyEngine * _self = ((struct FlappyEngine *)(self));
     {
         if (((struct FlappyEngine *)(self))->_gameOver) {
@@ -393,7 +393,7 @@ void FlappyEngine_update(NFObject * self, SEL _cmd) {
     }
 }
 
-void FlappyEngine_renderWithScoreBlock_(NFObject * self, SEL _cmd, int (^scoreBlock)(int)) {
+void FlappyEngine_renderWithScoreBlock_(NPObject * self, SEL _cmd, int (^scoreBlock)(int)) {
     struct FlappyEngine * _self = ((struct FlappyEngine *)(self));
     {
         printf("\033[H");
@@ -449,20 +449,20 @@ void FlappyEngine_renderWithScoreBlock_(NFObject * self, SEL _cmd, int (^scoreBl
     }
 }
 
-void FlappyEngine_dealloc(NFObject * self, SEL _cmd) {
+void FlappyEngine_dealloc(NPObject * self, SEL _cmd) {
     struct FlappyEngine * _self = ((struct FlappyEngine *)(self));
     {
         if (((struct FlappyEngine *)(self))->_bird) {
-            NFObject_release(((struct FlappyEngine *)(self))->_bird);
+            NPObject_release(((struct FlappyEngine *)(self))->_bird);
         }
         if (((struct FlappyEngine *)(self))->_pipe) {
-            NFObject_release(((struct FlappyEngine *)(self))->_pipe);
+            NPObject_release(((struct FlappyEngine *)(self))->_pipe);
         }
         nopa_object_dealloc(self);
     }
 }
 
-NFClass * FlappyEngine_getClass(NFClass * self, SEL _cmd) {
+NPClass * FlappyEngine_getClass(NPClass * self, SEL _cmd) {
     return &nopa_FlappyEngine_class;
 }
 
@@ -475,7 +475,7 @@ int main() {
             srand(time(NULL));
             enableRawMode();
             printf("\033[2J\033[H");
-            NFObject *__nopa_tmp_2 = (NFObject_alloc(&nopa_FlappyEngine_class, __nopa_sel_alloc));
+            NPObject *__nopa_tmp_2 = (NPObject_alloc(&nopa_FlappyEngine_class, __nopa_sel_alloc));
             FlappyEngine * engine = ((struct nopa_FlappyEngine_vtable *)__nopa_tmp_2->isa->vtable)->initWithWidth_height_(__nopa_tmp_2, __nopa_sel_initWithWidth_height_, 32, 16);
             int multiplier = 100;
             int (^arcadeScoreBlock)(int rawScore) = ^int(int rawScore) {
@@ -505,7 +505,7 @@ int main() {
             printf(" 💀 提示：小鸟完美坠毁，但编译器类型和 ARC 链路运行极度完美！\n");
             printf("===================================================\n");
             if (engine) {
-                NFObject_release(engine);
+                NPObject_release(engine);
             }
         }
         nopa_autoreleasepool_pop(__pool);
@@ -517,14 +517,14 @@ int main() {
 
 // ─── Class metadata ─────────────────────────────────────
 
-struct nopa_NFObject_vtable nopa_NFObject_vtable_inst = {
-    .init = NFObject_init,
-    .dealloc = NFObject_dealloc,
+struct nopa_NPObject_vtable nopa_NPObject_vtable_inst = {
+    .init = NPObject_init,
+    .dealloc = NPObject_dealloc,
 };
 
 struct nopa_Bird_vtable nopa_Bird_vtable_inst = {
     .init = Bird_init,
-    .dealloc = NFObject_dealloc,
+    .dealloc = NPObject_dealloc,
     .y = Bird_y,
     .flap = Bird_flap,
     .fall = Bird_fall,
@@ -532,7 +532,7 @@ struct nopa_Bird_vtable nopa_Bird_vtable_inst = {
 
 struct nopa_Pipe_vtable nopa_Pipe_vtable_inst = {
     .init = Pipe_init,
-    .dealloc = NFObject_dealloc,
+    .dealloc = NPObject_dealloc,
     .x = Pipe_x,
     .gapY = Pipe_gapY,
     .gapHeight = Pipe_gapHeight,
@@ -541,7 +541,7 @@ struct nopa_Pipe_vtable nopa_Pipe_vtable_inst = {
 };
 
 struct nopa_FlappyEngine_vtable nopa_FlappyEngine_vtable_inst = {
-    .init = NFObject_init,
+    .init = NPObject_init,
     .dealloc = FlappyEngine_dealloc,
     .initWithWidth_height_ = FlappyEngine_initWithWidth_height_,
     .gameOver = FlappyEngine_gameOver,
@@ -550,10 +550,10 @@ struct nopa_FlappyEngine_vtable nopa_FlappyEngine_vtable_inst = {
     .renderWithScoreBlock_ = FlappyEngine_renderWithScoreBlock_,
 };
 
-struct nopa_NFObject_meta_vtable nopa_NFObject_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
-    .class = NFObject_getClass,
+struct nopa_NPObject_meta_vtable nopa_NPObject_meta_vtable_inst = {
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
+    .class = NPObject_getClass,
 };
 
 struct nopa_Bird_meta_vtable nopa_Bird_meta_vtable_inst = {
@@ -568,39 +568,39 @@ struct nopa_FlappyEngine_meta_vtable nopa_FlappyEngine_meta_vtable_inst = {
     .class = FlappyEngine_getClass,
 };
 
-NFClass nopa_NFObject_class;
-NFClass nopa_Bird_class;
-NFClass nopa_Pipe_class;
-NFClass nopa_FlappyEngine_class;
+NPClass nopa_NPObject_class;
+NPClass nopa_Bird_class;
+NPClass nopa_Pipe_class;
+NPClass nopa_FlappyEngine_class;
 
 void nopa_meta_init(void) {
-    nopa_NFObject_class = (NFClass){
-        .name = "NFObject",
+    nopa_NPObject_class = (NPClass){
+        .name = "NPObject",
         .superclass = NULL,
-        .instance_size = sizeof(struct NFObject),
-        .vtable = &nopa_NFObject_vtable_inst,
-        .class_vtable = &nopa_NFObject_meta_vtable_inst,
+        .instance_size = sizeof(struct NPObject),
+        .vtable = &nopa_NPObject_vtable_inst,
+        .class_vtable = &nopa_NPObject_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_Bird_class = (NFClass){
+    nopa_Bird_class = (NPClass){
         .name = "Bird",
-        .superclass = &nopa_NFObject_class,
+        .superclass = &nopa_NPObject_class,
         .instance_size = sizeof(struct Bird),
         .vtable = &nopa_Bird_vtable_inst,
         .class_vtable = &nopa_Bird_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_Pipe_class = (NFClass){
+    nopa_Pipe_class = (NPClass){
         .name = "Pipe",
-        .superclass = &nopa_NFObject_class,
+        .superclass = &nopa_NPObject_class,
         .instance_size = sizeof(struct Pipe),
         .vtable = &nopa_Pipe_vtable_inst,
         .class_vtable = &nopa_Pipe_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_FlappyEngine_class = (NFClass){
+    nopa_FlappyEngine_class = (NPClass){
         .name = "FlappyEngine",
-        .superclass = &nopa_NFObject_class,
+        .superclass = &nopa_NPObject_class,
         .instance_size = sizeof(struct FlappyEngine),
         .vtable = &nopa_FlappyEngine_vtable_inst,
         .class_vtable = &nopa_FlappyEngine_meta_vtable_inst,

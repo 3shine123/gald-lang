@@ -199,7 +199,7 @@ static void sec1_c_superset(void) {
 @class FsForwardUser;
 
 // —— FsForwardUser 的真定义（对上面的 @class 兑现）——
-@interface FsForwardUser : NFObject
+@interface FsForwardUser : NPObject
 - (int)poke;
 @end
 
@@ -208,7 +208,7 @@ static void sec1_c_superset(void) {
 @end
 
 // 泛型类（monomorphization：Box<T> 按使用点特化）
-@interface FsBox<T> : NFObject {
+@interface FsBox<T> : NPObject {
 @public
     T _value;
 }
@@ -230,7 +230,7 @@ static void sec1_c_superset(void) {
 // 命名空间：类 + 跨命名空间继承 + @using 短名
 @namespace FsEngine
 
-@interface FsRenderable : NFObject
+@interface FsRenderable : NPObject
 - (int)render;
 @end
 
@@ -252,8 +252,8 @@ static void sec1_c_superset(void) {
 @public
     int _id;
 }
-@property (nonatomic, copy, nullable) NFString *label;   // 属性位 nullability
-@property (nonatomic, nonnull) NFString *tag;
+@property (nonatomic, copy, nullable) NPString *label;   // 属性位 nullability
+@property (nonatomic, nonnull) NPString *tag;
 - (FsSprite *)initWithId:(int)i;
 - (int)sum:(int)first, ...;                              // variadic 继承目标
 + (int)classSum:(int)first, ...;                         // 类方法 variadic
@@ -294,25 +294,25 @@ static void sec1_c_superset(void) {
 @end
 
 // 泛型容器特化（typed container：objectAtIndex: 返回元素类型）
-@interface FsTypedStore : NFObject
+@interface FsTypedStore : NPObject
 - (void)run;
 @end
 
 @implementation FsTypedStore
 - (void)run {
-    NFMutableArray<NFString *> *arr = [NFMutableArray array];
+    NPMutableArray<NPString *> *arr = [NPMutableArray array];
     [arr addObject:@"one"];
     [arr addObject:@"two"];
     // typed read：元素类型流经（泛型真检查），下标改写 a[0] → [a objectAtIndex:0]
-    NFString *s0 = [arr objectAtIndex:0];
-    NFString *s1 = arr[1];
+    NPString *s0 = [arr objectAtIndex:0];
+    NPString *s1 = arr[1];
     printf("2.6 typed %s %s %zu\n", [s0 UTF8String], [s1 UTF8String], [arr count]);
 
-    // 泛型类特化：FsBox<NFMutableString *>（嵌套泛型）
+    // 泛型类特化：FsBox<NPMutableString *>（嵌套泛型）
     // initWith 收 const char *（裸 C 串）——传 @"..." 对象当 C 串读会出垃圾
-    FsBox<NFMutableString *> *box = [[FsBox alloc] initWith:[NFMutableString stringWithUTF8String:"boxed"]];
+    FsBox<NPMutableString *> *box = [[FsBox alloc] initWith:[NPMutableString stringWithUTF8String:"boxed"]];
     printf("2.7 box %s\n", [[box value] UTF8String]);
-    [box setValue:[NFMutableString stringWithUTF8String:"reboxed"]];
+    [box setValue:[NPMutableString stringWithUTF8String:"reboxed"]];
     printf("2.8 box %s\n", [[box value] UTF8String]);
 }
 @end
@@ -378,33 +378,33 @@ static void sec3_expressions(void) {
     FsSprite *sp = [[FsSprite alloc] initWithId:3];
 
     // 3.1 装箱字面量：@int / @double / @YES @NO / @'c' / @(expr)
-    NFNumber *ni = @42;
-    NFNumber *nd = @1.5;
-    NFNumber *nb = @YES;
-    NFNumber *nc = @'A';
+    NPNumber *ni = @42;
+    NPNumber *nd = @1.5;
+    NPNumber *nb = @YES;
+    NPNumber *nc = @'A';
     int xv = 20;
-    NFNumber *ne = @(xv * 2 + 1);
+    NPNumber *ne = @(xv * 2 + 1);
     printf("3.1 box %d %.1f %d %d %d\n",
            [ni intValue], [nd doubleValue], [nb boolValue], [nc charValue], [ne intValue]);
 
-    // 3.2 数组字面量 @[...]（装箱元素同型 → 推断 NFArray<NFNumber *>）
-    NFArray *nums = @[ @1, @2, @3 ];
-    NFNumber *head = (NFNumber *)[nums objectAtIndex:0];   // 强转紧跟消息发送（曾误记不支持）
+    // 3.2 数组字面量 @[...]（装箱元素同型 → 推断 NPArray<NPNumber *>）
+    NPArray *nums = @[ @1, @2, @3 ];
+    NPNumber *head = (NPNumber *)[nums objectAtIndex:0];   // 强转紧跟消息发送（曾误记不支持）
     printf("3.2 arr %zu %d\n", [nums count], [head intValue]);
 
     // 3.3 字典字面量 @{}：多对（值的 parse 层曾吃逗号炸掉）+ 空字典
-    NFDictionary *d = @{ @"a": @1, @"b": @(xv), @"c": @"cee" };
-    NFDictionary *empty = @{};
-    NFNumber *dv = [d objectForKey:@"b"];
-    NFString *dc = [d objectForKey:@"c"];
+    NPDictionary *d = @{ @"a": @1, @"b": @(xv), @"c": @"cee" };
+    NPDictionary *empty = @{};
+    NPNumber *dv = [d objectForKey:@"b"];
+    NPString *dc = [d objectForKey:@"c"];
     printf("3.3 dict %zu %zu %d %s\n",
            [d count], [empty count], [dv intValue], [dc UTF8String]);
 
     // 3.4 可变数组全家 + 下标读写改写（ma[0] → setObject:atIndex:/objectAtIndex:）
     // 字符串字面量已 interning（同内容同对象）：containsObject:/indexOfObject:
     // 可直接用字面量查询（指针相等成立，原"必须同一变量"约束已随修废除）
-    NFMutableArray *ma = [NFMutableArray arrayWithCapacity:4];
-    NFString *z = @"z";
+    NPMutableArray *ma = [NPMutableArray arrayWithCapacity:4];
+    NPString *z = @"z";
     [ma addObject:@"x"];
     [ma insertObject:@"y" atIndex:0];
     [ma replaceObjectAtIndex:1 withObject:z];
@@ -412,15 +412,15 @@ static void sec3_expressions(void) {
     int idx = (int)[ma indexOfObject:@"z"];     // 同上
     [ma removeObjectAtIndex:0];
     ma[0] = @"w";                       // 写侧下标改写
-    NFString *m0 = ma[0];               // 读侧下标改写
+    NPString *m0 = ma[0];               // 读侧下标改写
     printf("3.4 marr %d %d %s\n", has, idx, [m0 UTF8String]);
 
     // 3.5 可变字典：插入-值语义替换-删除 + allKeys
-    NFMutableDictionary *md = [NFMutableDictionary dictionary];
+    NPMutableDictionary *md = [NPMutableDictionary dictionary];
     [md setObject:@1 forKey:@"k1"];
     [md setObject:@2 forKey:@"k2"];
     [md setObject:@9 forKey:@"k1"];     // isEqual: 值语义 → 替换而非追加
-    NFArray *keys = [md allKeys];
+    NPArray *keys = [md allKeys];
     [md removeObjectForKey:@"k2"];
     printf("3.5 mdict %zu %zu %d\n", [keys count], [md count], [[md objectForKey:@"k1"] intValue]);
 
@@ -442,14 +442,14 @@ static void sec3_expressions(void) {
            [sp respondsToSelector:@selector(color)]);
 
     // 3.9 字符串全家：拼接 / 值相等 / 长度 / description
-    NFString *base = [NFString stringWithUTF8String:"nopa"];
-    NFString *joined = [base stringByAppendingString:@"-full"];
+    NPString *base = [NPString stringWithUTF8String:"nopa"];
+    NPString *joined = [base stringByAppendingString:@"-full"];
     BOOL eq = [joined isEqualToString:@"nopa-full"];
-    NFString *desc = [joined description];
+    NPString *desc = [joined description];
     printf("3.9 str %s %d %zu %s\n", [joined UTF8String], eq, [joined length], [desc UTF8String]);
 
-    // 3.10 NFMutableString 追加链（构造收 C 串；appendString: 收对象——探针已证）
-    NFMutableString *mstr = [NFMutableString stringWithUTF8String:"a"];
+    // 3.10 NPMutableString 追加链（构造收 C 串；appendString: 收对象——探针已证）
+    NPMutableString *mstr = [NPMutableString stringWithUTF8String:"a"];
     [mstr appendString:@"b"];
     [mstr appendString:@"c"];
     printf("3.10 mstr %s %zu\n", [mstr UTF8String], [mstr length]);
@@ -478,8 +478,8 @@ static void sec3_expressions(void) {
     Class cls = [FsSprite class];
     printf("3.14 class %d %d\n", cls == [FsSprite class], [sp class] == cls);
 
-    // 3.15 NFLog %@ 展开（对象 → description → %s）
-    NFLog(@"3.15 nflog %@ %d", joined, 7);
+    // 3.15 NPLog %@ 展开（对象 → description → %s）
+    NPLog(@"3.15 nplog %@ %d", joined, 7);
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -488,7 +488,7 @@ static void sec3_expressions(void) {
 // ═══════════════════════════════════════════════════════════════════
 
 // typed catch 链的两个异常类（类型不同 → isa 依次匹配）
-@interface FsErrLow : NFObject
+@interface FsErrLow : NPObject
 @end
 @implementation FsErrLow
 @end
@@ -501,25 +501,25 @@ static void sec3_expressions(void) {
 static void sec4_control_runtime(void) {
     printf("== §4 control/runtime ==\n");
 
-    // 4.1 for-in：NFArray 遍历（desugar：集合只求值一次，元素借用零 ARC 注入）
-    NFArray *arr = @[ @"aa", @"bb", @"cc" ];
+    // 4.1 for-in：NPArray 遍历（desugar：集合只求值一次，元素借用零 ARC 注入）
+    NPArray *arr = @[ @"aa", @"bb", @"cc" ];
     int seen = 0;
-    NFString *last = nil;
-    for (NFString *item in arr) {
+    NPString *last = nil;
+    for (NPString *item in arr) {
         seen++;
         last = item;
     }
     printf("4.1 forin %d %s\n", seen, [last UTF8String]);
 
     // 4.2 嵌套 for-in + 空数组（体不执行）
-    NFArray *outer = @[ @1, @2 ];
+    NPArray *outer = @[ @1, @2 ];
     int pairs = 0;
-    for (NFNumber *o in outer) {
-        for (NFString *i in arr) { pairs++; }
+    for (NPNumber *o in outer) {
+        for (NPString *i in arr) { pairs++; }
     }
-    NFArray *empty = @[];
+    NPArray *empty = @[];
     int empt = 0;
-    for (NFString *i in empty) { empt++; }
+    for (NPString *i in empty) { empt++; }
     printf("4.2 nest %d %d\n", pairs, empt);
 
     // 4.3 while / do-while / continue
@@ -533,7 +533,7 @@ static void sec4_control_runtime(void) {
     printf("4.3 loops %d %d %d\n", w, dw, cont);
 
     // 4.4 switch 模式匹配 M1：Bind 臂（isKindOfClass:）+ default + break
-    NFObject *subj = [[FsSprite alloc] initWithId:5];
+    NPObject *subj = [[FsSprite alloc] initWithId:5];
     int t1 = 0;
     switch (subj) {
         case FsErrHigh *e:
@@ -549,7 +549,7 @@ static void sec4_control_runtime(void) {
     printf("4.4 pat-bind %d\n", t1);
 
     // 4.5 对象字面量臂（isEqual: 值语义）
-    NFString *sv = @"hit";
+    NPString *sv = @"hit";
     int t2 = 0;
     switch (sv) {
         case @"no":
@@ -679,9 +679,9 @@ static void sec4_control_runtime(void) {
     // 4.12 @autoreleasepool：嵌套池（pop 只结算本池对象）
     int pooled = 0;
     @autoreleasepool {
-        NFString *p1 = [NFString stringWithUTF8String:"pool1"];
+        NPString *p1 = [NPString stringWithUTF8String:"pool1"];
         @autoreleasepool {
-            NFString *p2 = [NFString stringWithUTF8String:"pool2"];
+            NPString *p2 = [NPString stringWithUTF8String:"pool2"];
             pooled += [p2 length];
         }
         pooled += [p1 length];
@@ -706,7 +706,7 @@ static void sec4_control_runtime(void) {
 
     // 4.15 @noarc：块内手动管理，计数平衡（alloc=1 → retain=2 → release×2 → 0）
     @noarc {
-        NFObject *owned = [[NFObject alloc] init];
+        NPObject *owned = [[NPObject alloc] init];
         [owned retain];
         [owned release];
         [owned release];
@@ -717,9 +717,9 @@ static void sec4_control_runtime(void) {
     // 源对象须是 owned（alloc+init = +1，ARC 作用域尾注入 release → dealloc →
     // weakClearAll 槽位清零）；便利构造器返回 autoreleased 对象不会销毁，
     // 验证不了 zeroing。赋值路径走 unregister→assign→register 重注册。
-    __weak NFString *weakref = nil;
+    __weak NPString *weakref = nil;
     {
-        NFString *strong = [[NFString alloc] initWithUTF8String:"weak-target"];
+        NPString *strong = [[NPString alloc] initWithUTF8String:"weak-target"];
         weakref = strong;
         printf("4.16 weak %d\n", weakref != nil);
     }
@@ -730,46 +730,46 @@ static void sec4_control_runtime(void) {
 // §5  nullability 全位 / @throws / @await / 内联 asm / Foundation 走查
 // ═══════════════════════════════════════════════════════════════════
 
-// NF_ASSUME_NONNULL 区域：真语法非宏；未标注指针 → nonnull，nullable 显式退出
-NF_ASSUME_NONNULL_BEGIN
-@interface FsGuarded : NFObject {
+// NP_ASSUME_NONNULL 区域：真语法非宏；未标注指针 → nonnull，nullable 显式退出
+NP_ASSUME_NONNULL_BEGIN
+@interface FsGuarded : NPObject {
 @public
-    NFString *inRegion;                 // ivar 位：区域内默认 nonnull
-    nullable NFString *optIvar;         // ivar 位显式 nullable
+    NPString *inRegion;                 // ivar 位：区域内默认 nonnull
+    nullable NPString *optIvar;         // ivar 位显式 nullable
 }
-- (void)take:(NFString *)s;             // 参数位：区域默认 nonnull
-- (void)optOut:(nullable NFString *)s;  // 区域内显式退出
-- (NFString *)produce;                  // 返回位：区域默认 nonnull
+- (void)take:(NPString *)s;             // 参数位：区域默认 nonnull
+- (void)optOut:(nullable NPString *)s;  // 区域内显式退出
+- (NPString *)produce;                  // 返回位：区域默认 nonnull
 @end
-NF_ASSUME_NONNULL_END
+NP_ASSUME_NONNULL_END
 
 @implementation FsGuarded
-- (void)take:(NFString *)s { printf("5.1 region take %s\n", [s UTF8String]); }
-- (void)optOut:(nullable NFString *)s { printf("5.2 opt %s\n", s ? [s UTF8String] : "(nil)"); }
-- (NFString *)produce { return @"made"; }
+- (void)take:(NPString *)s { printf("5.1 region take %s\n", [s UTF8String]); }
+- (void)optOut:(nullable NPString *)s { printf("5.2 opt %s\n", s ? [s UTF8String] : "(nil)"); }
+- (NPString *)produce { return @"made"; }
 @end
 
 // 区域外：未标注 → unspecified（渐进采用，两种拼写都接受）
-@interface FsAnnotated : NFObject
-- (void)pre:(nonnull NFString *)a post:(NFString * _Nonnull)b;
-- (nullable NFString *)maybe;
-- (NFString * _Nullable)maybeC;
+@interface FsAnnotated : NPObject
+- (void)pre:(nonnull NPString *)a post:(NPString * _Nonnull)b;
+- (nullable NPString *)maybe;
+- (NPString * _Nullable)maybeC;
 @end
 
 @implementation FsAnnotated
-- (void)pre:(nonnull NFString *)a post:(NFString * _Nonnull)b {
+- (void)pre:(nonnull NPString *)a post:(NPString * _Nonnull)b {
     printf("5.3 anno %s %s\n", [a UTF8String], [b UTF8String]);
 }
-- (nullable NFString *)maybe { return nil; }
-- (NFString * _Nullable)maybeC { return @"c"; }
+- (nullable NPString *)maybe { return nil; }
+- (NPString * _Nullable)maybeC { return @"c"; }
 @end
 
 // 顶层函数：返回位 + 参数位注解
-static nullable NFString *fs_maybe_fn(void) { return nil; }
-static void fs_take_fn(nonnull NFString *s) { printf("5.4 fn %s\n", [s UTF8String]); }
+static nullable NPString *fs_maybe_fn(void) { return nil; }
+static void fs_take_fn(nonnull NPString *s) { printf("5.4 fn %s\n", [s UTF8String]); }
 
 // enum 参数（真实 tag 关键字——曾误发 struct）+ struct 按值传参
-@interface FsModes : NFObject
+@interface FsModes : NPObject
 - (int)mix:(FsMode)m point:(struct FsPoint)p;
 @end
 @implementation FsModes
@@ -779,19 +779,19 @@ static void fs_take_fn(nonnull NFString *s) { printf("5.4 fn %s\n", [s UTF8Strin
 @end
 
 // @throws：声明标注（尾置、`;`/`{` 之前）——语句位是 @throw
-@interface FsParser : NFObject
-- (int)strictParse:(NFString *)s @throws(FsErrLow *);   // 带类型
-- (int)looseParse:(NFString *)s @throws;                 // 裸标注（体内必须真抛）
+@interface FsParser : NPObject
+- (int)strictParse:(NPString *)s @throws(FsErrLow *);   // 带类型
+- (int)looseParse:(NPString *)s @throws;                 // 裸标注（体内必须真抛）
 @end
 
 @implementation FsParser
-- (int)strictParse:(NFString *)s @throws(FsErrLow *) {
+- (int)strictParse:(NPString *)s @throws(FsErrLow *) {
     if ([s length] > 3) {
         @throw [[FsErrLow alloc] init];                  // 类型与声明一致
     }
     return [s length];
 }
-- (int)looseParse:(NFString *)s @throws {
+- (int)looseParse:(NPString *)s @throws {
     if (s == nil) {
         @throw [[FsErrLow alloc] init];
     }
@@ -799,21 +799,21 @@ static void fs_take_fn(nonnull NFString *s) { printf("5.4 fn %s\n", [s UTF8Strin
 }
 @end
 
-// @await / NFAsync<T>：标记是签名一部分（头文件可见）；入口 = async void 方法
+// @await / NPAsync<T>：标记是签名一部分（头文件可见）；入口 = async void 方法
 // 被同步上下文调用 → 自动 blocking wrapper（体内泵调度器），main 照常调用
-@interface FsFetcher : NFObject
-- (NFAsync<int>)compute:(int)n;                          // 标记 + 体内 @await
+@interface FsFetcher : NPObject
+- (NPAsync<int>)compute:(int)n;                          // 标记 + 体内 @await
 - (int)helper:(int)n;                                    // 纯同步（无标记无 await）
-+ (NFAsync<void>)runAll;                                 // 入口（类方法 async void）
++ (NPAsync<void>)runAll;                                 // 入口（类方法 async void）
 @end
 
 @implementation FsFetcher
 - (int)helper:(int)n { return n + 1; }
-- (NFAsync<int>)compute:(int)n {
+- (NPAsync<int>)compute:(int)n {
     int a = @await [self helper:n];                      // 挂起点（同步调用立即恢复）
     return a * 2;
 }
-+ (NFAsync<void>)runAll {
++ (NPAsync<void>)runAll {
     FsFetcher *f = [[FsFetcher alloc] init];
     int x = @await [f compute:20];                       // 跨方法 await 链
     printf("5.7 async %d\n", x);
@@ -883,19 +883,19 @@ z:
 after:
     printf("5.8 asm %d %d %d\n", ao, sh, rw);
 
-    // 5.9 Foundation 走查：NFNumber 全家 / NFString copy / NFArray copy
-    NFNumber *n1 = [NFNumber numberWithInt:7];
-    NFNumber *n2 = @7;                                     // 装箱 → 同工厂
+    // 5.9 Foundation 走查：NPNumber 全家 / NPString copy / NPArray copy
+    NPNumber *n1 = [NPNumber numberWithInt:7];
+    NPNumber *n2 = @7;                                     // 装箱 → 同工厂
     printf("5.9 num %lld %.2f %d %d\n",
-           [n1 longLongValue], [[NFNumber numberWithDouble:2.5] doubleValue],
+           [n1 longLongValue], [[NPNumber numberWithDouble:2.5] doubleValue],
            [n1 isEqualToNumber:n2], [@YES boolValue]);
 
-    NFString *orig = [NFString stringWithUTF8String:"cp"];
-    NFString *cp = [orig copy];                            // copy → +1 契约
+    NPString *orig = [NPString stringWithUTF8String:"cp"];
+    NPString *cp = [orig copy];                            // copy → +1 契约
     printf("5.9b strcopy %s %d\n", [cp UTF8String], [orig isEqual:cp] == NO);
 
-    NFArray *src = @[ @"p", @"q" ];
-    NFArray *arrcp = [src copy];
+    NPArray *src = @[ @"p", @"q" ];
+    NPArray *arrcp = [src copy];
     printf("5.9c arrcopy %zu %s\n", [arrcp count], [[arrcp objectAtIndex:1] UTF8String]);
 }
 

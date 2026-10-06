@@ -3,27 +3,27 @@
 
 int main() {
     @autoreleasepool {
-        NFArray *arr = @[ @"one", @"two", @"three" ];
+        NPArray *arr = @[ @"one", @"two", @"three" ];
 
-        // for-in over an NFArray: loop var is a fresh NFObject* per iteration
+        // for-in over an NPArray: loop var is a fresh NPObject* per iteration
         int idx = 0;
-        for (NFObject *x in arr) {
+        for (NPObject *x in arr) {
             idx = idx + 1;
-            printf("%d: %s\n", idx, [(NFString *)x UTF8String]);
+            printf("%d: %s\n", idx, [(NPString *)x UTF8String]);
         }
 
         // nested for-in
-        NFArray *rows = @[ @[ @"a", @"b" ], @[ @"c", @"d" ] ];
-        for (NFObject *row in rows) {
-            for (NFObject *cell in (NFArray *)row) {
-                printf("cell %s\n", [(NFString *)cell UTF8String]);
+        NPArray *rows = @[ @[ @"a", @"b" ], @[ @"c", @"d" ] ];
+        for (NPObject *row in rows) {
+            for (NPObject *cell in (NPArray *)row) {
+                printf("cell %s\n", [(NPString *)cell UTF8String]);
             }
         }
 
         // empty array: body must not run
-        NFArray *empty = [NFArray array];
+        NPArray *empty = [NPArray array];
         int hits = 0;
-        for (NFObject *e in empty) {
+        for (NPObject *e in empty) {
             hits = hits + 1;
         }
         printf("empty hits: %d\n", hits);

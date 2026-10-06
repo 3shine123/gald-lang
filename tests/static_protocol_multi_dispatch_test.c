@@ -5,8 +5,8 @@
 #include <stdint.h>
 #include <stddef.h>
 #include "nopa/runtime.h"
-struct nopa_NFObject_vtable;
-struct nopa_NFObject_meta_vtable;
+struct nopa_NPObject_vtable;
+struct nopa_NPObject_meta_vtable;
 struct nopa_HeavyRobot_vtable;
 struct nopa_HeavyRobot_meta_vtable;
 struct nopa_AISecurityGateway_vtable;
@@ -30,86 +30,86 @@ static const SEL __nopa_sel_initWithName_rules_ = {.name = "initWithName:rules:"
 static const SEL __nopa_sel_gatewayName = {.name = "gatewayName", .hash = 0x3F7D0172};
 static const SEL __nopa_sel_performSecurityAuditWithThreatLevel_ = {.name = "performSecurityAuditWithThreatLevel:", .hash = 0x401FA9C3};
 
-typedef struct NFObject NFObject;
+typedef struct NPObject NPObject;
 typedef struct HeavyRobot HeavyRobot;
 typedef struct AISecurityGateway AISecurityGateway;
 
-NFObject * NFObject_alloc(NFClass * self, SEL _cmd);
-NFObject * NFObject_new(NFClass * self, SEL _cmd);
-NFObject * NFObject_init(NFObject * self, SEL _cmd);
-void NFObject_dealloc(NFObject * self, SEL _cmd);
-void NFObject_release(NFObject * self, SEL _cmd);
-NFObject * NFObject_retain(NFObject * self, SEL _cmd);
-NFObject * HeavyRobot_initWithId_payload_(NFObject * self, SEL _cmd, int rid, int weight);
-int HeavyRobot_robotId(NFObject * self, SEL _cmd);
-void HeavyRobot_setRobotId_(NFObject * self, SEL _cmd, int value);
-int HeavyRobot_payloadWeight(NFObject * self, SEL _cmd);
-void HeavyRobot_setPayloadWeight_(NFObject * self, SEL _cmd, int value);
-const char * HeavyRobot_serializeToJSON(NFObject * self, SEL _cmd);
-void HeavyRobot_uploadToCloudWithEndpoint_(NFObject * self, SEL _cmd, const char * url);
-int HeavyRobot_getLastSyncLatency(NFObject * self, SEL _cmd);
-NFObject * AISecurityGateway_initWithName_rules_(NFObject * self, SEL _cmd, const char * name, int rules);
-const char * AISecurityGateway_gatewayName(NFObject * self, SEL _cmd);
-const char * AISecurityGateway_serializeToJSON(NFObject * self, SEL _cmd);
-int AISecurityGateway_performSecurityAuditWithThreatLevel_(NFObject * self, SEL _cmd, int level);
-NFObject * nopa_alloc(struct NFClass * cls);
-NFObject * nopa_init(NFObject * self);
-void nopa_release(NFObject * obj);
-NFObject * nopa_retain(NFObject * obj);
+NPObject * NPObject_alloc(NPClass * self, SEL _cmd);
+NPObject * NPObject_new(NPClass * self, SEL _cmd);
+NPObject * NPObject_init(NPObject * self, SEL _cmd);
+void NPObject_dealloc(NPObject * self, SEL _cmd);
+void NPObject_release(NPObject * self, SEL _cmd);
+NPObject * NPObject_retain(NPObject * self, SEL _cmd);
+NPObject * HeavyRobot_initWithId_payload_(NPObject * self, SEL _cmd, int rid, int weight);
+int HeavyRobot_robotId(NPObject * self, SEL _cmd);
+void HeavyRobot_setRobotId_(NPObject * self, SEL _cmd, int value);
+int HeavyRobot_payloadWeight(NPObject * self, SEL _cmd);
+void HeavyRobot_setPayloadWeight_(NPObject * self, SEL _cmd, int value);
+const char * HeavyRobot_serializeToJSON(NPObject * self, SEL _cmd);
+void HeavyRobot_uploadToCloudWithEndpoint_(NPObject * self, SEL _cmd, const char * url);
+int HeavyRobot_getLastSyncLatency(NPObject * self, SEL _cmd);
+NPObject * AISecurityGateway_initWithName_rules_(NPObject * self, SEL _cmd, const char * name, int rules);
+const char * AISecurityGateway_gatewayName(NPObject * self, SEL _cmd);
+const char * AISecurityGateway_serializeToJSON(NPObject * self, SEL _cmd);
+int AISecurityGateway_performSecurityAuditWithThreatLevel_(NPObject * self, SEL _cmd, int level);
+NPObject * nopa_alloc(struct NPClass * cls);
+NPObject * nopa_init(NPObject * self);
+void nopa_release(NPObject * obj);
+NPObject * nopa_retain(NPObject * obj);
 int main(int argc, const char * argv[]);
 
-NFClass * NFObject_getClass(NFClass * self, SEL _cmd);
-NFClass * HeavyRobot_getClass(NFClass * self, SEL _cmd);
-NFClass * AISecurityGateway_getClass(NFClass * self, SEL _cmd);
+NPClass * NPObject_getClass(NPClass * self, SEL _cmd);
+NPClass * HeavyRobot_getClass(NPClass * self, SEL _cmd);
+NPClass * AISecurityGateway_getClass(NPClass * self, SEL _cmd);
 
-struct nopa_NFObject_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    void (*release)(NFObject *, SEL);
-    NFObject * (*retain)(NFObject *, SEL);
+struct nopa_NPObject_vtable {
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    void (*release)(NPObject *, SEL);
+    NPObject * (*retain)(NPObject *, SEL);
 };
-struct nopa_NFObject_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+struct nopa_NPObject_meta_vtable {
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct nopa_HeavyRobot_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    void (*release)(NFObject *, SEL);
-    NFObject * (*retain)(NFObject *, SEL);
-    NFObject * (*initWithId_payload_)(NFObject *, SEL, int, int);
-    const char * (*serializeToJSON)(NFObject *, SEL);
-    void (*uploadToCloudWithEndpoint_)(NFObject *, SEL, const char *);
-    int (*getLastSyncLatency)(NFObject *, SEL);
-    int (*robotId)(NFObject *, SEL);
-    void (*setRobotId_)(NFObject *, SEL, int);
-    int (*payloadWeight)(NFObject *, SEL);
-    void (*setPayloadWeight_)(NFObject *, SEL, int);
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    void (*release)(NPObject *, SEL);
+    NPObject * (*retain)(NPObject *, SEL);
+    NPObject * (*initWithId_payload_)(NPObject *, SEL, int, int);
+    const char * (*serializeToJSON)(NPObject *, SEL);
+    void (*uploadToCloudWithEndpoint_)(NPObject *, SEL, const char *);
+    int (*getLastSyncLatency)(NPObject *, SEL);
+    int (*robotId)(NPObject *, SEL);
+    void (*setRobotId_)(NPObject *, SEL, int);
+    int (*payloadWeight)(NPObject *, SEL);
+    void (*setPayloadWeight_)(NPObject *, SEL, int);
 };
 struct nopa_HeavyRobot_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct nopa_AISecurityGateway_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    void (*release)(NFObject *, SEL);
-    NFObject * (*retain)(NFObject *, SEL);
-    NFObject * (*initWithName_rules_)(NFObject *, SEL, const char *, int);
-    const char * (*serializeToJSON)(NFObject *, SEL);
-    int (*performSecurityAuditWithThreatLevel_)(NFObject *, SEL, int);
-    const char * (*gatewayName)(NFObject *, SEL);
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    void (*release)(NPObject *, SEL);
+    NPObject * (*retain)(NPObject *, SEL);
+    NPObject * (*initWithName_rules_)(NPObject *, SEL, const char *, int);
+    const char * (*serializeToJSON)(NPObject *, SEL);
+    int (*performSecurityAuditWithThreatLevel_)(NPObject *, SEL, int);
+    const char * (*gatewayName)(NPObject *, SEL);
 };
 struct nopa_AISecurityGateway_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 
 struct HeavyRobot {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     int _robotId;
     int _payloadWeight;
@@ -117,30 +117,30 @@ struct HeavyRobot {
 typedef struct HeavyRobot HeavyRobot;
 
 struct AISecurityGateway {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     const char * _gatewayName;
     int _firewallRulesActive;
 };
 typedef struct AISecurityGateway AISecurityGateway;
 
-extern NFClass nopa_NFObject_class;
-extern NFClass nopa_HeavyRobot_class;
-extern NFClass nopa_AISecurityGateway_class;
+extern NPClass nopa_NPObject_class;
+extern NPClass nopa_HeavyRobot_class;
+extern NPClass nopa_AISecurityGateway_class;
 void nopa_meta_init(void);
 
-struct nopa_NFObject_vtable nopa_NFObject_vtable_inst = {
-    .init = NFObject_init,
-    .dealloc = NFObject_dealloc,
-    .release = NFObject_release,
-    .retain = NFObject_retain,
+struct nopa_NPObject_vtable nopa_NPObject_vtable_inst = {
+    .init = NPObject_init,
+    .dealloc = NPObject_dealloc,
+    .release = NPObject_release,
+    .retain = NPObject_retain,
 };
 
 struct nopa_HeavyRobot_vtable nopa_HeavyRobot_vtable_inst = {
-    .init = NFObject_init,
-    .dealloc = NFObject_dealloc,
-    .release = NFObject_release,
-    .retain = NFObject_retain,
+    .init = NPObject_init,
+    .dealloc = NPObject_dealloc,
+    .release = NPObject_release,
+    .retain = NPObject_retain,
     .initWithId_payload_ = HeavyRobot_initWithId_payload_,
     .serializeToJSON = HeavyRobot_serializeToJSON,
     .uploadToCloudWithEndpoint_ = HeavyRobot_uploadToCloudWithEndpoint_,
@@ -152,120 +152,120 @@ struct nopa_HeavyRobot_vtable nopa_HeavyRobot_vtable_inst = {
 };
 
 struct nopa_AISecurityGateway_vtable nopa_AISecurityGateway_vtable_inst = {
-    .init = NFObject_init,
-    .dealloc = NFObject_dealloc,
-    .release = NFObject_release,
-    .retain = NFObject_retain,
+    .init = NPObject_init,
+    .dealloc = NPObject_dealloc,
+    .release = NPObject_release,
+    .retain = NPObject_retain,
     .initWithName_rules_ = AISecurityGateway_initWithName_rules_,
     .serializeToJSON = AISecurityGateway_serializeToJSON,
     .performSecurityAuditWithThreatLevel_ = AISecurityGateway_performSecurityAuditWithThreatLevel_,
     .gatewayName = AISecurityGateway_gatewayName,
 };
 
-struct nopa_NFObject_meta_vtable nopa_NFObject_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
-    .class = NFObject_getClass,
+struct nopa_NPObject_meta_vtable nopa_NPObject_meta_vtable_inst = {
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
+    .class = NPObject_getClass,
 };
 
 struct nopa_HeavyRobot_meta_vtable nopa_HeavyRobot_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
     .class = HeavyRobot_getClass,
 };
 
 struct nopa_AISecurityGateway_meta_vtable nopa_AISecurityGateway_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
     .class = AISecurityGateway_getClass,
 };
 
-NFClass * NFObject_getClass(NFClass * self, SEL _cmd) {
+NPClass * NPObject_getClass(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
-NFClass * HeavyRobot_getClass(NFClass * self, SEL _cmd) {
+NPClass * HeavyRobot_getClass(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
-NFClass * AISecurityGateway_getClass(NFClass * self, SEL _cmd) {
+NPClass * AISecurityGateway_getClass(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
-NFClass nopa_NFObject_class;
-NFClass nopa_HeavyRobot_class;
-NFClass nopa_AISecurityGateway_class;
+NPClass nopa_NPObject_class;
+NPClass nopa_HeavyRobot_class;
+NPClass nopa_AISecurityGateway_class;
 
 void nopa_meta_init(void) {
-    nopa_NFObject_class = (NFClass){
-        .name = "NFObject",
+    nopa_NPObject_class = (NPClass){
+        .name = "NPObject",
         .superclass = NULL,
-        .instance_size = sizeof(struct NFObject),
-        .vtable = &nopa_NFObject_vtable_inst,
-        .class_vtable = &nopa_NFObject_meta_vtable_inst,
+        .instance_size = sizeof(struct NPObject),
+        .vtable = &nopa_NPObject_vtable_inst,
+        .class_vtable = &nopa_NPObject_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_HeavyRobot_class = (NFClass){
+    nopa_HeavyRobot_class = (NPClass){
         .name = "HeavyRobot",
-        .superclass = &nopa_NFObject_class,
+        .superclass = &nopa_NPObject_class,
         .instance_size = sizeof(struct HeavyRobot),
         .vtable = &nopa_HeavyRobot_vtable_inst,
         .class_vtable = &nopa_HeavyRobot_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_AISecurityGateway_class = (NFClass){
+    nopa_AISecurityGateway_class = (NPClass){
         .name = "AISecurityGateway",
-        .superclass = &nopa_NFObject_class,
+        .superclass = &nopa_NPObject_class,
         .instance_size = sizeof(struct AISecurityGateway),
         .vtable = &nopa_AISecurityGateway_vtable_inst,
         .class_vtable = &nopa_AISecurityGateway_meta_vtable_inst,
         .protocol_count = 0,
     };
 }
-NFObject * NFObject_alloc(NFClass * self, SEL _cmd) {
+NPObject * NPObject_alloc(NPClass * self, SEL _cmd) {
   return nopa_alloc(self);
 }
 
-NFObject * NFObject_new(NFClass * self, SEL _cmd) {
-  NFObject * obj = nopa_alloc(self);
+NPObject * NPObject_new(NPClass * self, SEL _cmd) {
+  NPObject * obj = nopa_alloc(self);
   return nopa_init(obj);
 }
 
-NFObject * NFObject_init(NFObject * self, SEL _cmd) {
-  struct NFObject * _self = (struct NFObject *)self;
+NPObject * NPObject_init(NPObject * self, SEL _cmd) {
+  struct NPObject * _self = (struct NPObject *)self;
   {
     return nopa_init(self);
   }
 }
 
-void NFObject_dealloc(NFObject * self, SEL _cmd) {
-  struct NFObject * _self = (struct NFObject *)self;
+void NPObject_dealloc(NPObject * self, SEL _cmd) {
+  struct NPObject * _self = (struct NPObject *)self;
   {
     return;
   }
 }
 
-void NFObject_release(NFObject * self, SEL _cmd) {
-  struct NFObject * _self = (struct NFObject *)self;
+void NPObject_release(NPObject * self, SEL _cmd) {
+  struct NPObject * _self = (struct NPObject *)self;
   {
     nopa_release(self);
   }
 }
 
-NFObject * NFObject_retain(NFObject * self, SEL _cmd) {
-  struct NFObject * _self = (struct NFObject *)self;
+NPObject * NPObject_retain(NPObject * self, SEL _cmd) {
+  struct NPObject * _self = (struct NPObject *)self;
   {
     return nopa_retain(self);
   }
 }
 
-NFObject * HeavyRobot_initWithId_payload_(NFObject * self, SEL _cmd, int rid, int weight) {
+NPObject * HeavyRobot_initWithId_payload_(NPObject * self, SEL _cmd, int rid, int weight) {
   struct HeavyRobot * _self = (struct HeavyRobot *)self;
   {
-    self = NFObject_init(self, sel_registerName("init"));
+    self = NPObject_init(self, sel_registerName("init"));
     if (self)     {
       _self->_robotId = rid;
       _self->_payloadWeight = weight;
@@ -274,23 +274,23 @@ NFObject * HeavyRobot_initWithId_payload_(NFObject * self, SEL _cmd, int rid, in
   }
 }
 
-int HeavyRobot_robotId(NFObject * self, SEL _cmd) {
+int HeavyRobot_robotId(NPObject * self, SEL _cmd) {
   return ((struct HeavyRobot *)self)->_robotId;
 }
 
-void HeavyRobot_setRobotId_(NFObject * self, SEL _cmd, int value) {
+void HeavyRobot_setRobotId_(NPObject * self, SEL _cmd, int value) {
   ((struct HeavyRobot *)self)->_robotId = value;
 }
 
-int HeavyRobot_payloadWeight(NFObject * self, SEL _cmd) {
+int HeavyRobot_payloadWeight(NPObject * self, SEL _cmd) {
   return ((struct HeavyRobot *)self)->_payloadWeight;
 }
 
-void HeavyRobot_setPayloadWeight_(NFObject * self, SEL _cmd, int value) {
+void HeavyRobot_setPayloadWeight_(NPObject * self, SEL _cmd, int value) {
   ((struct HeavyRobot *)self)->_payloadWeight = value;
 }
 
-const char * HeavyRobot_serializeToJSON(NFObject * self, SEL _cmd) {
+const char * HeavyRobot_serializeToJSON(NPObject * self, SEL _cmd) {
   struct HeavyRobot * _self = (struct HeavyRobot *)self;
   {
     static char jsonBuffer[128];
@@ -299,24 +299,24 @@ const char * HeavyRobot_serializeToJSON(NFObject * self, SEL _cmd) {
   }
 }
 
-void HeavyRobot_uploadToCloudWithEndpoint_(NFObject * self, SEL _cmd, const char * url) {
+void HeavyRobot_uploadToCloudWithEndpoint_(NPObject * self, SEL _cmd, const char * url) {
   struct HeavyRobot * _self = (struct HeavyRobot *)self;
   {
     printf("[重型机器人-%d] 数据包已上传至云端端点: %s\n", _self->_robotId, url);
   }
 }
 
-int HeavyRobot_getLastSyncLatency(NFObject * self, SEL _cmd) {
+int HeavyRobot_getLastSyncLatency(NPObject * self, SEL _cmd) {
   struct HeavyRobot * _self = (struct HeavyRobot *)self;
   {
     return 15;
   }
 }
 
-NFObject * AISecurityGateway_initWithName_rules_(NFObject * self, SEL _cmd, const char * name, int rules) {
+NPObject * AISecurityGateway_initWithName_rules_(NPObject * self, SEL _cmd, const char * name, int rules) {
   struct AISecurityGateway * _self = (struct AISecurityGateway *)self;
   {
-    self = NFObject_init(self, sel_registerName("init"));
+    self = NPObject_init(self, sel_registerName("init"));
     if (self)     {
       _self->_gatewayName = name;
       _self->_firewallRulesActive = rules;
@@ -325,11 +325,11 @@ NFObject * AISecurityGateway_initWithName_rules_(NFObject * self, SEL _cmd, cons
   }
 }
 
-const char * AISecurityGateway_gatewayName(NFObject * self, SEL _cmd) {
+const char * AISecurityGateway_gatewayName(NPObject * self, SEL _cmd) {
   return ((struct AISecurityGateway *)self)->_gatewayName;
 }
 
-const char * AISecurityGateway_serializeToJSON(NFObject * self, SEL _cmd) {
+const char * AISecurityGateway_serializeToJSON(NPObject * self, SEL _cmd) {
   struct AISecurityGateway * _self = (struct AISecurityGateway *)self;
   {
     static char jsonBuffer[128];
@@ -338,7 +338,7 @@ const char * AISecurityGateway_serializeToJSON(NFObject * self, SEL _cmd) {
   }
 }
 
-int AISecurityGateway_performSecurityAuditWithThreatLevel_(NFObject * self, SEL _cmd, int level) {
+int AISecurityGateway_performSecurityAuditWithThreatLevel_(NPObject * self, SEL _cmd, int level) {
   struct AISecurityGateway * _self = (struct AISecurityGateway *)self;
   {
     printf("[安全网关-%s] 正在执行全盘扫描，注入威胁等级：%d\n", _self->_gatewayName, level);
@@ -346,13 +346,13 @@ int AISecurityGateway_performSecurityAuditWithThreatLevel_(NFObject * self, SEL 
   }
 }
 
-NFObject * nopa_alloc(struct NFClass * cls);
+NPObject * nopa_alloc(struct NPClass * cls);
 
-NFObject * nopa_init(NFObject * self);
+NPObject * nopa_init(NPObject * self);
 
-void nopa_release(NFObject * obj);
+void nopa_release(NPObject * obj);
 
-NFObject * nopa_retain(NFObject * obj);
+NPObject * nopa_retain(NPObject * obj);
 
 int main(int argc, const char * argv[]) {
   nopa_meta_init();
@@ -361,22 +361,22 @@ int main(int argc, const char * argv[]) {
     printf(">>>      nopac 编译器「静态协议多态与可选方法」全新特性压测        <<<\n");
     printf("====================================================================\n\n");
     printf("--- 1. 验证单协议限定指针 id<DataSerializable> 的静态派发 ---\n");
-    NFObject *__nopa_tmp_1 = (NFObject_alloc(&nopa_HeavyRobot_class, sel_registerName("alloc")));
+    NPObject *__nopa_tmp_1 = (NPObject_alloc(&nopa_HeavyRobot_class, sel_registerName("alloc")));
     HeavyRobot * robot = ((struct nopa_HeavyRobot_vtable *)__nopa_tmp_1->isa->vtable)->initWithId_payload_(__nopa_tmp_1, sel_registerName("initWithId:payload:"), 101, 500);
-    NFObject *__nopa_tmp_2 = (NFObject_alloc(&nopa_AISecurityGateway_class, sel_registerName("alloc")));
+    NPObject *__nopa_tmp_2 = (NPObject_alloc(&nopa_AISecurityGateway_class, sel_registerName("alloc")));
     AISecurityGateway * gateway = ((struct nopa_AISecurityGateway_vtable *)__nopa_tmp_2->isa->vtable)->initWithName_rules_(__nopa_tmp_2, sel_registerName("initWithName:rules:"), "Quantum_Gate_Alpha", 45);
-    NFObject * serializableA = (NFObject *)robot;
-    NFObject * serializableB = (NFObject *)gateway;
+    NPObject * serializableA = (NPObject *)robot;
+    NPObject * serializableB = (NPObject *)gateway;
     printf("[协议多态断言 1] 成功调用不同底层类的协议实现：\n");
-    printf("          -> 机器人序列化结果: %s\n", ((NFObject *)serializableA)->isa == &nopa_AISecurityGateway_class ? ((struct nopa_AISecurityGateway_vtable *)(serializableA)->isa->vtable)->serializeToJSON(serializableA, sel_registerName("serializeToJSON")) : ((struct nopa_HeavyRobot_vtable *)(serializableA)->isa->vtable)->serializeToJSON(serializableA, sel_registerName("serializeToJSON")));
-    printf("          -> 网关序列化结果: %s\n", ((NFObject *)serializableB)->isa == &nopa_AISecurityGateway_class ? ((struct nopa_AISecurityGateway_vtable *)(serializableB)->isa->vtable)->serializeToJSON(serializableB, sel_registerName("serializeToJSON")) : ((struct nopa_HeavyRobot_vtable *)(serializableB)->isa->vtable)->serializeToJSON(serializableB, sel_registerName("serializeToJSON")));
+    printf("          -> 机器人序列化结果: %s\n", ((NPObject *)serializableA)->isa == &nopa_AISecurityGateway_class ? ((struct nopa_AISecurityGateway_vtable *)(serializableA)->isa->vtable)->serializeToJSON(serializableA, sel_registerName("serializeToJSON")) : ((struct nopa_HeavyRobot_vtable *)(serializableA)->isa->vtable)->serializeToJSON(serializableA, sel_registerName("serializeToJSON")));
+    printf("          -> 网关序列化结果: %s\n", ((NPObject *)serializableB)->isa == &nopa_AISecurityGateway_class ? ((struct nopa_AISecurityGateway_vtable *)(serializableB)->isa->vtable)->serializeToJSON(serializableB, sel_registerName("serializeToJSON")) : ((struct nopa_HeavyRobot_vtable *)(serializableB)->isa->vtable)->serializeToJSON(serializableB, sel_registerName("serializeToJSON")));
     printf("\n--- 2. 验证多协议复合指针 id<DataSerializable, CloudSyncable> 的静态检验 ---\n");
-    NFObject * compoundTarget = (NFObject *)robot;
+    NPObject * compoundTarget = (NPObject *)robot;
     printf("[协议多态断言 2] 复合协议方法链式静态派发：\n");
-    printf("          -> 调用 Serializable: %s\n", ((NFObject *)compoundTarget)->isa == &nopa_AISecurityGateway_class ? ((struct nopa_AISecurityGateway_vtable *)(compoundTarget)->isa->vtable)->serializeToJSON(compoundTarget, sel_registerName("serializeToJSON")) : ((struct nopa_HeavyRobot_vtable *)(compoundTarget)->isa->vtable)->serializeToJSON(compoundTarget, sel_registerName("serializeToJSON")));
+    printf("          -> 调用 Serializable: %s\n", ((NPObject *)compoundTarget)->isa == &nopa_AISecurityGateway_class ? ((struct nopa_AISecurityGateway_vtable *)(compoundTarget)->isa->vtable)->serializeToJSON(compoundTarget, sel_registerName("serializeToJSON")) : ((struct nopa_HeavyRobot_vtable *)(compoundTarget)->isa->vtable)->serializeToJSON(compoundTarget, sel_registerName("serializeToJSON")));
     ((struct nopa_HeavyRobot_vtable *)(compoundTarget)->isa->vtable)->uploadToCloudWithEndpoint_(compoundTarget, sel_registerName("uploadToCloudWithEndpoint:"), "https://api.np-cloud.org/v1/sync");
     printf("\n--- 3. 压测协议 @optional 可选方法在静态环境下的安全决议 ---\n");
-    NFObject * testSyncObj = (NFObject *)robot;
+    NPObject * testSyncObj = (NPObject *)robot;
     int latency = 0;
     printf("[可选方法断言] 静态调用遵守协议对象的 @optional 方法：\n");
     latency = ((struct nopa_HeavyRobot_vtable *)(testSyncObj)->isa->vtable)->getLastSyncLatency(testSyncObj, sel_registerName("getLastSyncLatency"));
@@ -384,23 +384,23 @@ int main(int argc, const char * argv[]) {
     printf("\n--- 4. 测试协议类型作为 Block 闭包参数跨作用域捕获与安全传递 ---\n");
     __block int auditCount = 0;
     __block int finalSecScore = 0;
-    void (^auditRunner)(NFObject *) = ^void(NFObject * inspector) {
+    void (^auditRunner)(NPObject *) = ^void(NPObject * inspector) {
   auditCount++;
   finalSecScore = ((struct nopa_AISecurityGateway_vtable *)(inspector)->isa->vtable)->performSecurityAuditWithThreatLevel_(inspector, sel_registerName("performSecurityAuditWithThreatLevel:"), 80);
   printf("[安全审计闭包] 审计次数: %d | 计算出最终安全系数: %d\n", auditCount, finalSecScore);
 }
 ;
-    auditRunner((NFObject *)gateway);
+    auditRunner((NPObject *)gateway);
     printf("\n--- 5. 极限混淆守门员：三元表达式内包含带副作用的协议指针方法调用 ---\n");
     int isSystemSecure = 1;
     int protocolStepCounter = 4444;
-    char * finalSerializedOutput = (isSystemSecure > 0) ? ({ NFObject *__nopa_tmp_3 = ((protocolStepCounter++, serializableB)); __nopa_tmp_3->isa == &nopa_AISecurityGateway_class ? ((struct nopa_AISecurityGateway_vtable *)__nopa_tmp_3->isa->vtable)->serializeToJSON(__nopa_tmp_3, sel_registerName("serializeToJSON")) : ((struct nopa_HeavyRobot_vtable *)__nopa_tmp_3->isa->vtable)->serializeToJSON(__nopa_tmp_3, sel_registerName("serializeToJSON")); }) : "{}";
+    char * finalSerializedOutput = (isSystemSecure > 0) ? ({ NPObject *__nopa_tmp_3 = ((protocolStepCounter++, serializableB)); __nopa_tmp_3->isa == &nopa_AISecurityGateway_class ? ((struct nopa_AISecurityGateway_vtable *)__nopa_tmp_3->isa->vtable)->serializeToJSON(__nopa_tmp_3, sel_registerName("serializeToJSON")) : ((struct nopa_HeavyRobot_vtable *)__nopa_tmp_3->isa->vtable)->serializeToJSON(__nopa_tmp_3, sel_registerName("serializeToJSON")); }) : "{}";
     printf("[终极协议边界断言] 协议类型消息传递与自增副作用完美结合！\n");
     printf("          -> 副作用自增计数器: %d (预期: 4445)\n", protocolStepCounter);
     printf("          -> 通过复合表达式链抓取的网关序列化数据: %s\n", finalSerializedOutput);
     printf("\n--- 6. 正在释放智能工厂协议多态拓扑资源... ---\n");
-    ((struct nopa_NFObject_vtable *)(robot)->isa->vtable)->release(robot, sel_registerName("release"));
-    ((struct nopa_NFObject_vtable *)(gateway)->isa->vtable)->release(gateway, sel_registerName("release"));
+    ((struct nopa_NPObject_vtable *)(robot)->isa->vtable)->release(robot, sel_registerName("release"));
+    ((struct nopa_NPObject_vtable *)(gateway)->isa->vtable)->release(gateway, sel_registerName("release"));
     printf("\n====================================================================\n");
     printf(">>> 奇迹！静态协议多态 (Protocols) 及多协议复合测试全线通关！   <<<\n");
     printf("====================================================================\n");

@@ -23,7 +23,7 @@
     // ------------------------------------------------------------------------
     // 基类：通用日志条目
     // ------------------------------------------------------------------------
-    @interface LogEntry : NFObject {
+    @interface LogEntry : NPObject {
         @public
         const char *_rawLine;
     }
@@ -103,7 +103,7 @@
     // ------------------------------------------------------------------------
     // 泛型容器：LogBuffer<T> —— 存储任意类型的日志对象
     // ------------------------------------------------------------------------
-    @interface LogBuffer<T> : NFObject {
+    @interface LogBuffer<T> : NPObject {
         @public
         int _capacity;
         int _count;
@@ -139,7 +139,7 @@
     // ------------------------------------------------------------------------
     // 分析器引擎：解析、过滤、统计
     // ------------------------------------------------------------------------
-    @interface Analyzer : NFObject {
+    @interface Analyzer : NPObject {
         @public
         LogBuffer<LogTool::LogEntry *> *_buffer;
         int _errorCount;

@@ -1,21 +1,21 @@
-#ifndef NOPA_HELLO_NF_H
-#define NOPA_HELLO_NF_H
+#ifndef NOPA_HELLO_NP_H
+#define NOPA_HELLO_NP_H
 
 #include <nopa/object.h>
 
-struct nopa_NFObject_vtable;
+struct nopa_NPObject_vtable;
 struct nopa_Student_vtable;
 
-struct NFObject;
-NFObject * NFObject_init(NFObject * self, SEL _cmd);
-void NFObject_dealloc(NFObject * self, SEL _cmd);
-struct nopa_NFObject_vtable;
+struct NPObject;
+NPObject * NPObject_init(NPObject * self, SEL _cmd);
+void NPObject_dealloc(NPObject * self, SEL _cmd);
+struct nopa_NPObject_vtable;
 struct Student;
-int Student_grade(NFObject * self, SEL _cmd);
-void Student_setGrade_(NFObject * self, SEL _cmd, int value);
+int Student_grade(NPObject * self, SEL _cmd);
+void Student_setGrade_(NPObject * self, SEL _cmd, int value);
 struct nopa_Student_vtable;
-extern NFClass nopa_NFObject_class;
-extern NFClass nopa_Student_class;
+extern NPClass nopa_NPObject_class;
+extern NPClass nopa_Student_class;
 void nopa_init(void);
 
-#endif /* NOPA_HELLO_NF_H */
+#endif /* NOPA_HELLO_NP_H */

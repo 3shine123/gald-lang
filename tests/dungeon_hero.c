@@ -6,7 +6,7 @@
 #include "nopa/runtime.h"
 #import <string.h>
 struct nopa_vtable;
-struct nopa_NFObject_meta_vtable;
+struct nopa_NPObject_meta_vtable;
 struct nopa_GameEntity_meta_vtable;
 struct nopa_Hero_meta_vtable;
 struct nopa_Spirit_meta_vtable;
@@ -41,18 +41,18 @@ static const SEL __nopa_sel_attack_ = {.name = "attack:", .hash = 0x51B1E145};
 #ifndef __NOPA_ROOT_DEFINED
 #define __NOPA_ROOT_DEFINED
 struct __nopa_root {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
 };
 typedef struct __nopa_root __nopa_root;
 #endif
-#ifndef NFOBJECT_DEFINED
-#define NFOBJECT_DEFINED
-struct NFObject {
-    struct NFClass *isa;
+#ifndef NPOBJECT_DEFINED
+#define NPOBJECT_DEFINED
+struct NPObject {
+    struct NPClass *isa;
     uint32_t retain_count;
 };
-typedef struct NFObject NFObject;
+typedef struct NPObject NPObject;
 #endif
 struct GameEntity;
 typedef struct GameEntity GameEntity;
@@ -63,103 +63,103 @@ typedef struct Spirit Spirit;
 struct Monster;
 typedef struct Monster Monster;
 
-NFObject * __nopa_root_init(NFObject * self, SEL _cmd);
-void __nopa_root_dealloc(NFObject * self, SEL _cmd);
-void __nopa_root_release(NFObject * self, SEL _cmd);
-NFObject * __nopa_root_retain(NFObject * self, SEL _cmd);
-NFObject * NFObject_alloc(NFClass * self, SEL _cmd);
-NFObject * NFObject_new(NFClass * self, SEL _cmd);
-NFObject * NFObject_init(NFObject * self, SEL _cmd);
-void NFObject_dealloc(NFObject * self, SEL _cmd);
-void NFObject_release(NFObject * self, SEL _cmd);
-NFObject * NFObject_retain(NFObject * self, SEL _cmd);
-NFObject * GameEntity_initWithName_hp_attack_(NFObject * self, SEL _cmd, char * name, int hp, int attack);
-void GameEntity_displayStatus(NFObject * self, SEL _cmd);
-char * GameEntity_name(NFObject * self, SEL _cmd);
-void GameEntity_setName_(NFObject * self, SEL _cmd, char * value);
-int GameEntity_hp(NFObject * self, SEL _cmd);
-void GameEntity_setHp_(NFObject * self, SEL _cmd, int value);
-int GameEntity_attackPower(NFObject * self, SEL _cmd);
-void GameEntity_setAttackPower_(NFObject * self, SEL _cmd, int value);
-void Spirit_castHeal_(NFObject * self, SEL _cmd, GameEntity * target);
-void Hero_levelUp(NFObject * self, SEL _cmd);
-Spirit * Hero_companion(NFObject * self, SEL _cmd);
-void Hero_setCompanion_(NFObject * self, SEL _cmd, Spirit * value);
-int Hero_exp(NFObject * self, SEL _cmd);
-void Hero_setExp_(NFObject * self, SEL _cmd, int value);
-NFObject * Monster_initWithName_hp_attack_type_(NFObject * self, SEL _cmd, char * name, int hp, int attack, char * type);
-char * Monster_monsterType(NFObject * self, SEL _cmd);
-void Monster_setMonsterType_(NFObject * self, SEL _cmd, char * value);
-void GameEntity_takeDamage_(NFObject * self, SEL _cmd, int amount);
-void GameEntity_attack_(NFObject * self, SEL _cmd, NFObject * target);
-void GameEntity_dealloc(NFObject * self, SEL _cmd);
-void Monster_attack_(NFObject * self, SEL _cmd, NFObject * target);
-NFObject * nopa_alloc(struct NFClass * cls);
-NFObject * nopa_init(NFObject * self);
-void nopa_release(NFObject * obj);
-NFObject * nopa_retain(NFObject * obj);
+NPObject * __nopa_root_init(NPObject * self, SEL _cmd);
+void __nopa_root_dealloc(NPObject * self, SEL _cmd);
+void __nopa_root_release(NPObject * self, SEL _cmd);
+NPObject * __nopa_root_retain(NPObject * self, SEL _cmd);
+NPObject * NPObject_alloc(NPClass * self, SEL _cmd);
+NPObject * NPObject_new(NPClass * self, SEL _cmd);
+NPObject * NPObject_init(NPObject * self, SEL _cmd);
+void NPObject_dealloc(NPObject * self, SEL _cmd);
+void NPObject_release(NPObject * self, SEL _cmd);
+NPObject * NPObject_retain(NPObject * self, SEL _cmd);
+NPObject * GameEntity_initWithName_hp_attack_(NPObject * self, SEL _cmd, char * name, int hp, int attack);
+void GameEntity_displayStatus(NPObject * self, SEL _cmd);
+char * GameEntity_name(NPObject * self, SEL _cmd);
+void GameEntity_setName_(NPObject * self, SEL _cmd, char * value);
+int GameEntity_hp(NPObject * self, SEL _cmd);
+void GameEntity_setHp_(NPObject * self, SEL _cmd, int value);
+int GameEntity_attackPower(NPObject * self, SEL _cmd);
+void GameEntity_setAttackPower_(NPObject * self, SEL _cmd, int value);
+void Spirit_castHeal_(NPObject * self, SEL _cmd, GameEntity * target);
+void Hero_levelUp(NPObject * self, SEL _cmd);
+Spirit * Hero_companion(NPObject * self, SEL _cmd);
+void Hero_setCompanion_(NPObject * self, SEL _cmd, Spirit * value);
+int Hero_exp(NPObject * self, SEL _cmd);
+void Hero_setExp_(NPObject * self, SEL _cmd, int value);
+NPObject * Monster_initWithName_hp_attack_type_(NPObject * self, SEL _cmd, char * name, int hp, int attack, char * type);
+char * Monster_monsterType(NPObject * self, SEL _cmd);
+void Monster_setMonsterType_(NPObject * self, SEL _cmd, char * value);
+void GameEntity_takeDamage_(NPObject * self, SEL _cmd, int amount);
+void GameEntity_attack_(NPObject * self, SEL _cmd, NPObject * target);
+void GameEntity_dealloc(NPObject * self, SEL _cmd);
+void Monster_attack_(NPObject * self, SEL _cmd, NPObject * target);
+NPObject * nopa_alloc(struct NPClass * cls);
+NPObject * nopa_init(NPObject * self);
+void nopa_release(NPObject * obj);
+NPObject * nopa_retain(NPObject * obj);
 int main(int argc, const char * argv[]);
 
-NFClass * NFObject_getClass(NFClass * self, SEL _cmd);
-NFClass * GameEntity_getClass(NFClass * self, SEL _cmd);
-NFClass * Hero_getClass(NFClass * self, SEL _cmd);
-NFClass * Spirit_getClass(NFClass * self, SEL _cmd);
-NFClass * Monster_getClass(NFClass * self, SEL _cmd);
+NPClass * NPObject_getClass(NPClass * self, SEL _cmd);
+NPClass * GameEntity_getClass(NPClass * self, SEL _cmd);
+NPClass * Hero_getClass(NPClass * self, SEL _cmd);
+NPClass * Spirit_getClass(NPClass * self, SEL _cmd);
+NPClass * Monster_getClass(NPClass * self, SEL _cmd);
 
 struct nopa_vtable {
-    int (*attackPower)(NFObject *, SEL);
-    void (*attack_)(NFObject *, SEL, NFObject *);
-    void (*castHeal_)(NFObject *, SEL, GameEntity *);
-    Spirit * (*companion)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    void (*displayStatus)(NFObject *, SEL);
-    int (*exp)(NFObject *, SEL);
-    int (*hp)(NFObject *, SEL);
-    NFObject * (*init)(NFObject *, SEL);
-    NFObject * (*initWithName_hp_attack_)(NFObject *, SEL, char *, int, int);
-    NFObject * (*initWithName_hp_attack_type_)(NFObject *, SEL, char *, int, int, char *);
-    void (*levelUp)(NFObject *, SEL);
-    char * (*monsterType)(NFObject *, SEL);
-    char * (*name)(NFObject *, SEL);
-    void (*release)(NFObject *, SEL);
-    NFObject * (*retain)(NFObject *, SEL);
-    void (*setAttackPower_)(NFObject *, SEL, int);
-    void (*setCompanion_)(NFObject *, SEL, Spirit *);
-    void (*setExp_)(NFObject *, SEL, int);
-    void (*setHp_)(NFObject *, SEL, int);
-    void (*setMonsterType_)(NFObject *, SEL, char *);
-    void (*setName_)(NFObject *, SEL, char *);
-    void (*takeDamage_)(NFObject *, SEL, int);
+    int (*attackPower)(NPObject *, SEL);
+    void (*attack_)(NPObject *, SEL, NPObject *);
+    void (*castHeal_)(NPObject *, SEL, GameEntity *);
+    Spirit * (*companion)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    void (*displayStatus)(NPObject *, SEL);
+    int (*exp)(NPObject *, SEL);
+    int (*hp)(NPObject *, SEL);
+    NPObject * (*init)(NPObject *, SEL);
+    NPObject * (*initWithName_hp_attack_)(NPObject *, SEL, char *, int, int);
+    NPObject * (*initWithName_hp_attack_type_)(NPObject *, SEL, char *, int, int, char *);
+    void (*levelUp)(NPObject *, SEL);
+    char * (*monsterType)(NPObject *, SEL);
+    char * (*name)(NPObject *, SEL);
+    void (*release)(NPObject *, SEL);
+    NPObject * (*retain)(NPObject *, SEL);
+    void (*setAttackPower_)(NPObject *, SEL, int);
+    void (*setCompanion_)(NPObject *, SEL, Spirit *);
+    void (*setExp_)(NPObject *, SEL, int);
+    void (*setHp_)(NPObject *, SEL, int);
+    void (*setMonsterType_)(NPObject *, SEL, char *);
+    void (*setName_)(NPObject *, SEL, char *);
+    void (*takeDamage_)(NPObject *, SEL, int);
 };
 
-struct nopa_NFObject_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+struct nopa_NPObject_meta_vtable {
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct nopa_GameEntity_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct nopa_Hero_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct nopa_Spirit_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct nopa_Monster_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 
 struct GameEntity {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     char * _name;
     int _hp;
@@ -168,7 +168,7 @@ struct GameEntity {
 typedef struct GameEntity GameEntity;
 
 struct Hero {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     char * _name;
     int _hp;
@@ -179,7 +179,7 @@ struct Hero {
 typedef struct Hero Hero;
 
 struct Spirit {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     char * _name;
     int _hp;
@@ -188,7 +188,7 @@ struct Spirit {
 typedef struct Spirit Spirit;
 
 struct Monster {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     char * _name;
     int _hp;
@@ -197,12 +197,12 @@ struct Monster {
 };
 typedef struct Monster Monster;
 
-extern NFClass nopa___nopa_root_class;
-extern NFClass nopa_NFObject_class;
-extern NFClass nopa_GameEntity_class;
-extern NFClass nopa_Hero_class;
-extern NFClass nopa_Spirit_class;
-extern NFClass nopa_Monster_class;
+extern NPClass nopa___nopa_root_class;
+extern NPClass nopa_NPObject_class;
+extern NPClass nopa_GameEntity_class;
+extern NPClass nopa_Hero_class;
+extern NPClass nopa_Spirit_class;
+extern NPClass nopa_Monster_class;
 void nopa_meta_init(void);
 
 struct nopa_vtable nopa___nopa_root_vtable_inst = {
@@ -210,18 +210,18 @@ struct nopa_vtable nopa___nopa_root_vtable_inst = {
     .attack_ = NULL,
     .castHeal_ = NULL,
     .companion = NULL,
-    .dealloc = (void (*)(NFObject *, SEL))__nopa_root_dealloc,
+    .dealloc = (void (*)(NPObject *, SEL))__nopa_root_dealloc,
     .displayStatus = NULL,
     .exp = NULL,
     .hp = NULL,
-    .init = (NFObject * (*)(NFObject *, SEL))__nopa_root_init,
+    .init = (NPObject * (*)(NPObject *, SEL))__nopa_root_init,
     .initWithName_hp_attack_ = NULL,
     .initWithName_hp_attack_type_ = NULL,
     .levelUp = NULL,
     .monsterType = NULL,
     .name = NULL,
-    .release = (void (*)(NFObject *, SEL))__nopa_root_release,
-    .retain = (NFObject * (*)(NFObject *, SEL))__nopa_root_retain,
+    .release = (void (*)(NPObject *, SEL))__nopa_root_release,
+    .retain = (NPObject * (*)(NPObject *, SEL))__nopa_root_retain,
     .setAttackPower_ = NULL,
     .setCompanion_ = NULL,
     .setExp_ = NULL,
@@ -231,23 +231,23 @@ struct nopa_vtable nopa___nopa_root_vtable_inst = {
     .takeDamage_ = NULL,
 };
 
-struct nopa_vtable nopa_NFObject_vtable_inst = {
+struct nopa_vtable nopa_NPObject_vtable_inst = {
     .attackPower = NULL,
     .attack_ = NULL,
     .castHeal_ = NULL,
     .companion = NULL,
-    .dealloc = (void (*)(NFObject *, SEL))NFObject_dealloc,
+    .dealloc = (void (*)(NPObject *, SEL))NPObject_dealloc,
     .displayStatus = NULL,
     .exp = NULL,
     .hp = NULL,
-    .init = (NFObject * (*)(NFObject *, SEL))NFObject_init,
+    .init = (NPObject * (*)(NPObject *, SEL))NPObject_init,
     .initWithName_hp_attack_ = NULL,
     .initWithName_hp_attack_type_ = NULL,
     .levelUp = NULL,
     .monsterType = NULL,
     .name = NULL,
-    .release = (void (*)(NFObject *, SEL))NFObject_release,
-    .retain = (NFObject * (*)(NFObject *, SEL))NFObject_retain,
+    .release = (void (*)(NPObject *, SEL))NPObject_release,
+    .retain = (NPObject * (*)(NPObject *, SEL))NPObject_retain,
     .setAttackPower_ = NULL,
     .setCompanion_ = NULL,
     .setExp_ = NULL,
@@ -258,173 +258,173 @@ struct nopa_vtable nopa_NFObject_vtable_inst = {
 };
 
 struct nopa_vtable nopa_GameEntity_vtable_inst = {
-    .attackPower = (int (*)(NFObject *, SEL))GameEntity_attackPower,
-    .attack_ = (void (*)(NFObject *, SEL, NFObject *))GameEntity_attack_,
+    .attackPower = (int (*)(NPObject *, SEL))GameEntity_attackPower,
+    .attack_ = (void (*)(NPObject *, SEL, NPObject *))GameEntity_attack_,
     .castHeal_ = NULL,
     .companion = NULL,
-    .dealloc = (void (*)(NFObject *, SEL))GameEntity_dealloc,
-    .displayStatus = (void (*)(NFObject *, SEL))GameEntity_displayStatus,
+    .dealloc = (void (*)(NPObject *, SEL))GameEntity_dealloc,
+    .displayStatus = (void (*)(NPObject *, SEL))GameEntity_displayStatus,
     .exp = NULL,
-    .hp = (int (*)(NFObject *, SEL))GameEntity_hp,
-    .init = (NFObject * (*)(NFObject *, SEL))NFObject_init,
-    .initWithName_hp_attack_ = (NFObject * (*)(NFObject *, SEL, char *, int, int))GameEntity_initWithName_hp_attack_,
+    .hp = (int (*)(NPObject *, SEL))GameEntity_hp,
+    .init = (NPObject * (*)(NPObject *, SEL))NPObject_init,
+    .initWithName_hp_attack_ = (NPObject * (*)(NPObject *, SEL, char *, int, int))GameEntity_initWithName_hp_attack_,
     .initWithName_hp_attack_type_ = NULL,
     .levelUp = NULL,
     .monsterType = NULL,
-    .name = (char * (*)(NFObject *, SEL))GameEntity_name,
-    .release = (void (*)(NFObject *, SEL))NFObject_release,
-    .retain = (NFObject * (*)(NFObject *, SEL))NFObject_retain,
-    .setAttackPower_ = (void (*)(NFObject *, SEL, int))GameEntity_setAttackPower_,
+    .name = (char * (*)(NPObject *, SEL))GameEntity_name,
+    .release = (void (*)(NPObject *, SEL))NPObject_release,
+    .retain = (NPObject * (*)(NPObject *, SEL))NPObject_retain,
+    .setAttackPower_ = (void (*)(NPObject *, SEL, int))GameEntity_setAttackPower_,
     .setCompanion_ = NULL,
     .setExp_ = NULL,
-    .setHp_ = (void (*)(NFObject *, SEL, int))GameEntity_setHp_,
+    .setHp_ = (void (*)(NPObject *, SEL, int))GameEntity_setHp_,
     .setMonsterType_ = NULL,
-    .setName_ = (void (*)(NFObject *, SEL, char *))GameEntity_setName_,
-    .takeDamage_ = (void (*)(NFObject *, SEL, int))GameEntity_takeDamage_,
+    .setName_ = (void (*)(NPObject *, SEL, char *))GameEntity_setName_,
+    .takeDamage_ = (void (*)(NPObject *, SEL, int))GameEntity_takeDamage_,
 };
 
 struct nopa_vtable nopa_Hero_vtable_inst = {
-    .attackPower = (int (*)(NFObject *, SEL))GameEntity_attackPower,
-    .attack_ = (void (*)(NFObject *, SEL, NFObject *))GameEntity_attack_,
+    .attackPower = (int (*)(NPObject *, SEL))GameEntity_attackPower,
+    .attack_ = (void (*)(NPObject *, SEL, NPObject *))GameEntity_attack_,
     .castHeal_ = NULL,
-    .companion = (Spirit * (*)(NFObject *, SEL))Hero_companion,
-    .dealloc = (void (*)(NFObject *, SEL))GameEntity_dealloc,
-    .displayStatus = (void (*)(NFObject *, SEL))GameEntity_displayStatus,
-    .exp = (int (*)(NFObject *, SEL))Hero_exp,
-    .hp = (int (*)(NFObject *, SEL))GameEntity_hp,
-    .init = (NFObject * (*)(NFObject *, SEL))NFObject_init,
-    .initWithName_hp_attack_ = (NFObject * (*)(NFObject *, SEL, char *, int, int))GameEntity_initWithName_hp_attack_,
+    .companion = (Spirit * (*)(NPObject *, SEL))Hero_companion,
+    .dealloc = (void (*)(NPObject *, SEL))GameEntity_dealloc,
+    .displayStatus = (void (*)(NPObject *, SEL))GameEntity_displayStatus,
+    .exp = (int (*)(NPObject *, SEL))Hero_exp,
+    .hp = (int (*)(NPObject *, SEL))GameEntity_hp,
+    .init = (NPObject * (*)(NPObject *, SEL))NPObject_init,
+    .initWithName_hp_attack_ = (NPObject * (*)(NPObject *, SEL, char *, int, int))GameEntity_initWithName_hp_attack_,
     .initWithName_hp_attack_type_ = NULL,
-    .levelUp = (void (*)(NFObject *, SEL))Hero_levelUp,
+    .levelUp = (void (*)(NPObject *, SEL))Hero_levelUp,
     .monsterType = NULL,
-    .name = (char * (*)(NFObject *, SEL))GameEntity_name,
-    .release = (void (*)(NFObject *, SEL))NFObject_release,
-    .retain = (NFObject * (*)(NFObject *, SEL))NFObject_retain,
-    .setAttackPower_ = (void (*)(NFObject *, SEL, int))GameEntity_setAttackPower_,
-    .setCompanion_ = (void (*)(NFObject *, SEL, Spirit *))Hero_setCompanion_,
-    .setExp_ = (void (*)(NFObject *, SEL, int))Hero_setExp_,
-    .setHp_ = (void (*)(NFObject *, SEL, int))GameEntity_setHp_,
+    .name = (char * (*)(NPObject *, SEL))GameEntity_name,
+    .release = (void (*)(NPObject *, SEL))NPObject_release,
+    .retain = (NPObject * (*)(NPObject *, SEL))NPObject_retain,
+    .setAttackPower_ = (void (*)(NPObject *, SEL, int))GameEntity_setAttackPower_,
+    .setCompanion_ = (void (*)(NPObject *, SEL, Spirit *))Hero_setCompanion_,
+    .setExp_ = (void (*)(NPObject *, SEL, int))Hero_setExp_,
+    .setHp_ = (void (*)(NPObject *, SEL, int))GameEntity_setHp_,
     .setMonsterType_ = NULL,
-    .setName_ = (void (*)(NFObject *, SEL, char *))GameEntity_setName_,
-    .takeDamage_ = (void (*)(NFObject *, SEL, int))GameEntity_takeDamage_,
+    .setName_ = (void (*)(NPObject *, SEL, char *))GameEntity_setName_,
+    .takeDamage_ = (void (*)(NPObject *, SEL, int))GameEntity_takeDamage_,
 };
 
 struct nopa_vtable nopa_Spirit_vtable_inst = {
-    .attackPower = (int (*)(NFObject *, SEL))GameEntity_attackPower,
-    .attack_ = (void (*)(NFObject *, SEL, NFObject *))GameEntity_attack_,
-    .castHeal_ = (void (*)(NFObject *, SEL, GameEntity *))Spirit_castHeal_,
+    .attackPower = (int (*)(NPObject *, SEL))GameEntity_attackPower,
+    .attack_ = (void (*)(NPObject *, SEL, NPObject *))GameEntity_attack_,
+    .castHeal_ = (void (*)(NPObject *, SEL, GameEntity *))Spirit_castHeal_,
     .companion = NULL,
-    .dealloc = (void (*)(NFObject *, SEL))GameEntity_dealloc,
-    .displayStatus = (void (*)(NFObject *, SEL))GameEntity_displayStatus,
+    .dealloc = (void (*)(NPObject *, SEL))GameEntity_dealloc,
+    .displayStatus = (void (*)(NPObject *, SEL))GameEntity_displayStatus,
     .exp = NULL,
-    .hp = (int (*)(NFObject *, SEL))GameEntity_hp,
-    .init = (NFObject * (*)(NFObject *, SEL))NFObject_init,
-    .initWithName_hp_attack_ = (NFObject * (*)(NFObject *, SEL, char *, int, int))GameEntity_initWithName_hp_attack_,
+    .hp = (int (*)(NPObject *, SEL))GameEntity_hp,
+    .init = (NPObject * (*)(NPObject *, SEL))NPObject_init,
+    .initWithName_hp_attack_ = (NPObject * (*)(NPObject *, SEL, char *, int, int))GameEntity_initWithName_hp_attack_,
     .initWithName_hp_attack_type_ = NULL,
     .levelUp = NULL,
     .monsterType = NULL,
-    .name = (char * (*)(NFObject *, SEL))GameEntity_name,
-    .release = (void (*)(NFObject *, SEL))NFObject_release,
-    .retain = (NFObject * (*)(NFObject *, SEL))NFObject_retain,
-    .setAttackPower_ = (void (*)(NFObject *, SEL, int))GameEntity_setAttackPower_,
+    .name = (char * (*)(NPObject *, SEL))GameEntity_name,
+    .release = (void (*)(NPObject *, SEL))NPObject_release,
+    .retain = (NPObject * (*)(NPObject *, SEL))NPObject_retain,
+    .setAttackPower_ = (void (*)(NPObject *, SEL, int))GameEntity_setAttackPower_,
     .setCompanion_ = NULL,
     .setExp_ = NULL,
-    .setHp_ = (void (*)(NFObject *, SEL, int))GameEntity_setHp_,
+    .setHp_ = (void (*)(NPObject *, SEL, int))GameEntity_setHp_,
     .setMonsterType_ = NULL,
-    .setName_ = (void (*)(NFObject *, SEL, char *))GameEntity_setName_,
-    .takeDamage_ = (void (*)(NFObject *, SEL, int))GameEntity_takeDamage_,
+    .setName_ = (void (*)(NPObject *, SEL, char *))GameEntity_setName_,
+    .takeDamage_ = (void (*)(NPObject *, SEL, int))GameEntity_takeDamage_,
 };
 
 struct nopa_vtable nopa_Monster_vtable_inst = {
-    .attackPower = (int (*)(NFObject *, SEL))GameEntity_attackPower,
-    .attack_ = (void (*)(NFObject *, SEL, NFObject *))Monster_attack_,
+    .attackPower = (int (*)(NPObject *, SEL))GameEntity_attackPower,
+    .attack_ = (void (*)(NPObject *, SEL, NPObject *))Monster_attack_,
     .castHeal_ = NULL,
     .companion = NULL,
-    .dealloc = (void (*)(NFObject *, SEL))GameEntity_dealloc,
-    .displayStatus = (void (*)(NFObject *, SEL))GameEntity_displayStatus,
+    .dealloc = (void (*)(NPObject *, SEL))GameEntity_dealloc,
+    .displayStatus = (void (*)(NPObject *, SEL))GameEntity_displayStatus,
     .exp = NULL,
-    .hp = (int (*)(NFObject *, SEL))GameEntity_hp,
-    .init = (NFObject * (*)(NFObject *, SEL))NFObject_init,
-    .initWithName_hp_attack_ = (NFObject * (*)(NFObject *, SEL, char *, int, int))GameEntity_initWithName_hp_attack_,
-    .initWithName_hp_attack_type_ = (NFObject * (*)(NFObject *, SEL, char *, int, int, char *))Monster_initWithName_hp_attack_type_,
+    .hp = (int (*)(NPObject *, SEL))GameEntity_hp,
+    .init = (NPObject * (*)(NPObject *, SEL))NPObject_init,
+    .initWithName_hp_attack_ = (NPObject * (*)(NPObject *, SEL, char *, int, int))GameEntity_initWithName_hp_attack_,
+    .initWithName_hp_attack_type_ = (NPObject * (*)(NPObject *, SEL, char *, int, int, char *))Monster_initWithName_hp_attack_type_,
     .levelUp = NULL,
-    .monsterType = (char * (*)(NFObject *, SEL))Monster_monsterType,
-    .name = (char * (*)(NFObject *, SEL))GameEntity_name,
-    .release = (void (*)(NFObject *, SEL))NFObject_release,
-    .retain = (NFObject * (*)(NFObject *, SEL))NFObject_retain,
-    .setAttackPower_ = (void (*)(NFObject *, SEL, int))GameEntity_setAttackPower_,
+    .monsterType = (char * (*)(NPObject *, SEL))Monster_monsterType,
+    .name = (char * (*)(NPObject *, SEL))GameEntity_name,
+    .release = (void (*)(NPObject *, SEL))NPObject_release,
+    .retain = (NPObject * (*)(NPObject *, SEL))NPObject_retain,
+    .setAttackPower_ = (void (*)(NPObject *, SEL, int))GameEntity_setAttackPower_,
     .setCompanion_ = NULL,
     .setExp_ = NULL,
-    .setHp_ = (void (*)(NFObject *, SEL, int))GameEntity_setHp_,
-    .setMonsterType_ = (void (*)(NFObject *, SEL, char *))Monster_setMonsterType_,
-    .setName_ = (void (*)(NFObject *, SEL, char *))GameEntity_setName_,
-    .takeDamage_ = (void (*)(NFObject *, SEL, int))GameEntity_takeDamage_,
+    .setHp_ = (void (*)(NPObject *, SEL, int))GameEntity_setHp_,
+    .setMonsterType_ = (void (*)(NPObject *, SEL, char *))Monster_setMonsterType_,
+    .setName_ = (void (*)(NPObject *, SEL, char *))GameEntity_setName_,
+    .takeDamage_ = (void (*)(NPObject *, SEL, int))GameEntity_takeDamage_,
 };
 
-struct nopa_NFObject_meta_vtable nopa_NFObject_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
-    .class = NFObject_getClass,
+struct nopa_NPObject_meta_vtable nopa_NPObject_meta_vtable_inst = {
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
+    .class = NPObject_getClass,
 };
 
 struct nopa_GameEntity_meta_vtable nopa_GameEntity_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
     .class = GameEntity_getClass,
 };
 
 struct nopa_Hero_meta_vtable nopa_Hero_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
     .class = Hero_getClass,
 };
 
 struct nopa_Spirit_meta_vtable nopa_Spirit_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
     .class = Spirit_getClass,
 };
 
 struct nopa_Monster_meta_vtable nopa_Monster_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
     .class = Monster_getClass,
 };
 
-NFClass * NFObject_getClass(NFClass * self, SEL _cmd) {
+NPClass * NPObject_getClass(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
-NFClass * GameEntity_getClass(NFClass * self, SEL _cmd) {
+NPClass * GameEntity_getClass(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
-NFClass * Hero_getClass(NFClass * self, SEL _cmd) {
+NPClass * Hero_getClass(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
-NFClass * Spirit_getClass(NFClass * self, SEL _cmd) {
+NPClass * Spirit_getClass(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
-NFClass * Monster_getClass(NFClass * self, SEL _cmd) {
+NPClass * Monster_getClass(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
-NFClass nopa___nopa_root_class;
-NFClass nopa_NFObject_class;
-NFClass nopa_GameEntity_class;
-NFClass nopa_Hero_class;
-NFClass nopa_Spirit_class;
-NFClass nopa_Monster_class;
+NPClass nopa___nopa_root_class;
+NPClass nopa_NPObject_class;
+NPClass nopa_GameEntity_class;
+NPClass nopa_Hero_class;
+NPClass nopa_Spirit_class;
+NPClass nopa_Monster_class;
 
 void nopa_meta_init(void) {
-    nopa___nopa_root_class = (NFClass){
+    nopa___nopa_root_class = (NPClass){
         .name = "__nopa_root",
         .superclass = NULL,
         .instance_size = sizeof(struct __nopa_root),
@@ -432,23 +432,23 @@ void nopa_meta_init(void) {
         .class_vtable = NULL,
         .protocol_count = 0,
     };
-    nopa_NFObject_class = (NFClass){
-        .name = "NFObject",
+    nopa_NPObject_class = (NPClass){
+        .name = "NPObject",
         .superclass = &nopa___nopa_root_class,
-        .instance_size = sizeof(struct NFObject),
-        .vtable = &nopa_NFObject_vtable_inst,
-        .class_vtable = &nopa_NFObject_meta_vtable_inst,
+        .instance_size = sizeof(struct NPObject),
+        .vtable = &nopa_NPObject_vtable_inst,
+        .class_vtable = &nopa_NPObject_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_GameEntity_class = (NFClass){
+    nopa_GameEntity_class = (NPClass){
         .name = "GameEntity",
-        .superclass = &nopa_NFObject_class,
+        .superclass = &nopa_NPObject_class,
         .instance_size = sizeof(struct GameEntity),
         .vtable = &nopa_GameEntity_vtable_inst,
         .class_vtable = &nopa_GameEntity_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_Hero_class = (NFClass){
+    nopa_Hero_class = (NPClass){
         .name = "Hero",
         .superclass = &nopa_GameEntity_class,
         .instance_size = sizeof(struct Hero),
@@ -456,7 +456,7 @@ void nopa_meta_init(void) {
         .class_vtable = &nopa_Hero_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_Spirit_class = (NFClass){
+    nopa_Spirit_class = (NPClass){
         .name = "Spirit",
         .superclass = &nopa_GameEntity_class,
         .instance_size = sizeof(struct Spirit),
@@ -464,7 +464,7 @@ void nopa_meta_init(void) {
         .class_vtable = &nopa_Spirit_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_Monster_class = (NFClass){
+    nopa_Monster_class = (NPClass){
         .name = "Monster",
         .superclass = &nopa_GameEntity_class,
         .instance_size = sizeof(struct Monster),
@@ -473,49 +473,49 @@ void nopa_meta_init(void) {
         .protocol_count = 0,
     };
 }
-NFObject * __nopa_root_init(NFObject * self, SEL _cmd) {
+NPObject * __nopa_root_init(NPObject * self, SEL _cmd) {
   return nopa_init(self);
 }
 
-void __nopa_root_dealloc(NFObject * self, SEL _cmd) {
+void __nopa_root_dealloc(NPObject * self, SEL _cmd) {
   return;
 }
 
-void __nopa_root_release(NFObject * self, SEL _cmd) {
+void __nopa_root_release(NPObject * self, SEL _cmd) {
   nopa_release(self);
 }
 
-NFObject * __nopa_root_retain(NFObject * self, SEL _cmd) {
+NPObject * __nopa_root_retain(NPObject * self, SEL _cmd) {
   return nopa_retain(self);
 }
 
-NFObject * NFObject_alloc(NFClass * self, SEL _cmd) {
+NPObject * NPObject_alloc(NPClass * self, SEL _cmd) {
   return nopa_alloc(self);
 }
 
-NFObject * NFObject_new(NFClass * self, SEL _cmd) {
-  NFObject * obj = nopa_alloc(self);
+NPObject * NPObject_new(NPClass * self, SEL _cmd) {
+  NPObject * obj = nopa_alloc(self);
   return nopa_init(obj);
 }
 
-NFObject * NFObject_init(NFObject * self, SEL _cmd) {
+NPObject * NPObject_init(NPObject * self, SEL _cmd) {
   return nopa_init(self);
 }
 
-void NFObject_dealloc(NFObject * self, SEL _cmd) {
+void NPObject_dealloc(NPObject * self, SEL _cmd) {
   return;
 }
 
-void NFObject_release(NFObject * self, SEL _cmd) {
+void NPObject_release(NPObject * self, SEL _cmd) {
   nopa_release(self);
 }
 
-NFObject * NFObject_retain(NFObject * self, SEL _cmd) {
+NPObject * NPObject_retain(NPObject * self, SEL _cmd) {
   return nopa_retain(self);
 }
 
-NFObject * GameEntity_initWithName_hp_attack_(NFObject * self, SEL _cmd, char * name, int hp, int attack) {
-  self = (&nopa_NFObject_vtable_inst)->init(self, __nopa_sel_init);
+NPObject * GameEntity_initWithName_hp_attack_(NPObject * self, SEL _cmd, char * name, int hp, int attack) {
+  self = (&nopa_NPObject_vtable_inst)->init(self, __nopa_sel_init);
   if (self)   {
     ((struct GameEntity *)self)->_name = name;
     ((struct GameEntity *)self)->_hp = hp;
@@ -524,65 +524,65 @@ NFObject * GameEntity_initWithName_hp_attack_(NFObject * self, SEL _cmd, char * 
   return self;
 }
 
-void GameEntity_displayStatus(NFObject * self, SEL _cmd) {
+void GameEntity_displayStatus(NPObject * self, SEL _cmd) {
   printf(" -> 实体状态: [%s] | HP: %d | ATK: %d\n", ((struct GameEntity *)self)->_name, ((struct GameEntity *)self)->_hp, ((struct GameEntity *)self)->_attackPower);
 }
 
-char * GameEntity_name(NFObject * self, SEL _cmd) {
+char * GameEntity_name(NPObject * self, SEL _cmd) {
   return ((struct GameEntity *)self)->_name;
 }
 
-void GameEntity_setName_(NFObject * self, SEL _cmd, char * value) {
+void GameEntity_setName_(NPObject * self, SEL _cmd, char * value) {
   ((struct GameEntity *)self)->_name = value;
 }
 
-int GameEntity_hp(NFObject * self, SEL _cmd) {
+int GameEntity_hp(NPObject * self, SEL _cmd) {
   return ((struct GameEntity *)self)->_hp;
 }
 
-void GameEntity_setHp_(NFObject * self, SEL _cmd, int value) {
+void GameEntity_setHp_(NPObject * self, SEL _cmd, int value) {
   ((struct GameEntity *)self)->_hp = value;
 }
 
-int GameEntity_attackPower(NFObject * self, SEL _cmd) {
+int GameEntity_attackPower(NPObject * self, SEL _cmd) {
   return ((struct GameEntity *)self)->_attackPower;
 }
 
-void GameEntity_setAttackPower_(NFObject * self, SEL _cmd, int value) {
+void GameEntity_setAttackPower_(NPObject * self, SEL _cmd, int value) {
   ((struct GameEntity *)self)->_attackPower = value;
 }
 
-void Spirit_castHeal_(NFObject * self, SEL _cmd, GameEntity * target) {
+void Spirit_castHeal_(NPObject * self, SEL _cmd, GameEntity * target) {
   int healAmount = 25;
-  ((struct nopa_vtable *)(target->isa->vtable))->setHp_((NFObject *)(target), __nopa_sel_setHp_, (((struct nopa_vtable *)(target->isa->vtable))->hp((NFObject *)(target), __nopa_sel_hp) + healAmount));
-  printf(" ✨ [守护精灵 %s] 施展了治愈之光！为 [%s] 恢复了 %d 点生命！\n", ((struct nopa_vtable *)(self->isa->vtable))->name(self, __nopa_sel_name), ((struct nopa_vtable *)(target->isa->vtable))->name((NFObject *)(target), __nopa_sel_name), healAmount);
+  ((struct nopa_vtable *)(target->isa->vtable))->setHp_((NPObject *)(target), __nopa_sel_setHp_, (((struct nopa_vtable *)(target->isa->vtable))->hp((NPObject *)(target), __nopa_sel_hp) + healAmount));
+  printf(" ✨ [守护精灵 %s] 施展了治愈之光！为 [%s] 恢复了 %d 点生命！\n", ((struct nopa_vtable *)(self->isa->vtable))->name(self, __nopa_sel_name), ((struct nopa_vtable *)(target->isa->vtable))->name((NPObject *)(target), __nopa_sel_name), healAmount);
 }
 
-void Hero_levelUp(NFObject * self, SEL _cmd) {
+void Hero_levelUp(NPObject * self, SEL _cmd) {
   (((struct Hero *)self)->_exp += 50);
   ((struct nopa_vtable *)(self->isa->vtable))->setAttackPower_(self, __nopa_sel_setAttackPower_, (((struct nopa_vtable *)(self->isa->vtable))->attackPower(self, __nopa_sel_attackPower) + 15));
   printf(" ⭐⭐⭐ [%s] 战意高涨！等级提升！当前攻击力: %d\n", ((struct nopa_vtable *)(self->isa->vtable))->name(self, __nopa_sel_name), ((struct nopa_vtable *)(self->isa->vtable))->attackPower(self, __nopa_sel_attackPower));
 }
 
-Spirit * Hero_companion(NFObject * self, SEL _cmd) {
+Spirit * Hero_companion(NPObject * self, SEL _cmd) {
   return ((struct Hero *)self)->_companion;
 }
 
-void Hero_setCompanion_(NFObject * self, SEL _cmd, Spirit * value) {
-  nopa_weak_unregister((NFObject **)&((struct Hero *)self)->_companion);
+void Hero_setCompanion_(NPObject * self, SEL _cmd, Spirit * value) {
+  nopa_weak_unregister((NPObject **)&((struct Hero *)self)->_companion);
   ((struct Hero *)self)->_companion = value;
-  nopa_weak_register((NFObject **)&((struct Hero *)self)->_companion, (NFObject *)value);
+  nopa_weak_register((NPObject **)&((struct Hero *)self)->_companion, (NPObject *)value);
 }
 
-int Hero_exp(NFObject * self, SEL _cmd) {
+int Hero_exp(NPObject * self, SEL _cmd) {
   return ((struct Hero *)self)->_exp;
 }
 
-void Hero_setExp_(NFObject * self, SEL _cmd, int value) {
+void Hero_setExp_(NPObject * self, SEL _cmd, int value) {
   ((struct Hero *)self)->_exp = value;
 }
 
-NFObject * Monster_initWithName_hp_attack_type_(NFObject * self, SEL _cmd, char * name, int hp, int attack, char * type) {
+NPObject * Monster_initWithName_hp_attack_type_(NPObject * self, SEL _cmd, char * name, int hp, int attack, char * type) {
   self = (&nopa_GameEntity_vtable_inst)->initWithName_hp_attack_(self, __nopa_sel_initWithName_hp_attack_, name, hp, attack);
   if (self)   {
     ((struct Monster *)self)->_monsterType = type;
@@ -590,48 +590,48 @@ NFObject * Monster_initWithName_hp_attack_type_(NFObject * self, SEL _cmd, char 
   return self;
 }
 
-char * Monster_monsterType(NFObject * self, SEL _cmd) {
+char * Monster_monsterType(NPObject * self, SEL _cmd) {
   return ((struct Monster *)self)->_monsterType;
 }
 
-void Monster_setMonsterType_(NFObject * self, SEL _cmd, char * value) {
+void Monster_setMonsterType_(NPObject * self, SEL _cmd, char * value) {
   ((struct Monster *)self)->_monsterType = value;
 }
 
-void GameEntity_takeDamage_(NFObject * self, SEL _cmd, int amount) {
+void GameEntity_takeDamage_(NPObject * self, SEL _cmd, int amount) {
   (((struct GameEntity *)self)->_hp -= amount);
   if ((((struct GameEntity *)self)->_hp < 0))   ((struct GameEntity *)self)->_hp = 0;
   printf(" [%s] 受到 %d 点伤害！(剩余生命: %d/%d)\n", ((struct GameEntity *)self)->_name, amount, ((struct GameEntity *)self)->_hp, 100);
 }
 
-void GameEntity_attack_(NFObject * self, SEL _cmd, NFObject * target) {
-  printf(" ⚔️ [%s] 挥动武器，砍向 [%s]！\n", ((struct GameEntity *)self)->_name, ((struct nopa_vtable *)(target->isa->vtable))->name((NFObject *)(target), __nopa_sel_name));
-  ((struct nopa_vtable *)(target->isa->vtable))->takeDamage_((NFObject *)(target), __nopa_sel_takeDamage_, ((struct GameEntity *)self)->_attackPower);
+void GameEntity_attack_(NPObject * self, SEL _cmd, NPObject * target) {
+  printf(" ⚔️ [%s] 挥动武器，砍向 [%s]！\n", ((struct GameEntity *)self)->_name, ((struct nopa_vtable *)(target->isa->vtable))->name((NPObject *)(target), __nopa_sel_name));
+  ((struct nopa_vtable *)(target->isa->vtable))->takeDamage_((NPObject *)(target), __nopa_sel_takeDamage_, ((struct GameEntity *)self)->_attackPower);
 }
 
-void GameEntity_dealloc(NFObject * self, SEL _cmd) {
+void GameEntity_dealloc(NPObject * self, SEL _cmd) {
   printf(" 👻 [%s] 离开了这个地牢世界...\n", ((struct GameEntity *)self)->_name);
 }
 
-void Monster_attack_(NFObject * self, SEL _cmd, NFObject * target) {
+void Monster_attack_(NPObject * self, SEL _cmd, NPObject * target) {
   int damage = ((struct nopa_vtable *)(self->isa->vtable))->attackPower(self, __nopa_sel_attackPower);
   if (((rand() % 100) < 30))   {
     (damage *= 2);
-    printf(" ⚡💥 [%s](%s) 触发暴击！疯狂地扑向 [%s]！\n", ((struct nopa_vtable *)(self->isa->vtable))->name(self, __nopa_sel_name), ((struct Monster *)self)->_monsterType, ((struct nopa_vtable *)(target->isa->vtable))->name((NFObject *)(target), __nopa_sel_name));
+    printf(" ⚡💥 [%s](%s) 触发暴击！疯狂地扑向 [%s]！\n", ((struct nopa_vtable *)(self->isa->vtable))->name(self, __nopa_sel_name), ((struct Monster *)self)->_monsterType, ((struct nopa_vtable *)(target->isa->vtable))->name((NPObject *)(target), __nopa_sel_name));
   }
   else   {
-    printf(" 👹 [%s](%s) 嘶吼着抓向 [%s]！\n", ((struct nopa_vtable *)(self->isa->vtable))->name(self, __nopa_sel_name), ((struct Monster *)self)->_monsterType, ((struct nopa_vtable *)(target->isa->vtable))->name((NFObject *)(target), __nopa_sel_name));
+    printf(" 👹 [%s](%s) 嘶吼着抓向 [%s]！\n", ((struct nopa_vtable *)(self->isa->vtable))->name(self, __nopa_sel_name), ((struct Monster *)self)->_monsterType, ((struct nopa_vtable *)(target->isa->vtable))->name((NPObject *)(target), __nopa_sel_name));
   }
-  ((struct nopa_vtable *)(target->isa->vtable))->takeDamage_((NFObject *)(target), __nopa_sel_takeDamage_, damage);
+  ((struct nopa_vtable *)(target->isa->vtable))->takeDamage_((NPObject *)(target), __nopa_sel_takeDamage_, damage);
 }
 
-NFObject * nopa_alloc(struct NFClass * cls);
+NPObject * nopa_alloc(struct NPClass * cls);
 
-NFObject * nopa_init(NFObject * self);
+NPObject * nopa_init(NPObject * self);
 
-void nopa_release(NFObject * obj);
+void nopa_release(NPObject * obj);
 
-NFObject * nopa_retain(NFObject * obj);
+NPObject * nopa_retain(NPObject * obj);
 
 int main(int argc, const char * argv[]) {
   nopa_meta_init();
@@ -640,24 +640,24 @@ int main(int argc, const char * argv[]) {
     printf("\n======================================================\n");
     printf("       ⚔️ 欢迎来到 Micrit 纯静态地牢冒险 ⚔️\n");
     printf("======================================================\n\n");
-    NFObject *__nopa_tmp_1 = (NFObject_alloc(&nopa_Hero_class, __nopa_sel_alloc));
+    NPObject *__nopa_tmp_1 = (NPObject_alloc(&nopa_Hero_class, __nopa_sel_alloc));
     Hero * hero = (Hero *)(((struct nopa_vtable *)__nopa_tmp_1->isa->vtable)->initWithName_hp_attack_(__nopa_tmp_1, __nopa_sel_initWithName_hp_attack_, "雷恩", 120, 25));
-    ((struct nopa_vtable *)(hero->isa->vtable))->displayStatus((NFObject *)(hero), __nopa_sel_displayStatus);
+    ((struct nopa_vtable *)(hero->isa->vtable))->displayStatus((NPObject *)(hero), __nopa_sel_displayStatus);
     {
       printf("\n--> 呼唤古老誓约，召唤守护精灵...\n");
-      NFObject *__nopa_tmp_2 = (NFObject_alloc(&nopa_Spirit_class, __nopa_sel_alloc));
+      NPObject *__nopa_tmp_2 = (NPObject_alloc(&nopa_Spirit_class, __nopa_sel_alloc));
       Spirit * fairy = (Spirit *)(((struct nopa_vtable *)__nopa_tmp_2->isa->vtable)->initWithName_hp_attack_(__nopa_tmp_2, __nopa_sel_initWithName_hp_attack_, "小光", 50, 5));
       hero->_companion = fairy;
       printf("--> 守护誓约建立成功！\n");
-      if (((struct nopa_vtable *)(hero->isa->vtable))->companion((NFObject *)(hero), __nopa_sel_companion))       {
-        printf(" [状态验证] 勇士 %s 的守护精灵 %s 当前【存活】！\n", ((struct nopa_vtable *)(hero->isa->vtable))->name((NFObject *)(hero), __nopa_sel_name), ({ NFObject *__nopa_tmp_3 = ((NFObject *)(((struct nopa_vtable *)(hero->isa->vtable))->companion((NFObject *)(hero), __nopa_sel_companion))); __nopa_tmp_3 ? ((struct nopa_vtable *)__nopa_tmp_3->isa->vtable)->name(__nopa_tmp_3, __nopa_sel_name) : 0; }));
+      if (((struct nopa_vtable *)(hero->isa->vtable))->companion((NPObject *)(hero), __nopa_sel_companion))       {
+        printf(" [状态验证] 勇士 %s 的守护精灵 %s 当前【存活】！\n", ((struct nopa_vtable *)(hero->isa->vtable))->name((NPObject *)(hero), __nopa_sel_name), ({ NPObject *__nopa_tmp_3 = ((NPObject *)(((struct nopa_vtable *)(hero->isa->vtable))->companion((NPObject *)(hero), __nopa_sel_companion))); __nopa_tmp_3 ? ((struct nopa_vtable *)__nopa_tmp_3->isa->vtable)->name(__nopa_tmp_3, __nopa_sel_name) : 0; }));
       }
-      ((struct nopa_vtable *)(fairy->isa->vtable))->castHeal_((NFObject *)(fairy), __nopa_sel_castHeal_, (GameEntity *)(hero));
+      ((struct nopa_vtable *)(fairy->isa->vtable))->castHeal_((NPObject *)(fairy), __nopa_sel_castHeal_, (GameEntity *)(hero));
       printf("--> 精灵能量耗尽，即将重归虚无...\n");
     }
     printf("\n--> 已经走出精灵作用域\n");
     printf("--> 再次验证勇士的守护灵状态：\n");
-    if (((struct nopa_vtable *)(hero->isa->vtable))->companion((NFObject *)(hero), __nopa_sel_companion) == NULL)     {
+    if (((struct nopa_vtable *)(hero->isa->vtable))->companion((NPObject *)(hero), __nopa_sel_companion) == NULL)     {
       printf(" ✨ [弱引用安全验证成功] hero.companion 自动归零 (nil)！完美规避了野指针崩溃！\n");
     }
     else     {
@@ -665,13 +665,13 @@ int main(int argc, const char * argv[]) {
     }
     printf("\n------------------------------------------------------\n");
     printf(" ⚠️ 警告：前方迷雾中走出一尊恐怖的存在...\n");
-    NFObject *__nopa_tmp_4 = (NFObject_alloc(&nopa_Monster_class, __nopa_sel_alloc));
+    NPObject *__nopa_tmp_4 = (NPObject_alloc(&nopa_Monster_class, __nopa_sel_alloc));
     Monster * boss = (Monster *)(((struct nopa_vtable *)__nopa_tmp_4->isa->vtable)->initWithName_hp_attack_type_(__nopa_tmp_4, __nopa_sel_initWithName_hp_attack_type_, "深渊炎魔", 180, 18, "恶魔BOSS"));
-    ((struct nopa_vtable *)(boss->isa->vtable))->displayStatus((NFObject *)(boss), __nopa_sel_displayStatus);
+    ((struct nopa_vtable *)(boss->isa->vtable))->displayStatus((NPObject *)(boss), __nopa_sel_displayStatus);
     printf("------------------------------------------------------\n\n");
     printf("==== [第一回合开始] ====\n");
-    ((struct nopa_vtable *)(hero->isa->vtable))->attack_((NFObject *)(hero), __nopa_sel_attack_, (NFObject *)(boss));
-    ((struct nopa_vtable *)(boss->isa->vtable))->attack_((NFObject *)(boss), __nopa_sel_attack_, (NFObject *)(hero));
+    ((struct nopa_vtable *)(hero->isa->vtable))->attack_((NPObject *)(hero), __nopa_sel_attack_, (NPObject *)(boss));
+    ((struct nopa_vtable *)(boss->isa->vtable))->attack_((NPObject *)(boss), __nopa_sel_attack_, (NPObject *)(hero));
     printf("\n==== [第二回合：雷恩积蓄力量] ====\n");
     int rage_multiplier = 3;
     int (^ultimateSlash)(int) = ^int(int baseDamage) {
@@ -679,16 +679,16 @@ int main(int argc, const char * argv[]) {
   return (baseDamage * rage_multiplier);
 }
 ;
-    int finalDamage = ultimateSlash(((struct nopa_vtable *)(hero->isa->vtable))->attackPower((NFObject *)(hero), __nopa_sel_attackPower));
+    int finalDamage = ultimateSlash(((struct nopa_vtable *)(hero->isa->vtable))->attackPower((NPObject *)(hero), __nopa_sel_attackPower));
     printf(" 💥 终极伤害计算完成: %d 点！\n", finalDamage);
-    ((struct nopa_vtable *)(boss->isa->vtable))->takeDamage_((NFObject *)(boss), __nopa_sel_takeDamage_, finalDamage);
+    ((struct nopa_vtable *)(boss->isa->vtable))->takeDamage_((NPObject *)(boss), __nopa_sel_takeDamage_, finalDamage);
     printf("\n==== [战斗结算] ====\n");
-    if ((((struct nopa_vtable *)(boss->isa->vtable))->hp((NFObject *)(boss), __nopa_sel_hp) <= 0))     {
-      printf(" 🎉 恭喜！[%s] 击败了 [%s]！地牢重归和平！\n", ((struct nopa_vtable *)(hero->isa->vtable))->name((NFObject *)(hero), __nopa_sel_name), ((struct nopa_vtable *)(boss->isa->vtable))->name((NFObject *)(boss), __nopa_sel_name));
-      ((struct nopa_vtable *)(hero->isa->vtable))->levelUp((NFObject *)(hero), __nopa_sel_levelUp);
+    if ((((struct nopa_vtable *)(boss->isa->vtable))->hp((NPObject *)(boss), __nopa_sel_hp) <= 0))     {
+      printf(" 🎉 恭喜！[%s] 击败了 [%s]！地牢重归和平！\n", ((struct nopa_vtable *)(hero->isa->vtable))->name((NPObject *)(hero), __nopa_sel_name), ((struct nopa_vtable *)(boss->isa->vtable))->name((NPObject *)(boss), __nopa_sel_name));
+      ((struct nopa_vtable *)(hero->isa->vtable))->levelUp((NPObject *)(hero), __nopa_sel_levelUp);
     }
     else     {
-      printf(" 💀 [%s] 未能击败强敌，倒在了地牢深处...\n", ((struct nopa_vtable *)(hero->isa->vtable))->name((NFObject *)(hero), __nopa_sel_name));
+      printf(" 💀 [%s] 未能击败强敌，倒在了地牢深处...\n", ((struct nopa_vtable *)(hero->isa->vtable))->name((NPObject *)(hero), __nopa_sel_name));
     }
     printf("\n======================================================\n");
     printf("                    地牢探险结束\n");

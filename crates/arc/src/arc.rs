@@ -109,7 +109,7 @@ static ARC_TMP_SEQ: std::sync::atomic::AtomicUsize = std::sync::atomic::AtomicUs
 ///   * `return nopa_autorelease(h);` / `return [h autorelease];` — the object
 ///     is handed to the autorelease pool; the value the caller receives is
 ///     +0 and must stay valid, so releasing it here would be a premature free.
-///     Foundation relies on this (`NFArray +arrayWithObjects:count:`).
+///     Foundation relies on this (`NPArray +arrayWithObjects:count:`).
 ///
 /// Deliberately NOT a transfer: an expression that merely *reads* the local
 /// (`return [h text];`, `return [[h text] length] - 5;`). Those keep their

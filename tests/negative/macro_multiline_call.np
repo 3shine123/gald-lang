@@ -7,7 +7,7 @@
 
 int main() {
     nopa_meta_init();
-    NFObject *w = (NFObject *)0;
+    NPObject *w = (NPObject *)0;
     // call split across lines — unsupported
     printf("%d\n", TAG(
         w));

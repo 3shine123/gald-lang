@@ -3,8 +3,8 @@
 #include <stdint.h>
 #include <stddef.h>
 #include "nopa/runtime.h"
-struct nopa_NFObject_vtable;
-struct nopa_NFObject_meta_vtable;
+struct nopa_NPObject_vtable;
+struct nopa_NPObject_meta_vtable;
 struct nopa_Node_vtable;
 struct nopa_Node_meta_vtable;
 
@@ -19,205 +19,205 @@ static const SEL __nopa_sel_setValue_ = {.name = "setValue_", .hash = 0xA9DE6A6D
 static const SEL __nopa_sel_next = {.name = "next", .hash = 0x5CB68DE8};
 static const SEL __nopa_sel_setNext_ = {.name = "setNext_", .hash = 0x0B748ABF};
 
-typedef struct NFObject NFObject;
+typedef struct NPObject NPObject;
 typedef struct Node Node;
 
-NFObject * NFObject_alloc(NFClass * self, SEL _cmd);
-NFObject * NFObject_new(NFClass * self, SEL _cmd);
-NFObject * NFObject_init(NFObject * self, SEL _cmd);
-void NFObject_dealloc(NFObject * self, SEL _cmd);
-void NFObject_release(NFObject * self, SEL _cmd);
-NFObject * NFObject_retain(NFObject * self, SEL _cmd);
-int Node_value(NFObject * self, SEL _cmd);
-void Node_setValue_(NFObject * self, SEL _cmd, int value);
-Node * Node_next(NFObject * self, SEL _cmd);
-void Node_setNext_(NFObject * self, SEL _cmd, Node * value);
-void Node_dealloc(NFObject * self, SEL _cmd);
-NFObject * nopa_alloc(struct NFClass * cls);
-NFObject * nopa_init(NFObject * self);
-void nopa_release(NFObject * obj);
-NFObject * nopa_retain(NFObject * obj);
+NPObject * NPObject_alloc(NPClass * self, SEL _cmd);
+NPObject * NPObject_new(NPClass * self, SEL _cmd);
+NPObject * NPObject_init(NPObject * self, SEL _cmd);
+void NPObject_dealloc(NPObject * self, SEL _cmd);
+void NPObject_release(NPObject * self, SEL _cmd);
+NPObject * NPObject_retain(NPObject * self, SEL _cmd);
+int Node_value(NPObject * self, SEL _cmd);
+void Node_setValue_(NPObject * self, SEL _cmd, int value);
+Node * Node_next(NPObject * self, SEL _cmd);
+void Node_setNext_(NPObject * self, SEL _cmd, Node * value);
+void Node_dealloc(NPObject * self, SEL _cmd);
+NPObject * nopa_alloc(struct NPClass * cls);
+NPObject * nopa_init(NPObject * self);
+void nopa_release(NPObject * obj);
+NPObject * nopa_retain(NPObject * obj);
 int main(void);
 
-NFClass * NFObject_getClass(NFClass * self, SEL _cmd);
-NFClass * Node_getClass(NFClass * self, SEL _cmd);
+NPClass * NPObject_getClass(NPClass * self, SEL _cmd);
+NPClass * Node_getClass(NPClass * self, SEL _cmd);
 
-struct nopa_NFObject_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    void (*release)(NFObject *, SEL);
-    NFObject * (*retain)(NFObject *, SEL);
+struct nopa_NPObject_vtable {
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    void (*release)(NPObject *, SEL);
+    NPObject * (*retain)(NPObject *, SEL);
 };
-struct nopa_NFObject_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+struct nopa_NPObject_meta_vtable {
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct nopa_Node_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    void (*release)(NFObject *, SEL);
-    NFObject * (*retain)(NFObject *, SEL);
-    int (*value)(NFObject *, SEL);
-    void (*setValue_)(NFObject *, SEL, int);
-    Node * (*next)(NFObject *, SEL);
-    void (*setNext_)(NFObject *, SEL, Node *);
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    void (*release)(NPObject *, SEL);
+    NPObject * (*retain)(NPObject *, SEL);
+    int (*value)(NPObject *, SEL);
+    void (*setValue_)(NPObject *, SEL, int);
+    Node * (*next)(NPObject *, SEL);
+    void (*setNext_)(NPObject *, SEL, Node *);
 };
 struct nopa_Node_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 
 struct Node {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     int _value;
     Node * _next;
 };
 typedef struct Node Node;
 
-extern NFClass nopa_NFObject_class;
-extern NFClass nopa_Node_class;
+extern NPClass nopa_NPObject_class;
+extern NPClass nopa_Node_class;
 void nopa_meta_init(void);
 
-struct nopa_NFObject_vtable nopa_NFObject_vtable_inst = {
-    .init = NFObject_init,
-    .dealloc = NFObject_dealloc,
-    .release = NFObject_release,
-    .retain = NFObject_retain,
+struct nopa_NPObject_vtable nopa_NPObject_vtable_inst = {
+    .init = NPObject_init,
+    .dealloc = NPObject_dealloc,
+    .release = NPObject_release,
+    .retain = NPObject_retain,
 };
 
 struct nopa_Node_vtable nopa_Node_vtable_inst = {
-    .init = NFObject_init,
+    .init = NPObject_init,
     .dealloc = Node_dealloc,
-    .release = NFObject_release,
-    .retain = NFObject_retain,
+    .release = NPObject_release,
+    .retain = NPObject_retain,
     .value = Node_value,
     .setValue_ = Node_setValue_,
     .next = Node_next,
     .setNext_ = Node_setNext_,
 };
 
-struct nopa_NFObject_meta_vtable nopa_NFObject_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
-    .class = NFObject_getClass,
+struct nopa_NPObject_meta_vtable nopa_NPObject_meta_vtable_inst = {
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
+    .class = NPObject_getClass,
 };
 
 struct nopa_Node_meta_vtable nopa_Node_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
     .class = Node_getClass,
 };
 
-NFClass * NFObject_getClass(NFClass * self, SEL _cmd) {
+NPClass * NPObject_getClass(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
-NFClass * Node_getClass(NFClass * self, SEL _cmd) {
+NPClass * Node_getClass(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
-NFClass nopa_NFObject_class;
-NFClass nopa_Node_class;
+NPClass nopa_NPObject_class;
+NPClass nopa_Node_class;
 
 void nopa_meta_init(void) {
-    nopa_NFObject_class = (NFClass){
-        .name = "NFObject",
+    nopa_NPObject_class = (NPClass){
+        .name = "NPObject",
         .superclass = NULL,
-        .instance_size = sizeof(struct NFObject),
-        .vtable = &nopa_NFObject_vtable_inst,
-        .class_vtable = &nopa_NFObject_meta_vtable_inst,
+        .instance_size = sizeof(struct NPObject),
+        .vtable = &nopa_NPObject_vtable_inst,
+        .class_vtable = &nopa_NPObject_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_Node_class = (NFClass){
+    nopa_Node_class = (NPClass){
         .name = "Node",
-        .superclass = &nopa_NFObject_class,
+        .superclass = &nopa_NPObject_class,
         .instance_size = sizeof(struct Node),
         .vtable = &nopa_Node_vtable_inst,
         .class_vtable = &nopa_Node_meta_vtable_inst,
         .protocol_count = 0,
     };
 }
-NFObject * NFObject_alloc(NFClass * self, SEL _cmd) {
+NPObject * NPObject_alloc(NPClass * self, SEL _cmd) {
   return nopa_alloc(self);
 }
 
-NFObject * NFObject_new(NFClass * self, SEL _cmd) {
-  NFObject * obj = nopa_alloc(self);
+NPObject * NPObject_new(NPClass * self, SEL _cmd) {
+  NPObject * obj = nopa_alloc(self);
   return nopa_init(obj);
 }
 
-NFObject * NFObject_init(NFObject * self, SEL _cmd) {
-  struct NFObject * _self = (struct NFObject *)self;
+NPObject * NPObject_init(NPObject * self, SEL _cmd) {
+  struct NPObject * _self = (struct NPObject *)self;
   {
     return nopa_init(self);
   }
 }
 
-void NFObject_dealloc(NFObject * self, SEL _cmd) {
-  struct NFObject * _self = (struct NFObject *)self;
+void NPObject_dealloc(NPObject * self, SEL _cmd) {
+  struct NPObject * _self = (struct NPObject *)self;
   {
     return;
   }
 }
 
-void NFObject_release(NFObject * self, SEL _cmd) {
-  struct NFObject * _self = (struct NFObject *)self;
+void NPObject_release(NPObject * self, SEL _cmd) {
+  struct NPObject * _self = (struct NPObject *)self;
   {
     nopa_release(self);
   }
 }
 
-NFObject * NFObject_retain(NFObject * self, SEL _cmd) {
-  struct NFObject * _self = (struct NFObject *)self;
+NPObject * NPObject_retain(NPObject * self, SEL _cmd) {
+  struct NPObject * _self = (struct NPObject *)self;
   {
     return nopa_retain(self);
   }
 }
 
-int Node_value(NFObject * self, SEL _cmd) {
+int Node_value(NPObject * self, SEL _cmd) {
   return ((struct Node *)self)->_value;
 }
 
-void Node_setValue_(NFObject * self, SEL _cmd, int value) {
+void Node_setValue_(NPObject * self, SEL _cmd, int value) {
   ((struct Node *)self)->_value = value;
 }
 
-Node * Node_next(NFObject * self, SEL _cmd) {
+Node * Node_next(NPObject * self, SEL _cmd) {
   return ((struct Node *)self)->_next;
 }
 
-void Node_setNext_(NFObject * self, SEL _cmd, Node * value) {
-  nopa_weak_unregister((NFObject **)&((struct Node *)self)->_next);
+void Node_setNext_(NPObject * self, SEL _cmd, Node * value) {
+  nopa_weak_unregister((NPObject **)&((struct Node *)self)->_next);
   ((struct Node *)self)->_next = value;
-  nopa_weak_register((NFObject **)&((struct Node *)self)->_next, (NFObject *)value);
+  nopa_weak_register((NPObject **)&((struct Node *)self)->_next, (NPObject *)value);
 }
 
-void Node_dealloc(NFObject * self, SEL _cmd) {
+void Node_dealloc(NPObject * self, SEL _cmd) {
   struct Node * _self = (struct Node *)self;
   {
     printf("dealloc %d\n", ((struct nopa_Node_vtable *)(self)->isa->vtable)->value(self, sel_registerName("value")));
   }
 }
 
-NFObject * nopa_alloc(struct NFClass * cls);
+NPObject * nopa_alloc(struct NPClass * cls);
 
-NFObject * nopa_init(NFObject * self);
+NPObject * nopa_init(NPObject * self);
 
-void nopa_release(NFObject * obj);
+void nopa_release(NPObject * obj);
 
-NFObject * nopa_retain(NFObject * obj);
+NPObject * nopa_retain(NPObject * obj);
 
 int main(void) {
   nopa_meta_init();
-  Node * n1 = NFObject_new(&nopa_Node_class, sel_registerName("new"));
+  Node * n1 = NPObject_new(&nopa_Node_class, sel_registerName("new"));
   n1->_value = 1;
   {
-    Node * n2 = NFObject_new(&nopa_Node_class, sel_registerName("new"));
+    Node * n2 = NPObject_new(&nopa_Node_class, sel_registerName("new"));
     n2->_value = 2;
     n1->_next = n2;
     printf("n2 created\n");

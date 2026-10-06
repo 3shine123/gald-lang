@@ -40,7 +40,7 @@ static int kbhit() {
 // ==========================================================
 // 2. 障碍物类定义（陨石）
 // ==========================================================
-@interface Obstacle : NFObject {
+@interface Obstacle : NPObject {
     int _x;
     int _y;
     BOOL _active;
@@ -83,7 +83,7 @@ static int kbhit() {
 // ==========================================================
 // 3. 游戏核心引擎类（测试核心：它强引用了三个 Obstacle 对象）
 // ==========================================================
-@interface SpaceEngine : NFObject {
+@interface SpaceEngine : NPObject {
     int _width;
     int _height;
     int _playerX;
@@ -218,9 +218,9 @@ static int kbhit() {
 
 // 🔥 验证重点：完美的级联 dealloc 链条
 - (void)dealloc {
-    if (_obs1) NFObject_release(_obs1);
-    if (_obs2) NFObject_release(_obs2);
-    if (_obs3) NFObject_release(_obs3);
+    if (_obs1) NPObject_release(_obs1);
+    if (_obs2) NPObject_release(_obs2);
+    if (_obs3) NPObject_release(_obs3);
     [super dealloc];
 }
 @end
@@ -269,7 +269,7 @@ int main() {
         printf("======================================================\n");
         
         // 🔥 终极考验：只调用这一句，检查后台是否自动干净释放了 engine 和它体内的 3 个陨石！
-        if (engine) NFObject_release(engine);
+        if (engine) NPObject_release(engine);
     }
     return 0;
 }

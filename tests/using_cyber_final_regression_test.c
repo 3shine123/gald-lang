@@ -9,13 +9,13 @@
 
 #include <string.h>
 
-struct nopa_NFObject_vtable;
+struct nopa_NPObject_vtable;
 struct nopa_Cyber__Security__IntrusionPayload_vtable;
 struct nopa_Cyber__Infrastructure__MainframeFirewall_vtable;
 struct nopa_Cyber__Exploits__ProxyBypass_vtable;
 
-#define nopa_NFObject_vtable_index_init 2
-#define nopa_NFObject_vtable_index_dealloc 3
+#define nopa_NPObject_vtable_index_init 2
+#define nopa_NPObject_vtable_index_dealloc 3
 #define nopa_Cyber__Security__IntrusionPayload_vtable_index_initWithName_threat_ 6
 #define nopa_Cyber__Infrastructure__MainframeFirewall_vtable_index_initWithDomain_rating_ 4
 #define nopa_Cyber__Infrastructure__MainframeFirewall_vtable_index_analyzeAndBlockPayload_withFormula_ 5
@@ -38,7 +38,7 @@ static const SEL __nopa_sel_infectFirewall_ = {.name = "infectFirewall_", .hash 
 static const SEL __nopa_sel_analyzeAndBlockPayload_withFormula_ = {.name = "analyzeAndBlockPayload_withFormula_", .hash = 0x9F9BB8C1};
 static const SEL __nopa_sel_createZeroDay = {.name = "createZeroDay", .hash = 0xDE9481E7};
 
-typedef struct NFObject NFObject;
+typedef struct NPObject NPObject;
 typedef struct Cyber__Security__IntrusionPayload Cyber__Security__IntrusionPayload;
 typedef struct Cyber__Infrastructure__MainframeFirewall Cyber__Infrastructure__MainframeFirewall;
 typedef struct Cyber__Exploits__ProxyBypass Cyber__Exploits__ProxyBypass;
@@ -46,149 +46,149 @@ typedef struct Cyber__Exploits__ProxyBypass Cyber__Exploits__ProxyBypass;
 
 typedef int (^MitigationFormulaBlock)(int);
 
-NFObject * NFObject_alloc(NFClass * self, SEL _cmd);
-NFObject * NFObject_new(NFClass * self, SEL _cmd);
-NFObject * NFObject_init(NFObject * self, SEL _cmd);
-void NFObject_dealloc(NFObject * self, SEL _cmd);
-NFClass * NFObject_getClass(NFClass * self, SEL _cmd);
-Cyber__Security__IntrusionPayload * Cyber__Security__IntrusionPayload_createBufferOverflow(NFClass * self, SEL _cmd);
-Cyber__Security__IntrusionPayload * Cyber__Security__IntrusionPayload_createZeroDay(NFClass * self, SEL _cmd);
-NFObject * Cyber__Security__IntrusionPayload_initWithName_threat_(NFObject * self, SEL _cmd, const char * name, int t);
-int Cyber__Security__IntrusionPayload_threatLevel(NFObject * self, SEL _cmd);
-void Cyber__Security__IntrusionPayload_setThreatLevel_(NFObject * self, SEL _cmd, int value);
-const char * Cyber__Security__IntrusionPayload_exploitName(NFObject * self, SEL _cmd);
-NFClass * Cyber__Security__IntrusionPayload_getClass(NFClass * self, SEL _cmd);
-NFObject * Cyber__Infrastructure__MainframeFirewall_initWithDomain_rating_(NFObject * self, SEL _cmd, const char * domain, int r);
-int Cyber__Infrastructure__MainframeFirewall_analyzeAndBlockPayload_withFormula_(NFObject * self, SEL _cmd, Cyber__Security__IntrusionPayload * payload, MitigationFormulaBlock formula);
-int Cyber__Infrastructure__MainframeFirewall_defenseRating(NFObject * self, SEL _cmd);
-void Cyber__Infrastructure__MainframeFirewall_setDefenseRating_(NFObject * self, SEL _cmd, int value);
-const char * Cyber__Infrastructure__MainframeFirewall_hostDomain(NFObject * self, SEL _cmd);
-NFClass * Cyber__Infrastructure__MainframeFirewall_getClass(NFClass * self, SEL _cmd);
-NFObject * Cyber__Exploits__ProxyBypass_initWithName_factor_(NFObject * self, SEL _cmd, const char * name, int f);
-void Cyber__Exploits__ProxyBypass_infectFirewall_(NFObject * self, SEL _cmd, Cyber__Infrastructure__MainframeFirewall * fw);
-int Cyber__Exploits__ProxyBypass_amplificationFactor(NFObject * self, SEL _cmd);
-void Cyber__Exploits__ProxyBypass_setAmplificationFactor_(NFObject * self, SEL _cmd, int value);
-const char * Cyber__Exploits__ProxyBypass_proxyName(NFObject * self, SEL _cmd);
-NFClass * Cyber__Exploits__ProxyBypass_getClass(NFClass * self, SEL _cmd);
+NPObject * NPObject_alloc(NPClass * self, SEL _cmd);
+NPObject * NPObject_new(NPClass * self, SEL _cmd);
+NPObject * NPObject_init(NPObject * self, SEL _cmd);
+void NPObject_dealloc(NPObject * self, SEL _cmd);
+NPClass * NPObject_getClass(NPClass * self, SEL _cmd);
+Cyber__Security__IntrusionPayload * Cyber__Security__IntrusionPayload_createBufferOverflow(NPClass * self, SEL _cmd);
+Cyber__Security__IntrusionPayload * Cyber__Security__IntrusionPayload_createZeroDay(NPClass * self, SEL _cmd);
+NPObject * Cyber__Security__IntrusionPayload_initWithName_threat_(NPObject * self, SEL _cmd, const char * name, int t);
+int Cyber__Security__IntrusionPayload_threatLevel(NPObject * self, SEL _cmd);
+void Cyber__Security__IntrusionPayload_setThreatLevel_(NPObject * self, SEL _cmd, int value);
+const char * Cyber__Security__IntrusionPayload_exploitName(NPObject * self, SEL _cmd);
+NPClass * Cyber__Security__IntrusionPayload_getClass(NPClass * self, SEL _cmd);
+NPObject * Cyber__Infrastructure__MainframeFirewall_initWithDomain_rating_(NPObject * self, SEL _cmd, const char * domain, int r);
+int Cyber__Infrastructure__MainframeFirewall_analyzeAndBlockPayload_withFormula_(NPObject * self, SEL _cmd, Cyber__Security__IntrusionPayload * payload, MitigationFormulaBlock formula);
+int Cyber__Infrastructure__MainframeFirewall_defenseRating(NPObject * self, SEL _cmd);
+void Cyber__Infrastructure__MainframeFirewall_setDefenseRating_(NPObject * self, SEL _cmd, int value);
+const char * Cyber__Infrastructure__MainframeFirewall_hostDomain(NPObject * self, SEL _cmd);
+NPClass * Cyber__Infrastructure__MainframeFirewall_getClass(NPClass * self, SEL _cmd);
+NPObject * Cyber__Exploits__ProxyBypass_initWithName_factor_(NPObject * self, SEL _cmd, const char * name, int f);
+void Cyber__Exploits__ProxyBypass_infectFirewall_(NPObject * self, SEL _cmd, Cyber__Infrastructure__MainframeFirewall * fw);
+int Cyber__Exploits__ProxyBypass_amplificationFactor(NPObject * self, SEL _cmd);
+void Cyber__Exploits__ProxyBypass_setAmplificationFactor_(NPObject * self, SEL _cmd, int value);
+const char * Cyber__Exploits__ProxyBypass_proxyName(NPObject * self, SEL _cmd);
+NPClass * Cyber__Exploits__ProxyBypass_getClass(NPClass * self, SEL _cmd);
 int main(int argc, const char * * argv);
 
-extern NFClass nopa_NFObject_class;
-extern NFClass nopa_Cyber__Security__IntrusionPayload_class;
-extern NFClass nopa_Cyber__Infrastructure__MainframeFirewall_class;
-extern NFClass nopa_Cyber__Exploits__ProxyBypass_class;
+extern NPClass nopa_NPObject_class;
+extern NPClass nopa_Cyber__Security__IntrusionPayload_class;
+extern NPClass nopa_Cyber__Infrastructure__MainframeFirewall_class;
+extern NPClass nopa_Cyber__Exploits__ProxyBypass_class;
 void nopa_meta_init(void);
 
-// struct NFClass defined in runtime.h
-// struct NFObject defined in runtime.h
-struct nopa_NFObject_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
+// struct NPClass defined in runtime.h
+// struct NPObject defined in runtime.h
+struct nopa_NPObject_vtable {
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
 };
-struct nopa_NFObject_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+struct nopa_NPObject_meta_vtable {
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct Cyber__Security__IntrusionPayload {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     int _threatLevel;
     const char * _exploitName;
 };
 typedef struct Cyber__Security__IntrusionPayload Cyber__Security__IntrusionPayload;
 struct nopa_Cyber__Security__IntrusionPayload_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    NFObject * (*initWithName_threat_)(NFObject *, SEL, const char *, int);
-    int (*threatLevel)(NFObject *, SEL);
-    void (*setThreatLevel_)(NFObject *, SEL, int);
-    const char * (*exploitName)(NFObject *, SEL);
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    NPObject * (*initWithName_threat_)(NPObject *, SEL, const char *, int);
+    int (*threatLevel)(NPObject *, SEL);
+    void (*setThreatLevel_)(NPObject *, SEL, int);
+    const char * (*exploitName)(NPObject *, SEL);
 };
 struct nopa_Cyber__Security__IntrusionPayload_meta_vtable {
-    Cyber__Security__IntrusionPayload * (*createBufferOverflow)(NFClass *, SEL);
-    Cyber__Security__IntrusionPayload * (*createZeroDay)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+    Cyber__Security__IntrusionPayload * (*createBufferOverflow)(NPClass *, SEL);
+    Cyber__Security__IntrusionPayload * (*createZeroDay)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 typedef int (^MitigationFormulaBlock)(int);
 struct Cyber__Infrastructure__MainframeFirewall {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     const char * _hostDomain;
     int _defenseRating;
 };
 typedef struct Cyber__Infrastructure__MainframeFirewall Cyber__Infrastructure__MainframeFirewall;
 struct nopa_Cyber__Infrastructure__MainframeFirewall_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    NFObject * (*initWithDomain_rating_)(NFObject *, SEL, const char *, int);
-    int (*analyzeAndBlockPayload_withFormula_)(NFObject *, SEL, Cyber__Security__IntrusionPayload *, MitigationFormulaBlock);
-    int (*defenseRating)(NFObject *, SEL);
-    void (*setDefenseRating_)(NFObject *, SEL, int);
-    const char * (*hostDomain)(NFObject *, SEL);
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    NPObject * (*initWithDomain_rating_)(NPObject *, SEL, const char *, int);
+    int (*analyzeAndBlockPayload_withFormula_)(NPObject *, SEL, Cyber__Security__IntrusionPayload *, MitigationFormulaBlock);
+    int (*defenseRating)(NPObject *, SEL);
+    void (*setDefenseRating_)(NPObject *, SEL, int);
+    const char * (*hostDomain)(NPObject *, SEL);
 };
 struct nopa_Cyber__Infrastructure__MainframeFirewall_meta_vtable {
-    NFClass * (*class)(NFClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct Cyber__Exploits__ProxyBypass {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     const char * _proxyName;
     int _amplificationFactor;
 };
 typedef struct Cyber__Exploits__ProxyBypass Cyber__Exploits__ProxyBypass;
 struct nopa_Cyber__Exploits__ProxyBypass_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    NFObject * (*initWithName_factor_)(NFObject *, SEL, const char *, int);
-    void (*infectFirewall_)(NFObject *, SEL, Cyber__Infrastructure__MainframeFirewall *);
-    int (*amplificationFactor)(NFObject *, SEL);
-    void (*setAmplificationFactor_)(NFObject *, SEL, int);
-    const char * (*proxyName)(NFObject *, SEL);
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    NPObject * (*initWithName_factor_)(NPObject *, SEL, const char *, int);
+    void (*infectFirewall_)(NPObject *, SEL, Cyber__Infrastructure__MainframeFirewall *);
+    int (*amplificationFactor)(NPObject *, SEL);
+    void (*setAmplificationFactor_)(NPObject *, SEL, int);
+    const char * (*proxyName)(NPObject *, SEL);
 };
 struct nopa_Cyber__Exploits__ProxyBypass_meta_vtable {
-    NFClass * (*class)(NFClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
-NFObject * NFObject_alloc(NFClass * self, SEL _cmd) {
+NPObject * NPObject_alloc(NPClass * self, SEL _cmd) {
     return nopa_alloc(self);
 }
 
-NFObject * NFObject_new(NFClass * self, SEL _cmd) {
-    NFObject * obj = nopa_alloc(self);
+NPObject * NPObject_new(NPClass * self, SEL _cmd) {
+    NPObject * obj = nopa_alloc(self);
     return nopa_init(obj);
 }
 
-NFObject * NFObject_init(NFObject * self, SEL _cmd) {
-    struct NFObject * _self = ((struct NFObject *)(self));
+NPObject * NPObject_init(NPObject * self, SEL _cmd) {
+    struct NPObject * _self = ((struct NPObject *)(self));
     {
         return nopa_init(self);
     }
 }
 
-void NFObject_dealloc(NFObject * self, SEL _cmd) {
-    struct NFObject * _self = ((struct NFObject *)(self));
+void NPObject_dealloc(NPObject * self, SEL _cmd) {
+    struct NPObject * _self = ((struct NPObject *)(self));
     {
         return;
     }
 }
 
-NFClass * NFObject_getClass(NFClass * self, SEL _cmd) {
-    return &nopa_NFObject_class;
+NPClass * NPObject_getClass(NPClass * self, SEL _cmd) {
+    return &nopa_NPObject_class;
 }
 
-NFObject * nopa_alloc(struct NFClass * cls);
-NFObject * nopa_init(NFObject * );
-Cyber__Security__IntrusionPayload * Cyber__Security__IntrusionPayload_createBufferOverflow(NFClass * self, SEL _cmd) {
-    return ({ NFObject *__nopa_tmp_0 = (NFObject_alloc(&nopa_Cyber__Security__IntrusionPayload_class, __nopa_sel_alloc)); ((struct nopa_Cyber__Security__IntrusionPayload_vtable *)__nopa_tmp_0->isa->vtable)->initWithName_threat_(__nopa_tmp_0, __nopa_sel_initWithName_threat_, "缓冲区溢出漏洞注入", 65); });
+NPObject * nopa_alloc(struct NPClass * cls);
+NPObject * nopa_init(NPObject * );
+Cyber__Security__IntrusionPayload * Cyber__Security__IntrusionPayload_createBufferOverflow(NPClass * self, SEL _cmd) {
+    return ({ NPObject *__nopa_tmp_0 = (NPObject_alloc(&nopa_Cyber__Security__IntrusionPayload_class, __nopa_sel_alloc)); ((struct nopa_Cyber__Security__IntrusionPayload_vtable *)__nopa_tmp_0->isa->vtable)->initWithName_threat_(__nopa_tmp_0, __nopa_sel_initWithName_threat_, "缓冲区溢出漏洞注入", 65); });
 }
 
-Cyber__Security__IntrusionPayload * Cyber__Security__IntrusionPayload_createZeroDay(NFClass * self, SEL _cmd) {
-    return ({ NFObject *__nopa_tmp_1 = (NFObject_alloc(&nopa_Cyber__Security__IntrusionPayload_class, __nopa_sel_alloc)); ((struct nopa_Cyber__Security__IntrusionPayload_vtable *)__nopa_tmp_1->isa->vtable)->initWithName_threat_(__nopa_tmp_1, __nopa_sel_initWithName_threat_, "高级0-Day木马攻击", 99); });
+Cyber__Security__IntrusionPayload * Cyber__Security__IntrusionPayload_createZeroDay(NPClass * self, SEL _cmd) {
+    return ({ NPObject *__nopa_tmp_1 = (NPObject_alloc(&nopa_Cyber__Security__IntrusionPayload_class, __nopa_sel_alloc)); ((struct nopa_Cyber__Security__IntrusionPayload_vtable *)__nopa_tmp_1->isa->vtable)->initWithName_threat_(__nopa_tmp_1, __nopa_sel_initWithName_threat_, "高级0-Day木马攻击", 99); });
 }
 
-NFObject * Cyber__Security__IntrusionPayload_initWithName_threat_(NFObject * self, SEL _cmd, const char * name, int t) {
+NPObject * Cyber__Security__IntrusionPayload_initWithName_threat_(NPObject * self, SEL _cmd, const char * name, int t) {
     struct Cyber__Security__IntrusionPayload * _self = ((struct Cyber__Security__IntrusionPayload *)(self));
     {
-        self = NFObject_init(self, __nopa_sel_init);
+        self = NPObject_init(self, __nopa_sel_init);
         if (self) {
             {
                 ((struct Cyber__Security__IntrusionPayload *)(self))->_exploitName = name;
@@ -199,26 +199,26 @@ NFObject * Cyber__Security__IntrusionPayload_initWithName_threat_(NFObject * sel
     }
 }
 
-int Cyber__Security__IntrusionPayload_threatLevel(NFObject * self, SEL _cmd) {
+int Cyber__Security__IntrusionPayload_threatLevel(NPObject * self, SEL _cmd) {
     return ((struct Cyber::Security::IntrusionPayload *)(self))->_threatLevel;
 }
 
-void Cyber__Security__IntrusionPayload_setThreatLevel_(NFObject * self, SEL _cmd, int value) {
+void Cyber__Security__IntrusionPayload_setThreatLevel_(NPObject * self, SEL _cmd, int value) {
     ((struct Cyber__Security__IntrusionPayload *)(self))->_threatLevel = value;
 }
 
-const char * Cyber__Security__IntrusionPayload_exploitName(NFObject * self, SEL _cmd) {
+const char * Cyber__Security__IntrusionPayload_exploitName(NPObject * self, SEL _cmd) {
     return ((struct Cyber::Security::IntrusionPayload *)(self))->_exploitName;
 }
 
-NFClass * Cyber__Security__IntrusionPayload_getClass(NFClass * self, SEL _cmd) {
+NPClass * Cyber__Security__IntrusionPayload_getClass(NPClass * self, SEL _cmd) {
     return &nopa_Cyber__Security__IntrusionPayload_class;
 }
 
-NFObject * Cyber__Infrastructure__MainframeFirewall_initWithDomain_rating_(NFObject * self, SEL _cmd, const char * domain, int r) {
+NPObject * Cyber__Infrastructure__MainframeFirewall_initWithDomain_rating_(NPObject * self, SEL _cmd, const char * domain, int r) {
     struct Cyber__Infrastructure__MainframeFirewall * _self = ((struct Cyber__Infrastructure__MainframeFirewall *)(self));
     {
-        self = NFObject_init(self, __nopa_sel_init);
+        self = NPObject_init(self, __nopa_sel_init);
         if (self) {
             {
                 ((struct Cyber__Infrastructure__MainframeFirewall *)(self))->_hostDomain = domain;
@@ -229,7 +229,7 @@ NFObject * Cyber__Infrastructure__MainframeFirewall_initWithDomain_rating_(NFObj
     }
 }
 
-int Cyber__Infrastructure__MainframeFirewall_analyzeAndBlockPayload_withFormula_(NFObject * self, SEL _cmd, Cyber__Security__IntrusionPayload * payload, MitigationFormulaBlock formula) {
+int Cyber__Infrastructure__MainframeFirewall_analyzeAndBlockPayload_withFormula_(NPObject * self, SEL _cmd, Cyber__Security__IntrusionPayload * payload, MitigationFormulaBlock formula) {
     struct Cyber__Infrastructure__MainframeFirewall * _self = ((struct Cyber__Infrastructure__MainframeFirewall *)(self));
     {
         if (!payload) {
@@ -250,26 +250,26 @@ int Cyber__Infrastructure__MainframeFirewall_analyzeAndBlockPayload_withFormula_
     }
 }
 
-int Cyber__Infrastructure__MainframeFirewall_defenseRating(NFObject * self, SEL _cmd) {
+int Cyber__Infrastructure__MainframeFirewall_defenseRating(NPObject * self, SEL _cmd) {
     return ((struct Cyber::Infrastructure::MainframeFirewall *)(self))->_defenseRating;
 }
 
-void Cyber__Infrastructure__MainframeFirewall_setDefenseRating_(NFObject * self, SEL _cmd, int value) {
+void Cyber__Infrastructure__MainframeFirewall_setDefenseRating_(NPObject * self, SEL _cmd, int value) {
     ((struct Cyber__Infrastructure__MainframeFirewall *)(self))->_defenseRating = value;
 }
 
-const char * Cyber__Infrastructure__MainframeFirewall_hostDomain(NFObject * self, SEL _cmd) {
+const char * Cyber__Infrastructure__MainframeFirewall_hostDomain(NPObject * self, SEL _cmd) {
     return ((struct Cyber::Infrastructure::MainframeFirewall *)(self))->_hostDomain;
 }
 
-NFClass * Cyber__Infrastructure__MainframeFirewall_getClass(NFClass * self, SEL _cmd) {
+NPClass * Cyber__Infrastructure__MainframeFirewall_getClass(NPClass * self, SEL _cmd) {
     return &nopa_Cyber__Infrastructure__MainframeFirewall_class;
 }
 
-NFObject * Cyber__Exploits__ProxyBypass_initWithName_factor_(NFObject * self, SEL _cmd, const char * name, int f) {
+NPObject * Cyber__Exploits__ProxyBypass_initWithName_factor_(NPObject * self, SEL _cmd, const char * name, int f) {
     struct Cyber__Exploits__ProxyBypass * _self = ((struct Cyber__Exploits__ProxyBypass *)(self));
     {
-        self = NFObject_init(self, __nopa_sel_init);
+        self = NPObject_init(self, __nopa_sel_init);
         if (self) {
             {
                 ((struct Cyber__Exploits__ProxyBypass *)(self))->_proxyName = name;
@@ -280,7 +280,7 @@ NFObject * Cyber__Exploits__ProxyBypass_initWithName_factor_(NFObject * self, SE
     }
 }
 
-void Cyber__Exploits__ProxyBypass_infectFirewall_(NFObject * self, SEL _cmd, Cyber__Infrastructure__MainframeFirewall * fw) {
+void Cyber__Exploits__ProxyBypass_infectFirewall_(NPObject * self, SEL _cmd, Cyber__Infrastructure__MainframeFirewall * fw) {
     struct Cyber__Exploits__ProxyBypass * _self = ((struct Cyber__Exploits__ProxyBypass *)(self));
     {
         if (fw) {
@@ -293,19 +293,19 @@ void Cyber__Exploits__ProxyBypass_infectFirewall_(NFObject * self, SEL _cmd, Cyb
     }
 }
 
-int Cyber__Exploits__ProxyBypass_amplificationFactor(NFObject * self, SEL _cmd) {
+int Cyber__Exploits__ProxyBypass_amplificationFactor(NPObject * self, SEL _cmd) {
     return ((struct Cyber::Exploits::ProxyBypass *)(self))->_amplificationFactor;
 }
 
-void Cyber__Exploits__ProxyBypass_setAmplificationFactor_(NFObject * self, SEL _cmd, int value) {
+void Cyber__Exploits__ProxyBypass_setAmplificationFactor_(NPObject * self, SEL _cmd, int value) {
     ((struct Cyber__Exploits__ProxyBypass *)(self))->_amplificationFactor = value;
 }
 
-const char * Cyber__Exploits__ProxyBypass_proxyName(NFObject * self, SEL _cmd) {
+const char * Cyber__Exploits__ProxyBypass_proxyName(NPObject * self, SEL _cmd) {
     return ((struct Cyber::Exploits::ProxyBypass *)(self))->_proxyName;
 }
 
-NFClass * Cyber__Exploits__ProxyBypass_getClass(NFClass * self, SEL _cmd) {
+NPClass * Cyber__Exploits__ProxyBypass_getClass(NPClass * self, SEL _cmd) {
     return &nopa_Cyber__Exploits__ProxyBypass_class;
 }
 
@@ -322,11 +322,11 @@ int main(int argc, const char * * argv) {
             Cyber__Security__IntrusionPayload * overflow = Cyber__Security__IntrusionPayload_createBufferOverflow(&nopa_Cyber__Security__IntrusionPayload_class, __nopa_sel_createBufferOverflow);
             printf("[数据生成] 成功利用短名称激活 + 类方法: 载荷=%s | 威胁值=%d\n", ((struct nopa_Cyber__Security__IntrusionPayload_vtable *)overflow->isa->vtable)->exploitName(overflow, __nopa_sel_exploitName), ((struct nopa_Cyber__Security__IntrusionPayload_vtable *)overflow->isa->vtable)->threatLevel(overflow, __nopa_sel_threatLevel));
             printf("\n--- 2. 测试 Form 2 别名类的实例化与 Property 读写控制 ---\n");
-            NFObject *__nopa_tmp_2 = (NFObject_alloc(&nopa_Cyber__Infrastructure__MainframeFirewall_class, __nopa_sel_alloc));
+            NPObject *__nopa_tmp_2 = (NPObject_alloc(&nopa_Cyber__Infrastructure__MainframeFirewall_class, __nopa_sel_alloc));
             Cyber__Infrastructure__MainframeFirewall * myGrid = ((struct nopa_Cyber__Infrastructure__MainframeFirewall_vtable *)__nopa_tmp_2->isa->vtable)->initWithDomain_rating_(__nopa_tmp_2, __nopa_sel_initWithDomain_rating_, "mainframe.pentagon.gov", 1000);
             printf("[安全报告] 别名实例化完成: 目标主机=%s | 初始防御系数=%d\n", ((struct nopa_Cyber__Infrastructure__MainframeFirewall_vtable *)myGrid->isa->vtable)->hostDomain(myGrid, __nopa_sel_hostDomain), ((struct nopa_Cyber__Infrastructure__MainframeFirewall_vtable *)myGrid->isa->vtable)->defenseRating(myGrid, __nopa_sel_defenseRating));
             printf("\n--- 3. 测试 Form 3 命名空间批量导入及旁路攻击挂载 ---\n");
-            NFObject *__nopa_tmp_3 = (NFObject_alloc(&nopa_Cyber__Exploits__ProxyBypass_class, __nopa_sel_alloc));
+            NPObject *__nopa_tmp_3 = (NPObject_alloc(&nopa_Cyber__Exploits__ProxyBypass_class, __nopa_sel_alloc));
             Cyber__Exploits__ProxyBypass * rootkit = ((struct nopa_Cyber__Exploits__ProxyBypass_vtable *)__nopa_tmp_3->isa->vtable)->initWithName_factor_(__nopa_tmp_3, __nopa_sel_initWithName_factor_, "暗影透传Rootkit", 2);
             printf("[黑客资产] 成功抓取 Form 3 空间内的扩展插件: %s\n", ((struct nopa_Cyber__Exploits__ProxyBypass_vtable *)rootkit->isa->vtable)->proxyName(rootkit, __nopa_sel_proxyName));
             ((struct nopa_Cyber__Exploits__ProxyBypass_vtable *)rootkit->isa->vtable)->infectFirewall_(rootkit, __nopa_sel_infectFirewall_, myGrid);
@@ -351,7 +351,7 @@ int main(int argc, const char * * argv) {
             printf("\n--- 5. 终极收官回归：别名接收者、三元判断与逗号表达式副作用自增 ---\n");
             int isQuantumDecryptActive = 1;
             int cyberneticStepCounter = 5555;
-            int finalVerifiedRating = isQuantumDecryptActive > 0 ? ({ NFObject *__nopa_tmp_4 = (cyberneticStepCounter++, myGrid); ((struct nopa_Cyber__Infrastructure__MainframeFirewall_vtable *)__nopa_tmp_4->isa->vtable)->defenseRating(__nopa_tmp_4, __nopa_sel_defenseRating); }) : 0;
+            int finalVerifiedRating = isQuantumDecryptActive > 0 ? ({ NPObject *__nopa_tmp_4 = (cyberneticStepCounter++, myGrid); ((struct nopa_Cyber__Infrastructure__MainframeFirewall_vtable *)__nopa_tmp_4->isa->vtable)->defenseRating(__nopa_tmp_4, __nopa_sel_defenseRating); }) : 0;
             printf("[终极收官断言] 编译器语法降维翻译完美！生成的 C99 树结构坚不可摧！\n");
             printf("          -> 副作用计数器自增值: %d (预期为 5556)\n", cyberneticStepCounter);
             printf("          -> 动态通过表达式链抓取的最终防火墙防御系数: %d\n", finalVerifiedRating);
@@ -373,14 +373,14 @@ int main(int argc, const char * * argv) {
 
 // ─── Class metadata ─────────────────────────────────────
 
-struct nopa_NFObject_vtable nopa_NFObject_vtable_inst = {
-    .init = NFObject_init,
-    .dealloc = NFObject_dealloc,
+struct nopa_NPObject_vtable nopa_NPObject_vtable_inst = {
+    .init = NPObject_init,
+    .dealloc = NPObject_dealloc,
 };
 
 struct nopa_Cyber__Security__IntrusionPayload_vtable nopa_Cyber__Security__IntrusionPayload_vtable_inst = {
-    .init = NFObject_init,
-    .dealloc = NFObject_dealloc,
+    .init = NPObject_init,
+    .dealloc = NPObject_dealloc,
     .initWithName_threat_ = Cyber__Security__IntrusionPayload_initWithName_threat_,
     .threatLevel = Cyber__Security__IntrusionPayload_threatLevel,
     .setThreatLevel_ = Cyber__Security__IntrusionPayload_setThreatLevel_,
@@ -388,8 +388,8 @@ struct nopa_Cyber__Security__IntrusionPayload_vtable nopa_Cyber__Security__Intru
 };
 
 struct nopa_Cyber__Infrastructure__MainframeFirewall_vtable nopa_Cyber__Infrastructure__MainframeFirewall_vtable_inst = {
-    .init = NFObject_init,
-    .dealloc = NFObject_dealloc,
+    .init = NPObject_init,
+    .dealloc = NPObject_dealloc,
     .initWithDomain_rating_ = Cyber__Infrastructure__MainframeFirewall_initWithDomain_rating_,
     .analyzeAndBlockPayload_withFormula_ = Cyber__Infrastructure__MainframeFirewall_analyzeAndBlockPayload_withFormula_,
     .defenseRating = Cyber__Infrastructure__MainframeFirewall_defenseRating,
@@ -398,8 +398,8 @@ struct nopa_Cyber__Infrastructure__MainframeFirewall_vtable nopa_Cyber__Infrastr
 };
 
 struct nopa_Cyber__Exploits__ProxyBypass_vtable nopa_Cyber__Exploits__ProxyBypass_vtable_inst = {
-    .init = NFObject_init,
-    .dealloc = NFObject_dealloc,
+    .init = NPObject_init,
+    .dealloc = NPObject_dealloc,
     .initWithName_factor_ = Cyber__Exploits__ProxyBypass_initWithName_factor_,
     .infectFirewall_ = Cyber__Exploits__ProxyBypass_infectFirewall_,
     .amplificationFactor = Cyber__Exploits__ProxyBypass_amplificationFactor,
@@ -407,10 +407,10 @@ struct nopa_Cyber__Exploits__ProxyBypass_vtable nopa_Cyber__Exploits__ProxyBypas
     .proxyName = Cyber__Exploits__ProxyBypass_proxyName,
 };
 
-struct nopa_NFObject_meta_vtable nopa_NFObject_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
-    .class = NFObject_getClass,
+struct nopa_NPObject_meta_vtable nopa_NPObject_meta_vtable_inst = {
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
+    .class = NPObject_getClass,
 };
 
 struct nopa_Cyber__Security__IntrusionPayload_meta_vtable nopa_Cyber__Security__IntrusionPayload_meta_vtable_inst = {
@@ -427,39 +427,39 @@ struct nopa_Cyber__Exploits__ProxyBypass_meta_vtable nopa_Cyber__Exploits__Proxy
     .class = Cyber__Exploits__ProxyBypass_getClass,
 };
 
-NFClass nopa_NFObject_class;
-NFClass nopa_Cyber__Security__IntrusionPayload_class;
-NFClass nopa_Cyber__Infrastructure__MainframeFirewall_class;
-NFClass nopa_Cyber__Exploits__ProxyBypass_class;
+NPClass nopa_NPObject_class;
+NPClass nopa_Cyber__Security__IntrusionPayload_class;
+NPClass nopa_Cyber__Infrastructure__MainframeFirewall_class;
+NPClass nopa_Cyber__Exploits__ProxyBypass_class;
 
 void nopa_meta_init(void) {
-    nopa_NFObject_class = (NFClass){
-        .name = "NFObject",
+    nopa_NPObject_class = (NPClass){
+        .name = "NPObject",
         .superclass = NULL,
-        .instance_size = sizeof(struct NFObject),
-        .vtable = &nopa_NFObject_vtable_inst,
-        .class_vtable = &nopa_NFObject_meta_vtable_inst,
+        .instance_size = sizeof(struct NPObject),
+        .vtable = &nopa_NPObject_vtable_inst,
+        .class_vtable = &nopa_NPObject_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_Cyber__Security__IntrusionPayload_class = (NFClass){
+    nopa_Cyber__Security__IntrusionPayload_class = (NPClass){
         .name = "Cyber__Security__IntrusionPayload",
-        .superclass = &nopa_NFObject_class,
+        .superclass = &nopa_NPObject_class,
         .instance_size = sizeof(struct Cyber__Security__IntrusionPayload),
         .vtable = &nopa_Cyber__Security__IntrusionPayload_vtable_inst,
         .class_vtable = &nopa_Cyber__Security__IntrusionPayload_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_Cyber__Infrastructure__MainframeFirewall_class = (NFClass){
+    nopa_Cyber__Infrastructure__MainframeFirewall_class = (NPClass){
         .name = "Cyber__Infrastructure__MainframeFirewall",
-        .superclass = &nopa_NFObject_class,
+        .superclass = &nopa_NPObject_class,
         .instance_size = sizeof(struct Cyber__Infrastructure__MainframeFirewall),
         .vtable = &nopa_Cyber__Infrastructure__MainframeFirewall_vtable_inst,
         .class_vtable = &nopa_Cyber__Infrastructure__MainframeFirewall_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_Cyber__Exploits__ProxyBypass_class = (NFClass){
+    nopa_Cyber__Exploits__ProxyBypass_class = (NPClass){
         .name = "Cyber__Exploits__ProxyBypass",
-        .superclass = &nopa_NFObject_class,
+        .superclass = &nopa_NPObject_class,
         .instance_size = sizeof(struct Cyber__Exploits__ProxyBypass),
         .vtable = &nopa_Cyber__Exploits__ProxyBypass_vtable_inst,
         .class_vtable = &nopa_Cyber__Exploits__ProxyBypass_meta_vtable_inst,

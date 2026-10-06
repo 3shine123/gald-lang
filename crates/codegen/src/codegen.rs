@@ -471,9 +471,9 @@ pub struct CgClassMeta {
 /// *referent's* weak list in sync:
 ///
 /// ```c
-/// (nopa_weakUnregister((NFObject **)&target),
+/// (nopa_weakUnregister((NPObject **)&target),
 ///  target = value,
-///  nopa_weakRegister((NFObject **)&target, (NFObject *)value))
+///  nopa_weakRegister((NPObject **)&target, (NPObject *)value))
 /// ```
 ///
 /// Used for both explicit `self->_weakIvar = v` writes and weak property
@@ -495,11 +495,11 @@ fn build_weak_write(
     };
     let cast_addr = CgExpr {
         kind: CgExprKind::Cast, type_str: None, line, col,
-        data: CgExprData::Cast { target_type: "NFObject **".into(), expr: Box::new(addr) },
+        data: CgExprData::Cast { target_type: "NPObject **".into(), expr: Box::new(addr) },
     };
     let cast_value = CgExpr {
         kind: CgExprKind::Cast, type_str: None, line, col,
-        data: CgExprData::Cast { target_type: "NFObject *".into(), expr: Box::new(value.clone()) },
+        data: CgExprData::Cast { target_type: "NPObject *".into(), expr: Box::new(value.clone()) },
     };
     let call = |name: &str, args: Vec<CgExpr>| CgExpr {
         kind: CgExprKind::Call, type_str: Some("void".into()), line, col,
@@ -531,8 +531,8 @@ fn is_owned_object_ivar_type(ty: &str) -> bool {
     if t.contains("(*") { return false; }                  // function pointer
     if t.contains("struct __nopa_block") { return false; }  // block layout
     if !t.ends_with('*') { return false; }
-    // Exactly ONE level of indirection. `NFObject **` is a C array of objects
-    // (Foundation's NFArray/NFDictionary back `_items`/`_keys`/`_values` with
+    // Exactly ONE level of indirection. `NPObject **` is a C array of objects
+    // (Foundation's NPArray/NPDictionary back `_items`/`_keys`/`_values` with
     // one) — releasing it would free the array, not an element.
     if t.matches('*').count() != 1 { return false; }
     let base = t.trim_end_matches('*').trim();
@@ -560,7 +560,7 @@ fn owned_ivars_of(cm: &CgClassMeta) -> Vec<String> {
 ///     the leak this pass exists to close: such a class previously destroyed
 ///     its instance without ever releasing the objects it owned.
 ///   * a user `dealloc` EXISTS → ARC stays out of the way. The body commonly
-///     releases ivars itself (handwritten `NFObject_release(_x)`, `[_x release]`,
+///     releases ivars itself (handwritten `NPObject_release(_x)`, `[_x release]`,
 ///     or an OO cascade), and a synthesized release on top of that is a double
 ///     free. A class that declares `dealloc` has declared its ivar policy.
 ///
@@ -572,7 +572,7 @@ fn emit_arc_dealloc_wrappers(classes: &[CgClassMeta]) -> (std::collections::Hash
     use std::collections::HashMap;
     // Only a dealloc the class DEFINED ITSELF counts. `method_names` also
     // carries inherited entries (with their real owner recorded in
-    // `method_owners`), and treating an inherited NFObject_dealloc as "the user
+    // `method_owners`), and treating an inherited NPObject_dealloc as "the user
     // wrote one" would switch the synthesis off for every subclass.
     let has_user_dealloc = |c: &CgClassMeta| {
         let flat = name_flat(&c.class_name);
@@ -632,7 +632,7 @@ fn emit_arc_dealloc_wrappers(classes: &[CgClassMeta]) -> (std::collections::Hash
 
         defs.push_str(&format!(
             "/* ARC: release '{}'s owned ivars (no user dealloc) */\n\
-             static void {}__nopa_arc_dealloc(NFObject * self, SEL _cmd) {{\n{}{}}}\n\n",
+             static void {}__nopa_arc_dealloc(NPObject * self, SEL _cmd) {{\n{}{}}}\n\n",
             c.class_name,
             flat,
             entry,
@@ -681,7 +681,7 @@ fn name_flat(fqn: &str) -> String {
             // separator comes from `full.push('_')` below). Pushing '_' before
             // the mangled arg gave the first arg a leading underscore and
             // dropped the inter-arg separator for multi-arg generics
-            // (`NFDictionary__NFString_ptrNFNumber_ptr`).
+            // (`NPDictionary__NPString_ptrNFNumber_ptr`).
             let mangled = mangle_one_arg(&cur_arg);
             out.push_str(&mangled);
             out.push('_');
@@ -853,20 +853,20 @@ fn cst_type_to_c_str(ct: &nopa_cst::CstType) -> String {
         TypePrim::Bool => s.push_str("_Bool"),
         TypePrim::Signed => s.push_str("signed"),
         TypePrim::Unsigned => s.push_str("unsigned"),
-        TypePrim::Id => s.push_str("NFObject *"),
-        TypePrim::Class => s.push_str("NFClass *"),
+        TypePrim::Id => s.push_str("NPObject *"),
+        TypePrim::Class => s.push_str("NPClass *"),
         TypePrim::Sel => s.push_str("SEL"),
-        TypePrim::Instancetype => s.push_str("NFObject *"),
+        TypePrim::Instancetype => s.push_str("NPObject *"),
         // Type parameter (T in `@interface X<T>`). Rendered with a comment
         // sentinel so monomorphization can replace it by position instead of
-        // blindly replacing every `NFObject *` (which would also hit real `id`).
+        // blindly replacing every `NPObject *` (which would also hit real `id`).
         // Even if a sentinel leaks into the output it is legal C, semantically
         // identical to the bare type.
         TypePrim::Param => match ct.name.as_deref() {
             // Per-name sentinel: the monomorphization pass pairs each param
             // name with its own type argument (`/*K*/`→args[0], `/*V*/`→args[1]).
             // A nameless Param falls back to the generic `/*T*/` marker.
-            Some(n) if !n.is_empty() => s.push_str(&format!("NFObject * /*{}*/", n)),
+            Some(n) if !n.is_empty() => s.push_str(&format!("NPObject * /*{}*/", n)),
             _ => s.push_str(T_PARAM_RENDER),
         },
         TypePrim::Named => {
@@ -976,13 +976,13 @@ pub fn ast_type_to_c_str(t: &AstType) -> String {
         TypePrim::Bool => s.push_str("_Bool"),
         TypePrim::Signed => s.push_str("signed"),
         TypePrim::Unsigned => s.push_str("unsigned"),
-        TypePrim::Id => s.push_str("NFObject *"),
-        TypePrim::Class => s.push_str("NFClass *"),
+        TypePrim::Id => s.push_str("NPObject *"),
+        TypePrim::Class => s.push_str("NPClass *"),
         TypePrim::Sel => s.push_str("SEL"),
-        TypePrim::Instancetype => s.push_str("NFObject *"),
+        TypePrim::Instancetype => s.push_str("NPObject *"),
         TypePrim::Param => match t.name.as_deref() {
             // Per-name sentinel — see the cst_type_to_c_str Param arm.
-            Some(n) if !n.is_empty() => s.push_str(&format!("NFObject * /*{}*/", n)),
+            Some(n) if !n.is_empty() => s.push_str(&format!("NPObject * /*{}*/", n)),
             _ => s.push_str(T_PARAM_RENDER),
         },
         TypePrim::Named => {
@@ -1071,7 +1071,7 @@ struct ClassInfo {
     class_name: String,
     flat: String,
     super_name: Option<String>,
-    /// Declared generic type params in order (`NFDictionary<K, V>` →
+    /// Declared generic type params in order (`NPDictionary<K, V>` →
     /// ["K", "V"]). Pairs each instantiation's type_args with the right
     /// per-name Param sentinel during monomorphization.
     type_params: Vec<String>,
@@ -1139,8 +1139,8 @@ fn render_callee_expr(ae: &AstExpr) -> String {
     }
 }
 
-fn expand_nflog_format(fmt: &str, args: &[AstExpr], class_infos: &std::collections::BTreeMap<String, ClassInfo>, line: usize, col: usize, type_str: Option<String>) -> CgExpr {
-    let has_nfstring = class_infos.contains_key("NFString");
+fn expand_nplog_format(fmt: &str, args: &[AstExpr], class_infos: &std::collections::BTreeMap<String, ClassInfo>, line: usize, col: usize, type_str: Option<String>) -> CgExpr {
+    let has_npstring = class_infos.contains_key("NPString");
     let mut new_fmt = String::with_capacity(fmt.len() + 16);
     let mut expanded_args: Vec<CgExpr> = Vec::with_capacity(args.len() + 1);
     let mut arg_idx = 0usize;
@@ -1152,7 +1152,7 @@ fn expand_nflog_format(fmt: &str, args: &[AstExpr], class_infos: &std::collectio
                 chars.next();
             } else if let Some(&(_, '@')) = chars.peek() {
                 chars.next();
-                if has_nfstring {
+                if has_npstring {
                     // %@ → [[arg description] UTF8String] guarded by NULL ternary
                     new_fmt.push('%'); new_fmt.push('s');
                     if let Some(arg_ast) = args.get(arg_idx) {
@@ -1160,11 +1160,11 @@ fn expand_nflog_format(fmt: &str, args: &[AstExpr], class_infos: &std::collectio
                         let desc_sel = sel_const_name("description");
                         let utf8_sel = sel_const_name("UTF8String");
                         let desc_call = CgExpr {
-                            kind: CgExprKind::Call, type_str: Some("NFObject *".into()), line, col,
+                            kind: CgExprKind::Call, type_str: Some("NPObject *".into()), line, col,
                             data: CgExprData::Call {
                                 name: "description".into(),
                                 args: vec![arg_cg.clone()],
-                                vtable_class: Some("NFString".into()),
+                                vtable_class: Some("NPString".into()),
                                 alt_vtable_classes: vec![],
                                 is_class_method: false, is_super: false,
                                 sel_const_name: Some(desc_sel),
@@ -1176,7 +1176,7 @@ fn expand_nflog_format(fmt: &str, args: &[AstExpr], class_infos: &std::collectio
                             data: CgExprData::Call {
                                 name: "UTF8String".into(),
                                 args: vec![desc_call],
-                                vtable_class: Some("NFString".into()),
+                                vtable_class: Some("NPString".into()),
                                 alt_vtable_classes: vec![],
                                 is_class_method: false, is_super: false,
                                 sel_const_name: Some(utf8_sel),
@@ -1196,7 +1196,7 @@ fn expand_nflog_format(fmt: &str, args: &[AstExpr], class_infos: &std::collectio
                         expanded_args.push(CgExpr { kind: CgExprKind::String, type_str: None, line, col, data: CgExprData::String("(null)".into()) });
                     }
                 } else {
-                    // NFString not available — fall back to %p (print pointer)
+                    // NPString not available — fall back to %p (print pointer)
                     new_fmt.push('%'); new_fmt.push('p');
                     if let Some(arg_ast) = args.get(arg_idx) {
                         expanded_args.push(convert_expr(arg_ast, class_infos));
@@ -1224,29 +1224,29 @@ fn expand_nflog_format(fmt: &str, args: &[AstExpr], class_infos: &std::collectio
             new_fmt.push(ch);
         }
     }
-    let mut all_args = vec![nflog_format_arg(new_fmt, has_nfstring, 0, 0)];
+    let mut all_args = vec![nplog_format_arg(new_fmt, has_npstring, 0, 0)];
     all_args.extend(expanded_args);
     CgExpr {
         kind: CgExprKind::Call, type_str, line, col,
         data: CgExprData::Call {
-            name: "NFLog".into(), args: all_args,
+            name: "NPLog".into(), args: all_args,
             vtable_class: None, alt_vtable_classes: vec![], is_class_method: false, is_super: false,
             sel_const_name: None, method_index: None,
         },
     }
 }
 
-/// Build the format argument for NFLog: when NFString is available, emit
-/// `(NFString *)nopa_stringFromCstr("...")` so the format is passed as an NFString.
-/// When NFString is absent, fall back to a raw C string (graceful degradation).
-fn nflog_format_arg(fmt: String, has_nfstring: bool, line: usize, col: usize) -> CgExpr {
-    if has_nfstring {
+/// Build the format argument for NPLog: when NPString is available, emit
+/// `(NPString *)nopa_stringFromCstr("...")` so the format is passed as an NPString.
+/// When NPString is absent, fall back to a raw C string (graceful degradation).
+fn nplog_format_arg(fmt: String, has_npstring: bool, line: usize, col: usize) -> CgExpr {
+    if has_npstring {
         CgExpr {
-            kind: CgExprKind::Cast, type_str: Some("NFString *".into()), line, col,
+            kind: CgExprKind::Cast, type_str: Some("NPString *".into()), line, col,
             data: CgExprData::Cast {
-                target_type: "NFString *".into(),
+                target_type: "NPString *".into(),
                 expr: Box::new(CgExpr {
-                    kind: CgExprKind::Call, type_str: Some("NFObject *".into()), line, col,
+                    kind: CgExprKind::Call, type_str: Some("NPObject *".into()), line, col,
                     data: CgExprData::Call {
                         name: "nopa_stringFromCstr".into(),
                         args: vec![CgExpr { kind: CgExprKind::String, type_str: None, line, col, data: CgExprData::String(fmt) }],
@@ -1272,10 +1272,10 @@ fn convert_expr(ae: &AstExpr, class_infos: &std::collections::BTreeMap<String, C
         return CgExpr { kind: CgExprKind::Ident, type_str, line, col, data: CgExprData::Ident("NULL".into()) };
     }
     if ae.kind == AstExprKind::Self_ {
-        return CgExpr { kind: CgExprKind::Ident, type_str: Some("NFObject *".into()), line, col, data: CgExprData::Ident("self".into()) };
+        return CgExpr { kind: CgExprKind::Ident, type_str: Some("NPObject *".into()), line, col, data: CgExprData::Ident("self".into()) };
     }
     if ae.kind == AstExprKind::Super {
-        return CgExpr { kind: CgExprKind::Ident, type_str: Some("NFObject *".into()), line, col, data: CgExprData::Ident("super".into()) };
+        return CgExpr { kind: CgExprKind::Ident, type_str: Some("NPObject *".into()), line, col, data: CgExprData::Ident("super".into()) };
     }
     if ae.kind == AstExprKind::BlockLit {
         // BlockLit is handled in the match below via AstExprData::Block
@@ -1285,7 +1285,7 @@ fn convert_expr(ae: &AstExpr, class_infos: &std::collections::BTreeMap<String, C
         // codegen. This arm is the passthrough safety net (e.g. -fno-async or
         // an await outside any method): treat as its inner expression.
         AstExprData::Await(inner) => convert_expr(inner, class_infos),
-        // `@(expr)`: the checker rewrites this into the `NFNumber` factory
+        // `@(expr)`: the checker rewrites this into the `NPNumber` factory
         // matching the operand's static type — only the checker has types, and
         // the C99 backend has no `_Generic` to fall back on. This arm is the
         // passthrough safety net (`-fno-checker`): treat it as its inner
@@ -1296,10 +1296,10 @@ fn convert_expr(ae: &AstExpr, class_infos: &std::collections::BTreeMap<String, C
         AstExprData::FloatRaw(raw) => CgExpr { kind: CgExprKind::Float, type_str, line, col, data: CgExprData::FloatRaw(raw.clone()) },
         AstExprData::String(s) => CgExpr { kind: CgExprKind::String, type_str, line, col, data: CgExprData::String(s.clone()) },
         AstExprData::AtString(s) => {
-            let has_nfstring = class_infos.contains_key("NFString");
-            if has_nfstring {
+            let has_npstring = class_infos.contains_key("NPString");
+            if has_npstring {
                 CgExpr {
-                    kind: CgExprKind::Call, type_str: Some("NFObject *".into()), line, col,
+                    kind: CgExprKind::Call, type_str: Some("NPObject *".into()), line, col,
                     data: CgExprData::Call {
                         name: "nopa_stringFromCstr".into(),
                         args: vec![CgExpr { kind: CgExprKind::String, type_str: None, line, col, data: CgExprData::String(s.clone()) }],
@@ -1351,7 +1351,7 @@ fn convert_expr(ae: &AstExpr, class_infos: &std::collections::BTreeMap<String, C
             CgExpr { kind: CgExprKind::Arrow, type_str, line, col, data: CgExprData::Arrow { obj: Box::new(obj_cg), field } }
         }
         AstExprData::MsgSend { receiver, selector, args, is_class_method, is_super, super_name, .. } => {
-            // Special case: [receiver class] -> ((NFClass *)((nopa_root *)receiver)->isa)
+            // Special case: [receiver class] -> ((NPClass *)((nopa_root *)receiver)->isa)
             // The "class" method is auto-generated on every meta vtable but NOT registered
             // in class_infos, so normal vtable dispatch can't find it. Emit the direct
             // ivar access which is semantically equivalent for all ObjC objects.
@@ -1391,7 +1391,7 @@ fn convert_expr(ae: &AstExpr, class_infos: &std::collections::BTreeMap<String, C
                 return CgExpr {
                     kind: CgExprKind::Cast, type_str, line, col,
                     data: CgExprData::Cast {
-                        target_type: "NFClass *".to_string(),
+                        target_type: "NPClass *".to_string(),
                         expr: Box::new(isa_access),
                     },
                 };
@@ -1460,7 +1460,7 @@ fn convert_expr(ae: &AstExpr, class_infos: &std::collections::BTreeMap<String, C
                 // For super calls, start with the direct superclass name.
                 // Walk the superclass chain to find the nearest ancestor that
                 // actually declares the method (the direct superclass may inherit
-                // it — e.g. NFLayer4 doesn't have dealloc, only NFObject does).
+                // it — e.g. NPLayer4 doesn't have dealloc, only NPObject does).
                 vtable_class = super_name.clone();
                 // A super send inside a CLASS method (e.g. `[super alloc]`) is
                 // not marked is_class_method in the AST — resolve it: if the
@@ -1509,7 +1509,7 @@ fn convert_expr(ae: &AstExpr, class_infos: &std::collections::BTreeMap<String, C
                             if let Some(owner) = info.method_owners.get(idx) {
                                 if let Some(owner_info) = class_infos.get(owner) {
                                     if let Some(ref sup) = owner_info.super_name {
-                                        if sup != "NFObject" {
+                                        if sup != "NPObject" {
                                             best = Some(sup.clone());
                                             break;
                                         }
@@ -1607,7 +1607,7 @@ fn convert_expr(ae: &AstExpr, class_infos: &std::collections::BTreeMap<String, C
                         // identifier and only makes sense to the nopa parser).
                         let cls_addr = if rc == "self" || (rc == "super" && *is_super) {
                             // `super` as receiver → pass `self` (in a class method
-                            // self IS the NFClass*; `super` is not a C identifier).
+                            // self IS the NPClass*; `super` is not a C identifier).
                             let recv_ident = if rc == "super" { "self" } else { rc.as_str() };
                             CgExpr {
                                 kind: CgExprKind::Ident, type_str: None, line, col,
@@ -1651,7 +1651,7 @@ fn convert_expr(ae: &AstExpr, class_infos: &std::collections::BTreeMap<String, C
                         call_args.push(cls_addr);
                     } else {
                         // Class method on expression receiver (e.g. [[self class] alloc]):
-                        // receiver expression evaluates to an NFClass*, pass it directly
+                        // receiver expression evaluates to an NPClass*, pass it directly
                         call_args.push(convert_expr(receiver, &class_infos));
                     }
                 } else {
@@ -1688,29 +1688,29 @@ fn convert_expr(ae: &AstExpr, class_infos: &std::collections::BTreeMap<String, C
             }
         }
         AstExprData::FuncCall { name, args, callee, .. } => {
-            // NFLog(@"...%@...", arg1, arg2): resolve `%@` at COMPILE TIME per
+            // NPLog(@"...%@...", arg1, arg2): resolve `%@` at COMPILE TIME per
             // the nopa static-dispatch model. No runtime reflection is allowed.
             // Each `%@` arg becomes  arg ? [[arg description] UTF8String] : "(null)"
             // and the format's `%@` is rewritten to `%s`.
-            if name == "NFLog" && callee.is_none() && !args.is_empty() {
+            if name == "NPLog" && callee.is_none() && !args.is_empty() {
                 if let Some(fmt_str) = match &args[0].data {
                     AstExprData::AtString(s) => Some(s.clone()),
                     AstExprData::String(s) => Some(s.clone()),
                     _ => None,
                 } {
                     if fmt_str.contains("%@") {
-                        return expand_nflog_format(&fmt_str, &args[1..], class_infos, line, col, type_str);
+                        return expand_nplog_format(&fmt_str, &args[1..], class_infos, line, col, type_str);
                     } else {
-                        // No %@ — the format is passed as an NFString.
-                        let has_nfstring = class_infos.contains_key("NFString");
-                        let mut cg_args = vec![nflog_format_arg(fmt_str, has_nfstring, line, col)];
+                        // No %@ — the format is passed as an NPString.
+                        let has_npstring = class_infos.contains_key("NPString");
+                        let mut cg_args = vec![nplog_format_arg(fmt_str, has_npstring, line, col)];
                         for a in &args[1..] {
                             cg_args.push(convert_expr(a, class_infos));
                         }
                         return CgExpr {
                             kind: CgExprKind::Call, type_str, line, col,
                             data: CgExprData::Call {
-                                name: "NFLog".into(), args: cg_args,
+                                name: "NPLog".into(), args: cg_args,
                                 vtable_class: None, alt_vtable_classes: vec![], is_class_method: false, is_super: false,
                                 sel_const_name: None, method_index: None,
                             },
@@ -1744,15 +1744,15 @@ fn convert_expr(ae: &AstExpr, class_infos: &std::collections::BTreeMap<String, C
             let mut auto_sel = None;
             let mut auto_is_class = false;
             if callee.is_none() {
-                // Detect direct calls to NFObject method functions like
-                // `NFObject_release(obj)`, `NFObject_retain(obj)`, `NFObject_dealloc(obj)`.
+                // Detect direct calls to NPObject method functions like
+                // `NPObject_release(obj)`, `NPObject_retain(obj)`, `NPObject_dealloc(obj)`.
                 // Convert these to vtable dispatch so the normal vtable path handles
-                // arg casting (e.g. (NFObject *)(child)) instead of a bare C call.
-                if let Some(method) = call_name.strip_prefix("NFObject_") {
+                // arg casting (e.g. (NPObject *)(child)) instead of a bare C call.
+                if let Some(method) = call_name.strip_prefix("NPObject_") {
                     if !method.is_empty() && args.len() == 1 {
                         auto_sel = Some(sel_const_name(method));
                         // Determine if class method (alloc/new) or instance method.
-                        auto_is_class = class_infos.get("NFObject")
+                        auto_is_class = class_infos.get("NPObject")
                             .map(|info| {
                                 info.method_names.iter()
                                     .zip(info.is_class_methods.iter())
@@ -1764,15 +1764,15 @@ fn convert_expr(ae: &AstExpr, class_infos: &std::collections::BTreeMap<String, C
             }
             let cg_args: Vec<CgExpr> = args.iter().map(|a| convert_expr(a, &class_infos)).collect();
             if let Some(sel) = auto_sel {
-                // Convert NFObject_* calls to vtable dispatch by setting vtable_class,
-                // sel_const_name, and using the method name (without NFObject_ prefix).
-                let method = call_name.strip_prefix("NFObject_").unwrap();
+                // Convert NPObject_* calls to vtable dispatch by setting vtable_class,
+                // sel_const_name, and using the method name (without NPObject_ prefix).
+                let method = call_name.strip_prefix("NPObject_").unwrap();
                 CgExpr {
                     kind: CgExprKind::Call, type_str, line, col,
                     data: CgExprData::Call {
                         name: method.to_string(),
                         args: cg_args, // no SEL — emitted from sel_const_name
-                        vtable_class: Some("NFObject".to_string()),
+                        vtable_class: Some("NPObject".to_string()),
                         alt_vtable_classes: vec![],
                         is_class_method: auto_is_class,
                         is_super: false,
@@ -1982,14 +1982,14 @@ fn convert_expr(ae: &AstExpr, class_infos: &std::collections::BTreeMap<String, C
             CgExpr { kind: CgExprKind::DesignatedInit, type_str, line, col, data: CgExprData::DesignatedInit { designators: designators.iter().map(conv_d).collect(), expr: Box::new(convert_expr(expr, &class_infos)) } }
         }
         AstExprData::ArrayLit(elements) => {
-            if class_infos.contains_key("NFArray") {
+            if class_infos.contains_key("NPArray") {
                 // @[a, b, c] → nopa_array_create(3, a, b, c)
                 let mut cg_args = Vec::with_capacity(elements.len() + 1);
                 cg_args.push(CgExpr { kind: CgExprKind::Int, type_str: None, line, col, data: CgExprData::Int(elements.len() as i64) });
                 for el in elements {
                     cg_args.push(convert_expr(el, &class_infos));
                 }
-                CgExpr { kind: CgExprKind::Call, type_str: Some("NFObject *".into()), line, col,
+                CgExpr { kind: CgExprKind::Call, type_str: Some("NPObject *".into()), line, col,
                     data: CgExprData::Call {
                         name: "nopa_array_create".into(), args: cg_args,
                         vtable_class: None, alt_vtable_classes: vec![], is_class_method: false, is_super: false,
@@ -2004,7 +2004,7 @@ fn convert_expr(ae: &AstExpr, class_infos: &std::collections::BTreeMap<String, C
             CgExpr { kind: CgExprKind::Ident, type_str: None, line, col, data: CgExprData::Ident(sel_const_name(s)) }
         }
         AstExprData::DictLit { keys, values } => {
-            if class_infos.contains_key("NFDictionary") {
+            if class_infos.contains_key("NPDictionary") {
                 // @{k: v, ...} → nopa_dictionary_create(n, k1, v1, ..., kn, vn)
                 let stored = keys.len().min(values.len());
                 let mut cg_args = Vec::with_capacity(stored * 2 + 1);
@@ -2013,7 +2013,7 @@ fn convert_expr(ae: &AstExpr, class_infos: &std::collections::BTreeMap<String, C
                     cg_args.push(convert_expr(&keys[i], &class_infos));
                     cg_args.push(convert_expr(&values[i], &class_infos));
                 }
-                CgExpr { kind: CgExprKind::Call, type_str: Some("NFObject *".into()), line, col,
+                CgExpr { kind: CgExprKind::Call, type_str: Some("NPObject *".into()), line, col,
                     data: CgExprData::Call {
                         name: "nopa_dictionary_create".into(), args: cg_args,
                         vtable_class: None, alt_vtable_classes: vec![], is_class_method: false, is_super: false,
@@ -2021,7 +2021,7 @@ fn convert_expr(ae: &AstExpr, class_infos: &std::collections::BTreeMap<String, C
                     },
                 }
             } else {
-                // No NFDictionary in this TU (Foundation not imported): keep the
+                // No NPDictionary in this TU (Foundation not imported): keep the
                 // historical `NULL` placeholder rather than emit a call to a
                 // helper that was never emitted.
                 CgExpr { kind: CgExprKind::Ident, type_str, line, col, data: CgExprData::Ident("NULL".into()) }
@@ -2321,7 +2321,7 @@ fn convert_stmt(as_: &AstStmt, class_infos: &std::collections::BTreeMap<String, 
                 let mut cg_val = value.as_ref().map(|v| Box::new(convert_expr(v, &class_infos)));
                 let rt_str = CURRENT_RETURN_TYPE.lock().unwrap().clone();
                 if let Some(ref rt) = rt_str {
-                    if rt.contains(" *") && rt != "NFObject *" {
+                    if rt.contains(" *") && rt != "NPObject *" {
                         // Check if the return value is `self` or a message-send (which
                         // the checker types as `int`).  Both need a cast to the function's
                         // return type to avoid `-Wincompatible-pointer-types` in gcc.
@@ -2516,7 +2516,7 @@ let mut catch_body: Vec<CgStmt> = Vec::new();
                         // add `(void)name;` to silence the unused-variable warning.
                         let param_used = stmt_refs_name(&*body, &param_name);
                         if param_used {
-                            // Cast __nopa_exception_value (an NFObject *) to the catch
+                            // Cast __nopa_exception_value (an NPObject *) to the catch
                             // param type so typed catches don't trigger incompatible
                             // pointer types with -Wall -Wextra.
                             let cast_ctor = CgExpr {
@@ -2586,7 +2586,7 @@ let mut catch_body: Vec<CgStmt> = Vec::new();
                             let name = t.name.as_ref()?;
                             let flat = name_flat(name);
                             if !class_infos.contains_key(&flat) { return None; }
-                            // Build: __nopa_eh_isa((NFObject *)__nopa_exception_value,
+                            // Build: __nopa_eh_isa((NPObject *)__nopa_exception_value,
                             //                       &nopa_Flat_class)
                             // __nopa_eh_isa walks the superclass chain and is
                             // nil-safe (runtime.c) — a subclass instance matches a
@@ -2603,7 +2603,7 @@ let mut catch_body: Vec<CgStmt> = Vec::new();
                                         CgExpr {
                                             kind: CgExprKind::Cast, type_str: None, line, col,
                                             data: CgExprData::Cast {
-                                                target_type: "NFObject *".into(),
+                                                target_type: "NPObject *".into(),
                                                 expr: Box::new(CgExpr {
                                                     kind: CgExprKind::Ident, type_str: None, line, col,
                                                     data: CgExprData::Ident("__nopa_exception_value".into()),
@@ -3580,10 +3580,10 @@ fn block_type_signature_key(s: &str) -> String {
 
 /// Sentinel rendered for `TypePrim::Param` (a generic type parameter like `T`).
 /// The trailing comment marks the position so monomorphization can replace
-/// exactly the T positions instead of blindly replacing every `NFObject *`
+/// exactly the T positions instead of blindly replacing every `NPObject *`
 /// (which corrupted real `id` positions like `-copy`/`-description` in
 /// specialized copies). If a sentinel ever leaks into output it is legal C.
-const T_PARAM_RENDER: &str = "NFObject * /*T*/";
+const T_PARAM_RENDER: &str = "NPObject * /*T*/";
 
 /// Render a parameter's name plus any `__attribute__((...))` suffixes, e.g.
 /// `x __attribute__((unused))`. The attrs are appended to the name so
@@ -3619,12 +3619,12 @@ fn format_param_decl(pt: &str, pn: &str) -> String {
 ///
 /// When `Box<T>` is specialized to `Box<Node*>`, the cloned method body still
 /// refers to the generic template: `struct Box * _self = (struct Box *)self;`
-/// and `T item` (rendered as `NFObject * item`). This walks the CgStmt/CgExpr
+/// and `T item` (rendered as `NPObject * item`). This walks the CgStmt/CgExpr
 /// tree and replaces:
 ///   * `struct {base_flat} *` → `struct {mangled_flat} *`   (the `_self` cast)
 ///   * `{t_render}` → `{concrete_str}`                       (T → concrete)
 ///
-/// `t_render` is the C string used for `TypePrim::Param` (typically `NFObject *`);
+/// `t_render` is the C string used for `TypePrim::Param` (typically `NPObject *`);
 /// `concrete_str` is the rendered concrete type (e.g. `Node *`).
 fn substitute_cg_stmt(
     s: &mut CgStmt,
@@ -3800,7 +3800,7 @@ fn rewrite_type_str(
         return;
     }
     // T → concrete (T renders with the `/*T*/` sentinel; see T_PARAM_RENDER).
-    // Matches both the sentinel form and, defensively, a bare `NFObject *`
+    // Matches both the sentinel form and, defensively, a bare `NPObject *`
     // string that came from an older path without the marker.
     if !t_render.is_empty() && s.contains(t_render) {
         *s = s.replace(t_render, concrete_str);
@@ -3863,10 +3863,10 @@ pub fn ast_to_cg_unit_with_slots_ext(
         match &e.data {
             AstExprData::FuncCall { name, args, .. } => {
                 for a in args { collect_sel_expr(a, sels); }
-                // NFLog(@"...%@...") expands each %@ into a `-description` +
+                // NPLog(@"...%@...") expands each %@ into a `-description` +
                 // `-UTF8String` message send at codegen time. Collect those two
                 // selectors so the SEL constants are emitted.
-                if name == "NFLog" {
+                if name == "NPLog" {
                     if let Some(AstExprData::AtString(fmt)) = args.first().map(|a| &a.data) {
                         if fmt.contains("%@") {
                             add_sel(sels, "description");
@@ -3976,8 +3976,8 @@ pub fn ast_to_cg_unit_with_slots_ext(
     // Pre‑pass: register all class entries + method names so that
     // vtable dispatch resolution in method‑body conversion can find
     // protocol methods implemented in classes defined later in source
-    // order (e.g. NFCollectionInspector implements collectionDidReachCapacity:
-    // but NFDataContainer's method body that calls it is converted first).
+    // order (e.g. NPCollectionInspector implements collectionDidReachCapacity:
+    // but NPDataContainer's method body that calls it is converted first).
     for d in &ast.decls {
         if d.kind != AstDeclKind::Class { continue; }
         let cls_name = d.name.clone().unwrap_or_default();
@@ -4121,8 +4121,8 @@ pub fn ast_to_cg_unit_with_slots_ext(
 
                     let ret_type = match &m.data {
                         AstDeclData::Method { return_type, .. } =>
-                            return_type.as_ref().map(|t| ast_type_to_c_str(t)).unwrap_or_else(|| "NFObject *".into()),
-                        _ => "NFObject *".into(),
+                            return_type.as_ref().map(|t| ast_type_to_c_str(t)).unwrap_or_else(|| "NPObject *".into()),
+                        _ => "NPObject *".into(),
                     };
                     let is_class = match &m.data {
                         AstDeclData::Method { is_class_method, .. } => *is_class_method,
@@ -4152,7 +4152,7 @@ pub fn ast_to_cg_unit_with_slots_ext(
                     }
 
                     let mut fn_params = Vec::new();
-                    let self_type = if is_class { "NFClass *" } else { "NFObject *" };
+                    let self_type = if is_class { "NPClass *" } else { "NPObject *" };
                     fn_params.push((self_type.to_string(), "self".to_string()));
                     fn_params.push(("SEL".to_string(), "_cmd".to_string()));
 
@@ -4358,7 +4358,7 @@ pub fn ast_to_cg_unit_with_slots_ext(
                         ]),
                     };
 
-                    let getter_params = vec![("NFObject *".to_string(), "self".to_string()), ("SEL".to_string(), "_cmd".to_string())];
+                    let getter_params = vec![("NPObject *".to_string(), "self".to_string()), ("SEL".to_string(), "_cmd".to_string())];
                     let getter_params_clone = getter_params.clone();
                     // Only create CgDecl if it doesn't already exist (e.g. pre‑pass or @implementation registered it).
                     if decls.iter().any(|d| d.name == getter_fn_name) {
@@ -4452,7 +4452,7 @@ pub fn ast_to_cg_unit_with_slots_ext(
                             ]),
                         };
 
-                        let mut setter_params = vec![("NFObject *".to_string(), "self".to_string()), ("SEL".to_string(), "_cmd".to_string())];
+                        let mut setter_params = vec![("NPObject *".to_string(), "self".to_string()), ("SEL".to_string(), "_cmd".to_string())];
                         // Use the original parameter name from the @implementation method if available
                         let existing_param_name = decls.iter()
                             .find(|d| d.name == setter_fn_name)
@@ -4512,7 +4512,7 @@ pub fn ast_to_cg_unit_with_slots_ext(
                             let cast_addr = CgExpr {
                                 kind: CgExprKind::Cast, type_str: None, line: 0, col: 0,
                                 data: CgExprData::Cast {
-                                    target_type: "NFObject **".into(), expr: Box::new(addr_of_ivar),
+                                    target_type: "NPObject **".into(), expr: Box::new(addr_of_ivar),
                                 },
                             };
                             let value_ident = CgExpr {
@@ -4522,7 +4522,7 @@ pub fn ast_to_cg_unit_with_slots_ext(
                             let cast_value = CgExpr {
                                 kind: CgExprKind::Cast, type_str: None, line: 0, col: 0,
                                 data: CgExprData::Cast {
-                                    target_type: "NFObject *".into(), expr: Box::new(value_ident),
+                                    target_type: "NPObject *".into(), expr: Box::new(value_ident),
                                 },
                             };
                             let assign_expr = CgExpr {
@@ -4672,7 +4672,7 @@ pub fn ast_to_cg_unit_with_slots_ext(
                 continue;
             }
             for cg in convert_decl(d, &class_infos) {
-                // Skip empty struct forward declarations (e.g. `struct NFClass;`)
+                // Skip empty struct forward declarations (e.g. `struct NPClass;`)
                 if cg.kind == CgDeclKind::Variable && cg.name == d.name.clone().unwrap_or_default() {
                     if let CgDeclData::Variable { ref var_type, .. } = cg.data {
                         if var_type == "void" { continue; }
@@ -4916,7 +4916,7 @@ pub fn ast_to_cg_unit_with_slots_ext(
     });
     // Clone generic classes per instantiation with substituted types.
     // Substitute T → concrete type in ivar_types/method return types/params by
-    // string replacement (rendered C strings use `NFObject *` for TypePrim::Param).
+    // string replacement (rendered C strings use `NPObject *` for TypePrim::Param).
     for (base, args) in &generic_instantiations {
         let mangled = format!("{}<{}>", base, args.iter().map(ast_type_to_c_str).collect::<Vec<_>>().join(", "));
         let mangled_flat = name_flat(&mangled);
@@ -4925,16 +4925,16 @@ pub fn ast_to_cg_unit_with_slots_ext(
         let base_flat = name_flat(base);
         if let Some(template) = class_infos.get(&base_flat).cloned() {
             // Build (sentinel → concrete) pairs from the template's declared
-            // type params: `NFDictionary<K, V>` with args [NFString*, NFNumber*]
-            // pairs (`NFObject * /*K*/` → `NFString *`) and
-            // (`NFObject * /*V*/` → `NFNumber *`) so each position substitutes
+            // type params: `NPDictionary<K, V>` with args [NPString*, NPNumber*]
+            // pairs (`NPObject * /*K*/` → `NPString *`) and
+            // (`NPObject * /*V*/` → `NPNumber *`) so each position substitutes
             // by name. Templates whose params are missing or arg-count-
             // mismatched fall back to the single legacy `/*T*/` marker joined
             // across all args.
             let param_pairs: Vec<(String, String)> =
                 if !template.type_params.is_empty() && template.type_params.len() == args.len() {
                     template.type_params.iter().zip(args.iter())
-                        .map(|(pn, a)| (format!("NFObject * /*{}*/", pn), ast_type_to_c_str(a)))
+                        .map(|(pn, a)| (format!("NPObject * /*{}*/", pn), ast_type_to_c_str(a)))
                         .collect()
                 } else {
                     let concrete_str = args.iter().map(ast_type_to_c_str).collect::<Vec<_>>().join(", ");
@@ -4968,7 +4968,7 @@ pub fn ast_to_cg_unit_with_slots_ext(
             }
             for (i, mname) in sub_info.method_names.iter().enumerate() {
                 let fn_name = format!("{}_{}", mangled_flat, mname);
-                let ret_type = sub_info.method_return_types.get(i).cloned().unwrap_or_else(|| "NFObject *".into());
+                let ret_type = sub_info.method_return_types.get(i).cloned().unwrap_or_else(|| "NPObject *".into());
                 let params = sub_info.method_params_list.get(i).cloned().unwrap_or_default();
                 let base_fn_name = format!("{}_{}", base_flat, mname);
                 let body = sub_info.method_bodies.get(i)
@@ -5249,10 +5249,10 @@ method_names: info.method_names,
         for cm in &classes {
             if let Some(pos) = cm.method_names.iter().position(|n| n == mname) {
                 if !cm.is_class_methods[pos] {
-                    let rt = cm.method_return_types.get(pos).cloned().unwrap_or_else(|| "NFObject *".into());
+                    let rt = cm.method_return_types.get(pos).cloned().unwrap_or_else(|| "NPObject *".into());
                     let params = cm.method_params_list.get(pos)
                         .map(|p| p.iter().map(|(pt, _)| pt.clone()).collect::<Vec<_>>().join(", "))
-                        .unwrap_or_else(|| "NFObject *, SEL".into());
+                        .unwrap_or_else(|| "NPObject *, SEL".into());
                     // Variadic method → C `...` in the fn-ptr type; the dispatch
                     // cast must match the emitted variadic signature exactly
                     // (nopa has no msgSend runtime to paper over a mismatch).
@@ -5300,10 +5300,10 @@ method_names: info.method_names,
         for (j, mname) in cm.method_names.iter().enumerate() {
             if !cm.is_class_methods[j] {
                 if let Some((idx, _)) = global_meta.get(mname) {
-                    let rt = cm.method_return_types.get(j).cloned().unwrap_or_else(|| "NFObject *".into());
+                    let rt = cm.method_return_types.get(j).cloned().unwrap_or_else(|| "NPObject *".into());
                     let params = cm.method_params_list.get(j)
                         .map(|p| p.iter().map(|(pt, _)| pt.clone()).collect::<Vec<_>>().join(", "))
-                        .unwrap_or_else(|| "NFObject *, SEL".into());
+                        .unwrap_or_else(|| "NPObject *, SEL".into());
                     let ellipsis = if cm.method_variadic.get(j).copied().unwrap_or(false) { ", ..." } else { "" };
                     let ptr_type = format!("{} (*)({}{})", rt, params, ellipsis);
                     inner.insert(mname.clone(), (*idx, ptr_type));
@@ -5489,7 +5489,7 @@ fn rewrite_block_var_refs(unit: &mut CgUnit) {
 /// Zeroing-weak assignment rewrite for local `__weak` variables (M1).
 ///
 /// A weak local is registered with the runtime at declaration time (the Decl
-/// emitter emits `nopa_weakRegister((NFObject **)&name, (NFObject *)init)`),
+/// emitter emits `nopa_weakRegister((NPObject **)&name, (NPObject *)init)`),
 /// but a later plain assignment (`weakref = strong`) bypassed the weak table:
 /// the slot stayed registered against the old target (often the initial
 /// NULL), so deallocating the newly-assigned target never zeroed the
@@ -5586,8 +5586,8 @@ fn rewrite_weak_stmt(stmt: &mut CgStmt, weak: &std::collections::HashSet<String>
     }
 }
 
-/// Build `{ __auto_type tmp = <value>; nopa_weakUnregister((NFObject **)&w);
-/// w = tmp; nopa_weakRegister((NFObject **)&w, (NFObject *)tmp); }` — the
+/// Build `{ __auto_type tmp = <value>; nopa_weakUnregister((NPObject **)&w);
+/// w = tmp; nopa_weakRegister((NPObject **)&w, (NPObject *)tmp); }` — the
 /// statement-level analogue of the weak-ivar setter's comma sequence.
 fn build_weak_assign_stmts(name: &str, value: Box<CgExpr>, line: usize, col: usize) -> CgStmt {
     let tmp = format!("__nopa_weak_val_{}", next_temp_id());
@@ -5598,7 +5598,7 @@ fn build_weak_assign_stmts(name: &str, value: Box<CgExpr>, line: usize, col: usi
     let cast_addr = CgExpr {
         kind: CgExprKind::Cast, type_str: None, line, col,
         data: CgExprData::Cast {
-            target_type: "NFObject **".into(),
+            target_type: "NPObject **".into(),
             expr: Box::new(CgExpr {
                 kind: CgExprKind::Unary, type_str: None, line, col,
                 data: CgExprData::Unary { op_str: "&".into(), operand: Box::new(ident(name)), is_postfix: false },
@@ -5649,7 +5649,7 @@ fn build_weak_assign_stmts(name: &str, value: Box<CgExpr>, line: usize, col: usi
                 CgExpr {
                     kind: CgExprKind::Cast, type_str: None, line, col,
                     data: CgExprData::Cast {
-                        target_type: "NFObject **".into(),
+                        target_type: "NPObject **".into(),
                         expr: Box::new(CgExpr {
                             kind: CgExprKind::Unary, type_str: None, line, col,
                             data: CgExprData::Unary { op_str: "&".into(), operand: Box::new(ident(name)), is_postfix: false },
@@ -5659,7 +5659,7 @@ fn build_weak_assign_stmts(name: &str, value: Box<CgExpr>, line: usize, col: usi
                 CgExpr {
                     kind: CgExprKind::Cast, type_str: None, line, col,
                     data: CgExprData::Cast {
-                        target_type: "NFObject *".into(),
+                        target_type: "NPObject *".into(),
                         expr: Box::new(ident(&tmp)),
                     },
                 },
@@ -5783,7 +5783,7 @@ fn emit_expr(e: &CgExpr, out: &mut String) {
             out.push_str(" = ");
             // Cast the value when target is a subclass pointer and value is a vtable call
             if let Some(ttype) = &target.type_str {
-                if ttype.ends_with(" *") && ttype != "NFObject *" && matches!(value.data, CgExprData::Call { .. }) {
+                if ttype.ends_with(" *") && ttype != "NPObject *" && matches!(value.data, CgExprData::Call { .. }) {
                     let _ = write!(out, "({})(", ttype.trim_end());
                     emit_expr(value, out);
                     out.push(')');
@@ -5799,13 +5799,13 @@ fn emit_expr(e: &CgExpr, out: &mut String) {
         CgExprData::Call { name, args, vtable_class, alt_vtable_classes: _, is_class_method, is_super, sel_const_name, method_index: _ } => {
             if *is_super {
                 let sel = sel_const_name.as_deref().unwrap_or("0");
-                let cls_flat = vtable_class.as_deref().map(|c| name_flat(c)).unwrap_or_else(|| "NFObject".to_string());
+                let cls_flat = vtable_class.as_deref().map(|c| name_flat(c)).unwrap_or_else(|| "NPObject".to_string());
                 if *is_class_method {
                     // Super CLASS method (e.g. `[super alloc]` inside a class
                     // method): dispatch through the parent class's META vtable
                     // instance (class methods live there, not on the uniform
                     // instance vtable — which has no such members and produced
-                    // invalid C). `self` in a class method is the NFClass*
+                    // invalid C). `self` in a class method is the NPClass*
                     // receiver; the parent's meta vtable instance is statically
                     // known (Foundation ancestors are always inlined into the TU).
                     let _ = write!(out, "(&{}_inst)->{}(", meta_symbol("META_VTABLE_", &cls_flat), name);
@@ -5878,11 +5878,11 @@ fn emit_expr(e: &CgExpr, out: &mut String) {
                     // `[nil msg]` is a safe no-op returning 0/nil, matching ObjC
                     // nil-messaging semantics. The receiver is evaluated once into
                     // a temp, then dispatched only if non-nil:
-                    //   ({ NFObject *__nopa_tmp_N = ((NFObject *)(recv));
+                    //   ({ NPObject *__nopa_tmp_N = ((NPObject *)(recv));
                     //      __nopa_tmp_N ? <dispatch>(__nopa_tmp_N, sel, ...) : 0; })
                     // This works for both value-returning and void-returning sends.
                     let tid = next_temp_id();
-                    let _ = write!(out, "({{ NFObject *__nopa_tmp_{} = ((NFObject *)(", tid);
+                    let _ = write!(out, "({{ NPObject *__nopa_tmp_{} = ((NPObject *)(", tid);
                     if !args.is_empty() {
                         emit_expr(&args[0], out);
                         out.push_str(")");
@@ -6396,8 +6396,8 @@ pub fn emit_stmt(s: &CgStmt, out: &mut String, indent: usize) {
                     out.push_str(&ind);
                     if !args.is_empty() {
                             let tid = next_temp_id();
-                            // Emit: NFObject *__nopa_tmp_N = receiver;
-                            let _ = write!(out, "NFObject *__nopa_tmp_{} = (", tid);
+                            // Emit: NPObject *__nopa_tmp_N = receiver;
+                            let _ = write!(out, "NPObject *__nopa_tmp_{} = (", tid);
                             emit_expr(&args[0], out);
                             out.push_str(");\n");
                             out.push_str(&ind);
@@ -6408,7 +6408,7 @@ pub fn emit_stmt(s: &CgStmt, out: &mut String, indent: usize) {
                             if let Some(suffix) = array_suffix { out.push_str(suffix); }
                             // Uniform vtable member dispatch with (SubClass*) cast for concrete class pointers.
                             // Guard the temp (the alloc result) against nil for safe nil-messaging.
-                            let needs_cast = decl_type.ends_with(" *") && decl_type != "NFObject *";
+                            let needs_cast = decl_type.ends_with(" *") && decl_type != "NPObject *";
                             if needs_cast {
                                 let _ = write!(out, " = ({})(", decl_type.trim_end());
                             } else {
@@ -6479,21 +6479,21 @@ pub fn emit_stmt(s: &CgStmt, out: &mut String, indent: usize) {
                 }
                 if let Some(suffix) = array_suffix { out.push_str(suffix); }
                 if let Some(i) = init {
-                    // When init has type NFObject * but decl_type is a subclass pointer,
+                    // When init has type NPObject * but decl_type is a subclass pointer,
                     // add an explicit cast to avoid -Wincompatible-pointer-types.
-                    let needs_cast = decl_type.ends_with(" *") && decl_type != "NFObject *"
+                    let needs_cast = decl_type.ends_with(" *") && decl_type != "NPObject *"
                         && !is_block_type
                         && matches!(i.data, CgExprData::Call { .. });
-                    let needs_reverse_cast = decl_type == "NFObject *"
-                        && i.type_str.as_ref().map_or(false, |t| t.ends_with(" *") && t != "NFObject *");
-                    let needs_self_cast = decl_type.ends_with(" *") && decl_type != "NFObject *"
-                        && i.type_str.as_deref() == Some("NFObject *");
+                    let needs_reverse_cast = decl_type == "NPObject *"
+                        && i.type_str.as_ref().map_or(false, |t| t.ends_with(" *") && t != "NPObject *");
+                    let needs_self_cast = decl_type.ends_with(" *") && decl_type != "NPObject *"
+                        && i.type_str.as_deref() == Some("NPObject *");
                     if needs_cast {
                         let _ = write!(out, " = ({})(", decl_type.trim_end());
                         emit_expr(i, out);
                         out.push_str(")");
                     } else if needs_reverse_cast {
-                        let _ = write!(out, " = (NFObject *)(");
+                        let _ = write!(out, " = (NPObject *)(");
                         emit_expr(i, out);
                         out.push_str(")");
                     } else if needs_self_cast {
@@ -6530,7 +6530,7 @@ pub fn emit_stmt(s: &CgStmt, out: &mut String, indent: usize) {
                 out.push_str(";\n");
                 if *is_weak {
                     if let Some(ref init_expr) = init {
-                        let _ = write!(out, "{}nopa_weakRegister((NFObject **)&{}, (NFObject *)", ind, name);
+                        let _ = write!(out, "{}nopa_weakRegister((NPObject **)&{}, (NPObject *)", ind, name);
                         emit_expr(init_expr, out);
                         out.push_str(");\n");
                     }
@@ -6652,10 +6652,10 @@ pub fn emit_decl(d: &CgDecl, out: &mut String) {
                 out.push_str(&d.name);
                 out.push_str(suffix);
                 if let Some(i) = init {
-                    // When init has type NFObject * but var_type is a subclass pointer,
+                    // When init has type NPObject * but var_type is a subclass pointer,
                     // add an explicit cast to avoid -Wincompatible-pointer-types.
-                    let needs_cast = var_type.ends_with(" *") && var_type != "NFObject *"
-                        && i.type_str.as_deref() == Some("NFObject *");
+                    let needs_cast = var_type.ends_with(" *") && var_type != "NPObject *"
+                        && i.type_str.as_deref() == Some("NPObject *");
                     if needs_cast {
                         let _ = write!(out, " = ({})(", var_type);
                         emit_expr(i, out);
@@ -6767,17 +6767,17 @@ fn section_comment(out: &mut String, comments: bool, label: &str) {
     out.push_str(" */\n");
 }
 
-/// Strip any surviving type-parameter sentinels (`NFObject * /*NAME*/` — the
+/// Strip any surviving type-parameter sentinels (`NPObject * /*NAME*/` — the
 /// legacy `/*T*/` and the per-name `/*K*/`/`/*V*/`/user-param forms) from
 /// generated C text. Called on the final output in `emit_unit_with_headers`:
 /// sentinels that escaped substitution belong to the bare generic template or
 /// uniform dispatch casts, where the param genuinely renders as plain
-/// `NFObject *`. Text-level (not a CgUnit walk) because sentinels can hide in
+/// `NPObject *`. Text-level (not a CgUnit walk) because sentinels can hide in
 /// nested method-body CgStmt trees no cheap traversal covers. Only a strict
 /// identifier body is treated as a sentinel — arbitrary comments after
-/// `NFObject *` pass through untouched.
+/// `NPObject *` pass through untouched.
 fn normalize_t_sentinels_text(c: &str) -> String {
-    const HEAD: &str = "NFObject * /*";
+    const HEAD: &str = "NPObject * /*";
     let mut out = String::with_capacity(c.len());
     let mut rest = c;
     while let Some(pos) = rest.find(HEAD) {
@@ -6792,7 +6792,7 @@ fn normalize_t_sentinels_text(c: &str) -> String {
         if sentinel {
             let end = after.find("*/").unwrap();
             out.push_str(&rest[..pos]);
-            out.push_str("NFObject *");
+            out.push_str("NPObject *");
             rest = &after[end + 2..];
         } else {
             // Not a well-formed sentinel — keep the text and scan on.
@@ -6920,7 +6920,7 @@ pub fn emit_unit_with_headers(unit: &CgUnit, c_headers: &[String], search_dirs: 
     section_comment(&mut out, comments, "Section 4 · Type declarations & typedefs");
     for cm in &unit.classes {
         let fc = name_flat(&cm.class_name);
-        if fc == "nopa_root" || fc == "NFObject" {
+        if fc == "nopa_root" || fc == "NPObject" {
             // Emit full struct definitions with include guard so that if
             // runtime.h (which already defines them) is included first,
             // these are silently skipped.  If runtime.h is NOT available,
@@ -6929,15 +6929,15 @@ pub fn emit_unit_with_headers(unit: &CgUnit, c_headers: &[String], search_dirs: 
             let guard = if fc == "nopa_root" {
                 "NOPA_ROOT_DEFINED"
             } else {
-                "NFOBJECT_DEFINED"
+                "NPOBJECT_DEFINED"
             };
             let _ = writeln!(out, "#ifndef {}", guard);
             let _ = writeln!(out, "#define {}", guard);
             let _ = writeln!(out, "struct {} {{", fc);
             if fc == "nopa_root" {
-                let _ = writeln!(out, "    struct NFClass *isa;");
+                let _ = writeln!(out, "    struct NPClass *isa;");
             } else {
-                let _ = writeln!(out, "    struct NFClass *isa;");
+                let _ = writeln!(out, "    struct NPClass *isa;");
             }
             let _ = writeln!(out, "    uint32_t retain_count;");
             let _ = writeln!(out, "}};");
@@ -6965,7 +6965,7 @@ pub fn emit_unit_with_headers(unit: &CgUnit, c_headers: &[String], search_dirs: 
             let mut any = false;
             for n in names {
                 let fc = name_flat(n);
-                if fc == "nopa_root" || fc == "NFObject" { continue; }
+                if fc == "nopa_root" || fc == "NPObject" { continue; }
                 if unit.classes.iter().any(|cm| name_flat(&cm.class_name) == fc) { continue; }
                 let _ = write!(out, "struct {};\n", fc);
                 let _ = write!(out, "typedef struct {} {};\n", fc, fc);
@@ -7117,7 +7117,7 @@ pub fn emit_unit_with_headers(unit: &CgUnit, c_headers: &[String], search_dirs: 
         let has_super = cm.super_name.is_some();
         if has_class_methods || has_super {
             let fc = name_flat(&cm.class_name);
-            let _ = write!(out, "NFClass * {}(NFClass * self, SEL _cmd);\n", meta_symbol("GETCLASS_", &fc));
+            let _ = write!(out, "NPClass * {}(NPClass * self, SEL _cmd);\n", meta_symbol("GETCLASS_", &fc));
         }
     }
     if unit.classes.iter().any(|cm| cm.is_class_methods.iter().any(|&c| c) || cm.super_name.is_some()) {
@@ -7201,7 +7201,7 @@ pub fn emit_unit_with_headers(unit: &CgUnit, c_headers: &[String], search_dirs: 
         for member in members {
             let _ = write!(out,
                 "/* respondsToSelector: helper for selector member '{member}' */\n\
-                 static BOOL nopa_resp_{member}(NFObject *__o) {{\n\
+                 static BOOL nopa_resp_{member}(NPObject *__o) {{\n\
                      return __o && ((struct nopa_vtable *)__o->isa->vtable)->{member} != 0;\n\
                  }}\n\n",
                 member = member);
@@ -7217,8 +7217,8 @@ pub fn emit_unit_with_headers(unit: &CgUnit, c_headers: &[String], search_dirs: 
                 let _ = write!(out, "struct {} {{\n", meta_symbol("META_VTABLE_", &name_flat(&cm.class_name)));
                 for (i, (mname, &is_class)) in cm.method_names.iter().zip(&cm.is_class_methods).enumerate() {
                     if is_class {
-                        let rt = cm.method_return_types.get(i).map(|s| s.as_str()).unwrap_or("NFObject *");
-                        let params = cm.method_params_list.get(i).map(|p| p.iter().map(|(pt, _)| pt.clone()).collect::<Vec<_>>().join(", ")).unwrap_or_else(|| "NFClass *, SEL".to_string());
+                        let rt = cm.method_return_types.get(i).map(|s| s.as_str()).unwrap_or("NPObject *");
+                        let params = cm.method_params_list.get(i).map(|p| p.iter().map(|(pt, _)| pt.clone()).collect::<Vec<_>>().join(", ")).unwrap_or_else(|| "NPClass *, SEL".to_string());
                         // Variadic class method → `...` in the fn-ptr member type;
                         // must match the function signature exactly (same rule as
                         // the METHOD_METADATA / CLASS_METHOD_METADATA casts) or the
@@ -7227,7 +7227,7 @@ pub fn emit_unit_with_headers(unit: &CgUnit, c_headers: &[String], search_dirs: 
                         let _ = write!(out, "    {} (*{})({}{});\n", rt, mname, params, ellipsis);
                     }
                 }
-                let _ = write!(out, "    NFClass * (*class)(NFClass *, SEL);\n");
+                let _ = write!(out, "    NPClass * (*class)(NPClass *, SEL);\n");
                 out.push_str("};\n");
             }
         }
@@ -7253,7 +7253,7 @@ pub fn emit_unit_with_headers(unit: &CgUnit, c_headers: &[String], search_dirs: 
             }
         }
         let _ = write!(out, "struct {} {{\n", name_flat(&cm.class_name));
-        let _ = write!(out, "    struct NFClass *isa;\n");
+        let _ = write!(out, "    struct NPClass *isa;\n");
         let _ = write!(out, "    uint32_t retain_count;\n");
         // Walk superclass chain and emit ancestor ivars (flat, not embedded).
         // Each non-root struct starts with isa+retain_count (matching nopa_root)
@@ -7299,7 +7299,7 @@ pub fn emit_unit_with_headers(unit: &CgUnit, c_headers: &[String], search_dirs: 
     // Forward-declare class metadata variables
     section_comment(&mut out, comments, "Section 9 · Class metadata infrastructure");
     for cm in &unit.classes {
-        let _ = write!(out, "extern NFClass {};\n", meta_symbol("CLASS_", &name_flat(&cm.class_name)));
+        let _ = write!(out, "extern NPClass {};\n", meta_symbol("CLASS_", &name_flat(&cm.class_name)));
     }
     if !unit.classes.is_empty() {
         out.push_str("void nopa_metaInit(void);\n\n");
@@ -7399,7 +7399,7 @@ pub fn emit_unit_with_headers(unit: &CgUnit, c_headers: &[String], search_dirs: 
             let _ = writeln!(out, "/* +getClass for {} */", cm.class_name);
         }
         let cw = if unit.owned_classes.contains(&cm.class_name) { "" } else { "__attribute__((weak)) " };
-        let _ = write!(out, "{}NFClass * {}(NFClass * self, SEL _cmd) {{\n", cw, meta_symbol("GETCLASS_", &name_flat(&cm.class_name)));
+        let _ = write!(out, "{}NPClass * {}(NPClass * self, SEL _cmd) {{\n", cw, meta_symbol("GETCLASS_", &name_flat(&cm.class_name)));
         out.push_str("    (void)_cmd;\n");
         out.push_str("    return self;\n");
         out.push_str("}\n\n");
@@ -7442,10 +7442,10 @@ pub fn emit_unit_with_headers(unit: &CgUnit, c_headers: &[String], search_dirs: 
         let sym = meta_symbol("CLASS_", &flat);
         let owned = unit.owned_classes.contains(&cm.class_name);
         if !owned {
-            let _ = write!(out, "NFClass {};\n", sym);
+            let _ = write!(out, "NPClass {};\n", sym);
             continue;
         }
-        let _ = write!(out, "NFClass {} = {{\n", sym);
+        let _ = write!(out, "NPClass {} = {{\n", sym);
         out.push_str(&format!("        .name = \"{}\",\n", cm.class_name));
         if let Some(ref sup) = cm.super_name {
             out.push_str(&format!("        .superclass = &{},\n", meta_symbol("CLASS_", &name_flat(sup))));
@@ -7473,11 +7473,11 @@ pub fn emit_unit_with_headers(unit: &CgUnit, c_headers: &[String], search_dirs: 
         // wrapper when one was generated for this class, else the class's own
         // dealloc, else NULL.
         if let Some(wrapper) = arc_dealloc_names.get(&flat) {
-            out.push_str(&format!("        .dealloc = (void (*)(NFObject *, SEL)){},\n", wrapper));
+            out.push_str(&format!("        .dealloc = (void (*)(NPObject *, SEL)){},\n", wrapper));
         } else if let Some(pos) = cm.method_names.iter().position(|n| n == "dealloc") {
             if !cm.is_class_methods[pos] {
                 let owner = cm.method_owners.get(pos).cloned().unwrap_or_else(|| flat.clone());
-                out.push_str(&format!("        .dealloc = (void (*)(NFObject *, SEL)){}_{},\n", owner, "dealloc"));
+                out.push_str(&format!("        .dealloc = (void (*)(NPObject *, SEL)){}_{},\n", owner, "dealloc"));
             } else {
                 out.push_str("        .dealloc = NULL,\n");
             }
@@ -7519,7 +7519,7 @@ pub fn emit_unit_with_headers(unit: &CgUnit, c_headers: &[String], search_dirs: 
     {
         out.push_str(&format!("{}void nopa_metaInit(void) {{\n", meta_weak));
         for cm in &unit.classes {
-            let _ = write!(out, "    {} = (NFClass){{\n", meta_symbol("CLASS_", &name_flat(&cm.class_name)));
+            let _ = write!(out, "    {} = (NPClass){{\n", meta_symbol("CLASS_", &name_flat(&cm.class_name)));
             out.push_str(&format!("        .name = \"{}\",\n", cm.class_name));
             if let Some(ref sup) = cm.super_name {
                 out.push_str(&format!("        .superclass = &{},\n", meta_symbol("CLASS_", &name_flat(sup))));
@@ -7550,11 +7550,11 @@ pub fn emit_unit_with_headers(unit: &CgUnit, c_headers: &[String], search_dirs: 
             // dealloc chain and then releases the ivars ARC owns.
             let flat_here = name_flat(&cm.class_name);
             if let Some(wrapper) = arc_dealloc_names.get(&flat_here) {
-                out.push_str(&format!("        .dealloc = (void (*)(NFObject *, SEL)){},\n", wrapper));
+                out.push_str(&format!("        .dealloc = (void (*)(NPObject *, SEL)){},\n", wrapper));
             } else if let Some(pos) = cm.method_names.iter().position(|n| n == "dealloc") {
                 if !cm.is_class_methods[pos] {
                     let owner = cm.method_owners.get(pos).cloned().unwrap_or_else(|| name_flat(&cm.class_name));
-                    out.push_str(&format!("        .dealloc = (void (*)(NFObject *, SEL)){}_{},\n", owner, "dealloc"));
+                    out.push_str(&format!("        .dealloc = (void (*)(NPObject *, SEL)){}_{},\n", owner, "dealloc"));
                 } else {
                     out.push_str("        .dealloc = NULL,\n");
                 }
@@ -7570,7 +7570,7 @@ pub fn emit_unit_with_headers(unit: &CgUnit, c_headers: &[String], search_dirs: 
         out.push_str(&format!("{}void nopa_meta_init(void) {{ nopa_metaInit(); }}\n\n", meta_weak));
     }
 
-    // nopa_stringFromCstr — emitted when NFString class is present.
+    // nopa_stringFromCstr — emitted when NPString class is present.
     // Hosted builds INTERN: identical contents map to ONE shared instance
     // (ObjC constant-`@"..."` semantics), so pointer equality across literal
     // occurrences works (`containsObject:`/`indexOfObject:` with a fresh
@@ -7583,13 +7583,13 @@ pub fn emit_unit_with_headers(unit: &CgUnit, c_headers: &[String], search_dirs: 
     // — single-threaded assumption, same class as the runtime's weak side
     //     table. Freestanding keeps the old fresh-object body (no <string.h>).
     section_comment(&mut out, comments, "Section 12 · Runtime support");
-    if unit.classes.iter().any(|c| c.class_name == "NFString") {
-        out.push_str("__attribute__((weak)) NFObject *nopa_stringFromCstr(const char *cstr) {\n");
+    if unit.classes.iter().any(|c| c.class_name == "NPString") {
+        out.push_str("__attribute__((weak)) NPObject *nopa_stringFromCstr(const char *cstr) {\n");
         out.push_str("#ifdef __NOPA_FREESTANDING\n");
         out.push_str("    if (!cstr) cstr = \"\";\n");
-        out.push_str(&format!("    NFObject *obj = nopa_alloc(&{});\n", meta_symbol("CLASS_", "NFString")));
+        out.push_str(&format!("    NPObject *obj = nopa_alloc(&{});\n", meta_symbol("CLASS_", "NPString")));
         out.push_str("    if (!obj) return NULL;\n");
-        out.push_str("    struct NFString *str = (struct NFString *)obj;\n");
+        out.push_str("    struct NPString *str = (struct NPString *)obj;\n");
         out.push_str("    size_t len = strlen(cstr);\n");
         out.push_str("    str->_cstr = (char *)malloc(len + 1);\n");
         out.push_str("    if (str->_cstr) strcpy(str->_cstr, cstr);\n");
@@ -7599,15 +7599,15 @@ pub fn emit_unit_with_headers(unit: &CgUnit, c_headers: &[String], search_dirs: 
         out.push_str("    return nopa_autorelease(obj);\n");
         out.push_str("#else\n");
         out.push_str("    if (!cstr) cstr = \"\";\n");
-        out.push_str("    static struct { const char *cstr; NFObject *obj; } nopa_intern_table[256];\n");
+        out.push_str("    static struct { const char *cstr; NPObject *obj; } nopa_intern_table[256];\n");
         out.push_str("    static int nopa_intern_count = 0;\n");
         out.push_str("    for (int i = 0; i < nopa_intern_count; i++) {\n");
         out.push_str("        if (nopa_intern_table[i].cstr == cstr || strcmp(nopa_intern_table[i].cstr, cstr) == 0)\n");
         out.push_str("            return nopa_intern_table[i].obj;\n");
         out.push_str("    }\n");
-        out.push_str(&format!("    NFObject *obj = nopa_alloc(&{});\n", meta_symbol("CLASS_", "NFString")));
+        out.push_str(&format!("    NPObject *obj = nopa_alloc(&{});\n", meta_symbol("CLASS_", "NPString")));
         out.push_str("    if (!obj) return NULL;\n");
-        out.push_str("    struct NFString *str = (struct NFString *)obj;\n");
+        out.push_str("    struct NPString *str = (struct NPString *)obj;\n");
         out.push_str("    size_t len = strlen(cstr);\n");
         out.push_str("    str->_cstr = (char *)malloc(len + 1);\n");
         out.push_str("    if (str->_cstr) strcpy(str->_cstr, cstr);\n");
@@ -7632,19 +7632,19 @@ pub fn emit_unit_with_headers(unit: &CgUnit, c_headers: &[String], search_dirs: 
         out.push_str("}\n\n");
     }
 
-    // nopa_array_create — emitted when NFArray class is present
-    if unit.classes.iter().any(|c| c.class_name == "NFArray") {
-        out.push_str("__attribute__((weak)) NFObject *nopa_array_create(size_t count, ...) {\n");
-        out.push_str(&format!("    NFObject *arr = nopa_alloc(&{});\n", meta_symbol("CLASS_", "NFArray")));
+    // nopa_array_create — emitted when NPArray class is present
+    if unit.classes.iter().any(|c| c.class_name == "NPArray") {
+        out.push_str("__attribute__((weak)) NPObject *nopa_array_create(size_t count, ...) {\n");
+        out.push_str(&format!("    NPObject *arr = nopa_alloc(&{});\n", meta_symbol("CLASS_", "NPArray")));
         out.push_str("    if (!arr) return NULL;\n");
-        out.push_str("    struct NFArray *a = (struct NFArray *)arr;\n");
+        out.push_str("    struct NPArray *a = (struct NPArray *)arr;\n");
         out.push_str("    if (count > 0) {\n");
-        out.push_str("        a->_items = (NFObject **)malloc(count * sizeof(NFObject *));\n");
+        out.push_str("        a->_items = (NPObject **)malloc(count * sizeof(NPObject *));\n");
         out.push_str("        if (a->_items) {\n");
         out.push_str("            va_list ap;\n");
         out.push_str("            va_start(ap, count);\n");
         out.push_str("            for (size_t i = 0; i < count; i++) {\n");
-        out.push_str("                NFObject *obj = va_arg(ap, NFObject *);\n");
+        out.push_str("                NPObject *obj = va_arg(ap, NPObject *);\n");
         out.push_str("                a->_items[i] = obj ? nopa_retain(obj) : NULL;\n");
         out.push_str("            }\n");
         out.push_str("            va_end(ap);\n");
@@ -7656,23 +7656,23 @@ pub fn emit_unit_with_headers(unit: &CgUnit, c_headers: &[String], search_dirs: 
         out.push_str("}\n\n");
     }
 
-    // nopa_dictionary_create — emitted when NFDictionary class is present.
+    // nopa_dictionary_create — emitted when NPDictionary class is present.
     // Alternating key/value varargs, one pair per `@{}` entry.
-    if unit.classes.iter().any(|c| c.class_name == "NFDictionary") {
-        out.push_str("__attribute__((weak)) NFObject *nopa_dictionary_create(size_t count, ...) {\n");
-        out.push_str(&format!("    NFObject *obj = nopa_alloc(&{});\n", meta_symbol("CLASS_", "NFDictionary")));
+    if unit.classes.iter().any(|c| c.class_name == "NPDictionary") {
+        out.push_str("__attribute__((weak)) NPObject *nopa_dictionary_create(size_t count, ...) {\n");
+        out.push_str(&format!("    NPObject *obj = nopa_alloc(&{});\n", meta_symbol("CLASS_", "NPDictionary")));
         out.push_str("    if (!obj) return NULL;\n");
-        out.push_str("    struct NFDictionary *dict = (struct NFDictionary *)obj;\n");
+        out.push_str("    struct NPDictionary *dict = (struct NPDictionary *)obj;\n");
         out.push_str("    if (count > 0) {\n");
-        out.push_str("        dict->_keys = (NFObject **)calloc(count, sizeof(NFObject *));\n");
-        out.push_str("        dict->_values = (NFObject **)calloc(count, sizeof(NFObject *));\n");
+        out.push_str("        dict->_keys = (NPObject **)calloc(count, sizeof(NPObject *));\n");
+        out.push_str("        dict->_values = (NPObject **)calloc(count, sizeof(NPObject *));\n");
         out.push_str("        if (dict->_keys && dict->_values) {\n");
         out.push_str("            va_list ap;\n");
         out.push_str("            va_start(ap, count);\n");
         out.push_str("            size_t stored = 0;\n");
         out.push_str("            for (size_t i = 0; i < count; i++) {\n");
-        out.push_str("                NFObject *k = va_arg(ap, NFObject *);\n");
-        out.push_str("                NFObject *v = va_arg(ap, NFObject *);\n");
+        out.push_str("                NPObject *k = va_arg(ap, NPObject *);\n");
+        out.push_str("                NPObject *v = va_arg(ap, NPObject *);\n");
         out.push_str("                if (!k) continue;\n");
         out.push_str("                dict->_keys[stored] = nopa_retain(k);\n");
         out.push_str("                dict->_values[stored] = v ? nopa_retain(v) : NULL;\n");
@@ -7768,8 +7768,8 @@ pub fn emit_unit(unit: &CgUnit) -> String {
 ///
 /// Usage from C:
 ///   #include "nopa_bridge.h"
-///   NFString *s = nopa_NFString_stringWithUTF8String("hello");
-///   const char *c = nopa_NFString_UTF8String(s);
+///   NPString *s = nopa_NPString_stringWithUTF8String("hello");
+///   const char *c = nopa_NPString_UTF8String(s);
 /// Emit the call of the wrapped method inside a bridge-header inline wrapper,
 /// followed by the checked-EH guard. `-eh checked` compiles `@throw` into
 /// `__nopa_eh_flag = 1` + a zero return, so a pure-C caller that ignores the
@@ -7803,7 +7803,7 @@ pub fn emit_bridge_header(unit: &CgUnit) -> String {
         out.push_str(&format!("struct {};\n", flat));
         out.push_str(&format!("typedef struct {} {};\n", flat, flat));
     }
-    out.push_str("typedef struct { size_t location; size_t length; } NFRange;\n\n");
+    out.push_str("typedef struct { size_t location; size_t length; } NPRange;\n\n");
     out.push_str("extern void nopa_metaInit(void);\n\n");
 
     for cls in &unit.classes {
@@ -7828,12 +7828,12 @@ pub fn emit_bridge_header(unit: &CgUnit) -> String {
 
             if is_class {
                 let sig = if decl_params.is_empty() {
-                    "NFClass *self, SEL _cmd".to_string()
+                    "NPClass *self, SEL _cmd".to_string()
                 } else {
-                    format!("NFClass *self, SEL _cmd, {}", decl_params.join(", "))
+                    format!("NPClass *self, SEL _cmd, {}", decl_params.join(", "))
                 };
                 out.push_str(&format!("extern {} {}({});\n", ret, fn_name, sig));
-                out.push_str(&format!("extern NFClass NOPA_CLASS_$_{};\n\n", flat));
+                out.push_str(&format!("extern NPClass NOPA_CLASS_$_{};\n\n", flat));
                 out.push_str(&format!("static inline {} {}({}) {{\n",
                     ret, wrapper_name,
                     if decl_params.is_empty() { "void".to_string() } else { decl_params.join(", ") }));
@@ -7845,16 +7845,16 @@ pub fn emit_bridge_header(unit: &CgUnit) -> String {
                 out.push_str("}\n\n");
             } else {
                 let sig = if decl_params.is_empty() {
-                    "NFObject *self, SEL _cmd".to_string()
+                    "NPObject *self, SEL _cmd".to_string()
                 } else {
-                    format!("NFObject *self, SEL _cmd, {}", decl_params.join(", "))
+                    format!("NPObject *self, SEL _cmd, {}", decl_params.join(", "))
                 };
                 out.push_str(&format!("extern {} {}({});\n", ret, fn_name, sig));
                 out.push_str(&format!("static inline {} {}(void *self{}) {{\n",
                     ret, wrapper_name,
                     if extra_params.is_empty() { String::new() } else { format!(", {}", decl_params.join(", ")) }));
                 out.push_str(&format!("    SEL _sel = sel_registerName(\"{}\");\n", orig_sel));
-                let call = format!("{}((NFObject *)self, _sel{})",
+                let call = format!("{}((NPObject *)self, _sel{})",
                     fn_name,
                     if call_names.is_empty() { String::new() } else { format!(", {}", call_names.join(", ")) });
                 emit_bridge_eh_guard(&mut out, &ret, &call);
@@ -7896,7 +7896,7 @@ mod vtable_sig_tests {
         // Exercise the real emitter over a tiny class so the assertions below
         // run against actual generated C, not a hand-written fixture.
         // Build the uniform method set the pipeline would collect for a unit
-        // containing `@interface Probe : NFObject` with a single `-ping`,
+        // containing `@interface Probe : NPObject` with a single `-ping`,
         // plus that class so the vtable scaffolding is actually emitted.
         let unit = CgUnit {
             decls: Vec::new(),
@@ -7905,7 +7905,7 @@ mod vtable_sig_tests {
             selectors: Vec::new(),
             classes: vec![CgClassMeta {
                 class_name: "Probe".to_string(),
-                super_name: Some("NFObject".to_string()),
+                super_name: Some("NPObject".to_string()),
                 method_names: vec!["ping".to_string()],
                 method_sel_names: vec!["ping".to_string()],
                 is_class_methods: vec![false],
@@ -7932,11 +7932,11 @@ mod vtable_sig_tests {
         // The emitter needs METHOD_METADATA populated; seed it once for this
         // test binary. `set` is idempotent from the test's point of view.
         let _ = METHOD_METADATA.set(HashMap::from([
-            ("dealloc".to_string(), (0usize, "void (*)(NFObject *, SEL)".to_string())),
-            ("init".to_string(), (0usize, "NFObject * (*)(NFObject *, SEL)".to_string())),
-            ("ping".to_string(), (0usize, "void (*)(NFObject *, SEL)".to_string())),
-            ("release".to_string(), (0usize, "void (*)(NFObject *, SEL)".to_string())),
-            ("retain".to_string(), (0usize, "NFObject * (*)(NFObject *, SEL)".to_string())),
+            ("dealloc".to_string(), (0usize, "void (*)(NPObject *, SEL)".to_string())),
+            ("init".to_string(), (0usize, "NPObject * (*)(NPObject *, SEL)".to_string())),
+            ("ping".to_string(), (0usize, "void (*)(NPObject *, SEL)".to_string())),
+            ("release".to_string(), (0usize, "void (*)(NPObject *, SEL)".to_string())),
+            ("retain".to_string(), (0usize, "NPObject * (*)(NPObject *, SEL)".to_string())),
         ]));
         let headers = unit.c_headers.clone();
         let c = emit_unit_with_headers(&unit, &headers, &[], false, Backend::Clang, false, false);

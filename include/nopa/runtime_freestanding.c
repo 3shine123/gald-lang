@@ -22,7 +22,7 @@
 
 // ─── Runtime globals (referenced by transpiled code) ─────────────────────────
 
-NFClass NOPA_CLASS_$_nopa_root;
+NPClass NOPA_CLASS_$_nopa_root;
 
 #ifdef __NOPA_FREESTANDING
 jmp_buf __nopa_exception_buf;
@@ -82,7 +82,7 @@ void nopa_free(void *ptr) {
 
 struct nopa_autoreleasepool {
     struct nopa_autoreleasepool *next;
-    NFObject **objects;
+    NPObject **objects;
     int count;
     int capacity;
 };
@@ -114,9 +114,9 @@ void nopa_autoreleasepoolPop(nopa_autoreleasepool_t *pool) {
 // Same isa-chain walk as the hosted runtime: walk obj->isa up the superclass
 // chain looking for cls. Ten lines of pure C — no allocation, no libc.
 
-BOOL nopa_isKindOf(NFObject *obj, NFClass *cls) {
+BOOL nopa_isKindOf(NPObject *obj, NPClass *cls) {
     if (!obj || !cls) return 0;
-    NFClass *isa = obj->isa;
+    NPClass *isa = obj->isa;
     while (isa) {
         if (isa == cls) return 1;
         isa = isa->superclass;
@@ -126,7 +126,7 @@ BOOL nopa_isKindOf(NFObject *obj, NFClass *cls) {
 
 /* Official ObjC spelling of isKindOf: (kept as a compatible alias).
  * Same isa-chain walk. */
-BOOL nopa_isKindOfClass(NFObject *obj, NFClass *cls) {
+BOOL nopa_isKindOfClass(NPObject *obj, NPClass *cls) {
     return nopa_isKindOf(obj, cls);
 }
 
@@ -145,7 +145,7 @@ __thread id   __nopa_eh_val;
 void nopa_console_write(const char *s, unsigned len);
 static const char *nopa_safe_isa_name(id obj);
 
-int __nopa_eh_isa(NFObject *obj, NFClass *cls) {
+int __nopa_eh_isa(NPObject *obj, NPClass *cls) {
     if (!obj || !cls) return 0;
     return nopa_isKindOf(obj, cls) ? 1 : 0;
 }
@@ -163,8 +163,8 @@ void nopa_eh_uncaught(void) {
 // with nopa_malloc/nopa_free instead of calloc/free. No new overhead: a task
 // costs one struct + its frame, same as hosted.
 
-NFTask *nopa_task_create(nopa_task_entry_fn entry, NFObject *self_obj, size_t frame_size) {
-    NFTask *t = (NFTask *)nopa_malloc(sizeof(NFTask));
+NPTask *nopa_task_create(nopa_task_entry_fn entry, NPObject *self_obj, size_t frame_size) {
+    NPTask *t = (NPTask *)nopa_malloc(sizeof(NPTask));
     if (!t) return NULL;
     t->state = 1;   /* state 1 = the entry's first case; 0 means "not started" */
     t->finished = 0;
@@ -176,7 +176,7 @@ NFTask *nopa_task_create(nopa_task_entry_fn entry, NFObject *self_obj, size_t fr
     return t;
 }
 
-int nopa_task_resume(NFTask *task) {
+int nopa_task_resume(NPTask *task) {
     if (!task || task->finished) return 1;
     if (task->entry) {
         if (task->entry(task) != 0) {
@@ -188,11 +188,11 @@ int nopa_task_resume(NFTask *task) {
     return task->finished ? 1 : 0;
 }
 
-void nopa_task_finish(NFTask *task) {
+void nopa_task_finish(NPTask *task) {
     if (task) task->finished = 1;
 }
 
-void *nopa_task_join(NFTask *task) {
+void *nopa_task_join(NPTask *task) {
     if (!task) return NULL;
     while (!task->finished) {
         (void)nopa_task_resume(task);
@@ -215,13 +215,13 @@ void *nopa_task_join(NFTask *task) {
 #define NOPA_WEAK_SLOTS_PER_TARGET 8
 
 typedef struct {
-    NFObject *object;                 /* NULL = free entry */
-    NFObject **slots[NOPA_WEAK_SLOTS_PER_TARGET];
+    NPObject *object;                 /* NULL = free entry */
+    NPObject **slots[NOPA_WEAK_SLOTS_PER_TARGET];
 } WeakEntry;
 
 static WeakEntry weak_table[NOPA_WEAK_MAX_TARGETS];
 
-static WeakEntry *find_weak_entry(NFObject *target) {
+static WeakEntry *find_weak_entry(NPObject *target) {
     for (int i = 0; i < NOPA_WEAK_MAX_TARGETS; i++) {
         if (weak_table[i].object == target)
             return &weak_table[i];
@@ -229,7 +229,7 @@ static WeakEntry *find_weak_entry(NFObject *target) {
     return NULL;
 }
 
-void nopa_weakRegister(NFObject **weak_loc, NFObject *target) {
+void nopa_weakRegister(NPObject **weak_loc, NPObject *target) {
     if (!target || !weak_loc) return;
     WeakEntry *entry = find_weak_entry(target);
     if (!entry) {
@@ -246,7 +246,7 @@ void nopa_weakRegister(NFObject **weak_loc, NFObject *target) {
     }
 }
 
-void nopa_weakUnregister(NFObject **weak_loc) {
+void nopa_weakUnregister(NPObject **weak_loc) {
     if (!weak_loc) return;
     for (int i = 0; i < NOPA_WEAK_MAX_TARGETS; i++) {
         WeakEntry *entry = &weak_table[i];
@@ -267,7 +267,7 @@ void nopa_weakUnregister(NFObject **weak_loc) {
     }
 }
 
-void nopa_weakClearAll(NFObject *target) {
+void nopa_weakClearAll(NPObject *target) {
     if (!target) return;
     WeakEntry *entry = find_weak_entry(target);
     if (!entry) return;
@@ -279,7 +279,7 @@ void nopa_weakClearAll(NFObject *target) {
 }
 
 void nopa_weakAutoCleanup(void *ptr) {
-    nopa_weakUnregister((NFObject **)ptr);
+    nopa_weakUnregister((NPObject **)ptr);
 }
 
 // ─── @synchronized monitors ──────────────────────────────────────────────────
@@ -304,7 +304,7 @@ void nopa_syncAutoCleanup(void *ptr) {
 
 // ─── Console hook (exception diagnostics only) ──────────────────────────────
 // Bare metal has no stdout/stderr: I/O is NOT a language mechanism, so the
-// runtime provides no printf/NFLog. The only output is the uncaught-
+// runtime provides no printf/NPLog. The only output is the uncaught-
 // exception report from nopa_eh_uncaught(), routed through this hook.
 // Users override it with their console driver (UART/kputs-style); the weak
 // no-op default links cleanly and the program simply traps silently.
@@ -331,9 +331,9 @@ static const char *nopa_safe_isa_name(id obj) {
 
 // ─── Lifecycle ───────────────────────────────────────────────────────────────
 
-NFObject *nopa_alloc(NFClass *cls) {
+NPObject *nopa_alloc(NPClass *cls) {
     if (!cls) return NULL;
-    NFObject *obj = (NFObject *)nopa_malloc(cls->instance_size);
+    NPObject *obj = (NPObject *)nopa_malloc(cls->instance_size);
     if (obj) {
         memset(obj, 0, cls->instance_size);
         obj->isa = cls;
@@ -342,25 +342,25 @@ NFObject *nopa_alloc(NFClass *cls) {
     return obj;
 }
 
-NFObject *nopa_init(NFObject *self) {
+NPObject *nopa_init(NPObject *self) {
     return self;
 }
 
-NFObject *nopa_retain(NFObject *obj) {
-    /* Raw pointers (@"..." literals without NFString, C strings cast to id)
+NPObject *nopa_retain(NPObject *obj) {
+    /* Raw pointers (@"..." literals without NPString, C strings cast to id)
      * live outside the bump heap: writing retain_count there faults. No-op. */
     if (!obj || !nopa_is_heap_object(obj)) return obj;
     obj->retain_count++;
     return obj;
 }
 
-void nopa_release(NFObject *obj) {
+void nopa_release(NPObject *obj) {
     if (!obj || !nopa_is_heap_object(obj)) return;
     if (obj->retain_count > 0)
         obj->retain_count--;
     if (obj->retain_count == 0) {
         nopa_weakClearAll(obj);
-        // Call dealloc so ivar cleanup runs (e.g. NFString frees _cstr).
+        // Call dealloc so ivar cleanup runs (e.g. NPString frees _cstr).
         // dealloc's own `[super dealloc]` calls the parent's dealloc directly
         // (not nopa_release), so no double-free.
         if (obj->isa && obj->isa->dealloc) {
@@ -370,13 +370,13 @@ void nopa_release(NFObject *obj) {
     }
 }
 
-NFObject *nopa_autorelease(NFObject *obj) {
+NPObject *nopa_autorelease(NPObject *obj) {
     if (!obj || !nopa_is_heap_object(obj)) return obj;
     nopa_autoreleasepool_t *pool = current_pool;
     if (!pool) return obj;
     if (pool->count >= pool->capacity) {
         int new_cap = pool->capacity ? pool->capacity * 2 : 16;
-        NFObject **new_objs = nopa_malloc(new_cap * sizeof(NFObject *));
+        NPObject **new_objs = nopa_malloc(new_cap * sizeof(NPObject *));
         if (!new_objs) return obj;
         if (pool->objects) {
             for (int i = 0; i < pool->count; i++) new_objs[i] = pool->objects[i];

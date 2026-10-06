@@ -40,7 +40,7 @@ static int kbhit() {
 // ==========================================================
 // 2. 小鸟类（改用平滑的恒定速度物理模型）
 // ==========================================================
-@interface Bird : NFObject {
+@interface Bird : NPObject {
     int _y;
 }
 - (instancetype)init;
@@ -72,7 +72,7 @@ static int kbhit() {
 // ==========================================================
 // 3. 障碍管道类（改用安全的单列 ASCII 逻辑）
 // ==========================================================
-@interface Pipe : NFObject {
+@interface Pipe : NPObject {
     int _x;
     int _gapY;
     int _gapHeight;
@@ -112,7 +112,7 @@ static int kbhit() {
 // ==========================================================
 // 4. 游戏核心引擎
 // ==========================================================
-@interface FlappyEngine : NFObject {
+@interface FlappyEngine : NPObject {
     int _width;
     int _height;
     int _score;
@@ -224,8 +224,8 @@ static int kbhit() {
 }
 
 - (void)dealloc {
-    if (_bird) NFObject_release(_bird);
-    if (_pipe) NFObject_release(_pipe);
+    if (_bird) NPObject_release(_bird);
+    if (_pipe) NPObject_release(_pipe);
     [super dealloc];
 }
 @end
@@ -269,7 +269,7 @@ int main() {
         printf(" 💀 提示：小鸟完美坠毁，但编译器类型和 ARC 链路运行极度完美！\n");
         printf("===================================================\n");
         
-        if (engine) NFObject_release(engine);
+        if (engine) NPObject_release(engine);
     }
     return 0;
 }

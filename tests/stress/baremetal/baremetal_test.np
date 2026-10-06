@@ -6,7 +6,7 @@
 //   + helpers.c (console) + asm_ext.s (real ARM64 assembly)
 // Exercises every language feature usable without Foundation.
 // NOTE: @await IS exercised (§16 R5) — runtime_freestanding.c provides the
-// NFTask API. I/O (NFLog etc.) is intentionally absent: bare metal has no
+// NPTask API. I/O (NPLog etc.) is intentionally absent: bare metal has no
 // console contract; use kputs-style externs from helpers.c.
 
 extern void kputs(const char *s);
@@ -169,9 +169,9 @@ static unsigned loopsum(int n) {
     - (int)  weight;
     - (void) setWeight:(int)w;
     - (int)  addTo:(int)v times:(int)k;           // multi-part instance method
-    - (NFAsync<int>) sumAsync:(int)v;             // async declaration marker (erased in C)
-    + (NFAsync<void>) awaitMake;                  // async entries: @await lives here,
-    + (NFAsync<void>) awaitSum:(Metal::Widget *)ww;   // never in main (canonical pattern)
+    - (NPAsync<int>) sumAsync:(int)v;             // async declaration marker (erased in C)
+    + (NPAsync<void>) awaitMake;                  // async entries: @await lives here,
+    + (NPAsync<void>) awaitSum:(Metal::Widget *)ww;   // never in main (canonical pattern)
     - (id)   retain;
     - (void) release;
     - (id)   autorelease;
@@ -192,17 +192,17 @@ static unsigned loopsum(int n) {
     - (int)  weight  { return weight; }
     - (void) setWeight:(int)w { weight = w; }
     - (int)  addTo:(int)v times:(int)k { return v + k * uid; }
-    - (NFAsync<int>) sumAsync:(int)v {
+    - (NPAsync<int>) sumAsync:(int)v {
         int r = @await [self addTo:v times:2];    // 5 + 2*7 = 19 (v=5, uid=7)
         return r + v;                             // 24
     }
-    + (NFAsync<void>) awaitMake {
+    + (NPAsync<void>) awaitMake {
         int awaited = @await [Metal::Widget make:10 plus:3];
         kputs("[R5] @await make:plus:=");
         kputdec(awaited);
         kputs("\n");
     }
-    + (NFAsync<void>) awaitSum:(Metal::Widget *)ww {
+    + (NPAsync<void>) awaitSum:(Metal::Widget *)ww {
         int av = @await [ww sumAsync:5];
         kputs("[R8] async marker sum=");
         kputdec(av);
@@ -715,7 +715,7 @@ skip_hit:
         kputs("\n");
     }
 
-    // NFAsync<T> declaration marker (erased in C) + @await chain
+    // NPAsync<T> declaration marker (erased in C) + @await chain
     [Metal::Widget awaitSum:w];
 
     // __weak ASSIGN re-registration + zeroing when the object dies

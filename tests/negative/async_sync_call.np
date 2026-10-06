@@ -1,7 +1,7 @@
 #import <Foundation/Foundation.np>
 // EXPECT_FAIL: sync context (main) calling a non-void async method
 // → cannot call suspending method 'compute:' from non-async context
-@interface F : NFObject
+@interface F : NPObject
 - (int)compute:(int)n;
 @end
 @implementation F

@@ -4,8 +4,8 @@
 #include <stddef.h>
 #include "nopa/runtime.h"
 struct nopa___nopa_root_vtable;
-struct nopa_NFObject_vtable;
-struct nopa_NFObject_meta_vtable;
+struct nopa_NPObject_vtable;
+struct nopa_NPObject_meta_vtable;
 struct nopa_Stack_Token_ptr_vtable;
 struct nopa_Stack_Token_ptr_meta_vtable;
 struct nopa_Token_vtable;
@@ -26,107 +26,107 @@ static const SEL __nopa_sel_name = {.name = "name", .hash = 0x8D39BDE6};
 static const SEL __nopa_sel_setName_ = {.name = "setName_", .hash = 0x366CA295};
 
 typedef struct __nopa_root __nopa_root;
-typedef struct NFObject NFObject;
+typedef struct NPObject NPObject;
 typedef struct Stack_Token_ptr Stack_Token_ptr;
 typedef struct Token Token;
 typedef struct Stack Stack;
 
-NFObject * __nopa_root_init(NFObject * self, SEL _cmd);
-void __nopa_root_dealloc(NFObject * self, SEL _cmd);
-void __nopa_root_release(NFObject * self, SEL _cmd);
-NFObject * __nopa_root_retain(NFObject * self, SEL _cmd);
-NFObject * NFObject_alloc(NFClass * self, SEL _cmd);
-NFObject * NFObject_new(NFClass * self, SEL _cmd);
-NFObject * NFObject_init(NFObject * self, SEL _cmd);
-void NFObject_dealloc(NFObject * self, SEL _cmd);
-void NFObject_release(NFObject * self, SEL _cmd);
-NFObject * NFObject_retain(NFObject * self, SEL _cmd);
-void Stack_push_(NFObject * self, SEL _cmd, NFObject * item);
-NFObject * Stack_pop(NFObject * self, SEL _cmd);
-_Bool Stack_isEmpty(NFObject * self, SEL _cmd);
-const char * Token_name(NFObject * self, SEL _cmd);
-void Token_setName_(NFObject * self, SEL _cmd, const char * value);
-NFObject * nopa_alloc(struct NFClass * cls);
-NFObject * nopa_init(NFObject * self);
-void nopa_release(NFObject * obj);
-NFObject * nopa_retain(NFObject * obj);
+NPObject * __nopa_root_init(NPObject * self, SEL _cmd);
+void __nopa_root_dealloc(NPObject * self, SEL _cmd);
+void __nopa_root_release(NPObject * self, SEL _cmd);
+NPObject * __nopa_root_retain(NPObject * self, SEL _cmd);
+NPObject * NPObject_alloc(NPClass * self, SEL _cmd);
+NPObject * NPObject_new(NPClass * self, SEL _cmd);
+NPObject * NPObject_init(NPObject * self, SEL _cmd);
+void NPObject_dealloc(NPObject * self, SEL _cmd);
+void NPObject_release(NPObject * self, SEL _cmd);
+NPObject * NPObject_retain(NPObject * self, SEL _cmd);
+void Stack_push_(NPObject * self, SEL _cmd, NPObject * item);
+NPObject * Stack_pop(NPObject * self, SEL _cmd);
+_Bool Stack_isEmpty(NPObject * self, SEL _cmd);
+const char * Token_name(NPObject * self, SEL _cmd);
+void Token_setName_(NPObject * self, SEL _cmd, const char * value);
+NPObject * nopa_alloc(struct NPClass * cls);
+NPObject * nopa_init(NPObject * self);
+void nopa_release(NPObject * obj);
+NPObject * nopa_retain(NPObject * obj);
 int main(void);
 void Stack_Token_ptr_push_(Token * self, SEL _cmd, Token * item);
 Token * Stack_Token_ptr_pop(Token * self, SEL _cmd);
 _Bool Stack_Token_ptr_isEmpty(Token * self, SEL _cmd);
 
-NFClass * NFObject_getClass(NFClass * self, SEL _cmd);
-NFClass * Stack_Token_ptr_getClass(NFClass * self, SEL _cmd);
-NFClass * Token_getClass(NFClass * self, SEL _cmd);
-NFClass * Stack_getClass(NFClass * self, SEL _cmd);
+NPClass * NPObject_getClass(NPClass * self, SEL _cmd);
+NPClass * Stack_Token_ptr_getClass(NPClass * self, SEL _cmd);
+NPClass * Token_getClass(NPClass * self, SEL _cmd);
+NPClass * Stack_getClass(NPClass * self, SEL _cmd);
 
 struct nopa___nopa_root_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    void (*release)(NFObject *, SEL);
-    NFObject * (*retain)(NFObject *, SEL);
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    void (*release)(NPObject *, SEL);
+    NPObject * (*retain)(NPObject *, SEL);
 };
-struct nopa_NFObject_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    void (*release)(NFObject *, SEL);
-    NFObject * (*retain)(NFObject *, SEL);
+struct nopa_NPObject_vtable {
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    void (*release)(NPObject *, SEL);
+    NPObject * (*retain)(NPObject *, SEL);
 };
-struct nopa_NFObject_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+struct nopa_NPObject_meta_vtable {
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct nopa_Stack_Token_ptr_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    void (*release)(NFObject *, SEL);
-    NFObject * (*retain)(NFObject *, SEL);
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    void (*release)(NPObject *, SEL);
+    NPObject * (*retain)(NPObject *, SEL);
     void (*push_)(Token *, SEL, Token *);
     Token * (*pop)(Token *, SEL);
     _Bool (*isEmpty)(Token *, SEL);
 };
 struct nopa_Stack_Token_ptr_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct nopa_Token_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    void (*release)(NFObject *, SEL);
-    NFObject * (*retain)(NFObject *, SEL);
-    const char * (*name)(NFObject *, SEL);
-    void (*setName_)(NFObject *, SEL, const char *);
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    void (*release)(NPObject *, SEL);
+    NPObject * (*retain)(NPObject *, SEL);
+    const char * (*name)(NPObject *, SEL);
+    void (*setName_)(NPObject *, SEL, const char *);
 };
 struct nopa_Token_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct nopa_Stack_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    void (*release)(NFObject *, SEL);
-    NFObject * (*retain)(NFObject *, SEL);
-    void (*push_)(NFObject *, SEL, NFObject *);
-    NFObject * (*pop)(NFObject *, SEL);
-    _Bool (*isEmpty)(NFObject *, SEL);
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    void (*release)(NPObject *, SEL);
+    NPObject * (*retain)(NPObject *, SEL);
+    void (*push_)(NPObject *, SEL, NPObject *);
+    NPObject * (*pop)(NPObject *, SEL);
+    _Bool (*isEmpty)(NPObject *, SEL);
 };
 struct nopa_Stack_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 
 struct __nopa_root {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
 };
 typedef struct __nopa_root __nopa_root;
 
 struct Stack_Token_ptr {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     Token * _items[3];
     int _count;
@@ -134,25 +134,25 @@ struct Stack_Token_ptr {
 typedef struct Stack_Token_ptr Stack_Token_ptr;
 
 struct Token {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     const char * _name;
 };
 typedef struct Token Token;
 
 struct Stack {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
-    NFObject * _items[3];
+    NPObject * _items[3];
     int _count;
 };
 typedef struct Stack Stack;
 
-extern NFClass nopa___nopa_root_class;
-extern NFClass nopa_NFObject_class;
-extern NFClass nopa_Stack_Token_ptr_class;
-extern NFClass nopa_Token_class;
-extern NFClass nopa_Stack_class;
+extern NPClass nopa___nopa_root_class;
+extern NPClass nopa_NPObject_class;
+extern NPClass nopa_Stack_Token_ptr_class;
+extern NPClass nopa_Token_class;
+extern NPClass nopa_Stack_class;
 void nopa_meta_init(void);
 
 struct nopa___nopa_root_vtable nopa___nopa_root_vtable_inst = {
@@ -162,94 +162,94 @@ struct nopa___nopa_root_vtable nopa___nopa_root_vtable_inst = {
     .retain = __nopa_root_retain,
 };
 
-struct nopa_NFObject_vtable nopa_NFObject_vtable_inst = {
-    .init = NFObject_init,
-    .dealloc = NFObject_dealloc,
-    .release = NFObject_release,
-    .retain = NFObject_retain,
+struct nopa_NPObject_vtable nopa_NPObject_vtable_inst = {
+    .init = NPObject_init,
+    .dealloc = NPObject_dealloc,
+    .release = NPObject_release,
+    .retain = NPObject_retain,
 };
 
 struct nopa_Stack_Token_ptr_vtable nopa_Stack_Token_ptr_vtable_inst = {
-    .init = NFObject_init,
-    .dealloc = NFObject_dealloc,
-    .release = NFObject_release,
-    .retain = NFObject_retain,
+    .init = NPObject_init,
+    .dealloc = NPObject_dealloc,
+    .release = NPObject_release,
+    .retain = NPObject_retain,
     .push_ = Stack_Token_ptr_push_,
     .pop = Stack_Token_ptr_pop,
     .isEmpty = Stack_Token_ptr_isEmpty,
 };
 
 struct nopa_Token_vtable nopa_Token_vtable_inst = {
-    .init = NFObject_init,
-    .dealloc = NFObject_dealloc,
-    .release = NFObject_release,
-    .retain = NFObject_retain,
+    .init = NPObject_init,
+    .dealloc = NPObject_dealloc,
+    .release = NPObject_release,
+    .retain = NPObject_retain,
     .name = Token_name,
     .setName_ = Token_setName_,
 };
 
 struct nopa_Stack_vtable nopa_Stack_vtable_inst = {
-    .init = NFObject_init,
-    .dealloc = NFObject_dealloc,
-    .release = NFObject_release,
-    .retain = NFObject_retain,
+    .init = NPObject_init,
+    .dealloc = NPObject_dealloc,
+    .release = NPObject_release,
+    .retain = NPObject_retain,
     .push_ = Stack_push_,
     .pop = Stack_pop,
     .isEmpty = Stack_isEmpty,
 };
 
-struct nopa_NFObject_meta_vtable nopa_NFObject_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
-    .class = NFObject_getClass,
+struct nopa_NPObject_meta_vtable nopa_NPObject_meta_vtable_inst = {
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
+    .class = NPObject_getClass,
 };
 
 struct nopa_Stack_Token_ptr_meta_vtable nopa_Stack_Token_ptr_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
     .class = Stack_Token_ptr_getClass,
 };
 
 struct nopa_Token_meta_vtable nopa_Token_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
     .class = Token_getClass,
 };
 
 struct nopa_Stack_meta_vtable nopa_Stack_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
     .class = Stack_getClass,
 };
 
-NFClass * NFObject_getClass(NFClass * self, SEL _cmd) {
+NPClass * NPObject_getClass(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
-NFClass * Stack_Token_ptr_getClass(NFClass * self, SEL _cmd) {
+NPClass * Stack_Token_ptr_getClass(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
-NFClass * Token_getClass(NFClass * self, SEL _cmd) {
+NPClass * Token_getClass(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
-NFClass * Stack_getClass(NFClass * self, SEL _cmd) {
+NPClass * Stack_getClass(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
-NFClass nopa___nopa_root_class;
-NFClass nopa_NFObject_class;
-NFClass nopa_Stack_Token_ptr_class;
-NFClass nopa_Token_class;
-NFClass nopa_Stack_class;
+NPClass nopa___nopa_root_class;
+NPClass nopa_NPObject_class;
+NPClass nopa_Stack_Token_ptr_class;
+NPClass nopa_Token_class;
+NPClass nopa_Stack_class;
 
 void nopa_meta_init(void) {
-    nopa___nopa_root_class = (NFClass){
+    nopa___nopa_root_class = (NPClass){
         .name = "__nopa_root",
         .superclass = NULL,
         .instance_size = sizeof(struct __nopa_root),
@@ -257,105 +257,105 @@ void nopa_meta_init(void) {
         .class_vtable = NULL,
         .protocol_count = 0,
     };
-    nopa_NFObject_class = (NFClass){
-        .name = "NFObject",
+    nopa_NPObject_class = (NPClass){
+        .name = "NPObject",
         .superclass = &nopa___nopa_root_class,
-        .instance_size = sizeof(struct NFObject),
-        .vtable = &nopa_NFObject_vtable_inst,
-        .class_vtable = &nopa_NFObject_meta_vtable_inst,
+        .instance_size = sizeof(struct NPObject),
+        .vtable = &nopa_NPObject_vtable_inst,
+        .class_vtable = &nopa_NPObject_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_Stack_Token_ptr_class = (NFClass){
+    nopa_Stack_Token_ptr_class = (NPClass){
         .name = "Stack<Token *>",
-        .superclass = &nopa_NFObject_class,
+        .superclass = &nopa_NPObject_class,
         .instance_size = sizeof(struct Stack_Token_ptr),
         .vtable = &nopa_Stack_Token_ptr_vtable_inst,
         .class_vtable = &nopa_Stack_Token_ptr_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_Token_class = (NFClass){
+    nopa_Token_class = (NPClass){
         .name = "Token",
-        .superclass = &nopa_NFObject_class,
+        .superclass = &nopa_NPObject_class,
         .instance_size = sizeof(struct Token),
         .vtable = &nopa_Token_vtable_inst,
         .class_vtable = &nopa_Token_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_Stack_class = (NFClass){
+    nopa_Stack_class = (NPClass){
         .name = "Stack",
-        .superclass = &nopa_NFObject_class,
+        .superclass = &nopa_NPObject_class,
         .instance_size = sizeof(struct Stack),
         .vtable = &nopa_Stack_vtable_inst,
         .class_vtable = &nopa_Stack_meta_vtable_inst,
         .protocol_count = 0,
     };
 }
-NFObject * __nopa_root_init(NFObject * self, SEL _cmd) {
+NPObject * __nopa_root_init(NPObject * self, SEL _cmd) {
   struct __nopa_root * _self = (struct __nopa_root *)self;
   {
     return nopa_init(self);
   }
 }
 
-void __nopa_root_dealloc(NFObject * self, SEL _cmd) {
+void __nopa_root_dealloc(NPObject * self, SEL _cmd) {
   struct __nopa_root * _self = (struct __nopa_root *)self;
   {
     return;
   }
 }
 
-void __nopa_root_release(NFObject * self, SEL _cmd) {
+void __nopa_root_release(NPObject * self, SEL _cmd) {
   struct __nopa_root * _self = (struct __nopa_root *)self;
   {
     nopa_release(self);
   }
 }
 
-NFObject * __nopa_root_retain(NFObject * self, SEL _cmd) {
+NPObject * __nopa_root_retain(NPObject * self, SEL _cmd) {
   struct __nopa_root * _self = (struct __nopa_root *)self;
   {
     return nopa_retain(self);
   }
 }
 
-NFObject * NFObject_alloc(NFClass * self, SEL _cmd) {
+NPObject * NPObject_alloc(NPClass * self, SEL _cmd) {
   return nopa_alloc(self);
 }
 
-NFObject * NFObject_new(NFClass * self, SEL _cmd) {
-  NFObject * obj = nopa_alloc(self);
+NPObject * NPObject_new(NPClass * self, SEL _cmd) {
+  NPObject * obj = nopa_alloc(self);
   return nopa_init(obj);
 }
 
-NFObject * NFObject_init(NFObject * self, SEL _cmd) {
-  struct NFObject * _self = (struct NFObject *)self;
+NPObject * NPObject_init(NPObject * self, SEL _cmd) {
+  struct NPObject * _self = (struct NPObject *)self;
   {
     return nopa_init(self);
   }
 }
 
-void NFObject_dealloc(NFObject * self, SEL _cmd) {
-  struct NFObject * _self = (struct NFObject *)self;
+void NPObject_dealloc(NPObject * self, SEL _cmd) {
+  struct NPObject * _self = (struct NPObject *)self;
   {
     return;
   }
 }
 
-void NFObject_release(NFObject * self, SEL _cmd) {
-  struct NFObject * _self = (struct NFObject *)self;
+void NPObject_release(NPObject * self, SEL _cmd) {
+  struct NPObject * _self = (struct NPObject *)self;
   {
     nopa_release(self);
   }
 }
 
-NFObject * NFObject_retain(NFObject * self, SEL _cmd) {
-  struct NFObject * _self = (struct NFObject *)self;
+NPObject * NPObject_retain(NPObject * self, SEL _cmd) {
+  struct NPObject * _self = (struct NPObject *)self;
   {
     return nopa_retain(self);
   }
 }
 
-void Stack_push_(NFObject * self, SEL _cmd, NFObject * item) {
+void Stack_push_(NPObject * self, SEL _cmd, NPObject * item) {
   struct Stack * _self = (struct Stack *)self;
   {
     if ((_self->_count < 3))     {
@@ -364,12 +364,12 @@ void Stack_push_(NFObject * self, SEL _cmd, NFObject * item) {
   }
 }
 
-NFObject * Stack_pop(NFObject * self, SEL _cmd) {
+NPObject * Stack_pop(NPObject * self, SEL _cmd) {
   struct Stack * _self = (struct Stack *)self;
   {
     if ((_self->_count > 0))     {
       _self->_count--;
-      NFObject * item = _self->_items[_self->_count];
+      NPObject * item = _self->_items[_self->_count];
       _self->_items[_self->_count] = 0;
       return item;
     }
@@ -377,41 +377,41 @@ NFObject * Stack_pop(NFObject * self, SEL _cmd) {
   }
 }
 
-_Bool Stack_isEmpty(NFObject * self, SEL _cmd) {
+_Bool Stack_isEmpty(NPObject * self, SEL _cmd) {
   struct Stack * _self = (struct Stack *)self;
   {
     return (_self->_count == 0);
   }
 }
 
-const char * Token_name(NFObject * self, SEL _cmd) {
+const char * Token_name(NPObject * self, SEL _cmd) {
   return ((struct Token *)self)->_name;
 }
 
-void Token_setName_(NFObject * self, SEL _cmd, const char * value) {
+void Token_setName_(NPObject * self, SEL _cmd, const char * value) {
   ((struct Token *)self)->_name = value;
 }
 
-NFObject * nopa_alloc(struct NFClass * cls);
+NPObject * nopa_alloc(struct NPClass * cls);
 
-NFObject * nopa_init(NFObject * self);
+NPObject * nopa_init(NPObject * self);
 
-void nopa_release(NFObject * obj);
+void nopa_release(NPObject * obj);
 
-NFObject * nopa_retain(NFObject * obj);
+NPObject * nopa_retain(NPObject * obj);
 
 int main(void) {
   nopa_meta_init();
   {
-    NFObject *__nopa_tmp_0 = (NFObject_alloc(&nopa_Stack_class, sel_registerName("alloc")));
-    Stack_Token_ptr * stack = ((struct nopa_NFObject_vtable *)__nopa_tmp_0->isa->vtable)->init(__nopa_tmp_0, sel_registerName("init"));
-    NFObject *__nopa_tmp_1 = (NFObject_alloc(&nopa_Token_class, sel_registerName("alloc")));
-    Token * t1 = ((struct nopa_NFObject_vtable *)__nopa_tmp_1->isa->vtable)->init(__nopa_tmp_1, sel_registerName("init"));
-    NFObject *__nopa_tmp_2 = (NFObject_alloc(&nopa_Token_class, sel_registerName("alloc")));
-    Token * t2 = ((struct nopa_NFObject_vtable *)__nopa_tmp_2->isa->vtable)->init(__nopa_tmp_2, sel_registerName("init"));
-    ((struct nopa_Stack_vtable *)((NFObject *)(stack))->isa->vtable)->push_(stack, sel_registerName("push:"), t1);
-    ((struct nopa_Stack_vtable *)((NFObject *)(stack))->isa->vtable)->push_(stack, sel_registerName("push:"), t2);
-    printf("Stack<Token*> works: isEmpty=%d\n", ((struct nopa_Stack_vtable *)((NFObject *)(stack))->isa->vtable)->isEmpty(stack, sel_registerName("isEmpty")));
+    NPObject *__nopa_tmp_0 = (NPObject_alloc(&nopa_Stack_class, sel_registerName("alloc")));
+    Stack_Token_ptr * stack = ((struct nopa_NPObject_vtable *)__nopa_tmp_0->isa->vtable)->init(__nopa_tmp_0, sel_registerName("init"));
+    NPObject *__nopa_tmp_1 = (NPObject_alloc(&nopa_Token_class, sel_registerName("alloc")));
+    Token * t1 = ((struct nopa_NPObject_vtable *)__nopa_tmp_1->isa->vtable)->init(__nopa_tmp_1, sel_registerName("init"));
+    NPObject *__nopa_tmp_2 = (NPObject_alloc(&nopa_Token_class, sel_registerName("alloc")));
+    Token * t2 = ((struct nopa_NPObject_vtable *)__nopa_tmp_2->isa->vtable)->init(__nopa_tmp_2, sel_registerName("init"));
+    ((struct nopa_Stack_vtable *)((NPObject *)(stack))->isa->vtable)->push_(stack, sel_registerName("push:"), t1);
+    ((struct nopa_Stack_vtable *)((NPObject *)(stack))->isa->vtable)->push_(stack, sel_registerName("push:"), t2);
+    printf("Stack<Token*> works: isEmpty=%d\n", ((struct nopa_Stack_vtable *)((NPObject *)(stack))->isa->vtable)->isEmpty(stack, sel_registerName("isEmpty")));
   }
   return 0;
 }

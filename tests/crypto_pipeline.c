@@ -10,13 +10,13 @@
 
 #include <string.h>
 
-struct nopa_NFObject_vtable;
+struct nopa_NPObject_vtable;
 struct nopa_StreamCipher_vtable;
 struct nopa_SecurityAuditor_vtable;
 struct nopa_UtilityBase_vtable;
 
-#define nopa_NFObject_vtable_index_init 2
-#define nopa_NFObject_vtable_index_dealloc 3
+#define nopa_NPObject_vtable_index_init 2
+#define nopa_NPObject_vtable_index_dealloc 3
 #define nopa_StreamCipher_vtable_index_initWithName_key_ 8
 #define nopa_StreamCipher_vtable_index_performDiagnostic 9
 #define nopa_StreamCipher_vtable_index_transformData_ 10
@@ -45,64 +45,64 @@ static const SEL __nopa_sel_keyLength = {.name = "keyLength", .hash = 0x6B44CD00
 static const SEL __nopa_sel_transformData_ = {.name = "transformData_", .hash = 0x30825EB4};
 static const SEL __nopa_sel_auditTargetStatus = {.name = "auditTargetStatus", .hash = 0x6639C973};
 
-typedef struct NFObject NFObject;
+typedef struct NPObject NPObject;
 typedef struct StreamCipher StreamCipher;
 typedef struct SecurityAuditor SecurityAuditor;
 typedef struct UtilityBase UtilityBase;
 
 
 
-NFObject * NFObject_alloc(NFClass * self, SEL _cmd);
-NFObject * NFObject_new(NFClass * self, SEL _cmd);
-NFObject * NFObject_init(NFObject * self, SEL _cmd);
-void NFObject_dealloc(NFObject * self, SEL _cmd);
-NFClass * NFObject_getClass(NFClass * self, SEL _cmd);
-NFObject * StreamCipher_initWithName_key_(NFObject * self, SEL _cmd, char * name, char * key);
-void StreamCipher_performDiagnostic(NFObject * self, SEL _cmd);
-char * StreamCipher_transformData_(NFObject * self, SEL _cmd, char * input);
-void StreamCipher_dealloc(NFObject * self, SEL _cmd);
-int StreamCipher_keyLength(NFObject * self, SEL _cmd);
-void StreamCipher_setKeyLength_(NFObject * self, SEL _cmd, int value);
-NFClass * StreamCipher_getClass(NFClass * self, SEL _cmd);
-NFObject * SecurityAuditor_initWithId_target_(NFObject * self, SEL _cmd, char * auditorId, StreamCipher * target);
-void SecurityAuditor_auditTargetStatus(NFObject * self, SEL _cmd);
-void SecurityAuditor_dealloc(NFObject * self, SEL _cmd);
-char * SecurityAuditor_auditorId(NFObject * self, SEL _cmd);
-void SecurityAuditor_setAuditorId_(NFObject * self, SEL _cmd, char * value);
-StreamCipher * SecurityAuditor_monitoredCipher(NFObject * self, SEL _cmd);
-void SecurityAuditor_setMonitoredCipher_(NFObject * self, SEL _cmd, StreamCipher * value);
-NFClass * SecurityAuditor_getClass(NFClass * self, SEL _cmd);
-NFObject * UtilityBase_initWithName_version_(NFObject * self, SEL _cmd, char * name, int ver);
-void UtilityBase_printBanner(NFObject * self, SEL _cmd);
-void UtilityBase_refreshInternalToken(NFObject * self, SEL _cmd);
-void UtilityBase_runQuickSanityCheck(NFObject * self, SEL _cmd);
-void UtilityBase_dealloc(NFObject * self, SEL _cmd);
-char * UtilityBase_utilityName(NFObject * self, SEL _cmd);
-void UtilityBase_setUtilityName_(NFObject * self, SEL _cmd, char * value);
-int UtilityBase_versionMajor(NFObject * self, SEL _cmd);
-void UtilityBase_setVersionMajor_(NFObject * self, SEL _cmd, int value);
-NFClass * UtilityBase_getClass(NFClass * self, SEL _cmd);
+NPObject * NPObject_alloc(NPClass * self, SEL _cmd);
+NPObject * NPObject_new(NPClass * self, SEL _cmd);
+NPObject * NPObject_init(NPObject * self, SEL _cmd);
+void NPObject_dealloc(NPObject * self, SEL _cmd);
+NPClass * NPObject_getClass(NPClass * self, SEL _cmd);
+NPObject * StreamCipher_initWithName_key_(NPObject * self, SEL _cmd, char * name, char * key);
+void StreamCipher_performDiagnostic(NPObject * self, SEL _cmd);
+char * StreamCipher_transformData_(NPObject * self, SEL _cmd, char * input);
+void StreamCipher_dealloc(NPObject * self, SEL _cmd);
+int StreamCipher_keyLength(NPObject * self, SEL _cmd);
+void StreamCipher_setKeyLength_(NPObject * self, SEL _cmd, int value);
+NPClass * StreamCipher_getClass(NPClass * self, SEL _cmd);
+NPObject * SecurityAuditor_initWithId_target_(NPObject * self, SEL _cmd, char * auditorId, StreamCipher * target);
+void SecurityAuditor_auditTargetStatus(NPObject * self, SEL _cmd);
+void SecurityAuditor_dealloc(NPObject * self, SEL _cmd);
+char * SecurityAuditor_auditorId(NPObject * self, SEL _cmd);
+void SecurityAuditor_setAuditorId_(NPObject * self, SEL _cmd, char * value);
+StreamCipher * SecurityAuditor_monitoredCipher(NPObject * self, SEL _cmd);
+void SecurityAuditor_setMonitoredCipher_(NPObject * self, SEL _cmd, StreamCipher * value);
+NPClass * SecurityAuditor_getClass(NPClass * self, SEL _cmd);
+NPObject * UtilityBase_initWithName_version_(NPObject * self, SEL _cmd, char * name, int ver);
+void UtilityBase_printBanner(NPObject * self, SEL _cmd);
+void UtilityBase_refreshInternalToken(NPObject * self, SEL _cmd);
+void UtilityBase_runQuickSanityCheck(NPObject * self, SEL _cmd);
+void UtilityBase_dealloc(NPObject * self, SEL _cmd);
+char * UtilityBase_utilityName(NPObject * self, SEL _cmd);
+void UtilityBase_setUtilityName_(NPObject * self, SEL _cmd, char * value);
+int UtilityBase_versionMajor(NPObject * self, SEL _cmd);
+void UtilityBase_setVersionMajor_(NPObject * self, SEL _cmd, int value);
+NPClass * UtilityBase_getClass(NPClass * self, SEL _cmd);
 int main(int argc, const char * * argv);
 
-extern NFClass nopa_NFObject_class;
-extern NFClass nopa_StreamCipher_class;
-extern NFClass nopa_SecurityAuditor_class;
-extern NFClass nopa_UtilityBase_class;
+extern NPClass nopa_NPObject_class;
+extern NPClass nopa_StreamCipher_class;
+extern NPClass nopa_SecurityAuditor_class;
+extern NPClass nopa_UtilityBase_class;
 void nopa_meta_init(void);
 
-// struct NFClass defined in runtime.h
-// struct NFObject defined in runtime.h
-struct nopa_NFObject_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
+// struct NPClass defined in runtime.h
+// struct NPObject defined in runtime.h
+struct nopa_NPObject_vtable {
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
 };
-struct nopa_NFObject_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+struct nopa_NPObject_meta_vtable {
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct StreamCipher {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     char * _utilityName;
     int _versionMajor;
@@ -112,47 +112,47 @@ struct StreamCipher {
 };
 typedef struct StreamCipher StreamCipher;
 struct nopa_StreamCipher_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    NFObject * (*initWithName_version_)(NFObject *, SEL, char *, int);
-    void (*printBanner)(NFObject *, SEL);
-    void (*refreshInternalToken)(NFObject *, SEL);
-    void (*runQuickSanityCheck)(NFObject *, SEL);
-    char * (*utilityName)(NFObject *, SEL);
-    void (*setUtilityName_)(NFObject *, SEL, char *);
-    int (*versionMajor)(NFObject *, SEL);
-    void (*setVersionMajor_)(NFObject *, SEL, int);
-    NFObject * (*initWithName_key_)(NFObject *, SEL, char *, char *);
-    void (*performDiagnostic)(NFObject *, SEL);
-    char * (*transformData_)(NFObject *, SEL, char *);
-    int (*keyLength)(NFObject *, SEL);
-    void (*setKeyLength_)(NFObject *, SEL, int);
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    NPObject * (*initWithName_version_)(NPObject *, SEL, char *, int);
+    void (*printBanner)(NPObject *, SEL);
+    void (*refreshInternalToken)(NPObject *, SEL);
+    void (*runQuickSanityCheck)(NPObject *, SEL);
+    char * (*utilityName)(NPObject *, SEL);
+    void (*setUtilityName_)(NPObject *, SEL, char *);
+    int (*versionMajor)(NPObject *, SEL);
+    void (*setVersionMajor_)(NPObject *, SEL, int);
+    NPObject * (*initWithName_key_)(NPObject *, SEL, char *, char *);
+    void (*performDiagnostic)(NPObject *, SEL);
+    char * (*transformData_)(NPObject *, SEL, char *);
+    int (*keyLength)(NPObject *, SEL);
+    void (*setKeyLength_)(NPObject *, SEL, int);
 };
 struct nopa_StreamCipher_meta_vtable {
-    NFClass * (*class)(NFClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct SecurityAuditor {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     char * _auditorId;
     StreamCipher * _monitoredCipher;
 };
 typedef struct SecurityAuditor SecurityAuditor;
 struct nopa_SecurityAuditor_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    NFObject * (*initWithId_target_)(NFObject *, SEL, char *, StreamCipher *);
-    void (*auditTargetStatus)(NFObject *, SEL);
-    char * (*auditorId)(NFObject *, SEL);
-    void (*setAuditorId_)(NFObject *, SEL, char *);
-    StreamCipher * (*monitoredCipher)(NFObject *, SEL);
-    void (*setMonitoredCipher_)(NFObject *, SEL, StreamCipher *);
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    NPObject * (*initWithId_target_)(NPObject *, SEL, char *, StreamCipher *);
+    void (*auditTargetStatus)(NPObject *, SEL);
+    char * (*auditorId)(NPObject *, SEL);
+    void (*setAuditorId_)(NPObject *, SEL, char *);
+    StreamCipher * (*monitoredCipher)(NPObject *, SEL);
+    void (*setMonitoredCipher_)(NPObject *, SEL, StreamCipher *);
 };
 struct nopa_SecurityAuditor_meta_vtable {
-    NFClass * (*class)(NFClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct UtilityBase {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     char * _utilityName;
     int _versionMajor;
@@ -160,50 +160,50 @@ struct UtilityBase {
 };
 typedef struct UtilityBase UtilityBase;
 struct nopa_UtilityBase_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    NFObject * (*initWithName_version_)(NFObject *, SEL, char *, int);
-    void (*printBanner)(NFObject *, SEL);
-    void (*refreshInternalToken)(NFObject *, SEL);
-    void (*runQuickSanityCheck)(NFObject *, SEL);
-    char * (*utilityName)(NFObject *, SEL);
-    void (*setUtilityName_)(NFObject *, SEL, char *);
-    int (*versionMajor)(NFObject *, SEL);
-    void (*setVersionMajor_)(NFObject *, SEL, int);
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    NPObject * (*initWithName_version_)(NPObject *, SEL, char *, int);
+    void (*printBanner)(NPObject *, SEL);
+    void (*refreshInternalToken)(NPObject *, SEL);
+    void (*runQuickSanityCheck)(NPObject *, SEL);
+    char * (*utilityName)(NPObject *, SEL);
+    void (*setUtilityName_)(NPObject *, SEL, char *);
+    int (*versionMajor)(NPObject *, SEL);
+    void (*setVersionMajor_)(NPObject *, SEL, int);
 };
 struct nopa_UtilityBase_meta_vtable {
-    NFClass * (*class)(NFClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
-NFObject * NFObject_alloc(NFClass * self, SEL _cmd) {
+NPObject * NPObject_alloc(NPClass * self, SEL _cmd) {
     return nopa_alloc(self);
 }
 
-NFObject * NFObject_new(NFClass * self, SEL _cmd) {
-    NFObject * obj = nopa_alloc(self);
+NPObject * NPObject_new(NPClass * self, SEL _cmd) {
+    NPObject * obj = nopa_alloc(self);
     return nopa_init(obj);
 }
 
-NFObject * NFObject_init(NFObject * self, SEL _cmd) {
-    struct NFObject * _self = ((struct NFObject *)(self));
+NPObject * NPObject_init(NPObject * self, SEL _cmd) {
+    struct NPObject * _self = ((struct NPObject *)(self));
     {
         return nopa_init(self);
     }
 }
 
-void NFObject_dealloc(NFObject * self, SEL _cmd) {
-    struct NFObject * _self = ((struct NFObject *)(self));
+void NPObject_dealloc(NPObject * self, SEL _cmd) {
+    struct NPObject * _self = ((struct NPObject *)(self));
     {
         return;
     }
 }
 
-NFClass * NFObject_getClass(NFClass * self, SEL _cmd) {
-    return &nopa_NFObject_class;
+NPClass * NPObject_getClass(NPClass * self, SEL _cmd) {
+    return &nopa_NPObject_class;
 }
 
-NFObject * nopa_alloc(struct NFClass * cls);
-NFObject * nopa_init(NFObject * );
-NFObject * StreamCipher_initWithName_key_(NFObject * self, SEL _cmd, char * name, char * key) {
+NPObject * nopa_alloc(struct NPClass * cls);
+NPObject * nopa_init(NPObject * );
+NPObject * StreamCipher_initWithName_key_(NPObject * self, SEL _cmd, char * name, char * key) {
     struct StreamCipher * _self = ((struct StreamCipher *)(self));
     {
         self = UtilityBase_initWithName_version_(self, __nopa_sel_initWithName_version_, name, 3);
@@ -232,7 +232,7 @@ NFObject * StreamCipher_initWithName_key_(NFObject * self, SEL _cmd, char * name
     }
 }
 
-void StreamCipher_performDiagnostic(NFObject * self, SEL _cmd) {
+void StreamCipher_performDiagnostic(NPObject * self, SEL _cmd) {
     struct StreamCipher * _self = ((struct StreamCipher *)(self));
     {
         ((struct nopa_UtilityBase_vtable *)self->isa->vtable)->printBanner(self, __nopa_sel_printBanner);
@@ -240,7 +240,7 @@ void StreamCipher_performDiagnostic(NFObject * self, SEL _cmd) {
     }
 }
 
-char * StreamCipher_transformData_(NFObject * self, SEL _cmd, char * input) {
+char * StreamCipher_transformData_(NPObject * self, SEL _cmd, char * input) {
     struct StreamCipher * _self = ((struct StreamCipher *)(self));
     {
         int inputLen = strlen(input);
@@ -258,29 +258,29 @@ char * StreamCipher_transformData_(NFObject * self, SEL _cmd, char * input) {
     }
 }
 
-void StreamCipher_dealloc(NFObject * self, SEL _cmd) {
+void StreamCipher_dealloc(NPObject * self, SEL _cmd) {
     struct StreamCipher * _self = ((struct StreamCipher *)(self));
     {
         printf(" 🗑️ [生命周期] 加密流处理器 [%s] 彻底从系统内核卸载。\n", ((struct UtilityBase *)(((UtilityBase *)(self))))->_utilityName);
     }
 }
 
-int StreamCipher_keyLength(NFObject * self, SEL _cmd) {
+int StreamCipher_keyLength(NPObject * self, SEL _cmd) {
     return ((struct StreamCipher *)(self))->_keyLength;
 }
 
-void StreamCipher_setKeyLength_(NFObject * self, SEL _cmd, int value) {
+void StreamCipher_setKeyLength_(NPObject * self, SEL _cmd, int value) {
     ((struct StreamCipher *)(self))->_keyLength = value;
 }
 
-NFClass * StreamCipher_getClass(NFClass * self, SEL _cmd) {
+NPClass * StreamCipher_getClass(NPClass * self, SEL _cmd) {
     return &nopa_StreamCipher_class;
 }
 
-NFObject * SecurityAuditor_initWithId_target_(NFObject * self, SEL _cmd, char * auditorId, StreamCipher * target) {
+NPObject * SecurityAuditor_initWithId_target_(NPObject * self, SEL _cmd, char * auditorId, StreamCipher * target) {
     struct SecurityAuditor * _self = ((struct SecurityAuditor *)(self));
     {
-        self = NFObject_init(self, __nopa_sel_init);
+        self = NPObject_init(self, __nopa_sel_init);
         if (self) {
             {
                 ((struct SecurityAuditor *)(self))->_auditorId = ((char *)(malloc(strlen(auditorId) + 1)));
@@ -292,7 +292,7 @@ NFObject * SecurityAuditor_initWithId_target_(NFObject * self, SEL _cmd, char * 
     }
 }
 
-void SecurityAuditor_auditTargetStatus(NFObject * self, SEL _cmd) {
+void SecurityAuditor_auditTargetStatus(NPObject * self, SEL _cmd) {
     struct SecurityAuditor * _self = ((struct SecurityAuditor *)(self));
     {
         if (((struct SecurityAuditor *)(self))->_monitoredCipher != NULL) {
@@ -307,7 +307,7 @@ void SecurityAuditor_auditTargetStatus(NFObject * self, SEL _cmd) {
     }
 }
 
-void SecurityAuditor_dealloc(NFObject * self, SEL _cmd) {
+void SecurityAuditor_dealloc(NPObject * self, SEL _cmd) {
     struct SecurityAuditor * _self = ((struct SecurityAuditor *)(self));
     {
         printf(" 🗑️ [生命周期] 审计监视器 [%s] 已下线。\n", ((struct SecurityAuditor *)(self))->_auditorId);
@@ -317,30 +317,30 @@ void SecurityAuditor_dealloc(NFObject * self, SEL _cmd) {
     }
 }
 
-char * SecurityAuditor_auditorId(NFObject * self, SEL _cmd) {
+char * SecurityAuditor_auditorId(NPObject * self, SEL _cmd) {
     return ((struct SecurityAuditor *)(self))->_auditorId;
 }
 
-void SecurityAuditor_setAuditorId_(NFObject * self, SEL _cmd, char * value) {
+void SecurityAuditor_setAuditorId_(NPObject * self, SEL _cmd, char * value) {
     ((struct SecurityAuditor *)(self))->_auditorId = value;
 }
 
-StreamCipher * SecurityAuditor_monitoredCipher(NFObject * self, SEL _cmd) {
+StreamCipher * SecurityAuditor_monitoredCipher(NPObject * self, SEL _cmd) {
     return ((struct SecurityAuditor *)(self))->_monitoredCipher;
 }
 
-void SecurityAuditor_setMonitoredCipher_(NFObject * self, SEL _cmd, StreamCipher * value) {
+void SecurityAuditor_setMonitoredCipher_(NPObject * self, SEL _cmd, StreamCipher * value) {
     ((struct SecurityAuditor *)(self))->_monitoredCipher = value;
 }
 
-NFClass * SecurityAuditor_getClass(NFClass * self, SEL _cmd) {
+NPClass * SecurityAuditor_getClass(NPClass * self, SEL _cmd) {
     return &nopa_SecurityAuditor_class;
 }
 
-NFObject * UtilityBase_initWithName_version_(NFObject * self, SEL _cmd, char * name, int ver) {
+NPObject * UtilityBase_initWithName_version_(NPObject * self, SEL _cmd, char * name, int ver) {
     struct UtilityBase * _self = ((struct UtilityBase *)(self));
     {
-        self = NFObject_init(self, __nopa_sel_init);
+        self = NPObject_init(self, __nopa_sel_init);
         if (self) {
             {
                 ((struct UtilityBase *)(self))->_utilityName = ((char *)(malloc(strlen(name) + 1)));
@@ -353,14 +353,14 @@ NFObject * UtilityBase_initWithName_version_(NFObject * self, SEL _cmd, char * n
     }
 }
 
-void UtilityBase_printBanner(NFObject * self, SEL _cmd) {
+void UtilityBase_printBanner(NPObject * self, SEL _cmd) {
     struct UtilityBase * _self = ((struct UtilityBase *)(self));
     {
         printf(" ⚙️ [系统服务] 服务名称: %-18s | 内核版本: v%d.0\n", ((struct UtilityBase *)(self))->_utilityName, ((struct UtilityBase *)(self))->_versionMajor);
     }
 }
 
-void UtilityBase_refreshInternalToken(NFObject * self, SEL _cmd) {
+void UtilityBase_refreshInternalToken(NPObject * self, SEL _cmd) {
     struct UtilityBase * _self = ((struct UtilityBase *)(self));
     {
         ((struct UtilityBase *)(self))->_securityToken = rand() % 9000 + 1000;
@@ -368,7 +368,7 @@ void UtilityBase_refreshInternalToken(NFObject * self, SEL _cmd) {
     }
 }
 
-void UtilityBase_runQuickSanityCheck(NFObject * self, SEL _cmd) {
+void UtilityBase_runQuickSanityCheck(NPObject * self, SEL _cmd) {
     struct UtilityBase * _self = ((struct UtilityBase *)(self));
     {
         printf("   🧪 [分类探针] 快速内存心跳检查启动...\n");
@@ -376,7 +376,7 @@ void UtilityBase_runQuickSanityCheck(NFObject * self, SEL _cmd) {
     }
 }
 
-void UtilityBase_dealloc(NFObject * self, SEL _cmd) {
+void UtilityBase_dealloc(NPObject * self, SEL _cmd) {
     struct UtilityBase * _self = ((struct UtilityBase *)(self));
     {
         printf(" 🗑️ [生命周期] 基类服务 [%s] 安全清退，回收缓存...\n", ((struct UtilityBase *)(self))->_utilityName);
@@ -386,23 +386,23 @@ void UtilityBase_dealloc(NFObject * self, SEL _cmd) {
     }
 }
 
-char * UtilityBase_utilityName(NFObject * self, SEL _cmd) {
+char * UtilityBase_utilityName(NPObject * self, SEL _cmd) {
     return ((struct UtilityBase *)(self))->_utilityName;
 }
 
-void UtilityBase_setUtilityName_(NFObject * self, SEL _cmd, char * value) {
+void UtilityBase_setUtilityName_(NPObject * self, SEL _cmd, char * value) {
     ((struct UtilityBase *)(self))->_utilityName = value;
 }
 
-int UtilityBase_versionMajor(NFObject * self, SEL _cmd) {
+int UtilityBase_versionMajor(NPObject * self, SEL _cmd) {
     return ((struct UtilityBase *)(self))->_versionMajor;
 }
 
-void UtilityBase_setVersionMajor_(NFObject * self, SEL _cmd, int value) {
+void UtilityBase_setVersionMajor_(NPObject * self, SEL _cmd, int value) {
     ((struct UtilityBase *)(self))->_versionMajor = value;
 }
 
-NFClass * UtilityBase_getClass(NFClass * self, SEL _cmd) {
+NPClass * UtilityBase_getClass(NPClass * self, SEL _cmd) {
     return &nopa_UtilityBase_class;
 }
 
@@ -416,11 +416,11 @@ int main(int argc, const char * * argv) {
             printf("\n======================================================\n");
             printf("      📡 Micrit 纯C99静态运维流式加密工具箱 📡      \n");
             printf("======================================================\n\n");
-            NFObject *__nopa_tmp_0 = (NFObject_alloc(&nopa_SecurityAuditor_class, __nopa_sel_alloc));
+            NPObject *__nopa_tmp_0 = (NPObject_alloc(&nopa_SecurityAuditor_class, __nopa_sel_alloc));
             SecurityAuditor * globalAuditor = ((struct nopa_SecurityAuditor_vtable *)__nopa_tmp_0->isa->vtable)->initWithId_target_(__nopa_tmp_0, __nopa_sel_initWithId_target_, "AUDIT-01", NULL);
             printf(" --- 🧬 [局部作用域：临时数据混淆与弱引用抹零演练] ---\n");
             {
-                NFObject *__nopa_tmp_1 = (NFObject_alloc(&nopa_StreamCipher_class, __nopa_sel_alloc));
+                NPObject *__nopa_tmp_1 = (NPObject_alloc(&nopa_StreamCipher_class, __nopa_sel_alloc));
                 StreamCipher * tempCipher = ((struct nopa_StreamCipher_vtable *)__nopa_tmp_1->isa->vtable)->initWithName_key_(__nopa_tmp_1, __nopa_sel_initWithName_key_, "AES-Lite-99", "CACTUS_SYS_SALT");
                 ((struct nopa_SecurityAuditor_vtable *)globalAuditor->isa->vtable)->setMonitoredCipher_(globalAuditor, __nopa_sel_setMonitoredCipher_, tempCipher);
                 ((struct nopa_StreamCipher_vtable *)tempCipher->isa->vtable)->performDiagnostic(tempCipher, __nopa_sel_performDiagnostic);
@@ -457,26 +457,26 @@ int main(int argc, const char * * argv) {
 
 // ─── Protocol metadata ─────────────────────────────────
 
-extern NFProtocol nopa_protocol_DataTransformer;
-extern NFProtocol nopa_protocol_CipherCodec;
+extern NPProtocol nopa_protocol_DataTransformer;
+extern NPProtocol nopa_protocol_CipherCodec;
 
-NFProtocol nopa_protocol_DataTransformer = {
+NPProtocol nopa_protocol_DataTransformer = {
     .name = "DataTransformer",
     .parent_count = 0,
-    .required_methods = (NFProtocolMethod[]){
+    .required_methods = (NPProtocolMethod[]){
         { .name = "performDiagnostic", .encoding = "@" },
     },
     .required_count = 1,
     .optional_count = 0,
 };
 
-NFProtocol nopa_protocol_CipherCodec = {
+NPProtocol nopa_protocol_CipherCodec = {
     .name = "CipherCodec",
-    .parents = (NFProtocol *[]){
+    .parents = (NPProtocol *[]){
         &nopa_protocol_DataTransformer,
     },
     .parent_count = 1,
-    .required_methods = (NFProtocolMethod[]){
+    .required_methods = (NPProtocolMethod[]){
         { .name = "transformData_", .encoding = "@" },
     },
     .required_count = 1,
@@ -486,13 +486,13 @@ NFProtocol nopa_protocol_CipherCodec = {
 
 // ─── Class metadata ─────────────────────────────────────
 
-struct nopa_NFObject_vtable nopa_NFObject_vtable_inst = {
-    .init = NFObject_init,
-    .dealloc = NFObject_dealloc,
+struct nopa_NPObject_vtable nopa_NPObject_vtable_inst = {
+    .init = NPObject_init,
+    .dealloc = NPObject_dealloc,
 };
 
 struct nopa_StreamCipher_vtable nopa_StreamCipher_vtable_inst = {
-    .init = NFObject_init,
+    .init = NPObject_init,
     .dealloc = StreamCipher_dealloc,
     .initWithName_version_ = UtilityBase_initWithName_version_,
     .printBanner = UtilityBase_printBanner,
@@ -510,7 +510,7 @@ struct nopa_StreamCipher_vtable nopa_StreamCipher_vtable_inst = {
 };
 
 struct nopa_SecurityAuditor_vtable nopa_SecurityAuditor_vtable_inst = {
-    .init = NFObject_init,
+    .init = NPObject_init,
     .dealloc = SecurityAuditor_dealloc,
     .initWithId_target_ = SecurityAuditor_initWithId_target_,
     .auditTargetStatus = SecurityAuditor_auditTargetStatus,
@@ -521,7 +521,7 @@ struct nopa_SecurityAuditor_vtable nopa_SecurityAuditor_vtable_inst = {
 };
 
 struct nopa_UtilityBase_vtable nopa_UtilityBase_vtable_inst = {
-    .init = NFObject_init,
+    .init = NPObject_init,
     .dealloc = UtilityBase_dealloc,
     .initWithName_version_ = UtilityBase_initWithName_version_,
     .printBanner = UtilityBase_printBanner,
@@ -533,10 +533,10 @@ struct nopa_UtilityBase_vtable nopa_UtilityBase_vtable_inst = {
     .setVersionMajor_ = UtilityBase_setVersionMajor_,
 };
 
-struct nopa_NFObject_meta_vtable nopa_NFObject_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
-    .class = NFObject_getClass,
+struct nopa_NPObject_meta_vtable nopa_NPObject_meta_vtable_inst = {
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
+    .class = NPObject_getClass,
 };
 
 struct nopa_StreamCipher_meta_vtable nopa_StreamCipher_meta_vtable_inst = {
@@ -551,41 +551,41 @@ struct nopa_UtilityBase_meta_vtable nopa_UtilityBase_meta_vtable_inst = {
     .class = UtilityBase_getClass,
 };
 
-NFClass nopa_NFObject_class;
-NFClass nopa_StreamCipher_class;
-NFClass nopa_SecurityAuditor_class;
-NFClass nopa_UtilityBase_class;
+NPClass nopa_NPObject_class;
+NPClass nopa_StreamCipher_class;
+NPClass nopa_SecurityAuditor_class;
+NPClass nopa_UtilityBase_class;
 
 void nopa_meta_init(void) {
-    nopa_NFObject_class = (NFClass){
-        .name = "NFObject",
+    nopa_NPObject_class = (NPClass){
+        .name = "NPObject",
         .superclass = NULL,
-        .instance_size = sizeof(struct NFObject),
-        .vtable = &nopa_NFObject_vtable_inst,
-        .class_vtable = &nopa_NFObject_meta_vtable_inst,
+        .instance_size = sizeof(struct NPObject),
+        .vtable = &nopa_NPObject_vtable_inst,
+        .class_vtable = &nopa_NPObject_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_StreamCipher_class = (NFClass){
+    nopa_StreamCipher_class = (NPClass){
         .name = "StreamCipher",
         .superclass = &nopa_UtilityBase_class,
         .instance_size = sizeof(struct StreamCipher),
         .vtable = &nopa_StreamCipher_vtable_inst,
         .class_vtable = &nopa_StreamCipher_meta_vtable_inst,
-        .protocols = (NFProtocol *[]){
+        .protocols = (NPProtocol *[]){
         },
         .protocol_count = 1,
     };
-    nopa_SecurityAuditor_class = (NFClass){
+    nopa_SecurityAuditor_class = (NPClass){
         .name = "SecurityAuditor",
-        .superclass = &nopa_NFObject_class,
+        .superclass = &nopa_NPObject_class,
         .instance_size = sizeof(struct SecurityAuditor),
         .vtable = &nopa_SecurityAuditor_vtable_inst,
         .class_vtable = &nopa_SecurityAuditor_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_UtilityBase_class = (NFClass){
+    nopa_UtilityBase_class = (NPClass){
         .name = "UtilityBase",
-        .superclass = &nopa_NFObject_class,
+        .superclass = &nopa_NPObject_class,
         .instance_size = sizeof(struct UtilityBase),
         .vtable = &nopa_UtilityBase_vtable_inst,
         .class_vtable = &nopa_UtilityBase_meta_vtable_inst,

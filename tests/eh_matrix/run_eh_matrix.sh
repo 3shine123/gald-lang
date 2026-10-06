@@ -172,7 +172,7 @@ run_scene "07_arc"             "$GOLD/04_arc/retain_release.np"                 
 # agree", which report_scene enforces.
 run_scene "08_mrc"             "$GOLD/04_arc/retain_release.np"                    "" -fno-nopa-arc
 run_scene "09_autoreleasepool" "$GOLD/05_autoreleasepool/nested_pool.np"           "$GOLD/05_autoreleasepool/nested_pool.out"
-run_scene "11_foundation_big"  "$GOLD/13_foundation/04_nfstring/nfstring_test.np"  "$GOLD/13_foundation/04_nfstring/nfstring_test.out"
+run_scene "11_foundation_big"  "$GOLD/13_foundation/04_npstring/npstring_test.np"  "$GOLD/13_foundation/04_npstring/npstring_test.out"
 run_scene "12_c_superset"      "$GOLD/22_c_superset/c_superset.np"                 ""
 run_scene "15_await_eh"        "tests/eh_matrix/samples/async_eh.np"               ""
 run_scene "16_block_throw"     "tests/eh_diff/06_block_throw.np"                   ""

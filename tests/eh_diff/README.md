@@ -2,7 +2,7 @@
 
 每个用例是一对文件:`X.np`(nopa 语义用例)+ `X.m`(**等价的真 ObjC 程序**)。
 ObjC 侧由系统 clang `-fobjc-arc` 编译运行,作为该语义的**基准实现**;nopa 侧用
-`nopac run X.np -eh checked` 走用户路径;两侧输出(NFLog/fprintf 都走 stderr)
+`nopac run X.np -eh checked` 走用户路径;两侧输出(NPLog/fprintf 都走 stderr)
 逐行 diff,不一致即 FAIL。
 
 ## 用途

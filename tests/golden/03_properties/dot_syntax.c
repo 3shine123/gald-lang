@@ -7,121 +7,121 @@
 
 #include <string.h>
 
-struct nopa_NFObject_vtable;
+struct nopa_NPObject_vtable;
 struct nopa_Person_vtable;
 
-#define nopa_NFObject_vtable_index_init 2
-#define nopa_NFObject_vtable_index_dealloc 3
+#define nopa_NPObject_vtable_index_init 2
+#define nopa_NPObject_vtable_index_dealloc 3
 
 static const SEL __nopa_sel_init = {.name = "init", .hash = 0x16B1D373};
 static const SEL __nopa_sel_alloc = {.name = "alloc", .hash = 0xBAB1BB16};
 static const SEL __nopa_sel_name = {.name = "name", .hash = 0x8D39BDE6};
 static const SEL __nopa_sel_age = {.name = "age", .hash = 0x2C41499C};
 
-typedef struct NFObject NFObject;
+typedef struct NPObject NPObject;
 typedef struct Person Person;
 
 
 
-NFObject * NFObject_alloc(NFClass * self, SEL _cmd);
-NFObject * NFObject_new(NFClass * self, SEL _cmd);
-NFObject * NFObject_init(NFObject * self, SEL _cmd);
-void NFObject_dealloc(NFObject * self, SEL _cmd);
-NFClass * NFObject_getClass(NFClass * self, SEL _cmd);
-char * Person_name(NFObject * self, SEL _cmd);
-void Person_setName_(NFObject * self, SEL _cmd, char * value);
-int Person_age(NFObject * self, SEL _cmd);
-void Person_setAge_(NFObject * self, SEL _cmd, int value);
-NFClass * Person_getClass(NFClass * self, SEL _cmd);
+NPObject * NPObject_alloc(NPClass * self, SEL _cmd);
+NPObject * NPObject_new(NPClass * self, SEL _cmd);
+NPObject * NPObject_init(NPObject * self, SEL _cmd);
+void NPObject_dealloc(NPObject * self, SEL _cmd);
+NPClass * NPObject_getClass(NPClass * self, SEL _cmd);
+char * Person_name(NPObject * self, SEL _cmd);
+void Person_setName_(NPObject * self, SEL _cmd, char * value);
+int Person_age(NPObject * self, SEL _cmd);
+void Person_setAge_(NPObject * self, SEL _cmd, int value);
+NPClass * Person_getClass(NPClass * self, SEL _cmd);
 int main();
 
-extern NFClass nopa_NFObject_class;
-extern NFClass nopa_Person_class;
+extern NPClass nopa_NPObject_class;
+extern NPClass nopa_Person_class;
 void nopa_meta_init(void);
 
-// struct NFClass defined in runtime.h
-// struct NFObject defined in runtime.h
-struct nopa_NFObject_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
+// struct NPClass defined in runtime.h
+// struct NPObject defined in runtime.h
+struct nopa_NPObject_vtable {
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
 };
-struct nopa_NFObject_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+struct nopa_NPObject_meta_vtable {
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct Person {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     char * _name;
     int _age;
 };
 typedef struct Person Person;
 struct nopa_Person_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    char * (*name)(NFObject *, SEL);
-    void (*setName_)(NFObject *, SEL, char *);
-    int (*age)(NFObject *, SEL);
-    void (*setAge_)(NFObject *, SEL, int);
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    char * (*name)(NPObject *, SEL);
+    void (*setName_)(NPObject *, SEL, char *);
+    int (*age)(NPObject *, SEL);
+    void (*setAge_)(NPObject *, SEL, int);
 };
 struct nopa_Person_meta_vtable {
-    NFClass * (*class)(NFClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
-NFObject * NFObject_alloc(NFClass * self, SEL _cmd) {
+NPObject * NPObject_alloc(NPClass * self, SEL _cmd) {
     return nopa_alloc(self);
 }
 
-NFObject * NFObject_new(NFClass * self, SEL _cmd) {
-    NFObject * obj = nopa_alloc(self);
+NPObject * NPObject_new(NPClass * self, SEL _cmd) {
+    NPObject * obj = nopa_alloc(self);
     return nopa_init(obj);
 }
 
-NFObject * NFObject_init(NFObject * self, SEL _cmd) {
-    struct NFObject * _self = ((struct NFObject *)(self));
+NPObject * NPObject_init(NPObject * self, SEL _cmd) {
+    struct NPObject * _self = ((struct NPObject *)(self));
     {
         return nopa_init(self);
     }
 }
 
-void NFObject_dealloc(NFObject * self, SEL _cmd) {
-    struct NFObject * _self = ((struct NFObject *)(self));
+void NPObject_dealloc(NPObject * self, SEL _cmd) {
+    struct NPObject * _self = ((struct NPObject *)(self));
     {
         return;
     }
 }
 
-NFClass * NFObject_getClass(NFClass * self, SEL _cmd) {
-    return &nopa_NFObject_class;
+NPClass * NPObject_getClass(NPClass * self, SEL _cmd) {
+    return &nopa_NPObject_class;
 }
 
-NFObject * nopa_alloc(struct NFClass * cls);
-NFObject * nopa_init(NFObject * );
-char * Person_name(NFObject * self, SEL _cmd) {
+NPObject * nopa_alloc(struct NPClass * cls);
+NPObject * nopa_init(NPObject * );
+char * Person_name(NPObject * self, SEL _cmd) {
     return ((struct Person *)(self))->_name;
 }
 
-void Person_setName_(NFObject * self, SEL _cmd, char * value) {
+void Person_setName_(NPObject * self, SEL _cmd, char * value) {
     ((struct Person *)(self))->_name = value;
 }
 
-int Person_age(NFObject * self, SEL _cmd) {
+int Person_age(NPObject * self, SEL _cmd) {
     return ((struct Person *)(self))->_age;
 }
 
-void Person_setAge_(NFObject * self, SEL _cmd, int value) {
+void Person_setAge_(NPObject * self, SEL _cmd, int value) {
     ((struct Person *)(self))->_age = value;
 }
 
-NFClass * Person_getClass(NFClass * self, SEL _cmd) {
+NPClass * Person_getClass(NPClass * self, SEL _cmd) {
     return &nopa_Person_class;
 }
 
 int main() {
     nopa_autoreleasepool_t *__pool = nopa_autoreleasepool_push();
     nopa_meta_init();
-    NFObject *__nopa_tmp_0 = (NFObject_alloc(&nopa_Person_class, __nopa_sel_alloc));
-    Person * p = ((struct nopa_NFObject_vtable *)__nopa_tmp_0->isa->vtable)->init(__nopa_tmp_0, __nopa_sel_init);
+    NPObject *__nopa_tmp_0 = (NPObject_alloc(&nopa_Person_class, __nopa_sel_alloc));
+    Person * p = ((struct nopa_NPObject_vtable *)__nopa_tmp_0->isa->vtable)->init(__nopa_tmp_0, __nopa_sel_init);
     p->_name = "Alice";
     p->_age = 30;
     printf("%s is %d years old\n", ((struct nopa_Person_vtable *)p->isa->vtable)->name(p, __nopa_sel_name), ((struct nopa_Person_vtable *)p->isa->vtable)->age(p, __nopa_sel_age));
@@ -132,45 +132,45 @@ int main() {
 
 // ─── Class metadata ─────────────────────────────────────
 
-struct nopa_NFObject_vtable nopa_NFObject_vtable_inst = {
-    .init = NFObject_init,
-    .dealloc = NFObject_dealloc,
+struct nopa_NPObject_vtable nopa_NPObject_vtable_inst = {
+    .init = NPObject_init,
+    .dealloc = NPObject_dealloc,
 };
 
 struct nopa_Person_vtable nopa_Person_vtable_inst = {
-    .init = NFObject_init,
-    .dealloc = NFObject_dealloc,
+    .init = NPObject_init,
+    .dealloc = NPObject_dealloc,
     .name = Person_name,
     .setName_ = Person_setName_,
     .age = Person_age,
     .setAge_ = Person_setAge_,
 };
 
-struct nopa_NFObject_meta_vtable nopa_NFObject_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
-    .class = NFObject_getClass,
+struct nopa_NPObject_meta_vtable nopa_NPObject_meta_vtable_inst = {
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
+    .class = NPObject_getClass,
 };
 
 struct nopa_Person_meta_vtable nopa_Person_meta_vtable_inst = {
     .class = Person_getClass,
 };
 
-NFClass nopa_NFObject_class;
-NFClass nopa_Person_class;
+NPClass nopa_NPObject_class;
+NPClass nopa_Person_class;
 
 void nopa_meta_init(void) {
-    nopa_NFObject_class = (NFClass){
-        .name = "NFObject",
+    nopa_NPObject_class = (NPClass){
+        .name = "NPObject",
         .superclass = NULL,
-        .instance_size = sizeof(struct NFObject),
-        .vtable = &nopa_NFObject_vtable_inst,
-        .class_vtable = &nopa_NFObject_meta_vtable_inst,
+        .instance_size = sizeof(struct NPObject),
+        .vtable = &nopa_NPObject_vtable_inst,
+        .class_vtable = &nopa_NPObject_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_Person_class = (NFClass){
+    nopa_Person_class = (NPClass){
         .name = "Person",
-        .superclass = &nopa_NFObject_class,
+        .superclass = &nopa_NPObject_class,
         .instance_size = sizeof(struct Person),
         .vtable = &nopa_Person_vtable_inst,
         .class_vtable = &nopa_Person_meta_vtable_inst,

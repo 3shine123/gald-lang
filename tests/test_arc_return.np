@@ -1,14 +1,14 @@
 #include <stdio.h>
 #import <Foundation/Foundation.np>
 
-@interface Obj : NFObject
+@interface Obj : NPObject
 - (void)doSomething;
 @end
 @implementation Obj
 - (void)doSomething { printf("done\n"); }
 @end
 
-NFObject * test_early_return(int cond) {
+NPObject * test_early_return(int cond) {
     id obj = [[Obj alloc] init];
     if (cond) return nil;  // obj must be released before this return
     [obj doSomething];

@@ -9,7 +9,7 @@
 
 | 类别 | ObjC 例子 | Nopa 例子 | 命名规则 |
 |---|---|---|---|
-| 框架类 | `NSObject`, `NSString` | `NFObject`, `NFString`, `NFArray` | CamelCase + `NF` 前缀 |
+| 框架类 | `NSObject`, `NSString` | `NPObject`, `NPString`, `NPArray` | CamelCase + `NP` 前缀 |
 | 运行时 C API（基础） | `objc_alloc`, `objc_release` | `nopa_alloc`, `nopa_release` | snake_case + `nopa_` 前缀 |
 | 运行时 C API（方法级） | `objc_autoreleasePoolPush` | `nopa_autoreleasepoolPush` | 直译 ObjC 方法名的 CamelCase |
 | 运行时元数据变量 | `objc_class` 外部符号 | `NOPA_CLASS_$_X` | 全大写 + `_` / `$_` 分隔 |
@@ -20,22 +20,22 @@
 
 ---
 
-## 2. 框架类（CamelCase + NF 前缀）
+## 2. 框架类（CamelCase + NP 前缀）
 
-ObjC 的 `NS`/`CF`/`CG` 前缀 → Nopa 用 `NF`。
+ObjC 的 `NS`/`CF`/`CG` 前缀 → Nopa 用 `NP`。
 
 | 当前 | 规范 | 对应 ObjC |
 |---|---|---|
-| `NFObject` | ✅ | `NSObject` |
-| `NFClass` | ✅ | 运行时元类型 |
-| `NFString` | ✅ | `NSString` |
-| `NFMutableString` | ✅ | `NSMutableString` |
-| `NFArray` | ✅ | `NSArray` |
-| `NFMutableArray` | ✅ | `NSMutableArray` |
-| `NFDictionary` | ✅ | `NSDictionary` |
-| `NFMutableDictionary` | ✅ | `NSMutableDictionary` |
+| `NPObject` | ✅ | `NSObject` |
+| `NPClass` | ✅ | 运行时元类型 |
+| `NPString` | ✅ | `NSString` |
+| `NPMutableString` | ✅ | `NSMutableString` |
+| `NPArray` | ✅ | `NSArray` |
+| `NPMutableArray` | ✅ | `NSMutableArray` |
+| `NPDictionary` | ✅ | `NSDictionary` |
+| `NPMutableDictionary` | ✅ | `NSMutableDictionary` |
 
-> 类名用 `NF`（Nopa）前缀，与 ObjC 的 `NS` 一一对应；后续新增容器（`NFSet`/`NFOrderedSet` 等）沿用。
+> 类名用 `NP`（Nopa）前缀，与 ObjC 的 `NS` 一一对应；后续新增容器（`NPSet`/`NPOrderedSet` 等）沿用。
 
 ---
 
@@ -59,7 +59,7 @@ ObjC 用 `objc_` 前缀 → Nopa 用 `nopa_`。
 |---|---|
 | `nopa_metaInit` | 初始化类元数据（弱符号） |
 | `nopa_autoreleasepoolPush` / `nopa_autoreleasepoolPop` | 自动释放池 |
-| `nopa_stringFromCstr` | C 串 → `NFString`（codegen 弱发射） |
+| `nopa_stringFromCstr` | C 串 → `NPString`（codegen 弱发射） |
 | `nopa_isKindOf` | 类型判断（保留 CamelCase，不转 snake） |
 | `nopa_array_create` | `@[...]` 字面量的运行时构造 |
 | `nopa_dictionary_create` | `@{...}` 字面量的运行时构造（交替 key/value varargs） |
@@ -79,21 +79,21 @@ ObjC 用 `objc_` 前缀 → Nopa 用 `nopa_`。
 | `enum nopa_vtable_index` | 全局方法索引枚举 |
 | `nopa_autoreleasepool_t` | 自动释放池句柄 |
 
-### 4.1 运行时**内部**实现类型用 `nf_` 前缀（重要：命名空间分层）
+### 4.1 运行时**内部**实现类型用 `np_` 前缀（重要：命名空间分层）
 
 | 当前 | 说明 |
 |---|---|
-| `struct nf_vtable` / `nf_vtable_t` | 运行时内部 vtable（isa + 方法指针数组） |
-| `struct nf_class` / `nf_class_t` | 运行时内部 class |
-| `struct nf_object` / `nf_object_t` | 运行时内部对象头 |
-| `nf_class_register` / `nf_class_create` / `nf_object_alloc` … | 内部实现 API |
+| `struct np_vtable` / `np_vtable_t` | 运行时内部 vtable（isa + 方法指针数组） |
+| `struct np_class` / `np_class_t` | 运行时内部 class |
+| `struct np_object` / `np_object_t` | 运行时内部对象头 |
+| `np_class_register` / `np_class_create` / `np_object_alloc` … | 内部实现 API |
 
 > **为什么不是 `nopa_`**：codegen 为每个类生成的实例 VTable 也叫
 > `struct nopa_vtable`，其字段是**具体的方法槽**（`dealloc`、`count`…）；
-> 而运行时内部的 `struct nf_vtable` 只有 `isa` + 方法指针数组。两者是不同的
+> 而运行时内部的 `struct np_vtable` 只有 `isa` + 方法指针数组。两者是不同的
 > 布局。若内部类型也改成 `nopa_vtable`，两个结构会撞成同一个名字，生成的 C
 > 会报 `field designator does not refer to any field in type 'struct nopa_vtable'`。
-> 因此内部实现类型统一用 `nf_`，与 codegen 生成的 `nopa_` 命名空间隔离。
+> 因此内部实现类型统一用 `np_`，与 codegen 生成的 `nopa_` 命名空间隔离。
 
 ---
 
@@ -103,15 +103,15 @@ Nopa 每个类生成一组全大写的元数据符号，分隔符随后端：
 
 | 后端 | 分隔符 | 例子 |
 |---|---|---|
-| clang / gcc | `$_` | `NOPA_CLASS_$_NFString` |
-| portable | `_` | `NOPA_CLASS_NFString` |
+| clang / gcc | `$_` | `NOPA_CLASS_$_NPString` |
+| portable | `_` | `NOPA_CLASS_NPString` |
 
-| 符号 | 例子（NFString） | 说明 |
+| 符号 | 例子（NPString） | 说明 |
 |---|---|---|
-| `NOPA_CLASS_$_X` | `NOPA_CLASS_$_NFString` | 类对象实例 |
-| `NOPA_VTABLE_$_X` | `NOPA_VTABLE_$_NFString` | 实例 VTable |
-| `NOPA_META_VTABLE_$_X` | `NOPA_META_VTABLE_$_NFString` | 类（meta）VTable |
-| `NOPA_GETCLASS_$_X` | `NOPA_GETCLASS_$_NFString` | 返回 `&NOPA_CLASS_$_X` |
+| `NOPA_CLASS_$_X` | `NOPA_CLASS_$_NPString` | 类对象实例 |
+| `NOPA_VTABLE_$_X` | `NOPA_VTABLE_$_NPString` | 实例 VTable |
+| `NOPA_META_VTABLE_$_X` | `NOPA_META_VTABLE_$_NPString` | 类（meta）VTable |
+| `NOPA_GETCLASS_$_X` | `NOPA_GETCLASS_$_NPString` | 返回 `&NOPA_CLASS_$_X` |
 
 > 根类：`NOPA_CLASS_$_nopa_root`；另有 `NOPA_ROOT_DEFINED` 宏标记根类已定义。
 
@@ -171,8 +171,8 @@ C 侧调用 Nopa 对象方法的包装函数：
 
 ```
 nopa_{类名}_{方法名}             数组类方法名
-nopa_NFString_stringWithUTF8String_   → 类方法
-nopa_NFString_UTF8String              → 实例方法
+nopa_NPString_stringWithUTF8String_   → 类方法
+nopa_NPString_UTF8String              → 实例方法
 
 格外显式初始化：nopa_metaInit()
 ```
@@ -218,7 +218,7 @@ nopa_NFString_UTF8String              → 实例方法
 
 ## 13. 快速记忆
 
-- **类**：`NF` + CamelCase（`NFArray`）
+- **类**：`NP` + CamelCase（`NPArray`）
 - **运行时函数**：`nopa_` + （基础 snake / 方法级 Camel）
 - **元数据**：`NOPA_{KIND}_$_名字`
 - **编译器符号**：`__nopa_` 开头

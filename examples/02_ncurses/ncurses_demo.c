@@ -5,8 +5,8 @@
 #include <stdint.h>
 #include <stddef.h>
 #include "nopa/runtime.h"
-#ifndef NFSTRING_NH
-#define NFSTRING_NH
+#ifndef NPSTRING_NH
+#define NPSTRING_NH
 #ifndef YES
 #define YES 1
 #endif
@@ -20,14 +20,14 @@
 #define TERMINAL_NCURSES_NH
 #endif
 struct nopa_vtable;
-struct nopa_NFObject_meta_vtable;
+struct nopa_NPObject_meta_vtable;
 struct nopa_Terminal__Ncurses__Button_meta_vtable;
 struct nopa_Terminal__Ncurses__Label_meta_vtable;
 struct nopa_Terminal__Ncurses__MenuBar_meta_vtable;
 struct nopa_Terminal__Ncurses__Screen_meta_vtable;
 struct nopa_Terminal__Ncurses__TextBox_meta_vtable;
 struct nopa_Terminal__Ncurses__Window_meta_vtable;
-struct nopa_NFString_meta_vtable;
+struct nopa_NPString_meta_vtable;
 
 static const SEL __nopa_sel_init = {.name = "init", .hash = 0x16B1D373};
 static const SEL __nopa_sel_dealloc = {.name = "dealloc", .hash = 0xD9929EB3};
@@ -87,18 +87,18 @@ static const SEL __nopa_sel_selected = {.name = "selected", .hash = 0x4E0A1774};
 #ifndef __NOPA_ROOT_DEFINED
 #define __NOPA_ROOT_DEFINED
 struct __nopa_root {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
 };
 typedef struct __nopa_root __nopa_root;
 #endif
-#ifndef NFOBJECT_DEFINED
-#define NFOBJECT_DEFINED
-struct NFObject {
-    struct NFClass *isa;
+#ifndef NPOBJECT_DEFINED
+#define NPOBJECT_DEFINED
+struct NPObject {
+    struct NPClass *isa;
     uint32_t retain_count;
 };
-typedef struct NFObject NFObject;
+typedef struct NPObject NPObject;
 #endif
 struct Terminal__Ncurses__Button;
 typedef struct Terminal__Ncurses__Button Terminal__Ncurses__Button;
@@ -112,217 +112,217 @@ struct Terminal__Ncurses__TextBox;
 typedef struct Terminal__Ncurses__TextBox Terminal__Ncurses__TextBox;
 struct Terminal__Ncurses__Window;
 typedef struct Terminal__Ncurses__Window Terminal__Ncurses__Window;
-struct NFString;
-typedef struct NFString NFString;
+struct NPString;
+typedef struct NPString NPString;
 
-typedef struct NFRange {
+typedef struct NPRange {
     int location;
     int length;
-} NFRange;
+} NPRange;
 
-NFObject * __nopa_root_init(NFObject * self, SEL _cmd);
-void __nopa_root_dealloc(NFObject * self, SEL _cmd);
-void __nopa_root_release(NFObject * self, SEL _cmd);
-NFObject * __nopa_root_retain(NFObject * self, SEL _cmd);
-_Bool __nopa_root_isKindOf_(NFObject * self, SEL _cmd, NFClass * cls);
-NFObject * NFObject_alloc(NFClass * self, SEL _cmd);
-NFObject * NFObject_new(NFClass * self, SEL _cmd);
-NFObject * NFObject_init(NFObject * self, SEL _cmd);
-void NFObject_dealloc(NFObject * self, SEL _cmd);
-void NFObject_release(NFObject * self, SEL _cmd);
-NFObject * NFObject_retain(NFObject * self, SEL _cmd);
-NFString * NFString_stringWithUTF8String_(NFClass * self, SEL _cmd, const char * cstr);
-NFString * NFString_stringWithString_(NFClass * self, SEL _cmd, NFString * str);
-NFString * NFString_initWithUTF8String_(NFObject * self, SEL _cmd, const char * cstr);
-NFString * NFString_initWithString_(NFObject * self, SEL _cmd, NFString * str);
-size_t NFString_length(NFObject * self, SEL _cmd);
-const char * NFString_UTF8String(NFObject * self, SEL _cmd);
-char NFString_characterAtIndex_(NFObject * self, SEL _cmd, size_t index);
-int NFString_isEqualToString_(NFObject * self, SEL _cmd, NFString * other);
-int NFString_compare_(NFObject * self, SEL _cmd, NFString * other);
-int NFString_hasPrefix_(NFObject * self, SEL _cmd, NFString * prefix);
-int NFString_hasSuffix_(NFObject * self, SEL _cmd, NFString * suffix);
-NFRange NFString_rangeOfString_(NFObject * self, SEL _cmd, NFString * substring);
-NFString * NFString_substringFromIndex_(NFObject * self, SEL _cmd, size_t from);
-NFString * NFString_substringToIndex_(NFObject * self, SEL _cmd, size_t to);
-NFString * NFString_substringWithRange_(NFObject * self, SEL _cmd, NFRange range);
-NFString * NFString_stringByAppendingString_(NFObject * self, SEL _cmd, NFString * other);
-NFString * NFString_stringByAppendingUTF8String_(NFObject * self, SEL _cmd, const char * cstr);
-NFString * NFString_uppercaseString(NFObject * self, SEL _cmd);
-NFString * NFString_lowercaseString(NFObject * self, SEL _cmd);
-uint32_t NFString_hash(NFObject * self, SEL _cmd);
-NFString * NFString_description(NFObject * self, SEL _cmd);
-NFString * NFString_copy(NFObject * self, SEL _cmd);
-void NFString_dealloc(NFObject * self, SEL _cmd);
-NFObject * Terminal__Ncurses__Screen_screen(NFClass * self, SEL _cmd);
-void Terminal__Ncurses__Screen_dealloc(NFObject * self, SEL _cmd);
-void Terminal__Ncurses__Screen_update(NFObject * self, SEL _cmd);
-void Terminal__Ncurses__Screen_clearScr(NFObject * self, SEL _cmd);
-int Terminal__Ncurses__Screen_readChar(NFObject * self, SEL _cmd);
-int Terminal__Ncurses__Screen_rows(NFObject * self, SEL _cmd);
-int Terminal__Ncurses__Screen_cols(NFObject * self, SEL _cmd);
-int Terminal__Ncurses__Screen_mouseEvent(NFObject * self, SEL _cmd);
-int Terminal__Ncurses__Screen_mouseX(NFObject * self, SEL _cmd);
-int Terminal__Ncurses__Screen_mouseY(NFObject * self, SEL _cmd);
-NFObject * Terminal__Ncurses__Window_initWithRect_y_w_h_(NFObject * self, SEL _cmd, int x, int y, int w, int h);
-void Terminal__Ncurses__Window_dealloc(NFObject * self, SEL _cmd);
-void Terminal__Ncurses__Window_update(NFObject * self, SEL _cmd);
-void Terminal__Ncurses__Window_drawBox(NFObject * self, SEL _cmd);
-void Terminal__Ncurses__Window_moveTo_x_(NFObject * self, SEL _cmd, int y, int x);
-void Terminal__Ncurses__Window_print_x_text_(NFObject * self, SEL _cmd, int y, int x, const char * fmt);
-int Terminal__Ncurses__Window_readChar(NFObject * self, SEL _cmd);
-WINDOW * Terminal__Ncurses__Window_handle(NFObject * self, SEL _cmd);
-NFObject * Terminal__Ncurses__Label_initWithWindow_x_y_text_(NFObject * self, SEL _cmd, Terminal__Ncurses__Window * win, int x, int y, NFString * text);
-void Terminal__Ncurses__Label_dealloc(NFObject * self, SEL _cmd);
-void Terminal__Ncurses__Label_draw(NFObject * self, SEL _cmd);
-void Terminal__Ncurses__Label_setText_(NFObject * self, SEL _cmd, NFString * text);
-NFObject * Terminal__Ncurses__Button_initWithWindow_x_y_w_text_(NFObject * self, SEL _cmd, Terminal__Ncurses__Window * win, int x, int y, int w, NFString * text);
-void Terminal__Ncurses__Button_dealloc(NFObject * self, SEL _cmd);
-int Terminal__Ncurses__Button_draw(NFObject * self, SEL _cmd);
-void Terminal__Ncurses__Button_setHighlight_(NFObject * self, SEL _cmd, int hl);
-NFObject * Terminal__Ncurses__TextBox_initWithWindow_x_y_w_(NFObject * self, SEL _cmd, Terminal__Ncurses__Window * win, int x, int y, int w);
-const char * Terminal__Ncurses__TextBox_edit(NFObject * self, SEL _cmd);
-const char * Terminal__Ncurses__TextBox_text(NFObject * self, SEL _cmd);
-NFObject * Terminal__Ncurses__MenuBar_initWithWindow_w_(NFObject * self, SEL _cmd, Terminal__Ncurses__Window * win, int w);
-void Terminal__Ncurses__MenuBar_addItem_(NFObject * self, SEL _cmd, const char * label);
-int Terminal__Ncurses__MenuBar_draw(NFObject * self, SEL _cmd);
-int Terminal__Ncurses__MenuBar_selected(NFObject * self, SEL _cmd);
-NFObject * nopa_alloc(struct NFClass * cls);
-NFObject * nopa_init(NFObject * self);
-void nopa_release(NFObject * obj);
-NFObject * nopa_retain(NFObject * obj);
+NPObject * __nopa_root_init(NPObject * self, SEL _cmd);
+void __nopa_root_dealloc(NPObject * self, SEL _cmd);
+void __nopa_root_release(NPObject * self, SEL _cmd);
+NPObject * __nopa_root_retain(NPObject * self, SEL _cmd);
+_Bool __nopa_root_isKindOf_(NPObject * self, SEL _cmd, NPClass * cls);
+NPObject * NPObject_alloc(NPClass * self, SEL _cmd);
+NPObject * NPObject_new(NPClass * self, SEL _cmd);
+NPObject * NPObject_init(NPObject * self, SEL _cmd);
+void NPObject_dealloc(NPObject * self, SEL _cmd);
+void NPObject_release(NPObject * self, SEL _cmd);
+NPObject * NPObject_retain(NPObject * self, SEL _cmd);
+NPString * NPString_stringWithUTF8String_(NPClass * self, SEL _cmd, const char * cstr);
+NPString * NPString_stringWithString_(NPClass * self, SEL _cmd, NPString * str);
+NPString * NPString_initWithUTF8String_(NPObject * self, SEL _cmd, const char * cstr);
+NPString * NPString_initWithString_(NPObject * self, SEL _cmd, NPString * str);
+size_t NPString_length(NPObject * self, SEL _cmd);
+const char * NPString_UTF8String(NPObject * self, SEL _cmd);
+char NPString_characterAtIndex_(NPObject * self, SEL _cmd, size_t index);
+int NPString_isEqualToString_(NPObject * self, SEL _cmd, NPString * other);
+int NPString_compare_(NPObject * self, SEL _cmd, NPString * other);
+int NPString_hasPrefix_(NPObject * self, SEL _cmd, NPString * prefix);
+int NPString_hasSuffix_(NPObject * self, SEL _cmd, NPString * suffix);
+NPRange NPString_rangeOfString_(NPObject * self, SEL _cmd, NPString * substring);
+NPString * NPString_substringFromIndex_(NPObject * self, SEL _cmd, size_t from);
+NPString * NPString_substringToIndex_(NPObject * self, SEL _cmd, size_t to);
+NPString * NPString_substringWithRange_(NPObject * self, SEL _cmd, NPRange range);
+NPString * NPString_stringByAppendingString_(NPObject * self, SEL _cmd, NPString * other);
+NPString * NPString_stringByAppendingUTF8String_(NPObject * self, SEL _cmd, const char * cstr);
+NPString * NPString_uppercaseString(NPObject * self, SEL _cmd);
+NPString * NPString_lowercaseString(NPObject * self, SEL _cmd);
+uint32_t NPString_hash(NPObject * self, SEL _cmd);
+NPString * NPString_description(NPObject * self, SEL _cmd);
+NPString * NPString_copy(NPObject * self, SEL _cmd);
+void NPString_dealloc(NPObject * self, SEL _cmd);
+NPObject * Terminal__Ncurses__Screen_screen(NPClass * self, SEL _cmd);
+void Terminal__Ncurses__Screen_dealloc(NPObject * self, SEL _cmd);
+void Terminal__Ncurses__Screen_update(NPObject * self, SEL _cmd);
+void Terminal__Ncurses__Screen_clearScr(NPObject * self, SEL _cmd);
+int Terminal__Ncurses__Screen_readChar(NPObject * self, SEL _cmd);
+int Terminal__Ncurses__Screen_rows(NPObject * self, SEL _cmd);
+int Terminal__Ncurses__Screen_cols(NPObject * self, SEL _cmd);
+int Terminal__Ncurses__Screen_mouseEvent(NPObject * self, SEL _cmd);
+int Terminal__Ncurses__Screen_mouseX(NPObject * self, SEL _cmd);
+int Terminal__Ncurses__Screen_mouseY(NPObject * self, SEL _cmd);
+NPObject * Terminal__Ncurses__Window_initWithRect_y_w_h_(NPObject * self, SEL _cmd, int x, int y, int w, int h);
+void Terminal__Ncurses__Window_dealloc(NPObject * self, SEL _cmd);
+void Terminal__Ncurses__Window_update(NPObject * self, SEL _cmd);
+void Terminal__Ncurses__Window_drawBox(NPObject * self, SEL _cmd);
+void Terminal__Ncurses__Window_moveTo_x_(NPObject * self, SEL _cmd, int y, int x);
+void Terminal__Ncurses__Window_print_x_text_(NPObject * self, SEL _cmd, int y, int x, const char * fmt);
+int Terminal__Ncurses__Window_readChar(NPObject * self, SEL _cmd);
+WINDOW * Terminal__Ncurses__Window_handle(NPObject * self, SEL _cmd);
+NPObject * Terminal__Ncurses__Label_initWithWindow_x_y_text_(NPObject * self, SEL _cmd, Terminal__Ncurses__Window * win, int x, int y, NPString * text);
+void Terminal__Ncurses__Label_dealloc(NPObject * self, SEL _cmd);
+void Terminal__Ncurses__Label_draw(NPObject * self, SEL _cmd);
+void Terminal__Ncurses__Label_setText_(NPObject * self, SEL _cmd, NPString * text);
+NPObject * Terminal__Ncurses__Button_initWithWindow_x_y_w_text_(NPObject * self, SEL _cmd, Terminal__Ncurses__Window * win, int x, int y, int w, NPString * text);
+void Terminal__Ncurses__Button_dealloc(NPObject * self, SEL _cmd);
+int Terminal__Ncurses__Button_draw(NPObject * self, SEL _cmd);
+void Terminal__Ncurses__Button_setHighlight_(NPObject * self, SEL _cmd, int hl);
+NPObject * Terminal__Ncurses__TextBox_initWithWindow_x_y_w_(NPObject * self, SEL _cmd, Terminal__Ncurses__Window * win, int x, int y, int w);
+const char * Terminal__Ncurses__TextBox_edit(NPObject * self, SEL _cmd);
+const char * Terminal__Ncurses__TextBox_text(NPObject * self, SEL _cmd);
+NPObject * Terminal__Ncurses__MenuBar_initWithWindow_w_(NPObject * self, SEL _cmd, Terminal__Ncurses__Window * win, int w);
+void Terminal__Ncurses__MenuBar_addItem_(NPObject * self, SEL _cmd, const char * label);
+int Terminal__Ncurses__MenuBar_draw(NPObject * self, SEL _cmd);
+int Terminal__Ncurses__MenuBar_selected(NPObject * self, SEL _cmd);
+NPObject * nopa_alloc(struct NPClass * cls);
+NPObject * nopa_init(NPObject * self);
+void nopa_release(NPObject * obj);
+NPObject * nopa_retain(NPObject * obj);
 int nk_mouse_get_event(int * x, int * y, int * btn);
 int main(void);
 
-NFClass * NFObject_getClass(NFClass * self, SEL _cmd);
-NFClass * Terminal__Ncurses__Button_getClass(NFClass * self, SEL _cmd);
-NFClass * Terminal__Ncurses__Label_getClass(NFClass * self, SEL _cmd);
-NFClass * Terminal__Ncurses__MenuBar_getClass(NFClass * self, SEL _cmd);
-NFClass * Terminal__Ncurses__Screen_getClass(NFClass * self, SEL _cmd);
-NFClass * Terminal__Ncurses__TextBox_getClass(NFClass * self, SEL _cmd);
-NFClass * Terminal__Ncurses__Window_getClass(NFClass * self, SEL _cmd);
-NFClass * NFString_getClass(NFClass * self, SEL _cmd);
+NPClass * NPObject_getClass(NPClass * self, SEL _cmd);
+NPClass * Terminal__Ncurses__Button_getClass(NPClass * self, SEL _cmd);
+NPClass * Terminal__Ncurses__Label_getClass(NPClass * self, SEL _cmd);
+NPClass * Terminal__Ncurses__MenuBar_getClass(NPClass * self, SEL _cmd);
+NPClass * Terminal__Ncurses__Screen_getClass(NPClass * self, SEL _cmd);
+NPClass * Terminal__Ncurses__TextBox_getClass(NPClass * self, SEL _cmd);
+NPClass * Terminal__Ncurses__Window_getClass(NPClass * self, SEL _cmd);
+NPClass * NPString_getClass(NPClass * self, SEL _cmd);
 
 struct nopa_vtable {
-    const char * (*UTF8String)(NFObject *, SEL);
-    void (*addItem_)(NFObject *, SEL, const char *);
-    char (*characterAtIndex_)(NFObject *, SEL, size_t);
-    void (*clearScr)(NFObject *, SEL);
-    int (*cols)(NFObject *, SEL);
-    int (*compare_)(NFObject *, SEL, NFString *);
-    NFString * (*copy)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    NFString * (*description)(NFObject *, SEL);
-    int (*draw)(NFObject *, SEL);
-    void (*drawBox)(NFObject *, SEL);
-    const char * (*edit)(NFObject *, SEL);
-    WINDOW * (*handle)(NFObject *, SEL);
-    int (*hasPrefix_)(NFObject *, SEL, NFString *);
-    int (*hasSuffix_)(NFObject *, SEL, NFString *);
-    uint32_t (*hash)(NFObject *, SEL);
-    NFObject * (*init)(NFObject *, SEL);
-    NFObject * (*initWithRect_y_w_h_)(NFObject *, SEL, int, int, int, int);
-    NFString * (*initWithString_)(NFObject *, SEL, NFString *);
-    NFString * (*initWithUTF8String_)(NFObject *, SEL, const char *);
-    NFObject * (*initWithWindow_w_)(NFObject *, SEL, Terminal__Ncurses__Window *, int);
-    NFObject * (*initWithWindow_x_y_text_)(NFObject *, SEL, Terminal__Ncurses__Window *, int, int, NFString *);
-    NFObject * (*initWithWindow_x_y_w_)(NFObject *, SEL, Terminal__Ncurses__Window *, int, int, int);
-    NFObject * (*initWithWindow_x_y_w_text_)(NFObject *, SEL, Terminal__Ncurses__Window *, int, int, int, NFString *);
-    int (*isEqualToString_)(NFObject *, SEL, NFString *);
-    _Bool (*isKindOf_)(NFObject *, SEL, NFClass *);
-    size_t (*length)(NFObject *, SEL);
-    NFString * (*lowercaseString)(NFObject *, SEL);
-    int (*mouseEvent)(NFObject *, SEL);
-    int (*mouseX)(NFObject *, SEL);
-    int (*mouseY)(NFObject *, SEL);
-    void (*moveTo_x_)(NFObject *, SEL, int, int);
-    void (*print_x_text_)(NFObject *, SEL, int, int, const char *);
-    NFRange (*rangeOfString_)(NFObject *, SEL, NFString *);
-    int (*readChar)(NFObject *, SEL);
-    void (*release)(NFObject *, SEL);
-    NFObject * (*retain)(NFObject *, SEL);
-    int (*rows)(NFObject *, SEL);
-    int (*selected)(NFObject *, SEL);
-    void (*setHighlight_)(NFObject *, SEL, int);
-    void (*setText_)(NFObject *, SEL, NFString *);
-    NFString * (*stringByAppendingString_)(NFObject *, SEL, NFString *);
-    NFString * (*stringByAppendingUTF8String_)(NFObject *, SEL, const char *);
-    NFString * (*substringFromIndex_)(NFObject *, SEL, size_t);
-    NFString * (*substringToIndex_)(NFObject *, SEL, size_t);
-    NFString * (*substringWithRange_)(NFObject *, SEL, NFRange);
-    const char * (*text)(NFObject *, SEL);
-    void (*update)(NFObject *, SEL);
-    NFString * (*uppercaseString)(NFObject *, SEL);
+    const char * (*UTF8String)(NPObject *, SEL);
+    void (*addItem_)(NPObject *, SEL, const char *);
+    char (*characterAtIndex_)(NPObject *, SEL, size_t);
+    void (*clearScr)(NPObject *, SEL);
+    int (*cols)(NPObject *, SEL);
+    int (*compare_)(NPObject *, SEL, NPString *);
+    NPString * (*copy)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    NPString * (*description)(NPObject *, SEL);
+    int (*draw)(NPObject *, SEL);
+    void (*drawBox)(NPObject *, SEL);
+    const char * (*edit)(NPObject *, SEL);
+    WINDOW * (*handle)(NPObject *, SEL);
+    int (*hasPrefix_)(NPObject *, SEL, NPString *);
+    int (*hasSuffix_)(NPObject *, SEL, NPString *);
+    uint32_t (*hash)(NPObject *, SEL);
+    NPObject * (*init)(NPObject *, SEL);
+    NPObject * (*initWithRect_y_w_h_)(NPObject *, SEL, int, int, int, int);
+    NPString * (*initWithString_)(NPObject *, SEL, NPString *);
+    NPString * (*initWithUTF8String_)(NPObject *, SEL, const char *);
+    NPObject * (*initWithWindow_w_)(NPObject *, SEL, Terminal__Ncurses__Window *, int);
+    NPObject * (*initWithWindow_x_y_text_)(NPObject *, SEL, Terminal__Ncurses__Window *, int, int, NPString *);
+    NPObject * (*initWithWindow_x_y_w_)(NPObject *, SEL, Terminal__Ncurses__Window *, int, int, int);
+    NPObject * (*initWithWindow_x_y_w_text_)(NPObject *, SEL, Terminal__Ncurses__Window *, int, int, int, NPString *);
+    int (*isEqualToString_)(NPObject *, SEL, NPString *);
+    _Bool (*isKindOf_)(NPObject *, SEL, NPClass *);
+    size_t (*length)(NPObject *, SEL);
+    NPString * (*lowercaseString)(NPObject *, SEL);
+    int (*mouseEvent)(NPObject *, SEL);
+    int (*mouseX)(NPObject *, SEL);
+    int (*mouseY)(NPObject *, SEL);
+    void (*moveTo_x_)(NPObject *, SEL, int, int);
+    void (*print_x_text_)(NPObject *, SEL, int, int, const char *);
+    NPRange (*rangeOfString_)(NPObject *, SEL, NPString *);
+    int (*readChar)(NPObject *, SEL);
+    void (*release)(NPObject *, SEL);
+    NPObject * (*retain)(NPObject *, SEL);
+    int (*rows)(NPObject *, SEL);
+    int (*selected)(NPObject *, SEL);
+    void (*setHighlight_)(NPObject *, SEL, int);
+    void (*setText_)(NPObject *, SEL, NPString *);
+    NPString * (*stringByAppendingString_)(NPObject *, SEL, NPString *);
+    NPString * (*stringByAppendingUTF8String_)(NPObject *, SEL, const char *);
+    NPString * (*substringFromIndex_)(NPObject *, SEL, size_t);
+    NPString * (*substringToIndex_)(NPObject *, SEL, size_t);
+    NPString * (*substringWithRange_)(NPObject *, SEL, NPRange);
+    const char * (*text)(NPObject *, SEL);
+    void (*update)(NPObject *, SEL);
+    NPString * (*uppercaseString)(NPObject *, SEL);
 };
 
-struct nopa_NFObject_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+struct nopa_NPObject_meta_vtable {
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct nopa_Terminal__Ncurses__Button_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct nopa_Terminal__Ncurses__Label_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct nopa_Terminal__Ncurses__MenuBar_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct nopa_Terminal__Ncurses__Screen_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFObject * (*screen)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPObject * (*screen)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct nopa_Terminal__Ncurses__TextBox_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct nopa_Terminal__Ncurses__Window_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
-struct nopa_NFString_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFString * (*stringWithUTF8String_)(NFClass *, SEL, const char *);
-    NFString * (*stringWithString_)(NFClass *, SEL, NFString *);
-    NFClass * (*class)(NFClass *, SEL);
+struct nopa_NPString_meta_vtable {
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPString * (*stringWithUTF8String_)(NPClass *, SEL, const char *);
+    NPString * (*stringWithString_)(NPClass *, SEL, NPString *);
+    NPClass * (*class)(NPClass *, SEL);
 };
 
 struct Terminal__Ncurses__Button {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     WINDOW * _win;
     int _x;
     int _y;
     int _w;
-    NFString * _text;
+    NPString * _text;
     int _highlighted;
 };
 typedef struct Terminal__Ncurses__Button Terminal__Ncurses__Button;
 
 struct Terminal__Ncurses__Label {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     WINDOW * _win;
     int _x;
     int _y;
-    NFString * _text;
+    NPString * _text;
 };
 typedef struct Terminal__Ncurses__Label Terminal__Ncurses__Label;
 
 struct Terminal__Ncurses__MenuBar {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     WINDOW * _win;
     int _w;
@@ -333,7 +333,7 @@ struct Terminal__Ncurses__MenuBar {
 typedef struct Terminal__Ncurses__MenuBar Terminal__Ncurses__MenuBar;
 
 struct Terminal__Ncurses__Screen {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     int _rows;
     int _cols;
@@ -344,7 +344,7 @@ struct Terminal__Ncurses__Screen {
 typedef struct Terminal__Ncurses__Screen Terminal__Ncurses__Screen;
 
 struct Terminal__Ncurses__TextBox {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     WINDOW * _win;
     int _x;
@@ -356,7 +356,7 @@ struct Terminal__Ncurses__TextBox {
 typedef struct Terminal__Ncurses__TextBox Terminal__Ncurses__TextBox;
 
 struct Terminal__Ncurses__Window {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     WINDOW * _win;
     int _x;
@@ -366,25 +366,25 @@ struct Terminal__Ncurses__Window {
 };
 typedef struct Terminal__Ncurses__Window Terminal__Ncurses__Window;
 
-struct NFString {
-    struct NFClass *isa;
+struct NPString {
+    struct NPClass *isa;
     uint32_t retain_count;
     char * _cstr;
     size_t _length;
     uint32_t _hash;
     int _hashIsValid;
 };
-typedef struct NFString NFString;
+typedef struct NPString NPString;
 
-extern NFClass nopa___nopa_root_class;
-extern NFClass nopa_NFObject_class;
-extern NFClass nopa_Terminal__Ncurses__Button_class;
-extern NFClass nopa_Terminal__Ncurses__Label_class;
-extern NFClass nopa_Terminal__Ncurses__MenuBar_class;
-extern NFClass nopa_Terminal__Ncurses__Screen_class;
-extern NFClass nopa_Terminal__Ncurses__TextBox_class;
-extern NFClass nopa_Terminal__Ncurses__Window_class;
-extern NFClass nopa_NFString_class;
+extern NPClass nopa___nopa_root_class;
+extern NPClass nopa_NPObject_class;
+extern NPClass nopa_Terminal__Ncurses__Button_class;
+extern NPClass nopa_Terminal__Ncurses__Label_class;
+extern NPClass nopa_Terminal__Ncurses__MenuBar_class;
+extern NPClass nopa_Terminal__Ncurses__Screen_class;
+extern NPClass nopa_Terminal__Ncurses__TextBox_class;
+extern NPClass nopa_Terminal__Ncurses__Window_class;
+extern NPClass nopa_NPString_class;
 void nopa_meta_init(void);
 
 struct nopa_vtable nopa___nopa_root_vtable_inst = {
@@ -395,7 +395,7 @@ struct nopa_vtable nopa___nopa_root_vtable_inst = {
     .cols = NULL,
     .compare_ = NULL,
     .copy = NULL,
-    .dealloc = (void (*)(NFObject *, SEL))__nopa_root_dealloc,
+    .dealloc = (void (*)(NPObject *, SEL))__nopa_root_dealloc,
     .description = NULL,
     .draw = NULL,
     .drawBox = NULL,
@@ -404,7 +404,7 @@ struct nopa_vtable nopa___nopa_root_vtable_inst = {
     .hasPrefix_ = NULL,
     .hasSuffix_ = NULL,
     .hash = NULL,
-    .init = (NFObject * (*)(NFObject *, SEL))__nopa_root_init,
+    .init = (NPObject * (*)(NPObject *, SEL))__nopa_root_init,
     .initWithRect_y_w_h_ = NULL,
     .initWithString_ = NULL,
     .initWithUTF8String_ = NULL,
@@ -413,7 +413,7 @@ struct nopa_vtable nopa___nopa_root_vtable_inst = {
     .initWithWindow_x_y_w_ = NULL,
     .initWithWindow_x_y_w_text_ = NULL,
     .isEqualToString_ = NULL,
-    .isKindOf_ = (_Bool (*)(NFObject *, SEL, NFClass *))__nopa_root_isKindOf_,
+    .isKindOf_ = (_Bool (*)(NPObject *, SEL, NPClass *))__nopa_root_isKindOf_,
     .length = NULL,
     .lowercaseString = NULL,
     .mouseEvent = NULL,
@@ -423,8 +423,8 @@ struct nopa_vtable nopa___nopa_root_vtable_inst = {
     .print_x_text_ = NULL,
     .rangeOfString_ = NULL,
     .readChar = NULL,
-    .release = (void (*)(NFObject *, SEL))__nopa_root_release,
-    .retain = (NFObject * (*)(NFObject *, SEL))__nopa_root_retain,
+    .release = (void (*)(NPObject *, SEL))__nopa_root_release,
+    .retain = (NPObject * (*)(NPObject *, SEL))__nopa_root_retain,
     .rows = NULL,
     .selected = NULL,
     .setHighlight_ = NULL,
@@ -439,7 +439,7 @@ struct nopa_vtable nopa___nopa_root_vtable_inst = {
     .uppercaseString = NULL,
 };
 
-struct nopa_vtable nopa_NFObject_vtable_inst = {
+struct nopa_vtable nopa_NPObject_vtable_inst = {
     .UTF8String = NULL,
     .addItem_ = NULL,
     .characterAtIndex_ = NULL,
@@ -447,7 +447,7 @@ struct nopa_vtable nopa_NFObject_vtable_inst = {
     .cols = NULL,
     .compare_ = NULL,
     .copy = NULL,
-    .dealloc = (void (*)(NFObject *, SEL))NFObject_dealloc,
+    .dealloc = (void (*)(NPObject *, SEL))NPObject_dealloc,
     .description = NULL,
     .draw = NULL,
     .drawBox = NULL,
@@ -456,7 +456,7 @@ struct nopa_vtable nopa_NFObject_vtable_inst = {
     .hasPrefix_ = NULL,
     .hasSuffix_ = NULL,
     .hash = NULL,
-    .init = (NFObject * (*)(NFObject *, SEL))NFObject_init,
+    .init = (NPObject * (*)(NPObject *, SEL))NPObject_init,
     .initWithRect_y_w_h_ = NULL,
     .initWithString_ = NULL,
     .initWithUTF8String_ = NULL,
@@ -465,7 +465,7 @@ struct nopa_vtable nopa_NFObject_vtable_inst = {
     .initWithWindow_x_y_w_ = NULL,
     .initWithWindow_x_y_w_text_ = NULL,
     .isEqualToString_ = NULL,
-    .isKindOf_ = (_Bool (*)(NFObject *, SEL, NFClass *))__nopa_root_isKindOf_,
+    .isKindOf_ = (_Bool (*)(NPObject *, SEL, NPClass *))__nopa_root_isKindOf_,
     .length = NULL,
     .lowercaseString = NULL,
     .mouseEvent = NULL,
@@ -475,8 +475,8 @@ struct nopa_vtable nopa_NFObject_vtable_inst = {
     .print_x_text_ = NULL,
     .rangeOfString_ = NULL,
     .readChar = NULL,
-    .release = (void (*)(NFObject *, SEL))NFObject_release,
-    .retain = (NFObject * (*)(NFObject *, SEL))NFObject_retain,
+    .release = (void (*)(NPObject *, SEL))NPObject_release,
+    .retain = (NPObject * (*)(NPObject *, SEL))NPObject_retain,
     .rows = NULL,
     .selected = NULL,
     .setHighlight_ = NULL,
@@ -499,25 +499,25 @@ struct nopa_vtable nopa_Terminal__Ncurses__Button_vtable_inst = {
     .cols = NULL,
     .compare_ = NULL,
     .copy = NULL,
-    .dealloc = (void (*)(NFObject *, SEL))Terminal__Ncurses__Button_dealloc,
+    .dealloc = (void (*)(NPObject *, SEL))Terminal__Ncurses__Button_dealloc,
     .description = NULL,
-    .draw = (int (*)(NFObject *, SEL))Terminal__Ncurses__Button_draw,
+    .draw = (int (*)(NPObject *, SEL))Terminal__Ncurses__Button_draw,
     .drawBox = NULL,
     .edit = NULL,
     .handle = NULL,
     .hasPrefix_ = NULL,
     .hasSuffix_ = NULL,
     .hash = NULL,
-    .init = (NFObject * (*)(NFObject *, SEL))NFObject_init,
+    .init = (NPObject * (*)(NPObject *, SEL))NPObject_init,
     .initWithRect_y_w_h_ = NULL,
     .initWithString_ = NULL,
     .initWithUTF8String_ = NULL,
     .initWithWindow_w_ = NULL,
     .initWithWindow_x_y_text_ = NULL,
     .initWithWindow_x_y_w_ = NULL,
-    .initWithWindow_x_y_w_text_ = (NFObject * (*)(NFObject *, SEL, Terminal__Ncurses__Window *, int, int, int, NFString *))Terminal__Ncurses__Button_initWithWindow_x_y_w_text_,
+    .initWithWindow_x_y_w_text_ = (NPObject * (*)(NPObject *, SEL, Terminal__Ncurses__Window *, int, int, int, NPString *))Terminal__Ncurses__Button_initWithWindow_x_y_w_text_,
     .isEqualToString_ = NULL,
-    .isKindOf_ = (_Bool (*)(NFObject *, SEL, NFClass *))__nopa_root_isKindOf_,
+    .isKindOf_ = (_Bool (*)(NPObject *, SEL, NPClass *))__nopa_root_isKindOf_,
     .length = NULL,
     .lowercaseString = NULL,
     .mouseEvent = NULL,
@@ -527,11 +527,11 @@ struct nopa_vtable nopa_Terminal__Ncurses__Button_vtable_inst = {
     .print_x_text_ = NULL,
     .rangeOfString_ = NULL,
     .readChar = NULL,
-    .release = (void (*)(NFObject *, SEL))NFObject_release,
-    .retain = (NFObject * (*)(NFObject *, SEL))NFObject_retain,
+    .release = (void (*)(NPObject *, SEL))NPObject_release,
+    .retain = (NPObject * (*)(NPObject *, SEL))NPObject_retain,
     .rows = NULL,
     .selected = NULL,
-    .setHighlight_ = (void (*)(NFObject *, SEL, int))Terminal__Ncurses__Button_setHighlight_,
+    .setHighlight_ = (void (*)(NPObject *, SEL, int))Terminal__Ncurses__Button_setHighlight_,
     .setText_ = NULL,
     .stringByAppendingString_ = NULL,
     .stringByAppendingUTF8String_ = NULL,
@@ -551,25 +551,25 @@ struct nopa_vtable nopa_Terminal__Ncurses__Label_vtable_inst = {
     .cols = NULL,
     .compare_ = NULL,
     .copy = NULL,
-    .dealloc = (void (*)(NFObject *, SEL))Terminal__Ncurses__Label_dealloc,
+    .dealloc = (void (*)(NPObject *, SEL))Terminal__Ncurses__Label_dealloc,
     .description = NULL,
-    .draw = (int (*)(NFObject *, SEL))Terminal__Ncurses__Label_draw,
+    .draw = (int (*)(NPObject *, SEL))Terminal__Ncurses__Label_draw,
     .drawBox = NULL,
     .edit = NULL,
     .handle = NULL,
     .hasPrefix_ = NULL,
     .hasSuffix_ = NULL,
     .hash = NULL,
-    .init = (NFObject * (*)(NFObject *, SEL))NFObject_init,
+    .init = (NPObject * (*)(NPObject *, SEL))NPObject_init,
     .initWithRect_y_w_h_ = NULL,
     .initWithString_ = NULL,
     .initWithUTF8String_ = NULL,
     .initWithWindow_w_ = NULL,
-    .initWithWindow_x_y_text_ = (NFObject * (*)(NFObject *, SEL, Terminal__Ncurses__Window *, int, int, NFString *))Terminal__Ncurses__Label_initWithWindow_x_y_text_,
+    .initWithWindow_x_y_text_ = (NPObject * (*)(NPObject *, SEL, Terminal__Ncurses__Window *, int, int, NPString *))Terminal__Ncurses__Label_initWithWindow_x_y_text_,
     .initWithWindow_x_y_w_ = NULL,
     .initWithWindow_x_y_w_text_ = NULL,
     .isEqualToString_ = NULL,
-    .isKindOf_ = (_Bool (*)(NFObject *, SEL, NFClass *))__nopa_root_isKindOf_,
+    .isKindOf_ = (_Bool (*)(NPObject *, SEL, NPClass *))__nopa_root_isKindOf_,
     .length = NULL,
     .lowercaseString = NULL,
     .mouseEvent = NULL,
@@ -579,12 +579,12 @@ struct nopa_vtable nopa_Terminal__Ncurses__Label_vtable_inst = {
     .print_x_text_ = NULL,
     .rangeOfString_ = NULL,
     .readChar = NULL,
-    .release = (void (*)(NFObject *, SEL))NFObject_release,
-    .retain = (NFObject * (*)(NFObject *, SEL))NFObject_retain,
+    .release = (void (*)(NPObject *, SEL))NPObject_release,
+    .retain = (NPObject * (*)(NPObject *, SEL))NPObject_retain,
     .rows = NULL,
     .selected = NULL,
     .setHighlight_ = NULL,
-    .setText_ = (void (*)(NFObject *, SEL, NFString *))Terminal__Ncurses__Label_setText_,
+    .setText_ = (void (*)(NPObject *, SEL, NPString *))Terminal__Ncurses__Label_setText_,
     .stringByAppendingString_ = NULL,
     .stringByAppendingUTF8String_ = NULL,
     .substringFromIndex_ = NULL,
@@ -597,31 +597,31 @@ struct nopa_vtable nopa_Terminal__Ncurses__Label_vtable_inst = {
 
 struct nopa_vtable nopa_Terminal__Ncurses__MenuBar_vtable_inst = {
     .UTF8String = NULL,
-    .addItem_ = (void (*)(NFObject *, SEL, const char *))Terminal__Ncurses__MenuBar_addItem_,
+    .addItem_ = (void (*)(NPObject *, SEL, const char *))Terminal__Ncurses__MenuBar_addItem_,
     .characterAtIndex_ = NULL,
     .clearScr = NULL,
     .cols = NULL,
     .compare_ = NULL,
     .copy = NULL,
-    .dealloc = (void (*)(NFObject *, SEL))NFObject_dealloc,
+    .dealloc = (void (*)(NPObject *, SEL))NPObject_dealloc,
     .description = NULL,
-    .draw = (int (*)(NFObject *, SEL))Terminal__Ncurses__MenuBar_draw,
+    .draw = (int (*)(NPObject *, SEL))Terminal__Ncurses__MenuBar_draw,
     .drawBox = NULL,
     .edit = NULL,
     .handle = NULL,
     .hasPrefix_ = NULL,
     .hasSuffix_ = NULL,
     .hash = NULL,
-    .init = (NFObject * (*)(NFObject *, SEL))NFObject_init,
+    .init = (NPObject * (*)(NPObject *, SEL))NPObject_init,
     .initWithRect_y_w_h_ = NULL,
     .initWithString_ = NULL,
     .initWithUTF8String_ = NULL,
-    .initWithWindow_w_ = (NFObject * (*)(NFObject *, SEL, Terminal__Ncurses__Window *, int))Terminal__Ncurses__MenuBar_initWithWindow_w_,
+    .initWithWindow_w_ = (NPObject * (*)(NPObject *, SEL, Terminal__Ncurses__Window *, int))Terminal__Ncurses__MenuBar_initWithWindow_w_,
     .initWithWindow_x_y_text_ = NULL,
     .initWithWindow_x_y_w_ = NULL,
     .initWithWindow_x_y_w_text_ = NULL,
     .isEqualToString_ = NULL,
-    .isKindOf_ = (_Bool (*)(NFObject *, SEL, NFClass *))__nopa_root_isKindOf_,
+    .isKindOf_ = (_Bool (*)(NPObject *, SEL, NPClass *))__nopa_root_isKindOf_,
     .length = NULL,
     .lowercaseString = NULL,
     .mouseEvent = NULL,
@@ -631,10 +631,10 @@ struct nopa_vtable nopa_Terminal__Ncurses__MenuBar_vtable_inst = {
     .print_x_text_ = NULL,
     .rangeOfString_ = NULL,
     .readChar = NULL,
-    .release = (void (*)(NFObject *, SEL))NFObject_release,
-    .retain = (NFObject * (*)(NFObject *, SEL))NFObject_retain,
+    .release = (void (*)(NPObject *, SEL))NPObject_release,
+    .retain = (NPObject * (*)(NPObject *, SEL))NPObject_retain,
     .rows = NULL,
-    .selected = (int (*)(NFObject *, SEL))Terminal__Ncurses__MenuBar_selected,
+    .selected = (int (*)(NPObject *, SEL))Terminal__Ncurses__MenuBar_selected,
     .setHighlight_ = NULL,
     .setText_ = NULL,
     .stringByAppendingString_ = NULL,
@@ -651,11 +651,11 @@ struct nopa_vtable nopa_Terminal__Ncurses__Screen_vtable_inst = {
     .UTF8String = NULL,
     .addItem_ = NULL,
     .characterAtIndex_ = NULL,
-    .clearScr = (void (*)(NFObject *, SEL))Terminal__Ncurses__Screen_clearScr,
-    .cols = (int (*)(NFObject *, SEL))Terminal__Ncurses__Screen_cols,
+    .clearScr = (void (*)(NPObject *, SEL))Terminal__Ncurses__Screen_clearScr,
+    .cols = (int (*)(NPObject *, SEL))Terminal__Ncurses__Screen_cols,
     .compare_ = NULL,
     .copy = NULL,
-    .dealloc = (void (*)(NFObject *, SEL))Terminal__Ncurses__Screen_dealloc,
+    .dealloc = (void (*)(NPObject *, SEL))Terminal__Ncurses__Screen_dealloc,
     .description = NULL,
     .draw = NULL,
     .drawBox = NULL,
@@ -664,7 +664,7 @@ struct nopa_vtable nopa_Terminal__Ncurses__Screen_vtable_inst = {
     .hasPrefix_ = NULL,
     .hasSuffix_ = NULL,
     .hash = NULL,
-    .init = (NFObject * (*)(NFObject *, SEL))NFObject_init,
+    .init = (NPObject * (*)(NPObject *, SEL))NPObject_init,
     .initWithRect_y_w_h_ = NULL,
     .initWithString_ = NULL,
     .initWithUTF8String_ = NULL,
@@ -673,19 +673,19 @@ struct nopa_vtable nopa_Terminal__Ncurses__Screen_vtable_inst = {
     .initWithWindow_x_y_w_ = NULL,
     .initWithWindow_x_y_w_text_ = NULL,
     .isEqualToString_ = NULL,
-    .isKindOf_ = (_Bool (*)(NFObject *, SEL, NFClass *))__nopa_root_isKindOf_,
+    .isKindOf_ = (_Bool (*)(NPObject *, SEL, NPClass *))__nopa_root_isKindOf_,
     .length = NULL,
     .lowercaseString = NULL,
-    .mouseEvent = (int (*)(NFObject *, SEL))Terminal__Ncurses__Screen_mouseEvent,
-    .mouseX = (int (*)(NFObject *, SEL))Terminal__Ncurses__Screen_mouseX,
-    .mouseY = (int (*)(NFObject *, SEL))Terminal__Ncurses__Screen_mouseY,
+    .mouseEvent = (int (*)(NPObject *, SEL))Terminal__Ncurses__Screen_mouseEvent,
+    .mouseX = (int (*)(NPObject *, SEL))Terminal__Ncurses__Screen_mouseX,
+    .mouseY = (int (*)(NPObject *, SEL))Terminal__Ncurses__Screen_mouseY,
     .moveTo_x_ = NULL,
     .print_x_text_ = NULL,
     .rangeOfString_ = NULL,
-    .readChar = (int (*)(NFObject *, SEL))Terminal__Ncurses__Screen_readChar,
-    .release = (void (*)(NFObject *, SEL))NFObject_release,
-    .retain = (NFObject * (*)(NFObject *, SEL))NFObject_retain,
-    .rows = (int (*)(NFObject *, SEL))Terminal__Ncurses__Screen_rows,
+    .readChar = (int (*)(NPObject *, SEL))Terminal__Ncurses__Screen_readChar,
+    .release = (void (*)(NPObject *, SEL))NPObject_release,
+    .retain = (NPObject * (*)(NPObject *, SEL))NPObject_retain,
+    .rows = (int (*)(NPObject *, SEL))Terminal__Ncurses__Screen_rows,
     .selected = NULL,
     .setHighlight_ = NULL,
     .setText_ = NULL,
@@ -695,7 +695,7 @@ struct nopa_vtable nopa_Terminal__Ncurses__Screen_vtable_inst = {
     .substringToIndex_ = NULL,
     .substringWithRange_ = NULL,
     .text = NULL,
-    .update = (void (*)(NFObject *, SEL))Terminal__Ncurses__Screen_update,
+    .update = (void (*)(NPObject *, SEL))Terminal__Ncurses__Screen_update,
     .uppercaseString = NULL,
 };
 
@@ -707,25 +707,25 @@ struct nopa_vtable nopa_Terminal__Ncurses__TextBox_vtable_inst = {
     .cols = NULL,
     .compare_ = NULL,
     .copy = NULL,
-    .dealloc = (void (*)(NFObject *, SEL))NFObject_dealloc,
+    .dealloc = (void (*)(NPObject *, SEL))NPObject_dealloc,
     .description = NULL,
     .draw = NULL,
     .drawBox = NULL,
-    .edit = (const char * (*)(NFObject *, SEL))Terminal__Ncurses__TextBox_edit,
+    .edit = (const char * (*)(NPObject *, SEL))Terminal__Ncurses__TextBox_edit,
     .handle = NULL,
     .hasPrefix_ = NULL,
     .hasSuffix_ = NULL,
     .hash = NULL,
-    .init = (NFObject * (*)(NFObject *, SEL))NFObject_init,
+    .init = (NPObject * (*)(NPObject *, SEL))NPObject_init,
     .initWithRect_y_w_h_ = NULL,
     .initWithString_ = NULL,
     .initWithUTF8String_ = NULL,
     .initWithWindow_w_ = NULL,
     .initWithWindow_x_y_text_ = NULL,
-    .initWithWindow_x_y_w_ = (NFObject * (*)(NFObject *, SEL, Terminal__Ncurses__Window *, int, int, int))Terminal__Ncurses__TextBox_initWithWindow_x_y_w_,
+    .initWithWindow_x_y_w_ = (NPObject * (*)(NPObject *, SEL, Terminal__Ncurses__Window *, int, int, int))Terminal__Ncurses__TextBox_initWithWindow_x_y_w_,
     .initWithWindow_x_y_w_text_ = NULL,
     .isEqualToString_ = NULL,
-    .isKindOf_ = (_Bool (*)(NFObject *, SEL, NFClass *))__nopa_root_isKindOf_,
+    .isKindOf_ = (_Bool (*)(NPObject *, SEL, NPClass *))__nopa_root_isKindOf_,
     .length = NULL,
     .lowercaseString = NULL,
     .mouseEvent = NULL,
@@ -735,8 +735,8 @@ struct nopa_vtable nopa_Terminal__Ncurses__TextBox_vtable_inst = {
     .print_x_text_ = NULL,
     .rangeOfString_ = NULL,
     .readChar = NULL,
-    .release = (void (*)(NFObject *, SEL))NFObject_release,
-    .retain = (NFObject * (*)(NFObject *, SEL))NFObject_retain,
+    .release = (void (*)(NPObject *, SEL))NPObject_release,
+    .retain = (NPObject * (*)(NPObject *, SEL))NPObject_retain,
     .rows = NULL,
     .selected = NULL,
     .setHighlight_ = NULL,
@@ -746,7 +746,7 @@ struct nopa_vtable nopa_Terminal__Ncurses__TextBox_vtable_inst = {
     .substringFromIndex_ = NULL,
     .substringToIndex_ = NULL,
     .substringWithRange_ = NULL,
-    .text = (const char * (*)(NFObject *, SEL))Terminal__Ncurses__TextBox_text,
+    .text = (const char * (*)(NPObject *, SEL))Terminal__Ncurses__TextBox_text,
     .update = NULL,
     .uppercaseString = NULL,
 };
@@ -759,17 +759,17 @@ struct nopa_vtable nopa_Terminal__Ncurses__Window_vtable_inst = {
     .cols = NULL,
     .compare_ = NULL,
     .copy = NULL,
-    .dealloc = (void (*)(NFObject *, SEL))Terminal__Ncurses__Window_dealloc,
+    .dealloc = (void (*)(NPObject *, SEL))Terminal__Ncurses__Window_dealloc,
     .description = NULL,
     .draw = NULL,
-    .drawBox = (void (*)(NFObject *, SEL))Terminal__Ncurses__Window_drawBox,
+    .drawBox = (void (*)(NPObject *, SEL))Terminal__Ncurses__Window_drawBox,
     .edit = NULL,
-    .handle = (WINDOW * (*)(NFObject *, SEL))Terminal__Ncurses__Window_handle,
+    .handle = (WINDOW * (*)(NPObject *, SEL))Terminal__Ncurses__Window_handle,
     .hasPrefix_ = NULL,
     .hasSuffix_ = NULL,
     .hash = NULL,
-    .init = (NFObject * (*)(NFObject *, SEL))NFObject_init,
-    .initWithRect_y_w_h_ = (NFObject * (*)(NFObject *, SEL, int, int, int, int))Terminal__Ncurses__Window_initWithRect_y_w_h_,
+    .init = (NPObject * (*)(NPObject *, SEL))NPObject_init,
+    .initWithRect_y_w_h_ = (NPObject * (*)(NPObject *, SEL, int, int, int, int))Terminal__Ncurses__Window_initWithRect_y_w_h_,
     .initWithString_ = NULL,
     .initWithUTF8String_ = NULL,
     .initWithWindow_w_ = NULL,
@@ -777,18 +777,18 @@ struct nopa_vtable nopa_Terminal__Ncurses__Window_vtable_inst = {
     .initWithWindow_x_y_w_ = NULL,
     .initWithWindow_x_y_w_text_ = NULL,
     .isEqualToString_ = NULL,
-    .isKindOf_ = (_Bool (*)(NFObject *, SEL, NFClass *))__nopa_root_isKindOf_,
+    .isKindOf_ = (_Bool (*)(NPObject *, SEL, NPClass *))__nopa_root_isKindOf_,
     .length = NULL,
     .lowercaseString = NULL,
     .mouseEvent = NULL,
     .mouseX = NULL,
     .mouseY = NULL,
-    .moveTo_x_ = (void (*)(NFObject *, SEL, int, int))Terminal__Ncurses__Window_moveTo_x_,
-    .print_x_text_ = (void (*)(NFObject *, SEL, int, int, const char *))Terminal__Ncurses__Window_print_x_text_,
+    .moveTo_x_ = (void (*)(NPObject *, SEL, int, int))Terminal__Ncurses__Window_moveTo_x_,
+    .print_x_text_ = (void (*)(NPObject *, SEL, int, int, const char *))Terminal__Ncurses__Window_print_x_text_,
     .rangeOfString_ = NULL,
-    .readChar = (int (*)(NFObject *, SEL))Terminal__Ncurses__Window_readChar,
-    .release = (void (*)(NFObject *, SEL))NFObject_release,
-    .retain = (NFObject * (*)(NFObject *, SEL))NFObject_retain,
+    .readChar = (int (*)(NPObject *, SEL))Terminal__Ncurses__Window_readChar,
+    .release = (void (*)(NPObject *, SEL))NPObject_release,
+    .retain = (NPObject * (*)(NPObject *, SEL))NPObject_retain,
     .rows = NULL,
     .selected = NULL,
     .setHighlight_ = NULL,
@@ -799,165 +799,165 @@ struct nopa_vtable nopa_Terminal__Ncurses__Window_vtable_inst = {
     .substringToIndex_ = NULL,
     .substringWithRange_ = NULL,
     .text = NULL,
-    .update = (void (*)(NFObject *, SEL))Terminal__Ncurses__Window_update,
+    .update = (void (*)(NPObject *, SEL))Terminal__Ncurses__Window_update,
     .uppercaseString = NULL,
 };
 
-struct nopa_vtable nopa_NFString_vtable_inst = {
-    .UTF8String = (const char * (*)(NFObject *, SEL))NFString_UTF8String,
+struct nopa_vtable nopa_NPString_vtable_inst = {
+    .UTF8String = (const char * (*)(NPObject *, SEL))NPString_UTF8String,
     .addItem_ = NULL,
-    .characterAtIndex_ = (char (*)(NFObject *, SEL, size_t))NFString_characterAtIndex_,
+    .characterAtIndex_ = (char (*)(NPObject *, SEL, size_t))NPString_characterAtIndex_,
     .clearScr = NULL,
     .cols = NULL,
-    .compare_ = (int (*)(NFObject *, SEL, NFString *))NFString_compare_,
-    .copy = (NFString * (*)(NFObject *, SEL))NFString_copy,
-    .dealloc = (void (*)(NFObject *, SEL))NFString_dealloc,
-    .description = (NFString * (*)(NFObject *, SEL))NFString_description,
+    .compare_ = (int (*)(NPObject *, SEL, NPString *))NPString_compare_,
+    .copy = (NPString * (*)(NPObject *, SEL))NPString_copy,
+    .dealloc = (void (*)(NPObject *, SEL))NPString_dealloc,
+    .description = (NPString * (*)(NPObject *, SEL))NPString_description,
     .draw = NULL,
     .drawBox = NULL,
     .edit = NULL,
     .handle = NULL,
-    .hasPrefix_ = (int (*)(NFObject *, SEL, NFString *))NFString_hasPrefix_,
-    .hasSuffix_ = (int (*)(NFObject *, SEL, NFString *))NFString_hasSuffix_,
-    .hash = (uint32_t (*)(NFObject *, SEL))NFString_hash,
-    .init = (NFObject * (*)(NFObject *, SEL))NFObject_init,
+    .hasPrefix_ = (int (*)(NPObject *, SEL, NPString *))NPString_hasPrefix_,
+    .hasSuffix_ = (int (*)(NPObject *, SEL, NPString *))NPString_hasSuffix_,
+    .hash = (uint32_t (*)(NPObject *, SEL))NPString_hash,
+    .init = (NPObject * (*)(NPObject *, SEL))NPObject_init,
     .initWithRect_y_w_h_ = NULL,
-    .initWithString_ = (NFString * (*)(NFObject *, SEL, NFString *))NFString_initWithString_,
-    .initWithUTF8String_ = (NFString * (*)(NFObject *, SEL, const char *))NFString_initWithUTF8String_,
+    .initWithString_ = (NPString * (*)(NPObject *, SEL, NPString *))NPString_initWithString_,
+    .initWithUTF8String_ = (NPString * (*)(NPObject *, SEL, const char *))NPString_initWithUTF8String_,
     .initWithWindow_w_ = NULL,
     .initWithWindow_x_y_text_ = NULL,
     .initWithWindow_x_y_w_ = NULL,
     .initWithWindow_x_y_w_text_ = NULL,
-    .isEqualToString_ = (int (*)(NFObject *, SEL, NFString *))NFString_isEqualToString_,
-    .isKindOf_ = (_Bool (*)(NFObject *, SEL, NFClass *))__nopa_root_isKindOf_,
-    .length = (size_t (*)(NFObject *, SEL))NFString_length,
-    .lowercaseString = (NFString * (*)(NFObject *, SEL))NFString_lowercaseString,
+    .isEqualToString_ = (int (*)(NPObject *, SEL, NPString *))NPString_isEqualToString_,
+    .isKindOf_ = (_Bool (*)(NPObject *, SEL, NPClass *))__nopa_root_isKindOf_,
+    .length = (size_t (*)(NPObject *, SEL))NPString_length,
+    .lowercaseString = (NPString * (*)(NPObject *, SEL))NPString_lowercaseString,
     .mouseEvent = NULL,
     .mouseX = NULL,
     .mouseY = NULL,
     .moveTo_x_ = NULL,
     .print_x_text_ = NULL,
-    .rangeOfString_ = (NFRange (*)(NFObject *, SEL, NFString *))NFString_rangeOfString_,
+    .rangeOfString_ = (NPRange (*)(NPObject *, SEL, NPString *))NPString_rangeOfString_,
     .readChar = NULL,
-    .release = (void (*)(NFObject *, SEL))NFObject_release,
-    .retain = (NFObject * (*)(NFObject *, SEL))NFObject_retain,
+    .release = (void (*)(NPObject *, SEL))NPObject_release,
+    .retain = (NPObject * (*)(NPObject *, SEL))NPObject_retain,
     .rows = NULL,
     .selected = NULL,
     .setHighlight_ = NULL,
     .setText_ = NULL,
-    .stringByAppendingString_ = (NFString * (*)(NFObject *, SEL, NFString *))NFString_stringByAppendingString_,
-    .stringByAppendingUTF8String_ = (NFString * (*)(NFObject *, SEL, const char *))NFString_stringByAppendingUTF8String_,
-    .substringFromIndex_ = (NFString * (*)(NFObject *, SEL, size_t))NFString_substringFromIndex_,
-    .substringToIndex_ = (NFString * (*)(NFObject *, SEL, size_t))NFString_substringToIndex_,
-    .substringWithRange_ = (NFString * (*)(NFObject *, SEL, NFRange))NFString_substringWithRange_,
+    .stringByAppendingString_ = (NPString * (*)(NPObject *, SEL, NPString *))NPString_stringByAppendingString_,
+    .stringByAppendingUTF8String_ = (NPString * (*)(NPObject *, SEL, const char *))NPString_stringByAppendingUTF8String_,
+    .substringFromIndex_ = (NPString * (*)(NPObject *, SEL, size_t))NPString_substringFromIndex_,
+    .substringToIndex_ = (NPString * (*)(NPObject *, SEL, size_t))NPString_substringToIndex_,
+    .substringWithRange_ = (NPString * (*)(NPObject *, SEL, NPRange))NPString_substringWithRange_,
     .text = NULL,
     .update = NULL,
-    .uppercaseString = (NFString * (*)(NFObject *, SEL))NFString_uppercaseString,
+    .uppercaseString = (NPString * (*)(NPObject *, SEL))NPString_uppercaseString,
 };
 
-struct nopa_NFObject_meta_vtable nopa_NFObject_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
-    .class = NFObject_getClass,
+struct nopa_NPObject_meta_vtable nopa_NPObject_meta_vtable_inst = {
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
+    .class = NPObject_getClass,
 };
 
 struct nopa_Terminal__Ncurses__Button_meta_vtable nopa_Terminal__Ncurses__Button_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
     .class = Terminal__Ncurses__Button_getClass,
 };
 
 struct nopa_Terminal__Ncurses__Label_meta_vtable nopa_Terminal__Ncurses__Label_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
     .class = Terminal__Ncurses__Label_getClass,
 };
 
 struct nopa_Terminal__Ncurses__MenuBar_meta_vtable nopa_Terminal__Ncurses__MenuBar_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
     .class = Terminal__Ncurses__MenuBar_getClass,
 };
 
 struct nopa_Terminal__Ncurses__Screen_meta_vtable nopa_Terminal__Ncurses__Screen_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
     .screen = Terminal__Ncurses__Screen_screen,
     .class = Terminal__Ncurses__Screen_getClass,
 };
 
 struct nopa_Terminal__Ncurses__TextBox_meta_vtable nopa_Terminal__Ncurses__TextBox_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
     .class = Terminal__Ncurses__TextBox_getClass,
 };
 
 struct nopa_Terminal__Ncurses__Window_meta_vtable nopa_Terminal__Ncurses__Window_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
     .class = Terminal__Ncurses__Window_getClass,
 };
 
-struct nopa_NFString_meta_vtable nopa_NFString_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
-    .stringWithUTF8String_ = NFString_stringWithUTF8String_,
-    .stringWithString_ = NFString_stringWithString_,
-    .class = NFString_getClass,
+struct nopa_NPString_meta_vtable nopa_NPString_meta_vtable_inst = {
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
+    .stringWithUTF8String_ = NPString_stringWithUTF8String_,
+    .stringWithString_ = NPString_stringWithString_,
+    .class = NPString_getClass,
 };
 
-NFClass * NFObject_getClass(NFClass * self, SEL _cmd) {
+NPClass * NPObject_getClass(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
-NFClass * Terminal__Ncurses__Button_getClass(NFClass * self, SEL _cmd) {
+NPClass * Terminal__Ncurses__Button_getClass(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
-NFClass * Terminal__Ncurses__Label_getClass(NFClass * self, SEL _cmd) {
+NPClass * Terminal__Ncurses__Label_getClass(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
-NFClass * Terminal__Ncurses__MenuBar_getClass(NFClass * self, SEL _cmd) {
+NPClass * Terminal__Ncurses__MenuBar_getClass(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
-NFClass * Terminal__Ncurses__Screen_getClass(NFClass * self, SEL _cmd) {
+NPClass * Terminal__Ncurses__Screen_getClass(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
-NFClass * Terminal__Ncurses__TextBox_getClass(NFClass * self, SEL _cmd) {
+NPClass * Terminal__Ncurses__TextBox_getClass(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
-NFClass * Terminal__Ncurses__Window_getClass(NFClass * self, SEL _cmd) {
+NPClass * Terminal__Ncurses__Window_getClass(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
-NFClass * NFString_getClass(NFClass * self, SEL _cmd) {
+NPClass * NPString_getClass(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
-NFClass nopa___nopa_root_class;
-NFClass nopa_NFObject_class;
-NFClass nopa_Terminal__Ncurses__Button_class;
-NFClass nopa_Terminal__Ncurses__Label_class;
-NFClass nopa_Terminal__Ncurses__MenuBar_class;
-NFClass nopa_Terminal__Ncurses__Screen_class;
-NFClass nopa_Terminal__Ncurses__TextBox_class;
-NFClass nopa_Terminal__Ncurses__Window_class;
-NFClass nopa_NFString_class;
+NPClass nopa___nopa_root_class;
+NPClass nopa_NPObject_class;
+NPClass nopa_Terminal__Ncurses__Button_class;
+NPClass nopa_Terminal__Ncurses__Label_class;
+NPClass nopa_Terminal__Ncurses__MenuBar_class;
+NPClass nopa_Terminal__Ncurses__Screen_class;
+NPClass nopa_Terminal__Ncurses__TextBox_class;
+NPClass nopa_Terminal__Ncurses__Window_class;
+NPClass nopa_NPString_class;
 
 void nopa_meta_init(void) {
-    nopa___nopa_root_class = (NFClass){
+    nopa___nopa_root_class = (NPClass){
         .name = "__nopa_root",
         .superclass = NULL,
         .instance_size = sizeof(struct __nopa_root),
@@ -965,76 +965,76 @@ void nopa_meta_init(void) {
         .class_vtable = NULL,
         .protocol_count = 0,
     };
-    nopa_NFObject_class = (NFClass){
-        .name = "NFObject",
+    nopa_NPObject_class = (NPClass){
+        .name = "NPObject",
         .superclass = &nopa___nopa_root_class,
-        .instance_size = sizeof(struct NFObject),
-        .vtable = &nopa_NFObject_vtable_inst,
-        .class_vtable = &nopa_NFObject_meta_vtable_inst,
+        .instance_size = sizeof(struct NPObject),
+        .vtable = &nopa_NPObject_vtable_inst,
+        .class_vtable = &nopa_NPObject_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_Terminal__Ncurses__Button_class = (NFClass){
+    nopa_Terminal__Ncurses__Button_class = (NPClass){
         .name = "Terminal::Ncurses::Button",
-        .superclass = &nopa_NFObject_class,
+        .superclass = &nopa_NPObject_class,
         .instance_size = sizeof(struct Terminal__Ncurses__Button),
         .vtable = &nopa_Terminal__Ncurses__Button_vtable_inst,
         .class_vtable = &nopa_Terminal__Ncurses__Button_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_Terminal__Ncurses__Label_class = (NFClass){
+    nopa_Terminal__Ncurses__Label_class = (NPClass){
         .name = "Terminal::Ncurses::Label",
-        .superclass = &nopa_NFObject_class,
+        .superclass = &nopa_NPObject_class,
         .instance_size = sizeof(struct Terminal__Ncurses__Label),
         .vtable = &nopa_Terminal__Ncurses__Label_vtable_inst,
         .class_vtable = &nopa_Terminal__Ncurses__Label_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_Terminal__Ncurses__MenuBar_class = (NFClass){
+    nopa_Terminal__Ncurses__MenuBar_class = (NPClass){
         .name = "Terminal::Ncurses::MenuBar",
-        .superclass = &nopa_NFObject_class,
+        .superclass = &nopa_NPObject_class,
         .instance_size = sizeof(struct Terminal__Ncurses__MenuBar),
         .vtable = &nopa_Terminal__Ncurses__MenuBar_vtable_inst,
         .class_vtable = &nopa_Terminal__Ncurses__MenuBar_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_Terminal__Ncurses__Screen_class = (NFClass){
+    nopa_Terminal__Ncurses__Screen_class = (NPClass){
         .name = "Terminal::Ncurses::Screen",
-        .superclass = &nopa_NFObject_class,
+        .superclass = &nopa_NPObject_class,
         .instance_size = sizeof(struct Terminal__Ncurses__Screen),
         .vtable = &nopa_Terminal__Ncurses__Screen_vtable_inst,
         .class_vtable = &nopa_Terminal__Ncurses__Screen_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_Terminal__Ncurses__TextBox_class = (NFClass){
+    nopa_Terminal__Ncurses__TextBox_class = (NPClass){
         .name = "Terminal::Ncurses::TextBox",
-        .superclass = &nopa_NFObject_class,
+        .superclass = &nopa_NPObject_class,
         .instance_size = sizeof(struct Terminal__Ncurses__TextBox),
         .vtable = &nopa_Terminal__Ncurses__TextBox_vtable_inst,
         .class_vtable = &nopa_Terminal__Ncurses__TextBox_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_Terminal__Ncurses__Window_class = (NFClass){
+    nopa_Terminal__Ncurses__Window_class = (NPClass){
         .name = "Terminal::Ncurses::Window",
-        .superclass = &nopa_NFObject_class,
+        .superclass = &nopa_NPObject_class,
         .instance_size = sizeof(struct Terminal__Ncurses__Window),
         .vtable = &nopa_Terminal__Ncurses__Window_vtable_inst,
         .class_vtable = &nopa_Terminal__Ncurses__Window_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_NFString_class = (NFClass){
-        .name = "NFString",
-        .superclass = &nopa_NFObject_class,
-        .instance_size = sizeof(struct NFString),
-        .vtable = &nopa_NFString_vtable_inst,
-        .class_vtable = &nopa_NFString_meta_vtable_inst,
+    nopa_NPString_class = (NPClass){
+        .name = "NPString",
+        .superclass = &nopa_NPObject_class,
+        .instance_size = sizeof(struct NPString),
+        .vtable = &nopa_NPString_vtable_inst,
+        .class_vtable = &nopa_NPString_meta_vtable_inst,
         .protocol_count = 0,
     };
 }
-NFObject *nopa_string_from_cstr(const char *cstr) {
+NPObject *nopa_string_from_cstr(const char *cstr) {
     if (!cstr) cstr = "";
-    NFObject *obj = nopa_alloc(&nopa_NFString_class);
+    NPObject *obj = nopa_alloc(&nopa_NPString_class);
     if (!obj) return NULL;
-    struct NFString *str = (struct NFString *)obj;
+    struct NPString *str = (struct NPString *)obj;
     size_t len = strlen(cstr);
     str->_cstr = (char *)malloc(len + 1);
     if (str->_cstr) strcpy(str->_cstr, cstr);
@@ -1044,131 +1044,131 @@ NFObject *nopa_string_from_cstr(const char *cstr) {
     return nopa_autorelease(obj);
 }
 
-NFObject * __nopa_root_init(NFObject * self, SEL _cmd) {
+NPObject * __nopa_root_init(NPObject * self, SEL _cmd) {
     return nopa_init(self);
 }
 
-void __nopa_root_dealloc(NFObject * self, SEL _cmd) {
+void __nopa_root_dealloc(NPObject * self, SEL _cmd) {
     return;
 }
 
-void __nopa_root_release(NFObject * self, SEL _cmd) {
+void __nopa_root_release(NPObject * self, SEL _cmd) {
     nopa_release(self);
 }
 
-NFObject * __nopa_root_retain(NFObject * self, SEL _cmd) {
+NPObject * __nopa_root_retain(NPObject * self, SEL _cmd) {
     return nopa_retain(self);
 }
 
-_Bool __nopa_root_isKindOf_(NFObject * self, SEL _cmd, NFClass * cls) {
+_Bool __nopa_root_isKindOf_(NPObject * self, SEL _cmd, NPClass * cls) {
     return nopa_isKindOf(self, cls);
 }
 
-NFObject * NFObject_alloc(NFClass * self, SEL _cmd) {
+NPObject * NPObject_alloc(NPClass * self, SEL _cmd) {
     return nopa_alloc(self);
 }
 
-NFObject * NFObject_new(NFClass * self, SEL _cmd) {
-    NFObject * obj = nopa_alloc(self);
+NPObject * NPObject_new(NPClass * self, SEL _cmd) {
+    NPObject * obj = nopa_alloc(self);
     return nopa_init(obj);
 }
 
-NFObject * NFObject_init(NFObject * self, SEL _cmd) {
+NPObject * NPObject_init(NPObject * self, SEL _cmd) {
     return nopa_init(self);
 }
 
-void NFObject_dealloc(NFObject * self, SEL _cmd) {
+void NPObject_dealloc(NPObject * self, SEL _cmd) {
     return;
 }
 
-void NFObject_release(NFObject * self, SEL _cmd) {
+void NPObject_release(NPObject * self, SEL _cmd) {
     nopa_release(self);
 }
 
-NFObject * NFObject_retain(NFObject * self, SEL _cmd) {
+NPObject * NPObject_retain(NPObject * self, SEL _cmd) {
     return nopa_retain(self);
 }
 
-NFString * NFString_stringWithUTF8String_(NFClass * self, SEL _cmd, const char * cstr) {
-    return ({ NFObject *__nopa_tmp_0 = ((NFObject *)(NFObject_alloc(self, __nopa_sel_alloc))); __nopa_tmp_0 ? ((struct nopa_vtable *)__nopa_tmp_0->isa->vtable)->initWithUTF8String_(__nopa_tmp_0, __nopa_sel_initWithUTF8String_, cstr) : 0; });
+NPString * NPString_stringWithUTF8String_(NPClass * self, SEL _cmd, const char * cstr) {
+    return ({ NPObject *__nopa_tmp_0 = ((NPObject *)(NPObject_alloc(self, __nopa_sel_alloc))); __nopa_tmp_0 ? ((struct nopa_vtable *)__nopa_tmp_0->isa->vtable)->initWithUTF8String_(__nopa_tmp_0, __nopa_sel_initWithUTF8String_, cstr) : 0; });
 }
 
-NFString * NFString_stringWithString_(NFClass * self, SEL _cmd, NFString * str) {
-    return ({ NFObject *__nopa_tmp_1 = ((NFObject *)(NFObject_alloc(self, __nopa_sel_alloc))); __nopa_tmp_1 ? ((struct nopa_vtable *)__nopa_tmp_1->isa->vtable)->initWithString_(__nopa_tmp_1, __nopa_sel_initWithString_, (NFString *)(str)) : 0; });
+NPString * NPString_stringWithString_(NPClass * self, SEL _cmd, NPString * str) {
+    return ({ NPObject *__nopa_tmp_1 = ((NPObject *)(NPObject_alloc(self, __nopa_sel_alloc))); __nopa_tmp_1 ? ((struct nopa_vtable *)__nopa_tmp_1->isa->vtable)->initWithString_(__nopa_tmp_1, __nopa_sel_initWithString_, (NPString *)(str)) : 0; });
 }
 
-NFString * NFString_initWithUTF8String_(NFObject * self, SEL _cmd, const char * cstr) {
-    self = (&nopa_NFObject_vtable_inst)->init(self, __nopa_sel_init);
+NPString * NPString_initWithUTF8String_(NPObject * self, SEL _cmd, const char * cstr) {
+    self = (&nopa_NPObject_vtable_inst)->init(self, __nopa_sel_init);
     if ((self && cstr))     {
-        ((struct NFString *)self)->_length = strlen(cstr);
-        ((struct NFString *)self)->_cstr = (char *)malloc((((struct NFString *)self)->_length + 1));
-        if (((struct NFString *)self)->_cstr)         {
-            strcpy(((struct NFString *)self)->_cstr, cstr);
+        ((struct NPString *)self)->_length = strlen(cstr);
+        ((struct NPString *)self)->_cstr = (char *)malloc((((struct NPString *)self)->_length + 1));
+        if (((struct NPString *)self)->_cstr)         {
+            strcpy(((struct NPString *)self)->_cstr, cstr);
         }
-        ((struct NFString *)self)->_hash = 0;
-        ((struct NFString *)self)->_hashIsValid = 0;
+        ((struct NPString *)self)->_hash = 0;
+        ((struct NPString *)self)->_hashIsValid = 0;
     }
     return self;
 }
 
-NFString * NFString_initWithString_(NFObject * self, SEL _cmd, NFString * str) {
-    self = (&nopa_NFObject_vtable_inst)->init(self, __nopa_sel_init);
+NPString * NPString_initWithString_(NPObject * self, SEL _cmd, NPString * str) {
+    self = (&nopa_NPObject_vtable_inst)->init(self, __nopa_sel_init);
     if ((self && str))     {
-        char * src = (char *)(((struct nopa_vtable *)(str->isa->vtable))->UTF8String((NFObject *)(str), __nopa_sel_UTF8String));
+        char * src = (char *)(((struct nopa_vtable *)(str->isa->vtable))->UTF8String((NPObject *)(str), __nopa_sel_UTF8String));
         if (src)         {
-            ((struct NFString *)self)->_length = strlen(src);
-            ((struct NFString *)self)->_cstr = (char *)malloc((((struct NFString *)self)->_length + 1));
-            if (((struct NFString *)self)->_cstr)             {
-                strcpy(((struct NFString *)self)->_cstr, src);
+            ((struct NPString *)self)->_length = strlen(src);
+            ((struct NPString *)self)->_cstr = (char *)malloc((((struct NPString *)self)->_length + 1));
+            if (((struct NPString *)self)->_cstr)             {
+                strcpy(((struct NPString *)self)->_cstr, src);
             }
         }
-        ((struct NFString *)self)->_hash = 0;
-        ((struct NFString *)self)->_hashIsValid = 0;
+        ((struct NPString *)self)->_hash = 0;
+        ((struct NPString *)self)->_hashIsValid = 0;
     }
     return self;
 }
 
-size_t NFString_length(NFObject * self, SEL _cmd) {
-    return ((struct NFString *)self)->_length;
+size_t NPString_length(NPObject * self, SEL _cmd) {
+    return ((struct NPString *)self)->_length;
 }
 
-const char * NFString_UTF8String(NFObject * self, SEL _cmd) {
-    return ((struct NFString *)self)->_cstr ? ((struct NFString *)self)->_cstr : "";
+const char * NPString_UTF8String(NPObject * self, SEL _cmd) {
+    return ((struct NPString *)self)->_cstr ? ((struct NPString *)self)->_cstr : "";
 }
 
-char NFString_characterAtIndex_(NFObject * self, SEL _cmd, size_t index) {
-    if ((((struct NFString *)self)->_cstr && (index < ((struct NFString *)self)->_length)))     {
-        return ((struct NFString *)self)->_cstr[index];
+char NPString_characterAtIndex_(NPObject * self, SEL _cmd, size_t index) {
+    if ((((struct NPString *)self)->_cstr && (index < ((struct NPString *)self)->_length)))     {
+        return ((struct NPString *)self)->_cstr[index];
     }
     return '\x00';
 }
 
-int NFString_isEqualToString_(NFObject * self, SEL _cmd, NFString * other) {
-    if (self == (NFObject *)other)     return 1;
+int NPString_isEqualToString_(NPObject * self, SEL _cmd, NPString * other) {
+    if (self == (NPObject *)other)     return 1;
     if (!other)     return 0;
     char * s1 = (char *)(((struct nopa_vtable *)(self->isa->vtable))->UTF8String(self, __nopa_sel_UTF8String));
-    char * s2 = (char *)(((struct nopa_vtable *)(other->isa->vtable))->UTF8String((NFObject *)(other), __nopa_sel_UTF8String));
+    char * s2 = (char *)(((struct nopa_vtable *)(other->isa->vtable))->UTF8String((NPObject *)(other), __nopa_sel_UTF8String));
     return strcmp(s1, s2) == 0;
 }
 
-int NFString_compare_(NFObject * self, SEL _cmd, NFString * other) {
+int NPString_compare_(NPObject * self, SEL _cmd, NPString * other) {
     if (!other)     return 1;
     char * s1 = (char *)(((struct nopa_vtable *)(self->isa->vtable))->UTF8String(self, __nopa_sel_UTF8String));
-    char * s2 = (char *)(((struct nopa_vtable *)(other->isa->vtable))->UTF8String((NFObject *)(other), __nopa_sel_UTF8String));
+    char * s2 = (char *)(((struct nopa_vtable *)(other->isa->vtable))->UTF8String((NPObject *)(other), __nopa_sel_UTF8String));
     return strcmp(s1, s2);
 }
 
-int NFString_hasPrefix_(NFObject * self, SEL _cmd, NFString * prefix) {
+int NPString_hasPrefix_(NPObject * self, SEL _cmd, NPString * prefix) {
     if (!prefix)     return 0;
-    char * pre = (char *)(((struct nopa_vtable *)(prefix->isa->vtable))->UTF8String((NFObject *)(prefix), __nopa_sel_UTF8String));
+    char * pre = (char *)(((struct nopa_vtable *)(prefix->isa->vtable))->UTF8String((NPObject *)(prefix), __nopa_sel_UTF8String));
     char * str = (char *)(((struct nopa_vtable *)(self->isa->vtable))->UTF8String(self, __nopa_sel_UTF8String));
     size_t preLen = strlen(pre);
     return strncmp(str, pre, preLen) == 0;
 }
 
-int NFString_hasSuffix_(NFObject * self, SEL _cmd, NFString * suffix) {
+int NPString_hasSuffix_(NPObject * self, SEL _cmd, NPString * suffix) {
     if (!suffix)     return 0;
-    char * suf = (char *)(((struct nopa_vtable *)(suffix->isa->vtable))->UTF8String((NFObject *)(suffix), __nopa_sel_UTF8String));
+    char * suf = (char *)(((struct nopa_vtable *)(suffix->isa->vtable))->UTF8String((NPObject *)(suffix), __nopa_sel_UTF8String));
     char * str = (char *)(((struct nopa_vtable *)(self->isa->vtable))->UTF8String(self, __nopa_sel_UTF8String));
     size_t sufLen = strlen(suf);
     size_t strLen = strlen(str);
@@ -1176,13 +1176,13 @@ int NFString_hasSuffix_(NFObject * self, SEL _cmd, NFString * suffix) {
     return strcmp(((str + strLen) - sufLen), suf) == 0;
 }
 
-NFRange NFString_rangeOfString_(NFObject * self, SEL _cmd, NFString * substring) {
-    NFRange range = { 0, 0 };
-    if ((!substring || !((struct NFString *)self)->_cstr))     return range;
-    char * sub = (char *)(((struct nopa_vtable *)(substring->isa->vtable))->UTF8String((NFObject *)(substring), __nopa_sel_UTF8String));
-    char * found = (char *)(strstr(((struct NFString *)self)->_cstr, sub));
+NPRange NPString_rangeOfString_(NPObject * self, SEL _cmd, NPString * substring) {
+    NPRange range = { 0, 0 };
+    if ((!substring || !((struct NPString *)self)->_cstr))     return range;
+    char * sub = (char *)(((struct nopa_vtable *)(substring->isa->vtable))->UTF8String((NPObject *)(substring), __nopa_sel_UTF8String));
+    char * found = (char *)(strstr(((struct NPString *)self)->_cstr, sub));
     if (found)     {
-        range.location = (size_t)(found - ((struct NFString *)self)->_cstr);
+        range.location = (size_t)(found - ((struct NPString *)self)->_cstr);
         range.length = strlen(sub);
     }
     else     {
@@ -1192,50 +1192,50 @@ NFRange NFString_rangeOfString_(NFObject * self, SEL _cmd, NFString * substring)
     return range;
 }
 
-NFString * NFString_substringFromIndex_(NFObject * self, SEL _cmd, size_t from) {
-    if ((!((struct NFString *)self)->_cstr || (from > ((struct NFString *)self)->_length)))     return NULL;
-    return NFString_stringWithUTF8String_(&nopa_NFString_class, __nopa_sel_stringWithUTF8String_, (((struct NFString *)self)->_cstr + from));
+NPString * NPString_substringFromIndex_(NPObject * self, SEL _cmd, size_t from) {
+    if ((!((struct NPString *)self)->_cstr || (from > ((struct NPString *)self)->_length)))     return NULL;
+    return NPString_stringWithUTF8String_(&nopa_NPString_class, __nopa_sel_stringWithUTF8String_, (((struct NPString *)self)->_cstr + from));
 }
 
-NFString * NFString_substringToIndex_(NFObject * self, SEL _cmd, size_t to) {
-    if (!((struct NFString *)self)->_cstr)     return NULL;
-    if ((to > ((struct NFString *)self)->_length))     to = ((struct NFString *)self)->_length;
+NPString * NPString_substringToIndex_(NPObject * self, SEL _cmd, size_t to) {
+    if (!((struct NPString *)self)->_cstr)     return NULL;
+    if ((to > ((struct NPString *)self)->_length))     to = ((struct NPString *)self)->_length;
     char * buf = (char *)malloc((to + 1));
-    strncpy(buf, ((struct NFString *)self)->_cstr, to);
+    strncpy(buf, ((struct NPString *)self)->_cstr, to);
     buf[to] = '\x00';
-    NFString * result = (NFString *)(NFString_stringWithUTF8String_(&nopa_NFString_class, __nopa_sel_stringWithUTF8String_, buf));
+    NPString * result = (NPString *)(NPString_stringWithUTF8String_(&nopa_NPString_class, __nopa_sel_stringWithUTF8String_, buf));
     free(buf);
     return result;
 }
 
-NFString * NFString_substringWithRange_(NFObject * self, SEL _cmd, NFRange range) {
-    if (!((struct NFString *)self)->_cstr)     return NULL;
-    if (((range.location > ((struct NFString *)self)->_length) || ((range.location + range.length) > ((struct NFString *)self)->_length)))     {
+NPString * NPString_substringWithRange_(NPObject * self, SEL _cmd, NPRange range) {
+    if (!((struct NPString *)self)->_cstr)     return NULL;
+    if (((range.location > ((struct NPString *)self)->_length) || ((range.location + range.length) > ((struct NPString *)self)->_length)))     {
         return NULL;
     }
     char * buf = (char *)malloc((range.length + 1));
-    strncpy(buf, (((struct NFString *)self)->_cstr + range.location), range.length);
+    strncpy(buf, (((struct NPString *)self)->_cstr + range.location), range.length);
     buf[range.length] = '\x00';
-    NFString * result = (NFString *)(NFString_stringWithUTF8String_(&nopa_NFString_class, __nopa_sel_stringWithUTF8String_, buf));
+    NPString * result = (NPString *)(NPString_stringWithUTF8String_(&nopa_NPString_class, __nopa_sel_stringWithUTF8String_, buf));
     free(buf);
     return result;
 }
 
-NFString * NFString_stringByAppendingString_(NFObject * self, SEL _cmd, NFString * other) {
+NPString * NPString_stringByAppendingString_(NPObject * self, SEL _cmd, NPString * other) {
     if (!other)     return ((struct nopa_vtable *)(self->isa->vtable))->copy(self, __nopa_sel_copy);
     char * s1 = (char *)(((struct nopa_vtable *)(self->isa->vtable))->UTF8String(self, __nopa_sel_UTF8String));
-    char * s2 = (char *)(((struct nopa_vtable *)(other->isa->vtable))->UTF8String((NFObject *)(other), __nopa_sel_UTF8String));
+    char * s2 = (char *)(((struct nopa_vtable *)(other->isa->vtable))->UTF8String((NPObject *)(other), __nopa_sel_UTF8String));
     size_t len1 = strlen(s1);
     size_t len2 = strlen(s2);
     char * buf = (char *)malloc(((len1 + len2) + 1));
     strcpy(buf, s1);
     strcat(buf, s2);
-    NFString * result = (NFString *)(NFString_stringWithUTF8String_(&nopa_NFString_class, __nopa_sel_stringWithUTF8String_, buf));
+    NPString * result = (NPString *)(NPString_stringWithUTF8String_(&nopa_NPString_class, __nopa_sel_stringWithUTF8String_, buf));
     free(buf);
     return result;
 }
 
-NFString * NFString_stringByAppendingUTF8String_(NFObject * self, SEL _cmd, const char * cstr) {
+NPString * NPString_stringByAppendingUTF8String_(NPObject * self, SEL _cmd, const char * cstr) {
     if (!cstr)     return ((struct nopa_vtable *)(self->isa->vtable))->copy(self, __nopa_sel_copy);
     char * s1 = (char *)(((struct nopa_vtable *)(self->isa->vtable))->UTF8String(self, __nopa_sel_UTF8String));
     size_t len1 = strlen(s1);
@@ -1243,69 +1243,69 @@ NFString * NFString_stringByAppendingUTF8String_(NFObject * self, SEL _cmd, cons
     char * buf = (char *)malloc(((len1 + len2) + 1));
     strcpy(buf, s1);
     strcat(buf, cstr);
-    NFString * result = (NFString *)(NFString_stringWithUTF8String_(&nopa_NFString_class, __nopa_sel_stringWithUTF8String_, buf));
+    NPString * result = (NPString *)(NPString_stringWithUTF8String_(&nopa_NPString_class, __nopa_sel_stringWithUTF8String_, buf));
     free(buf);
     return result;
 }
 
-NFString * NFString_uppercaseString(NFObject * self, SEL _cmd) {
-    if (!((struct NFString *)self)->_cstr)     return NULL;
-    char * buf = (char *)malloc((((struct NFString *)self)->_length + 1));
+NPString * NPString_uppercaseString(NPObject * self, SEL _cmd) {
+    if (!((struct NPString *)self)->_cstr)     return NULL;
+    char * buf = (char *)malloc((((struct NPString *)self)->_length + 1));
     for (unsigned long i = 0;
-(i <= ((struct NFString *)self)->_length); (i)++)     {
-        buf[i] = (char)toupper((unsigned char)((struct NFString *)self)->_cstr[i]);
+(i <= ((struct NPString *)self)->_length); (i)++)     {
+        buf[i] = (char)toupper((unsigned char)((struct NPString *)self)->_cstr[i]);
     }
-    NFString * result = (NFString *)(NFString_stringWithUTF8String_(&nopa_NFString_class, __nopa_sel_stringWithUTF8String_, buf));
+    NPString * result = (NPString *)(NPString_stringWithUTF8String_(&nopa_NPString_class, __nopa_sel_stringWithUTF8String_, buf));
     free(buf);
     return result;
 }
 
-NFString * NFString_lowercaseString(NFObject * self, SEL _cmd) {
-    if (!((struct NFString *)self)->_cstr)     return NULL;
-    char * buf = (char *)malloc((((struct NFString *)self)->_length + 1));
+NPString * NPString_lowercaseString(NPObject * self, SEL _cmd) {
+    if (!((struct NPString *)self)->_cstr)     return NULL;
+    char * buf = (char *)malloc((((struct NPString *)self)->_length + 1));
     for (unsigned long i = 0;
-(i <= ((struct NFString *)self)->_length); (i)++)     {
-        buf[i] = (char)tolower((unsigned char)((struct NFString *)self)->_cstr[i]);
+(i <= ((struct NPString *)self)->_length); (i)++)     {
+        buf[i] = (char)tolower((unsigned char)((struct NPString *)self)->_cstr[i]);
     }
-    NFString * result = (NFString *)(NFString_stringWithUTF8String_(&nopa_NFString_class, __nopa_sel_stringWithUTF8String_, buf));
+    NPString * result = (NPString *)(NPString_stringWithUTF8String_(&nopa_NPString_class, __nopa_sel_stringWithUTF8String_, buf));
     free(buf);
     return result;
 }
 
-uint32_t NFString_hash(NFObject * self, SEL _cmd) {
-    if (((struct NFString *)self)->_hashIsValid)     return ((struct NFString *)self)->_hash;
+uint32_t NPString_hash(NPObject * self, SEL _cmd) {
+    if (((struct NPString *)self)->_hashIsValid)     return ((struct NPString *)self)->_hash;
     uint32_t h = 2166136261;
-    if (((struct NFString *)self)->_cstr)     {
+    if (((struct NPString *)self)->_cstr)     {
         for (unsigned long i = 0;
-(i < ((struct NFString *)self)->_length); (i)++)         {
-            (h ^= (uint8_t)((struct NFString *)self)->_cstr[i]);
+(i < ((struct NPString *)self)->_length); (i)++)         {
+            (h ^= (uint8_t)((struct NPString *)self)->_cstr[i]);
             (h *= 16777619);
         }
     }
-    ((struct NFString *)self)->_hash = h;
-    ((struct NFString *)self)->_hashIsValid = 1;
+    ((struct NPString *)self)->_hash = h;
+    ((struct NPString *)self)->_hashIsValid = 1;
     return h;
 }
 
-NFString * NFString_description(NFObject * self, SEL _cmd) {
+NPString * NPString_description(NPObject * self, SEL _cmd) {
     return ((struct nopa_vtable *)(self->isa->vtable))->copy(self, __nopa_sel_copy);
 }
 
-NFString * NFString_copy(NFObject * self, SEL _cmd) {
-    return NFString_stringWithString_(&nopa_NFString_class, __nopa_sel_stringWithString_, self);
+NPString * NPString_copy(NPObject * self, SEL _cmd) {
+    return NPString_stringWithString_(&nopa_NPString_class, __nopa_sel_stringWithString_, self);
 }
 
-void NFString_dealloc(NFObject * self, SEL _cmd) {
-    if (((struct NFString *)self)->_cstr)     {
-        free(((struct NFString *)self)->_cstr);
-        ((struct NFString *)self)->_cstr = NULL;
+void NPString_dealloc(NPObject * self, SEL _cmd) {
+    if (((struct NPString *)self)->_cstr)     {
+        free(((struct NPString *)self)->_cstr);
+        ((struct NPString *)self)->_cstr = NULL;
     }
-    ((struct NFString *)self)->_length = 0;
-    (&nopa_NFObject_vtable_inst)->dealloc(self, __nopa_sel_dealloc);
+    ((struct NPString *)self)->_length = 0;
+    (&nopa_NPObject_vtable_inst)->dealloc(self, __nopa_sel_dealloc);
 }
 
-NFObject * Terminal__Ncurses__Screen_screen(NFClass * self, SEL _cmd) {
-    self = ({ NFObject *__nopa_tmp_2 = ((NFObject *)(NFObject_alloc(self, __nopa_sel_alloc))); __nopa_tmp_2 ? ((struct nopa_vtable *)__nopa_tmp_2->isa->vtable)->init(__nopa_tmp_2, __nopa_sel_init) : 0; });
+NPObject * Terminal__Ncurses__Screen_screen(NPClass * self, SEL _cmd) {
+    self = ({ NPObject *__nopa_tmp_2 = ((NPObject *)(NPObject_alloc(self, __nopa_sel_alloc))); __nopa_tmp_2 ? ((struct nopa_vtable *)__nopa_tmp_2->isa->vtable)->init(__nopa_tmp_2, __nopa_sel_init) : 0; });
     if (self)     {
         initscr();
         cbreak();
@@ -1319,32 +1319,32 @@ NFObject * Terminal__Ncurses__Screen_screen(NFClass * self, SEL _cmd) {
     return self;
 }
 
-void Terminal__Ncurses__Screen_dealloc(NFObject * self, SEL _cmd) {
+void Terminal__Ncurses__Screen_dealloc(NPObject * self, SEL _cmd) {
     endwin();
-    (&nopa_NFObject_vtable_inst)->dealloc(self, __nopa_sel_dealloc);
+    (&nopa_NPObject_vtable_inst)->dealloc(self, __nopa_sel_dealloc);
 }
 
-void Terminal__Ncurses__Screen_update(NFObject * self, SEL _cmd) {
+void Terminal__Ncurses__Screen_update(NPObject * self, SEL _cmd) {
     refresh();
 }
 
-void Terminal__Ncurses__Screen_clearScr(NFObject * self, SEL _cmd) {
+void Terminal__Ncurses__Screen_clearScr(NPObject * self, SEL _cmd) {
     clear();
 }
 
-int Terminal__Ncurses__Screen_readChar(NFObject * self, SEL _cmd) {
+int Terminal__Ncurses__Screen_readChar(NPObject * self, SEL _cmd) {
     return wgetch(stdscr);
 }
 
-int Terminal__Ncurses__Screen_rows(NFObject * self, SEL _cmd) {
+int Terminal__Ncurses__Screen_rows(NPObject * self, SEL _cmd) {
     return ((struct Terminal__Ncurses__Screen *)self)->_rows;
 }
 
-int Terminal__Ncurses__Screen_cols(NFObject * self, SEL _cmd) {
+int Terminal__Ncurses__Screen_cols(NPObject * self, SEL _cmd) {
     return ((struct Terminal__Ncurses__Screen *)self)->_cols;
 }
 
-int Terminal__Ncurses__Screen_mouseEvent(NFObject * self, SEL _cmd) {
+int Terminal__Ncurses__Screen_mouseEvent(NPObject * self, SEL _cmd) {
     int x, y, btn;
     int r = nk_mouse_get_event(&x, &y, &btn);
     if (r)     {
@@ -1355,16 +1355,16 @@ int Terminal__Ncurses__Screen_mouseEvent(NFObject * self, SEL _cmd) {
     return r;
 }
 
-int Terminal__Ncurses__Screen_mouseX(NFObject * self, SEL _cmd) {
+int Terminal__Ncurses__Screen_mouseX(NPObject * self, SEL _cmd) {
     return ((struct Terminal__Ncurses__Screen *)self)->_mouseX;
 }
 
-int Terminal__Ncurses__Screen_mouseY(NFObject * self, SEL _cmd) {
+int Terminal__Ncurses__Screen_mouseY(NPObject * self, SEL _cmd) {
     return ((struct Terminal__Ncurses__Screen *)self)->_mouseY;
 }
 
-NFObject * Terminal__Ncurses__Window_initWithRect_y_w_h_(NFObject * self, SEL _cmd, int x, int y, int w, int h) {
-    self = (&nopa_NFObject_vtable_inst)->init(self, __nopa_sel_init);
+NPObject * Terminal__Ncurses__Window_initWithRect_y_w_h_(NPObject * self, SEL _cmd, int x, int y, int w, int h) {
+    self = (&nopa_NPObject_vtable_inst)->init(self, __nopa_sel_init);
     if (self)     {
         ((struct Terminal__Ncurses__Window *)self)->_x = x;
         ((struct Terminal__Ncurses__Window *)self)->_y = y;
@@ -1375,83 +1375,83 @@ NFObject * Terminal__Ncurses__Window_initWithRect_y_w_h_(NFObject * self, SEL _c
     return self;
 }
 
-void Terminal__Ncurses__Window_dealloc(NFObject * self, SEL _cmd) {
+void Terminal__Ncurses__Window_dealloc(NPObject * self, SEL _cmd) {
     if (((struct Terminal__Ncurses__Window *)self)->_win)     delwin(((struct Terminal__Ncurses__Window *)self)->_win);
-    (&nopa_NFObject_vtable_inst)->dealloc(self, __nopa_sel_dealloc);
+    (&nopa_NPObject_vtable_inst)->dealloc(self, __nopa_sel_dealloc);
 }
 
-void Terminal__Ncurses__Window_update(NFObject * self, SEL _cmd) {
+void Terminal__Ncurses__Window_update(NPObject * self, SEL _cmd) {
     wrefresh(((struct Terminal__Ncurses__Window *)self)->_win);
 }
 
-void Terminal__Ncurses__Window_drawBox(NFObject * self, SEL _cmd) {
+void Terminal__Ncurses__Window_drawBox(NPObject * self, SEL _cmd) {
     box(((struct Terminal__Ncurses__Window *)self)->_win, 0, 0);
 }
 
-void Terminal__Ncurses__Window_moveTo_x_(NFObject * self, SEL _cmd, int y, int x) {
+void Terminal__Ncurses__Window_moveTo_x_(NPObject * self, SEL _cmd, int y, int x) {
     wmove(((struct Terminal__Ncurses__Window *)self)->_win, y, x);
 }
 
-void Terminal__Ncurses__Window_print_x_text_(NFObject * self, SEL _cmd, int y, int x, const char * fmt) {
+void Terminal__Ncurses__Window_print_x_text_(NPObject * self, SEL _cmd, int y, int x, const char * fmt) {
     mvwprintw(((struct Terminal__Ncurses__Window *)self)->_win, y, x, "%s", fmt);
 }
 
-int Terminal__Ncurses__Window_readChar(NFObject * self, SEL _cmd) {
+int Terminal__Ncurses__Window_readChar(NPObject * self, SEL _cmd) {
     return wgetch(((struct Terminal__Ncurses__Window *)self)->_win);
 }
 
-WINDOW * Terminal__Ncurses__Window_handle(NFObject * self, SEL _cmd) {
+WINDOW * Terminal__Ncurses__Window_handle(NPObject * self, SEL _cmd) {
     return ((struct Terminal__Ncurses__Window *)self)->_win;
 }
 
-NFObject * Terminal__Ncurses__Label_initWithWindow_x_y_text_(NFObject * self, SEL _cmd, Terminal__Ncurses__Window * win, int x, int y, NFString * text) {
-    self = (&nopa_NFObject_vtable_inst)->init(self, __nopa_sel_init);
+NPObject * Terminal__Ncurses__Label_initWithWindow_x_y_text_(NPObject * self, SEL _cmd, Terminal__Ncurses__Window * win, int x, int y, NPString * text) {
+    self = (&nopa_NPObject_vtable_inst)->init(self, __nopa_sel_init);
     if (self)     {
-        ((struct Terminal__Ncurses__Label *)self)->_win = (WINDOW *)(((struct nopa_vtable *)(win->isa->vtable))->handle((NFObject *)(win), __nopa_sel_handle));
+        ((struct Terminal__Ncurses__Label *)self)->_win = (WINDOW *)(((struct nopa_vtable *)(win->isa->vtable))->handle((NPObject *)(win), __nopa_sel_handle));
         ((struct Terminal__Ncurses__Label *)self)->_x = x;
         ((struct Terminal__Ncurses__Label *)self)->_y = y;
         ((struct Terminal__Ncurses__Label *)self)->_text = text;
-        ((struct nopa_vtable *)(text->isa->vtable))->retain((NFObject *)(text), __nopa_sel_retain);
+        ((struct nopa_vtable *)(text->isa->vtable))->retain((NPObject *)(text), __nopa_sel_retain);
     }
     return self;
 }
 
-void Terminal__Ncurses__Label_dealloc(NFObject * self, SEL _cmd) {
-    if (((struct Terminal__Ncurses__Label *)self)->_text)     ({ NFObject *__nopa_tmp_3 = ((NFObject *)(((struct Terminal__Ncurses__Label *)self)->_text)); __nopa_tmp_3 ? ((struct nopa_vtable *)__nopa_tmp_3->isa->vtable)->release(__nopa_tmp_3, __nopa_sel_release) : 0; });
-    (&nopa_NFObject_vtable_inst)->dealloc(self, __nopa_sel_dealloc);
+void Terminal__Ncurses__Label_dealloc(NPObject * self, SEL _cmd) {
+    if (((struct Terminal__Ncurses__Label *)self)->_text)     ({ NPObject *__nopa_tmp_3 = ((NPObject *)(((struct Terminal__Ncurses__Label *)self)->_text)); __nopa_tmp_3 ? ((struct nopa_vtable *)__nopa_tmp_3->isa->vtable)->release(__nopa_tmp_3, __nopa_sel_release) : 0; });
+    (&nopa_NPObject_vtable_inst)->dealloc(self, __nopa_sel_dealloc);
 }
 
-void Terminal__Ncurses__Label_draw(NFObject * self, SEL _cmd) {
-    if (((struct Terminal__Ncurses__Label *)self)->_text)     mvwprintw(((struct Terminal__Ncurses__Label *)self)->_win, ((struct Terminal__Ncurses__Label *)self)->_y, ((struct Terminal__Ncurses__Label *)self)->_x, "%s", ({ NFObject *__nopa_tmp_4 = ((NFObject *)(((struct Terminal__Ncurses__Label *)self)->_text)); __nopa_tmp_4 ? ((struct nopa_vtable *)__nopa_tmp_4->isa->vtable)->UTF8String(__nopa_tmp_4, __nopa_sel_UTF8String) : 0; }));
+void Terminal__Ncurses__Label_draw(NPObject * self, SEL _cmd) {
+    if (((struct Terminal__Ncurses__Label *)self)->_text)     mvwprintw(((struct Terminal__Ncurses__Label *)self)->_win, ((struct Terminal__Ncurses__Label *)self)->_y, ((struct Terminal__Ncurses__Label *)self)->_x, "%s", ({ NPObject *__nopa_tmp_4 = ((NPObject *)(((struct Terminal__Ncurses__Label *)self)->_text)); __nopa_tmp_4 ? ((struct nopa_vtable *)__nopa_tmp_4->isa->vtable)->UTF8String(__nopa_tmp_4, __nopa_sel_UTF8String) : 0; }));
 }
 
-void Terminal__Ncurses__Label_setText_(NFObject * self, SEL _cmd, NFString * text) {
-    if (((struct Terminal__Ncurses__Label *)self)->_text)     ({ NFObject *__nopa_tmp_5 = ((NFObject *)(((struct Terminal__Ncurses__Label *)self)->_text)); __nopa_tmp_5 ? ((struct nopa_vtable *)__nopa_tmp_5->isa->vtable)->release(__nopa_tmp_5, __nopa_sel_release) : 0; });
+void Terminal__Ncurses__Label_setText_(NPObject * self, SEL _cmd, NPString * text) {
+    if (((struct Terminal__Ncurses__Label *)self)->_text)     ({ NPObject *__nopa_tmp_5 = ((NPObject *)(((struct Terminal__Ncurses__Label *)self)->_text)); __nopa_tmp_5 ? ((struct nopa_vtable *)__nopa_tmp_5->isa->vtable)->release(__nopa_tmp_5, __nopa_sel_release) : 0; });
     ((struct Terminal__Ncurses__Label *)self)->_text = text;
-    ((struct nopa_vtable *)(text->isa->vtable))->retain((NFObject *)(text), __nopa_sel_retain);
+    ((struct nopa_vtable *)(text->isa->vtable))->retain((NPObject *)(text), __nopa_sel_retain);
 }
 
-NFObject * Terminal__Ncurses__Button_initWithWindow_x_y_w_text_(NFObject * self, SEL _cmd, Terminal__Ncurses__Window * win, int x, int y, int w, NFString * text) {
-    self = (&nopa_NFObject_vtable_inst)->init(self, __nopa_sel_init);
+NPObject * Terminal__Ncurses__Button_initWithWindow_x_y_w_text_(NPObject * self, SEL _cmd, Terminal__Ncurses__Window * win, int x, int y, int w, NPString * text) {
+    self = (&nopa_NPObject_vtable_inst)->init(self, __nopa_sel_init);
     if (self)     {
-        ((struct Terminal__Ncurses__Button *)self)->_win = (WINDOW *)(((struct nopa_vtable *)(win->isa->vtable))->handle((NFObject *)(win), __nopa_sel_handle));
+        ((struct Terminal__Ncurses__Button *)self)->_win = (WINDOW *)(((struct nopa_vtable *)(win->isa->vtable))->handle((NPObject *)(win), __nopa_sel_handle));
         ((struct Terminal__Ncurses__Button *)self)->_x = x;
         ((struct Terminal__Ncurses__Button *)self)->_y = y;
         ((struct Terminal__Ncurses__Button *)self)->_w = w;
         ((struct Terminal__Ncurses__Button *)self)->_text = text;
-        ((struct nopa_vtable *)(text->isa->vtable))->retain((NFObject *)(text), __nopa_sel_retain);
+        ((struct nopa_vtable *)(text->isa->vtable))->retain((NPObject *)(text), __nopa_sel_retain);
         ((struct Terminal__Ncurses__Button *)self)->_highlighted = 0;
     }
     return self;
 }
 
-void Terminal__Ncurses__Button_dealloc(NFObject * self, SEL _cmd) {
-    if (((struct Terminal__Ncurses__Button *)self)->_text)     ({ NFObject *__nopa_tmp_6 = ((NFObject *)(((struct Terminal__Ncurses__Button *)self)->_text)); __nopa_tmp_6 ? ((struct nopa_vtable *)__nopa_tmp_6->isa->vtable)->release(__nopa_tmp_6, __nopa_sel_release) : 0; });
-    (&nopa_NFObject_vtable_inst)->dealloc(self, __nopa_sel_dealloc);
+void Terminal__Ncurses__Button_dealloc(NPObject * self, SEL _cmd) {
+    if (((struct Terminal__Ncurses__Button *)self)->_text)     ({ NPObject *__nopa_tmp_6 = ((NPObject *)(((struct Terminal__Ncurses__Button *)self)->_text)); __nopa_tmp_6 ? ((struct nopa_vtable *)__nopa_tmp_6->isa->vtable)->release(__nopa_tmp_6, __nopa_sel_release) : 0; });
+    (&nopa_NPObject_vtable_inst)->dealloc(self, __nopa_sel_dealloc);
 }
 
-int Terminal__Ncurses__Button_draw(NFObject * self, SEL _cmd) {
-    char * cstr = ((struct Terminal__Ncurses__Button *)self)->_text ? ({ NFObject *__nopa_tmp_7 = ((NFObject *)(((struct Terminal__Ncurses__Button *)self)->_text)); __nopa_tmp_7 ? ((struct nopa_vtable *)__nopa_tmp_7->isa->vtable)->UTF8String(__nopa_tmp_7, __nopa_sel_UTF8String) : 0; }) : "";
+int Terminal__Ncurses__Button_draw(NPObject * self, SEL _cmd) {
+    char * cstr = ((struct Terminal__Ncurses__Button *)self)->_text ? ({ NPObject *__nopa_tmp_7 = ((NPObject *)(((struct Terminal__Ncurses__Button *)self)->_text)); __nopa_tmp_7 ? ((struct nopa_vtable *)__nopa_tmp_7->isa->vtable)->UTF8String(__nopa_tmp_7, __nopa_sel_UTF8String) : 0; }) : "";
     if (((struct Terminal__Ncurses__Button *)self)->_highlighted)     {
         wattron(((struct Terminal__Ncurses__Button *)self)->_win, A_REVERSE);
         mvwprintw(((struct Terminal__Ncurses__Button *)self)->_win, ((struct Terminal__Ncurses__Button *)self)->_y, ((struct Terminal__Ncurses__Button *)self)->_x, "%-*s", ((struct Terminal__Ncurses__Button *)self)->_w, cstr);
@@ -1463,14 +1463,14 @@ int Terminal__Ncurses__Button_draw(NFObject * self, SEL _cmd) {
     return ((struct Terminal__Ncurses__Button *)self)->_highlighted;
 }
 
-void Terminal__Ncurses__Button_setHighlight_(NFObject * self, SEL _cmd, int hl) {
+void Terminal__Ncurses__Button_setHighlight_(NPObject * self, SEL _cmd, int hl) {
     ((struct Terminal__Ncurses__Button *)self)->_highlighted = hl;
 }
 
-NFObject * Terminal__Ncurses__TextBox_initWithWindow_x_y_w_(NFObject * self, SEL _cmd, Terminal__Ncurses__Window * win, int x, int y, int w) {
-    self = (&nopa_NFObject_vtable_inst)->init(self, __nopa_sel_init);
+NPObject * Terminal__Ncurses__TextBox_initWithWindow_x_y_w_(NPObject * self, SEL _cmd, Terminal__Ncurses__Window * win, int x, int y, int w) {
+    self = (&nopa_NPObject_vtable_inst)->init(self, __nopa_sel_init);
     if (self)     {
-        ((struct Terminal__Ncurses__TextBox *)self)->_win = (WINDOW *)(((struct nopa_vtable *)(win->isa->vtable))->handle((NFObject *)(win), __nopa_sel_handle));
+        ((struct Terminal__Ncurses__TextBox *)self)->_win = (WINDOW *)(((struct nopa_vtable *)(win->isa->vtable))->handle((NPObject *)(win), __nopa_sel_handle));
         ((struct Terminal__Ncurses__TextBox *)self)->_x = x;
         ((struct Terminal__Ncurses__TextBox *)self)->_y = y;
         ((struct Terminal__Ncurses__TextBox *)self)->_w = w;
@@ -1480,7 +1480,7 @@ NFObject * Terminal__Ncurses__TextBox_initWithWindow_x_y_w_(NFObject * self, SEL
     return self;
 }
 
-const char * Terminal__Ncurses__TextBox_edit(NFObject * self, SEL _cmd) {
+const char * Terminal__Ncurses__TextBox_edit(NPObject * self, SEL _cmd) {
     int ch;
     int pos = ((struct Terminal__Ncurses__TextBox *)self)->_len;
     while (1)     {
@@ -1514,14 +1514,14 @@ const char * Terminal__Ncurses__TextBox_edit(NFObject * self, SEL _cmd) {
     return ((struct Terminal__Ncurses__TextBox *)self)->_buf;
 }
 
-const char * Terminal__Ncurses__TextBox_text(NFObject * self, SEL _cmd) {
+const char * Terminal__Ncurses__TextBox_text(NPObject * self, SEL _cmd) {
     return ((struct Terminal__Ncurses__TextBox *)self)->_buf;
 }
 
-NFObject * Terminal__Ncurses__MenuBar_initWithWindow_w_(NFObject * self, SEL _cmd, Terminal__Ncurses__Window * win, int w) {
-    self = (&nopa_NFObject_vtable_inst)->init(self, __nopa_sel_init);
+NPObject * Terminal__Ncurses__MenuBar_initWithWindow_w_(NPObject * self, SEL _cmd, Terminal__Ncurses__Window * win, int w) {
+    self = (&nopa_NPObject_vtable_inst)->init(self, __nopa_sel_init);
     if (self)     {
-        ((struct Terminal__Ncurses__MenuBar *)self)->_win = (WINDOW *)(((struct nopa_vtable *)(win->isa->vtable))->handle((NFObject *)(win), __nopa_sel_handle));
+        ((struct Terminal__Ncurses__MenuBar *)self)->_win = (WINDOW *)(((struct nopa_vtable *)(win->isa->vtable))->handle((NPObject *)(win), __nopa_sel_handle));
         ((struct Terminal__Ncurses__MenuBar *)self)->_w = w;
         ((struct Terminal__Ncurses__MenuBar *)self)->_count = 0;
         ((struct Terminal__Ncurses__MenuBar *)self)->_selected = 0;
@@ -1530,7 +1530,7 @@ NFObject * Terminal__Ncurses__MenuBar_initWithWindow_w_(NFObject * self, SEL _cm
     return self;
 }
 
-void Terminal__Ncurses__MenuBar_addItem_(NFObject * self, SEL _cmd, const char * label) {
+void Terminal__Ncurses__MenuBar_addItem_(NPObject * self, SEL _cmd, const char * label) {
     if ((((struct Terminal__Ncurses__MenuBar *)self)->_count < 10))     {
         int offset = (((struct Terminal__Ncurses__MenuBar *)self)->_count * 32);
         strncpy((((struct Terminal__Ncurses__MenuBar *)self)->_items + offset), label, 31);
@@ -1539,7 +1539,7 @@ void Terminal__Ncurses__MenuBar_addItem_(NFObject * self, SEL _cmd, const char *
     }
 }
 
-int Terminal__Ncurses__MenuBar_draw(NFObject * self, SEL _cmd) {
+int Terminal__Ncurses__MenuBar_draw(NPObject * self, SEL _cmd) {
     int x = 1;
     for (int i = 0;
 (i < ((struct Terminal__Ncurses__MenuBar *)self)->_count); (i)++)     {
@@ -1557,17 +1557,17 @@ int Terminal__Ncurses__MenuBar_draw(NFObject * self, SEL _cmd) {
     return ((struct Terminal__Ncurses__MenuBar *)self)->_selected;
 }
 
-int Terminal__Ncurses__MenuBar_selected(NFObject * self, SEL _cmd) {
+int Terminal__Ncurses__MenuBar_selected(NPObject * self, SEL _cmd) {
     return ((struct Terminal__Ncurses__MenuBar *)self)->_selected;
 }
 
-NFObject * nopa_alloc(struct NFClass * cls);
+NPObject * nopa_alloc(struct NPClass * cls);
 
-NFObject * nopa_init(NFObject * self);
+NPObject * nopa_init(NPObject * self);
 
-void nopa_release(NFObject * obj);
+void nopa_release(NPObject * obj);
 
-NFObject * nopa_retain(NFObject * obj);
+NPObject * nopa_retain(NPObject * obj);
 
 int nk_mouse_get_event(int * x, int * y, int * btn);
 
@@ -1576,30 +1576,30 @@ int main(void) {
     {
         nopa_autoreleasepool_t * __nopa_pool = nopa_autoreleasepool_push();
         Terminal__Ncurses__Screen * scr = (Terminal__Ncurses__Screen *)(Terminal__Ncurses__Screen_screen(&nopa_Terminal__Ncurses__Screen_class, __nopa_sel_screen));
-        NFObject *__nopa_tmp_8 = (NFObject_alloc(&nopa_Terminal__Ncurses__Window_class, __nopa_sel_alloc));
-        Terminal__Ncurses__Window * win = (Terminal__Ncurses__Window *)(((struct nopa_vtable *)__nopa_tmp_8->isa->vtable)->initWithRect_y_w_h_(__nopa_tmp_8, __nopa_sel_initWithRect_y_w_h_, 2, 2, (((struct nopa_vtable *)(scr->isa->vtable))->cols((NFObject *)(scr), __nopa_sel_cols) - 4), (((struct nopa_vtable *)(scr->isa->vtable))->rows((NFObject *)(scr), __nopa_sel_rows) - 4)));
-        ((struct nopa_vtable *)(win->isa->vtable))->drawBox((NFObject *)(win), __nopa_sel_drawBox);
-        ((struct nopa_vtable *)(win->isa->vtable))->print_x_text_((NFObject *)(win), __nopa_sel_print_x_text_, 1, 2, nopa_string_from_cstr("Nopa + Ncurses Demo"));
-        NFObject *__nopa_tmp_9 = (NFObject_alloc(&nopa_Terminal__Ncurses__Button_class, __nopa_sel_alloc));
+        NPObject *__nopa_tmp_8 = (NPObject_alloc(&nopa_Terminal__Ncurses__Window_class, __nopa_sel_alloc));
+        Terminal__Ncurses__Window * win = (Terminal__Ncurses__Window *)(((struct nopa_vtable *)__nopa_tmp_8->isa->vtable)->initWithRect_y_w_h_(__nopa_tmp_8, __nopa_sel_initWithRect_y_w_h_, 2, 2, (((struct nopa_vtable *)(scr->isa->vtable))->cols((NPObject *)(scr), __nopa_sel_cols) - 4), (((struct nopa_vtable *)(scr->isa->vtable))->rows((NPObject *)(scr), __nopa_sel_rows) - 4)));
+        ((struct nopa_vtable *)(win->isa->vtable))->drawBox((NPObject *)(win), __nopa_sel_drawBox);
+        ((struct nopa_vtable *)(win->isa->vtable))->print_x_text_((NPObject *)(win), __nopa_sel_print_x_text_, 1, 2, nopa_string_from_cstr("Nopa + Ncurses Demo"));
+        NPObject *__nopa_tmp_9 = (NPObject_alloc(&nopa_Terminal__Ncurses__Button_class, __nopa_sel_alloc));
         Terminal__Ncurses__Button * b1 = (Terminal__Ncurses__Button *)(((struct nopa_vtable *)__nopa_tmp_9->isa->vtable)->initWithWindow_x_y_w_text_(__nopa_tmp_9, __nopa_sel_initWithWindow_x_y_w_text_, win, 4, 4, 20, nopa_string_from_cstr("Quit")));
-        NFObject *__nopa_tmp_10 = (NFObject_alloc(&nopa_Terminal__Ncurses__Button_class, __nopa_sel_alloc));
+        NPObject *__nopa_tmp_10 = (NPObject_alloc(&nopa_Terminal__Ncurses__Button_class, __nopa_sel_alloc));
         Terminal__Ncurses__Button * b2 = (Terminal__Ncurses__Button *)(((struct nopa_vtable *)__nopa_tmp_10->isa->vtable)->initWithWindow_x_y_w_text_(__nopa_tmp_10, __nopa_sel_initWithWindow_x_y_w_text_, win, 4, 6, 20, nopa_string_from_cstr("Click me")));
-        NFObject *__nopa_tmp_11 = (NFObject_alloc(&nopa_Terminal__Ncurses__Label_class, __nopa_sel_alloc));
+        NPObject *__nopa_tmp_11 = (NPObject_alloc(&nopa_Terminal__Ncurses__Label_class, __nopa_sel_alloc));
         Terminal__Ncurses__Label * lbl = (Terminal__Ncurses__Label *)(((struct nopa_vtable *)__nopa_tmp_11->isa->vtable)->initWithWindow_x_y_text_(__nopa_tmp_11, __nopa_sel_initWithWindow_x_y_text_, win, 4, 8, nopa_string_from_cstr("Press Tab to switch, Enter to select")));
-        NFObject *__nopa_tmp_12 = (NFObject_alloc(&nopa_Terminal__Ncurses__TextBox_class, __nopa_sel_alloc));
+        NPObject *__nopa_tmp_12 = (NPObject_alloc(&nopa_Terminal__Ncurses__TextBox_class, __nopa_sel_alloc));
         Terminal__Ncurses__TextBox * tb = (Terminal__Ncurses__TextBox *)(((struct nopa_vtable *)__nopa_tmp_12->isa->vtable)->initWithWindow_x_y_w_(__nopa_tmp_12, __nopa_sel_initWithWindow_x_y_w_, win, 4, 10, 30));
         int sel = 0;
         int running = 1;
         while (running)         {
-            ((struct nopa_vtable *)(win->isa->vtable))->drawBox((NFObject *)(win), __nopa_sel_drawBox);
-            ((struct nopa_vtable *)(win->isa->vtable))->print_x_text_((NFObject *)(win), __nopa_sel_print_x_text_, 1, 2, "Nopa + Ncurses Demo");
-            ((struct nopa_vtable *)(lbl->isa->vtable))->draw((NFObject *)(lbl), __nopa_sel_draw);
-            ((struct nopa_vtable *)(b1->isa->vtable))->setHighlight_((NFObject *)(b1), __nopa_sel_setHighlight_, sel == 0);
-            ((struct nopa_vtable *)(b2->isa->vtable))->setHighlight_((NFObject *)(b2), __nopa_sel_setHighlight_, sel == 1);
-            ((struct nopa_vtable *)(b1->isa->vtable))->draw((NFObject *)(b1), __nopa_sel_draw);
-            ((struct nopa_vtable *)(b2->isa->vtable))->draw((NFObject *)(b2), __nopa_sel_draw);
-            ((struct nopa_vtable *)(win->isa->vtable))->update((NFObject *)(win), __nopa_sel_update);
-            int ch = ((struct nopa_vtable *)(scr->isa->vtable))->readChar((NFObject *)(scr), __nopa_sel_readChar);
+            ((struct nopa_vtable *)(win->isa->vtable))->drawBox((NPObject *)(win), __nopa_sel_drawBox);
+            ((struct nopa_vtable *)(win->isa->vtable))->print_x_text_((NPObject *)(win), __nopa_sel_print_x_text_, 1, 2, "Nopa + Ncurses Demo");
+            ((struct nopa_vtable *)(lbl->isa->vtable))->draw((NPObject *)(lbl), __nopa_sel_draw);
+            ((struct nopa_vtable *)(b1->isa->vtable))->setHighlight_((NPObject *)(b1), __nopa_sel_setHighlight_, sel == 0);
+            ((struct nopa_vtable *)(b2->isa->vtable))->setHighlight_((NPObject *)(b2), __nopa_sel_setHighlight_, sel == 1);
+            ((struct nopa_vtable *)(b1->isa->vtable))->draw((NPObject *)(b1), __nopa_sel_draw);
+            ((struct nopa_vtable *)(b2->isa->vtable))->draw((NPObject *)(b2), __nopa_sel_draw);
+            ((struct nopa_vtable *)(win->isa->vtable))->update((NPObject *)(win), __nopa_sel_update);
+            int ch = ((struct nopa_vtable *)(scr->isa->vtable))->readChar((NPObject *)(scr), __nopa_sel_readChar);
             switch (ch)             {
                 case '\t':
                     case KEY_DOWN:
@@ -1614,31 +1614,31 @@ int main(void) {
                             running = 0;
                         }
                         else                         if (sel == 1)                         {
-                            char * input = (char *)(((struct nopa_vtable *)(tb->isa->vtable))->edit((NFObject *)(tb), __nopa_sel_edit));
-                            ((struct nopa_vtable *)(lbl->isa->vtable))->setText_((NFObject *)(lbl), __nopa_sel_setText_, (NFString *)(NFString_stringWithUTF8String_(&nopa_NFString_class, __nopa_sel_stringWithUTF8String_, input)));
+                            char * input = (char *)(((struct nopa_vtable *)(tb->isa->vtable))->edit((NPObject *)(tb), __nopa_sel_edit));
+                            ((struct nopa_vtable *)(lbl->isa->vtable))->setText_((NPObject *)(lbl), __nopa_sel_setText_, (NPString *)(NPString_stringWithUTF8String_(&nopa_NPString_class, __nopa_sel_stringWithUTF8String_, input)));
                         }
                 break;
                 case KEY_MOUSE:
-                    if (((struct nopa_vtable *)(scr->isa->vtable))->mouseEvent((NFObject *)(scr), __nopa_sel_mouseEvent))                     {
-                        int mx = ((struct nopa_vtable *)(scr->isa->vtable))->mouseX((NFObject *)(scr), __nopa_sel_mouseX);
-                        int my = ((struct nopa_vtable *)(scr->isa->vtable))->mouseY((NFObject *)(scr), __nopa_sel_mouseY);
+                    if (((struct nopa_vtable *)(scr->isa->vtable))->mouseEvent((NPObject *)(scr), __nopa_sel_mouseEvent))                     {
+                        int mx = ((struct nopa_vtable *)(scr->isa->vtable))->mouseX((NPObject *)(scr), __nopa_sel_mouseX);
+                        int my = ((struct nopa_vtable *)(scr->isa->vtable))->mouseY((NPObject *)(scr), __nopa_sel_mouseY);
                         if (((my == 6 && (mx >= 6)) && (mx < 26)))                         {
                             running = 0;
                         }
                         if (((my == 8 && (mx >= 6)) && (mx < 26)))                         {
-                            char * input = (char *)(((struct nopa_vtable *)(tb->isa->vtable))->edit((NFObject *)(tb), __nopa_sel_edit));
-                            ((struct nopa_vtable *)(lbl->isa->vtable))->setText_((NFObject *)(lbl), __nopa_sel_setText_, (NFString *)(NFString_stringWithUTF8String_(&nopa_NFString_class, __nopa_sel_stringWithUTF8String_, input)));
+                            char * input = (char *)(((struct nopa_vtable *)(tb->isa->vtable))->edit((NPObject *)(tb), __nopa_sel_edit));
+                            ((struct nopa_vtable *)(lbl->isa->vtable))->setText_((NPObject *)(lbl), __nopa_sel_setText_, (NPString *)(NPString_stringWithUTF8String_(&nopa_NPString_class, __nopa_sel_stringWithUTF8String_, input)));
                         }
                     }
                 break;
             }
         }
-        ((struct nopa_vtable *)(tb->isa->vtable))->release((NFObject *)(tb), __nopa_sel_release);
-        ((struct nopa_vtable *)(lbl->isa->vtable))->release((NFObject *)(lbl), __nopa_sel_release);
-        ((struct nopa_vtable *)(b2->isa->vtable))->release((NFObject *)(b2), __nopa_sel_release);
-        ((struct nopa_vtable *)(b1->isa->vtable))->release((NFObject *)(b1), __nopa_sel_release);
-        ((struct nopa_vtable *)(win->isa->vtable))->release((NFObject *)(win), __nopa_sel_release);
-        ((struct nopa_vtable *)(scr->isa->vtable))->release((NFObject *)(scr), __nopa_sel_release);
+        ((struct nopa_vtable *)(tb->isa->vtable))->release((NPObject *)(tb), __nopa_sel_release);
+        ((struct nopa_vtable *)(lbl->isa->vtable))->release((NPObject *)(lbl), __nopa_sel_release);
+        ((struct nopa_vtable *)(b2->isa->vtable))->release((NPObject *)(b2), __nopa_sel_release);
+        ((struct nopa_vtable *)(b1->isa->vtable))->release((NPObject *)(b1), __nopa_sel_release);
+        ((struct nopa_vtable *)(win->isa->vtable))->release((NPObject *)(win), __nopa_sel_release);
+        ((struct nopa_vtable *)(scr->isa->vtable))->release((NPObject *)(scr), __nopa_sel_release);
         nopa_autoreleasepool_pop(__nopa_pool);
     }
     return 0;

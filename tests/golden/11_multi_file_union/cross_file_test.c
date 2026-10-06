@@ -7,20 +7,20 @@
 
 #include <string.h>
 
-struct nopa_NFObject_vtable;
-struct nopa_NFCraftPilot_vtable;
-struct nopa_NFShipSystem_vtable;
-struct nopa_NFDiamondAbuser_vtable;
+struct nopa_NPObject_vtable;
+struct nopa_NPCraftPilot_vtable;
+struct nopa_NPShipSystem_vtable;
+struct nopa_NPDiamondAbuser_vtable;
 
-#define nopa_NFObject_vtable_index_init 2
-#define nopa_NFObject_vtable_index_dealloc 3
-#define nopa_NFCraftPilot_vtable_index_initWithName_ 4
-#define nopa_NFCraftPilot_vtable_index_bindSystem_ 5
-#define nopa_NFShipSystem_vtable_index_initWithId_ 4
-#define nopa_NFShipSystem_vtable_index_linkPilot_ 5
-#define nopa_NFDiamondAbuser_vtable_index_executeCoreTask 4
-#define nopa_NFDiamondAbuser_vtable_index_leftBranchAction 5
-#define nopa_NFDiamondAbuser_vtable_index_rightBranchAction 6
+#define nopa_NPObject_vtable_index_init 2
+#define nopa_NPObject_vtable_index_dealloc 3
+#define nopa_NPCraftPilot_vtable_index_initWithName_ 4
+#define nopa_NPCraftPilot_vtable_index_bindSystem_ 5
+#define nopa_NPShipSystem_vtable_index_initWithId_ 4
+#define nopa_NPShipSystem_vtable_index_linkPilot_ 5
+#define nopa_NPDiamondAbuser_vtable_index_executeCoreTask 4
+#define nopa_NPDiamondAbuser_vtable_index_leftBranchAction 5
+#define nopa_NPDiamondAbuser_vtable_index_rightBranchAction 6
 
 static const SEL __nopa_sel_init = {.name = "init", .hash = 0x16B1D373};
 static const SEL __nopa_sel_bindSystem_ = {.name = "bindSystem_", .hash = 0xDB14CD90};
@@ -33,213 +33,213 @@ static const SEL __nopa_sel_rightBranchAction = {.name = "rightBranchAction", .h
 static const SEL __nopa_sel_executeCoreTask = {.name = "executeCoreTask", .hash = 0x3DD99A7E};
 static const SEL __nopa_sel_collisionCounter = {.name = "collisionCounter", .hash = 0x28D3BBA1};
 
-typedef struct NFObject NFObject;
-typedef struct NFCraftPilot NFCraftPilot;
-typedef struct NFShipSystem NFShipSystem;
-typedef struct NFDiamondAbuser NFDiamondAbuser;
+typedef struct NPObject NPObject;
+typedef struct NPCraftPilot NPCraftPilot;
+typedef struct NPShipSystem NPShipSystem;
+typedef struct NPDiamondAbuser NPDiamondAbuser;
 
 
 
-NFObject * NFObject_alloc(NFClass * self, SEL _cmd);
-NFObject * NFObject_new(NFClass * self, SEL _cmd);
-NFObject * NFObject_init(NFObject * self, SEL _cmd);
-void NFObject_dealloc(NFObject * self, SEL _cmd);
-NFClass * NFObject_getClass(NFClass * self, SEL _cmd);
-NFObject * NFCraftPilot_initWithName_(NFObject * self, SEL _cmd, const char * name);
-void NFCraftPilot_bindSystem_(NFObject * self, SEL _cmd, NFShipSystem * sys);
-NFClass * NFCraftPilot_getClass(NFClass * self, SEL _cmd);
-NFObject * NFShipSystem_initWithId_(NFObject * self, SEL _cmd, int sid);
-void NFShipSystem_linkPilot_(NFObject * self, SEL _cmd, NFObject * pilot);
-NFClass * NFShipSystem_getClass(NFClass * self, SEL _cmd);
-void NFDiamondAbuser_executeCoreTask(NFObject * self, SEL _cmd);
-void NFDiamondAbuser_leftBranchAction(NFObject * self, SEL _cmd);
-void NFDiamondAbuser_rightBranchAction(NFObject * self, SEL _cmd);
-int NFDiamondAbuser_collisionCounter(NFObject * self, SEL _cmd);
-void NFDiamondAbuser_setCollisionCounter_(NFObject * self, SEL _cmd, int value);
-NFClass * NFDiamondAbuser_getClass(NFClass * self, SEL _cmd);
+NPObject * NPObject_alloc(NPClass * self, SEL _cmd);
+NPObject * NPObject_new(NPClass * self, SEL _cmd);
+NPObject * NPObject_init(NPObject * self, SEL _cmd);
+void NPObject_dealloc(NPObject * self, SEL _cmd);
+NPClass * NPObject_getClass(NPClass * self, SEL _cmd);
+NPObject * NPCraftPilot_initWithName_(NPObject * self, SEL _cmd, const char * name);
+void NPCraftPilot_bindSystem_(NPObject * self, SEL _cmd, NPShipSystem * sys);
+NPClass * NPCraftPilot_getClass(NPClass * self, SEL _cmd);
+NPObject * NPShipSystem_initWithId_(NPObject * self, SEL _cmd, int sid);
+void NPShipSystem_linkPilot_(NPObject * self, SEL _cmd, NPObject * pilot);
+NPClass * NPShipSystem_getClass(NPClass * self, SEL _cmd);
+void NPDiamondAbuser_executeCoreTask(NPObject * self, SEL _cmd);
+void NPDiamondAbuser_leftBranchAction(NPObject * self, SEL _cmd);
+void NPDiamondAbuser_rightBranchAction(NPObject * self, SEL _cmd);
+int NPDiamondAbuser_collisionCounter(NPObject * self, SEL _cmd);
+void NPDiamondAbuser_setCollisionCounter_(NPObject * self, SEL _cmd, int value);
+NPClass * NPDiamondAbuser_getClass(NPClass * self, SEL _cmd);
 int main(int argc, const char * * argv);
 
-extern NFClass nopa_NFObject_class;
-extern NFClass nopa_NFCraftPilot_class;
-extern NFClass nopa_NFShipSystem_class;
-extern NFClass nopa_NFDiamondAbuser_class;
+extern NPClass nopa_NPObject_class;
+extern NPClass nopa_NPCraftPilot_class;
+extern NPClass nopa_NPShipSystem_class;
+extern NPClass nopa_NPDiamondAbuser_class;
 void nopa_meta_init(void);
 
-// struct NFClass defined in runtime.h
-// struct NFObject defined in runtime.h
-struct nopa_NFObject_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
+// struct NPClass defined in runtime.h
+// struct NPObject defined in runtime.h
+struct nopa_NPObject_vtable {
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
 };
-struct nopa_NFObject_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+struct nopa_NPObject_meta_vtable {
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
-struct NFCraftPilot {
-    struct NFClass *isa;
+struct NPCraftPilot {
+    struct NPClass *isa;
     uint32_t retain_count;
-    NFShipSystem * boundSystem;
+    NPShipSystem * boundSystem;
     const char * pilotName;
 };
-typedef struct NFCraftPilot NFCraftPilot;
-struct nopa_NFCraftPilot_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    NFObject * (*initWithName_)(NFObject *, SEL, const char *);
-    void (*bindSystem_)(NFObject *, SEL, NFShipSystem *);
+typedef struct NPCraftPilot NPCraftPilot;
+struct nopa_NPCraftPilot_vtable {
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    NPObject * (*initWithName_)(NPObject *, SEL, const char *);
+    void (*bindSystem_)(NPObject *, SEL, NPShipSystem *);
 };
-struct nopa_NFCraftPilot_meta_vtable {
-    NFClass * (*class)(NFClass *, SEL);
+struct nopa_NPCraftPilot_meta_vtable {
+    NPClass * (*class)(NPClass *, SEL);
 };
-struct NFShipSystem {
-    struct NFClass *isa;
+struct NPShipSystem {
+    struct NPClass *isa;
     uint32_t retain_count;
-    NFCraftPilot * currentPilot;
+    NPCraftPilot * currentPilot;
     int systemStatusId;
 };
-typedef struct NFShipSystem NFShipSystem;
-struct nopa_NFShipSystem_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    NFObject * (*initWithId_)(NFObject *, SEL, int);
-    void (*linkPilot_)(NFObject *, SEL, NFObject *);
+typedef struct NPShipSystem NPShipSystem;
+struct nopa_NPShipSystem_vtable {
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    NPObject * (*initWithId_)(NPObject *, SEL, int);
+    void (*linkPilot_)(NPObject *, SEL, NPObject *);
 };
-struct nopa_NFShipSystem_meta_vtable {
-    NFClass * (*class)(NFClass *, SEL);
+struct nopa_NPShipSystem_meta_vtable {
+    NPClass * (*class)(NPClass *, SEL);
 };
-struct NFDiamondAbuser {
-    struct NFClass *isa;
+struct NPDiamondAbuser {
+    struct NPClass *isa;
     uint32_t retain_count;
     int _collisionCounter;
 };
-typedef struct NFDiamondAbuser NFDiamondAbuser;
-struct nopa_NFDiamondAbuser_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    void (*executeCoreTask)(NFObject *, SEL);
-    void (*leftBranchAction)(NFObject *, SEL);
-    void (*rightBranchAction)(NFObject *, SEL);
-    int (*collisionCounter)(NFObject *, SEL);
-    void (*setCollisionCounter_)(NFObject *, SEL, int);
+typedef struct NPDiamondAbuser NPDiamondAbuser;
+struct nopa_NPDiamondAbuser_vtable {
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    void (*executeCoreTask)(NPObject *, SEL);
+    void (*leftBranchAction)(NPObject *, SEL);
+    void (*rightBranchAction)(NPObject *, SEL);
+    int (*collisionCounter)(NPObject *, SEL);
+    void (*setCollisionCounter_)(NPObject *, SEL, int);
 };
-struct nopa_NFDiamondAbuser_meta_vtable {
-    NFClass * (*class)(NFClass *, SEL);
+struct nopa_NPDiamondAbuser_meta_vtable {
+    NPClass * (*class)(NPClass *, SEL);
 };
-NFObject * NFObject_alloc(NFClass * self, SEL _cmd) {
+NPObject * NPObject_alloc(NPClass * self, SEL _cmd) {
     return nopa_alloc(self);
 }
 
-NFObject * NFObject_new(NFClass * self, SEL _cmd) {
-    NFObject * obj = nopa_alloc(self);
+NPObject * NPObject_new(NPClass * self, SEL _cmd) {
+    NPObject * obj = nopa_alloc(self);
     return nopa_init(obj);
 }
 
-NFObject * NFObject_init(NFObject * self, SEL _cmd) {
-    struct NFObject * _self = ((struct NFObject *)(self));
+NPObject * NPObject_init(NPObject * self, SEL _cmd) {
+    struct NPObject * _self = ((struct NPObject *)(self));
     {
         return nopa_init(self);
     }
 }
 
-void NFObject_dealloc(NFObject * self, SEL _cmd) {
-    struct NFObject * _self = ((struct NFObject *)(self));
+void NPObject_dealloc(NPObject * self, SEL _cmd) {
+    struct NPObject * _self = ((struct NPObject *)(self));
     {
         return;
     }
 }
 
-NFClass * NFObject_getClass(NFClass * self, SEL _cmd) {
-    return &nopa_NFObject_class;
+NPClass * NPObject_getClass(NPClass * self, SEL _cmd) {
+    return &nopa_NPObject_class;
 }
 
-NFObject * nopa_alloc(struct NFClass * cls);
-NFObject * nopa_init(NFObject * );
-NFObject * NFCraftPilot_initWithName_(NFObject * self, SEL _cmd, const char * name) {
-    struct NFCraftPilot * _self = ((struct NFCraftPilot *)(self));
+NPObject * nopa_alloc(struct NPClass * cls);
+NPObject * nopa_init(NPObject * );
+NPObject * NPCraftPilot_initWithName_(NPObject * self, SEL _cmd, const char * name) {
+    struct NPCraftPilot * _self = ((struct NPCraftPilot *)(self));
     {
-        self = NFObject_init(self, __nopa_sel_init);
+        self = NPObject_init(self, __nopa_sel_init);
         if (self) {
             {
-                ((struct NFCraftPilot *)(self))->pilotName = name;
-                ((struct NFCraftPilot *)(self))->boundSystem = NULL;
+                ((struct NPCraftPilot *)(self))->pilotName = name;
+                ((struct NPCraftPilot *)(self))->boundSystem = NULL;
             }
         }
         return self;
     }
 }
 
-void NFCraftPilot_bindSystem_(NFObject * self, SEL _cmd, NFShipSystem * sys) {
-    struct NFCraftPilot * _self = ((struct NFCraftPilot *)(self));
+void NPCraftPilot_bindSystem_(NPObject * self, SEL _cmd, NPShipSystem * sys) {
+    struct NPCraftPilot * _self = ((struct NPCraftPilot *)(self));
     {
-        ((struct NFCraftPilot *)(self))->boundSystem = sys;
+        ((struct NPCraftPilot *)(self))->boundSystem = sys;
     }
 }
 
-NFClass * NFCraftPilot_getClass(NFClass * self, SEL _cmd) {
-    return &nopa_NFCraftPilot_class;
+NPClass * NPCraftPilot_getClass(NPClass * self, SEL _cmd) {
+    return &nopa_NPCraftPilot_class;
 }
 
-NFObject * NFShipSystem_initWithId_(NFObject * self, SEL _cmd, int sid) {
-    struct NFShipSystem * _self = ((struct NFShipSystem *)(self));
+NPObject * NPShipSystem_initWithId_(NPObject * self, SEL _cmd, int sid) {
+    struct NPShipSystem * _self = ((struct NPShipSystem *)(self));
     {
-        self = NFObject_init(self, __nopa_sel_init);
+        self = NPObject_init(self, __nopa_sel_init);
         if (self) {
             {
-                ((struct NFShipSystem *)(self))->systemStatusId = sid;
-                ((struct NFShipSystem *)(self))->currentPilot = NULL;
+                ((struct NPShipSystem *)(self))->systemStatusId = sid;
+                ((struct NPShipSystem *)(self))->currentPilot = NULL;
             }
         }
         return self;
     }
 }
 
-void NFShipSystem_linkPilot_(NFObject * self, SEL _cmd, NFObject * pilot) {
-    struct NFShipSystem * _self = ((struct NFShipSystem *)(self));
+void NPShipSystem_linkPilot_(NPObject * self, SEL _cmd, NPObject * pilot) {
+    struct NPShipSystem * _self = ((struct NPShipSystem *)(self));
     {
-        ((struct NFShipSystem *)(self))->currentPilot = ((NFCraftPilot *)(pilot));
-        ((struct nopa_NFCraftPilot_vtable *)((struct NFShipSystem *)(self))->currentPilot->isa->vtable)->bindSystem_(((struct NFShipSystem *)(self))->currentPilot, __nopa_sel_bindSystem_, self);
+        ((struct NPShipSystem *)(self))->currentPilot = ((NPCraftPilot *)(pilot));
+        ((struct nopa_NPCraftPilot_vtable *)((struct NPShipSystem *)(self))->currentPilot->isa->vtable)->bindSystem_(((struct NPShipSystem *)(self))->currentPilot, __nopa_sel_bindSystem_, self);
     }
 }
 
-NFClass * NFShipSystem_getClass(NFClass * self, SEL _cmd) {
-    return &nopa_NFShipSystem_class;
+NPClass * NPShipSystem_getClass(NPClass * self, SEL _cmd) {
+    return &nopa_NPShipSystem_class;
 }
 
-void NFDiamondAbuser_executeCoreTask(NFObject * self, SEL _cmd) {
-    struct NFDiamondAbuser * _self = ((struct NFDiamondAbuser *)(self));
+void NPDiamondAbuser_executeCoreTask(NPObject * self, SEL _cmd) {
+    struct NPDiamondAbuser * _self = ((struct NPDiamondAbuser *)(self));
     {
-        ((struct NFDiamondAbuser *)(self))->_collisionCounter = ((struct NFDiamondAbuser *)(self))->_collisionCounter + 100;
+        ((struct NPDiamondAbuser *)(self))->_collisionCounter = ((struct NPDiamondAbuser *)(self))->_collisionCounter + 100;
         printf("[菱形汇聚] 成功穿透 Left 和 Right 协议网，执行最底层 Base 协议核心任务！\n");
     }
 }
 
-void NFDiamondAbuser_leftBranchAction(NFObject * self, SEL _cmd) {
-    struct NFDiamondAbuser * _self = ((struct NFDiamondAbuser *)(self));
+void NPDiamondAbuser_leftBranchAction(NPObject * self, SEL _cmd) {
+    struct NPDiamondAbuser * _self = ((struct NPDiamondAbuser *)(self));
     {
-        ((struct NFDiamondAbuser *)(self))->_collisionCounter = ((struct NFDiamondAbuser *)(self))->_collisionCounter + 10;
+        ((struct NPDiamondAbuser *)(self))->_collisionCounter = ((struct NPDiamondAbuser *)(self))->_collisionCounter + 10;
         printf("[左翼协议] 触发左分支动作。\n");
     }
 }
 
-void NFDiamondAbuser_rightBranchAction(NFObject * self, SEL _cmd) {
-    struct NFDiamondAbuser * _self = ((struct NFDiamondAbuser *)(self));
+void NPDiamondAbuser_rightBranchAction(NPObject * self, SEL _cmd) {
+    struct NPDiamondAbuser * _self = ((struct NPDiamondAbuser *)(self));
     {
-        ((struct NFDiamondAbuser *)(self))->_collisionCounter = ((struct NFDiamondAbuser *)(self))->_collisionCounter + 5;
+        ((struct NPDiamondAbuser *)(self))->_collisionCounter = ((struct NPDiamondAbuser *)(self))->_collisionCounter + 5;
         printf("[右翼协议] 触发右分支动作。\n");
     }
 }
 
-int NFDiamondAbuser_collisionCounter(NFObject * self, SEL _cmd) {
-    return ((struct NFDiamondAbuser *)(self))->_collisionCounter;
+int NPDiamondAbuser_collisionCounter(NPObject * self, SEL _cmd) {
+    return ((struct NPDiamondAbuser *)(self))->_collisionCounter;
 }
 
-void NFDiamondAbuser_setCollisionCounter_(NFObject * self, SEL _cmd, int value) {
-    ((struct NFDiamondAbuser *)(self))->_collisionCounter = value;
+void NPDiamondAbuser_setCollisionCounter_(NPObject * self, SEL _cmd, int value) {
+    ((struct NPDiamondAbuser *)(self))->_collisionCounter = value;
 }
 
-NFClass * NFDiamondAbuser_getClass(NFClass * self, SEL _cmd) {
-    return &nopa_NFDiamondAbuser_class;
+NPClass * NPDiamondAbuser_getClass(NPClass * self, SEL _cmd) {
+    return &nopa_NPDiamondAbuser_class;
 }
 
 int main(int argc, const char * * argv) {
@@ -252,21 +252,21 @@ int main(int argc, const char * * argv) {
             printf(">>>  nopac 编译器「多文件交叉依赖与菱形协议」压测  <<<\n");
             printf("==================================================\n\n");
             printf("--- 测试点 1: 跨文件前置声明与双向互锁依赖 ---\n");
-            NFObject *__nopa_tmp_0 = (NFObject_alloc(&nopa_NFShipSystem_class, __nopa_sel_alloc));
-            NFShipSystem * system = ((struct nopa_NFShipSystem_vtable *)__nopa_tmp_0->isa->vtable)->initWithId_(__nopa_tmp_0, __nopa_sel_initWithId_, 2026);
-            NFObject *__nopa_tmp_1 = (NFObject_alloc(&nopa_NFCraftPilot_class, __nopa_sel_alloc));
-            NFCraftPilot * pilot = ((struct nopa_NFCraftPilot_vtable *)__nopa_tmp_1->isa->vtable)->initWithName_(__nopa_tmp_1, __nopa_sel_initWithName_, "指挥官凯克特斯");
-            ((struct nopa_NFShipSystem_vtable *)system->isa->vtable)->linkPilot_(system, __nopa_sel_linkPilot_, pilot);
+            NPObject *__nopa_tmp_0 = (NPObject_alloc(&nopa_NPShipSystem_class, __nopa_sel_alloc));
+            NPShipSystem * system = ((struct nopa_NPShipSystem_vtable *)__nopa_tmp_0->isa->vtable)->initWithId_(__nopa_tmp_0, __nopa_sel_initWithId_, 2026);
+            NPObject *__nopa_tmp_1 = (NPObject_alloc(&nopa_NPCraftPilot_class, __nopa_sel_alloc));
+            NPCraftPilot * pilot = ((struct nopa_NPCraftPilot_vtable *)__nopa_tmp_1->isa->vtable)->initWithName_(__nopa_tmp_1, __nopa_sel_initWithName_, "指挥官凯克特斯");
+            ((struct nopa_NPShipSystem_vtable *)system->isa->vtable)->linkPilot_(system, __nopa_sel_linkPilot_, pilot);
             printf("[符号断言] 双向互锁指针解析成功！\n");
-            printf("船只系统绑定的飞行员: %s\n", ((struct NFShipSystem *)(system))->currentPilot->pilotName);
-            printf("飞行员反向绑定的系统ID: %d\n", ((struct NFCraftPilot *)(pilot))->boundSystem->systemStatusId);
+            printf("船只系统绑定的飞行员: %s\n", ((struct NPShipSystem *)(system))->currentPilot->pilotName);
+            printf("飞行员反向绑定的系统ID: %d\n", ((struct NPCraftPilot *)(pilot))->boundSystem->systemStatusId);
             printf("\n--- 测试点 2: 菱形协议树多重挂载与符号分发 ---\n");
-            NFObject *__nopa_tmp_2 = (NFObject_alloc(&nopa_NFDiamondAbuser_class, __nopa_sel_alloc));
-            NFDiamondAbuser * abuser = ((struct nopa_NFObject_vtable *)__nopa_tmp_2->isa->vtable)->init(__nopa_tmp_2, __nopa_sel_init);
-            ((struct nopa_NFDiamondAbuser_vtable *)abuser->isa->vtable)->leftBranchAction(abuser, __nopa_sel_leftBranchAction);
-            ((struct nopa_NFDiamondAbuser_vtable *)abuser->isa->vtable)->rightBranchAction(abuser, __nopa_sel_rightBranchAction);
-            ((struct nopa_NFDiamondAbuser_vtable *)abuser->isa->vtable)->executeCoreTask(abuser, __nopa_sel_executeCoreTask);
-            printf("[状态检查] 菱形冲突计数器累加值: %d (预期为 115)\n", ((struct nopa_NFDiamondAbuser_vtable *)abuser->isa->vtable)->collisionCounter(abuser, __nopa_sel_collisionCounter));
+            NPObject *__nopa_tmp_2 = (NPObject_alloc(&nopa_NPDiamondAbuser_class, __nopa_sel_alloc));
+            NPDiamondAbuser * abuser = ((struct nopa_NPObject_vtable *)__nopa_tmp_2->isa->vtable)->init(__nopa_tmp_2, __nopa_sel_init);
+            ((struct nopa_NPDiamondAbuser_vtable *)abuser->isa->vtable)->leftBranchAction(abuser, __nopa_sel_leftBranchAction);
+            ((struct nopa_NPDiamondAbuser_vtable *)abuser->isa->vtable)->rightBranchAction(abuser, __nopa_sel_rightBranchAction);
+            ((struct nopa_NPDiamondAbuser_vtable *)abuser->isa->vtable)->executeCoreTask(abuser, __nopa_sel_executeCoreTask);
+            printf("[状态检查] 菱形冲突计数器累加值: %d (预期为 115)\n", ((struct nopa_NPDiamondAbuser_vtable *)abuser->isa->vtable)->collisionCounter(abuser, __nopa_sel_collisionCounter));
             nopa_release(system);
             nopa_release(pilot);
             nopa_release(abuser);
@@ -283,42 +283,42 @@ int main(int argc, const char * * argv) {
 
 // ─── Protocol metadata ─────────────────────────────────
 
-extern NFProtocol nopa_protocol_NFBaseProtocol;
-extern NFProtocol nopa_protocol_NFLeftProtocol;
-extern NFProtocol nopa_protocol_NFRightProtocol;
+extern NPProtocol nopa_protocol_NPBaseProtocol;
+extern NPProtocol nopa_protocol_NPLeftProtocol;
+extern NPProtocol nopa_protocol_NPRightProtocol;
 
-NFProtocol nopa_protocol_NFBaseProtocol = {
-    .name = "NFBaseProtocol",
-    .parents = (NFProtocol *[]){
+NPProtocol nopa_protocol_NPBaseProtocol = {
+    .name = "NPBaseProtocol",
+    .parents = (NPProtocol *[]){
     },
     .parent_count = 1,
-    .required_methods = (NFProtocolMethod[]){
+    .required_methods = (NPProtocolMethod[]){
         { .name = "executeCoreTask", .encoding = "@" },
     },
     .required_count = 1,
     .optional_count = 0,
 };
 
-NFProtocol nopa_protocol_NFLeftProtocol = {
-    .name = "NFLeftProtocol",
-    .parents = (NFProtocol *[]){
-        &nopa_protocol_NFBaseProtocol,
+NPProtocol nopa_protocol_NPLeftProtocol = {
+    .name = "NPLeftProtocol",
+    .parents = (NPProtocol *[]){
+        &nopa_protocol_NPBaseProtocol,
     },
     .parent_count = 1,
-    .required_methods = (NFProtocolMethod[]){
+    .required_methods = (NPProtocolMethod[]){
         { .name = "leftBranchAction", .encoding = "@" },
     },
     .required_count = 1,
     .optional_count = 0,
 };
 
-NFProtocol nopa_protocol_NFRightProtocol = {
-    .name = "NFRightProtocol",
-    .parents = (NFProtocol *[]){
-        &nopa_protocol_NFBaseProtocol,
+NPProtocol nopa_protocol_NPRightProtocol = {
+    .name = "NPRightProtocol",
+    .parents = (NPProtocol *[]){
+        &nopa_protocol_NPBaseProtocol,
     },
     .parent_count = 1,
-    .required_methods = (NFProtocolMethod[]){
+    .required_methods = (NPProtocolMethod[]){
         { .name = "rightBranchAction", .encoding = "@" },
     },
     .required_count = 1,
@@ -328,90 +328,90 @@ NFProtocol nopa_protocol_NFRightProtocol = {
 
 // ─── Class metadata ─────────────────────────────────────
 
-struct nopa_NFObject_vtable nopa_NFObject_vtable_inst = {
-    .init = NFObject_init,
-    .dealloc = NFObject_dealloc,
+struct nopa_NPObject_vtable nopa_NPObject_vtable_inst = {
+    .init = NPObject_init,
+    .dealloc = NPObject_dealloc,
 };
 
-struct nopa_NFCraftPilot_vtable nopa_NFCraftPilot_vtable_inst = {
-    .init = NFObject_init,
-    .dealloc = NFObject_dealloc,
-    .initWithName_ = NFCraftPilot_initWithName_,
-    .bindSystem_ = NFCraftPilot_bindSystem_,
+struct nopa_NPCraftPilot_vtable nopa_NPCraftPilot_vtable_inst = {
+    .init = NPObject_init,
+    .dealloc = NPObject_dealloc,
+    .initWithName_ = NPCraftPilot_initWithName_,
+    .bindSystem_ = NPCraftPilot_bindSystem_,
 };
 
-struct nopa_NFShipSystem_vtable nopa_NFShipSystem_vtable_inst = {
-    .init = NFObject_init,
-    .dealloc = NFObject_dealloc,
-    .initWithId_ = NFShipSystem_initWithId_,
-    .linkPilot_ = NFShipSystem_linkPilot_,
+struct nopa_NPShipSystem_vtable nopa_NPShipSystem_vtable_inst = {
+    .init = NPObject_init,
+    .dealloc = NPObject_dealloc,
+    .initWithId_ = NPShipSystem_initWithId_,
+    .linkPilot_ = NPShipSystem_linkPilot_,
 };
 
-struct nopa_NFDiamondAbuser_vtable nopa_NFDiamondAbuser_vtable_inst = {
-    .init = NFObject_init,
-    .dealloc = NFObject_dealloc,
-    .executeCoreTask = NFDiamondAbuser_executeCoreTask,
-    .leftBranchAction = NFDiamondAbuser_leftBranchAction,
-    .rightBranchAction = NFDiamondAbuser_rightBranchAction,
-    .collisionCounter = NFDiamondAbuser_collisionCounter,
-    .setCollisionCounter_ = NFDiamondAbuser_setCollisionCounter_,
+struct nopa_NPDiamondAbuser_vtable nopa_NPDiamondAbuser_vtable_inst = {
+    .init = NPObject_init,
+    .dealloc = NPObject_dealloc,
+    .executeCoreTask = NPDiamondAbuser_executeCoreTask,
+    .leftBranchAction = NPDiamondAbuser_leftBranchAction,
+    .rightBranchAction = NPDiamondAbuser_rightBranchAction,
+    .collisionCounter = NPDiamondAbuser_collisionCounter,
+    .setCollisionCounter_ = NPDiamondAbuser_setCollisionCounter_,
 };
 
-struct nopa_NFObject_meta_vtable nopa_NFObject_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
-    .class = NFObject_getClass,
+struct nopa_NPObject_meta_vtable nopa_NPObject_meta_vtable_inst = {
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
+    .class = NPObject_getClass,
 };
 
-struct nopa_NFCraftPilot_meta_vtable nopa_NFCraftPilot_meta_vtable_inst = {
-    .class = NFCraftPilot_getClass,
+struct nopa_NPCraftPilot_meta_vtable nopa_NPCraftPilot_meta_vtable_inst = {
+    .class = NPCraftPilot_getClass,
 };
 
-struct nopa_NFShipSystem_meta_vtable nopa_NFShipSystem_meta_vtable_inst = {
-    .class = NFShipSystem_getClass,
+struct nopa_NPShipSystem_meta_vtable nopa_NPShipSystem_meta_vtable_inst = {
+    .class = NPShipSystem_getClass,
 };
 
-struct nopa_NFDiamondAbuser_meta_vtable nopa_NFDiamondAbuser_meta_vtable_inst = {
-    .class = NFDiamondAbuser_getClass,
+struct nopa_NPDiamondAbuser_meta_vtable nopa_NPDiamondAbuser_meta_vtable_inst = {
+    .class = NPDiamondAbuser_getClass,
 };
 
-NFClass nopa_NFObject_class;
-NFClass nopa_NFCraftPilot_class;
-NFClass nopa_NFShipSystem_class;
-NFClass nopa_NFDiamondAbuser_class;
+NPClass nopa_NPObject_class;
+NPClass nopa_NPCraftPilot_class;
+NPClass nopa_NPShipSystem_class;
+NPClass nopa_NPDiamondAbuser_class;
 
 void nopa_meta_init(void) {
-    nopa_NFObject_class = (NFClass){
-        .name = "NFObject",
+    nopa_NPObject_class = (NPClass){
+        .name = "NPObject",
         .superclass = NULL,
-        .instance_size = sizeof(struct NFObject),
-        .vtable = &nopa_NFObject_vtable_inst,
-        .class_vtable = &nopa_NFObject_meta_vtable_inst,
+        .instance_size = sizeof(struct NPObject),
+        .vtable = &nopa_NPObject_vtable_inst,
+        .class_vtable = &nopa_NPObject_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_NFCraftPilot_class = (NFClass){
-        .name = "NFCraftPilot",
-        .superclass = &nopa_NFObject_class,
-        .instance_size = sizeof(struct NFCraftPilot),
-        .vtable = &nopa_NFCraftPilot_vtable_inst,
-        .class_vtable = &nopa_NFCraftPilot_meta_vtable_inst,
+    nopa_NPCraftPilot_class = (NPClass){
+        .name = "NPCraftPilot",
+        .superclass = &nopa_NPObject_class,
+        .instance_size = sizeof(struct NPCraftPilot),
+        .vtable = &nopa_NPCraftPilot_vtable_inst,
+        .class_vtable = &nopa_NPCraftPilot_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_NFShipSystem_class = (NFClass){
-        .name = "NFShipSystem",
-        .superclass = &nopa_NFObject_class,
-        .instance_size = sizeof(struct NFShipSystem),
-        .vtable = &nopa_NFShipSystem_vtable_inst,
-        .class_vtable = &nopa_NFShipSystem_meta_vtable_inst,
+    nopa_NPShipSystem_class = (NPClass){
+        .name = "NPShipSystem",
+        .superclass = &nopa_NPObject_class,
+        .instance_size = sizeof(struct NPShipSystem),
+        .vtable = &nopa_NPShipSystem_vtable_inst,
+        .class_vtable = &nopa_NPShipSystem_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_NFDiamondAbuser_class = (NFClass){
-        .name = "NFDiamondAbuser",
-        .superclass = &nopa_NFObject_class,
-        .instance_size = sizeof(struct NFDiamondAbuser),
-        .vtable = &nopa_NFDiamondAbuser_vtable_inst,
-        .class_vtable = &nopa_NFDiamondAbuser_meta_vtable_inst,
-        .protocols = (NFProtocol *[]){
+    nopa_NPDiamondAbuser_class = (NPClass){
+        .name = "NPDiamondAbuser",
+        .superclass = &nopa_NPObject_class,
+        .instance_size = sizeof(struct NPDiamondAbuser),
+        .vtable = &nopa_NPDiamondAbuser_vtable_inst,
+        .class_vtable = &nopa_NPDiamondAbuser_meta_vtable_inst,
+        .protocols = (NPProtocol *[]){
         },
         .protocol_count = 2,
     };

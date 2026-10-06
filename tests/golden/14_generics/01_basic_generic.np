@@ -1,7 +1,7 @@
 #include <stdio.h>
 #import <Foundation/Foundation.np>
 
-@interface Box<T> : NFObject {
+@interface Box<T> : NPObject {
     @public
     T _value;
 }
@@ -18,7 +18,7 @@
 }
 @end
 
-@interface Wrapper : NFObject
+@interface Wrapper : NPObject
 @end
 @implementation Wrapper
 @end

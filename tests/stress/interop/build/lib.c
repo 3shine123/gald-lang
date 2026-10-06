@@ -26,12 +26,12 @@ typedef int (^IntBin)(int, int) ;
 
 /* -------------- Section 5 · Struct definitions --------------- */
 /* -------------- Section 6 · Function prototypes -------------- */
-NFObject * Calc_init(NFObject * self, SEL _cmd);
-void Calc_add_(NFObject * self, SEL _cmd, int v);
-int Calc_total(NFObject * self, SEL _cmd);
-int Calc_squareOf_(NFObject * self, SEL _cmd, int v);
-int Calc_scale_by_(NFObject * self, SEL _cmd, int v, int k);
-int Calc_mix_with_(NFObject * self, SEL _cmd, int v, int k);
+NPObject * Calc_init(NPObject * self, SEL _cmd);
+void Calc_add_(NPObject * self, SEL _cmd, int v);
+int Calc_total(NPObject * self, SEL _cmd);
+int Calc_squareOf_(NPObject * self, SEL _cmd, int v);
+int Calc_scale_by_(NPObject * self, SEL _cmd, int v, int k);
+int Calc_mix_with_(NPObject * self, SEL _cmd, int v, int k);
 int asm_square(int v);
 int asm_add3(int a, int b, int c);
 int c_helper_mul(int a, int b);
@@ -39,7 +39,7 @@ int nopa_add(int a, int b);
 
 /* ------------- Section 7 · File-level variables -------------- */
 /* ------------ Section 8 · VTable & class layouts ------------- */
-NFClass * NOPA_GETCLASS_$_Calc(NFClass * self, SEL _cmd);
+NPClass * NOPA_GETCLASS_$_Calc(NPClass * self, SEL _cmd);
 
 /* vtable layout signature: 51762295b43939eb (methods: 6) */
 __attribute__((weak)) void nopa_verify_vtable_sig(unsigned long long winner, unsigned long long mine, const char *method_list) {
@@ -51,40 +51,40 @@ __attribute__((weak)) void nopa_verify_vtable_sig(unsigned long long winner, uns
 
 struct nopa_vtable {
     unsigned long long __sig;
-    void (*add_)(NFObject *, SEL, int);
-    NFObject * (*init)(NFObject *, SEL);
-    int (*mix_with_)(NFObject *, SEL, int, int);
-    int (*scale_by_)(NFObject *, SEL, int, int);
-    int (*squareOf_)(NFObject *, SEL, int);
-    int (*total)(NFObject *, SEL);
+    void (*add_)(NPObject *, SEL, int);
+    NPObject * (*init)(NPObject *, SEL);
+    int (*mix_with_)(NPObject *, SEL, int, int);
+    int (*scale_by_)(NPObject *, SEL, int, int);
+    int (*squareOf_)(NPObject *, SEL, int);
+    int (*total)(NPObject *, SEL);
 };
 
 struct NOPA_META_VTABLE_$_Calc {
-    NFClass * (*class)(NFClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 
 /* Class layout: Calc (super: nopa_root) */
 struct Calc {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     int _acc;
 };
 typedef struct Calc Calc;
 
 /* --------- Section 9 · Class metadata infrastructure --------- */
-extern NFClass NOPA_CLASS_$_Calc;
+extern NPClass NOPA_CLASS_$_Calc;
 void nopa_metaInit(void);
 
 /* --------- Section 10 · Vtable & metadata instances ---------- */
 /* VTable instance: Calc */
 __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_Calc = {
     .__sig = 0x51762295b43939ebULL,
-    .add_ = (void (*)(NFObject *, SEL, int))Calc_add_,
-    .init = (NFObject * (*)(NFObject *, SEL))Calc_init,
-    .mix_with_ = (int (*)(NFObject *, SEL, int, int))Calc_mix_with_,
-    .scale_by_ = (int (*)(NFObject *, SEL, int, int))Calc_scale_by_,
-    .squareOf_ = (int (*)(NFObject *, SEL, int))Calc_squareOf_,
-    .total = (int (*)(NFObject *, SEL))Calc_total,
+    .add_ = (void (*)(NPObject *, SEL, int))Calc_add_,
+    .init = (NPObject * (*)(NPObject *, SEL))Calc_init,
+    .mix_with_ = (int (*)(NPObject *, SEL, int, int))Calc_mix_with_,
+    .scale_by_ = (int (*)(NPObject *, SEL, int, int))Calc_scale_by_,
+    .squareOf_ = (int (*)(NPObject *, SEL, int))Calc_squareOf_,
+    .total = (int (*)(NPObject *, SEL))Calc_total,
 };
 
 /* Meta vtable instance: Calc */
@@ -93,20 +93,20 @@ __attribute__((weak)) struct NOPA_META_VTABLE_$_Calc NOPA_META_VTABLE_$_Calc_ins
 };
 
 /* +getClass for Calc */
-__attribute__((weak)) NFClass * NOPA_GETCLASS_$_Calc(NFClass * self, SEL _cmd) {
+__attribute__((weak)) NPClass * NOPA_GETCLASS_$_Calc(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
 /* -------- Section 11 · Class metadata initialization --------- */
-NFClass NOPA_CLASS_$_Calc;
+NPClass NOPA_CLASS_$_Calc;
 
 __attribute__((constructor)) static void __nopa_vtable_layout_check(void) {
     nopa_verify_vtable_sig((&NOPA_VTABLE_$_Calc)->__sig, 0x51762295b43939ebULL, "add_ init mix_with_ scale_by_ squareOf_ total | class Calc | tu lib.np");
 }
 
 __attribute__((weak)) void nopa_metaInit(void) {
-    NOPA_CLASS_$_Calc = (NFClass){
+    NOPA_CLASS_$_Calc = (NPClass){
         .name = "Calc",
         .superclass = &NOPA_CLASS_$_nopa_root,
         .instance_size = sizeof(struct Calc),
@@ -122,36 +122,36 @@ __attribute__((weak)) void nopa_meta_init(void) { nopa_metaInit(); }
 /* --------------- Section 12 · Runtime support ---------------- */
 /* --------------- Section 13 · Function bodies ---------------- */
 /* -[Calc init] */
-__attribute__((weak)) NFObject * Calc_init(NFObject * self, SEL _cmd) {
+__attribute__((weak)) NPObject * Calc_init(NPObject * self, SEL _cmd) {
     ((struct Calc *)self)->_acc = 0;
     return self;
 }
 
 /* -[Calc add:] */
-__attribute__((weak)) void Calc_add_(NFObject * self, SEL _cmd, int v) {
+__attribute__((weak)) void Calc_add_(NPObject * self, SEL _cmd, int v) {
     ((struct Calc *)self)->_acc = (((struct Calc *)self)->_acc + v);
 }
 
 /* -[Calc total] */
-__attribute__((weak)) int Calc_total(NFObject * self, SEL _cmd) {
+__attribute__((weak)) int Calc_total(NPObject * self, SEL _cmd) {
     return ((struct Calc *)self)->_acc;
 }
 
 /* -[Calc squareOf:] */
-__attribute__((weak)) int Calc_squareOf_(NFObject * self, SEL _cmd, int v) {
+__attribute__((weak)) int Calc_squareOf_(NPObject * self, SEL _cmd, int v) {
     return asm_square(v);
 }
 
 /* -[Calc scale:by:] */
-__attribute__((weak)) int Calc_scale_by_(NFObject * self, SEL _cmd, int v, int k) {
+__attribute__((weak)) int Calc_scale_by_(NPObject * self, SEL _cmd, int v, int k) {
     return c_helper_mul(v, k);
 }
 
 /* -[Calc mix:with:] */
-__attribute__((weak)) int Calc_mix_with_(NFObject * self, SEL _cmd, int v, int k) {
+__attribute__((weak)) int Calc_mix_with_(NPObject * self, SEL _cmd, int v, int k) {
     IntBin f = ^int(int x, int y) { return ((x * y) + 1); };
     int r = f(v, k);
-    ({ NFObject *__nopa_tmp_1 = ((NFObject *)(self)); __nopa_tmp_1 ? ((void (*)(NFObject *, SEL, int))((struct nopa_vtable *)__nopa_tmp_1->isa->vtable)->add_)(__nopa_tmp_1, __nopa_sel_add_, r) : 0; });
+    ({ NPObject *__nopa_tmp_1 = ((NPObject *)(self)); __nopa_tmp_1 ? ((void (*)(NPObject *, SEL, int))((struct nopa_vtable *)__nopa_tmp_1->isa->vtable)->add_)(__nopa_tmp_1, __nopa_sel_add_, r) : 0; });
     return r;
 }
 

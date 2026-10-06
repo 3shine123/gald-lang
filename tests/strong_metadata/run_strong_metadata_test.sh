@@ -58,7 +58,7 @@ cat > "$client" <<'EOF'
 #include <stdio.h>
 int main() {
     @autoreleasepool {
-        NFString *s = [NFString stringWithUTF8String:"hello"];
+        NPString *s = [NPString stringWithUTF8String:"hello"];
         printf("len=%zu s=%s\n", [s length], [s UTF8String]);
     }
     return 0;
@@ -189,23 +189,23 @@ check_weak() {
 # Both spellings of a standalone TU — a self-contained .nh and a .np — must
 # emit STRONG metadata for the class they own, with no -fstrong-metadata.
 cat > "$work/own_iface.nh" <<'EOF'
-@interface OwnGm : NFObject
+@interface OwnGm : NPObject
 - (int)ping;
 @end
 EOF
 cat > "$work/own.nh" <<'EOF'
 #import <Foundation/Foundation.nh>
-@interface OwnGh : NFObject
+@interface OwnGh : NPObject
 - (int)ping;
 @end
-@implementation OwnGh : NFObject
+@implementation OwnGh : NPObject
 - (int)ping { return 42; }
 @end
 EOF
 cat > "$work/own.np" <<'EOF'
 #import <Foundation/Foundation.nh>
 #import "own_iface.nh"
-@implementation OwnGm : NFObject
+@implementation OwnGm : NPObject
 - (int)ping { return 7; }
 @end
 EOF
@@ -229,7 +229,7 @@ fi
 # owner's table, so they have to stay weak even without any flag.
 cat > "$work/client_decl.nh" <<'EOF'
 #import <Foundation/Foundation.nh>
-@interface ClientGadget : NFObject
+@interface ClientGadget : NPObject
 - (int)ping;
 @end
 EOF
@@ -242,17 +242,17 @@ else
 fi
 
 # ── 7. §9 STRUCT DEDUP: a main file owning the root classes compiles clean ──
-# Section 4 emits guarded fallbacks for nopa_root/NFObject; the class-layout
+# Section 4 emits guarded fallbacks for nopa_root/NPObject; the class-layout
 # section used to re-emit the same bodies unguarded in the same file — a hard
 # C redefinition error. The dedup records Section 4's bodies, so each root
 # struct is defined exactly once and the Foundation root TU compiles alone.
 dedup_ok=1
-if "$nopac" -rewrite-nopa include/Foundation/NFObject.np -I include -o "$work/nfo.c" > "$work/nfo.log" 2>&1; then
-    root_defs=$(grep -c 'struct nopa_root {' "$work/nfo.c")
-    obj_defs=$(grep -c 'struct NFObject {' "$work/nfo.c")
+if "$nopac" -rewrite-nopa include/Foundation/NPObject.np -I include -o "$work/npo.c" > "$work/npo.log" 2>&1; then
+    root_defs=$(grep -c 'struct nopa_root {' "$work/npo.c")
+    obj_defs=$(grep -c 'struct NPObject {' "$work/npo.c")
     if [[ "$root_defs" == "1" && "$obj_defs" == "1" ]] \
-            && clang -c -w "$work/nfo.c" -o "$work/nfo.o" -I include 2>>"$work/nfo.log"; then
-        ok "7. root-struct dedup: NFObject.np as a main file compiles clean (one definition each)"
+            && clang -c -w "$work/npo.c" -o "$work/npo.o" -I include 2>>"$work/npo.log"; then
+        ok "7. root-struct dedup: NPObject.np as a main file compiles clean (one definition each)"
     else
         dedup_ok=0
     fi
@@ -261,7 +261,7 @@ else
 fi
 if [[ $dedup_ok -eq 0 ]]; then
     bad "7. root-struct dedup regressed (same-file double definition or compile failure)"
-    sed 's/^/      /' "$work/nfo.log" | tail -12
+    sed 's/^/      /' "$work/npo.log" | tail -12
 fi
 
 echo "----"

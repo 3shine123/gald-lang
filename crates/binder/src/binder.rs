@@ -320,7 +320,7 @@ impl Binder {
                 // Capture superclass from the CST so the elaborator's ivar resolver
                 // can walk the superclass chain (subclass methods referencing an
                 // ivar declared in the parent, e.g. `_nodeType` declared in
-                // NFJsonNode used inside NFJsonStringNode's init).
+                // NPJsonNode used inside NPJsonStringNode's init).
                 let superclass_from_cst = match &d.data {
                     CstDeclData::Class { ref superclass, .. } => superclass.clone(),
                     _ => None,

@@ -1,7 +1,7 @@
 # Nopa 转译器开发 TODO
 
 > Nopa：纯静态 Objective-C 方言、C 的超集语言，转译到 C99
-> 编译器：nopac | 运行时：libnopa | 标准库：Foundation（NF-前缀）
+> 编译器：nopac | 运行时：libnopa | 标准库：Foundation（NP-前缀）
 > 核心特性：自动静态 ARC、CFG 分析、VTable 多态、完整 ObjC 语法兼容
 
 > ⚠️ **历史文件**：本 TODO 是早期 **C 版** 计划，已与当前 **Rust 重写版** 的实现脱节
@@ -182,10 +182,10 @@
 
 ### 3.3 类元数据生成
 
-- [x] 设计类元数据结构（NFClass 含 name/superclass/instance_size/vtable）
+- [x] 设计类元数据结构（NPClass 含 name/superclass/instance_size/vtable）
 - [x] 生成类元数据常量定义（nopa_ClassName_class 变量）
-- [x] 实现 +alloc 通用逻辑（NFObject 的 +alloc 方法）
-- [x] 实现 +init 方法（NFObject 的 -init 方法）
+- [x] 实现 +alloc 通用逻辑（NPObject 的 +alloc 方法）
+- [x] 实现 +init 方法（NPObject 的 -init 方法）
 - [x] 实现 +class 方法（自动生成 nopa_ClassName_getClass C 函数）
 - [x] 编写类元数据测试（integration/test_class_meta.sh，12 项检查）
 
@@ -313,7 +313,7 @@
 ### 6.4 实现文件生成（.np → .c）
 
 - [x] 生成 #include 指令（收集自源码 .h 递归导入）
-- [x] 生成 struct 定义（对象头：isa + retain_count，跳过 NFObject/NFClass 由 runtime.h 提供）
+- [x] 生成 struct 定义（对象头：isa + retain_count，跳过 NPObject/NPClass 由 runtime.h 提供）
 - [x] 生成静态常量（VTable 索引宏：`#define nopa_Class_vtable_index_method N`）
 - [x] 生成 VTable struct 类型定义 + vtable 实例初始化
 - [x] 生成类元数据初始化（nopa_init() 函数）
@@ -336,13 +336,13 @@
 ### 7.1 核心运行时
 
 - [x] 定义 nopa_object / nopa_class / nopa_vtable 基础结构（object.h）
-- [x] 定义 NFObject / NFClass 公共类型（object.h，与生成代码一致）
+- [x] 定义 NPObject / NPClass 公共类型（object.h，与生成代码一致）
 - [x] 实现 nopa_retain()（递增 retain_count）
 - [x] 实现 nopa_release()（递减，到 0 时 free）
 - [x] 实现 nopa_alloc()（calloc + 设 isa + retain_count=1）
 - [x] 实现 nopa_init()（返回 self）
 - [x] 实现 nopa_autorelease()
-- [x] 实现 nf_class_create / nf_vtable_alloc / nf_object_alloc（nopa_class.c）
+- [x] 实现 np_class_create / np_vtable_alloc / np_object_alloc（nopa_class.c）
 - [x] 运行时头文件统一为 object.h（无 nopa_msgSend / sel_registerName）
 - [ ] 实现 nopa_dealloc()（释放对象内存）
 - [ ] 实现 nopa_copy()
@@ -352,7 +352,7 @@
 
 ### 7.2 Block 运行时支持
 
-- [ ] 定义 NFConcreteStackBlock / NFConcreteGlobalBlock / NFConcreteMallocBlock
+- [ ] 定义 NPConcreteStackBlock / NPConcreteGlobalBlock / NPConcreteMallocBlock
 - [ ] 实现 nopa_Block_copy() / nopa_Block_release()
 - [ ] 实现 Block 的 retain/release 语义
 - [ ] 编写 Block 运行时测试
@@ -394,66 +394,66 @@
 
 ### 8.1 核心类（Tier 1）
 
-- [x] 实现 NFObject（根类）
-- [x] 实现 NFString
-- [x] 实现 NFMutableString
-- [x] 实现 NFArray
-- [x] 实现 NFMutableArray
-- [ ] 实现 NFDictionary
-- [ ] 实现 NFMutableDictionary
-- [ ] 实现 NFSet
-- [ ] 实现 NFMutableSet
-- [ ] 实现 NFData
-- [ ] 实现 NFMutableData
-- [ ] 实现 NFNumber
-- [ ] 实现 NFValue
-- [ ] 实现 NFEnumerator
-- [ ] 实现 NFFastEnumeration 协议
+- [x] 实现 NPObject（根类）
+- [x] 实现 NPString
+- [x] 实现 NPMutableString
+- [x] 实现 NPArray
+- [x] 实现 NPMutableArray
+- [ ] 实现 NPDictionary
+- [ ] 实现 NPMutableDictionary
+- [ ] 实现 NPSet
+- [ ] 实现 NPMutableSet
+- [ ] 实现 NPData
+- [ ] 实现 NPMutableData
+- [ ] 实现 NPNumber
+- [ ] 实现 NPValue
+- [ ] 实现 NPEnumerator
+- [ ] 实现 NPFastEnumeration 协议
 - [ ] 编写核心类测试
 
 ### 8.2 基础功能（Tier 2）
 
-- [ ] 实现 NFDate / NFCalendar
-- [ ] 实现 NFURL
-- [ ] 实现 NFStream / NFInfutStream / NFOutputStream
-- [ ] 实现 NFFileManager
-- [ ] 实现 NFJSONSerialization
-- [ ] 实现 NFPropertyList
-- [ ] 实现 NFCoder / NFKeyedArchiver / NFKeyedUnarchiver
-- [ ] 实现 NFUUID
-- [ ] 实现 NFLocale
-- [ ] 实现 NFBundle
-- [ ] 实现 NFProcessInfo
-- [ ] 实现 NFUserDefaults（简化版）
+- [ ] 实现 NPDate / NPCalendar
+- [ ] 实现 NPURL
+- [ ] 实现 NPStream / NPInfutStream / NPOutputStream
+- [ ] 实现 NPFileManager
+- [ ] 实现 NPJSONSerialization
+- [ ] 实现 NPPropertyList
+- [ ] 实现 NPCoder / NPKeyedArchiver / NPKeyedUnarchiver
+- [ ] 实现 NPUUID
+- [ ] 实现 NPLocale
+- [ ] 实现 NPBundle
+- [ ] 实现 NPProcessInfo
+- [ ] 实现 NPUserDefaults（简化版）
 - [ ] 编写基础功能测试
 
 ### 8.3 并发与通知（Tier 3）
 
-- [ ] 实现 NFThread
-- [ ] 实现 NFLock / NFRecursiveLock / NFCondition
-- [ ] 实现 NFOperation / NFOperationQueue（简化）
-- [ ] 实现 NFNotification / NFNotificationCenter
-- [ ] 实现 NFTimer
-- [ ] 实现 NFRunLoop（简化版）
+- [ ] 实现 NPThread
+- [ ] 实现 NPLock / NPRecursiveLock / NPCondition
+- [ ] 实现 NPOperation / NPOperationQueue（简化）
+- [ ] 实现 NPNotification / NPNotificationCenter
+- [ ] 实现 NPTimer
+- [ ] 实现 NPRunLoop（简化版）
 - [ ] 编写并发测试
 
 ### 8.4 高级集合（Tier 4）
 
-- [ ] 实现 NFPointerArray
-- [ ] 实现 NFHashTable
-- [ ] 实现 NFMapTable
-- [ ] 实现 NFIndexSet / NFMutableIndexSet
-- [ ] 实现 NFCharacterSet / NFMutableCharacterSet
-- [ ] 实现 NFRegularExpression
-- [ ] 实现 NFAttributedString / NFMutableAttributedString
-- [ ] 实现 NFPredicate
-- [ ] 实现 NFCache
+- [ ] 实现 NPPointerArray
+- [ ] 实现 NPHashTable
+- [ ] 实现 NPMapTable
+- [ ] 实现 NPIndexSet / NPMutableIndexSet
+- [ ] 实现 NPCharacterSet / NPMutableCharacterSet
+- [ ] 实现 NPRegularExpression
+- [ ] 实现 NPAttributedString / NPMutableAttributedString
+- [ ] 实现 NPPredicate
+- [ ] 实现 NPCache
 - [ ] 编写高级集合测试
 
 ### 8.5 网络（Tier 5，可选）
 
-- [ ] 实现 NFURLSession（简化版）
-- [ ] 实现 NFURLRequest / NFURLResponse
+- [ ] 实现 NPURLSession（简化版）
+- [ ] 实现 NPURLRequest / NPURLResponse
 - [ ] 编写网络测试
 
 ---
@@ -526,10 +526,10 @@
 
 | 类型       | 扩展名        | 示例                                |
 | -------- | ---------- | --------------------------------- |
-| Nopa 头文件 | .h        | `Foundation.nh`, `NFString.nh`    |
-| Nopa 源文件 | .np        | `main.np`, `NFPerson.np`          |
-| C 头文件    | .h         | `noparuntime.h`, `NFPerson.h`（生成） |
-| C 源文件    | .c         | `main.c`, `NFPerson.c`（生成）        |
+| Nopa 头文件 | .h        | `Foundation.nh`, `NPString.nh`    |
+| Nopa 源文件 | .np        | `main.np`, `NPPerson.np`          |
+| C 头文件    | .h         | `noparuntime.h`, `NPPerson.h`（生成） |
+| C 源文件    | .c         | `main.c`, `NPPerson.c`（生成）        |
 | 对象文件     | .o         | `main.o`                          |
 | 可执行文件    | 无          | `myapp`                           |
 | 静态库      | .a         | `libnopa.a`                       |
@@ -539,12 +539,12 @@
 
 | 范畴             | 前缀                  | 示例                                              |
 | -------------- | ------------------- | ----------------------------------------------- |
-| 标准库类           | NF                  | `NFObject`, `NFString`, `NFArray`               |
+| 标准库类           | NP                  | `NPObject`, `NPString`, `NPArray`               |
 | 运行时函数          | nopa_               | `nopa_retain()`, `nopa_release()`               |
 | 运行时类型          | nopa_               | `nopa_object`, `nopa_class`                     |
-| 编译器生成结构        | nopa_               | `nopa_NFString`, `nopa_NFString_vtable`         |
-| 编译器生成函数        | nopa_ClassName_     | `nopa_NFString_length()`                        |
-| 编译器生成常量        | nopa_               | `nopa_NFString_class`, `nopa_sel_initWithName_` |
+| 编译器生成结构        | nopa_               | `nopa_NPString`, `nopa_NPString_vtable`         |
+| 编译器生成函数        | nopa_ClassName_     | `nopa_NPString_length()`                        |
+| 编译器生成常量        | nopa_               | `nopa_NPString_class`, `nopa_sel_initWithName_` |
 | Block 内部结构     | __nopa_block_       | `__nopa_block_adder_0`                          |
 | Block byref 结构 | __nopa_block_byref_ | `__nopa_block_byref_counter`                    |
 | 内部临时变量         | __nopa_             | `__nopa_try_buf`, `__nopa_state`                |

@@ -10,7 +10,7 @@
 // ============================================================================
 // 1. 核心基础类：基因测序仪 (仅包含基础标识与生物样本源)
 // ============================================================================
-@interface BioGeneSequencer : NFObject {
+@interface BioGeneSequencer : NPObject {
     @public
     int _sequencerId;
     const char* _genomeSource;

@@ -5,7 +5,7 @@
 
 // ─── NOPA_CLASS_$_nopa_root (defined weak; codegen's nopa_metaInit fills it) ──
 
-__attribute__((weak)) NFClass NOPA_CLASS_$_nopa_root;
+__attribute__((weak)) NPClass NOPA_CLASS_$_nopa_root;
 
 // ─── Exception globals ────────────────────────────────────────────────────────
 
@@ -27,7 +27,7 @@ __thread int __nopa_eh_flag;
 __thread id   __nopa_eh_val;
 #endif
 
-int __nopa_eh_isa(NFObject *obj, NFClass *cls) {
+int __nopa_eh_isa(NPObject *obj, NPClass *cls) {
     if (!obj || !cls) return 0;
     return nopa_isKindOf(obj, cls) ? 1 : 0;
 }
@@ -48,8 +48,8 @@ void nopa_eh_uncaught(void) {
 #define INITIAL_SLOT_CAPACITY 4
 
 typedef struct {
-    NFObject *object;
-    NFObject ***slots;
+    NPObject *object;
+    NPObject ***slots;
     int count;
     int capacity;
 } WeakEntry;
@@ -57,7 +57,7 @@ typedef struct {
 static WeakEntry weak_table[MAX_WEAK_ENTRIES];
 static int weak_entries = 0;
 
-static WeakEntry *find_entry(NFObject *target) {
+static WeakEntry *find_entry(NPObject *target) {
     for (int i = 0; i < weak_entries; i++) {
         if (weak_table[i].object == target)
             return &weak_table[i];
@@ -65,25 +65,25 @@ static WeakEntry *find_entry(NFObject *target) {
     return NULL;
 }
 
-void nopa_weakRegister(NFObject **weak_loc, NFObject *target) {
+void nopa_weakRegister(NPObject **weak_loc, NPObject *target) {
     if (!target || !weak_loc) return;
     WeakEntry *entry = find_entry(target);
     if (!entry) {
         if (weak_entries >= MAX_WEAK_ENTRIES) return;
         entry = &weak_table[weak_entries++];
         entry->object = target;
-        entry->slots = malloc(INITIAL_SLOT_CAPACITY * sizeof(NFObject **));
+        entry->slots = malloc(INITIAL_SLOT_CAPACITY * sizeof(NPObject **));
         entry->count = 0;
         entry->capacity = INITIAL_SLOT_CAPACITY;
     }
     if (entry->count >= entry->capacity) {
         entry->capacity *= 2;
-        entry->slots = realloc(entry->slots, entry->capacity * sizeof(NFObject **));
+        entry->slots = realloc(entry->slots, entry->capacity * sizeof(NPObject **));
     }
     entry->slots[entry->count++] = weak_loc;
 }
 
-void nopa_weakUnregister(NFObject **weak_loc) {
+void nopa_weakUnregister(NPObject **weak_loc) {
     if (!weak_loc) return;
     for (int i = 0; i < weak_entries; i++) {
         WeakEntry *entry = &weak_table[i];
@@ -96,7 +96,7 @@ void nopa_weakUnregister(NFObject **weak_loc) {
     }
 }
 
-void nopa_weakClearAll(NFObject *target) {
+void nopa_weakClearAll(NPObject *target) {
     if (!target) return;
     for (int i = 0; i < weak_entries; i++) {
         WeakEntry *entry = &weak_table[i];
@@ -112,7 +112,7 @@ void nopa_weakClearAll(NFObject *target) {
 }
 
 void nopa_weakAutoCleanup(void *ptr) {
-    nopa_weakUnregister((NFObject **)ptr);
+    nopa_weakUnregister((NPObject **)ptr);
 }
 
 // ─── @synchronized monitors ──────────────────────────────────────────────────
@@ -171,9 +171,9 @@ SEL sel_registerName(const char *name) {
 
 // ─── Type introspection ─────────────────────────────────────────────────────────
 
-BOOL nopa_isKindOf(NFObject *obj, NFClass *cls) {
+BOOL nopa_isKindOf(NPObject *obj, NPClass *cls) {
     if (!obj || !cls) return 0;
-    NFClass *isa = obj->isa;
+    NPClass *isa = obj->isa;
     while (isa) {
         if (isa == cls) return 1;
         isa = isa->superclass;
@@ -183,7 +183,7 @@ BOOL nopa_isKindOf(NFObject *obj, NFClass *cls) {
 
 /* Official ObjC spelling of isKindOf: (kept as a compatible alias).
  * Same isa-chain walk. */
-BOOL nopa_isKindOfClass(NFObject *obj, NFClass *cls) {
+BOOL nopa_isKindOfClass(NPObject *obj, NPClass *cls) {
     return nopa_isKindOf(obj, cls);
 }
 
@@ -191,7 +191,7 @@ BOOL nopa_isKindOfClass(NFObject *obj, NFClass *cls) {
 
 struct nopa_autoreleasepool {
     struct nopa_autoreleasepool *next;
-    NFObject **objects;
+    NPObject **objects;
     int count;
     int capacity;
 };
@@ -218,9 +218,9 @@ void nopa_autoreleasepoolPop(nopa_autoreleasepool_t *pool) {
 
 // ─── Lifecycle ───────────────────────────────────────────────────────────────
 
-NFObject *nopa_alloc(NFClass *cls) {
+NPObject *nopa_alloc(NPClass *cls) {
     if (!cls) return NULL;
-    NFObject *obj = (NFObject *)calloc(1, cls->instance_size);
+    NPObject *obj = (NPObject *)calloc(1, cls->instance_size);
     if (obj) {
         obj->isa = cls;
         obj->retain_count = 1;
@@ -228,7 +228,7 @@ NFObject *nopa_alloc(NFClass *cls) {
     return obj;
 }
 
-NFObject *nopa_init(NFObject *self) {
+NPObject *nopa_init(NPObject *self) {
     return self;
 }
 
@@ -245,7 +245,7 @@ static int nopa_rc_debug_enabled(void) {
     return nopa_rc_debug;
 }
 
-static void nopa_rc_trace(const char *op, NFObject *obj, uint32_t rc_after, const char *note) {
+static void nopa_rc_trace(const char *op, NPObject *obj, uint32_t rc_after, const char *note) {
     const char *cls = (obj->isa && obj->isa->name) ? obj->isa->name : "?";
     if (note)
         fprintf(stderr, "[rc] %s %p %s rc=%u (%s)\n", op, (void *)obj, cls, rc_after, note);
@@ -253,7 +253,7 @@ static void nopa_rc_trace(const char *op, NFObject *obj, uint32_t rc_after, cons
         fprintf(stderr, "[rc] %s %p %s rc=%u\n", op, (void *)obj, cls, rc_after);
 }
 
-NFObject *nopa_retain(NFObject *obj) {
+NPObject *nopa_retain(NPObject *obj) {
     if (!obj) return NULL;
     obj->retain_count++;
     if (nopa_rc_debug_enabled())
@@ -261,7 +261,7 @@ NFObject *nopa_retain(NFObject *obj) {
     return obj;
 }
 
-void nopa_release(NFObject *obj) {
+void nopa_release(NPObject *obj) {
     if (!obj) return;
     if (obj->retain_count > 0)
         obj->retain_count--;
@@ -285,13 +285,13 @@ void nopa_release(NFObject *obj) {
     }
 }
 
-NFObject *nopa_autorelease(NFObject *obj) {
+NPObject *nopa_autorelease(NPObject *obj) {
     if (!obj) return obj;
     nopa_autoreleasepool_t *pool = current_pool;
     if (!pool) return obj;
     if (pool->count >= pool->capacity) {
         pool->capacity = pool->capacity ? pool->capacity * 2 : 16;
-        pool->objects = realloc(pool->objects, pool->capacity * sizeof(NFObject *));
+        pool->objects = realloc(pool->objects, pool->capacity * sizeof(NPObject *));
         if (!pool->objects) return obj;
     }
     pool->objects[pool->count++] = obj;
@@ -301,7 +301,7 @@ NFObject *nopa_autorelease(NFObject *obj) {
 // ─── String literals ──────────────────────────────────────────────────────────
 // nopa_stringFromCstr is emitted by the codegen in the generated C code.
 // The runtime.h declaration is used by the generated code to call it.
-// When NFString is not present, @"..." falls back to a regular C string literal.
+// When NPString is not present, @"..." falls back to a regular C string literal.
 
 // ─── Async tasks (route map item #4) ────────────────────────────────────────
 
@@ -310,8 +310,8 @@ NFObject *nopa_autorelease(NFObject *obj) {
 // created it (milestone 1). `parent` exists for milestone 2 (task graphs
 // where a suspended task resumes its awaiter).
 
-NFTask *nopa_task_create(nopa_task_entry_fn entry, NFObject *self_obj, size_t frame_size) {
-    NFTask *t = (NFTask *)calloc(1, sizeof(NFTask));
+NPTask *nopa_task_create(nopa_task_entry_fn entry, NPObject *self_obj, size_t frame_size) {
+    NPTask *t = (NPTask *)calloc(1, sizeof(NPTask));
     if (!t) return NULL;
     t->state = 1;   /* state 1 = the entry's first case; 0 means "not started" */
     t->finished = 0;
@@ -323,7 +323,7 @@ NFTask *nopa_task_create(nopa_task_entry_fn entry, NFObject *self_obj, size_t fr
     return t;
 }
 
-int nopa_task_resume(NFTask *task) {
+int nopa_task_resume(NPTask *task) {
     if (!task || task->finished) return 1;
     if (task->entry) {
         if (task->entry(task) != 0) {
@@ -335,11 +335,11 @@ int nopa_task_resume(NFTask *task) {
     return task->finished ? 1 : 0;
 }
 
-void nopa_task_finish(NFTask *task) {
+void nopa_task_finish(NPTask *task) {
     if (task) task->finished = 1;
 }
 
-void *nopa_task_join(NFTask *task) {
+void *nopa_task_join(NPTask *task) {
     if (!task) return NULL;
     while (!task->finished) {
         (void)nopa_task_resume(task);
@@ -352,10 +352,10 @@ void *nopa_task_join(NFTask *task) {
 
 // ─── Logging ─────────────────────────────────────────────────────────────────
 
-// NFLog takes a Foundation `NFString *` format. The `struct NFString` layout is
-// generated by the transpiler (from NFString.nh's `@public` ivars), so runtime.c
+// NPLog takes a Foundation `NPString *` format. The `struct NPString` layout is
+// generated by the transpiler (from NPString.nh's `@public` ivars), so runtime.c
 // mirrors that layout here to reach `_cstr` without depending on the generated
-// header. Keep in sync with NFString.nh (isa/retain_count base + _cstr/_length/
+// header. Keep in sync with NPString.nh (isa/retain_count base + _cstr/_length/
 // _hash/_hashIsValid).
 struct __nopa_npstring_layout {
     void *isa;
@@ -366,7 +366,7 @@ struct __nopa_npstring_layout {
     int _hashIsValid;
 };
 
-void NFLog(NFString *format, ...) {
+void NPLog(NPString *format, ...) {
     const char *cstr = format ? ((struct __nopa_npstring_layout *)format)->_cstr : "";
     va_list args;
     va_start(args, format);
@@ -375,7 +375,7 @@ void NFLog(NFString *format, ...) {
     fprintf(stderr, "\n");
 }
 
-void __NFLogv(NFString *format, va_list args) {
+void __NPLogv(NPString *format, va_list args) {
     const char *cstr = format ? ((struct __nopa_npstring_layout *)format)->_cstr : "";
     vfprintf(stderr, cstr ? cstr : "", args);
     fprintf(stderr, "\n");

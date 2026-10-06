@@ -13,9 +13,9 @@ pub enum TokenKind {
     AtString,
     AtNumber,
     /// `@(expr)` — boxed-expression literal. The checker rewrites it to the
-    /// `NFNumber` factory matching the expression's static type.
+    /// `NPNumber` factory matching the expression's static type.
     AtLParen,
-    /// `@'c'` — boxed character literal (`NFNumber`).
+    /// `@'c'` — boxed character literal (`NPNumber`).
     AtChar,
     /// `@YES` / `@NO` / `@true` / `@false` — boxed BOOL literal.
     AtBool,

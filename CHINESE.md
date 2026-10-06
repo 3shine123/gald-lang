@@ -163,7 +163,7 @@ Foundation 支持两种模式，都完整可用；**真实工程推荐预编译�
 #import <Foundation/Foundation.np>   // 声明 + 实现全部内联
 
 int main() {
-    NFLog(@"hello %@", [NFString stringWithUTF8String:"world"]);
+    NPLog(@"hello %@", [NPString stringWithUTF8String:"world"]);
     return 0;
 }
 ```
@@ -179,7 +179,7 @@ nopac run hello.np
 #import <Foundation/Foundation.nh>   // 纯声明——不内联任何东西
 
 int main() {
-    NFLog(@"hello %@", [NFString stringWithUTF8String:"world"]);
+    NPLog(@"hello %@", [NPString stringWithUTF8String:"world"]);
     return 0;
 }
 ```
@@ -241,17 +241,17 @@ cargo test --workspace
 ### 类系统
 
 ```nopa
-@interface Animal : NFObject {
+@interface Animal : NPObject {
 @public
-    NFString *_name;
+    NPString *_name;
 }
-- (instancetype)initWithName:(NFString *)name;
+- (instancetype)initWithName:(NPString *)name;
 - (void)speak;
-@property (readonly) NFString *name;
+@property (readonly) NPString *name;
 @end
 
 @implementation Animal
-- (instancetype)initWithName:(NFString *)name {
+- (instancetype)initWithName:(NPString *)name {
     self = [super init];
     if (self) {
         _name = name;
@@ -272,17 +272,17 @@ cargo test --workspace
 - (BOOL)isVisible;
 @end
 
-@interface Shape : NFObject <Drawable>
+@interface Shape : NPObject <Drawable>
 @end
 ```
 
 ### 属性
 
 ```nopa
-@interface Person : NFObject
-@property NFString *name;
+@interface Person : NPObject
+@property NPString *name;
 @property int age;
-@property (readonly) NFString *identifier;
+@property (readonly) NPString *identifier;
 @end
 ```
 
@@ -307,7 +307,7 @@ int (^square)(int) = ^int(int x) {
     return x * x;
 };
 
-void (^logAndCall)(NFString *, void (^)(void)) = ^void(NFString *msg, void (^next)(void)) {
+void (^logAndCall)(NPString *, void (^)(void)) = ^void(NPString *msg, void (^next)(void)) {
     printf("[LOG] %s\n", msg);
     if (next) next();
 };
@@ -317,7 +317,7 @@ void (^logAndCall)(NFString *, void (^)(void)) = ^void(NFString *msg, void (^nex
 
 ```nopa
 @autoreleasepool {
-    NFString *temp = [NFString stringWithUTF8String:"hello"];
+    NPString *temp = [NPString stringWithUTF8String:"hello"];
     // temp 在 pool pop 时自动 release
 }
 ```
@@ -334,7 +334,7 @@ SEL sel = @selector(doSomething:);
 #include <stdio.h>
 #include <stdlib.h>
 
-@interface Wrapper : NFObject
+@interface Wrapper : NPObject
 - (void)callCFunction;
 @end
 ```
@@ -383,25 +383,25 @@ int main(void) {
     nopa_metaInit();  // 元数据回填——见下方说明
 
     // 类方法：nopa_<类名>_<方法名>(参数...)
-    NFString *s = nopa_NFString_stringWithUTF8String_("Hello");
+    NPString *s = nopa_NPString_stringWithUTF8String_("Hello");
 
     // 实例方法：nopa_<类名>_<方法名>(self, 参数...)
-    size_t len = nopa_NFString_length(s);
-    const char *cstr = nopa_NFString_UTF8String(s);
+    size_t len = nopa_NPString_length(s);
+    const char *cstr = nopa_NPString_UTF8String(s);
 
     // 嵌套消息发送（等价于 Nopa 的 [[s UTF8String] ...]）
-    const char *nested = nopa_NFString_UTF8String(
-        nopa_NFString_stringWithUTF8String_("nested")
+    const char *nested = nopa_NPString_UTF8String(
+        nopa_NPString_stringWithUTF8String_("nested")
     );
 
     // 多参数消息发送（等价于 Nopa 的 [arr replaceObjectAtIndex:0 withObject:obj]）
-    NFArray *arr = nopa_NFArray_arrayWithObject_(s);
-    nopa_NFArray_replaceObjectAtIndex_withObject_(arr, 0, s);
+    NPArray *arr = nopa_NPArray_arrayWithObject_(s);
+    nopa_NPArray_replaceObjectAtIndex_withObject_(arr, 0, s);
 
     // 多参数带命名空间：selector 的每个 : 对应函数名里的一个 _
     // [obj foo:arg1 bar:arg2] → nopa_<类>_foo_bar_(obj, arg1, arg2)
     // [m replaceCharactersInRange:rng withString:str]
-    // → nopa_NFMutableString_replaceCharactersInRange_withString_(m, rng, str)
+    // → nopa_NPMutableString_replaceCharactersInRange_withString_(m, rng, str)
 }
 ```
 
@@ -431,18 +431,18 @@ int main(void) {
     nopa_autoreleasepool_t *pool = nopa_autoreleasepoolPush();
 
     // 便利构造器返回 autoreleased 对象，在当前 pool 内使用即可
-    NFString *s = nopa_NFString_stringWithUTF8String_("hello");
-    printf("%s\n", nopa_NFString_UTF8String(s));
+    NPString *s = nopa_NPString_stringWithUTF8String_("hello");
+    printf("%s\n", nopa_NPString_UTF8String(s));
 
     // 如需跨 pool 存活：先 retain，用完 release
-    NFString *t = nopa_NFString_stringWithUTF8String_("world");
+    NPString *t = nopa_NPString_stringWithUTF8String_("world");
     nopa_retain(t);
     nopa_autoreleasepoolPop(pool);      // t 存活（retain 过）
-    printf("%s\n", nopa_NFString_UTF8String(t));
+    printf("%s\n", nopa_NPString_UTF8String(t));
     nopa_release(t);
 
     // alloc/copy 家族返回 +1 → 必须 release
-    NFString *copy = nopa_NFString_copy(s);
+    NPString *copy = nopa_NPString_copy(s);
     nopa_release(copy);
 }
 ```
@@ -465,12 +465,12 @@ Nopa 在 Objective-C 语法基础上，加入了一些 ObjC 本身没有的语�
 ### for-in 遍历
 
 ```nopa
-for (NFString *s in arr) {
+for (NPString *s in arr) {
     printf("%s\n", [s UTF8String]);
 }
 ```
 
-在 parser 层 desugar 为对 `[coll count]` / `[coll objectAtIndex:]` 的下标循环——集合表达式只求值一次，nil 安全（`[nil count]` 为 0），元素是借用语义（不 retain/release）。普通 C 数组和 `NFArray` 都能用。
+在 parser 层 desugar 为对 `[coll count]` / `[coll objectAtIndex:]` 的下标循环——集合表达式只求值一次，nil 安全（`[nil count]` 为 0），元素是借用语义（不 retain/release）。普通 C 数组和 `NPArray` 都能用。
 
 ### 协议一致性检查
 
@@ -509,7 +509,7 @@ for (id item in items) {
 }
 ```
 
-`isKindOfClass:` 沿 isa 链查找，`respondsToSelector:` 查统一 vtable，`isEqual:` 在根类上默认指针相等（与 `NSObject` 一致）——而 `NFString` 与 `NFNumber` 各自重写为**值相等**，这正是字典键能用的前提。旧拼写 `isKindOf:` 保留作兼容别名。
+`isKindOfClass:` 沿 isa 链查找，`respondsToSelector:` 查统一 vtable，`isEqual:` 在根类上默认指针相等（与 `NSObject` 一致）——而 `NPString` 与 `NPNumber` 各自重写为**值相等**，这正是字典键能用的前提。旧拼写 `isKindOf:` 保留作兼容别名。
 
 ### struct `==` / `!=` 值比较
 
@@ -530,7 +530,7 @@ p == &a               // 指针比较语义不变
 方法体里含 `@await` 即为 async——无需任何标注，与 C++20 用 `co_await` 判定协程的风格一致（声明端与普通 ObjC 方法一字不差，vtable 布局不变）：
 
 ```nopa
-@interface Fetcher : NFObject
+@interface Fetcher : NPObject
 - (int)compute:(int)n;
 - (void)runAll;
 @end
@@ -544,7 +544,7 @@ p == &a               // 指针比较语义不变
 // async void = 入口方法（阻塞泵到完成）
 - (void)runAll {
     int x = @await [self compute:21]; // await 一个调用会把本方法也传染成 async
-    NFLog(@"result=%d", x);
+    NPLog(@"result=%d", x);
 }
 @end
 
@@ -558,7 +558,7 @@ int main() {
 设计规则：
 
 - **链式传染**——方法体里出现 `@await` 它自己就是 async；非 void 的 async 方法只能在 async 上下文中 await 调用（同步调用编译期报错）。
-- **`@await` 降级为状态机**——方法体在挂起点被拆进 `switch(task->state)` 驱动的堆上 `NFTask`；活过挂起点的局部变量提升进每方法一个的 frame 结构体。
+- **`@await` 降级为状态机**——方法体在挂起点被拆进 `switch(task->state)` 驱动的堆上 `NPTask`；活过挂起点的局部变量提升进每方法一个的 frame 结构体。
 - **`@try` 跨越 `@await`** 会被拒绝（`jmp_buf` 无法活过挂起点）；`@noarc` 跨 await 合法；break/continue 跨 await 变成状态跳转。
 - 协作式单线程调度器（`nopa_run_all`）与 I/O 集成是下一个里程碑。
 
@@ -569,14 +569,14 @@ int main() {
 ```nopa
 // 对象模式可以在同一个 switch 里自由混用：
 switch (subject) {
-    case NFString *s:                          // 类型绑定 → isKindOfClass:
-        NFLog(@"string: %s", [s UTF8String]);
+    case NPString *s:                          // 类型绑定 → isKindOfClass:
+        NPLog(@"string: %s", [s UTF8String]);
         break;
-    case NFNumber *n when [n intValue] > 3:    // 类型绑定 + `when` 守卫
-        NFLog(@"number: %d", [n intValue]);
+    case NPNumber *n when [n intValue] > 3:    // 类型绑定 + `when` 守卫
+        NPLog(@"number: %d", [n intValue]);
         break;
     case @"literal":                           // 对象字面量 → isEqual:（值语义）
-        NFLog(@"matched a literal");
+        NPLog(@"matched a literal");
         break;
     default:
         break;
@@ -585,10 +585,10 @@ switch (subject) {
 // 比较模式用在**标量** subject 上：
 switch (n) {
     case > 100:
-        NFLog(@"big");
+        NPLog(@"big");
         break;
     case > 0 && < 100:                         // 区间
-        NFLog(@"small");
+        NPLog(@"small");
         break;
     default:
         break;
@@ -597,7 +597,7 @@ switch (n) {
 // 普通多值常量仍是纯 C：
 switch (n) {
     case 1, 2, 3:
-        NFLog(@"one of 1-3");
+        NPLog(@"one of 1-3");
         break;
     default:
         break;
@@ -609,7 +609,7 @@ switch (n) {
 | `T *name` | `nopa_isKindOfClass(subject, &NOPA_CLASS_$_T)`；臂内 `name` 已绑定为 `(T *)subject` |
 | `> 10` / `< 10` / `>= 0` / `<= 9` | `subject > 10`（subject 填进悬空的操作数位） |
 | `> 0 && < 100` | `subject > 0 && subject < 100` |
-| `@"lit"` / `@42` / `@YES` / `@'c'` / `@(expr)` | `[subject isEqual:<字面量>]`——值语义，`@"lit"` 能匹配**另一个**内容相同的 NFString |
+| `@"lit"` / `@42` / `@YES` / `@'c'` / `@(expr)` | `[subject isEqual:<字面量>]`——值语义，`@"lit"` 能匹配**另一个**内容相同的 NPString |
 | `T *x when <expr>` | 类型测试再 `&&` 上守卫 |
 | 其余 | 普通 C 常量，用 `==` 比较 |
 
@@ -629,37 +629,37 @@ M1 限制，全部**报错而非静默编译错**：
 ### 装箱字面量（`@(expr)` / `@YES` / `@NO` / `@'c'`）
 
 ```nopa
-NFNumber *a = @123;          // int
-NFNumber *b = @1.5;          // double
-NFNumber *c = @YES;          // BOOL → 1
-NFNumber *d = @'c';          // char
-NFNumber *e = @(i + 1);      // 工厂由操作数的静态类型决定
+NPNumber *a = @123;          // int
+NPNumber *b = @1.5;          // double
+NPNumber *c = @YES;          // BOOL → 1
+NPNumber *d = @'c';          // char
+NPNumber *e = @(i + 1);      // 工厂由操作数的静态类型决定
 ```
 
-每个形态都产出真正的 `NFNumber`：字面量自身的类型选定工厂（`numberWithInt:` / `numberWithDouble:` / `numberWithChar:`），`@(expr)` 则按**操作数的静态类型**选——`double`/`float` → `numberWithDouble:`、`BOOL` → `numberWithBool:`、`char` → `numberWithChar:`、`long`/`long long` → `numberWithLongLong:`、其余整数 → `numberWithInt:`。装箱结果就是普通对象，照常派发：`[@(i * 2) intValue]`。
+每个形态都产出真正的 `NPNumber`：字面量自身的类型选定工厂（`numberWithInt:` / `numberWithDouble:` / `numberWithChar:`），`@(expr)` 则按**操作数的静态类型**选——`double`/`float` → `numberWithDouble:`、`BOOL` → `numberWithBool:`、`char` → `numberWithChar:`、`long`/`long long` → `numberWithLongLong:`、其余整数 → `numberWithInt:`。装箱结果就是普通对象，照常派发：`[@(i * 2) intValue]`。
 
 `@(expr)` 的改写落在 **checker** 而不是 parser：parser 没有类型，后端是 C99 更没有 `_Generic` 可用。改写复用普通消息发送节点，静态派发与 nil 守卫因此零特判——与对象下标、struct `==` 同一套机制。非算术类型不会被默默装箱，而是报错：
 
 ```
-illegal type 'NFString *' in a boxed expression — '@(...)' accepts arithmetic and BOOL values only
+illegal type 'NPString *' in a boxed expression — '@(...)' accepts arithmetic and BOOL values only
 ```
 
 ### 字典字面量（`@{ key: value }`）
 
 ```nopa
-NFDictionary *d = @{ @"a": @1, @"b": @2, @"c": @3 };
-NFLog(@"%d", [[d objectForKey:@"b"] intValue]);   // 2
+NPDictionary *d = @{ @"a": @1, @"b": @2, @"c": @3 };
+NPLog(@"%d", [[d objectForKey:@"b"] intValue]);   // 2
 printf("%lu\n", (unsigned long)[d count]);        // 3
 
-NFMutableDictionary *m = [NFMutableDictionary dictionary];
+NPMutableDictionary *m = [NPMutableDictionary dictionary];
 [m setObject:@10 forKey:@"x"];
 [m setObject:@11 forKey:@"x"];   // 相等的键是替换，不追加
 [m removeObjectForKey:@"x"];
 
-NFDictionary *empty = @{};       // `@{}` 是空字典（数组是 `@[]`）
+NPDictionary *empty = @{};       // `@{}` 是空字典（数组是 `@[]`）
 ```
 
-键用 `isEqual:` 比较，因此 `NFString`/`NFNumber` 键是**值语义**。字符串字面量已 **interning**（同内容 → 同一对象，ObjC 常量串语义），且值相等仍是语义保证——用新写的 `@"b"` 查询照样能找到条目。存储照搬 `NFArray`——两个平行对象数组 + 线性扫描；`count` / `objectForKey:` / `allKeys` / `allValues` / `copy` / `description` / 按内容的 `isEqual:` 补全了 API。条目必须是对象（与 ObjC 一致）：
+键用 `isEqual:` 比较，因此 `NPString`/`NPNumber` 键是**值语义**。字符串字面量已 **interning**（同内容 → 同一对象，ObjC 常量串语义），且值相等仍是语义保证——用新写的 `@"b"` 查询照样能找到条目。存储照搬 `NPArray`——两个平行对象数组 + 线性扫描；`count` / `objectForKey:` / `allKeys` / `allValues` / `copy` / `description` / 按内容的 `isEqual:` 补全了 API。条目必须是对象（与 ObjC 一致）：
 
 ```
 illegal type 'int' in a dictionary literal — keys and values must be Objective-C objects
@@ -670,7 +670,7 @@ illegal type 'int' in a dictionary literal — keys and values must be Objective
 Nopa 的异常是**不用栈展开的 ObjC 异常语义**。`@try`/`@catch`/`@finally`/`@throw` 的行为与 clang `-fobjc-arc-exceptions` 模式完全一致——差分测试套件（`tests/eh_diff/run_eh_diff.sh`）把每个用例同时跑在 nopac 与真 clang/ObjC 下、逐行 diff stderr，锁定这一保证（7/7 通过）。
 
 ```nopa
-@interface Boom : NFObject
+@interface Boom : NPObject
 - (void)fire;
 @end
 
@@ -684,13 +684,13 @@ int main() {
     @try {
         Boom *b = [[Boom alloc] init];
         [b fire];                       // 执行到此为止
-        NFLog(@"never runs");
+        NPLog(@"never runs");
     }
-    @catch (NFString *e) {
-        NFLog(@"caught: %@", e);
+    @catch (NPString *e) {
+        NPLog(@"caught: %@", e);
     }
     @finally {
-        NFLog(@"finally always runs");
+        NPLog(@"finally always runs");
     }
     return 0;
 }
@@ -703,7 +703,7 @@ int main() {
 - **typed catch 链按 isa 匹配** —— 不匹配的 `@catch` 放行给外层 `@try`；catch 内重抛传播到外层处理器，不会重入本层。
 - **`@finally` 顺序** —— 内层 finally 在外层 catch 之前执行；外层 finally 在外层 catch 之后执行。
 - **block 字面量内的 `@throw`** —— 像普通调用点一样传播到外层 `@try`。
-- **未捕获异常 abort** —— 输出 ObjC 措辞 `*** Terminating app due to uncaught exception of class 'NFString'`，退出码 1。
+- **未捕获异常 abort** —— 输出 ObjC 措辞 `*** Terminating app due to uncaught exception of class 'NPString'`，退出码 1。
 - **C 调用方不会错过异常** —— 桥接头 wrapper 检查错误旗标并 abort，而不是静默返回零值。
 
 **`-eh checked` 已是默认后端**——直接 `nopac run` 就用它。`-eh legacy`（别名 `-eh sjlj`）切回旧的零开销 setjmp 后端，是一条完整的回退路径；该后端有经典限制：跨函数抛出会跳过中间帧的清理（见下方已知限制）。
@@ -720,16 +720,16 @@ int main() {
 | 进生成的 C 吗 | 进（setjmp/旗标机制） | **永不** —— 无代码、不占 vtable 槽位 |
 
 ```nopa
-@interface Repo : NFObject
-- (NFString *)fetch:(const char *)url @throws(NFError *);   // 会抛 NFError *
+@interface Repo : NPObject
+- (NPString *)fetch:(const char *)url @throws(NPError *);   // 会抛 NPError *
 - (int)parse:(const char *)s @throws;                       // 会抛，类型不注明
 - (int)count;                                              // 从不抛
 @end
 
 @implementation Repo
-- (NFString *)fetch:(const char *)url @throws(NFError *) {
+- (NPString *)fetch:(const char *)url @throws(NPError *) {
     if (!url) {
-        @throw [[NFError alloc] init];   // 语句：抛出
+        @throw [[NPError alloc] init];   // 语句：抛出
     }
     return @"ok";
 }
@@ -741,7 +741,7 @@ int main() {
 **checker 强制什么**
 
 - `@throws(T *)` —— 逃逸出本声明的每个 `@throw`，其静态类型必须与 `T` 相容（允许子类）：
-  `error: '@throw' of type 'AppError *' does not match the declared '@throws(NFString *)'`
+  `error: '@throw' of type 'AppError *' does not match the declared '@throws(NPString *)'`
 - 裸 `@throws` —— 体内必须确有逃逸的 `@throw`：
   `error: 'liar' is marked '@throws' but its body never executes '@throw'`
 - 不写 —— 逃逸的 `@throw` 报 error：
@@ -777,19 +777,19 @@ static void guarded(int n) {                    // 通过 —— 就地捕获
 
 #### 隐式根类（nopa_root）
 
-Nopa 现在支持用户自定义根类。你不再需要强制继承 `NFObject`——不写父类的 `@interface` 会自动获得编译器注入的隐式根类 `nopa_root`，同时保持 `id` 类型的统一性和静态派发能力。
+Nopa 现在支持用户自定义根类。你不再需要强制继承 `NPObject`——不写父类的 `@interface` 会自动获得编译器注入的隐式根类 `nopa_root`，同时保持 `id` 类型的统一性和静态派发能力。
 
 **之前：**
 
 ```nopa
-@interface Animal : NFObject   // 必须继承 NFObject
+@interface Animal : NPObject   // 必须继承 NPObject
 ```
 
 **之后：**
 
 ```nopa
 @interface Animal              // 不写父类 → 隐式根类
-@interface Animal : NFObject   // 显式继承 NFObject 仍然合法
+@interface Animal : NPObject   // 显式继承 NPObject 仍然合法
 ```
 
 两者都合法，且 `id` 可以指向任何 Nopa 对象。
@@ -847,12 +847,12 @@ id obj = a;                    // ✅ 合法，Animal 继承自 nopa_root
 [obj speak];                   // 静态派发：obj->header.vtable[...]
 ```
 
-#### NFObject vs nopa_root
+#### NPObject vs nopa_root
 
 | 写法                          | 含义                       | 适用场景            |
 | --------------------------- | ------------------------ | --------------- |
 | `@interface Xxx`            | 隐式继承 `nopa_root`，最轻量     | 自定义内存布局、内核、嵌入式  |
-| `@interface Xxx : NFObject` | 显式继承，获得 retain/release 等 | 用户态应用、需要完整运行时支持 |
+| `@interface Xxx : NPObject` | 显式继承，获得 retain/release 等 | 用户态应用、需要完整运行时支持 |
 
 ```nopa
 // 自定义根类：轻量，无引用计数
@@ -863,9 +863,9 @@ id obj = a;                    // ✅ 合法，Animal 继承自 nopa_root
 - (void)run;
 @end
 
-// 使用 NFObject：完整功能，自动内存管理
-@interface UserModel : NFObject
-@property NFString *name;
+// 使用 NPObject：完整功能，自动内存管理
+@interface UserModel : NPObject
+@property NPString *name;
 @end
 ```
 
@@ -881,7 +881,7 @@ nopac -rewrite-nopa -ffreestanding kernel.np   # 生成自包含 C
 
 - 不 `#include <string.h>`，改 `#include <nopa/runtime.h>`（freestanding 分支）
 - `@try/@catch/@finally` 走默认 `-eh checked` 后端：纯旗标 + 守卫，零 `setjmp/longjmp`、零 `jmp_buf`（`-eh legacy` 才用 `__builtin_setjmp/longjmp` + 普通全局而非 `__thread`）
-- 类型（`SEL`/`NFClass`/`NFObject`/`id`）自含
+- 类型（`SEL`/`NPClass`/`NPObject`/`id`）自含
 - **不捆绑 Clang Blocks 运行时** —— block 字面量引用 `__NSConcreteStackBlock`/`_Block_copy`/`_Block_release`；真裸机上要么链接一个 Blocks runtime 移植，要么用 `-backend portable`/`-backend gcc`（block 展开为普通 C 函数，无 ABI 符号）
 
 用户只需提供：`nopa_nopa_root_class`、异常全局（如用 `@try`）、`memcpy`（如用 `@try`）、freestanding 头（`stdint.h`/`stddef.h`/`stdbool.h`）。
@@ -962,7 +962,7 @@ obj->header.vtable[INDEX_doSomething](obj, arg);
 
 ```nopa
 @namespace Game
-    @interface Player : NFObject {
+    @interface Player : NPObject {
         int health;
     }
     - (id)init;
@@ -980,7 +980,7 @@ obj->header.vtable[INDEX_doSomething](obj, arg);
 @endnamespace
 
 @namespace UI
-    @interface HUD : NFObject {}
+    @interface HUD : NPObject {}
     - (void)showPlayerHealth:(Game::Player *)player;
     @end
 @endnamespace
@@ -1065,7 +1065,7 @@ Enemy *e = [[Enemy alloc] init];
 - **不注入 ARC** — ARC 分析器完全跳过 `@noarc` 块，不为其中使用的对象插入任何 retain/release。
 - **运行时方法豁免** — `retain`/`release`/`dealloc`/`autorelease` 自身的实现无需 `@noarc` 即可调用这些方法。
 - **全程序等价物** — `-fno-nopa-arc` 把整个程序切到 MRC；`@noarc` 对单个块做同样的事。
-- **Foundation** — NFString/NFMutableString 的便捷构造器（`+stringWithUTF8String:`、`+stringWithString:`）把刻意为之的 `autorelease` 包在 `@noarc { }` 里。
+- **Foundation** — NPString/NPMutableString 的便捷构造器（`+stringWithUTF8String:`、`+stringWithString:`）把刻意为之的 `autorelease` 包在 `@noarc { }` 里。
 
 ---
 
@@ -1112,14 +1112,14 @@ M1 限制（编译期强制）：`@defer` 必须直接位于块内；defer 体�
 
 实现：纯 desugar（`crates/defer`，pipeline Step 3.9——`-eh checked` 改写之后、ARC 之前）。codegen/checker/运行时看到的都是普通语句——下游零改动。Golden：`tests/golden/36_defer/`。
 
-### `NFAsync<T>` —— 声明式 async 标记
+### `NPAsync<T>` —— 声明式 async 标记
 
-`@await` M1/M2 有个软肋：头文件里看不出方法会挂起。`NFAsync<T>` 把 async-ness 扶正为**返回类型位可见的标记**——parser 把它解包为 `T`，纯编译期元数据：生成 C 中 `NFAsync` 出现 **0 次**，vtable 布局、跨 TU 链接、桥接头全部不受影响。
+`@await` M1/M2 有个软肋：头文件里看不出方法会挂起。`NPAsync<T>` 把 async-ness 扶正为**返回类型位可见的标记**——parser 把它解包为 `T`，纯编译期元数据：生成 C 中 `NPAsync` 出现 **0 次**，vtable 布局、跨 TU 链接、桥接头全部不受影响。
 
 ```nopa
-@interface Fetcher : NFObject
-- (NFAsync<int>)compute:(int)n;   // 会挂起，完成后给 int
-+ (NFAsync<void>)runAll;          // 入口方法
+@interface Fetcher : NPObject
+- (NPAsync<int>)compute:(int)n;   // 会挂起，完成后给 int
++ (NPAsync<void>)runAll;          // 入口方法
 - (int)plain:(int)n;              // 不标 = 承诺不挂起
 @end
 ```
@@ -1128,14 +1128,14 @@ M1 限制（编译期强制）：`@defer` 必须直接位于块内；defer 体�
 
 | 声明 | 体内 | 判定 |
 |------|------|------|
-| `NFAsync<T>` | 有 `@await` | ✅ |
-| `NFAsync<T>` | 无 `@await` | **error** —— `'compute:' is marked 'NFAsync<T>' but its body never suspends — remove the marker or add an '@await'` |
-| 裸 `T` | 有 `@await` | **warning** —— `'compute:' contains '@await' but its return type is not marked 'NFAsync<T>' — mark it so callers can see it suspends`（`-Werror` 升级拦截） |
+| `NPAsync<T>` | 有 `@await` | ✅ |
+| `NPAsync<T>` | 无 `@await` | **error** —— `'compute:' is marked 'NPAsync<T>' but its body never suspends — remove the marker or add an '@await'` |
+| 裸 `T` | 有 `@await` | **warning** —— `'compute:' contains '@await' but its return type is not marked 'NPAsync<T>' — mark it so callers can see it suspends`（`-Werror` 升级拦截） |
 | 裸 `T` | 无 `@await` | ✅ |
 
-- 标记是签名的一部分：`@interface` 与 `@implementation` 必须一致——`'NFAsync' marker mismatch on 'compute:': the @interface and @implementation disagree` 报 error。仅头文件声明的 `@interface` 方法豁免（跨 TU 安全）。
-- 值位一律拒绝——变量/参数/ivar/属性：`'NFAsync<T>' is a declaration marker, not a value type (variable) — '@await' the async call instead`。
-- `NFAsync` 是保留类名。
+- 标记是签名的一部分：`@interface` 与 `@implementation` 必须一致——`'NPAsync' marker mismatch on 'compute:': the @interface and @implementation disagree` 报 error。仅头文件声明的 `@interface` 方法豁免（跨 TU 安全）。
+- 值位一律拒绝——变量/参数/ivar/属性：`'NPAsync<T>' is a declaration marker, not a value type (variable) — '@await' the async call instead`。
+- `NPAsync` 是保留类名。
 
 Golden：`tests/golden/37_async_marker/`；负例在 `tests/negative/async_marker_*.np`。
 
@@ -1149,42 +1149,42 @@ Golden：`tests/golden/37_async_marker/`；负例在 `tests/negative/async_marke
 | `recv[i] = v` | `[recv setObject:v atIndex:i]` | 类还声明了 `setObject:atIndex:` |
 
 ```nopa
-NFArray *a = @[ @"x", @"y", @"z" ];
-NFLog(@"%@", a[0]);            // → [a objectAtIndex:0]
-NFMutableArray *m = [NFMutableArray array];
+NPArray *a = @[ @"x", @"y", @"z" ];
+NPLog(@"%@", a[0]);            // → [a objectAtIndex:0]
+NPMutableArray *m = [NPMutableArray array];
 [m addObject:@"first"];
 m[0] = @"hello";               // → [m setObject:@"hello" atIndex:0] —— 替换语义，不是追加
 ```
 
 普通 C 零误伤：`int c[3]; c[1]`、`char *p; p[0]`、`const char *s; s[2]` 全部原样透传为 C 下标（探针验证，零误报）。改写落在 checker（parser 层拿不到变量类型，emit 阶段没有 vtable 元数据），下游 vtable 派发、nil 守卫、SEL 常量零特判。
 
-字典下标（`d[@"k"]`）**有意不纳入**本改写：改写只映射到 `objectAtIndex:`，所以 `NFDictionary` 不声明 `objectForKeyedSubscript:`——声明它等于宣传一个会被发到错 selector 的写法。用 `[d objectForKey:@"k"]`。
+字典下标（`d[@"k"]`）**有意不纳入**本改写：改写只映射到 `objectAtIndex:`，所以 `NPDictionary` 不声明 `objectForKeyedSubscript:`——声明它等于宣传一个会被发到错 selector 的写法。用 `[d objectForKey:@"k"]`。
 
 ### 泛型真检查（单态化 + 元素类型）
 
-泛型容器**真单态化并做类型检查**。`NFArray<NFString *>` 与 `NFDictionary<NFString *, NFNumber *>` 会生成真正的特化 C（struct、vtable、类元数据、类型已代入的方法副本），checker 再把元素类型代入方法签名——所以元素类型是被强制的，不是被擦除的：
+泛型容器**真单态化并做类型检查**。`NPArray<NPString *>` 与 `NPDictionary<NPString *, NPNumber *>` 会生成真正的特化 C（struct、vtable、类元数据、类型已代入的方法副本），checker 再把元素类型代入方法签名——所以元素类型是被强制的，不是被擦除的：
 
 ```nopa
-NFMutableArray<NFString *> *m = [NFMutableArray array];
+NPMutableArray<NPString *> *m = [NPMutableArray array];
 [m addObject:@"a"];
-NFString *s = [m objectAtIndex:0];      // NFString *，不是 id
+NPString *s = [m objectAtIndex:0];      // NPString *，不是 id
 
-[m addObject:@42];                      // ✗ 报错：NFNumber* 放进 NFString* 容器
+[m addObject:@42];                      // ✗ 报错：NPNumber* 放进 NPString* 容器
 int bad = [m objectAtIndex:0];          // ✗ 报错：指针赋给标量
 ```
 
-`@[...]` 与 `@{...}` 字面量在**所有元素同型**时会**推断**元素类型，所以 `NFArray<NFString *> *a = @[ @"x", @"y" ];` 无需标注；混合类型数组回退成裸 `NFArray`。
+`@[...]` 与 `@{...}` 字面量在**所有元素同型**时会**推断**元素类型，所以 `NPArray<NPString *> *a = @[ @"x", @"y" ];` 无需标注；混合类型数组回退成裸 `NPArray`。
 
-两种拼写并存：裸 `NFArray` 依然完整支持（零迁移），只是擦除成 `id`。把裸容器赋给特化变量是允许的，但会告警——此时元素类型未经验证：
+两种拼写并存：裸 `NPArray` 依然完整支持（零迁移），只是擦除成 `id`。把裸容器赋给特化变量是允许的，但会告警——此时元素类型未经验证：
 
 ```text
-warning: assigning a bare 'NFArray *' to a specialization of it — the bare
+warning: assigning a bare 'NPArray *' to a specialization of it — the bare
 container's element type is unchecked; add an explicit cast if the contents are known to match
 ```
 
-`-Werror` 可升级拦截。`NFArray<A>` 与 `NFArray<B>` 之间互相赋值则不告警——与 ObjC lightweight generics 同样的宽松（你要回了 `id`，就给你 `id`）。
+`-Werror` 可升级拦截。`NPArray<A>` 与 `NPArray<B>` 之间互相赋值则不告警——与 ObjC lightweight generics 同样的宽松（你要回了 `id`，就给你 `id`）。
 
-代价要说清楚：特化是编译期代码，不是免费的类型安全。同一程序改用泛型拼写而非裸拼写，生成的 C 多约 42 KB / +41%——全是重复的方法体与元数据，布局逐字节相同，故运行期收益为零。Golden：`tests/golden/40_nfarray_generic/`。
+代价要说清楚：特化是编译期代码，不是免费的类型安全。同一程序改用泛型拼写而非裸拼写，生成的 C 多约 42 KB / +41%——全是重复的方法体与元数据，布局逐字节相同，故运行期收益为零。Golden：`tests/golden/40_nparray_generic/`。
 
 ### Nopa 语法宏（双轨 `#define`）
 
@@ -1193,7 +1193,7 @@ container's element type is unchecked; add an explicit cast if the contents are 
 ```nopa
 #define TAG(o)      [o tag]                    // nopa 轨：nopac 展开
 #define BUMP(o, n)  [o addTo:n times:1]
-#define LOG(x)      NFLog(@"tag=%d", x)        // 宏体含 @literal
+#define LOG(x)      NPLog(@"tag=%d", x)        // 宏体含 @literal
 #define TWICE(x)    ((x) + (x))                // C 轨：clang 展开
 
 int t = TAG(w);                                    // → [w tag]
@@ -1215,7 +1215,7 @@ struct Point p1 = { .x = 1, .y = 2 };      // 1. 完整指定
 struct Point p2 = { .y = 5 };               // 2. 部分指定——未指定字段零填充
 struct Point p3 = { .x = 1, 7 };           // 3. 指定与位置式混合
 
-NFRange r = (NFRange){ .location = 3,      // 4. 复合字面量 + 指定
+NPRange r = (NPRange){ .location = 3,      // 4. 复合字面量 + 指定
                         .length = 9 };
 
 CGPoint pts[3] = { [0].wx = 1, [2].wy = 6 };  // 5. 数组元素
@@ -1307,8 +1307,8 @@ cargo test --workspace
 #import <Foundation/Foundation.nh>    // 纯声明——不内联任何实现
 
 int main() {
-    NFString *s = [NFString stringWithUTF8String:"hello"];
-    NFLog(@"%@", s);
+    NPString *s = [NPString stringWithUTF8String:"hello"];
+    NPLog(@"%@", s);
     return 0;
 }
 ```
@@ -1333,7 +1333,7 @@ nopac app.np -o app
 #include <stdio.h>
 #import <Foundation/Foundation.np>
 
-@interface Greeter : NFObject
+@interface Greeter : NPObject
 - (void)greet;
 @end
 
@@ -1355,7 +1355,7 @@ int main() {
 ### 多态
 
 ```nopa
-@interface Animal : NFObject
+@interface Animal : NPObject
 - (void)speak;
 @end
 
@@ -1390,9 +1390,9 @@ int main() {
 ### Block + ARC
 
 ```nopa
-typedef void (^EventHandler)(int code, NFString *msg);
+typedef void (^EventHandler)(int code, NPString *msg);
 
-@interface Engine : NFObject
+@interface Engine : NPObject
 - (void)onEvent:(EventHandler)handler;
 @end
 
@@ -1400,7 +1400,7 @@ int main() {
     @autoreleasepool {
         Engine *e = [[Engine alloc] init];
         int captured = 42;
-        [e onEvent:^void(int code, NFString *msg) {
+        [e onEvent:^void(int code, NPString *msg) {
             printf("code=%d msg=%s captured=%d\n", code, msg, captured);
         }];
     }
@@ -1413,7 +1413,7 @@ int main() {
 Nopa 通过**编译期单态化（monomorphization）**实现泛型——每个 `DataPack<QuantumToken *>` 都会生成独立的 C 结构体 `DataPack_QuantumToken_ptr`，类型参数被具体类型替换。没有类型擦除，没有装箱，没有运行时开销。
 
 ```nopa
-@interface DataPack<T> : NFObject {
+@interface DataPack<T> : NPObject {
     @public
     int _count;
     T _storage[2];

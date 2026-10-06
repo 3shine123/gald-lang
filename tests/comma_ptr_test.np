@@ -4,7 +4,7 @@ int main() {
     int *a = &v, *b = &v;
     char *s1 = "x", *s2 = "y";
     int x = 1, y = 2;
-    NFLog(@"%d %d %d %d", *a + 1, *b + 2, x, y);
-    NFLog(@"%s %s", s1, s2);
+    NPLog(@"%d %d %d %d", *a + 1, *b + 2, x, y);
+    NPLog(@"%s %s", s1, s2);
     return 0;
 }

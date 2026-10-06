@@ -55,9 +55,9 @@
 | `double` | `double` |
 | `char` | `char` |
 | `BOOL` | `_Bool` |
-| `id` | `NFObject *` |
+| `id` | `NPObject *` |
 | `SEL` | `SEL`（结构体） |
-| `instancetype` | `NFObject *` |
+| `instancetype` | `NPObject *` |
 | `T`（泛型参数） | 具体类型（monomorphization） |
 
 ### 3.2 对象指针
@@ -70,17 +70,17 @@
 | 源码 | `--backend=clang` | `--backend=gcc` / `--backend=portable` |
    |---|---|---|
    | `int (^)(int)` | `int (^)(int)` | `int (*)(struct __nopa_block_layout_N *, int)` |
-   | `void (^)(NFString *)` | `void (^)(NFString *)` | `void (*)(struct __nopa_block_layout_N *, NFString *)` |
+   | `void (^)(NPString *)` | `void (^)(NPString *)` | `void (*)(struct __nopa_block_layout_N *, NPString *)` |
 
 ---
 
 ## 4. 对象布局
 
-### 4.1 NFObject 基础头
+### 4.1 NPObject 基础头
 
 ```c
-struct NFObject {
-    struct NFClass *isa;     // 类元数据指针
+struct NPObject {
+    struct NPClass *isa;     // 类元数据指针
     uint32_t retain_count;   // 引用计数
 };
 ```
@@ -89,24 +89,24 @@ struct NFObject {
 
 ```c
 struct Person {
-    struct NFObject base;    // 父类字段必须为第一个成员
+    struct NPObject base;    // 父类字段必须为第一个成员
     int age;
-    NFString *name;
+    NPString *name;
 };
 ```
 
-### 4.3 类元数据（NFClass）
+### 4.3 类元数据（NPClass）
 
 ```c
-typedef struct NFClass {
+typedef struct NPClass {
     const char *name;
-    struct NFClass *superclass;
+    struct NPClass *superclass;
     size_t instance_size;
     struct nopa_vtable *vtable;
     struct nopa_meta_vtable *meta_vtable;
     struct nopa_vtable *meta_vtable_inst;
-    void (*dealloc)(NFObject *, SEL);
-} NFClass;
+    void (*dealloc)(NPObject *, SEL);
+} NPClass;
 ```
 
 ---
@@ -142,7 +142,7 @@ struct nopa_vtable {
 
 ```c
 // [ClassName method:arg]
-((RT(*)(NFClass *, SEL, int))((struct nopa_vtable *)meta_vtable_inst->methods[INDEX]))
+((RT(*)(NPClass *, SEL, int))((struct nopa_vtable *)meta_vtable_inst->methods[INDEX]))
     (meta_vtable_inst, _cmd, arg)
 ```
 
@@ -154,7 +154,7 @@ struct nopa_vtable {
 
 ```c
 // [super init]
-struct nopa_vtable *super_vt = ((struct NFClass *)((NFObject *)self)->isa)->superclass->vtable;
+struct nopa_vtable *super_vt = ((struct NPClass *)((NPObject *)self)->isa)->superclass->vtable;
 ((RT(*)(id, SEL))super_vt->methods[INDEX])(self, _cmd);
 ```
 
@@ -164,7 +164,7 @@ struct nopa_vtable *super_vt = ((struct NFClass *)((NFObject *)self)->isa)->supe
 
 ```c
 struct Person {
-    struct NFObject base;
+    struct NPObject base;
     int age;
 };
 struct Employee {
@@ -373,7 +373,7 @@ Block 字面量**与 gcc 后端共用同一套 struct+invoke 展开**（见 §8.
 - `nopa_release` 在 `retain_count` 到达 0 时，**必须**先通过 `obj->isa->dealloc` 调用 `dealloc`，再 `free(obj)`。
 - `dealloc` 方法体中 `[super dealloc]` 必须保留，生成为父类 vtable 的 `dealloc` 调用。
 - `dealloc` 调用期间**不再**走 `nopa_release` 路径，避免死循环/双重释放。
-- `NFClass` 结构体新增 `void (*dealloc)(NFObject *, SEL)` 字段，由 `nopa_meta_init()` 填充。
+- `NPClass` 结构体新增 `void (*dealloc)(NPObject *, SEL)` 字段，由 `nopa_meta_init()` 填充。
 
 ### 10.4 Autorelease Pool 实现约束
 
@@ -396,11 +396,11 @@ Block 字面量**与 gcc 后端共用同一套 struct+invoke 展开**（见 §8.
 
 | # | 禁止行为 | 原因 |
 |---|---|---|
-| 1 | 将方法签名中的 `NFObject *self` 改为具体子类指针 | 破坏 Uniform VTable 和对象头一致性 |
-| 2 | 将 `struct NFClass *isa` 改为 `NFClass *isa` | 类型不一致，依赖 typedef 可见性 |
+| 1 | 将方法签名中的 `NPObject *self` 改为具体子类指针 | 破坏 Uniform VTable 和对象头一致性 |
+| 2 | 将 `struct NPClass *isa` 改为 `NPClass *isa` | 类型不一致，依赖 typedef 可见性 |
 | 3 | 生成重复的 `#include` | 冗余，可能引发宏重定义问题 |
 | 4 | Block typedef 不带命名空间前缀 | 全局命名空间污染 |
-| 5 | `NFObject *` → 子类指针赋值时不加显式强制转换 | `clang -Werror` 报 incompatible pointer types |
+| 5 | `NPObject *` → 子类指针赋值时不加显式强制转换 | `clang -Werror` 报 incompatible pointer types |
 | 6 | 为每个类生成独立的 vtable struct | 破坏 Uniform VTable 设计 |
 | 7 | `@selector` 直接输出 hash 值作为无符号整数 | `SEL` 是结构体，不是 `unsigned` |
 | 8 | 在 `@try` body 中生成空块或 `/* stub */` | 异常处理必须实际生效 |

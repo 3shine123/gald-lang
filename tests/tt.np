@@ -1,5 +1,5 @@
-// NFKeywordTest.h -> 专为测试 @ 关键字编写的进阶工具类
-// 基于 NFFoundation 框架的 Objective-C 风格高阶测试
+// NPKeywordTest.h -> 专为测试 @ 关键字编写的进阶工具类
+// 基于 NPFoundation 框架的 Objective-C 风格高阶测试
 
 #import <Foundation/Foundation.np>
 #include <stdio.h>
@@ -8,7 +8,7 @@
 
 // ============ 1. @protocol 关键字测试 ============
 // 测试编译器对“协议/接口”定义以及可选/必选方法的解析
-@protocol NFCollectionDelegate <NFObject>
+@protocol NPCollectionDelegate <NPObject>
 @required
 - (void)collectionDidReachCapacity:(id)collection;
 @optional
@@ -18,11 +18,11 @@
 
 // ============ 2. @class 关键字测试 ============
 // 前置声明，测试编译器在未完全解析该类时对指针类型的容错能力
-@class NFDataNode;
+@class NPDataNode;
 
 
 // ============ 3. 核心数据类定义 ============
-@interface NFDataNode : NFObject
+@interface NPDataNode : NPObject
 {
     // 测试 @protected / @private / @public 访问权限关键字
     @private
@@ -30,18 +30,18 @@
     id _value;
     
     @protected
-    NFDataNode* _nextNode;
+    NPDataNode* _nextNode;
 }
 
 // 测试 @property 关键字及其属性修饰符（nonatomic, retain, copy, assign 等）
 @property (nonatomic, copy) const char* key;
 @property (nonatomic, retain) id value;
-@property (nonatomic, retain) NFDataNode* nextNode;
+@property (nonatomic, retain) NPDataNode* nextNode;
 
 - (id)initWithKey:(const char *)k value:(id)v;
 @end
 
-@implementation NFDataNode
+@implementation NPDataNode
 
 // 测试 @synthesize 关键字，看编译器能否自动生成 getter/setter 符号
 @synthesize key = _key;
@@ -70,21 +70,21 @@
 
 
 // ============ 4. 高级工具箱：带代理通知的容器类 ============
-@interface NFDataContainer : NFObject
+@interface NPDataContainer : NPObject
 {
     @private
-    NFDataNode* _headNode;
+    NPDataNode* _headNode;
     int _count;
     int _maxCapacity;
     
     // 测试协议类型的声明语法 (id<Protocol>)
-    id<NFCollectionDelegate> _delegate;
+    id<NPCollectionDelegate> _delegate;
 }
 
 @property (nonatomic, assign) int maxCapacity;
 @property (nonatomic, readonly) int count;
 // 代理通常用 assign/weak 避免循环引用
-@property (nonatomic, assign) id<NFCollectionDelegate> delegate;
+@property (nonatomic, assign) id<NPCollectionDelegate> delegate;
 
 - (id)initWithCapacity:(int)capacity;
 - (BOOL)setObject:(id)obj forKey:(const char*)key;
@@ -92,7 +92,7 @@
 - (void)performSelectorTest:(const char*)selectorName;
 @end
 
-@implementation NFDataContainer
+@implementation NPDataContainer
 
 @synthesize maxCapacity = _maxCapacity;
 @synthesize count = _count;
@@ -121,7 +121,7 @@
         return NO;
     }
 
-    NFDataNode* newNode = [[NFDataNode alloc] initWithKey:key value:obj];
+    NPDataNode* newNode = [[NPDataNode alloc] initWithKey:key value:obj];
     if (_headNode != nil) {
         [newNode setNextNode:_headNode];
     }
@@ -138,7 +138,7 @@
 
 - (id)objectForKey:(const char*)key
 {
-    NFDataNode* current = _headNode;
+    NPDataNode* current = _headNode;
     while (current != nil) {
         if (strcmp([current key], key) == 0) {
             return [current value];
@@ -168,14 +168,14 @@
 
 // ============ 5. 业务实现类：遵守协议的代理监听器 ============
 // 测试遵守协议的语法：@interface ClassName : BaseClass <ProtocolName>
-@interface NFCollectionInspector : NFObject <NFCollectionDelegate>
+@interface NPCollectionInspector : NPObject <NPCollectionDelegate>
 {
     const char* _inspectorName;
 }
 - (id)initWithName:(const char*)name;
 @end
 
-@implementation NFCollectionInspector
+@implementation NPCollectionInspector
 
 - (id)initWithName:(const char*)name
 {
@@ -189,7 +189,7 @@
 // 实现 @required 协议方法
 - (void)collectionDidReachCapacity:(id)collection
 {
-    NFDataContainer* container = (NFDataContainer*)collection;
+    NPDataContainer* container = (NPDataContainer*)collection;
     printf("[%s 报告] 警告：容器已满！当前数量: %d, 最大容量: %d\n", 
            _inspectorName, [container count], [container maxCapacity]);
 }
@@ -207,19 +207,19 @@ int main(int argc, const char* argv[])
 {
     // 测试 @autoreleasepool 关键字
     @autoreleasepool {
-        printf(">>> 开始 NFFoundation 关键字密集型压力测试 <<<\n\n");
+        printf(">>> 开始 NPFoundation 关键字密集型压力测试 <<<\n\n");
 
         // 1. 初始化监听器与容器
-        NFCollectionInspector* inspector = [[NFCollectionInspector alloc] initWithName:"核心审计器"];
-        NFDataContainer* container = [[NFDataContainer alloc] initWithCapacity:2];
+        NPCollectionInspector* inspector = [[NPCollectionInspector alloc] initWithName:"核心审计器"];
+        NPDataContainer* container = [[NPDataContainer alloc] initWithCapacity:2];
         
         // 设置代理
         [container setDelegate:inspector];
 
         // 2. 准备一些模拟测试数据对象
-        NFObject* dummyData1 = [[NFObject alloc] init];
-        NFObject* dummyData2 = [[NFObject alloc] init];
-        NFObject* dummyData3 = [[NFObject alloc] init];
+        NPObject* dummyData1 = [[NPObject alloc] init];
+        NPObject* dummyData2 = [[NPObject alloc] init];
+        NPObject* dummyData3 = [[NPObject alloc] init];
 
         // 3. 压入数据（前两次应该成功并触发 didAddItem，第三次应该失败并触发 didReachCapacity）
         printf("--- 尝试插入元素 1 ---\n");

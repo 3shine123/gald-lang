@@ -178,7 +178,7 @@ impl Pipeline {
         let mut parser = Parser::with_c_type_names(&pre.resolved_nopa, &c_type_names, c_types_complete);
         // The parser reads one inlined buffer, so it has no `#include` boundary
         // of its own. The line→file map is the only way it can scope an
-        // `NF_ASSUME_NONNULL` region to the file that opened it — without this
+        // `NP_ASSUME_NONNULL` region to the file that opened it — without this
         // an open region marks every pointer in every imported header nonnull.
         parser.set_source_map(pre.source_map.clone());
         let mut cst = parser.parse_translation_unit()
@@ -347,7 +347,7 @@ impl Pipeline {
             self.error_msg = format!("Async check failed:\n{}", prefix_lines("[async]", &translate_lines(&async_diags.errors.join("\n"), &pre.source_map)));
             return Err(self.error_msg.clone());
         }
-        // Recoverable async warnings (e.g. `@await` without an `NFAsync<T>`
+        // Recoverable async warnings (e.g. `@await` without an `NPAsync<T>`
         // marker) — printed purple like ARC warnings; `-Werror` escalates.
         // Lines are inline-buffer positions: translate via SourceMap.
         if !async_diags.warnings.is_empty() {
@@ -548,7 +548,7 @@ fn translate_lines(msg: &str, sm: &nopa_cst::source_map::SourceMap) -> String {
 /// selector that appears solely in an imported `@implementation` is private to
 /// the file that defines it: counting it made the library TU (which imports
 /// `*.np`) and a client TU (which sees only `*.nh`) disagree on where a
-/// property-synthesised accessor such as `NFError.localizedDescription` sits,
+/// property-synthesised accessor such as `NPError.localizedDescription` sits,
 /// so their layouts split. Restricting to `@interface` makes the two align.
 ///
 /// Where the preprocessor has no source map, the set comes back empty and the

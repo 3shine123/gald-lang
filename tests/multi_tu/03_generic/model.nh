@@ -8,7 +8,7 @@
    Ivars live on the @interface (Nopa convention). The `T _storage[4]` slot is
    what monomorphisation substitutes: `int * _storage[4]` in the specialised
    C struct. */
-@interface Stack<T> : NFObject {
+@interface Stack<T> : NPObject {
     @public
     int _count;
     T _storage[4];

@@ -3,26 +3,26 @@
 // ARC order 03: a complex binary expression that calls two different selectors
 // on the same owned local — both calls must complete before the release.
 
-@interface AO03Holder : NFObject {
+@interface AO03Holder : NPObject {
 @public
-    NFString *_s;
+    NPString *_s;
 }
-- (NFString *)text;
+- (NPString *)text;
 - (int)offset;
 @end
 
 @implementation AO03Holder
 - (instancetype)init {
     self = [super init];
-    if (self) { _s = [[NFString alloc] initWithUTF8String:"hello"]; }
+    if (self) { _s = [[NPString alloc] initWithUTF8String:"hello"]; }
     return self;
 }
 - (void)dealloc {
     _s = nil;
-    NFLog(@"ao03 dealloc");
+    NPLog(@"ao03 dealloc");
     [super dealloc];
 }
-- (NFString *)text { return _s; }
+- (NPString *)text { return _s; }
 - (int)offset { return 2; }
 @end
 

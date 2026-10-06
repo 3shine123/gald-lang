@@ -19,7 +19,7 @@
     - (id)copyValue;
     @end
 
-    @interface String : NFObject <Value> {
+    @interface String : NPObject <Value> {
         char *_value;
     }
     - (instancetype)initWithString:(const char *)val;
@@ -27,28 +27,28 @@
     @property (assign) const char *value;
     @end
 
-    @interface Integer : NFObject <Value> {
+    @interface Integer : NPObject <Value> {
         long long _value;
     }
     - (instancetype)initWithLong:(long long)val;
     @property long long value;
     @end
 
-    @interface Float : NFObject <Value> {
+    @interface Float : NPObject <Value> {
         double _value;
     }
     - (instancetype)initWithDouble:(double)val;
     @property double value;
     @end
 
-    @interface Bool : NFObject <Value> {
+    @interface Bool : NPObject <Value> {
         BOOL _value;
     }
     - (instancetype)initWithBool:(BOOL)val;
     @property BOOL value;
     @end
 
-    @interface Array : NFObject <Value> {
+    @interface Array : NPObject <Value> {
         @public
         id *_items; int _count; int _capacity;
     }
@@ -61,7 +61,7 @@
     - (void)each:(void (^)(int idx, id val))block;
     @end
 
-    @interface Table : NFObject <Value> {
+    @interface Table : NPObject <Value> {
         @public
         char **_keys; id *_values; int _count; int _capacity;
     }
@@ -80,14 +80,14 @@
     - (void)setBool:(BOOL)val forKey:(const char *)key;
     @end
 
-    @interface Parser : NFObject
+    @interface Parser : NPObject
     + (id)parse:(const char *)input;
     + (void)emit:(id)root into:(char *)buf size:(int)size;
     + (char *)parseKey:(const char **)p;
     + (id)parseValue:(const char *)p;
     @end
 
-    @interface Editor : NFObject {
+    @interface Editor : NPObject {
         @public
         id _root; BOOL _running;
         char _inputBuf[8192]; char _filePath[1024];
@@ -111,7 +111,7 @@
 @endnamespace // @namespace TOML
 
 // 泛型 + Watcher（不在 namespace 内，全局可用）
-@interface Buffer<T> : NFObject {
+@interface Buffer<T> : NPObject {
     T _storage[16]; int _count;
 }
 - (instancetype)init;
@@ -120,7 +120,7 @@
 - (int)count;
 @end
 
-@interface Watcher : NFObject {
+@interface Watcher : NPObject {
     @public (weak) id _target;
 }
 - (instancetype)initWithTarget:(id)t;

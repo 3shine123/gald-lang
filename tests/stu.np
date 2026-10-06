@@ -1,4 +1,4 @@
-// 基于 NFFoundation 框架的 Objective-C 风格工具类测试
+// 基于 NPFoundation 框架的 Objective-C 风格工具类测试
 
 #import <Foundation/Foundation.np>
 #include <stdio.h>
@@ -6,7 +6,7 @@
 #include <string.h>
 
 // ============ 1. 模拟一个简单的学生/数据对象 ============
-@interface NFStudent : NFObject
+@interface NPStudent : NPObject
 {
     const char* name;
     int score;
@@ -19,7 +19,7 @@
 - (void)displayInfo;
 @end
 
-@implementation NFStudent
+@implementation NPStudent
 - (id)initWithName:(const char*)aName studentId:(int)sId score:(int)aScore
 {
     self = [super init];
@@ -46,21 +46,21 @@
 // ============ 2. 核心工具类：数据统计管理器 ============
 #define MAX_RECORDS 20
 
-@interface NFDataCollector : NFObject
+@interface NPDataCollector : NPObject
 {
-    NFStudent* records[MAX_RECORDS];
+    NPStudent* records[MAX_RECORDS];
     int currentCount;
     const char* className;
 }
 - (id)initWithClassName:(const char*)cName;
-- (BOOL)addStudent:(NFStudent*)student;
+- (BOOL)addStudent:(NPStudent*)student;
 - (void)printAllRecords;
 - (double)calculateAverageScore;
-- (NFStudent*)findHighestScorer;
+- (NPStudent*)findHighestScorer;
 - (void)clearAllRecords;
 @end
 
-@implementation NFDataCollector
+@implementation NPDataCollector
 
 - (id)initWithClassName:(const char*)cName
 {
@@ -75,7 +75,7 @@
     return self;
 }
 
-- (BOOL)addStudent:(NFStudent*)student
+- (BOOL)addStudent:(NPStudent*)student
 {
     if (currentCount >= MAX_RECORDS || student == nil) {
         return NO;
@@ -111,11 +111,11 @@
     return (double)totalScore / currentCount;
 }
 
-- (NFStudent*)findHighestScorer
+- (NPStudent*)findHighestScorer
 {
     if (currentCount == 0) return nil;
     
-    NFStudent* topStudent = records[0];
+    NPStudent* topStudent = records[0];
     for (int i = 1; i < currentCount; i++) {
         if ([records[i] getScore] > [topStudent getScore]) {
             topStudent = records[i];
@@ -147,16 +147,16 @@
 int main(int argc, const char* argv[])
 {
     @autoreleasepool {
-        printf(">>> 开始 NFFoundation 工具类测试 <<<\n");
+        printf(">>> 开始 NPFoundation 工具类测试 <<<\n");
 
         // 1. 初始化工具管理类
-        NFDataCollector* collector = [[NFDataCollector alloc] initWithClassName:"宇宙航天一班"];
+        NPDataCollector* collector = [[NPDataCollector alloc] initWithClassName:"宇宙航天一班"];
 
         // 2. 创建测试数据
-        NFStudent* s1 = [[NFStudent alloc] initWithName:"艾伦" studentId:1001 score:95];
-        NFStudent* s2 = [[NFStudent alloc] initWithName:"三笠" studentId:1002 score:98];
-        NFStudent* s3 = [[NFStudent alloc] initWithName:"阿尔敏" studentId:1003 score:92];
-        NFStudent* s4 = [[NFStudent alloc] initWithName:"利威尔" studentId:1004 score:100];
+        NPStudent* s1 = [[NPStudent alloc] initWithName:"艾伦" studentId:1001 score:95];
+        NPStudent* s2 = [[NPStudent alloc] initWithName:"三笠" studentId:1002 score:98];
+        NPStudent* s3 = [[NPStudent alloc] initWithName:"阿尔敏" studentId:1003 score:92];
+        NPStudent* s4 = [[NPStudent alloc] initWithName:"利威尔" studentId:1004 score:100];
 
         // 3. 将数据组装进工具类
         [collector addStudent:s1];
@@ -171,7 +171,7 @@ int main(int argc, const char* argv[])
         double avg = [collector calculateAverageScore];
         printf("\n[统计结果] 班级平均分: %.2f\n", avg);
 
-        NFStudent* top = [collector findHighestScorer];
+        NPStudent* top = [collector findHighestScorer];
         if (top != nil) {
             printf("[荣誉榜] 最高分获得者: %s (%d分)\n", [top getName], [top getScore]);
         }

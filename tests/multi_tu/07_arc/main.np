@@ -5,7 +5,7 @@
    lib TU, plus an unowned convenience object coming back out. */
 int main() {
     Vault *v = [[Vault alloc] init];
-    NFString *tok = VaultToken();
+    NPString *tok = VaultToken();
     printf("token=%s\n", [tok UTF8String]);
     printf("total=%d\n", [v total]);
     printf("helper=%d\n", VaultHelper());

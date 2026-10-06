@@ -2,7 +2,7 @@
 
 #import <Foundation/Foundation.np>
 
-@interface Game : NFObject
+@interface Game : NPObject
 @property int board[9];
 - (void)initBoard;
 - (void)play:(int)pos player:(int)p;

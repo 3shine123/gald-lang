@@ -5,7 +5,7 @@
 
 int main(void) {
     int i = 7;
-    NFDictionary *d = @{ 1: @"one", @"k": i };
+    NPDictionary *d = @{ 1: @"one", @"k": i };
     (void)d;
     return 0;
 }

@@ -43,7 +43,7 @@
 // 地牢游戏主类
 // ============================================================================
 
-@interface DungeonGame : NFObject
+@interface DungeonGame : NPObject
 @property int gameOver;
 @property int victory;
 @property int turnCount;

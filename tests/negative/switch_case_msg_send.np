@@ -6,7 +6,7 @@
 // at the source location instead. Expected: exit=1 with
 //   "case label is not a constant expression"
 int main(void) {
-    NFObject *o = @42;
+    NPObject *o = @42;
     int r = 0;
     switch (r) {
         case [o description]:
@@ -15,6 +15,6 @@ int main(void) {
         default:
             r = 9;
     }
-    NFLog(@"r=%d", r);
+    NPLog(@"r=%d", r);
     return 0;
 }

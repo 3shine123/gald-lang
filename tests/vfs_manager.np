@@ -21,7 +21,7 @@
 // ==========================================================
 // 3. Base Class 基类：FSNode (抽象文件/目录基类)
 // ==========================================================
-@interface FSNode : NFObject <FSItem> {
+@interface FSNode : NPObject <FSItem> {
 @public
     char *_name;
     
@@ -184,7 +184,7 @@
     
     // 2. 强引用持有子节点（计数加1）
     _children[_childCount] = child;
-    NFObject_retain(child);
+    NPObject_retain(child);
     _childCount++;
     
     return YES;
@@ -228,7 +228,7 @@
     // 💥 静态 ARC 级联释放：强引用释放导致子节点计数清零，触发链式析构
     for (int i = 0; i < _childCount; i++) {
         if (_children[i]) {
-            NFObject_release(_children[i]);
+            NPObject_release(_children[i]);
             _children[i] = nil;
         }
     }
@@ -367,7 +367,7 @@ int main(int argc, const char * argv[]) {
         printf("  --> 主动释放 'usr' 目录...\n");
         // usr 从 root 剪钩，或者我们直接对其强引用递减并销毁
         // 在 VFS 实战中，我们将 root 手动销毁，验证整体级联析构
-        NFObject_release(root); // root 会析构 usr/bin，usr 会析构 local，local 会析构 dbFile
+        NPObject_release(root); // root 会析构 usr/bin，usr 会析构 local，local 会析构 dbFile
 
         // 💥 关键点：当 root 销毁后，所有子文件都被级联析构。
         // usr、local、bin、dbFile、shFile 应该全部安全地走完 dealloc 的 printf，验证 100% 内存无泄漏！

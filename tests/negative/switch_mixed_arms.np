@@ -6,7 +6,7 @@
 // dropping the constant arm. Expected: exit=1 with
 //   "switch mixes plain constant 'case' arms with pattern arms"
 int main(void) {
-    NFObject *o = @42;
+    NPObject *o = @42;
     int r = 0;
     switch (o) {
         case 1:
@@ -18,6 +18,6 @@ int main(void) {
         default:
             r = 9;
     }
-    NFLog(@"r=%d", r);
+    NPLog(@"r=%d", r);
     return 0;
 }

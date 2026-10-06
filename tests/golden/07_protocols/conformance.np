@@ -5,7 +5,7 @@
 - (void)speak;
 @end
 
-@interface Dog : NFObject <Speaker>
+@interface Dog : NPObject <Speaker>
 @end
 
 @implementation Dog

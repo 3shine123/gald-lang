@@ -6,7 +6,7 @@
 #include "nopa/runtime.h"
 #define CHECK(cond) do { if (!(cond)) { printf("CHECK FAILED at line %d: %s\n", __LINE__, #cond); g_checks_failed++; } } while (0)
 struct nopa_vtable;
-struct nopa_NFObject_meta_vtable;
+struct nopa_NPObject_meta_vtable;
 struct nopa_Counter_meta_vtable;
 
 static const SEL __nopa_sel_init = {.name = "init", .hash = 0x16B1D373};
@@ -24,148 +24,148 @@ static const SEL __nopa_sel_setCount_ = {.name = "setCount_", .hash = 0x2278DE67
 #ifndef __NOPA_ROOT_DEFINED
 #define __NOPA_ROOT_DEFINED
 struct __nopa_root {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
 };
 typedef struct __nopa_root __nopa_root;
 #endif
-#ifndef NFOBJECT_DEFINED
-#define NFOBJECT_DEFINED
-struct NFObject {
-    struct NFClass *isa;
+#ifndef NPOBJECT_DEFINED
+#define NPOBJECT_DEFINED
+struct NPObject {
+    struct NPClass *isa;
     uint32_t retain_count;
 };
-typedef struct NFObject NFObject;
+typedef struct NPObject NPObject;
 #endif
 struct Counter;
 typedef struct Counter Counter;
 
-NFObject * __nopa_root_init(NFObject * self, SEL _cmd);
-void __nopa_root_dealloc(NFObject * self, SEL _cmd);
-void __nopa_root_release(NFObject * self, SEL _cmd);
-NFObject * __nopa_root_retain(NFObject * self, SEL _cmd);
-_Bool __nopa_root_isKindOf_(NFObject * self, SEL _cmd, NFClass * cls);
-NFObject * NFObject_alloc(NFClass * self, SEL _cmd);
-NFObject * NFObject_new(NFClass * self, SEL _cmd);
-NFObject * NFObject_init(NFObject * self, SEL _cmd);
-void NFObject_dealloc(NFObject * self, SEL _cmd);
-void NFObject_release(NFObject * self, SEL _cmd);
-NFObject * NFObject_retain(NFObject * self, SEL _cmd);
-void Counter_increment(NFObject * self, SEL _cmd);
-int Counter_value(NFObject * self, SEL _cmd);
-int Counter_count(NFObject * self, SEL _cmd);
-void Counter_setCount_(NFObject * self, SEL _cmd, int value);
-NFObject * nopa_alloc(struct NFClass * cls);
-NFObject * nopa_init(NFObject * self);
-void nopa_release(NFObject * obj);
-NFObject * nopa_retain(NFObject * obj);
+NPObject * __nopa_root_init(NPObject * self, SEL _cmd);
+void __nopa_root_dealloc(NPObject * self, SEL _cmd);
+void __nopa_root_release(NPObject * self, SEL _cmd);
+NPObject * __nopa_root_retain(NPObject * self, SEL _cmd);
+_Bool __nopa_root_isKindOf_(NPObject * self, SEL _cmd, NPClass * cls);
+NPObject * NPObject_alloc(NPClass * self, SEL _cmd);
+NPObject * NPObject_new(NPClass * self, SEL _cmd);
+NPObject * NPObject_init(NPObject * self, SEL _cmd);
+void NPObject_dealloc(NPObject * self, SEL _cmd);
+void NPObject_release(NPObject * self, SEL _cmd);
+NPObject * NPObject_retain(NPObject * self, SEL _cmd);
+void Counter_increment(NPObject * self, SEL _cmd);
+int Counter_value(NPObject * self, SEL _cmd);
+int Counter_count(NPObject * self, SEL _cmd);
+void Counter_setCount_(NPObject * self, SEL _cmd, int value);
+NPObject * nopa_alloc(struct NPClass * cls);
+NPObject * nopa_init(NPObject * self);
+void nopa_release(NPObject * obj);
+NPObject * nopa_retain(NPObject * obj);
 Counter * make_counter(void);
 int main(void);
 
 static int g_checks_failed = 0;
 
-NFClass * NFObject_getClass(NFClass * self, SEL _cmd);
-NFClass * Counter_getClass(NFClass * self, SEL _cmd);
+NPClass * NPObject_getClass(NPClass * self, SEL _cmd);
+NPClass * Counter_getClass(NPClass * self, SEL _cmd);
 
 struct nopa_vtable {
-    int (*count)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    void (*increment)(NFObject *, SEL);
-    NFObject * (*init)(NFObject *, SEL);
-    _Bool (*isKindOf_)(NFObject *, SEL, NFClass *);
-    void (*release)(NFObject *, SEL);
-    NFObject * (*retain)(NFObject *, SEL);
-    void (*setCount_)(NFObject *, SEL, int);
-    int (*value)(NFObject *, SEL);
+    int (*count)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    void (*increment)(NPObject *, SEL);
+    NPObject * (*init)(NPObject *, SEL);
+    _Bool (*isKindOf_)(NPObject *, SEL, NPClass *);
+    void (*release)(NPObject *, SEL);
+    NPObject * (*retain)(NPObject *, SEL);
+    void (*setCount_)(NPObject *, SEL, int);
+    int (*value)(NPObject *, SEL);
 };
 
-struct nopa_NFObject_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+struct nopa_NPObject_meta_vtable {
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct nopa_Counter_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 
 struct Counter {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     int _count;
 };
 typedef struct Counter Counter;
 
-extern NFClass nopa___nopa_root_class;
-extern NFClass nopa_NFObject_class;
-extern NFClass nopa_Counter_class;
+extern NPClass nopa___nopa_root_class;
+extern NPClass nopa_NPObject_class;
+extern NPClass nopa_Counter_class;
 void nopa_meta_init(void);
 
 __attribute__((weak)) struct nopa_vtable nopa___nopa_root_vtable_inst = {
     .count = NULL,
-    .dealloc = (void (*)(NFObject *, SEL))__nopa_root_dealloc,
+    .dealloc = (void (*)(NPObject *, SEL))__nopa_root_dealloc,
     .increment = NULL,
-    .init = (NFObject * (*)(NFObject *, SEL))__nopa_root_init,
-    .isKindOf_ = (_Bool (*)(NFObject *, SEL, NFClass *))__nopa_root_isKindOf_,
-    .release = (void (*)(NFObject *, SEL))__nopa_root_release,
-    .retain = (NFObject * (*)(NFObject *, SEL))__nopa_root_retain,
+    .init = (NPObject * (*)(NPObject *, SEL))__nopa_root_init,
+    .isKindOf_ = (_Bool (*)(NPObject *, SEL, NPClass *))__nopa_root_isKindOf_,
+    .release = (void (*)(NPObject *, SEL))__nopa_root_release,
+    .retain = (NPObject * (*)(NPObject *, SEL))__nopa_root_retain,
     .setCount_ = NULL,
     .value = NULL,
 };
 
-__attribute__((weak)) struct nopa_vtable nopa_NFObject_vtable_inst = {
+__attribute__((weak)) struct nopa_vtable nopa_NPObject_vtable_inst = {
     .count = NULL,
-    .dealloc = (void (*)(NFObject *, SEL))NFObject_dealloc,
+    .dealloc = (void (*)(NPObject *, SEL))NPObject_dealloc,
     .increment = NULL,
-    .init = (NFObject * (*)(NFObject *, SEL))NFObject_init,
-    .isKindOf_ = (_Bool (*)(NFObject *, SEL, NFClass *))__nopa_root_isKindOf_,
-    .release = (void (*)(NFObject *, SEL))NFObject_release,
-    .retain = (NFObject * (*)(NFObject *, SEL))NFObject_retain,
+    .init = (NPObject * (*)(NPObject *, SEL))NPObject_init,
+    .isKindOf_ = (_Bool (*)(NPObject *, SEL, NPClass *))__nopa_root_isKindOf_,
+    .release = (void (*)(NPObject *, SEL))NPObject_release,
+    .retain = (NPObject * (*)(NPObject *, SEL))NPObject_retain,
     .setCount_ = NULL,
     .value = NULL,
 };
 
 __attribute__((weak)) struct nopa_vtable nopa_Counter_vtable_inst = {
-    .count = (int (*)(NFObject *, SEL))Counter_count,
-    .dealloc = (void (*)(NFObject *, SEL))NFObject_dealloc,
-    .increment = (void (*)(NFObject *, SEL))Counter_increment,
-    .init = (NFObject * (*)(NFObject *, SEL))NFObject_init,
-    .isKindOf_ = (_Bool (*)(NFObject *, SEL, NFClass *))__nopa_root_isKindOf_,
-    .release = (void (*)(NFObject *, SEL))NFObject_release,
-    .retain = (NFObject * (*)(NFObject *, SEL))NFObject_retain,
-    .setCount_ = (void (*)(NFObject *, SEL, int))Counter_setCount_,
-    .value = (int (*)(NFObject *, SEL))Counter_value,
+    .count = (int (*)(NPObject *, SEL))Counter_count,
+    .dealloc = (void (*)(NPObject *, SEL))NPObject_dealloc,
+    .increment = (void (*)(NPObject *, SEL))Counter_increment,
+    .init = (NPObject * (*)(NPObject *, SEL))NPObject_init,
+    .isKindOf_ = (_Bool (*)(NPObject *, SEL, NPClass *))__nopa_root_isKindOf_,
+    .release = (void (*)(NPObject *, SEL))NPObject_release,
+    .retain = (NPObject * (*)(NPObject *, SEL))NPObject_retain,
+    .setCount_ = (void (*)(NPObject *, SEL, int))Counter_setCount_,
+    .value = (int (*)(NPObject *, SEL))Counter_value,
 };
 
-__attribute__((weak)) struct nopa_NFObject_meta_vtable nopa_NFObject_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
-    .class = NFObject_getClass,
+__attribute__((weak)) struct nopa_NPObject_meta_vtable nopa_NPObject_meta_vtable_inst = {
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
+    .class = NPObject_getClass,
 };
 
 __attribute__((weak)) struct nopa_Counter_meta_vtable nopa_Counter_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
     .class = Counter_getClass,
 };
 
-__attribute__((weak)) NFClass * NFObject_getClass(NFClass * self, SEL _cmd) {
+__attribute__((weak)) NPClass * NPObject_getClass(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
-__attribute__((weak)) NFClass * Counter_getClass(NFClass * self, SEL _cmd) {
+__attribute__((weak)) NPClass * Counter_getClass(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
-NFClass nopa___nopa_root_class;
-NFClass nopa_NFObject_class;
-NFClass nopa_Counter_class;
+NPClass nopa___nopa_root_class;
+NPClass nopa_NPObject_class;
+NPClass nopa_Counter_class;
 
 __attribute__((weak)) void nopa_meta_init(void) {
-    nopa___nopa_root_class = (NFClass){
+    nopa___nopa_root_class = (NPClass){
         .name = "__nopa_root",
         .superclass = NULL,
         .instance_size = sizeof(struct __nopa_root),
@@ -173,94 +173,94 @@ __attribute__((weak)) void nopa_meta_init(void) {
         .class_vtable = NULL,
         .protocol_count = 0,
     };
-    nopa_NFObject_class = (NFClass){
-        .name = "NFObject",
+    nopa_NPObject_class = (NPClass){
+        .name = "NPObject",
         .superclass = &nopa___nopa_root_class,
-        .instance_size = sizeof(struct NFObject),
-        .vtable = &nopa_NFObject_vtable_inst,
-        .class_vtable = &nopa_NFObject_meta_vtable_inst,
+        .instance_size = sizeof(struct NPObject),
+        .vtable = &nopa_NPObject_vtable_inst,
+        .class_vtable = &nopa_NPObject_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_Counter_class = (NFClass){
+    nopa_Counter_class = (NPClass){
         .name = "Counter",
-        .superclass = &nopa_NFObject_class,
+        .superclass = &nopa_NPObject_class,
         .instance_size = sizeof(struct Counter),
         .vtable = &nopa_Counter_vtable_inst,
         .class_vtable = &nopa_Counter_meta_vtable_inst,
         .protocol_count = 0,
     };
 }
-__attribute__((weak)) NFObject * __nopa_root_init(NFObject * self, SEL _cmd) {
+__attribute__((weak)) NPObject * __nopa_root_init(NPObject * self, SEL _cmd) {
     return nopa_init(self);
 }
 
-__attribute__((weak)) void __nopa_root_dealloc(NFObject * self, SEL _cmd) {
+__attribute__((weak)) void __nopa_root_dealloc(NPObject * self, SEL _cmd) {
     return;
 }
 
-__attribute__((weak)) void __nopa_root_release(NFObject * self, SEL _cmd) {
+__attribute__((weak)) void __nopa_root_release(NPObject * self, SEL _cmd) {
     nopa_release(self);
 }
 
-__attribute__((weak)) NFObject * __nopa_root_retain(NFObject * self, SEL _cmd) {
+__attribute__((weak)) NPObject * __nopa_root_retain(NPObject * self, SEL _cmd) {
     return nopa_retain(self);
 }
 
-__attribute__((weak)) _Bool __nopa_root_isKindOf_(NFObject * self, SEL _cmd, NFClass * cls) {
+__attribute__((weak)) _Bool __nopa_root_isKindOf_(NPObject * self, SEL _cmd, NPClass * cls) {
     return nopa_isKindOf(self, cls);
 }
 
-__attribute__((weak)) NFObject * NFObject_alloc(NFClass * self, SEL _cmd) {
+__attribute__((weak)) NPObject * NPObject_alloc(NPClass * self, SEL _cmd) {
     return nopa_alloc(self);
 }
 
-__attribute__((weak)) NFObject * NFObject_new(NFClass * self, SEL _cmd) {
-    NFObject * obj = nopa_alloc(self);
+__attribute__((weak)) NPObject * NPObject_new(NPClass * self, SEL _cmd) {
+    NPObject * obj = nopa_alloc(self);
     return nopa_init(obj);
 }
 
-__attribute__((weak)) NFObject * NFObject_init(NFObject * self, SEL _cmd) {
+__attribute__((weak)) NPObject * NPObject_init(NPObject * self, SEL _cmd) {
     return nopa_init(self);
 }
 
-__attribute__((weak)) void NFObject_dealloc(NFObject * self, SEL _cmd) {
+__attribute__((weak)) void NPObject_dealloc(NPObject * self, SEL _cmd) {
     return;
 }
 
-__attribute__((weak)) void NFObject_release(NFObject * self, SEL _cmd) {
+__attribute__((weak)) void NPObject_release(NPObject * self, SEL _cmd) {
     nopa_release(self);
 }
 
-__attribute__((weak)) NFObject * NFObject_retain(NFObject * self, SEL _cmd) {
+__attribute__((weak)) NPObject * NPObject_retain(NPObject * self, SEL _cmd) {
     return nopa_retain(self);
 }
 
-__attribute__((weak)) void Counter_increment(NFObject * self, SEL _cmd) {
+__attribute__((weak)) void Counter_increment(NPObject * self, SEL _cmd) {
     ((struct Counter *)self)->_count = (((struct Counter *)self)->_count + 1);
 }
 
-__attribute__((weak)) int Counter_value(NFObject * self, SEL _cmd) {
+__attribute__((weak)) int Counter_value(NPObject * self, SEL _cmd) {
     return ((struct Counter *)self)->_count;
 }
 
-__attribute__((weak)) int Counter_count(NFObject * self, SEL _cmd) {
+__attribute__((weak)) int Counter_count(NPObject * self, SEL _cmd) {
     return ((struct Counter *)self)->_count;
 }
 
-__attribute__((weak)) void Counter_setCount_(NFObject * self, SEL _cmd, int value) {
+__attribute__((weak)) void Counter_setCount_(NPObject * self, SEL _cmd, int value) {
     ((struct Counter *)self)->_count = value;
 }
 
-NFObject * nopa_alloc(struct NFClass * cls);
+NPObject * nopa_alloc(struct NPClass * cls);
 
-NFObject * nopa_init(NFObject * self);
+NPObject * nopa_init(NPObject * self);
 
-void nopa_release(NFObject * obj);
+void nopa_release(NPObject * obj);
 
-NFObject * nopa_retain(NFObject * obj);
+NPObject * nopa_retain(NPObject * obj);
 
 __attribute__((weak)) Counter * make_counter(void) {
-    NFObject *__nopa_tmp_0 = (NFObject_alloc(&nopa_Counter_class, __nopa_sel_alloc));
+    NPObject *__nopa_tmp_0 = (NPObject_alloc(&nopa_Counter_class, __nopa_sel_alloc));
     Counter * c = (Counter *)(((struct nopa_vtable *)__nopa_tmp_0->isa->vtable)->init(__nopa_tmp_0, __nopa_sel_init));
     return c;
 }
@@ -269,103 +269,103 @@ __attribute__((weak)) int main(void) {
     nopa_meta_init();
     {
         nopa_autoreleasepool_t * __nopa_pool = nopa_autoreleasepool_push();
-        NFObject *__nopa_tmp_1 = (NFObject_alloc(&nopa_Counter_class, __nopa_sel_alloc));
+        NPObject *__nopa_tmp_1 = (NPObject_alloc(&nopa_Counter_class, __nopa_sel_alloc));
         Counter * a = (Counter *)(((struct nopa_vtable *)__nopa_tmp_1->isa->vtable)->init(__nopa_tmp_1, __nopa_sel_init));
         for (int i = 0; (i < 10); (i)++) {
-            ((struct nopa_vtable *)(a->isa->vtable))->increment((NFObject *)(a), __nopa_sel_increment);
+            ((struct nopa_vtable *)(a->isa->vtable))->increment((NPObject *)(a), __nopa_sel_increment);
         }
-        CHECK(((struct nopa_vtable *)(a->isa->vtable))->value((NFObject *)(a), __nopa_sel_value) == 10);
-        NFObject *__nopa_tmp_2 = (NFObject_alloc(&nopa_Counter_class, __nopa_sel_alloc));
+        CHECK(((struct nopa_vtable *)(a->isa->vtable))->value((NPObject *)(a), __nopa_sel_value) == 10);
+        NPObject *__nopa_tmp_2 = (NPObject_alloc(&nopa_Counter_class, __nopa_sel_alloc));
         Counter * b = (Counter *)(((struct nopa_vtable *)__nopa_tmp_2->isa->vtable)->init(__nopa_tmp_2, __nopa_sel_init));
         int j = 0;
         while ((j < 5)) {
-            ((struct nopa_vtable *)(b->isa->vtable))->increment((NFObject *)(b), __nopa_sel_increment);
+            ((struct nopa_vtable *)(b->isa->vtable))->increment((NPObject *)(b), __nopa_sel_increment);
             (j)++;
         }
-        CHECK(((struct nopa_vtable *)(b->isa->vtable))->value((NFObject *)(b), __nopa_sel_value) == 5);
-        NFObject *__nopa_tmp_3 = (NFObject_alloc(&nopa_Counter_class, __nopa_sel_alloc));
+        CHECK(((struct nopa_vtable *)(b->isa->vtable))->value((NPObject *)(b), __nopa_sel_value) == 5);
+        NPObject *__nopa_tmp_3 = (NPObject_alloc(&nopa_Counter_class, __nopa_sel_alloc));
         Counter * c = (Counter *)(((struct nopa_vtable *)__nopa_tmp_3->isa->vtable)->init(__nopa_tmp_3, __nopa_sel_init));
         int k = 0;
         do {
-            ((struct nopa_vtable *)(c->isa->vtable))->increment((NFObject *)(c), __nopa_sel_increment);
+            ((struct nopa_vtable *)(c->isa->vtable))->increment((NPObject *)(c), __nopa_sel_increment);
             (k)++;
         }
         while ((k < 3));
-        CHECK(((struct nopa_vtable *)(c->isa->vtable))->value((NFObject *)(c), __nopa_sel_value) == 3);
-        NFObject *__nopa_tmp_4 = (NFObject_alloc(&nopa_Counter_class, __nopa_sel_alloc));
+        CHECK(((struct nopa_vtable *)(c->isa->vtable))->value((NPObject *)(c), __nopa_sel_value) == 3);
+        NPObject *__nopa_tmp_4 = (NPObject_alloc(&nopa_Counter_class, __nopa_sel_alloc));
         Counter * d = (Counter *)(((struct nopa_vtable *)__nopa_tmp_4->isa->vtable)->init(__nopa_tmp_4, __nopa_sel_init));
         for (int x = 0; (x < 4); (x)++) {
             for (int y = 0; (y < 4); (y)++) {
-                ((struct nopa_vtable *)(d->isa->vtable))->increment((NFObject *)(d), __nopa_sel_increment);
+                ((struct nopa_vtable *)(d->isa->vtable))->increment((NPObject *)(d), __nopa_sel_increment);
             }
         }
-        CHECK(((struct nopa_vtable *)(d->isa->vtable))->value((NFObject *)(d), __nopa_sel_value) == 16);
-        NFObject *__nopa_tmp_5 = (NFObject_alloc(&nopa_Counter_class, __nopa_sel_alloc));
+        CHECK(((struct nopa_vtable *)(d->isa->vtable))->value((NPObject *)(d), __nopa_sel_value) == 16);
+        NPObject *__nopa_tmp_5 = (NPObject_alloc(&nopa_Counter_class, __nopa_sel_alloc));
         Counter * e = (Counter *)(((struct nopa_vtable *)__nopa_tmp_5->isa->vtable)->init(__nopa_tmp_5, __nopa_sel_init));
         for (int i = 0; (i < 100); (i)++) {
             if (i == 7) {
                 break;
             }
-            ((struct nopa_vtable *)(e->isa->vtable))->increment((NFObject *)(e), __nopa_sel_increment);
+            ((struct nopa_vtable *)(e->isa->vtable))->increment((NPObject *)(e), __nopa_sel_increment);
         }
-        CHECK(((struct nopa_vtable *)(e->isa->vtable))->value((NFObject *)(e), __nopa_sel_value) == 7);
-        NFObject *__nopa_tmp_6 = (NFObject_alloc(&nopa_Counter_class, __nopa_sel_alloc));
+        CHECK(((struct nopa_vtable *)(e->isa->vtable))->value((NPObject *)(e), __nopa_sel_value) == 7);
+        NPObject *__nopa_tmp_6 = (NPObject_alloc(&nopa_Counter_class, __nopa_sel_alloc));
         Counter * f = (Counter *)(((struct nopa_vtable *)__nopa_tmp_6->isa->vtable)->init(__nopa_tmp_6, __nopa_sel_init));
         for (int i = 0; (i < 10); (i)++) {
             if ((i % 2) == 0) {
                 continue;
             }
-            ((struct nopa_vtable *)(f->isa->vtable))->increment((NFObject *)(f), __nopa_sel_increment);
+            ((struct nopa_vtable *)(f->isa->vtable))->increment((NPObject *)(f), __nopa_sel_increment);
         }
-        CHECK(((struct nopa_vtable *)(f->isa->vtable))->value((NFObject *)(f), __nopa_sel_value) == 5);
-        NFObject *__nopa_tmp_7 = (NFObject_alloc(&nopa_Counter_class, __nopa_sel_alloc));
+        CHECK(((struct nopa_vtable *)(f->isa->vtable))->value((NPObject *)(f), __nopa_sel_value) == 5);
+        NPObject *__nopa_tmp_7 = (NPObject_alloc(&nopa_Counter_class, __nopa_sel_alloc));
         Counter * g = (Counter *)(((struct nopa_vtable *)__nopa_tmp_7->isa->vtable)->init(__nopa_tmp_7, __nopa_sel_init));
         {
             nopa_autoreleasepool_t * __nopa_pool = nopa_autoreleasepool_push();
-            NFObject *__nopa_tmp_8 = (NFObject_alloc(&nopa_Counter_class, __nopa_sel_alloc));
+            NPObject *__nopa_tmp_8 = (NPObject_alloc(&nopa_Counter_class, __nopa_sel_alloc));
             Counter * inner = (Counter *)(((struct nopa_vtable *)__nopa_tmp_8->isa->vtable)->init(__nopa_tmp_8, __nopa_sel_init));
-            ((struct nopa_vtable *)(inner->isa->vtable))->increment((NFObject *)(inner), __nopa_sel_increment);
-            CHECK(((struct nopa_vtable *)(inner->isa->vtable))->value((NFObject *)(inner), __nopa_sel_value) == 1);
-            ((struct nopa_vtable *)(inner->isa->vtable))->release((NFObject *)(inner), __nopa_sel_release);
+            ((struct nopa_vtable *)(inner->isa->vtable))->increment((NPObject *)(inner), __nopa_sel_increment);
+            CHECK(((struct nopa_vtable *)(inner->isa->vtable))->value((NPObject *)(inner), __nopa_sel_value) == 1);
+            ((struct nopa_vtable *)(inner->isa->vtable))->release((NPObject *)(inner), __nopa_sel_release);
             nopa_autoreleasepool_pop(__nopa_pool);
         }
-        ((struct nopa_vtable *)(g->isa->vtable))->increment((NFObject *)(g), __nopa_sel_increment);
-        CHECK(((struct nopa_vtable *)(g->isa->vtable))->value((NFObject *)(g), __nopa_sel_value) == 1);
-        NFObject *__nopa_tmp_9 = (NFObject_alloc(&nopa_Counter_class, __nopa_sel_alloc));
+        ((struct nopa_vtable *)(g->isa->vtable))->increment((NPObject *)(g), __nopa_sel_increment);
+        CHECK(((struct nopa_vtable *)(g->isa->vtable))->value((NPObject *)(g), __nopa_sel_value) == 1);
+        NPObject *__nopa_tmp_9 = (NPObject_alloc(&nopa_Counter_class, __nopa_sel_alloc));
         Counter * h = (Counter *)(((struct nopa_vtable *)__nopa_tmp_9->isa->vtable)->init(__nopa_tmp_9, __nopa_sel_init));
         for (int i = 0; (i < 3); (i)++) {
-            NFObject *__nopa_tmp_10 = (NFObject_alloc(&nopa_Counter_class, __nopa_sel_alloc));
+            NPObject *__nopa_tmp_10 = (NPObject_alloc(&nopa_Counter_class, __nopa_sel_alloc));
             Counter * tmp = (Counter *)(((struct nopa_vtable *)__nopa_tmp_10->isa->vtable)->init(__nopa_tmp_10, __nopa_sel_init));
-            ((struct nopa_vtable *)(tmp->isa->vtable))->increment((NFObject *)(tmp), __nopa_sel_increment);
-            ((struct nopa_vtable *)(tmp->isa->vtable))->release((NFObject *)(tmp), __nopa_sel_release);
+            ((struct nopa_vtable *)(tmp->isa->vtable))->increment((NPObject *)(tmp), __nopa_sel_increment);
+            ((struct nopa_vtable *)(tmp->isa->vtable))->release((NPObject *)(tmp), __nopa_sel_release);
         }
-        ((struct nopa_vtable *)(h->isa->vtable))->increment((NFObject *)(h), __nopa_sel_increment);
-        CHECK(((struct nopa_vtable *)(h->isa->vtable))->value((NFObject *)(h), __nopa_sel_value) == 1);
-        NFObject *__nopa_tmp_11 = (NFObject_alloc(&nopa_Counter_class, __nopa_sel_alloc));
+        ((struct nopa_vtable *)(h->isa->vtable))->increment((NPObject *)(h), __nopa_sel_increment);
+        CHECK(((struct nopa_vtable *)(h->isa->vtable))->value((NPObject *)(h), __nopa_sel_value) == 1);
+        NPObject *__nopa_tmp_11 = (NPObject_alloc(&nopa_Counter_class, __nopa_sel_alloc));
         Counter * i1 = (Counter *)(((struct nopa_vtable *)__nopa_tmp_11->isa->vtable)->init(__nopa_tmp_11, __nopa_sel_init));
-        NFObject *__nopa_tmp_12 = (NFObject_alloc(&nopa_Counter_class, __nopa_sel_alloc));
+        NPObject *__nopa_tmp_12 = (NPObject_alloc(&nopa_Counter_class, __nopa_sel_alloc));
         Counter * i2 = (Counter *)(((struct nopa_vtable *)__nopa_tmp_12->isa->vtable)->init(__nopa_tmp_12, __nopa_sel_init));
-        if ((((struct nopa_vtable *)(i1->isa->vtable))->value((NFObject *)(i1), __nopa_sel_value) < ((struct nopa_vtable *)(i2->isa->vtable))->value((NFObject *)(i2), __nopa_sel_value))) {
-            ((struct nopa_vtable *)(i1->isa->vtable))->increment((NFObject *)(i1), __nopa_sel_increment);
+        if ((((struct nopa_vtable *)(i1->isa->vtable))->value((NPObject *)(i1), __nopa_sel_value) < ((struct nopa_vtable *)(i2->isa->vtable))->value((NPObject *)(i2), __nopa_sel_value))) {
+            ((struct nopa_vtable *)(i1->isa->vtable))->increment((NPObject *)(i1), __nopa_sel_increment);
         }
         else {
-            ((struct nopa_vtable *)(i2->isa->vtable))->increment((NFObject *)(i2), __nopa_sel_increment);
+            ((struct nopa_vtable *)(i2->isa->vtable))->increment((NPObject *)(i2), __nopa_sel_increment);
         }
-        CHECK(((((struct nopa_vtable *)(i1->isa->vtable))->value((NFObject *)(i1), __nopa_sel_value) >= 0) && (((struct nopa_vtable *)(i2->isa->vtable))->value((NFObject *)(i2), __nopa_sel_value) >= 0)));
+        CHECK(((((struct nopa_vtable *)(i1->isa->vtable))->value((NPObject *)(i1), __nopa_sel_value) >= 0) && (((struct nopa_vtable *)(i2->isa->vtable))->value((NPObject *)(i2), __nopa_sel_value) >= 0)));
         Counter * ret = (Counter *)(make_counter());
-        ((struct nopa_vtable *)(ret->isa->vtable))->increment((NFObject *)(ret), __nopa_sel_increment);
-        CHECK(((struct nopa_vtable *)(ret->isa->vtable))->value((NFObject *)(ret), __nopa_sel_value) == 1);
-        ((struct nopa_vtable *)(a->isa->vtable))->release((NFObject *)(a), __nopa_sel_release);
-        ((struct nopa_vtable *)(b->isa->vtable))->release((NFObject *)(b), __nopa_sel_release);
-        ((struct nopa_vtable *)(c->isa->vtable))->release((NFObject *)(c), __nopa_sel_release);
-        ((struct nopa_vtable *)(d->isa->vtable))->release((NFObject *)(d), __nopa_sel_release);
-        ((struct nopa_vtable *)(e->isa->vtable))->release((NFObject *)(e), __nopa_sel_release);
-        ((struct nopa_vtable *)(f->isa->vtable))->release((NFObject *)(f), __nopa_sel_release);
-        ((struct nopa_vtable *)(g->isa->vtable))->release((NFObject *)(g), __nopa_sel_release);
-        ((struct nopa_vtable *)(h->isa->vtable))->release((NFObject *)(h), __nopa_sel_release);
-        ((struct nopa_vtable *)(i1->isa->vtable))->release((NFObject *)(i1), __nopa_sel_release);
-        ((struct nopa_vtable *)(i2->isa->vtable))->release((NFObject *)(i2), __nopa_sel_release);
-        ((struct nopa_vtable *)(ret->isa->vtable))->release((NFObject *)(ret), __nopa_sel_release);
+        ((struct nopa_vtable *)(ret->isa->vtable))->increment((NPObject *)(ret), __nopa_sel_increment);
+        CHECK(((struct nopa_vtable *)(ret->isa->vtable))->value((NPObject *)(ret), __nopa_sel_value) == 1);
+        ((struct nopa_vtable *)(a->isa->vtable))->release((NPObject *)(a), __nopa_sel_release);
+        ((struct nopa_vtable *)(b->isa->vtable))->release((NPObject *)(b), __nopa_sel_release);
+        ((struct nopa_vtable *)(c->isa->vtable))->release((NPObject *)(c), __nopa_sel_release);
+        ((struct nopa_vtable *)(d->isa->vtable))->release((NPObject *)(d), __nopa_sel_release);
+        ((struct nopa_vtable *)(e->isa->vtable))->release((NPObject *)(e), __nopa_sel_release);
+        ((struct nopa_vtable *)(f->isa->vtable))->release((NPObject *)(f), __nopa_sel_release);
+        ((struct nopa_vtable *)(g->isa->vtable))->release((NPObject *)(g), __nopa_sel_release);
+        ((struct nopa_vtable *)(h->isa->vtable))->release((NPObject *)(h), __nopa_sel_release);
+        ((struct nopa_vtable *)(i1->isa->vtable))->release((NPObject *)(i1), __nopa_sel_release);
+        ((struct nopa_vtable *)(i2->isa->vtable))->release((NPObject *)(i2), __nopa_sel_release);
+        ((struct nopa_vtable *)(ret->isa->vtable))->release((NPObject *)(ret), __nopa_sel_release);
         nopa_autoreleasepool_pop(__nopa_pool);
     }
     if (g_checks_failed == 0) {

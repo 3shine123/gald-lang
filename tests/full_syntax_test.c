@@ -8,8 +8,8 @@
 #include <stdint.h>
 #include <stddef.h>
 #include "nopa/runtime.h"
-#define NFOBJECT_NH
-#define NFSTRING_NH
+#define NPOBJECT_NH
+#define NPSTRING_NH
 #ifndef YES
 #define YES 1
 #endif
@@ -19,22 +19,22 @@
 #include <string.h>
 #include <ctype.h>
 #include <stdlib.h>
-#define NFMUTABLESTRING_NH
-#define NFARRAY_NH
+#define NPMUTABLESTRING_NH
+#define NPARRAY_NH
 #include <stdio.h>
-#define NFMUTABLEARRAY_NH
-#define NFDICTIONARY_NH
-#define NFMUTABLEDICTIONARY_NH
-#define NFNUMBER_NH
-#define NFERROR_NH
+#define NPMUTABLEARRAY_NH
+#define NPDICTIONARY_NH
+#define NPMUTABLEDICTIONARY_NH
+#define NPNUMBER_NH
+#define NPERROR_NH
 #include <stdarg.h>
 #include <time.h>
 #define FSQ_MAX(a, b)        ((a) > (b) ? (a) : (b))
 #define FSQ_NAME             "full-syntax"
 /* ------------- Section 2 · Forward declarations -------------- */
 struct nopa_vtable;
-struct NOPA_META_VTABLE_$_NFObject;
-struct NOPA_META_VTABLE_$_FsBox_NFMutableString_ptr;
+struct NOPA_META_VTABLE_$_NPObject;
+struct NOPA_META_VTABLE_$_FsBox_NPMutableString_ptr;
 struct NOPA_META_VTABLE_$_FsEngine__FsRenderable;
 struct NOPA_META_VTABLE_$_FsErrLow;
 struct NOPA_META_VTABLE_$_FsFetcher;
@@ -43,20 +43,20 @@ struct NOPA_META_VTABLE_$_FsGuarded;
 struct NOPA_META_VTABLE_$_FsModes;
 struct NOPA_META_VTABLE_$_FsParser;
 struct NOPA_META_VTABLE_$_FsTypedStore;
-struct NOPA_META_VTABLE_$_NFArray;
-struct NOPA_META_VTABLE_$_NFArray_NFNumber_ptr;
-struct NOPA_META_VTABLE_$_NFDictionary;
-struct NOPA_META_VTABLE_$_NFError;
-struct NOPA_META_VTABLE_$_NFNumber;
+struct NOPA_META_VTABLE_$_NPArray;
+struct NOPA_META_VTABLE_$_NPArray_NPNumber_ptr;
+struct NOPA_META_VTABLE_$_NPDictionary;
+struct NOPA_META_VTABLE_$_NPError;
+struct NOPA_META_VTABLE_$_NPNumber;
 struct NOPA_META_VTABLE_$_FsAnnotated;
-struct NOPA_META_VTABLE_$_NFString;
+struct NOPA_META_VTABLE_$_NPString;
 struct NOPA_META_VTABLE_$_FsBox;
-struct NOPA_META_VTABLE_$_NFMutableDictionary;
-struct NOPA_META_VTABLE_$_NFMutableString;
+struct NOPA_META_VTABLE_$_NPMutableDictionary;
+struct NOPA_META_VTABLE_$_NPMutableString;
 struct NOPA_META_VTABLE_$_FsSprite;
 struct NOPA_META_VTABLE_$_FsErrHigh;
-struct NOPA_META_VTABLE_$_NFMutableArray;
-struct NOPA_META_VTABLE_$_NFMutableArray_NFString_ptr;
+struct NOPA_META_VTABLE_$_NPMutableArray;
+struct NOPA_META_VTABLE_$_NPMutableArray_NPString_ptr;
 
 /* ----------------- Section 3 · SEL constants ----------------- */
 static const SEL __nopa_sel_init = {.name = "init", .hash = 0x16B1D373};
@@ -185,21 +185,21 @@ static const SEL __nopa_sel_decorate = {.name = "decorate", .hash = 0xB4330F66};
 #ifndef NOPA_ROOT_DEFINED
 #define NOPA_ROOT_DEFINED
 struct nopa_root {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
 };
 typedef struct nopa_root nopa_root;
 #endif
-#ifndef NFOBJECT_DEFINED
-#define NFOBJECT_DEFINED
-struct NFObject {
-    struct NFClass *isa;
+#ifndef NPOBJECT_DEFINED
+#define NPOBJECT_DEFINED
+struct NPObject {
+    struct NPClass *isa;
     uint32_t retain_count;
 };
-typedef struct NFObject NFObject;
+typedef struct NPObject NPObject;
 #endif
-struct FsBox_NFMutableString_ptr;
-typedef struct FsBox_NFMutableString_ptr FsBox_NFMutableString_ptr;
+struct FsBox_NPMutableString_ptr;
+typedef struct FsBox_NPMutableString_ptr FsBox_NPMutableString_ptr;
 struct FsEngine__FsRenderable;
 typedef struct FsEngine__FsRenderable FsEngine__FsRenderable;
 struct FsErrLow;
@@ -216,34 +216,34 @@ struct FsParser;
 typedef struct FsParser FsParser;
 struct FsTypedStore;
 typedef struct FsTypedStore FsTypedStore;
-struct NFArray;
-typedef struct NFArray NFArray;
-struct NFArray_NFNumber_ptr;
-typedef struct NFArray_NFNumber_ptr NFArray_NFNumber_ptr;
-struct NFDictionary;
-typedef struct NFDictionary NFDictionary;
-struct NFError;
-typedef struct NFError NFError;
-struct NFNumber;
-typedef struct NFNumber NFNumber;
+struct NPArray;
+typedef struct NPArray NPArray;
+struct NPArray_NPNumber_ptr;
+typedef struct NPArray_NPNumber_ptr NPArray_NPNumber_ptr;
+struct NPDictionary;
+typedef struct NPDictionary NPDictionary;
+struct NPError;
+typedef struct NPError NPError;
+struct NPNumber;
+typedef struct NPNumber NPNumber;
 struct FsAnnotated;
 typedef struct FsAnnotated FsAnnotated;
-struct NFString;
-typedef struct NFString NFString;
+struct NPString;
+typedef struct NPString NPString;
 struct FsBox;
 typedef struct FsBox FsBox;
-struct NFMutableDictionary;
-typedef struct NFMutableDictionary NFMutableDictionary;
-struct NFMutableString;
-typedef struct NFMutableString NFMutableString;
+struct NPMutableDictionary;
+typedef struct NPMutableDictionary NPMutableDictionary;
+struct NPMutableString;
+typedef struct NPMutableString NPMutableString;
 struct FsSprite;
 typedef struct FsSprite FsSprite;
 struct FsErrHigh;
 typedef struct FsErrHigh FsErrHigh;
-struct NFMutableArray;
-typedef struct NFMutableArray NFMutableArray;
-struct NFMutableArray_NFString_ptr;
-typedef struct NFMutableArray_NFString_ptr NFMutableArray_NFString_ptr;
+struct NPMutableArray;
+typedef struct NPMutableArray NPMutableArray;
+struct NPMutableArray_NPString_ptr;
+typedef struct NPMutableArray_NPString_ptr NPMutableArray_NPString_ptr;
 
 enum FsMode {
     FS_MODE_OFF = 0,
@@ -264,10 +264,10 @@ struct compute__frame {
 struct runAll_frame {
     char __nopa_pad;
 };
-typedef struct NFRange {
+typedef struct NPRange {
     size_t location;
     size_t length;
-} NFRange;
+} NPRange;
 #pragma mark - Â§1 C superset
 struct FsInner {
     int a;
@@ -309,161 +309,161 @@ static int nopa_struct_eq_FsPoint(struct FsPoint a, struct FsPoint b) {
 }
 
 /* -------------- Section 6 · Function prototypes -------------- */
-NFObject * nopa_root_init(NFObject * self, SEL _cmd);
-void nopa_root_dealloc(NFObject * self, SEL _cmd);
-void nopa_root_release(NFObject * self, SEL _cmd);
-NFObject * nopa_root_retain(NFObject * self, SEL _cmd);
-_Bool nopa_root_isKindOf_(NFObject * self, SEL _cmd, NFClass * cls);
-_Bool nopa_root_isKindOfClass_(NFObject * self, SEL _cmd, NFClass * cls);
-_Bool nopa_root_isEqual_(NFObject * self, SEL _cmd, NFObject * object);
-NFObject * nopa_root_description(NFObject * self, SEL _cmd);
-NFObject * NFObject_alloc(NFClass * self, SEL _cmd);
-NFObject * NFObject_new(NFClass * self, SEL _cmd);
-NFObject * NFObject_init(NFObject * self, SEL _cmd);
-void NFObject_dealloc(NFObject * self, SEL _cmd);
-void NFObject_release(NFObject * self, SEL _cmd);
-NFObject * NFObject_retain(NFObject * self, SEL _cmd);
-NFObject * NFObject_description(NFObject * self, SEL _cmd);
-NFString * NFString_stringWithUTF8String_(NFClass * self, SEL _cmd, const char * cstr);
-NFString * NFString_stringWithString_(NFClass * self, SEL _cmd, NFString * str);
-NFString * NFString_initWithUTF8String_(NFObject * self, SEL _cmd, const char * cstr);
-NFString * NFString_initWithString_(NFObject * self, SEL _cmd, NFString * str);
-size_t NFString_length(NFObject * self, SEL _cmd);
-const char * NFString_UTF8String(NFObject * self, SEL _cmd);
-char NFString_characterAtIndex_(NFObject * self, SEL _cmd, size_t index);
-_Bool NFString_isEqual_(NFObject * self, SEL _cmd, NFObject * object);
-int NFString_isEqualToString_(NFObject * self, SEL _cmd, NFString * other);
-int NFString_compare_(NFObject * self, SEL _cmd, NFString * other);
-int NFString_hasPrefix_(NFObject * self, SEL _cmd, NFString * prefix);
-int NFString_hasSuffix_(NFObject * self, SEL _cmd, NFString * suffix);
-NFRange NFString_rangeOfString_(NFObject * self, SEL _cmd, NFString * substring);
-NFString * NFString_substringFromIndex_(NFObject * self, SEL _cmd, size_t from);
-NFString * NFString_substringToIndex_(NFObject * self, SEL _cmd, size_t to);
-NFString * NFString_substringWithRange_(NFObject * self, SEL _cmd, NFRange range);
-NFString * NFString_stringByAppendingString_(NFObject * self, SEL _cmd, NFString * other);
-NFString * NFString_stringByAppendingUTF8String_(NFObject * self, SEL _cmd, const char * cstr);
-NFString * NFString_uppercaseString(NFObject * self, SEL _cmd);
-NFString * NFString_lowercaseString(NFObject * self, SEL _cmd);
-uint32_t NFString_hash(NFObject * self, SEL _cmd);
-NFString * NFString_description(NFObject * self, SEL _cmd);
-NFString * NFString_copy(NFObject * self, SEL _cmd);
-void NFString_dealloc(NFObject * self, SEL _cmd);
-NFMutableString * NFMutableString_stringWithUTF8String_(NFClass * self, SEL _cmd, const char * cstr);
-NFMutableString * NFMutableString_stringWithString_(NFClass * self, SEL _cmd, NFString * str);
-NFMutableString * NFMutableString_initWithUTF8String_(NFObject * self, SEL _cmd, const char * cstr);
-NFMutableString * NFMutableString_initWithString_(NFObject * self, SEL _cmd, NFString * str);
-void NFMutableString_appendString_(NFObject * self, SEL _cmd, NFString * str);
-void NFMutableString_appendUTF8String_(NFObject * self, SEL _cmd, const char * cstr);
-void NFMutableString_insertString_atIndex_(NFObject * self, SEL _cmd, NFString * str, size_t idx);
-void NFMutableString_deleteCharactersInRange_(NFObject * self, SEL _cmd, NFRange range);
-void NFMutableString_replaceCharactersInRange_withString_(NFObject * self, SEL _cmd, NFRange range, NFString * str);
-void NFMutableString_setString_(NFObject * self, SEL _cmd, NFString * str);
-NFObject * NFArray_arrayWithObjects_count_(NFClass * self, SEL _cmd, NFObject * * objs, size_t n);
-NFObject * NFArray_arrayWithObject_(NFClass * self, SEL _cmd, NFObject * obj);
-NFObject * NFArray_array(NFClass * self, SEL _cmd);
-size_t NFArray_count(NFObject * self, SEL _cmd);
-NFObject * NFArray_objectAtIndex_(NFObject * self, SEL _cmd, size_t index);
-NFObject * NFArray_firstObject(NFObject * self, SEL _cmd);
-NFObject * NFArray_lastObject(NFObject * self, SEL _cmd);
-_Bool NFArray_containsObject_(NFObject * self, SEL _cmd, NFObject * obj);
-size_t NFArray_indexOfObject_(NFObject * self, SEL _cmd, NFObject * obj);
-NFObject * NFArray_copy(NFObject * self, SEL _cmd);
-NFString * NFArray_description(NFObject * self, SEL _cmd);
-void NFArray_dealloc(NFObject * self, SEL _cmd);
-NFMutableArray * NFMutableArray_arrayWithCapacity_(NFClass * self, SEL _cmd, size_t capacity);
-NFMutableArray * NFMutableArray_array(NFClass * self, SEL _cmd);
-NFMutableArray * NFMutableArray_arrayWithObject_(NFClass * self, SEL _cmd, NFObject * obj);
-NFMutableArray * NFMutableArray_arrayWithObjects_count_(NFClass * self, SEL _cmd, NFObject * * objs, size_t n);
-NFMutableArray * NFMutableArray_init(NFObject * self, SEL _cmd);
-NFMutableArray * NFMutableArray_initWithCapacity_(NFObject * self, SEL _cmd, size_t capacity);
-NFMutableArray * NFMutableArray_initWithArray_(NFObject * self, SEL _cmd, NFArray * other);
-NFMutableArray * NFMutableArray_initWithObjects_count_(NFObject * self, SEL _cmd, NFObject * * objs, size_t n);
-void NFMutableArray_addObject_(NFObject * self, SEL _cmd, NFObject * obj);
-void NFMutableArray_addObjectsFromArray_(NFObject * self, SEL _cmd, NFArray * other);
-void NFMutableArray_insertObject_atIndex_(NFObject * self, SEL _cmd, NFObject * obj, size_t index);
-void NFMutableArray_removeObjectAtIndex_(NFObject * self, SEL _cmd, size_t index);
-void NFMutableArray_removeLastObject(NFObject * self, SEL _cmd);
-void NFMutableArray_removeObject_(NFObject * self, SEL _cmd, NFObject * obj);
-void NFMutableArray_removeAllObjects(NFObject * self, SEL _cmd);
-void NFMutableArray_replaceObjectAtIndex_withObject_(NFObject * self, SEL _cmd, size_t index, NFObject * obj);
-void NFMutableArray_exchangeObjectAtIndex_withObjectAtIndex_(NFObject * self, SEL _cmd, size_t a, size_t b);
-void NFMutableArray_setObject_atIndex_(NFObject * self, SEL _cmd, NFObject * obj, size_t index);
-NFDictionary * NFDictionary_dictionary(NFClass * self, SEL _cmd);
-NFDictionary * NFDictionary_dictionaryWithObject_forKey_(NFClass * self, SEL _cmd, NFObject * value, NFObject * key);
-NFDictionary * NFDictionary_dictionaryWithObjects_forKeys_count_(NFClass * self, SEL _cmd, NFObject * * values, NFObject * * keys, size_t n);
-size_t NFDictionary_count(NFObject * self, SEL _cmd);
-NFObject * NFDictionary_objectForKey_(NFObject * self, SEL _cmd, NFObject * key);
-NFArray * NFDictionary_allKeys(NFObject * self, SEL _cmd);
-NFArray * NFDictionary_allValues(NFObject * self, SEL _cmd);
-_Bool NFDictionary_isEqual_(NFObject * self, SEL _cmd, NFObject * object);
-NFObject * NFDictionary_copy(NFObject * self, SEL _cmd);
-NFString * NFDictionary_description(NFObject * self, SEL _cmd);
-void NFDictionary_dealloc(NFObject * self, SEL _cmd);
-NFMutableDictionary * NFMutableDictionary_dictionary(NFClass * self, SEL _cmd);
-NFMutableDictionary * NFMutableDictionary_dictionaryWithCapacity_(NFClass * self, SEL _cmd, size_t capacity);
-NFMutableDictionary * NFMutableDictionary_dictionaryWithObject_forKey_(NFClass * self, SEL _cmd, NFObject * value, NFObject * key);
-NFMutableDictionary * NFMutableDictionary_init(NFObject * self, SEL _cmd);
-NFMutableDictionary * NFMutableDictionary_initWithCapacity_(NFObject * self, SEL _cmd, size_t capacity);
-NFMutableDictionary * NFMutableDictionary_initWithDictionary_(NFObject * self, SEL _cmd, NFDictionary * other);
-void NFMutableDictionary_setObject_forKey_(NFObject * self, SEL _cmd, NFObject * value, NFObject * key);
-void NFMutableDictionary_addEntriesFromDictionary_(NFObject * self, SEL _cmd, NFDictionary * other);
-void NFMutableDictionary_removeObjectForKey_(NFObject * self, SEL _cmd, NFObject * key);
-void NFMutableDictionary_removeAllObjects(NFObject * self, SEL _cmd);
-NFNumber * NFNumber_numberWithInt_(NFClass * self, SEL _cmd, int value);
-NFNumber * NFNumber_numberWithLongLong_(NFClass * self, SEL _cmd, long long value);
-NFNumber * NFNumber_numberWithDouble_(NFClass * self, SEL _cmd, double value);
-NFNumber * NFNumber_numberWithBool_(NFClass * self, SEL _cmd, int value);
-NFNumber * NFNumber_numberWithChar_(NFClass * self, SEL _cmd, char value);
-NFNumber * NFNumber_initWithLongLong_(NFObject * self, SEL _cmd, long long value);
-NFNumber * NFNumber_initWithDouble_(NFObject * self, SEL _cmd, double value);
-int NFNumber_intValue(NFObject * self, SEL _cmd);
-long long NFNumber_longLongValue(NFObject * self, SEL _cmd);
-double NFNumber_doubleValue(NFObject * self, SEL _cmd);
-int NFNumber_boolValue(NFObject * self, SEL _cmd);
-char NFNumber_charValue(NFObject * self, SEL _cmd);
-NFString * NFNumber_description(NFObject * self, SEL _cmd);
-_Bool NFNumber_isEqual_(NFObject * self, SEL _cmd, NFObject * object);
-int NFNumber_isEqualToNumber_(NFObject * self, SEL _cmd, NFNumber * other);
-NFError * NFError_errorWithCode_domain_(NFClass * self, SEL _cmd, int code, NFString * domain);
-NFError * NFError_errorWithCode_domain_userInfo_(NFClass * self, SEL _cmd, int code, NFString * domain, NFDictionary * userInfo);
-NFError * NFError_initWithCode_domain_userInfo_(NFObject * self, SEL _cmd, int code, NFString * domain, NFDictionary * userInfo);
-NFError * NFError_parseErrorWithMessage_(NFClass * self, SEL _cmd, NFString * message);
-NFError * NFError_fileIOErrorWithMessage_(NFClass * self, SEL _cmd, NFString * message);
-int NFError_code(NFObject * self, SEL _cmd);
-NFString * NFError_domain(NFObject * self, SEL _cmd);
-NFDictionary * NFError_userInfo(NFObject * self, SEL _cmd);
-NFString * NFError_localizedDescription(NFObject * self, SEL _cmd);
-NFString * NFError_description(NFObject * self, SEL _cmd);
-int FsForwardUser_poke(NFObject * self, SEL _cmd);
-FsBox * FsBox_initWith_(NFObject * self, SEL _cmd, NFObject * v);
-NFObject * FsBox_value(NFObject * self, SEL _cmd);
-void FsBox_setValue_(NFObject * self, SEL _cmd, NFObject * v);
-int FsEngine__FsRenderable_render(NFObject * self, SEL _cmd);
-FsSprite * FsSprite_initWithId_(NFObject * self, SEL _cmd, int i);
-int FsSprite_sum_(NFObject * self, SEL _cmd, int first, ...);
-int FsSprite_classSum_(NFClass * self, SEL _cmd, int first, ...);
-NFString * FsSprite_label(NFObject * self, SEL _cmd);
-void FsSprite_setLabel_(NFObject * self, SEL _cmd, NFString * value);
-NFString * FsSprite_tag(NFObject * self, SEL _cmd);
-void FsSprite_setTag_(NFObject * self, SEL _cmd, NFString * value);
-void FsSprite_draw(NFObject * self, SEL _cmd);
-int FsSprite_color(NFObject * self, SEL _cmd);
-int FsSprite_render(NFObject * self, SEL _cmd);
-void FsTypedStore_run(NFObject * self, SEL _cmd);
-void FsGuarded_take_(NFObject * self, SEL _cmd, NFString * s);
-void FsGuarded_optOut_(NFObject * self, SEL _cmd, NFString * s);
-NFString * FsGuarded_produce(NFObject * self, SEL _cmd);
-void FsAnnotated_pre_post_(NFObject * self, SEL _cmd, NFString * a, NFString * b);
-NFString * FsAnnotated_maybe(NFObject * self, SEL _cmd);
-NFString * FsAnnotated_maybeC(NFObject * self, SEL _cmd);
-int FsModes_mix_point_(NFObject * self, SEL _cmd, FsMode m, struct FsPoint p);
-int FsParser_strictParse_(NFObject * self, SEL _cmd, NFString * s);
-int FsParser_looseParse_(NFObject * self, SEL _cmd, NFString * s);
-int FsFetcher_compute_(NFObject * self, SEL _cmd, int n);
-int FsFetcher_helper_(NFObject * self, SEL _cmd, int n);
-void FsFetcher_runAll(NFClass * self, SEL _cmd);
-int nopa_async_state_compute_(NFTask * t);
-int nopa_async_state_runAll(NFTask * t);
+NPObject * nopa_root_init(NPObject * self, SEL _cmd);
+void nopa_root_dealloc(NPObject * self, SEL _cmd);
+void nopa_root_release(NPObject * self, SEL _cmd);
+NPObject * nopa_root_retain(NPObject * self, SEL _cmd);
+_Bool nopa_root_isKindOf_(NPObject * self, SEL _cmd, NPClass * cls);
+_Bool nopa_root_isKindOfClass_(NPObject * self, SEL _cmd, NPClass * cls);
+_Bool nopa_root_isEqual_(NPObject * self, SEL _cmd, NPObject * object);
+NPObject * nopa_root_description(NPObject * self, SEL _cmd);
+NPObject * NPObject_alloc(NPClass * self, SEL _cmd);
+NPObject * NPObject_new(NPClass * self, SEL _cmd);
+NPObject * NPObject_init(NPObject * self, SEL _cmd);
+void NPObject_dealloc(NPObject * self, SEL _cmd);
+void NPObject_release(NPObject * self, SEL _cmd);
+NPObject * NPObject_retain(NPObject * self, SEL _cmd);
+NPObject * NPObject_description(NPObject * self, SEL _cmd);
+NPString * NPString_stringWithUTF8String_(NPClass * self, SEL _cmd, const char * cstr);
+NPString * NPString_stringWithString_(NPClass * self, SEL _cmd, NPString * str);
+NPString * NPString_initWithUTF8String_(NPObject * self, SEL _cmd, const char * cstr);
+NPString * NPString_initWithString_(NPObject * self, SEL _cmd, NPString * str);
+size_t NPString_length(NPObject * self, SEL _cmd);
+const char * NPString_UTF8String(NPObject * self, SEL _cmd);
+char NPString_characterAtIndex_(NPObject * self, SEL _cmd, size_t index);
+_Bool NPString_isEqual_(NPObject * self, SEL _cmd, NPObject * object);
+int NPString_isEqualToString_(NPObject * self, SEL _cmd, NPString * other);
+int NPString_compare_(NPObject * self, SEL _cmd, NPString * other);
+int NPString_hasPrefix_(NPObject * self, SEL _cmd, NPString * prefix);
+int NPString_hasSuffix_(NPObject * self, SEL _cmd, NPString * suffix);
+NPRange NPString_rangeOfString_(NPObject * self, SEL _cmd, NPString * substring);
+NPString * NPString_substringFromIndex_(NPObject * self, SEL _cmd, size_t from);
+NPString * NPString_substringToIndex_(NPObject * self, SEL _cmd, size_t to);
+NPString * NPString_substringWithRange_(NPObject * self, SEL _cmd, NPRange range);
+NPString * NPString_stringByAppendingString_(NPObject * self, SEL _cmd, NPString * other);
+NPString * NPString_stringByAppendingUTF8String_(NPObject * self, SEL _cmd, const char * cstr);
+NPString * NPString_uppercaseString(NPObject * self, SEL _cmd);
+NPString * NPString_lowercaseString(NPObject * self, SEL _cmd);
+uint32_t NPString_hash(NPObject * self, SEL _cmd);
+NPString * NPString_description(NPObject * self, SEL _cmd);
+NPString * NPString_copy(NPObject * self, SEL _cmd);
+void NPString_dealloc(NPObject * self, SEL _cmd);
+NPMutableString * NPMutableString_stringWithUTF8String_(NPClass * self, SEL _cmd, const char * cstr);
+NPMutableString * NPMutableString_stringWithString_(NPClass * self, SEL _cmd, NPString * str);
+NPMutableString * NPMutableString_initWithUTF8String_(NPObject * self, SEL _cmd, const char * cstr);
+NPMutableString * NPMutableString_initWithString_(NPObject * self, SEL _cmd, NPString * str);
+void NPMutableString_appendString_(NPObject * self, SEL _cmd, NPString * str);
+void NPMutableString_appendUTF8String_(NPObject * self, SEL _cmd, const char * cstr);
+void NPMutableString_insertString_atIndex_(NPObject * self, SEL _cmd, NPString * str, size_t idx);
+void NPMutableString_deleteCharactersInRange_(NPObject * self, SEL _cmd, NPRange range);
+void NPMutableString_replaceCharactersInRange_withString_(NPObject * self, SEL _cmd, NPRange range, NPString * str);
+void NPMutableString_setString_(NPObject * self, SEL _cmd, NPString * str);
+NPObject * NPArray_arrayWithObjects_count_(NPClass * self, SEL _cmd, NPObject * * objs, size_t n);
+NPObject * NPArray_arrayWithObject_(NPClass * self, SEL _cmd, NPObject * obj);
+NPObject * NPArray_array(NPClass * self, SEL _cmd);
+size_t NPArray_count(NPObject * self, SEL _cmd);
+NPObject * NPArray_objectAtIndex_(NPObject * self, SEL _cmd, size_t index);
+NPObject * NPArray_firstObject(NPObject * self, SEL _cmd);
+NPObject * NPArray_lastObject(NPObject * self, SEL _cmd);
+_Bool NPArray_containsObject_(NPObject * self, SEL _cmd, NPObject * obj);
+size_t NPArray_indexOfObject_(NPObject * self, SEL _cmd, NPObject * obj);
+NPObject * NPArray_copy(NPObject * self, SEL _cmd);
+NPString * NPArray_description(NPObject * self, SEL _cmd);
+void NPArray_dealloc(NPObject * self, SEL _cmd);
+NPMutableArray * NPMutableArray_arrayWithCapacity_(NPClass * self, SEL _cmd, size_t capacity);
+NPMutableArray * NPMutableArray_array(NPClass * self, SEL _cmd);
+NPMutableArray * NPMutableArray_arrayWithObject_(NPClass * self, SEL _cmd, NPObject * obj);
+NPMutableArray * NPMutableArray_arrayWithObjects_count_(NPClass * self, SEL _cmd, NPObject * * objs, size_t n);
+NPMutableArray * NPMutableArray_init(NPObject * self, SEL _cmd);
+NPMutableArray * NPMutableArray_initWithCapacity_(NPObject * self, SEL _cmd, size_t capacity);
+NPMutableArray * NPMutableArray_initWithArray_(NPObject * self, SEL _cmd, NPArray * other);
+NPMutableArray * NPMutableArray_initWithObjects_count_(NPObject * self, SEL _cmd, NPObject * * objs, size_t n);
+void NPMutableArray_addObject_(NPObject * self, SEL _cmd, NPObject * obj);
+void NPMutableArray_addObjectsFromArray_(NPObject * self, SEL _cmd, NPArray * other);
+void NPMutableArray_insertObject_atIndex_(NPObject * self, SEL _cmd, NPObject * obj, size_t index);
+void NPMutableArray_removeObjectAtIndex_(NPObject * self, SEL _cmd, size_t index);
+void NPMutableArray_removeLastObject(NPObject * self, SEL _cmd);
+void NPMutableArray_removeObject_(NPObject * self, SEL _cmd, NPObject * obj);
+void NPMutableArray_removeAllObjects(NPObject * self, SEL _cmd);
+void NPMutableArray_replaceObjectAtIndex_withObject_(NPObject * self, SEL _cmd, size_t index, NPObject * obj);
+void NPMutableArray_exchangeObjectAtIndex_withObjectAtIndex_(NPObject * self, SEL _cmd, size_t a, size_t b);
+void NPMutableArray_setObject_atIndex_(NPObject * self, SEL _cmd, NPObject * obj, size_t index);
+NPDictionary * NPDictionary_dictionary(NPClass * self, SEL _cmd);
+NPDictionary * NPDictionary_dictionaryWithObject_forKey_(NPClass * self, SEL _cmd, NPObject * value, NPObject * key);
+NPDictionary * NPDictionary_dictionaryWithObjects_forKeys_count_(NPClass * self, SEL _cmd, NPObject * * values, NPObject * * keys, size_t n);
+size_t NPDictionary_count(NPObject * self, SEL _cmd);
+NPObject * NPDictionary_objectForKey_(NPObject * self, SEL _cmd, NPObject * key);
+NPArray * NPDictionary_allKeys(NPObject * self, SEL _cmd);
+NPArray * NPDictionary_allValues(NPObject * self, SEL _cmd);
+_Bool NPDictionary_isEqual_(NPObject * self, SEL _cmd, NPObject * object);
+NPObject * NPDictionary_copy(NPObject * self, SEL _cmd);
+NPString * NPDictionary_description(NPObject * self, SEL _cmd);
+void NPDictionary_dealloc(NPObject * self, SEL _cmd);
+NPMutableDictionary * NPMutableDictionary_dictionary(NPClass * self, SEL _cmd);
+NPMutableDictionary * NPMutableDictionary_dictionaryWithCapacity_(NPClass * self, SEL _cmd, size_t capacity);
+NPMutableDictionary * NPMutableDictionary_dictionaryWithObject_forKey_(NPClass * self, SEL _cmd, NPObject * value, NPObject * key);
+NPMutableDictionary * NPMutableDictionary_init(NPObject * self, SEL _cmd);
+NPMutableDictionary * NPMutableDictionary_initWithCapacity_(NPObject * self, SEL _cmd, size_t capacity);
+NPMutableDictionary * NPMutableDictionary_initWithDictionary_(NPObject * self, SEL _cmd, NPDictionary * other);
+void NPMutableDictionary_setObject_forKey_(NPObject * self, SEL _cmd, NPObject * value, NPObject * key);
+void NPMutableDictionary_addEntriesFromDictionary_(NPObject * self, SEL _cmd, NPDictionary * other);
+void NPMutableDictionary_removeObjectForKey_(NPObject * self, SEL _cmd, NPObject * key);
+void NPMutableDictionary_removeAllObjects(NPObject * self, SEL _cmd);
+NPNumber * NPNumber_numberWithInt_(NPClass * self, SEL _cmd, int value);
+NPNumber * NPNumber_numberWithLongLong_(NPClass * self, SEL _cmd, long long value);
+NPNumber * NPNumber_numberWithDouble_(NPClass * self, SEL _cmd, double value);
+NPNumber * NPNumber_numberWithBool_(NPClass * self, SEL _cmd, int value);
+NPNumber * NPNumber_numberWithChar_(NPClass * self, SEL _cmd, char value);
+NPNumber * NPNumber_initWithLongLong_(NPObject * self, SEL _cmd, long long value);
+NPNumber * NPNumber_initWithDouble_(NPObject * self, SEL _cmd, double value);
+int NPNumber_intValue(NPObject * self, SEL _cmd);
+long long NPNumber_longLongValue(NPObject * self, SEL _cmd);
+double NPNumber_doubleValue(NPObject * self, SEL _cmd);
+int NPNumber_boolValue(NPObject * self, SEL _cmd);
+char NPNumber_charValue(NPObject * self, SEL _cmd);
+NPString * NPNumber_description(NPObject * self, SEL _cmd);
+_Bool NPNumber_isEqual_(NPObject * self, SEL _cmd, NPObject * object);
+int NPNumber_isEqualToNumber_(NPObject * self, SEL _cmd, NPNumber * other);
+NPError * NPError_errorWithCode_domain_(NPClass * self, SEL _cmd, int code, NPString * domain);
+NPError * NPError_errorWithCode_domain_userInfo_(NPClass * self, SEL _cmd, int code, NPString * domain, NPDictionary * userInfo);
+NPError * NPError_initWithCode_domain_userInfo_(NPObject * self, SEL _cmd, int code, NPString * domain, NPDictionary * userInfo);
+NPError * NPError_parseErrorWithMessage_(NPClass * self, SEL _cmd, NPString * message);
+NPError * NPError_fileIOErrorWithMessage_(NPClass * self, SEL _cmd, NPString * message);
+int NPError_code(NPObject * self, SEL _cmd);
+NPString * NPError_domain(NPObject * self, SEL _cmd);
+NPDictionary * NPError_userInfo(NPObject * self, SEL _cmd);
+NPString * NPError_localizedDescription(NPObject * self, SEL _cmd);
+NPString * NPError_description(NPObject * self, SEL _cmd);
+int FsForwardUser_poke(NPObject * self, SEL _cmd);
+FsBox * FsBox_initWith_(NPObject * self, SEL _cmd, NPObject * v);
+NPObject * FsBox_value(NPObject * self, SEL _cmd);
+void FsBox_setValue_(NPObject * self, SEL _cmd, NPObject * v);
+int FsEngine__FsRenderable_render(NPObject * self, SEL _cmd);
+FsSprite * FsSprite_initWithId_(NPObject * self, SEL _cmd, int i);
+int FsSprite_sum_(NPObject * self, SEL _cmd, int first, ...);
+int FsSprite_classSum_(NPClass * self, SEL _cmd, int first, ...);
+NPString * FsSprite_label(NPObject * self, SEL _cmd);
+void FsSprite_setLabel_(NPObject * self, SEL _cmd, NPString * value);
+NPString * FsSprite_tag(NPObject * self, SEL _cmd);
+void FsSprite_setTag_(NPObject * self, SEL _cmd, NPString * value);
+void FsSprite_draw(NPObject * self, SEL _cmd);
+int FsSprite_color(NPObject * self, SEL _cmd);
+int FsSprite_render(NPObject * self, SEL _cmd);
+void FsTypedStore_run(NPObject * self, SEL _cmd);
+void FsGuarded_take_(NPObject * self, SEL _cmd, NPString * s);
+void FsGuarded_optOut_(NPObject * self, SEL _cmd, NPString * s);
+NPString * FsGuarded_produce(NPObject * self, SEL _cmd);
+void FsAnnotated_pre_post_(NPObject * self, SEL _cmd, NPString * a, NPString * b);
+NPString * FsAnnotated_maybe(NPObject * self, SEL _cmd);
+NPString * FsAnnotated_maybeC(NPObject * self, SEL _cmd);
+int FsModes_mix_point_(NPObject * self, SEL _cmd, FsMode m, struct FsPoint p);
+int FsParser_strictParse_(NPObject * self, SEL _cmd, NPString * s);
+int FsParser_looseParse_(NPObject * self, SEL _cmd, NPString * s);
+int FsFetcher_compute_(NPObject * self, SEL _cmd, int n);
+int FsFetcher_helper_(NPObject * self, SEL _cmd, int n);
+void FsFetcher_runAll(NPClass * self, SEL _cmd);
+int nopa_async_state_compute_(NPTask * t);
+int nopa_async_state_runAll(NPTask * t);
 __attribute__((format (printf , 1 , 2 ))) int fs_format_fn(const char * fmt, ...);
 int fs_asm_square(int x);
 int fs_asm_add3(int a, int b, int c);
@@ -474,70 +474,70 @@ void sec2_objects(void );
 int fs_call_block(FsIntBlock b, int x, int y);
 void sec3_expressions(void );
 void sec4_control_runtime(void );
-NFString * fs_maybe_fn(void );
-void fs_take_fn(NFString * s);
+NPString * fs_maybe_fn(void );
+void fs_take_fn(NPString * s);
 void sec5_misc(void );
 int main(void );
-NFMutableArray * NFMutableArray_NFString_ptr_arrayWithCapacity_(NFClass * self, SEL _cmd, size_t capacity);
-NFMutableArray * NFMutableArray_NFString_ptr_array(NFClass * self, SEL _cmd);
-NFMutableArray * NFMutableArray_NFString_ptr_arrayWithObject_(NFClass * self, SEL _cmd, NFString * obj);
-NFMutableArray * NFMutableArray_NFString_ptr_arrayWithObjects_count_(NFClass * self, SEL _cmd, NFObject * * objs, size_t n);
-NFMutableArray * NFMutableArray_NFString_ptr_init(NFObject * self, SEL _cmd);
-NFMutableArray * NFMutableArray_NFString_ptr_initWithCapacity_(NFObject * self, SEL _cmd, size_t capacity);
-NFMutableArray * NFMutableArray_NFString_ptr_initWithArray_(NFObject * self, SEL _cmd, NFArray * other);
-NFMutableArray * NFMutableArray_NFString_ptr_initWithObjects_count_(NFObject * self, SEL _cmd, NFObject * * objs, size_t n);
-void NFMutableArray_NFString_ptr_addObject_(NFObject * self, SEL _cmd, NFString * obj);
-void NFMutableArray_NFString_ptr_addObjectsFromArray_(NFObject * self, SEL _cmd, NFArray * other);
-void NFMutableArray_NFString_ptr_insertObject_atIndex_(NFObject * self, SEL _cmd, NFString * obj, size_t index);
-void NFMutableArray_NFString_ptr_removeObjectAtIndex_(NFObject * self, SEL _cmd, size_t index);
-void NFMutableArray_NFString_ptr_removeLastObject(NFObject * self, SEL _cmd);
-void NFMutableArray_NFString_ptr_removeObject_(NFObject * self, SEL _cmd, NFString * obj);
-void NFMutableArray_NFString_ptr_removeAllObjects(NFObject * self, SEL _cmd);
-void NFMutableArray_NFString_ptr_replaceObjectAtIndex_withObject_(NFObject * self, SEL _cmd, size_t index, NFString * obj);
-void NFMutableArray_NFString_ptr_exchangeObjectAtIndex_withObjectAtIndex_(NFObject * self, SEL _cmd, size_t a, size_t b);
-void NFMutableArray_NFString_ptr_setObject_atIndex_(NFObject * self, SEL _cmd, NFString * obj, size_t index);
-FsBox * FsBox_NFMutableString_ptr_initWith_(NFObject * self, SEL _cmd, NFMutableString * v);
-NFMutableString * FsBox_NFMutableString_ptr_value(NFObject * self, SEL _cmd);
-void FsBox_NFMutableString_ptr_setValue_(NFObject * self, SEL _cmd, NFMutableString * v);
-NFObject * NFArray_NFNumber_ptr_arrayWithObjects_count_(NFClass * self, SEL _cmd, NFObject * * objs, size_t n);
-NFObject * NFArray_NFNumber_ptr_arrayWithObject_(NFClass * self, SEL _cmd, NFNumber * obj);
-NFObject * NFArray_NFNumber_ptr_array(NFClass * self, SEL _cmd);
-size_t NFArray_NFNumber_ptr_count(NFObject * self, SEL _cmd);
-NFNumber * NFArray_NFNumber_ptr_objectAtIndex_(NFObject * self, SEL _cmd, size_t index);
-NFNumber * NFArray_NFNumber_ptr_firstObject(NFObject * self, SEL _cmd);
-NFNumber * NFArray_NFNumber_ptr_lastObject(NFObject * self, SEL _cmd);
-_Bool NFArray_NFNumber_ptr_containsObject_(NFObject * self, SEL _cmd, NFNumber * obj);
-size_t NFArray_NFNumber_ptr_indexOfObject_(NFObject * self, SEL _cmd, NFNumber * obj);
-NFObject * NFArray_NFNumber_ptr_copy(NFObject * self, SEL _cmd);
-NFString * NFArray_NFNumber_ptr_description(NFObject * self, SEL _cmd);
-void NFArray_NFNumber_ptr_dealloc(NFObject * self, SEL _cmd);
+NPMutableArray * NPMutableArray_NPString_ptr_arrayWithCapacity_(NPClass * self, SEL _cmd, size_t capacity);
+NPMutableArray * NPMutableArray_NPString_ptr_array(NPClass * self, SEL _cmd);
+NPMutableArray * NPMutableArray_NPString_ptr_arrayWithObject_(NPClass * self, SEL _cmd, NPString * obj);
+NPMutableArray * NPMutableArray_NPString_ptr_arrayWithObjects_count_(NPClass * self, SEL _cmd, NPObject * * objs, size_t n);
+NPMutableArray * NPMutableArray_NPString_ptr_init(NPObject * self, SEL _cmd);
+NPMutableArray * NPMutableArray_NPString_ptr_initWithCapacity_(NPObject * self, SEL _cmd, size_t capacity);
+NPMutableArray * NPMutableArray_NPString_ptr_initWithArray_(NPObject * self, SEL _cmd, NPArray * other);
+NPMutableArray * NPMutableArray_NPString_ptr_initWithObjects_count_(NPObject * self, SEL _cmd, NPObject * * objs, size_t n);
+void NPMutableArray_NPString_ptr_addObject_(NPObject * self, SEL _cmd, NPString * obj);
+void NPMutableArray_NPString_ptr_addObjectsFromArray_(NPObject * self, SEL _cmd, NPArray * other);
+void NPMutableArray_NPString_ptr_insertObject_atIndex_(NPObject * self, SEL _cmd, NPString * obj, size_t index);
+void NPMutableArray_NPString_ptr_removeObjectAtIndex_(NPObject * self, SEL _cmd, size_t index);
+void NPMutableArray_NPString_ptr_removeLastObject(NPObject * self, SEL _cmd);
+void NPMutableArray_NPString_ptr_removeObject_(NPObject * self, SEL _cmd, NPString * obj);
+void NPMutableArray_NPString_ptr_removeAllObjects(NPObject * self, SEL _cmd);
+void NPMutableArray_NPString_ptr_replaceObjectAtIndex_withObject_(NPObject * self, SEL _cmd, size_t index, NPString * obj);
+void NPMutableArray_NPString_ptr_exchangeObjectAtIndex_withObjectAtIndex_(NPObject * self, SEL _cmd, size_t a, size_t b);
+void NPMutableArray_NPString_ptr_setObject_atIndex_(NPObject * self, SEL _cmd, NPString * obj, size_t index);
+FsBox * FsBox_NPMutableString_ptr_initWith_(NPObject * self, SEL _cmd, NPMutableString * v);
+NPMutableString * FsBox_NPMutableString_ptr_value(NPObject * self, SEL _cmd);
+void FsBox_NPMutableString_ptr_setValue_(NPObject * self, SEL _cmd, NPMutableString * v);
+NPObject * NPArray_NPNumber_ptr_arrayWithObjects_count_(NPClass * self, SEL _cmd, NPObject * * objs, size_t n);
+NPObject * NPArray_NPNumber_ptr_arrayWithObject_(NPClass * self, SEL _cmd, NPNumber * obj);
+NPObject * NPArray_NPNumber_ptr_array(NPClass * self, SEL _cmd);
+size_t NPArray_NPNumber_ptr_count(NPObject * self, SEL _cmd);
+NPNumber * NPArray_NPNumber_ptr_objectAtIndex_(NPObject * self, SEL _cmd, size_t index);
+NPNumber * NPArray_NPNumber_ptr_firstObject(NPObject * self, SEL _cmd);
+NPNumber * NPArray_NPNumber_ptr_lastObject(NPObject * self, SEL _cmd);
+_Bool NPArray_NPNumber_ptr_containsObject_(NPObject * self, SEL _cmd, NPNumber * obj);
+size_t NPArray_NPNumber_ptr_indexOfObject_(NPObject * self, SEL _cmd, NPNumber * obj);
+NPObject * NPArray_NPNumber_ptr_copy(NPObject * self, SEL _cmd);
+NPString * NPArray_NPNumber_ptr_description(NPObject * self, SEL _cmd);
+void NPArray_NPNumber_ptr_dealloc(NPObject * self, SEL _cmd);
 
 /* ------------- Section 7 · File-level variables -------------- */
 /* ------------ Section 8 · VTable & class layouts ------------- */
-NFClass * NOPA_GETCLASS_$_NFObject(NFClass * self, SEL _cmd);
-NFClass * NOPA_GETCLASS_$_FsBox_NFMutableString_ptr(NFClass * self, SEL _cmd);
-NFClass * NOPA_GETCLASS_$_FsEngine__FsRenderable(NFClass * self, SEL _cmd);
-NFClass * NOPA_GETCLASS_$_FsErrLow(NFClass * self, SEL _cmd);
-NFClass * NOPA_GETCLASS_$_FsFetcher(NFClass * self, SEL _cmd);
-NFClass * NOPA_GETCLASS_$_FsForwardUser(NFClass * self, SEL _cmd);
-NFClass * NOPA_GETCLASS_$_FsGuarded(NFClass * self, SEL _cmd);
-NFClass * NOPA_GETCLASS_$_FsModes(NFClass * self, SEL _cmd);
-NFClass * NOPA_GETCLASS_$_FsParser(NFClass * self, SEL _cmd);
-NFClass * NOPA_GETCLASS_$_FsTypedStore(NFClass * self, SEL _cmd);
-NFClass * NOPA_GETCLASS_$_NFArray(NFClass * self, SEL _cmd);
-NFClass * NOPA_GETCLASS_$_NFArray_NFNumber_ptr(NFClass * self, SEL _cmd);
-NFClass * NOPA_GETCLASS_$_NFDictionary(NFClass * self, SEL _cmd);
-NFClass * NOPA_GETCLASS_$_NFError(NFClass * self, SEL _cmd);
-NFClass * NOPA_GETCLASS_$_NFNumber(NFClass * self, SEL _cmd);
-NFClass * NOPA_GETCLASS_$_FsAnnotated(NFClass * self, SEL _cmd);
-NFClass * NOPA_GETCLASS_$_NFString(NFClass * self, SEL _cmd);
-NFClass * NOPA_GETCLASS_$_FsBox(NFClass * self, SEL _cmd);
-NFClass * NOPA_GETCLASS_$_NFMutableDictionary(NFClass * self, SEL _cmd);
-NFClass * NOPA_GETCLASS_$_NFMutableString(NFClass * self, SEL _cmd);
-NFClass * NOPA_GETCLASS_$_FsSprite(NFClass * self, SEL _cmd);
-NFClass * NOPA_GETCLASS_$_FsErrHigh(NFClass * self, SEL _cmd);
-NFClass * NOPA_GETCLASS_$_NFMutableArray(NFClass * self, SEL _cmd);
-NFClass * NOPA_GETCLASS_$_NFMutableArray_NFString_ptr(NFClass * self, SEL _cmd);
+NPClass * NOPA_GETCLASS_$_NPObject(NPClass * self, SEL _cmd);
+NPClass * NOPA_GETCLASS_$_FsBox_NPMutableString_ptr(NPClass * self, SEL _cmd);
+NPClass * NOPA_GETCLASS_$_FsEngine__FsRenderable(NPClass * self, SEL _cmd);
+NPClass * NOPA_GETCLASS_$_FsErrLow(NPClass * self, SEL _cmd);
+NPClass * NOPA_GETCLASS_$_FsFetcher(NPClass * self, SEL _cmd);
+NPClass * NOPA_GETCLASS_$_FsForwardUser(NPClass * self, SEL _cmd);
+NPClass * NOPA_GETCLASS_$_FsGuarded(NPClass * self, SEL _cmd);
+NPClass * NOPA_GETCLASS_$_FsModes(NPClass * self, SEL _cmd);
+NPClass * NOPA_GETCLASS_$_FsParser(NPClass * self, SEL _cmd);
+NPClass * NOPA_GETCLASS_$_FsTypedStore(NPClass * self, SEL _cmd);
+NPClass * NOPA_GETCLASS_$_NPArray(NPClass * self, SEL _cmd);
+NPClass * NOPA_GETCLASS_$_NPArray_NPNumber_ptr(NPClass * self, SEL _cmd);
+NPClass * NOPA_GETCLASS_$_NPDictionary(NPClass * self, SEL _cmd);
+NPClass * NOPA_GETCLASS_$_NPError(NPClass * self, SEL _cmd);
+NPClass * NOPA_GETCLASS_$_NPNumber(NPClass * self, SEL _cmd);
+NPClass * NOPA_GETCLASS_$_FsAnnotated(NPClass * self, SEL _cmd);
+NPClass * NOPA_GETCLASS_$_NPString(NPClass * self, SEL _cmd);
+NPClass * NOPA_GETCLASS_$_FsBox(NPClass * self, SEL _cmd);
+NPClass * NOPA_GETCLASS_$_NPMutableDictionary(NPClass * self, SEL _cmd);
+NPClass * NOPA_GETCLASS_$_NPMutableString(NPClass * self, SEL _cmd);
+NPClass * NOPA_GETCLASS_$_FsSprite(NPClass * self, SEL _cmd);
+NPClass * NOPA_GETCLASS_$_FsErrHigh(NPClass * self, SEL _cmd);
+NPClass * NOPA_GETCLASS_$_NPMutableArray(NPClass * self, SEL _cmd);
+NPClass * NOPA_GETCLASS_$_NPMutableArray_NPString_ptr(NPClass * self, SEL _cmd);
 
 /* vtable layout signature: 4adeb6d807e3ebfa (methods: 97) */
 __attribute__((weak)) void nopa_verify_vtable_sig(unsigned long long winner, unsigned long long mine, const char *method_list) {
@@ -564,501 +564,501 @@ __attribute__((weak)) void nopa_verify_vtable_sig(unsigned long long winner, uns
 
 struct nopa_vtable {
     unsigned long long __sig;
-    const char * (*UTF8String)(NFObject *, SEL);
-    void (*addEntriesFromDictionary_)(NFObject *, SEL, NFDictionary *);
-    void (*addObject_)(NFObject *, SEL, NFObject *);
-    void (*addObjectsFromArray_)(NFObject *, SEL, NFArray *);
-    NFArray * (*allKeys)(NFObject *, SEL);
-    NFArray * (*allValues)(NFObject *, SEL);
-    void (*appendString_)(NFObject *, SEL, NFString *);
-    void (*appendUTF8String_)(NFObject *, SEL, const char *);
-    int (*boolValue)(NFObject *, SEL);
-    char (*charValue)(NFObject *, SEL);
-    char (*characterAtIndex_)(NFObject *, SEL, size_t);
-    int (*code)(NFObject *, SEL);
-    int (*color)(NFObject *, SEL);
-    int (*compare_)(NFObject *, SEL, NFString *);
-    int (*compute_)(NFObject *, SEL, int);
-    _Bool (*containsObject_)(NFObject *, SEL, NFObject *);
-    NFObject * (*copy)(NFObject *, SEL);
-    size_t (*count)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    void (*deleteCharactersInRange_)(NFObject *, SEL, NFRange);
-    NFObject * (*description)(NFObject *, SEL);
-    NFString * (*domain)(NFObject *, SEL);
-    double (*doubleValue)(NFObject *, SEL);
-    void (*draw)(NFObject *, SEL);
-    void (*exchangeObjectAtIndex_withObjectAtIndex_)(NFObject *, SEL, size_t, size_t);
-    NFObject * (*firstObject)(NFObject *, SEL);
-    int (*hasPrefix_)(NFObject *, SEL, NFString *);
-    int (*hasSuffix_)(NFObject *, SEL, NFString *);
-    uint32_t (*hash)(NFObject *, SEL);
-    int (*helper_)(NFObject *, SEL, int);
-    size_t (*indexOfObject_)(NFObject *, SEL, NFObject *);
-    NFObject * (*init)(NFObject *, SEL);
-    NFMutableArray * (*initWithArray_)(NFObject *, SEL, NFArray *);
-    NFMutableDictionary * (*initWithCapacity_)(NFObject *, SEL, size_t);
-    NFError * (*initWithCode_domain_userInfo_)(NFObject *, SEL, int, NFString *, NFDictionary *);
-    NFMutableDictionary * (*initWithDictionary_)(NFObject *, SEL, NFDictionary *);
-    NFNumber * (*initWithDouble_)(NFObject *, SEL, double);
-    FsSprite * (*initWithId_)(NFObject *, SEL, int);
-    NFNumber * (*initWithLongLong_)(NFObject *, SEL, long long);
-    NFMutableArray * (*initWithObjects_count_)(NFObject *, SEL, NFObject * *, size_t);
-    NFString * (*initWithString_)(NFObject *, SEL, NFString *);
-    NFString * (*initWithUTF8String_)(NFObject *, SEL, const char *);
-    FsBox * (*initWith_)(NFObject *, SEL, NFMutableString *);
-    void (*insertObject_atIndex_)(NFObject *, SEL, NFObject *, size_t);
-    void (*insertString_atIndex_)(NFObject *, SEL, NFString *, size_t);
-    int (*intValue)(NFObject *, SEL);
-    int (*isEqualToNumber_)(NFObject *, SEL, NFNumber *);
-    int (*isEqualToString_)(NFObject *, SEL, NFString *);
-    _Bool (*isEqual_)(NFObject *, SEL, NFObject *);
-    _Bool (*isKindOfClass_)(NFObject *, SEL, NFClass *);
-    _Bool (*isKindOf_)(NFObject *, SEL, NFClass *);
-    NFString * (*label)(NFObject *, SEL);
-    NFObject * (*lastObject)(NFObject *, SEL);
-    size_t (*length)(NFObject *, SEL);
-    NFString * (*localizedDescription)(NFObject *, SEL);
-    long long (*longLongValue)(NFObject *, SEL);
-    int (*looseParse_)(NFObject *, SEL, NFString *);
-    NFString * (*lowercaseString)(NFObject *, SEL);
-    NFString * (*maybe)(NFObject *, SEL);
-    NFString * (*maybeC)(NFObject *, SEL);
-    int (*mix_point_)(NFObject *, SEL, FsMode, struct FsPoint);
-    NFObject * (*objectAtIndex_)(NFObject *, SEL, size_t);
-    NFObject * (*objectForKey_)(NFObject *, SEL, NFObject *);
-    void (*optOut_)(NFObject *, SEL, NFString *);
-    int (*poke)(NFObject *, SEL);
-    void (*pre_post_)(NFObject *, SEL, NFString *, NFString *);
-    NFString * (*produce)(NFObject *, SEL);
-    NFRange (*rangeOfString_)(NFObject *, SEL, NFString *);
-    void (*release)(NFObject *, SEL);
-    void (*removeAllObjects)(NFObject *, SEL);
-    void (*removeLastObject)(NFObject *, SEL);
-    void (*removeObjectAtIndex_)(NFObject *, SEL, size_t);
-    void (*removeObjectForKey_)(NFObject *, SEL, NFObject *);
-    void (*removeObject_)(NFObject *, SEL, NFObject *);
-    int (*render)(NFObject *, SEL);
-    void (*replaceCharactersInRange_withString_)(NFObject *, SEL, NFRange, NFString *);
-    void (*replaceObjectAtIndex_withObject_)(NFObject *, SEL, size_t, NFObject *);
-    NFObject * (*retain)(NFObject *, SEL);
-    void (*run)(NFObject *, SEL);
-    void (*setLabel_)(NFObject *, SEL, NFString *);
-    void (*setObject_atIndex_)(NFObject *, SEL, NFObject *, size_t);
-    void (*setObject_forKey_)(NFObject *, SEL, NFObject *, NFObject *);
-    void (*setString_)(NFObject *, SEL, NFString *);
-    void (*setTag_)(NFObject *, SEL, NFString *);
-    void (*setValue_)(NFObject *, SEL, NFMutableString *);
-    int (*strictParse_)(NFObject *, SEL, NFString *);
-    NFString * (*stringByAppendingString_)(NFObject *, SEL, NFString *);
-    NFString * (*stringByAppendingUTF8String_)(NFObject *, SEL, const char *);
-    NFString * (*substringFromIndex_)(NFObject *, SEL, size_t);
-    NFString * (*substringToIndex_)(NFObject *, SEL, size_t);
-    NFString * (*substringWithRange_)(NFObject *, SEL, NFRange);
-    int (*sum_)(NFObject *, SEL, int, ...);
-    NFString * (*tag)(NFObject *, SEL);
-    void (*take_)(NFObject *, SEL, NFString *);
-    NFString * (*uppercaseString)(NFObject *, SEL);
-    NFDictionary * (*userInfo)(NFObject *, SEL);
-    NFMutableString * (*value)(NFObject *, SEL);
+    const char * (*UTF8String)(NPObject *, SEL);
+    void (*addEntriesFromDictionary_)(NPObject *, SEL, NPDictionary *);
+    void (*addObject_)(NPObject *, SEL, NPObject *);
+    void (*addObjectsFromArray_)(NPObject *, SEL, NPArray *);
+    NPArray * (*allKeys)(NPObject *, SEL);
+    NPArray * (*allValues)(NPObject *, SEL);
+    void (*appendString_)(NPObject *, SEL, NPString *);
+    void (*appendUTF8String_)(NPObject *, SEL, const char *);
+    int (*boolValue)(NPObject *, SEL);
+    char (*charValue)(NPObject *, SEL);
+    char (*characterAtIndex_)(NPObject *, SEL, size_t);
+    int (*code)(NPObject *, SEL);
+    int (*color)(NPObject *, SEL);
+    int (*compare_)(NPObject *, SEL, NPString *);
+    int (*compute_)(NPObject *, SEL, int);
+    _Bool (*containsObject_)(NPObject *, SEL, NPObject *);
+    NPObject * (*copy)(NPObject *, SEL);
+    size_t (*count)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    void (*deleteCharactersInRange_)(NPObject *, SEL, NPRange);
+    NPObject * (*description)(NPObject *, SEL);
+    NPString * (*domain)(NPObject *, SEL);
+    double (*doubleValue)(NPObject *, SEL);
+    void (*draw)(NPObject *, SEL);
+    void (*exchangeObjectAtIndex_withObjectAtIndex_)(NPObject *, SEL, size_t, size_t);
+    NPObject * (*firstObject)(NPObject *, SEL);
+    int (*hasPrefix_)(NPObject *, SEL, NPString *);
+    int (*hasSuffix_)(NPObject *, SEL, NPString *);
+    uint32_t (*hash)(NPObject *, SEL);
+    int (*helper_)(NPObject *, SEL, int);
+    size_t (*indexOfObject_)(NPObject *, SEL, NPObject *);
+    NPObject * (*init)(NPObject *, SEL);
+    NPMutableArray * (*initWithArray_)(NPObject *, SEL, NPArray *);
+    NPMutableDictionary * (*initWithCapacity_)(NPObject *, SEL, size_t);
+    NPError * (*initWithCode_domain_userInfo_)(NPObject *, SEL, int, NPString *, NPDictionary *);
+    NPMutableDictionary * (*initWithDictionary_)(NPObject *, SEL, NPDictionary *);
+    NPNumber * (*initWithDouble_)(NPObject *, SEL, double);
+    FsSprite * (*initWithId_)(NPObject *, SEL, int);
+    NPNumber * (*initWithLongLong_)(NPObject *, SEL, long long);
+    NPMutableArray * (*initWithObjects_count_)(NPObject *, SEL, NPObject * *, size_t);
+    NPString * (*initWithString_)(NPObject *, SEL, NPString *);
+    NPString * (*initWithUTF8String_)(NPObject *, SEL, const char *);
+    FsBox * (*initWith_)(NPObject *, SEL, NPMutableString *);
+    void (*insertObject_atIndex_)(NPObject *, SEL, NPObject *, size_t);
+    void (*insertString_atIndex_)(NPObject *, SEL, NPString *, size_t);
+    int (*intValue)(NPObject *, SEL);
+    int (*isEqualToNumber_)(NPObject *, SEL, NPNumber *);
+    int (*isEqualToString_)(NPObject *, SEL, NPString *);
+    _Bool (*isEqual_)(NPObject *, SEL, NPObject *);
+    _Bool (*isKindOfClass_)(NPObject *, SEL, NPClass *);
+    _Bool (*isKindOf_)(NPObject *, SEL, NPClass *);
+    NPString * (*label)(NPObject *, SEL);
+    NPObject * (*lastObject)(NPObject *, SEL);
+    size_t (*length)(NPObject *, SEL);
+    NPString * (*localizedDescription)(NPObject *, SEL);
+    long long (*longLongValue)(NPObject *, SEL);
+    int (*looseParse_)(NPObject *, SEL, NPString *);
+    NPString * (*lowercaseString)(NPObject *, SEL);
+    NPString * (*maybe)(NPObject *, SEL);
+    NPString * (*maybeC)(NPObject *, SEL);
+    int (*mix_point_)(NPObject *, SEL, FsMode, struct FsPoint);
+    NPObject * (*objectAtIndex_)(NPObject *, SEL, size_t);
+    NPObject * (*objectForKey_)(NPObject *, SEL, NPObject *);
+    void (*optOut_)(NPObject *, SEL, NPString *);
+    int (*poke)(NPObject *, SEL);
+    void (*pre_post_)(NPObject *, SEL, NPString *, NPString *);
+    NPString * (*produce)(NPObject *, SEL);
+    NPRange (*rangeOfString_)(NPObject *, SEL, NPString *);
+    void (*release)(NPObject *, SEL);
+    void (*removeAllObjects)(NPObject *, SEL);
+    void (*removeLastObject)(NPObject *, SEL);
+    void (*removeObjectAtIndex_)(NPObject *, SEL, size_t);
+    void (*removeObjectForKey_)(NPObject *, SEL, NPObject *);
+    void (*removeObject_)(NPObject *, SEL, NPObject *);
+    int (*render)(NPObject *, SEL);
+    void (*replaceCharactersInRange_withString_)(NPObject *, SEL, NPRange, NPString *);
+    void (*replaceObjectAtIndex_withObject_)(NPObject *, SEL, size_t, NPObject *);
+    NPObject * (*retain)(NPObject *, SEL);
+    void (*run)(NPObject *, SEL);
+    void (*setLabel_)(NPObject *, SEL, NPString *);
+    void (*setObject_atIndex_)(NPObject *, SEL, NPObject *, size_t);
+    void (*setObject_forKey_)(NPObject *, SEL, NPObject *, NPObject *);
+    void (*setString_)(NPObject *, SEL, NPString *);
+    void (*setTag_)(NPObject *, SEL, NPString *);
+    void (*setValue_)(NPObject *, SEL, NPMutableString *);
+    int (*strictParse_)(NPObject *, SEL, NPString *);
+    NPString * (*stringByAppendingString_)(NPObject *, SEL, NPString *);
+    NPString * (*stringByAppendingUTF8String_)(NPObject *, SEL, const char *);
+    NPString * (*substringFromIndex_)(NPObject *, SEL, size_t);
+    NPString * (*substringToIndex_)(NPObject *, SEL, size_t);
+    NPString * (*substringWithRange_)(NPObject *, SEL, NPRange);
+    int (*sum_)(NPObject *, SEL, int, ...);
+    NPString * (*tag)(NPObject *, SEL);
+    void (*take_)(NPObject *, SEL, NPString *);
+    NPString * (*uppercaseString)(NPObject *, SEL);
+    NPDictionary * (*userInfo)(NPObject *, SEL);
+    NPMutableString * (*value)(NPObject *, SEL);
 };
 
 /* respondsToSelector: helper for selector member 'color' */
-static BOOL nopa_resp_color(NFObject *__o) {
+static BOOL nopa_resp_color(NPObject *__o) {
 return __o && ((struct nopa_vtable *)__o->isa->vtable)->color != 0;
 }
 
 /* respondsToSelector: helper for selector member 'poke' */
-static BOOL nopa_resp_poke(NFObject *__o) {
+static BOOL nopa_resp_poke(NPObject *__o) {
 return __o && ((struct nopa_vtable *)__o->isa->vtable)->poke != 0;
 }
 
-struct NOPA_META_VTABLE_$_NFObject {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+struct NOPA_META_VTABLE_$_NPObject {
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
-struct NOPA_META_VTABLE_$_FsBox_NFMutableString_ptr {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+struct NOPA_META_VTABLE_$_FsBox_NPMutableString_ptr {
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct NOPA_META_VTABLE_$_FsEngine__FsRenderable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct NOPA_META_VTABLE_$_FsErrLow {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct NOPA_META_VTABLE_$_FsFetcher {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    void (*runAll)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    void (*runAll)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct NOPA_META_VTABLE_$_FsForwardUser {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct NOPA_META_VTABLE_$_FsGuarded {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct NOPA_META_VTABLE_$_FsModes {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct NOPA_META_VTABLE_$_FsParser {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct NOPA_META_VTABLE_$_FsTypedStore {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
-struct NOPA_META_VTABLE_$_NFArray {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFObject * (*arrayWithObjects_count_)(NFClass *, SEL, NFObject * *, size_t);
-    NFObject * (*arrayWithObject_)(NFClass *, SEL, NFObject *);
-    NFObject * (*array)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+struct NOPA_META_VTABLE_$_NPArray {
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPObject * (*arrayWithObjects_count_)(NPClass *, SEL, NPObject * *, size_t);
+    NPObject * (*arrayWithObject_)(NPClass *, SEL, NPObject *);
+    NPObject * (*array)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
-struct NOPA_META_VTABLE_$_NFArray_NFNumber_ptr {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFObject * (*arrayWithObjects_count_)(NFClass *, SEL, NFObject * *, size_t);
-    NFObject * (*arrayWithObject_)(NFClass *, SEL, NFNumber *);
-    NFObject * (*array)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+struct NOPA_META_VTABLE_$_NPArray_NPNumber_ptr {
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPObject * (*arrayWithObjects_count_)(NPClass *, SEL, NPObject * *, size_t);
+    NPObject * (*arrayWithObject_)(NPClass *, SEL, NPNumber *);
+    NPObject * (*array)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
-struct NOPA_META_VTABLE_$_NFDictionary {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFDictionary * (*dictionary)(NFClass *, SEL);
-    NFDictionary * (*dictionaryWithObject_forKey_)(NFClass *, SEL, NFObject *, NFObject *);
-    NFDictionary * (*dictionaryWithObjects_forKeys_count_)(NFClass *, SEL, NFObject * *, NFObject * *, size_t);
-    NFClass * (*class)(NFClass *, SEL);
+struct NOPA_META_VTABLE_$_NPDictionary {
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPDictionary * (*dictionary)(NPClass *, SEL);
+    NPDictionary * (*dictionaryWithObject_forKey_)(NPClass *, SEL, NPObject *, NPObject *);
+    NPDictionary * (*dictionaryWithObjects_forKeys_count_)(NPClass *, SEL, NPObject * *, NPObject * *, size_t);
+    NPClass * (*class)(NPClass *, SEL);
 };
-struct NOPA_META_VTABLE_$_NFError {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFError * (*errorWithCode_domain_)(NFClass *, SEL, int, NFString *);
-    NFError * (*errorWithCode_domain_userInfo_)(NFClass *, SEL, int, NFString *, NFDictionary *);
-    NFError * (*parseErrorWithMessage_)(NFClass *, SEL, NFString *);
-    NFError * (*fileIOErrorWithMessage_)(NFClass *, SEL, NFString *);
-    NFClass * (*class)(NFClass *, SEL);
+struct NOPA_META_VTABLE_$_NPError {
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPError * (*errorWithCode_domain_)(NPClass *, SEL, int, NPString *);
+    NPError * (*errorWithCode_domain_userInfo_)(NPClass *, SEL, int, NPString *, NPDictionary *);
+    NPError * (*parseErrorWithMessage_)(NPClass *, SEL, NPString *);
+    NPError * (*fileIOErrorWithMessage_)(NPClass *, SEL, NPString *);
+    NPClass * (*class)(NPClass *, SEL);
 };
-struct NOPA_META_VTABLE_$_NFNumber {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFNumber * (*numberWithInt_)(NFClass *, SEL, int);
-    NFNumber * (*numberWithLongLong_)(NFClass *, SEL, long long);
-    NFNumber * (*numberWithDouble_)(NFClass *, SEL, double);
-    NFNumber * (*numberWithBool_)(NFClass *, SEL, int);
-    NFNumber * (*numberWithChar_)(NFClass *, SEL, char);
-    NFClass * (*class)(NFClass *, SEL);
+struct NOPA_META_VTABLE_$_NPNumber {
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPNumber * (*numberWithInt_)(NPClass *, SEL, int);
+    NPNumber * (*numberWithLongLong_)(NPClass *, SEL, long long);
+    NPNumber * (*numberWithDouble_)(NPClass *, SEL, double);
+    NPNumber * (*numberWithBool_)(NPClass *, SEL, int);
+    NPNumber * (*numberWithChar_)(NPClass *, SEL, char);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct NOPA_META_VTABLE_$_FsAnnotated {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
-struct NOPA_META_VTABLE_$_NFString {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFString * (*stringWithUTF8String_)(NFClass *, SEL, const char *);
-    NFString * (*stringWithString_)(NFClass *, SEL, NFString *);
-    NFClass * (*class)(NFClass *, SEL);
+struct NOPA_META_VTABLE_$_NPString {
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPString * (*stringWithUTF8String_)(NPClass *, SEL, const char *);
+    NPString * (*stringWithString_)(NPClass *, SEL, NPString *);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct NOPA_META_VTABLE_$_FsBox {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
-struct NOPA_META_VTABLE_$_NFMutableDictionary {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFMutableDictionary * (*dictionary)(NFClass *, SEL);
-    NFMutableDictionary * (*dictionaryWithObject_forKey_)(NFClass *, SEL, NFObject *, NFObject *);
-    NFDictionary * (*dictionaryWithObjects_forKeys_count_)(NFClass *, SEL, NFObject * *, NFObject * *, size_t);
-    NFMutableDictionary * (*dictionaryWithCapacity_)(NFClass *, SEL, size_t);
-    NFClass * (*class)(NFClass *, SEL);
+struct NOPA_META_VTABLE_$_NPMutableDictionary {
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPMutableDictionary * (*dictionary)(NPClass *, SEL);
+    NPMutableDictionary * (*dictionaryWithObject_forKey_)(NPClass *, SEL, NPObject *, NPObject *);
+    NPDictionary * (*dictionaryWithObjects_forKeys_count_)(NPClass *, SEL, NPObject * *, NPObject * *, size_t);
+    NPMutableDictionary * (*dictionaryWithCapacity_)(NPClass *, SEL, size_t);
+    NPClass * (*class)(NPClass *, SEL);
 };
-struct NOPA_META_VTABLE_$_NFMutableString {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFMutableString * (*stringWithUTF8String_)(NFClass *, SEL, const char *);
-    NFMutableString * (*stringWithString_)(NFClass *, SEL, NFString *);
-    NFClass * (*class)(NFClass *, SEL);
+struct NOPA_META_VTABLE_$_NPMutableString {
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPMutableString * (*stringWithUTF8String_)(NPClass *, SEL, const char *);
+    NPMutableString * (*stringWithString_)(NPClass *, SEL, NPString *);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct NOPA_META_VTABLE_$_FsSprite {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    int (*classSum_)(NFClass *, SEL, int, ...);
-    NFClass * (*class)(NFClass *, SEL);
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    int (*classSum_)(NPClass *, SEL, int, ...);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct NOPA_META_VTABLE_$_FsErrHigh {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
-struct NOPA_META_VTABLE_$_NFMutableArray {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFMutableArray * (*arrayWithObjects_count_)(NFClass *, SEL, NFObject * *, size_t);
-    NFMutableArray * (*arrayWithObject_)(NFClass *, SEL, NFObject *);
-    NFMutableArray * (*array)(NFClass *, SEL);
-    NFMutableArray * (*arrayWithCapacity_)(NFClass *, SEL, size_t);
-    NFClass * (*class)(NFClass *, SEL);
+struct NOPA_META_VTABLE_$_NPMutableArray {
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPMutableArray * (*arrayWithObjects_count_)(NPClass *, SEL, NPObject * *, size_t);
+    NPMutableArray * (*arrayWithObject_)(NPClass *, SEL, NPObject *);
+    NPMutableArray * (*array)(NPClass *, SEL);
+    NPMutableArray * (*arrayWithCapacity_)(NPClass *, SEL, size_t);
+    NPClass * (*class)(NPClass *, SEL);
 };
-struct NOPA_META_VTABLE_$_NFMutableArray_NFString_ptr {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFMutableArray * (*arrayWithObjects_count_)(NFClass *, SEL, NFObject * *, size_t);
-    NFMutableArray * (*arrayWithObject_)(NFClass *, SEL, NFString *);
-    NFMutableArray * (*array)(NFClass *, SEL);
-    NFMutableArray * (*arrayWithCapacity_)(NFClass *, SEL, size_t);
-    NFClass * (*class)(NFClass *, SEL);
+struct NOPA_META_VTABLE_$_NPMutableArray_NPString_ptr {
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPMutableArray * (*arrayWithObjects_count_)(NPClass *, SEL, NPObject * *, size_t);
+    NPMutableArray * (*arrayWithObject_)(NPClass *, SEL, NPString *);
+    NPMutableArray * (*array)(NPClass *, SEL);
+    NPMutableArray * (*arrayWithCapacity_)(NPClass *, SEL, size_t);
+    NPClass * (*class)(NPClass *, SEL);
 };
 
-/* Class layout: FsBox<NFMutableString *> (super: NFObject) */
-struct FsBox_NFMutableString_ptr {
-    struct NFClass *isa;
+/* Class layout: FsBox<NPMutableString *> (super: NPObject) */
+struct FsBox_NPMutableString_ptr {
+    struct NPClass *isa;
     uint32_t retain_count;
-    NFMutableString * _value;
+    NPMutableString * _value;
 };
-typedef struct FsBox_NFMutableString_ptr FsBox_NFMutableString_ptr;
+typedef struct FsBox_NPMutableString_ptr FsBox_NPMutableString_ptr;
 
-/* Class layout: FsEngine::FsRenderable (super: NFObject) */
+/* Class layout: FsEngine::FsRenderable (super: NPObject) */
 struct FsEngine__FsRenderable {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
 };
 typedef struct FsEngine__FsRenderable FsEngine__FsRenderable;
 
-/* Class layout: FsErrLow (super: NFObject) */
+/* Class layout: FsErrLow (super: NPObject) */
 struct FsErrLow {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
 };
 typedef struct FsErrLow FsErrLow;
 
-/* Class layout: FsFetcher (super: NFObject) */
+/* Class layout: FsFetcher (super: NPObject) */
 struct FsFetcher {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
 };
 typedef struct FsFetcher FsFetcher;
 
-/* Class layout: FsForwardUser (super: NFObject) */
+/* Class layout: FsForwardUser (super: NPObject) */
 struct FsForwardUser {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
 };
 typedef struct FsForwardUser FsForwardUser;
 
-/* Class layout: FsGuarded (super: NFObject) */
+/* Class layout: FsGuarded (super: NPObject) */
 struct FsGuarded {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
-    NFString * inRegion;
-    NFString * optIvar;
+    NPString * inRegion;
+    NPString * optIvar;
 };
 typedef struct FsGuarded FsGuarded;
 
-/* Class layout: FsModes (super: NFObject) */
+/* Class layout: FsModes (super: NPObject) */
 struct FsModes {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
 };
 typedef struct FsModes FsModes;
 
-/* Class layout: FsParser (super: NFObject) */
+/* Class layout: FsParser (super: NPObject) */
 struct FsParser {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
 };
 typedef struct FsParser FsParser;
 
-/* Class layout: FsTypedStore (super: NFObject) */
+/* Class layout: FsTypedStore (super: NPObject) */
 struct FsTypedStore {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
 };
 typedef struct FsTypedStore FsTypedStore;
 
-/* Class layout: NFArray (super: NFObject) */
-struct NFArray {
-    struct NFClass *isa;
+/* Class layout: NPArray (super: NPObject) */
+struct NPArray {
+    struct NPClass *isa;
     uint32_t retain_count;
-    NFObject * * _items;
+    NPObject * * _items;
     size_t _count;
     size_t _capacity;
 };
-typedef struct NFArray NFArray;
+typedef struct NPArray NPArray;
 
-/* Class layout: NFArray<NFNumber *> (super: NFObject) */
-struct NFArray_NFNumber_ptr {
-    struct NFClass *isa;
+/* Class layout: NPArray<NPNumber *> (super: NPObject) */
+struct NPArray_NPNumber_ptr {
+    struct NPClass *isa;
     uint32_t retain_count;
-    NFObject * * _items;
+    NPObject * * _items;
     size_t _count;
     size_t _capacity;
 };
-typedef struct NFArray_NFNumber_ptr NFArray_NFNumber_ptr;
+typedef struct NPArray_NPNumber_ptr NPArray_NPNumber_ptr;
 
-/* Class layout: NFDictionary (super: NFObject) */
-struct NFDictionary {
-    struct NFClass *isa;
+/* Class layout: NPDictionary (super: NPObject) */
+struct NPDictionary {
+    struct NPClass *isa;
     uint32_t retain_count;
-    NFObject * * _keys;
-    NFObject * * _values;
+    NPObject * * _keys;
+    NPObject * * _values;
     size_t _count;
     size_t _capacity;
 };
-typedef struct NFDictionary NFDictionary;
+typedef struct NPDictionary NPDictionary;
 
-/* Class layout: NFError (super: NFObject) */
-struct NFError {
-    struct NFClass *isa;
+/* Class layout: NPError (super: NPObject) */
+struct NPError {
+    struct NPClass *isa;
     uint32_t retain_count;
     int _code;
-    NFString * _domain;
-    NFDictionary * _userInfo;
-    NFString * _localizedDescription;
+    NPString * _domain;
+    NPDictionary * _userInfo;
+    NPString * _localizedDescription;
 };
-typedef struct NFError NFError;
+typedef struct NPError NPError;
 
-/* Class layout: NFNumber (super: NFObject) */
-struct NFNumber {
-    struct NFClass *isa;
+/* Class layout: NPNumber (super: NPObject) */
+struct NPNumber {
+    struct NPClass *isa;
     uint32_t retain_count;
     int _isDouble;
     long long _intValue;
     double _doubleValue;
 };
-typedef struct NFNumber NFNumber;
+typedef struct NPNumber NPNumber;
 
-/* Class layout: FsAnnotated (super: NFObject) */
+/* Class layout: FsAnnotated (super: NPObject) */
 struct FsAnnotated {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
 };
 typedef struct FsAnnotated FsAnnotated;
 
-/* Class layout: NFString (super: NFObject) */
-struct NFString {
-    struct NFClass *isa;
+/* Class layout: NPString (super: NPObject) */
+struct NPString {
+    struct NPClass *isa;
     uint32_t retain_count;
     char * _cstr;
     size_t _length;
     uint32_t _hash;
     int _hashIsValid;
 };
-typedef struct NFString NFString;
+typedef struct NPString NPString;
 
-/* Class layout: FsBox (super: NFObject) */
+/* Class layout: FsBox (super: NPObject) */
 struct FsBox {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
-    NFObject * _value;
+    NPObject * _value;
 };
 typedef struct FsBox FsBox;
 
-/* Class layout: NFMutableDictionary (super: NFDictionary) */
-struct NFMutableDictionary {
-    struct NFClass *isa;
+/* Class layout: NPMutableDictionary (super: NPDictionary) */
+struct NPMutableDictionary {
+    struct NPClass *isa;
     uint32_t retain_count;
-    NFObject * * _keys;
-    NFObject * * _values;
+    NPObject * * _keys;
+    NPObject * * _values;
     size_t _count;
     size_t _capacity;
 };
-typedef struct NFMutableDictionary NFMutableDictionary;
+typedef struct NPMutableDictionary NPMutableDictionary;
 
-/* Class layout: NFMutableString (super: NFString) */
-struct NFMutableString {
-    struct NFClass *isa;
+/* Class layout: NPMutableString (super: NPString) */
+struct NPMutableString {
+    struct NPClass *isa;
     uint32_t retain_count;
     char * _cstr;
     size_t _length;
     uint32_t _hash;
     int _hashIsValid;
 };
-typedef struct NFMutableString NFMutableString;
+typedef struct NPMutableString NPMutableString;
 
 /* Class layout: FsSprite (super: FsEngine::FsRenderable) */
 struct FsSprite {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     int _id;
-    NFString * _label;
-    NFString * _tag;
+    NPString * _label;
+    NPString * _tag;
 };
 typedef struct FsSprite FsSprite;
 
 /* Class layout: FsErrHigh (super: FsErrLow) */
 struct FsErrHigh {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
 };
 typedef struct FsErrHigh FsErrHigh;
 
-/* Class layout: NFMutableArray (super: NFArray) */
-struct NFMutableArray {
-    struct NFClass *isa;
+/* Class layout: NPMutableArray (super: NPArray) */
+struct NPMutableArray {
+    struct NPClass *isa;
     uint32_t retain_count;
-    NFObject * * _items;
+    NPObject * * _items;
     size_t _count;
     size_t _capacity;
 };
-typedef struct NFMutableArray NFMutableArray;
+typedef struct NPMutableArray NPMutableArray;
 
-/* Class layout: NFMutableArray<NFString *> (super: NFArray) */
-struct NFMutableArray_NFString_ptr {
-    struct NFClass *isa;
+/* Class layout: NPMutableArray<NPString *> (super: NPArray) */
+struct NPMutableArray_NPString_ptr {
+    struct NPClass *isa;
     uint32_t retain_count;
-    NFObject * * _items;
+    NPObject * * _items;
     size_t _count;
     size_t _capacity;
 };
-typedef struct NFMutableArray_NFString_ptr NFMutableArray_NFString_ptr;
+typedef struct NPMutableArray_NPString_ptr NPMutableArray_NPString_ptr;
 
 /* --------- Section 9 · Class metadata infrastructure --------- */
-extern NFClass NOPA_CLASS_$_nopa_root;
-extern NFClass NOPA_CLASS_$_NFObject;
-extern NFClass NOPA_CLASS_$_FsBox_NFMutableString_ptr;
-extern NFClass NOPA_CLASS_$_FsEngine__FsRenderable;
-extern NFClass NOPA_CLASS_$_FsErrLow;
-extern NFClass NOPA_CLASS_$_FsFetcher;
-extern NFClass NOPA_CLASS_$_FsForwardUser;
-extern NFClass NOPA_CLASS_$_FsGuarded;
-extern NFClass NOPA_CLASS_$_FsModes;
-extern NFClass NOPA_CLASS_$_FsParser;
-extern NFClass NOPA_CLASS_$_FsTypedStore;
-extern NFClass NOPA_CLASS_$_NFArray;
-extern NFClass NOPA_CLASS_$_NFArray_NFNumber_ptr;
-extern NFClass NOPA_CLASS_$_NFDictionary;
-extern NFClass NOPA_CLASS_$_NFError;
-extern NFClass NOPA_CLASS_$_NFNumber;
-extern NFClass NOPA_CLASS_$_FsAnnotated;
-extern NFClass NOPA_CLASS_$_NFString;
-extern NFClass NOPA_CLASS_$_FsBox;
-extern NFClass NOPA_CLASS_$_NFMutableDictionary;
-extern NFClass NOPA_CLASS_$_NFMutableString;
-extern NFClass NOPA_CLASS_$_FsSprite;
-extern NFClass NOPA_CLASS_$_FsErrHigh;
-extern NFClass NOPA_CLASS_$_NFMutableArray;
-extern NFClass NOPA_CLASS_$_NFMutableArray_NFString_ptr;
+extern NPClass NOPA_CLASS_$_nopa_root;
+extern NPClass NOPA_CLASS_$_NPObject;
+extern NPClass NOPA_CLASS_$_FsBox_NPMutableString_ptr;
+extern NPClass NOPA_CLASS_$_FsEngine__FsRenderable;
+extern NPClass NOPA_CLASS_$_FsErrLow;
+extern NPClass NOPA_CLASS_$_FsFetcher;
+extern NPClass NOPA_CLASS_$_FsForwardUser;
+extern NPClass NOPA_CLASS_$_FsGuarded;
+extern NPClass NOPA_CLASS_$_FsModes;
+extern NPClass NOPA_CLASS_$_FsParser;
+extern NPClass NOPA_CLASS_$_FsTypedStore;
+extern NPClass NOPA_CLASS_$_NPArray;
+extern NPClass NOPA_CLASS_$_NPArray_NPNumber_ptr;
+extern NPClass NOPA_CLASS_$_NPDictionary;
+extern NPClass NOPA_CLASS_$_NPError;
+extern NPClass NOPA_CLASS_$_NPNumber;
+extern NPClass NOPA_CLASS_$_FsAnnotated;
+extern NPClass NOPA_CLASS_$_NPString;
+extern NPClass NOPA_CLASS_$_FsBox;
+extern NPClass NOPA_CLASS_$_NPMutableDictionary;
+extern NPClass NOPA_CLASS_$_NPMutableString;
+extern NPClass NOPA_CLASS_$_FsSprite;
+extern NPClass NOPA_CLASS_$_FsErrHigh;
+extern NPClass NOPA_CLASS_$_NPMutableArray;
+extern NPClass NOPA_CLASS_$_NPMutableArray_NPString_ptr;
 void nopa_metaInit(void);
 
 /* --------- Section 10 · Vtable & metadata instances ---------- */
@@ -1083,9 +1083,9 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_nopa_root = {
     .containsObject_ = NULL,
     .copy = NULL,
     .count = NULL,
-    .dealloc = (void (*)(NFObject *, SEL))nopa_root_dealloc,
+    .dealloc = (void (*)(NPObject *, SEL))nopa_root_dealloc,
     .deleteCharactersInRange_ = NULL,
-    .description = (NFObject * (*)(NFObject *, SEL))nopa_root_description,
+    .description = (NPObject * (*)(NPObject *, SEL))nopa_root_description,
     .domain = NULL,
     .doubleValue = NULL,
     .draw = NULL,
@@ -1096,7 +1096,7 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_nopa_root = {
     .hash = NULL,
     .helper_ = NULL,
     .indexOfObject_ = NULL,
-    .init = (NFObject * (*)(NFObject *, SEL))nopa_root_init,
+    .init = (NPObject * (*)(NPObject *, SEL))nopa_root_init,
     .initWithArray_ = NULL,
     .initWithCapacity_ = NULL,
     .initWithCode_domain_userInfo_ = NULL,
@@ -1113,9 +1113,9 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_nopa_root = {
     .intValue = NULL,
     .isEqualToNumber_ = NULL,
     .isEqualToString_ = NULL,
-    .isEqual_ = (_Bool (*)(NFObject *, SEL, NFObject *))nopa_root_isEqual_,
-    .isKindOfClass_ = (_Bool (*)(NFObject *, SEL, NFClass *))nopa_root_isKindOfClass_,
-    .isKindOf_ = (_Bool (*)(NFObject *, SEL, NFClass *))nopa_root_isKindOf_,
+    .isEqual_ = (_Bool (*)(NPObject *, SEL, NPObject *))nopa_root_isEqual_,
+    .isKindOfClass_ = (_Bool (*)(NPObject *, SEL, NPClass *))nopa_root_isKindOfClass_,
+    .isKindOf_ = (_Bool (*)(NPObject *, SEL, NPClass *))nopa_root_isKindOf_,
     .label = NULL,
     .lastObject = NULL,
     .length = NULL,
@@ -1133,7 +1133,7 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_nopa_root = {
     .pre_post_ = NULL,
     .produce = NULL,
     .rangeOfString_ = NULL,
-    .release = (void (*)(NFObject *, SEL))nopa_root_release,
+    .release = (void (*)(NPObject *, SEL))nopa_root_release,
     .removeAllObjects = NULL,
     .removeLastObject = NULL,
     .removeObjectAtIndex_ = NULL,
@@ -1142,7 +1142,7 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_nopa_root = {
     .render = NULL,
     .replaceCharactersInRange_withString_ = NULL,
     .replaceObjectAtIndex_withObject_ = NULL,
-    .retain = (NFObject * (*)(NFObject *, SEL))nopa_root_retain,
+    .retain = (NPObject * (*)(NPObject *, SEL))nopa_root_retain,
     .run = NULL,
     .setLabel_ = NULL,
     .setObject_atIndex_ = NULL,
@@ -1164,8 +1164,8 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_nopa_root = {
     .value = NULL,
 };
 
-/* VTable instance: NFObject */
-__attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_NFObject = {
+/* VTable instance: NPObject */
+__attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_NPObject = {
     .__sig = 0x4adeb6d807e3ebfaULL,
     .UTF8String = NULL,
     .addEntriesFromDictionary_ = NULL,
@@ -1185,9 +1185,9 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_NFObject = {
     .containsObject_ = NULL,
     .copy = NULL,
     .count = NULL,
-    .dealloc = (void (*)(NFObject *, SEL))NFObject_dealloc,
+    .dealloc = (void (*)(NPObject *, SEL))NPObject_dealloc,
     .deleteCharactersInRange_ = NULL,
-    .description = (NFObject * (*)(NFObject *, SEL))NFObject_description,
+    .description = (NPObject * (*)(NPObject *, SEL))NPObject_description,
     .domain = NULL,
     .doubleValue = NULL,
     .draw = NULL,
@@ -1198,7 +1198,7 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_NFObject = {
     .hash = NULL,
     .helper_ = NULL,
     .indexOfObject_ = NULL,
-    .init = (NFObject * (*)(NFObject *, SEL))NFObject_init,
+    .init = (NPObject * (*)(NPObject *, SEL))NPObject_init,
     .initWithArray_ = NULL,
     .initWithCapacity_ = NULL,
     .initWithCode_domain_userInfo_ = NULL,
@@ -1215,9 +1215,9 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_NFObject = {
     .intValue = NULL,
     .isEqualToNumber_ = NULL,
     .isEqualToString_ = NULL,
-    .isEqual_ = (_Bool (*)(NFObject *, SEL, NFObject *))nopa_root_isEqual_,
-    .isKindOfClass_ = (_Bool (*)(NFObject *, SEL, NFClass *))nopa_root_isKindOfClass_,
-    .isKindOf_ = (_Bool (*)(NFObject *, SEL, NFClass *))nopa_root_isKindOf_,
+    .isEqual_ = (_Bool (*)(NPObject *, SEL, NPObject *))nopa_root_isEqual_,
+    .isKindOfClass_ = (_Bool (*)(NPObject *, SEL, NPClass *))nopa_root_isKindOfClass_,
+    .isKindOf_ = (_Bool (*)(NPObject *, SEL, NPClass *))nopa_root_isKindOf_,
     .label = NULL,
     .lastObject = NULL,
     .length = NULL,
@@ -1235,7 +1235,7 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_NFObject = {
     .pre_post_ = NULL,
     .produce = NULL,
     .rangeOfString_ = NULL,
-    .release = (void (*)(NFObject *, SEL))NFObject_release,
+    .release = (void (*)(NPObject *, SEL))NPObject_release,
     .removeAllObjects = NULL,
     .removeLastObject = NULL,
     .removeObjectAtIndex_ = NULL,
@@ -1244,7 +1244,7 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_NFObject = {
     .render = NULL,
     .replaceCharactersInRange_withString_ = NULL,
     .replaceObjectAtIndex_withObject_ = NULL,
-    .retain = (NFObject * (*)(NFObject *, SEL))NFObject_retain,
+    .retain = (NPObject * (*)(NPObject *, SEL))NPObject_retain,
     .run = NULL,
     .setLabel_ = NULL,
     .setObject_atIndex_ = NULL,
@@ -1266,8 +1266,8 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_NFObject = {
     .value = NULL,
 };
 
-/* VTable instance: FsBox<NFMutableString *> */
-__attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_FsBox_NFMutableString_ptr = {
+/* VTable instance: FsBox<NPMutableString *> */
+__attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_FsBox_NPMutableString_ptr = {
     .__sig = 0x4adeb6d807e3ebfaULL,
     .UTF8String = NULL,
     .addEntriesFromDictionary_ = NULL,
@@ -1287,9 +1287,9 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_FsBox_NFMutableString_ptr
     .containsObject_ = NULL,
     .copy = NULL,
     .count = NULL,
-    .dealloc = (void (*)(NFObject *, SEL))NFObject_dealloc,
+    .dealloc = (void (*)(NPObject *, SEL))NPObject_dealloc,
     .deleteCharactersInRange_ = NULL,
-    .description = (NFObject * (*)(NFObject *, SEL))NFObject_description,
+    .description = (NPObject * (*)(NPObject *, SEL))NPObject_description,
     .domain = NULL,
     .doubleValue = NULL,
     .draw = NULL,
@@ -1300,7 +1300,7 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_FsBox_NFMutableString_ptr
     .hash = NULL,
     .helper_ = NULL,
     .indexOfObject_ = NULL,
-    .init = (NFObject * (*)(NFObject *, SEL))NFObject_init,
+    .init = (NPObject * (*)(NPObject *, SEL))NPObject_init,
     .initWithArray_ = NULL,
     .initWithCapacity_ = NULL,
     .initWithCode_domain_userInfo_ = NULL,
@@ -1311,15 +1311,15 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_FsBox_NFMutableString_ptr
     .initWithObjects_count_ = NULL,
     .initWithString_ = NULL,
     .initWithUTF8String_ = NULL,
-    .initWith_ = (FsBox * (*)(NFObject *, SEL, NFMutableString *))FsBox_NFMutableString_ptr_initWith_,
+    .initWith_ = (FsBox * (*)(NPObject *, SEL, NPMutableString *))FsBox_NPMutableString_ptr_initWith_,
     .insertObject_atIndex_ = NULL,
     .insertString_atIndex_ = NULL,
     .intValue = NULL,
     .isEqualToNumber_ = NULL,
     .isEqualToString_ = NULL,
-    .isEqual_ = (_Bool (*)(NFObject *, SEL, NFObject *))nopa_root_isEqual_,
-    .isKindOfClass_ = (_Bool (*)(NFObject *, SEL, NFClass *))nopa_root_isKindOfClass_,
-    .isKindOf_ = (_Bool (*)(NFObject *, SEL, NFClass *))nopa_root_isKindOf_,
+    .isEqual_ = (_Bool (*)(NPObject *, SEL, NPObject *))nopa_root_isEqual_,
+    .isKindOfClass_ = (_Bool (*)(NPObject *, SEL, NPClass *))nopa_root_isKindOfClass_,
+    .isKindOf_ = (_Bool (*)(NPObject *, SEL, NPClass *))nopa_root_isKindOf_,
     .label = NULL,
     .lastObject = NULL,
     .length = NULL,
@@ -1337,7 +1337,7 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_FsBox_NFMutableString_ptr
     .pre_post_ = NULL,
     .produce = NULL,
     .rangeOfString_ = NULL,
-    .release = (void (*)(NFObject *, SEL))NFObject_release,
+    .release = (void (*)(NPObject *, SEL))NPObject_release,
     .removeAllObjects = NULL,
     .removeLastObject = NULL,
     .removeObjectAtIndex_ = NULL,
@@ -1346,14 +1346,14 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_FsBox_NFMutableString_ptr
     .render = NULL,
     .replaceCharactersInRange_withString_ = NULL,
     .replaceObjectAtIndex_withObject_ = NULL,
-    .retain = (NFObject * (*)(NFObject *, SEL))NFObject_retain,
+    .retain = (NPObject * (*)(NPObject *, SEL))NPObject_retain,
     .run = NULL,
     .setLabel_ = NULL,
     .setObject_atIndex_ = NULL,
     .setObject_forKey_ = NULL,
     .setString_ = NULL,
     .setTag_ = NULL,
-    .setValue_ = (void (*)(NFObject *, SEL, NFMutableString *))FsBox_NFMutableString_ptr_setValue_,
+    .setValue_ = (void (*)(NPObject *, SEL, NPMutableString *))FsBox_NPMutableString_ptr_setValue_,
     .strictParse_ = NULL,
     .stringByAppendingString_ = NULL,
     .stringByAppendingUTF8String_ = NULL,
@@ -1365,7 +1365,7 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_FsBox_NFMutableString_ptr
     .take_ = NULL,
     .uppercaseString = NULL,
     .userInfo = NULL,
-    .value = (NFMutableString * (*)(NFObject *, SEL))FsBox_NFMutableString_ptr_value,
+    .value = (NPMutableString * (*)(NPObject *, SEL))FsBox_NPMutableString_ptr_value,
 };
 
 /* VTable instance: FsEngine::FsRenderable */
@@ -1389,9 +1389,9 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_FsEngine__FsRenderable = 
     .containsObject_ = NULL,
     .copy = NULL,
     .count = NULL,
-    .dealloc = (void (*)(NFObject *, SEL))NFObject_dealloc,
+    .dealloc = (void (*)(NPObject *, SEL))NPObject_dealloc,
     .deleteCharactersInRange_ = NULL,
-    .description = (NFObject * (*)(NFObject *, SEL))NFObject_description,
+    .description = (NPObject * (*)(NPObject *, SEL))NPObject_description,
     .domain = NULL,
     .doubleValue = NULL,
     .draw = NULL,
@@ -1402,7 +1402,7 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_FsEngine__FsRenderable = 
     .hash = NULL,
     .helper_ = NULL,
     .indexOfObject_ = NULL,
-    .init = (NFObject * (*)(NFObject *, SEL))NFObject_init,
+    .init = (NPObject * (*)(NPObject *, SEL))NPObject_init,
     .initWithArray_ = NULL,
     .initWithCapacity_ = NULL,
     .initWithCode_domain_userInfo_ = NULL,
@@ -1419,9 +1419,9 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_FsEngine__FsRenderable = 
     .intValue = NULL,
     .isEqualToNumber_ = NULL,
     .isEqualToString_ = NULL,
-    .isEqual_ = (_Bool (*)(NFObject *, SEL, NFObject *))nopa_root_isEqual_,
-    .isKindOfClass_ = (_Bool (*)(NFObject *, SEL, NFClass *))nopa_root_isKindOfClass_,
-    .isKindOf_ = (_Bool (*)(NFObject *, SEL, NFClass *))nopa_root_isKindOf_,
+    .isEqual_ = (_Bool (*)(NPObject *, SEL, NPObject *))nopa_root_isEqual_,
+    .isKindOfClass_ = (_Bool (*)(NPObject *, SEL, NPClass *))nopa_root_isKindOfClass_,
+    .isKindOf_ = (_Bool (*)(NPObject *, SEL, NPClass *))nopa_root_isKindOf_,
     .label = NULL,
     .lastObject = NULL,
     .length = NULL,
@@ -1439,16 +1439,16 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_FsEngine__FsRenderable = 
     .pre_post_ = NULL,
     .produce = NULL,
     .rangeOfString_ = NULL,
-    .release = (void (*)(NFObject *, SEL))NFObject_release,
+    .release = (void (*)(NPObject *, SEL))NPObject_release,
     .removeAllObjects = NULL,
     .removeLastObject = NULL,
     .removeObjectAtIndex_ = NULL,
     .removeObjectForKey_ = NULL,
     .removeObject_ = NULL,
-    .render = (int (*)(NFObject *, SEL))FsEngine__FsRenderable_render,
+    .render = (int (*)(NPObject *, SEL))FsEngine__FsRenderable_render,
     .replaceCharactersInRange_withString_ = NULL,
     .replaceObjectAtIndex_withObject_ = NULL,
-    .retain = (NFObject * (*)(NFObject *, SEL))NFObject_retain,
+    .retain = (NPObject * (*)(NPObject *, SEL))NPObject_retain,
     .run = NULL,
     .setLabel_ = NULL,
     .setObject_atIndex_ = NULL,
@@ -1491,9 +1491,9 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_FsErrLow = {
     .containsObject_ = NULL,
     .copy = NULL,
     .count = NULL,
-    .dealloc = (void (*)(NFObject *, SEL))NFObject_dealloc,
+    .dealloc = (void (*)(NPObject *, SEL))NPObject_dealloc,
     .deleteCharactersInRange_ = NULL,
-    .description = (NFObject * (*)(NFObject *, SEL))NFObject_description,
+    .description = (NPObject * (*)(NPObject *, SEL))NPObject_description,
     .domain = NULL,
     .doubleValue = NULL,
     .draw = NULL,
@@ -1504,7 +1504,7 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_FsErrLow = {
     .hash = NULL,
     .helper_ = NULL,
     .indexOfObject_ = NULL,
-    .init = (NFObject * (*)(NFObject *, SEL))NFObject_init,
+    .init = (NPObject * (*)(NPObject *, SEL))NPObject_init,
     .initWithArray_ = NULL,
     .initWithCapacity_ = NULL,
     .initWithCode_domain_userInfo_ = NULL,
@@ -1521,9 +1521,9 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_FsErrLow = {
     .intValue = NULL,
     .isEqualToNumber_ = NULL,
     .isEqualToString_ = NULL,
-    .isEqual_ = (_Bool (*)(NFObject *, SEL, NFObject *))nopa_root_isEqual_,
-    .isKindOfClass_ = (_Bool (*)(NFObject *, SEL, NFClass *))nopa_root_isKindOfClass_,
-    .isKindOf_ = (_Bool (*)(NFObject *, SEL, NFClass *))nopa_root_isKindOf_,
+    .isEqual_ = (_Bool (*)(NPObject *, SEL, NPObject *))nopa_root_isEqual_,
+    .isKindOfClass_ = (_Bool (*)(NPObject *, SEL, NPClass *))nopa_root_isKindOfClass_,
+    .isKindOf_ = (_Bool (*)(NPObject *, SEL, NPClass *))nopa_root_isKindOf_,
     .label = NULL,
     .lastObject = NULL,
     .length = NULL,
@@ -1541,7 +1541,7 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_FsErrLow = {
     .pre_post_ = NULL,
     .produce = NULL,
     .rangeOfString_ = NULL,
-    .release = (void (*)(NFObject *, SEL))NFObject_release,
+    .release = (void (*)(NPObject *, SEL))NPObject_release,
     .removeAllObjects = NULL,
     .removeLastObject = NULL,
     .removeObjectAtIndex_ = NULL,
@@ -1550,7 +1550,7 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_FsErrLow = {
     .render = NULL,
     .replaceCharactersInRange_withString_ = NULL,
     .replaceObjectAtIndex_withObject_ = NULL,
-    .retain = (NFObject * (*)(NFObject *, SEL))NFObject_retain,
+    .retain = (NPObject * (*)(NPObject *, SEL))NPObject_retain,
     .run = NULL,
     .setLabel_ = NULL,
     .setObject_atIndex_ = NULL,
@@ -1589,13 +1589,13 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_FsFetcher = {
     .code = NULL,
     .color = NULL,
     .compare_ = NULL,
-    .compute_ = (int (*)(NFObject *, SEL, int))FsFetcher_compute_,
+    .compute_ = (int (*)(NPObject *, SEL, int))FsFetcher_compute_,
     .containsObject_ = NULL,
     .copy = NULL,
     .count = NULL,
-    .dealloc = (void (*)(NFObject *, SEL))NFObject_dealloc,
+    .dealloc = (void (*)(NPObject *, SEL))NPObject_dealloc,
     .deleteCharactersInRange_ = NULL,
-    .description = (NFObject * (*)(NFObject *, SEL))NFObject_description,
+    .description = (NPObject * (*)(NPObject *, SEL))NPObject_description,
     .domain = NULL,
     .doubleValue = NULL,
     .draw = NULL,
@@ -1604,9 +1604,9 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_FsFetcher = {
     .hasPrefix_ = NULL,
     .hasSuffix_ = NULL,
     .hash = NULL,
-    .helper_ = (int (*)(NFObject *, SEL, int))FsFetcher_helper_,
+    .helper_ = (int (*)(NPObject *, SEL, int))FsFetcher_helper_,
     .indexOfObject_ = NULL,
-    .init = (NFObject * (*)(NFObject *, SEL))NFObject_init,
+    .init = (NPObject * (*)(NPObject *, SEL))NPObject_init,
     .initWithArray_ = NULL,
     .initWithCapacity_ = NULL,
     .initWithCode_domain_userInfo_ = NULL,
@@ -1623,9 +1623,9 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_FsFetcher = {
     .intValue = NULL,
     .isEqualToNumber_ = NULL,
     .isEqualToString_ = NULL,
-    .isEqual_ = (_Bool (*)(NFObject *, SEL, NFObject *))nopa_root_isEqual_,
-    .isKindOfClass_ = (_Bool (*)(NFObject *, SEL, NFClass *))nopa_root_isKindOfClass_,
-    .isKindOf_ = (_Bool (*)(NFObject *, SEL, NFClass *))nopa_root_isKindOf_,
+    .isEqual_ = (_Bool (*)(NPObject *, SEL, NPObject *))nopa_root_isEqual_,
+    .isKindOfClass_ = (_Bool (*)(NPObject *, SEL, NPClass *))nopa_root_isKindOfClass_,
+    .isKindOf_ = (_Bool (*)(NPObject *, SEL, NPClass *))nopa_root_isKindOf_,
     .label = NULL,
     .lastObject = NULL,
     .length = NULL,
@@ -1643,7 +1643,7 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_FsFetcher = {
     .pre_post_ = NULL,
     .produce = NULL,
     .rangeOfString_ = NULL,
-    .release = (void (*)(NFObject *, SEL))NFObject_release,
+    .release = (void (*)(NPObject *, SEL))NPObject_release,
     .removeAllObjects = NULL,
     .removeLastObject = NULL,
     .removeObjectAtIndex_ = NULL,
@@ -1652,7 +1652,7 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_FsFetcher = {
     .render = NULL,
     .replaceCharactersInRange_withString_ = NULL,
     .replaceObjectAtIndex_withObject_ = NULL,
-    .retain = (NFObject * (*)(NFObject *, SEL))NFObject_retain,
+    .retain = (NPObject * (*)(NPObject *, SEL))NPObject_retain,
     .run = NULL,
     .setLabel_ = NULL,
     .setObject_atIndex_ = NULL,
@@ -1695,9 +1695,9 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_FsForwardUser = {
     .containsObject_ = NULL,
     .copy = NULL,
     .count = NULL,
-    .dealloc = (void (*)(NFObject *, SEL))NFObject_dealloc,
+    .dealloc = (void (*)(NPObject *, SEL))NPObject_dealloc,
     .deleteCharactersInRange_ = NULL,
-    .description = (NFObject * (*)(NFObject *, SEL))NFObject_description,
+    .description = (NPObject * (*)(NPObject *, SEL))NPObject_description,
     .domain = NULL,
     .doubleValue = NULL,
     .draw = NULL,
@@ -1708,7 +1708,7 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_FsForwardUser = {
     .hash = NULL,
     .helper_ = NULL,
     .indexOfObject_ = NULL,
-    .init = (NFObject * (*)(NFObject *, SEL))NFObject_init,
+    .init = (NPObject * (*)(NPObject *, SEL))NPObject_init,
     .initWithArray_ = NULL,
     .initWithCapacity_ = NULL,
     .initWithCode_domain_userInfo_ = NULL,
@@ -1725,9 +1725,9 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_FsForwardUser = {
     .intValue = NULL,
     .isEqualToNumber_ = NULL,
     .isEqualToString_ = NULL,
-    .isEqual_ = (_Bool (*)(NFObject *, SEL, NFObject *))nopa_root_isEqual_,
-    .isKindOfClass_ = (_Bool (*)(NFObject *, SEL, NFClass *))nopa_root_isKindOfClass_,
-    .isKindOf_ = (_Bool (*)(NFObject *, SEL, NFClass *))nopa_root_isKindOf_,
+    .isEqual_ = (_Bool (*)(NPObject *, SEL, NPObject *))nopa_root_isEqual_,
+    .isKindOfClass_ = (_Bool (*)(NPObject *, SEL, NPClass *))nopa_root_isKindOfClass_,
+    .isKindOf_ = (_Bool (*)(NPObject *, SEL, NPClass *))nopa_root_isKindOf_,
     .label = NULL,
     .lastObject = NULL,
     .length = NULL,
@@ -1741,11 +1741,11 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_FsForwardUser = {
     .objectAtIndex_ = NULL,
     .objectForKey_ = NULL,
     .optOut_ = NULL,
-    .poke = (int (*)(NFObject *, SEL))FsForwardUser_poke,
+    .poke = (int (*)(NPObject *, SEL))FsForwardUser_poke,
     .pre_post_ = NULL,
     .produce = NULL,
     .rangeOfString_ = NULL,
-    .release = (void (*)(NFObject *, SEL))NFObject_release,
+    .release = (void (*)(NPObject *, SEL))NPObject_release,
     .removeAllObjects = NULL,
     .removeLastObject = NULL,
     .removeObjectAtIndex_ = NULL,
@@ -1754,7 +1754,7 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_FsForwardUser = {
     .render = NULL,
     .replaceCharactersInRange_withString_ = NULL,
     .replaceObjectAtIndex_withObject_ = NULL,
-    .retain = (NFObject * (*)(NFObject *, SEL))NFObject_retain,
+    .retain = (NPObject * (*)(NPObject *, SEL))NPObject_retain,
     .run = NULL,
     .setLabel_ = NULL,
     .setObject_atIndex_ = NULL,
@@ -1797,9 +1797,9 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_FsGuarded = {
     .containsObject_ = NULL,
     .copy = NULL,
     .count = NULL,
-    .dealloc = (void (*)(NFObject *, SEL))NFObject_dealloc,
+    .dealloc = (void (*)(NPObject *, SEL))NPObject_dealloc,
     .deleteCharactersInRange_ = NULL,
-    .description = (NFObject * (*)(NFObject *, SEL))NFObject_description,
+    .description = (NPObject * (*)(NPObject *, SEL))NPObject_description,
     .domain = NULL,
     .doubleValue = NULL,
     .draw = NULL,
@@ -1810,7 +1810,7 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_FsGuarded = {
     .hash = NULL,
     .helper_ = NULL,
     .indexOfObject_ = NULL,
-    .init = (NFObject * (*)(NFObject *, SEL))NFObject_init,
+    .init = (NPObject * (*)(NPObject *, SEL))NPObject_init,
     .initWithArray_ = NULL,
     .initWithCapacity_ = NULL,
     .initWithCode_domain_userInfo_ = NULL,
@@ -1827,9 +1827,9 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_FsGuarded = {
     .intValue = NULL,
     .isEqualToNumber_ = NULL,
     .isEqualToString_ = NULL,
-    .isEqual_ = (_Bool (*)(NFObject *, SEL, NFObject *))nopa_root_isEqual_,
-    .isKindOfClass_ = (_Bool (*)(NFObject *, SEL, NFClass *))nopa_root_isKindOfClass_,
-    .isKindOf_ = (_Bool (*)(NFObject *, SEL, NFClass *))nopa_root_isKindOf_,
+    .isEqual_ = (_Bool (*)(NPObject *, SEL, NPObject *))nopa_root_isEqual_,
+    .isKindOfClass_ = (_Bool (*)(NPObject *, SEL, NPClass *))nopa_root_isKindOfClass_,
+    .isKindOf_ = (_Bool (*)(NPObject *, SEL, NPClass *))nopa_root_isKindOf_,
     .label = NULL,
     .lastObject = NULL,
     .length = NULL,
@@ -1842,12 +1842,12 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_FsGuarded = {
     .mix_point_ = NULL,
     .objectAtIndex_ = NULL,
     .objectForKey_ = NULL,
-    .optOut_ = (void (*)(NFObject *, SEL, NFString *))FsGuarded_optOut_,
+    .optOut_ = (void (*)(NPObject *, SEL, NPString *))FsGuarded_optOut_,
     .poke = NULL,
     .pre_post_ = NULL,
-    .produce = (NFString * (*)(NFObject *, SEL))FsGuarded_produce,
+    .produce = (NPString * (*)(NPObject *, SEL))FsGuarded_produce,
     .rangeOfString_ = NULL,
-    .release = (void (*)(NFObject *, SEL))NFObject_release,
+    .release = (void (*)(NPObject *, SEL))NPObject_release,
     .removeAllObjects = NULL,
     .removeLastObject = NULL,
     .removeObjectAtIndex_ = NULL,
@@ -1856,7 +1856,7 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_FsGuarded = {
     .render = NULL,
     .replaceCharactersInRange_withString_ = NULL,
     .replaceObjectAtIndex_withObject_ = NULL,
-    .retain = (NFObject * (*)(NFObject *, SEL))NFObject_retain,
+    .retain = (NPObject * (*)(NPObject *, SEL))NPObject_retain,
     .run = NULL,
     .setLabel_ = NULL,
     .setObject_atIndex_ = NULL,
@@ -1872,7 +1872,7 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_FsGuarded = {
     .substringWithRange_ = NULL,
     .sum_ = NULL,
     .tag = NULL,
-    .take_ = (void (*)(NFObject *, SEL, NFString *))FsGuarded_take_,
+    .take_ = (void (*)(NPObject *, SEL, NPString *))FsGuarded_take_,
     .uppercaseString = NULL,
     .userInfo = NULL,
     .value = NULL,
@@ -1899,9 +1899,9 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_FsModes = {
     .containsObject_ = NULL,
     .copy = NULL,
     .count = NULL,
-    .dealloc = (void (*)(NFObject *, SEL))NFObject_dealloc,
+    .dealloc = (void (*)(NPObject *, SEL))NPObject_dealloc,
     .deleteCharactersInRange_ = NULL,
-    .description = (NFObject * (*)(NFObject *, SEL))NFObject_description,
+    .description = (NPObject * (*)(NPObject *, SEL))NPObject_description,
     .domain = NULL,
     .doubleValue = NULL,
     .draw = NULL,
@@ -1912,7 +1912,7 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_FsModes = {
     .hash = NULL,
     .helper_ = NULL,
     .indexOfObject_ = NULL,
-    .init = (NFObject * (*)(NFObject *, SEL))NFObject_init,
+    .init = (NPObject * (*)(NPObject *, SEL))NPObject_init,
     .initWithArray_ = NULL,
     .initWithCapacity_ = NULL,
     .initWithCode_domain_userInfo_ = NULL,
@@ -1929,9 +1929,9 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_FsModes = {
     .intValue = NULL,
     .isEqualToNumber_ = NULL,
     .isEqualToString_ = NULL,
-    .isEqual_ = (_Bool (*)(NFObject *, SEL, NFObject *))nopa_root_isEqual_,
-    .isKindOfClass_ = (_Bool (*)(NFObject *, SEL, NFClass *))nopa_root_isKindOfClass_,
-    .isKindOf_ = (_Bool (*)(NFObject *, SEL, NFClass *))nopa_root_isKindOf_,
+    .isEqual_ = (_Bool (*)(NPObject *, SEL, NPObject *))nopa_root_isEqual_,
+    .isKindOfClass_ = (_Bool (*)(NPObject *, SEL, NPClass *))nopa_root_isKindOfClass_,
+    .isKindOf_ = (_Bool (*)(NPObject *, SEL, NPClass *))nopa_root_isKindOf_,
     .label = NULL,
     .lastObject = NULL,
     .length = NULL,
@@ -1941,7 +1941,7 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_FsModes = {
     .lowercaseString = NULL,
     .maybe = NULL,
     .maybeC = NULL,
-    .mix_point_ = (int (*)(NFObject *, SEL, FsMode, struct FsPoint))FsModes_mix_point_,
+    .mix_point_ = (int (*)(NPObject *, SEL, FsMode, struct FsPoint))FsModes_mix_point_,
     .objectAtIndex_ = NULL,
     .objectForKey_ = NULL,
     .optOut_ = NULL,
@@ -1949,7 +1949,7 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_FsModes = {
     .pre_post_ = NULL,
     .produce = NULL,
     .rangeOfString_ = NULL,
-    .release = (void (*)(NFObject *, SEL))NFObject_release,
+    .release = (void (*)(NPObject *, SEL))NPObject_release,
     .removeAllObjects = NULL,
     .removeLastObject = NULL,
     .removeObjectAtIndex_ = NULL,
@@ -1958,7 +1958,7 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_FsModes = {
     .render = NULL,
     .replaceCharactersInRange_withString_ = NULL,
     .replaceObjectAtIndex_withObject_ = NULL,
-    .retain = (NFObject * (*)(NFObject *, SEL))NFObject_retain,
+    .retain = (NPObject * (*)(NPObject *, SEL))NPObject_retain,
     .run = NULL,
     .setLabel_ = NULL,
     .setObject_atIndex_ = NULL,
@@ -2001,9 +2001,9 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_FsParser = {
     .containsObject_ = NULL,
     .copy = NULL,
     .count = NULL,
-    .dealloc = (void (*)(NFObject *, SEL))NFObject_dealloc,
+    .dealloc = (void (*)(NPObject *, SEL))NPObject_dealloc,
     .deleteCharactersInRange_ = NULL,
-    .description = (NFObject * (*)(NFObject *, SEL))NFObject_description,
+    .description = (NPObject * (*)(NPObject *, SEL))NPObject_description,
     .domain = NULL,
     .doubleValue = NULL,
     .draw = NULL,
@@ -2014,7 +2014,7 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_FsParser = {
     .hash = NULL,
     .helper_ = NULL,
     .indexOfObject_ = NULL,
-    .init = (NFObject * (*)(NFObject *, SEL))NFObject_init,
+    .init = (NPObject * (*)(NPObject *, SEL))NPObject_init,
     .initWithArray_ = NULL,
     .initWithCapacity_ = NULL,
     .initWithCode_domain_userInfo_ = NULL,
@@ -2031,15 +2031,15 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_FsParser = {
     .intValue = NULL,
     .isEqualToNumber_ = NULL,
     .isEqualToString_ = NULL,
-    .isEqual_ = (_Bool (*)(NFObject *, SEL, NFObject *))nopa_root_isEqual_,
-    .isKindOfClass_ = (_Bool (*)(NFObject *, SEL, NFClass *))nopa_root_isKindOfClass_,
-    .isKindOf_ = (_Bool (*)(NFObject *, SEL, NFClass *))nopa_root_isKindOf_,
+    .isEqual_ = (_Bool (*)(NPObject *, SEL, NPObject *))nopa_root_isEqual_,
+    .isKindOfClass_ = (_Bool (*)(NPObject *, SEL, NPClass *))nopa_root_isKindOfClass_,
+    .isKindOf_ = (_Bool (*)(NPObject *, SEL, NPClass *))nopa_root_isKindOf_,
     .label = NULL,
     .lastObject = NULL,
     .length = NULL,
     .localizedDescription = NULL,
     .longLongValue = NULL,
-    .looseParse_ = (int (*)(NFObject *, SEL, NFString *))FsParser_looseParse_,
+    .looseParse_ = (int (*)(NPObject *, SEL, NPString *))FsParser_looseParse_,
     .lowercaseString = NULL,
     .maybe = NULL,
     .maybeC = NULL,
@@ -2051,7 +2051,7 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_FsParser = {
     .pre_post_ = NULL,
     .produce = NULL,
     .rangeOfString_ = NULL,
-    .release = (void (*)(NFObject *, SEL))NFObject_release,
+    .release = (void (*)(NPObject *, SEL))NPObject_release,
     .removeAllObjects = NULL,
     .removeLastObject = NULL,
     .removeObjectAtIndex_ = NULL,
@@ -2060,7 +2060,7 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_FsParser = {
     .render = NULL,
     .replaceCharactersInRange_withString_ = NULL,
     .replaceObjectAtIndex_withObject_ = NULL,
-    .retain = (NFObject * (*)(NFObject *, SEL))NFObject_retain,
+    .retain = (NPObject * (*)(NPObject *, SEL))NPObject_retain,
     .run = NULL,
     .setLabel_ = NULL,
     .setObject_atIndex_ = NULL,
@@ -2068,7 +2068,7 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_FsParser = {
     .setString_ = NULL,
     .setTag_ = NULL,
     .setValue_ = NULL,
-    .strictParse_ = (int (*)(NFObject *, SEL, NFString *))FsParser_strictParse_,
+    .strictParse_ = (int (*)(NPObject *, SEL, NPString *))FsParser_strictParse_,
     .stringByAppendingString_ = NULL,
     .stringByAppendingUTF8String_ = NULL,
     .substringFromIndex_ = NULL,
@@ -2103,9 +2103,9 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_FsTypedStore = {
     .containsObject_ = NULL,
     .copy = NULL,
     .count = NULL,
-    .dealloc = (void (*)(NFObject *, SEL))NFObject_dealloc,
+    .dealloc = (void (*)(NPObject *, SEL))NPObject_dealloc,
     .deleteCharactersInRange_ = NULL,
-    .description = (NFObject * (*)(NFObject *, SEL))NFObject_description,
+    .description = (NPObject * (*)(NPObject *, SEL))NPObject_description,
     .domain = NULL,
     .doubleValue = NULL,
     .draw = NULL,
@@ -2116,7 +2116,7 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_FsTypedStore = {
     .hash = NULL,
     .helper_ = NULL,
     .indexOfObject_ = NULL,
-    .init = (NFObject * (*)(NFObject *, SEL))NFObject_init,
+    .init = (NPObject * (*)(NPObject *, SEL))NPObject_init,
     .initWithArray_ = NULL,
     .initWithCapacity_ = NULL,
     .initWithCode_domain_userInfo_ = NULL,
@@ -2133,9 +2133,9 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_FsTypedStore = {
     .intValue = NULL,
     .isEqualToNumber_ = NULL,
     .isEqualToString_ = NULL,
-    .isEqual_ = (_Bool (*)(NFObject *, SEL, NFObject *))nopa_root_isEqual_,
-    .isKindOfClass_ = (_Bool (*)(NFObject *, SEL, NFClass *))nopa_root_isKindOfClass_,
-    .isKindOf_ = (_Bool (*)(NFObject *, SEL, NFClass *))nopa_root_isKindOf_,
+    .isEqual_ = (_Bool (*)(NPObject *, SEL, NPObject *))nopa_root_isEqual_,
+    .isKindOfClass_ = (_Bool (*)(NPObject *, SEL, NPClass *))nopa_root_isKindOfClass_,
+    .isKindOf_ = (_Bool (*)(NPObject *, SEL, NPClass *))nopa_root_isKindOf_,
     .label = NULL,
     .lastObject = NULL,
     .length = NULL,
@@ -2153,7 +2153,7 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_FsTypedStore = {
     .pre_post_ = NULL,
     .produce = NULL,
     .rangeOfString_ = NULL,
-    .release = (void (*)(NFObject *, SEL))NFObject_release,
+    .release = (void (*)(NPObject *, SEL))NPObject_release,
     .removeAllObjects = NULL,
     .removeLastObject = NULL,
     .removeObjectAtIndex_ = NULL,
@@ -2162,8 +2162,8 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_FsTypedStore = {
     .render = NULL,
     .replaceCharactersInRange_withString_ = NULL,
     .replaceObjectAtIndex_withObject_ = NULL,
-    .retain = (NFObject * (*)(NFObject *, SEL))NFObject_retain,
-    .run = (void (*)(NFObject *, SEL))FsTypedStore_run,
+    .retain = (NPObject * (*)(NPObject *, SEL))NPObject_retain,
+    .run = (void (*)(NPObject *, SEL))FsTypedStore_run,
     .setLabel_ = NULL,
     .setObject_atIndex_ = NULL,
     .setObject_forKey_ = NULL,
@@ -2184,8 +2184,8 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_FsTypedStore = {
     .value = NULL,
 };
 
-/* VTable instance: NFArray */
-__attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_NFArray = {
+/* VTable instance: NPArray */
+__attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_NPArray = {
     .__sig = 0x4adeb6d807e3ebfaULL,
     .UTF8String = NULL,
     .addEntriesFromDictionary_ = NULL,
@@ -2202,23 +2202,23 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_NFArray = {
     .color = NULL,
     .compare_ = NULL,
     .compute_ = NULL,
-    .containsObject_ = (_Bool (*)(NFObject *, SEL, NFObject *))NFArray_containsObject_,
-    .copy = (NFObject * (*)(NFObject *, SEL))NFArray_copy,
-    .count = (size_t (*)(NFObject *, SEL))NFArray_count,
-    .dealloc = (void (*)(NFObject *, SEL))NFArray_dealloc,
+    .containsObject_ = (_Bool (*)(NPObject *, SEL, NPObject *))NPArray_containsObject_,
+    .copy = (NPObject * (*)(NPObject *, SEL))NPArray_copy,
+    .count = (size_t (*)(NPObject *, SEL))NPArray_count,
+    .dealloc = (void (*)(NPObject *, SEL))NPArray_dealloc,
     .deleteCharactersInRange_ = NULL,
-    .description = (NFObject * (*)(NFObject *, SEL))NFArray_description,
+    .description = (NPObject * (*)(NPObject *, SEL))NPArray_description,
     .domain = NULL,
     .doubleValue = NULL,
     .draw = NULL,
     .exchangeObjectAtIndex_withObjectAtIndex_ = NULL,
-    .firstObject = (NFObject * (*)(NFObject *, SEL))NFArray_firstObject,
+    .firstObject = (NPObject * (*)(NPObject *, SEL))NPArray_firstObject,
     .hasPrefix_ = NULL,
     .hasSuffix_ = NULL,
     .hash = NULL,
     .helper_ = NULL,
-    .indexOfObject_ = (size_t (*)(NFObject *, SEL, NFObject *))NFArray_indexOfObject_,
-    .init = (NFObject * (*)(NFObject *, SEL))NFObject_init,
+    .indexOfObject_ = (size_t (*)(NPObject *, SEL, NPObject *))NPArray_indexOfObject_,
+    .init = (NPObject * (*)(NPObject *, SEL))NPObject_init,
     .initWithArray_ = NULL,
     .initWithCapacity_ = NULL,
     .initWithCode_domain_userInfo_ = NULL,
@@ -2235,11 +2235,11 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_NFArray = {
     .intValue = NULL,
     .isEqualToNumber_ = NULL,
     .isEqualToString_ = NULL,
-    .isEqual_ = (_Bool (*)(NFObject *, SEL, NFObject *))nopa_root_isEqual_,
-    .isKindOfClass_ = (_Bool (*)(NFObject *, SEL, NFClass *))nopa_root_isKindOfClass_,
-    .isKindOf_ = (_Bool (*)(NFObject *, SEL, NFClass *))nopa_root_isKindOf_,
+    .isEqual_ = (_Bool (*)(NPObject *, SEL, NPObject *))nopa_root_isEqual_,
+    .isKindOfClass_ = (_Bool (*)(NPObject *, SEL, NPClass *))nopa_root_isKindOfClass_,
+    .isKindOf_ = (_Bool (*)(NPObject *, SEL, NPClass *))nopa_root_isKindOf_,
     .label = NULL,
-    .lastObject = (NFObject * (*)(NFObject *, SEL))NFArray_lastObject,
+    .lastObject = (NPObject * (*)(NPObject *, SEL))NPArray_lastObject,
     .length = NULL,
     .localizedDescription = NULL,
     .longLongValue = NULL,
@@ -2248,14 +2248,14 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_NFArray = {
     .maybe = NULL,
     .maybeC = NULL,
     .mix_point_ = NULL,
-    .objectAtIndex_ = (NFObject * (*)(NFObject *, SEL, size_t))NFArray_objectAtIndex_,
+    .objectAtIndex_ = (NPObject * (*)(NPObject *, SEL, size_t))NPArray_objectAtIndex_,
     .objectForKey_ = NULL,
     .optOut_ = NULL,
     .poke = NULL,
     .pre_post_ = NULL,
     .produce = NULL,
     .rangeOfString_ = NULL,
-    .release = (void (*)(NFObject *, SEL))NFObject_release,
+    .release = (void (*)(NPObject *, SEL))NPObject_release,
     .removeAllObjects = NULL,
     .removeLastObject = NULL,
     .removeObjectAtIndex_ = NULL,
@@ -2264,7 +2264,7 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_NFArray = {
     .render = NULL,
     .replaceCharactersInRange_withString_ = NULL,
     .replaceObjectAtIndex_withObject_ = NULL,
-    .retain = (NFObject * (*)(NFObject *, SEL))NFObject_retain,
+    .retain = (NPObject * (*)(NPObject *, SEL))NPObject_retain,
     .run = NULL,
     .setLabel_ = NULL,
     .setObject_atIndex_ = NULL,
@@ -2286,8 +2286,8 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_NFArray = {
     .value = NULL,
 };
 
-/* VTable instance: NFArray<NFNumber *> */
-__attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_NFArray_NFNumber_ptr = {
+/* VTable instance: NPArray<NPNumber *> */
+__attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_NPArray_NPNumber_ptr = {
     .__sig = 0x4adeb6d807e3ebfaULL,
     .UTF8String = NULL,
     .addEntriesFromDictionary_ = NULL,
@@ -2304,23 +2304,23 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_NFArray_NFNumber_ptr = {
     .color = NULL,
     .compare_ = NULL,
     .compute_ = NULL,
-    .containsObject_ = (_Bool (*)(NFObject *, SEL, NFObject *))NFArray_NFNumber_ptr_containsObject_,
-    .copy = (NFObject * (*)(NFObject *, SEL))NFArray_NFNumber_ptr_copy,
-    .count = (size_t (*)(NFObject *, SEL))NFArray_NFNumber_ptr_count,
-    .dealloc = (void (*)(NFObject *, SEL))NFArray_NFNumber_ptr_dealloc,
+    .containsObject_ = (_Bool (*)(NPObject *, SEL, NPObject *))NPArray_NPNumber_ptr_containsObject_,
+    .copy = (NPObject * (*)(NPObject *, SEL))NPArray_NPNumber_ptr_copy,
+    .count = (size_t (*)(NPObject *, SEL))NPArray_NPNumber_ptr_count,
+    .dealloc = (void (*)(NPObject *, SEL))NPArray_NPNumber_ptr_dealloc,
     .deleteCharactersInRange_ = NULL,
-    .description = (NFObject * (*)(NFObject *, SEL))NFArray_NFNumber_ptr_description,
+    .description = (NPObject * (*)(NPObject *, SEL))NPArray_NPNumber_ptr_description,
     .domain = NULL,
     .doubleValue = NULL,
     .draw = NULL,
     .exchangeObjectAtIndex_withObjectAtIndex_ = NULL,
-    .firstObject = (NFObject * (*)(NFObject *, SEL))NFArray_NFNumber_ptr_firstObject,
+    .firstObject = (NPObject * (*)(NPObject *, SEL))NPArray_NPNumber_ptr_firstObject,
     .hasPrefix_ = NULL,
     .hasSuffix_ = NULL,
     .hash = NULL,
     .helper_ = NULL,
-    .indexOfObject_ = (size_t (*)(NFObject *, SEL, NFObject *))NFArray_NFNumber_ptr_indexOfObject_,
-    .init = (NFObject * (*)(NFObject *, SEL))NFObject_init,
+    .indexOfObject_ = (size_t (*)(NPObject *, SEL, NPObject *))NPArray_NPNumber_ptr_indexOfObject_,
+    .init = (NPObject * (*)(NPObject *, SEL))NPObject_init,
     .initWithArray_ = NULL,
     .initWithCapacity_ = NULL,
     .initWithCode_domain_userInfo_ = NULL,
@@ -2337,11 +2337,11 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_NFArray_NFNumber_ptr = {
     .intValue = NULL,
     .isEqualToNumber_ = NULL,
     .isEqualToString_ = NULL,
-    .isEqual_ = (_Bool (*)(NFObject *, SEL, NFObject *))nopa_root_isEqual_,
-    .isKindOfClass_ = (_Bool (*)(NFObject *, SEL, NFClass *))nopa_root_isKindOfClass_,
-    .isKindOf_ = (_Bool (*)(NFObject *, SEL, NFClass *))nopa_root_isKindOf_,
+    .isEqual_ = (_Bool (*)(NPObject *, SEL, NPObject *))nopa_root_isEqual_,
+    .isKindOfClass_ = (_Bool (*)(NPObject *, SEL, NPClass *))nopa_root_isKindOfClass_,
+    .isKindOf_ = (_Bool (*)(NPObject *, SEL, NPClass *))nopa_root_isKindOf_,
     .label = NULL,
-    .lastObject = (NFObject * (*)(NFObject *, SEL))NFArray_NFNumber_ptr_lastObject,
+    .lastObject = (NPObject * (*)(NPObject *, SEL))NPArray_NPNumber_ptr_lastObject,
     .length = NULL,
     .localizedDescription = NULL,
     .longLongValue = NULL,
@@ -2350,14 +2350,14 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_NFArray_NFNumber_ptr = {
     .maybe = NULL,
     .maybeC = NULL,
     .mix_point_ = NULL,
-    .objectAtIndex_ = (NFObject * (*)(NFObject *, SEL, size_t))NFArray_NFNumber_ptr_objectAtIndex_,
+    .objectAtIndex_ = (NPObject * (*)(NPObject *, SEL, size_t))NPArray_NPNumber_ptr_objectAtIndex_,
     .objectForKey_ = NULL,
     .optOut_ = NULL,
     .poke = NULL,
     .pre_post_ = NULL,
     .produce = NULL,
     .rangeOfString_ = NULL,
-    .release = (void (*)(NFObject *, SEL))NFObject_release,
+    .release = (void (*)(NPObject *, SEL))NPObject_release,
     .removeAllObjects = NULL,
     .removeLastObject = NULL,
     .removeObjectAtIndex_ = NULL,
@@ -2366,7 +2366,7 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_NFArray_NFNumber_ptr = {
     .render = NULL,
     .replaceCharactersInRange_withString_ = NULL,
     .replaceObjectAtIndex_withObject_ = NULL,
-    .retain = (NFObject * (*)(NFObject *, SEL))NFObject_retain,
+    .retain = (NPObject * (*)(NPObject *, SEL))NPObject_retain,
     .run = NULL,
     .setLabel_ = NULL,
     .setObject_atIndex_ = NULL,
@@ -2388,15 +2388,15 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_NFArray_NFNumber_ptr = {
     .value = NULL,
 };
 
-/* VTable instance: NFDictionary */
-__attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_NFDictionary = {
+/* VTable instance: NPDictionary */
+__attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_NPDictionary = {
     .__sig = 0x4adeb6d807e3ebfaULL,
     .UTF8String = NULL,
     .addEntriesFromDictionary_ = NULL,
     .addObject_ = NULL,
     .addObjectsFromArray_ = NULL,
-    .allKeys = (NFArray * (*)(NFObject *, SEL))NFDictionary_allKeys,
-    .allValues = (NFArray * (*)(NFObject *, SEL))NFDictionary_allValues,
+    .allKeys = (NPArray * (*)(NPObject *, SEL))NPDictionary_allKeys,
+    .allValues = (NPArray * (*)(NPObject *, SEL))NPDictionary_allValues,
     .appendString_ = NULL,
     .appendUTF8String_ = NULL,
     .boolValue = NULL,
@@ -2407,11 +2407,11 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_NFDictionary = {
     .compare_ = NULL,
     .compute_ = NULL,
     .containsObject_ = NULL,
-    .copy = (NFObject * (*)(NFObject *, SEL))NFDictionary_copy,
-    .count = (size_t (*)(NFObject *, SEL))NFDictionary_count,
-    .dealloc = (void (*)(NFObject *, SEL))NFDictionary_dealloc,
+    .copy = (NPObject * (*)(NPObject *, SEL))NPDictionary_copy,
+    .count = (size_t (*)(NPObject *, SEL))NPDictionary_count,
+    .dealloc = (void (*)(NPObject *, SEL))NPDictionary_dealloc,
     .deleteCharactersInRange_ = NULL,
-    .description = (NFObject * (*)(NFObject *, SEL))NFDictionary_description,
+    .description = (NPObject * (*)(NPObject *, SEL))NPDictionary_description,
     .domain = NULL,
     .doubleValue = NULL,
     .draw = NULL,
@@ -2422,7 +2422,7 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_NFDictionary = {
     .hash = NULL,
     .helper_ = NULL,
     .indexOfObject_ = NULL,
-    .init = (NFObject * (*)(NFObject *, SEL))NFObject_init,
+    .init = (NPObject * (*)(NPObject *, SEL))NPObject_init,
     .initWithArray_ = NULL,
     .initWithCapacity_ = NULL,
     .initWithCode_domain_userInfo_ = NULL,
@@ -2439,9 +2439,9 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_NFDictionary = {
     .intValue = NULL,
     .isEqualToNumber_ = NULL,
     .isEqualToString_ = NULL,
-    .isEqual_ = (_Bool (*)(NFObject *, SEL, NFObject *))NFDictionary_isEqual_,
-    .isKindOfClass_ = (_Bool (*)(NFObject *, SEL, NFClass *))nopa_root_isKindOfClass_,
-    .isKindOf_ = (_Bool (*)(NFObject *, SEL, NFClass *))nopa_root_isKindOf_,
+    .isEqual_ = (_Bool (*)(NPObject *, SEL, NPObject *))NPDictionary_isEqual_,
+    .isKindOfClass_ = (_Bool (*)(NPObject *, SEL, NPClass *))nopa_root_isKindOfClass_,
+    .isKindOf_ = (_Bool (*)(NPObject *, SEL, NPClass *))nopa_root_isKindOf_,
     .label = NULL,
     .lastObject = NULL,
     .length = NULL,
@@ -2453,13 +2453,13 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_NFDictionary = {
     .maybeC = NULL,
     .mix_point_ = NULL,
     .objectAtIndex_ = NULL,
-    .objectForKey_ = (NFObject * (*)(NFObject *, SEL, NFObject *))NFDictionary_objectForKey_,
+    .objectForKey_ = (NPObject * (*)(NPObject *, SEL, NPObject *))NPDictionary_objectForKey_,
     .optOut_ = NULL,
     .poke = NULL,
     .pre_post_ = NULL,
     .produce = NULL,
     .rangeOfString_ = NULL,
-    .release = (void (*)(NFObject *, SEL))NFObject_release,
+    .release = (void (*)(NPObject *, SEL))NPObject_release,
     .removeAllObjects = NULL,
     .removeLastObject = NULL,
     .removeObjectAtIndex_ = NULL,
@@ -2468,7 +2468,7 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_NFDictionary = {
     .render = NULL,
     .replaceCharactersInRange_withString_ = NULL,
     .replaceObjectAtIndex_withObject_ = NULL,
-    .retain = (NFObject * (*)(NFObject *, SEL))NFObject_retain,
+    .retain = (NPObject * (*)(NPObject *, SEL))NPObject_retain,
     .run = NULL,
     .setLabel_ = NULL,
     .setObject_atIndex_ = NULL,
@@ -2490,8 +2490,8 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_NFDictionary = {
     .value = NULL,
 };
 
-/* VTable instance: NFError */
-__attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_NFError = {
+/* VTable instance: NPError */
+__attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_NPError = {
     .__sig = 0x4adeb6d807e3ebfaULL,
     .UTF8String = NULL,
     .addEntriesFromDictionary_ = NULL,
@@ -2504,120 +2504,18 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_NFError = {
     .boolValue = NULL,
     .charValue = NULL,
     .characterAtIndex_ = NULL,
-    .code = (int (*)(NFObject *, SEL))NFError_code,
-    .color = NULL,
-    .compare_ = NULL,
-    .compute_ = NULL,
-    .containsObject_ = NULL,
-    .copy = NULL,
-    .count = NULL,
-    .dealloc = (void (*)(NFObject *, SEL))NFObject_dealloc,
-    .deleteCharactersInRange_ = NULL,
-    .description = (NFObject * (*)(NFObject *, SEL))NFError_description,
-    .domain = (NFString * (*)(NFObject *, SEL))NFError_domain,
-    .doubleValue = NULL,
-    .draw = NULL,
-    .exchangeObjectAtIndex_withObjectAtIndex_ = NULL,
-    .firstObject = NULL,
-    .hasPrefix_ = NULL,
-    .hasSuffix_ = NULL,
-    .hash = NULL,
-    .helper_ = NULL,
-    .indexOfObject_ = NULL,
-    .init = (NFObject * (*)(NFObject *, SEL))NFObject_init,
-    .initWithArray_ = NULL,
-    .initWithCapacity_ = NULL,
-    .initWithCode_domain_userInfo_ = (NFError * (*)(NFObject *, SEL, int, NFString *, NFDictionary *))NFError_initWithCode_domain_userInfo_,
-    .initWithDictionary_ = NULL,
-    .initWithDouble_ = NULL,
-    .initWithId_ = NULL,
-    .initWithLongLong_ = NULL,
-    .initWithObjects_count_ = NULL,
-    .initWithString_ = NULL,
-    .initWithUTF8String_ = NULL,
-    .initWith_ = NULL,
-    .insertObject_atIndex_ = NULL,
-    .insertString_atIndex_ = NULL,
-    .intValue = NULL,
-    .isEqualToNumber_ = NULL,
-    .isEqualToString_ = NULL,
-    .isEqual_ = (_Bool (*)(NFObject *, SEL, NFObject *))nopa_root_isEqual_,
-    .isKindOfClass_ = (_Bool (*)(NFObject *, SEL, NFClass *))nopa_root_isKindOfClass_,
-    .isKindOf_ = (_Bool (*)(NFObject *, SEL, NFClass *))nopa_root_isKindOf_,
-    .label = NULL,
-    .lastObject = NULL,
-    .length = NULL,
-    .localizedDescription = (NFString * (*)(NFObject *, SEL))NFError_localizedDescription,
-    .longLongValue = NULL,
-    .looseParse_ = NULL,
-    .lowercaseString = NULL,
-    .maybe = NULL,
-    .maybeC = NULL,
-    .mix_point_ = NULL,
-    .objectAtIndex_ = NULL,
-    .objectForKey_ = NULL,
-    .optOut_ = NULL,
-    .poke = NULL,
-    .pre_post_ = NULL,
-    .produce = NULL,
-    .rangeOfString_ = NULL,
-    .release = (void (*)(NFObject *, SEL))NFObject_release,
-    .removeAllObjects = NULL,
-    .removeLastObject = NULL,
-    .removeObjectAtIndex_ = NULL,
-    .removeObjectForKey_ = NULL,
-    .removeObject_ = NULL,
-    .render = NULL,
-    .replaceCharactersInRange_withString_ = NULL,
-    .replaceObjectAtIndex_withObject_ = NULL,
-    .retain = (NFObject * (*)(NFObject *, SEL))NFObject_retain,
-    .run = NULL,
-    .setLabel_ = NULL,
-    .setObject_atIndex_ = NULL,
-    .setObject_forKey_ = NULL,
-    .setString_ = NULL,
-    .setTag_ = NULL,
-    .setValue_ = NULL,
-    .strictParse_ = NULL,
-    .stringByAppendingString_ = NULL,
-    .stringByAppendingUTF8String_ = NULL,
-    .substringFromIndex_ = NULL,
-    .substringToIndex_ = NULL,
-    .substringWithRange_ = NULL,
-    .sum_ = NULL,
-    .tag = NULL,
-    .take_ = NULL,
-    .uppercaseString = NULL,
-    .userInfo = (NFDictionary * (*)(NFObject *, SEL))NFError_userInfo,
-    .value = NULL,
-};
-
-/* VTable instance: NFNumber */
-__attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_NFNumber = {
-    .__sig = 0x4adeb6d807e3ebfaULL,
-    .UTF8String = NULL,
-    .addEntriesFromDictionary_ = NULL,
-    .addObject_ = NULL,
-    .addObjectsFromArray_ = NULL,
-    .allKeys = NULL,
-    .allValues = NULL,
-    .appendString_ = NULL,
-    .appendUTF8String_ = NULL,
-    .boolValue = (int (*)(NFObject *, SEL))NFNumber_boolValue,
-    .charValue = (char (*)(NFObject *, SEL))NFNumber_charValue,
-    .characterAtIndex_ = NULL,
-    .code = NULL,
+    .code = (int (*)(NPObject *, SEL))NPError_code,
     .color = NULL,
     .compare_ = NULL,
     .compute_ = NULL,
     .containsObject_ = NULL,
     .copy = NULL,
     .count = NULL,
-    .dealloc = (void (*)(NFObject *, SEL))NFObject_dealloc,
+    .dealloc = (void (*)(NPObject *, SEL))NPObject_dealloc,
     .deleteCharactersInRange_ = NULL,
-    .description = (NFObject * (*)(NFObject *, SEL))NFNumber_description,
-    .domain = NULL,
-    .doubleValue = (double (*)(NFObject *, SEL))NFNumber_doubleValue,
+    .description = (NPObject * (*)(NPObject *, SEL))NPError_description,
+    .domain = (NPString * (*)(NPObject *, SEL))NPError_domain,
+    .doubleValue = NULL,
     .draw = NULL,
     .exchangeObjectAtIndex_withObjectAtIndex_ = NULL,
     .firstObject = NULL,
@@ -2626,31 +2524,31 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_NFNumber = {
     .hash = NULL,
     .helper_ = NULL,
     .indexOfObject_ = NULL,
-    .init = (NFObject * (*)(NFObject *, SEL))NFObject_init,
+    .init = (NPObject * (*)(NPObject *, SEL))NPObject_init,
     .initWithArray_ = NULL,
     .initWithCapacity_ = NULL,
-    .initWithCode_domain_userInfo_ = NULL,
+    .initWithCode_domain_userInfo_ = (NPError * (*)(NPObject *, SEL, int, NPString *, NPDictionary *))NPError_initWithCode_domain_userInfo_,
     .initWithDictionary_ = NULL,
-    .initWithDouble_ = (NFNumber * (*)(NFObject *, SEL, double))NFNumber_initWithDouble_,
+    .initWithDouble_ = NULL,
     .initWithId_ = NULL,
-    .initWithLongLong_ = (NFNumber * (*)(NFObject *, SEL, long long))NFNumber_initWithLongLong_,
+    .initWithLongLong_ = NULL,
     .initWithObjects_count_ = NULL,
     .initWithString_ = NULL,
     .initWithUTF8String_ = NULL,
     .initWith_ = NULL,
     .insertObject_atIndex_ = NULL,
     .insertString_atIndex_ = NULL,
-    .intValue = (int (*)(NFObject *, SEL))NFNumber_intValue,
-    .isEqualToNumber_ = (int (*)(NFObject *, SEL, NFNumber *))NFNumber_isEqualToNumber_,
+    .intValue = NULL,
+    .isEqualToNumber_ = NULL,
     .isEqualToString_ = NULL,
-    .isEqual_ = (_Bool (*)(NFObject *, SEL, NFObject *))NFNumber_isEqual_,
-    .isKindOfClass_ = (_Bool (*)(NFObject *, SEL, NFClass *))nopa_root_isKindOfClass_,
-    .isKindOf_ = (_Bool (*)(NFObject *, SEL, NFClass *))nopa_root_isKindOf_,
+    .isEqual_ = (_Bool (*)(NPObject *, SEL, NPObject *))nopa_root_isEqual_,
+    .isKindOfClass_ = (_Bool (*)(NPObject *, SEL, NPClass *))nopa_root_isKindOfClass_,
+    .isKindOf_ = (_Bool (*)(NPObject *, SEL, NPClass *))nopa_root_isKindOf_,
     .label = NULL,
     .lastObject = NULL,
     .length = NULL,
-    .localizedDescription = NULL,
-    .longLongValue = (long long (*)(NFObject *, SEL))NFNumber_longLongValue,
+    .localizedDescription = (NPString * (*)(NPObject *, SEL))NPError_localizedDescription,
+    .longLongValue = NULL,
     .looseParse_ = NULL,
     .lowercaseString = NULL,
     .maybe = NULL,
@@ -2663,7 +2561,7 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_NFNumber = {
     .pre_post_ = NULL,
     .produce = NULL,
     .rangeOfString_ = NULL,
-    .release = (void (*)(NFObject *, SEL))NFObject_release,
+    .release = (void (*)(NPObject *, SEL))NPObject_release,
     .removeAllObjects = NULL,
     .removeLastObject = NULL,
     .removeObjectAtIndex_ = NULL,
@@ -2672,7 +2570,109 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_NFNumber = {
     .render = NULL,
     .replaceCharactersInRange_withString_ = NULL,
     .replaceObjectAtIndex_withObject_ = NULL,
-    .retain = (NFObject * (*)(NFObject *, SEL))NFObject_retain,
+    .retain = (NPObject * (*)(NPObject *, SEL))NPObject_retain,
+    .run = NULL,
+    .setLabel_ = NULL,
+    .setObject_atIndex_ = NULL,
+    .setObject_forKey_ = NULL,
+    .setString_ = NULL,
+    .setTag_ = NULL,
+    .setValue_ = NULL,
+    .strictParse_ = NULL,
+    .stringByAppendingString_ = NULL,
+    .stringByAppendingUTF8String_ = NULL,
+    .substringFromIndex_ = NULL,
+    .substringToIndex_ = NULL,
+    .substringWithRange_ = NULL,
+    .sum_ = NULL,
+    .tag = NULL,
+    .take_ = NULL,
+    .uppercaseString = NULL,
+    .userInfo = (NPDictionary * (*)(NPObject *, SEL))NPError_userInfo,
+    .value = NULL,
+};
+
+/* VTable instance: NPNumber */
+__attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_NPNumber = {
+    .__sig = 0x4adeb6d807e3ebfaULL,
+    .UTF8String = NULL,
+    .addEntriesFromDictionary_ = NULL,
+    .addObject_ = NULL,
+    .addObjectsFromArray_ = NULL,
+    .allKeys = NULL,
+    .allValues = NULL,
+    .appendString_ = NULL,
+    .appendUTF8String_ = NULL,
+    .boolValue = (int (*)(NPObject *, SEL))NPNumber_boolValue,
+    .charValue = (char (*)(NPObject *, SEL))NPNumber_charValue,
+    .characterAtIndex_ = NULL,
+    .code = NULL,
+    .color = NULL,
+    .compare_ = NULL,
+    .compute_ = NULL,
+    .containsObject_ = NULL,
+    .copy = NULL,
+    .count = NULL,
+    .dealloc = (void (*)(NPObject *, SEL))NPObject_dealloc,
+    .deleteCharactersInRange_ = NULL,
+    .description = (NPObject * (*)(NPObject *, SEL))NPNumber_description,
+    .domain = NULL,
+    .doubleValue = (double (*)(NPObject *, SEL))NPNumber_doubleValue,
+    .draw = NULL,
+    .exchangeObjectAtIndex_withObjectAtIndex_ = NULL,
+    .firstObject = NULL,
+    .hasPrefix_ = NULL,
+    .hasSuffix_ = NULL,
+    .hash = NULL,
+    .helper_ = NULL,
+    .indexOfObject_ = NULL,
+    .init = (NPObject * (*)(NPObject *, SEL))NPObject_init,
+    .initWithArray_ = NULL,
+    .initWithCapacity_ = NULL,
+    .initWithCode_domain_userInfo_ = NULL,
+    .initWithDictionary_ = NULL,
+    .initWithDouble_ = (NPNumber * (*)(NPObject *, SEL, double))NPNumber_initWithDouble_,
+    .initWithId_ = NULL,
+    .initWithLongLong_ = (NPNumber * (*)(NPObject *, SEL, long long))NPNumber_initWithLongLong_,
+    .initWithObjects_count_ = NULL,
+    .initWithString_ = NULL,
+    .initWithUTF8String_ = NULL,
+    .initWith_ = NULL,
+    .insertObject_atIndex_ = NULL,
+    .insertString_atIndex_ = NULL,
+    .intValue = (int (*)(NPObject *, SEL))NPNumber_intValue,
+    .isEqualToNumber_ = (int (*)(NPObject *, SEL, NPNumber *))NPNumber_isEqualToNumber_,
+    .isEqualToString_ = NULL,
+    .isEqual_ = (_Bool (*)(NPObject *, SEL, NPObject *))NPNumber_isEqual_,
+    .isKindOfClass_ = (_Bool (*)(NPObject *, SEL, NPClass *))nopa_root_isKindOfClass_,
+    .isKindOf_ = (_Bool (*)(NPObject *, SEL, NPClass *))nopa_root_isKindOf_,
+    .label = NULL,
+    .lastObject = NULL,
+    .length = NULL,
+    .localizedDescription = NULL,
+    .longLongValue = (long long (*)(NPObject *, SEL))NPNumber_longLongValue,
+    .looseParse_ = NULL,
+    .lowercaseString = NULL,
+    .maybe = NULL,
+    .maybeC = NULL,
+    .mix_point_ = NULL,
+    .objectAtIndex_ = NULL,
+    .objectForKey_ = NULL,
+    .optOut_ = NULL,
+    .poke = NULL,
+    .pre_post_ = NULL,
+    .produce = NULL,
+    .rangeOfString_ = NULL,
+    .release = (void (*)(NPObject *, SEL))NPObject_release,
+    .removeAllObjects = NULL,
+    .removeLastObject = NULL,
+    .removeObjectAtIndex_ = NULL,
+    .removeObjectForKey_ = NULL,
+    .removeObject_ = NULL,
+    .render = NULL,
+    .replaceCharactersInRange_withString_ = NULL,
+    .replaceObjectAtIndex_withObject_ = NULL,
+    .retain = (NPObject * (*)(NPObject *, SEL))NPObject_retain,
     .run = NULL,
     .setLabel_ = NULL,
     .setObject_atIndex_ = NULL,
@@ -2715,9 +2715,9 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_FsAnnotated = {
     .containsObject_ = NULL,
     .copy = NULL,
     .count = NULL,
-    .dealloc = (void (*)(NFObject *, SEL))NFObject_dealloc,
+    .dealloc = (void (*)(NPObject *, SEL))NPObject_dealloc,
     .deleteCharactersInRange_ = NULL,
-    .description = (NFObject * (*)(NFObject *, SEL))NFObject_description,
+    .description = (NPObject * (*)(NPObject *, SEL))NPObject_description,
     .domain = NULL,
     .doubleValue = NULL,
     .draw = NULL,
@@ -2728,7 +2728,7 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_FsAnnotated = {
     .hash = NULL,
     .helper_ = NULL,
     .indexOfObject_ = NULL,
-    .init = (NFObject * (*)(NFObject *, SEL))NFObject_init,
+    .init = (NPObject * (*)(NPObject *, SEL))NPObject_init,
     .initWithArray_ = NULL,
     .initWithCapacity_ = NULL,
     .initWithCode_domain_userInfo_ = NULL,
@@ -2745,9 +2745,9 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_FsAnnotated = {
     .intValue = NULL,
     .isEqualToNumber_ = NULL,
     .isEqualToString_ = NULL,
-    .isEqual_ = (_Bool (*)(NFObject *, SEL, NFObject *))nopa_root_isEqual_,
-    .isKindOfClass_ = (_Bool (*)(NFObject *, SEL, NFClass *))nopa_root_isKindOfClass_,
-    .isKindOf_ = (_Bool (*)(NFObject *, SEL, NFClass *))nopa_root_isKindOf_,
+    .isEqual_ = (_Bool (*)(NPObject *, SEL, NPObject *))nopa_root_isEqual_,
+    .isKindOfClass_ = (_Bool (*)(NPObject *, SEL, NPClass *))nopa_root_isKindOfClass_,
+    .isKindOf_ = (_Bool (*)(NPObject *, SEL, NPClass *))nopa_root_isKindOf_,
     .label = NULL,
     .lastObject = NULL,
     .length = NULL,
@@ -2755,17 +2755,17 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_FsAnnotated = {
     .longLongValue = NULL,
     .looseParse_ = NULL,
     .lowercaseString = NULL,
-    .maybe = (NFString * (*)(NFObject *, SEL))FsAnnotated_maybe,
-    .maybeC = (NFString * (*)(NFObject *, SEL))FsAnnotated_maybeC,
+    .maybe = (NPString * (*)(NPObject *, SEL))FsAnnotated_maybe,
+    .maybeC = (NPString * (*)(NPObject *, SEL))FsAnnotated_maybeC,
     .mix_point_ = NULL,
     .objectAtIndex_ = NULL,
     .objectForKey_ = NULL,
     .optOut_ = NULL,
     .poke = NULL,
-    .pre_post_ = (void (*)(NFObject *, SEL, NFString *, NFString *))FsAnnotated_pre_post_,
+    .pre_post_ = (void (*)(NPObject *, SEL, NPString *, NPString *))FsAnnotated_pre_post_,
     .produce = NULL,
     .rangeOfString_ = NULL,
-    .release = (void (*)(NFObject *, SEL))NFObject_release,
+    .release = (void (*)(NPObject *, SEL))NPObject_release,
     .removeAllObjects = NULL,
     .removeLastObject = NULL,
     .removeObjectAtIndex_ = NULL,
@@ -2774,7 +2774,7 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_FsAnnotated = {
     .render = NULL,
     .replaceCharactersInRange_withString_ = NULL,
     .replaceObjectAtIndex_withObject_ = NULL,
-    .retain = (NFObject * (*)(NFObject *, SEL))NFObject_retain,
+    .retain = (NPObject * (*)(NPObject *, SEL))NPObject_retain,
     .run = NULL,
     .setLabel_ = NULL,
     .setObject_atIndex_ = NULL,
@@ -2796,10 +2796,10 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_FsAnnotated = {
     .value = NULL,
 };
 
-/* VTable instance: NFString */
-__attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_NFString = {
+/* VTable instance: NPString */
+__attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_NPString = {
     .__sig = 0x4adeb6d807e3ebfaULL,
-    .UTF8String = (const char * (*)(NFObject *, SEL))NFString_UTF8String,
+    .UTF8String = (const char * (*)(NPObject *, SEL))NPString_UTF8String,
     .addEntriesFromDictionary_ = NULL,
     .addObject_ = NULL,
     .addObjectsFromArray_ = NULL,
@@ -2809,28 +2809,28 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_NFString = {
     .appendUTF8String_ = NULL,
     .boolValue = NULL,
     .charValue = NULL,
-    .characterAtIndex_ = (char (*)(NFObject *, SEL, size_t))NFString_characterAtIndex_,
+    .characterAtIndex_ = (char (*)(NPObject *, SEL, size_t))NPString_characterAtIndex_,
     .code = NULL,
     .color = NULL,
-    .compare_ = (int (*)(NFObject *, SEL, NFString *))NFString_compare_,
+    .compare_ = (int (*)(NPObject *, SEL, NPString *))NPString_compare_,
     .compute_ = NULL,
     .containsObject_ = NULL,
-    .copy = (NFObject * (*)(NFObject *, SEL))NFString_copy,
+    .copy = (NPObject * (*)(NPObject *, SEL))NPString_copy,
     .count = NULL,
-    .dealloc = (void (*)(NFObject *, SEL))NFString_dealloc,
+    .dealloc = (void (*)(NPObject *, SEL))NPString_dealloc,
     .deleteCharactersInRange_ = NULL,
-    .description = (NFObject * (*)(NFObject *, SEL))NFString_description,
+    .description = (NPObject * (*)(NPObject *, SEL))NPString_description,
     .domain = NULL,
     .doubleValue = NULL,
     .draw = NULL,
     .exchangeObjectAtIndex_withObjectAtIndex_ = NULL,
     .firstObject = NULL,
-    .hasPrefix_ = (int (*)(NFObject *, SEL, NFString *))NFString_hasPrefix_,
-    .hasSuffix_ = (int (*)(NFObject *, SEL, NFString *))NFString_hasSuffix_,
-    .hash = (uint32_t (*)(NFObject *, SEL))NFString_hash,
+    .hasPrefix_ = (int (*)(NPObject *, SEL, NPString *))NPString_hasPrefix_,
+    .hasSuffix_ = (int (*)(NPObject *, SEL, NPString *))NPString_hasSuffix_,
+    .hash = (uint32_t (*)(NPObject *, SEL))NPString_hash,
     .helper_ = NULL,
     .indexOfObject_ = NULL,
-    .init = (NFObject * (*)(NFObject *, SEL))NFObject_init,
+    .init = (NPObject * (*)(NPObject *, SEL))NPObject_init,
     .initWithArray_ = NULL,
     .initWithCapacity_ = NULL,
     .initWithCode_domain_userInfo_ = NULL,
@@ -2839,24 +2839,24 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_NFString = {
     .initWithId_ = NULL,
     .initWithLongLong_ = NULL,
     .initWithObjects_count_ = NULL,
-    .initWithString_ = (NFString * (*)(NFObject *, SEL, NFString *))NFString_initWithString_,
-    .initWithUTF8String_ = (NFString * (*)(NFObject *, SEL, const char *))NFString_initWithUTF8String_,
+    .initWithString_ = (NPString * (*)(NPObject *, SEL, NPString *))NPString_initWithString_,
+    .initWithUTF8String_ = (NPString * (*)(NPObject *, SEL, const char *))NPString_initWithUTF8String_,
     .initWith_ = NULL,
     .insertObject_atIndex_ = NULL,
     .insertString_atIndex_ = NULL,
     .intValue = NULL,
     .isEqualToNumber_ = NULL,
-    .isEqualToString_ = (int (*)(NFObject *, SEL, NFString *))NFString_isEqualToString_,
-    .isEqual_ = (_Bool (*)(NFObject *, SEL, NFObject *))NFString_isEqual_,
-    .isKindOfClass_ = (_Bool (*)(NFObject *, SEL, NFClass *))nopa_root_isKindOfClass_,
-    .isKindOf_ = (_Bool (*)(NFObject *, SEL, NFClass *))nopa_root_isKindOf_,
+    .isEqualToString_ = (int (*)(NPObject *, SEL, NPString *))NPString_isEqualToString_,
+    .isEqual_ = (_Bool (*)(NPObject *, SEL, NPObject *))NPString_isEqual_,
+    .isKindOfClass_ = (_Bool (*)(NPObject *, SEL, NPClass *))nopa_root_isKindOfClass_,
+    .isKindOf_ = (_Bool (*)(NPObject *, SEL, NPClass *))nopa_root_isKindOf_,
     .label = NULL,
     .lastObject = NULL,
-    .length = (size_t (*)(NFObject *, SEL))NFString_length,
+    .length = (size_t (*)(NPObject *, SEL))NPString_length,
     .localizedDescription = NULL,
     .longLongValue = NULL,
     .looseParse_ = NULL,
-    .lowercaseString = (NFString * (*)(NFObject *, SEL))NFString_lowercaseString,
+    .lowercaseString = (NPString * (*)(NPObject *, SEL))NPString_lowercaseString,
     .maybe = NULL,
     .maybeC = NULL,
     .mix_point_ = NULL,
@@ -2866,8 +2866,8 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_NFString = {
     .poke = NULL,
     .pre_post_ = NULL,
     .produce = NULL,
-    .rangeOfString_ = (NFRange (*)(NFObject *, SEL, NFString *))NFString_rangeOfString_,
-    .release = (void (*)(NFObject *, SEL))NFObject_release,
+    .rangeOfString_ = (NPRange (*)(NPObject *, SEL, NPString *))NPString_rangeOfString_,
+    .release = (void (*)(NPObject *, SEL))NPObject_release,
     .removeAllObjects = NULL,
     .removeLastObject = NULL,
     .removeObjectAtIndex_ = NULL,
@@ -2876,7 +2876,7 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_NFString = {
     .render = NULL,
     .replaceCharactersInRange_withString_ = NULL,
     .replaceObjectAtIndex_withObject_ = NULL,
-    .retain = (NFObject * (*)(NFObject *, SEL))NFObject_retain,
+    .retain = (NPObject * (*)(NPObject *, SEL))NPObject_retain,
     .run = NULL,
     .setLabel_ = NULL,
     .setObject_atIndex_ = NULL,
@@ -2885,15 +2885,15 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_NFString = {
     .setTag_ = NULL,
     .setValue_ = NULL,
     .strictParse_ = NULL,
-    .stringByAppendingString_ = (NFString * (*)(NFObject *, SEL, NFString *))NFString_stringByAppendingString_,
-    .stringByAppendingUTF8String_ = (NFString * (*)(NFObject *, SEL, const char *))NFString_stringByAppendingUTF8String_,
-    .substringFromIndex_ = (NFString * (*)(NFObject *, SEL, size_t))NFString_substringFromIndex_,
-    .substringToIndex_ = (NFString * (*)(NFObject *, SEL, size_t))NFString_substringToIndex_,
-    .substringWithRange_ = (NFString * (*)(NFObject *, SEL, NFRange))NFString_substringWithRange_,
+    .stringByAppendingString_ = (NPString * (*)(NPObject *, SEL, NPString *))NPString_stringByAppendingString_,
+    .stringByAppendingUTF8String_ = (NPString * (*)(NPObject *, SEL, const char *))NPString_stringByAppendingUTF8String_,
+    .substringFromIndex_ = (NPString * (*)(NPObject *, SEL, size_t))NPString_substringFromIndex_,
+    .substringToIndex_ = (NPString * (*)(NPObject *, SEL, size_t))NPString_substringToIndex_,
+    .substringWithRange_ = (NPString * (*)(NPObject *, SEL, NPRange))NPString_substringWithRange_,
     .sum_ = NULL,
     .tag = NULL,
     .take_ = NULL,
-    .uppercaseString = (NFString * (*)(NFObject *, SEL))NFString_uppercaseString,
+    .uppercaseString = (NPString * (*)(NPObject *, SEL))NPString_uppercaseString,
     .userInfo = NULL,
     .value = NULL,
 };
@@ -2919,9 +2919,9 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_FsBox = {
     .containsObject_ = NULL,
     .copy = NULL,
     .count = NULL,
-    .dealloc = (void (*)(NFObject *, SEL))NFObject_dealloc,
+    .dealloc = (void (*)(NPObject *, SEL))NPObject_dealloc,
     .deleteCharactersInRange_ = NULL,
-    .description = (NFObject * (*)(NFObject *, SEL))NFObject_description,
+    .description = (NPObject * (*)(NPObject *, SEL))NPObject_description,
     .domain = NULL,
     .doubleValue = NULL,
     .draw = NULL,
@@ -2932,7 +2932,7 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_FsBox = {
     .hash = NULL,
     .helper_ = NULL,
     .indexOfObject_ = NULL,
-    .init = (NFObject * (*)(NFObject *, SEL))NFObject_init,
+    .init = (NPObject * (*)(NPObject *, SEL))NPObject_init,
     .initWithArray_ = NULL,
     .initWithCapacity_ = NULL,
     .initWithCode_domain_userInfo_ = NULL,
@@ -2943,15 +2943,15 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_FsBox = {
     .initWithObjects_count_ = NULL,
     .initWithString_ = NULL,
     .initWithUTF8String_ = NULL,
-    .initWith_ = (FsBox * (*)(NFObject *, SEL, NFMutableString *))FsBox_initWith_,
+    .initWith_ = (FsBox * (*)(NPObject *, SEL, NPMutableString *))FsBox_initWith_,
     .insertObject_atIndex_ = NULL,
     .insertString_atIndex_ = NULL,
     .intValue = NULL,
     .isEqualToNumber_ = NULL,
     .isEqualToString_ = NULL,
-    .isEqual_ = (_Bool (*)(NFObject *, SEL, NFObject *))nopa_root_isEqual_,
-    .isKindOfClass_ = (_Bool (*)(NFObject *, SEL, NFClass *))nopa_root_isKindOfClass_,
-    .isKindOf_ = (_Bool (*)(NFObject *, SEL, NFClass *))nopa_root_isKindOf_,
+    .isEqual_ = (_Bool (*)(NPObject *, SEL, NPObject *))nopa_root_isEqual_,
+    .isKindOfClass_ = (_Bool (*)(NPObject *, SEL, NPClass *))nopa_root_isKindOfClass_,
+    .isKindOf_ = (_Bool (*)(NPObject *, SEL, NPClass *))nopa_root_isKindOf_,
     .label = NULL,
     .lastObject = NULL,
     .length = NULL,
@@ -2969,7 +2969,7 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_FsBox = {
     .pre_post_ = NULL,
     .produce = NULL,
     .rangeOfString_ = NULL,
-    .release = (void (*)(NFObject *, SEL))NFObject_release,
+    .release = (void (*)(NPObject *, SEL))NPObject_release,
     .removeAllObjects = NULL,
     .removeLastObject = NULL,
     .removeObjectAtIndex_ = NULL,
@@ -2978,14 +2978,14 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_FsBox = {
     .render = NULL,
     .replaceCharactersInRange_withString_ = NULL,
     .replaceObjectAtIndex_withObject_ = NULL,
-    .retain = (NFObject * (*)(NFObject *, SEL))NFObject_retain,
+    .retain = (NPObject * (*)(NPObject *, SEL))NPObject_retain,
     .run = NULL,
     .setLabel_ = NULL,
     .setObject_atIndex_ = NULL,
     .setObject_forKey_ = NULL,
     .setString_ = NULL,
     .setTag_ = NULL,
-    .setValue_ = (void (*)(NFObject *, SEL, NFMutableString *))FsBox_setValue_,
+    .setValue_ = (void (*)(NPObject *, SEL, NPMutableString *))FsBox_setValue_,
     .strictParse_ = NULL,
     .stringByAppendingString_ = NULL,
     .stringByAppendingUTF8String_ = NULL,
@@ -2997,18 +2997,18 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_FsBox = {
     .take_ = NULL,
     .uppercaseString = NULL,
     .userInfo = NULL,
-    .value = (NFMutableString * (*)(NFObject *, SEL))FsBox_value,
+    .value = (NPMutableString * (*)(NPObject *, SEL))FsBox_value,
 };
 
-/* VTable instance: NFMutableDictionary */
-__attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_NFMutableDictionary = {
+/* VTable instance: NPMutableDictionary */
+__attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_NPMutableDictionary = {
     .__sig = 0x4adeb6d807e3ebfaULL,
     .UTF8String = NULL,
-    .addEntriesFromDictionary_ = (void (*)(NFObject *, SEL, NFDictionary *))NFMutableDictionary_addEntriesFromDictionary_,
+    .addEntriesFromDictionary_ = (void (*)(NPObject *, SEL, NPDictionary *))NPMutableDictionary_addEntriesFromDictionary_,
     .addObject_ = NULL,
     .addObjectsFromArray_ = NULL,
-    .allKeys = (NFArray * (*)(NFObject *, SEL))NFDictionary_allKeys,
-    .allValues = (NFArray * (*)(NFObject *, SEL))NFDictionary_allValues,
+    .allKeys = (NPArray * (*)(NPObject *, SEL))NPDictionary_allKeys,
+    .allValues = (NPArray * (*)(NPObject *, SEL))NPDictionary_allValues,
     .appendString_ = NULL,
     .appendUTF8String_ = NULL,
     .boolValue = NULL,
@@ -3019,11 +3019,11 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_NFMutableDictionary = {
     .compare_ = NULL,
     .compute_ = NULL,
     .containsObject_ = NULL,
-    .copy = (NFObject * (*)(NFObject *, SEL))NFDictionary_copy,
-    .count = (size_t (*)(NFObject *, SEL))NFDictionary_count,
-    .dealloc = (void (*)(NFObject *, SEL))NFDictionary_dealloc,
+    .copy = (NPObject * (*)(NPObject *, SEL))NPDictionary_copy,
+    .count = (size_t (*)(NPObject *, SEL))NPDictionary_count,
+    .dealloc = (void (*)(NPObject *, SEL))NPDictionary_dealloc,
     .deleteCharactersInRange_ = NULL,
-    .description = (NFObject * (*)(NFObject *, SEL))NFDictionary_description,
+    .description = (NPObject * (*)(NPObject *, SEL))NPDictionary_description,
     .domain = NULL,
     .doubleValue = NULL,
     .draw = NULL,
@@ -3034,11 +3034,11 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_NFMutableDictionary = {
     .hash = NULL,
     .helper_ = NULL,
     .indexOfObject_ = NULL,
-    .init = (NFObject * (*)(NFObject *, SEL))NFMutableDictionary_init,
+    .init = (NPObject * (*)(NPObject *, SEL))NPMutableDictionary_init,
     .initWithArray_ = NULL,
-    .initWithCapacity_ = (NFMutableDictionary * (*)(NFObject *, SEL, size_t))NFMutableDictionary_initWithCapacity_,
+    .initWithCapacity_ = (NPMutableDictionary * (*)(NPObject *, SEL, size_t))NPMutableDictionary_initWithCapacity_,
     .initWithCode_domain_userInfo_ = NULL,
-    .initWithDictionary_ = (NFMutableDictionary * (*)(NFObject *, SEL, NFDictionary *))NFMutableDictionary_initWithDictionary_,
+    .initWithDictionary_ = (NPMutableDictionary * (*)(NPObject *, SEL, NPDictionary *))NPMutableDictionary_initWithDictionary_,
     .initWithDouble_ = NULL,
     .initWithId_ = NULL,
     .initWithLongLong_ = NULL,
@@ -3051,9 +3051,9 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_NFMutableDictionary = {
     .intValue = NULL,
     .isEqualToNumber_ = NULL,
     .isEqualToString_ = NULL,
-    .isEqual_ = (_Bool (*)(NFObject *, SEL, NFObject *))NFDictionary_isEqual_,
-    .isKindOfClass_ = (_Bool (*)(NFObject *, SEL, NFClass *))nopa_root_isKindOfClass_,
-    .isKindOf_ = (_Bool (*)(NFObject *, SEL, NFClass *))nopa_root_isKindOf_,
+    .isEqual_ = (_Bool (*)(NPObject *, SEL, NPObject *))NPDictionary_isEqual_,
+    .isKindOfClass_ = (_Bool (*)(NPObject *, SEL, NPClass *))nopa_root_isKindOfClass_,
+    .isKindOf_ = (_Bool (*)(NPObject *, SEL, NPClass *))nopa_root_isKindOf_,
     .label = NULL,
     .lastObject = NULL,
     .length = NULL,
@@ -3065,26 +3065,26 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_NFMutableDictionary = {
     .maybeC = NULL,
     .mix_point_ = NULL,
     .objectAtIndex_ = NULL,
-    .objectForKey_ = (NFObject * (*)(NFObject *, SEL, NFObject *))NFDictionary_objectForKey_,
+    .objectForKey_ = (NPObject * (*)(NPObject *, SEL, NPObject *))NPDictionary_objectForKey_,
     .optOut_ = NULL,
     .poke = NULL,
     .pre_post_ = NULL,
     .produce = NULL,
     .rangeOfString_ = NULL,
-    .release = (void (*)(NFObject *, SEL))NFObject_release,
-    .removeAllObjects = (void (*)(NFObject *, SEL))NFMutableDictionary_removeAllObjects,
+    .release = (void (*)(NPObject *, SEL))NPObject_release,
+    .removeAllObjects = (void (*)(NPObject *, SEL))NPMutableDictionary_removeAllObjects,
     .removeLastObject = NULL,
     .removeObjectAtIndex_ = NULL,
-    .removeObjectForKey_ = (void (*)(NFObject *, SEL, NFObject *))NFMutableDictionary_removeObjectForKey_,
+    .removeObjectForKey_ = (void (*)(NPObject *, SEL, NPObject *))NPMutableDictionary_removeObjectForKey_,
     .removeObject_ = NULL,
     .render = NULL,
     .replaceCharactersInRange_withString_ = NULL,
     .replaceObjectAtIndex_withObject_ = NULL,
-    .retain = (NFObject * (*)(NFObject *, SEL))NFObject_retain,
+    .retain = (NPObject * (*)(NPObject *, SEL))NPObject_retain,
     .run = NULL,
     .setLabel_ = NULL,
     .setObject_atIndex_ = NULL,
-    .setObject_forKey_ = (void (*)(NFObject *, SEL, NFObject *, NFObject *))NFMutableDictionary_setObject_forKey_,
+    .setObject_forKey_ = (void (*)(NPObject *, SEL, NPObject *, NPObject *))NPMutableDictionary_setObject_forKey_,
     .setString_ = NULL,
     .setTag_ = NULL,
     .setValue_ = NULL,
@@ -3102,41 +3102,41 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_NFMutableDictionary = {
     .value = NULL,
 };
 
-/* VTable instance: NFMutableString */
-__attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_NFMutableString = {
+/* VTable instance: NPMutableString */
+__attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_NPMutableString = {
     .__sig = 0x4adeb6d807e3ebfaULL,
-    .UTF8String = (const char * (*)(NFObject *, SEL))NFString_UTF8String,
+    .UTF8String = (const char * (*)(NPObject *, SEL))NPString_UTF8String,
     .addEntriesFromDictionary_ = NULL,
     .addObject_ = NULL,
     .addObjectsFromArray_ = NULL,
     .allKeys = NULL,
     .allValues = NULL,
-    .appendString_ = (void (*)(NFObject *, SEL, NFString *))NFMutableString_appendString_,
-    .appendUTF8String_ = (void (*)(NFObject *, SEL, const char *))NFMutableString_appendUTF8String_,
+    .appendString_ = (void (*)(NPObject *, SEL, NPString *))NPMutableString_appendString_,
+    .appendUTF8String_ = (void (*)(NPObject *, SEL, const char *))NPMutableString_appendUTF8String_,
     .boolValue = NULL,
     .charValue = NULL,
-    .characterAtIndex_ = (char (*)(NFObject *, SEL, size_t))NFString_characterAtIndex_,
+    .characterAtIndex_ = (char (*)(NPObject *, SEL, size_t))NPString_characterAtIndex_,
     .code = NULL,
     .color = NULL,
-    .compare_ = (int (*)(NFObject *, SEL, NFString *))NFString_compare_,
+    .compare_ = (int (*)(NPObject *, SEL, NPString *))NPString_compare_,
     .compute_ = NULL,
     .containsObject_ = NULL,
-    .copy = (NFObject * (*)(NFObject *, SEL))NFString_copy,
+    .copy = (NPObject * (*)(NPObject *, SEL))NPString_copy,
     .count = NULL,
-    .dealloc = (void (*)(NFObject *, SEL))NFString_dealloc,
-    .deleteCharactersInRange_ = (void (*)(NFObject *, SEL, NFRange))NFMutableString_deleteCharactersInRange_,
-    .description = (NFObject * (*)(NFObject *, SEL))NFString_description,
+    .dealloc = (void (*)(NPObject *, SEL))NPString_dealloc,
+    .deleteCharactersInRange_ = (void (*)(NPObject *, SEL, NPRange))NPMutableString_deleteCharactersInRange_,
+    .description = (NPObject * (*)(NPObject *, SEL))NPString_description,
     .domain = NULL,
     .doubleValue = NULL,
     .draw = NULL,
     .exchangeObjectAtIndex_withObjectAtIndex_ = NULL,
     .firstObject = NULL,
-    .hasPrefix_ = (int (*)(NFObject *, SEL, NFString *))NFString_hasPrefix_,
-    .hasSuffix_ = (int (*)(NFObject *, SEL, NFString *))NFString_hasSuffix_,
-    .hash = (uint32_t (*)(NFObject *, SEL))NFString_hash,
+    .hasPrefix_ = (int (*)(NPObject *, SEL, NPString *))NPString_hasPrefix_,
+    .hasSuffix_ = (int (*)(NPObject *, SEL, NPString *))NPString_hasSuffix_,
+    .hash = (uint32_t (*)(NPObject *, SEL))NPString_hash,
     .helper_ = NULL,
     .indexOfObject_ = NULL,
-    .init = (NFObject * (*)(NFObject *, SEL))NFObject_init,
+    .init = (NPObject * (*)(NPObject *, SEL))NPObject_init,
     .initWithArray_ = NULL,
     .initWithCapacity_ = NULL,
     .initWithCode_domain_userInfo_ = NULL,
@@ -3145,24 +3145,24 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_NFMutableString = {
     .initWithId_ = NULL,
     .initWithLongLong_ = NULL,
     .initWithObjects_count_ = NULL,
-    .initWithString_ = (NFString * (*)(NFObject *, SEL, NFString *))NFMutableString_initWithString_,
-    .initWithUTF8String_ = (NFString * (*)(NFObject *, SEL, const char *))NFMutableString_initWithUTF8String_,
+    .initWithString_ = (NPString * (*)(NPObject *, SEL, NPString *))NPMutableString_initWithString_,
+    .initWithUTF8String_ = (NPString * (*)(NPObject *, SEL, const char *))NPMutableString_initWithUTF8String_,
     .initWith_ = NULL,
     .insertObject_atIndex_ = NULL,
-    .insertString_atIndex_ = (void (*)(NFObject *, SEL, NFString *, size_t))NFMutableString_insertString_atIndex_,
+    .insertString_atIndex_ = (void (*)(NPObject *, SEL, NPString *, size_t))NPMutableString_insertString_atIndex_,
     .intValue = NULL,
     .isEqualToNumber_ = NULL,
-    .isEqualToString_ = (int (*)(NFObject *, SEL, NFString *))NFString_isEqualToString_,
-    .isEqual_ = (_Bool (*)(NFObject *, SEL, NFObject *))NFString_isEqual_,
-    .isKindOfClass_ = (_Bool (*)(NFObject *, SEL, NFClass *))nopa_root_isKindOfClass_,
-    .isKindOf_ = (_Bool (*)(NFObject *, SEL, NFClass *))nopa_root_isKindOf_,
+    .isEqualToString_ = (int (*)(NPObject *, SEL, NPString *))NPString_isEqualToString_,
+    .isEqual_ = (_Bool (*)(NPObject *, SEL, NPObject *))NPString_isEqual_,
+    .isKindOfClass_ = (_Bool (*)(NPObject *, SEL, NPClass *))nopa_root_isKindOfClass_,
+    .isKindOf_ = (_Bool (*)(NPObject *, SEL, NPClass *))nopa_root_isKindOf_,
     .label = NULL,
     .lastObject = NULL,
-    .length = (size_t (*)(NFObject *, SEL))NFString_length,
+    .length = (size_t (*)(NPObject *, SEL))NPString_length,
     .localizedDescription = NULL,
     .longLongValue = NULL,
     .looseParse_ = NULL,
-    .lowercaseString = (NFString * (*)(NFObject *, SEL))NFString_lowercaseString,
+    .lowercaseString = (NPString * (*)(NPObject *, SEL))NPString_lowercaseString,
     .maybe = NULL,
     .maybeC = NULL,
     .mix_point_ = NULL,
@@ -3172,34 +3172,34 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_NFMutableString = {
     .poke = NULL,
     .pre_post_ = NULL,
     .produce = NULL,
-    .rangeOfString_ = (NFRange (*)(NFObject *, SEL, NFString *))NFString_rangeOfString_,
-    .release = (void (*)(NFObject *, SEL))NFObject_release,
+    .rangeOfString_ = (NPRange (*)(NPObject *, SEL, NPString *))NPString_rangeOfString_,
+    .release = (void (*)(NPObject *, SEL))NPObject_release,
     .removeAllObjects = NULL,
     .removeLastObject = NULL,
     .removeObjectAtIndex_ = NULL,
     .removeObjectForKey_ = NULL,
     .removeObject_ = NULL,
     .render = NULL,
-    .replaceCharactersInRange_withString_ = (void (*)(NFObject *, SEL, NFRange, NFString *))NFMutableString_replaceCharactersInRange_withString_,
+    .replaceCharactersInRange_withString_ = (void (*)(NPObject *, SEL, NPRange, NPString *))NPMutableString_replaceCharactersInRange_withString_,
     .replaceObjectAtIndex_withObject_ = NULL,
-    .retain = (NFObject * (*)(NFObject *, SEL))NFObject_retain,
+    .retain = (NPObject * (*)(NPObject *, SEL))NPObject_retain,
     .run = NULL,
     .setLabel_ = NULL,
     .setObject_atIndex_ = NULL,
     .setObject_forKey_ = NULL,
-    .setString_ = (void (*)(NFObject *, SEL, NFString *))NFMutableString_setString_,
+    .setString_ = (void (*)(NPObject *, SEL, NPString *))NPMutableString_setString_,
     .setTag_ = NULL,
     .setValue_ = NULL,
     .strictParse_ = NULL,
-    .stringByAppendingString_ = (NFString * (*)(NFObject *, SEL, NFString *))NFString_stringByAppendingString_,
-    .stringByAppendingUTF8String_ = (NFString * (*)(NFObject *, SEL, const char *))NFString_stringByAppendingUTF8String_,
-    .substringFromIndex_ = (NFString * (*)(NFObject *, SEL, size_t))NFString_substringFromIndex_,
-    .substringToIndex_ = (NFString * (*)(NFObject *, SEL, size_t))NFString_substringToIndex_,
-    .substringWithRange_ = (NFString * (*)(NFObject *, SEL, NFRange))NFString_substringWithRange_,
+    .stringByAppendingString_ = (NPString * (*)(NPObject *, SEL, NPString *))NPString_stringByAppendingString_,
+    .stringByAppendingUTF8String_ = (NPString * (*)(NPObject *, SEL, const char *))NPString_stringByAppendingUTF8String_,
+    .substringFromIndex_ = (NPString * (*)(NPObject *, SEL, size_t))NPString_substringFromIndex_,
+    .substringToIndex_ = (NPString * (*)(NPObject *, SEL, size_t))NPString_substringToIndex_,
+    .substringWithRange_ = (NPString * (*)(NPObject *, SEL, NPRange))NPString_substringWithRange_,
     .sum_ = NULL,
     .tag = NULL,
     .take_ = NULL,
-    .uppercaseString = (NFString * (*)(NFObject *, SEL))NFString_uppercaseString,
+    .uppercaseString = (NPString * (*)(NPObject *, SEL))NPString_uppercaseString,
     .userInfo = NULL,
     .value = NULL,
 };
@@ -3219,18 +3219,18 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_FsSprite = {
     .charValue = NULL,
     .characterAtIndex_ = NULL,
     .code = NULL,
-    .color = (int (*)(NFObject *, SEL))FsSprite_color,
+    .color = (int (*)(NPObject *, SEL))FsSprite_color,
     .compare_ = NULL,
     .compute_ = NULL,
     .containsObject_ = NULL,
     .copy = NULL,
     .count = NULL,
-    .dealloc = (void (*)(NFObject *, SEL))NFObject_dealloc,
+    .dealloc = (void (*)(NPObject *, SEL))NPObject_dealloc,
     .deleteCharactersInRange_ = NULL,
-    .description = (NFObject * (*)(NFObject *, SEL))NFObject_description,
+    .description = (NPObject * (*)(NPObject *, SEL))NPObject_description,
     .domain = NULL,
     .doubleValue = NULL,
-    .draw = (void (*)(NFObject *, SEL))FsSprite_draw,
+    .draw = (void (*)(NPObject *, SEL))FsSprite_draw,
     .exchangeObjectAtIndex_withObjectAtIndex_ = NULL,
     .firstObject = NULL,
     .hasPrefix_ = NULL,
@@ -3238,13 +3238,13 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_FsSprite = {
     .hash = NULL,
     .helper_ = NULL,
     .indexOfObject_ = NULL,
-    .init = (NFObject * (*)(NFObject *, SEL))NFObject_init,
+    .init = (NPObject * (*)(NPObject *, SEL))NPObject_init,
     .initWithArray_ = NULL,
     .initWithCapacity_ = NULL,
     .initWithCode_domain_userInfo_ = NULL,
     .initWithDictionary_ = NULL,
     .initWithDouble_ = NULL,
-    .initWithId_ = (FsSprite * (*)(NFObject *, SEL, int))FsSprite_initWithId_,
+    .initWithId_ = (FsSprite * (*)(NPObject *, SEL, int))FsSprite_initWithId_,
     .initWithLongLong_ = NULL,
     .initWithObjects_count_ = NULL,
     .initWithString_ = NULL,
@@ -3255,10 +3255,10 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_FsSprite = {
     .intValue = NULL,
     .isEqualToNumber_ = NULL,
     .isEqualToString_ = NULL,
-    .isEqual_ = (_Bool (*)(NFObject *, SEL, NFObject *))nopa_root_isEqual_,
-    .isKindOfClass_ = (_Bool (*)(NFObject *, SEL, NFClass *))nopa_root_isKindOfClass_,
-    .isKindOf_ = (_Bool (*)(NFObject *, SEL, NFClass *))nopa_root_isKindOf_,
-    .label = (NFString * (*)(NFObject *, SEL))FsSprite_label,
+    .isEqual_ = (_Bool (*)(NPObject *, SEL, NPObject *))nopa_root_isEqual_,
+    .isKindOfClass_ = (_Bool (*)(NPObject *, SEL, NPClass *))nopa_root_isKindOfClass_,
+    .isKindOf_ = (_Bool (*)(NPObject *, SEL, NPClass *))nopa_root_isKindOf_,
+    .label = (NPString * (*)(NPObject *, SEL))FsSprite_label,
     .lastObject = NULL,
     .length = NULL,
     .localizedDescription = NULL,
@@ -3275,22 +3275,22 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_FsSprite = {
     .pre_post_ = NULL,
     .produce = NULL,
     .rangeOfString_ = NULL,
-    .release = (void (*)(NFObject *, SEL))NFObject_release,
+    .release = (void (*)(NPObject *, SEL))NPObject_release,
     .removeAllObjects = NULL,
     .removeLastObject = NULL,
     .removeObjectAtIndex_ = NULL,
     .removeObjectForKey_ = NULL,
     .removeObject_ = NULL,
-    .render = (int (*)(NFObject *, SEL))FsSprite_render,
+    .render = (int (*)(NPObject *, SEL))FsSprite_render,
     .replaceCharactersInRange_withString_ = NULL,
     .replaceObjectAtIndex_withObject_ = NULL,
-    .retain = (NFObject * (*)(NFObject *, SEL))NFObject_retain,
+    .retain = (NPObject * (*)(NPObject *, SEL))NPObject_retain,
     .run = NULL,
-    .setLabel_ = (void (*)(NFObject *, SEL, NFString *))FsSprite_setLabel_,
+    .setLabel_ = (void (*)(NPObject *, SEL, NPString *))FsSprite_setLabel_,
     .setObject_atIndex_ = NULL,
     .setObject_forKey_ = NULL,
     .setString_ = NULL,
-    .setTag_ = (void (*)(NFObject *, SEL, NFString *))FsSprite_setTag_,
+    .setTag_ = (void (*)(NPObject *, SEL, NPString *))FsSprite_setTag_,
     .setValue_ = NULL,
     .strictParse_ = NULL,
     .stringByAppendingString_ = NULL,
@@ -3298,8 +3298,8 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_FsSprite = {
     .substringFromIndex_ = NULL,
     .substringToIndex_ = NULL,
     .substringWithRange_ = NULL,
-    .sum_ = (int (*)(NFObject *, SEL, int, ...))FsSprite_sum_,
-    .tag = (NFString * (*)(NFObject *, SEL))FsSprite_tag,
+    .sum_ = (int (*)(NPObject *, SEL, int, ...))FsSprite_sum_,
+    .tag = (NPString * (*)(NPObject *, SEL))FsSprite_tag,
     .take_ = NULL,
     .uppercaseString = NULL,
     .userInfo = NULL,
@@ -3327,9 +3327,9 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_FsErrHigh = {
     .containsObject_ = NULL,
     .copy = NULL,
     .count = NULL,
-    .dealloc = (void (*)(NFObject *, SEL))NFObject_dealloc,
+    .dealloc = (void (*)(NPObject *, SEL))NPObject_dealloc,
     .deleteCharactersInRange_ = NULL,
-    .description = (NFObject * (*)(NFObject *, SEL))NFObject_description,
+    .description = (NPObject * (*)(NPObject *, SEL))NPObject_description,
     .domain = NULL,
     .doubleValue = NULL,
     .draw = NULL,
@@ -3340,7 +3340,7 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_FsErrHigh = {
     .hash = NULL,
     .helper_ = NULL,
     .indexOfObject_ = NULL,
-    .init = (NFObject * (*)(NFObject *, SEL))NFObject_init,
+    .init = (NPObject * (*)(NPObject *, SEL))NPObject_init,
     .initWithArray_ = NULL,
     .initWithCapacity_ = NULL,
     .initWithCode_domain_userInfo_ = NULL,
@@ -3357,9 +3357,9 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_FsErrHigh = {
     .intValue = NULL,
     .isEqualToNumber_ = NULL,
     .isEqualToString_ = NULL,
-    .isEqual_ = (_Bool (*)(NFObject *, SEL, NFObject *))nopa_root_isEqual_,
-    .isKindOfClass_ = (_Bool (*)(NFObject *, SEL, NFClass *))nopa_root_isKindOfClass_,
-    .isKindOf_ = (_Bool (*)(NFObject *, SEL, NFClass *))nopa_root_isKindOf_,
+    .isEqual_ = (_Bool (*)(NPObject *, SEL, NPObject *))nopa_root_isEqual_,
+    .isKindOfClass_ = (_Bool (*)(NPObject *, SEL, NPClass *))nopa_root_isKindOfClass_,
+    .isKindOf_ = (_Bool (*)(NPObject *, SEL, NPClass *))nopa_root_isKindOf_,
     .label = NULL,
     .lastObject = NULL,
     .length = NULL,
@@ -3377,7 +3377,7 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_FsErrHigh = {
     .pre_post_ = NULL,
     .produce = NULL,
     .rangeOfString_ = NULL,
-    .release = (void (*)(NFObject *, SEL))NFObject_release,
+    .release = (void (*)(NPObject *, SEL))NPObject_release,
     .removeAllObjects = NULL,
     .removeLastObject = NULL,
     .removeObjectAtIndex_ = NULL,
@@ -3386,7 +3386,7 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_FsErrHigh = {
     .render = NULL,
     .replaceCharactersInRange_withString_ = NULL,
     .replaceObjectAtIndex_withObject_ = NULL,
-    .retain = (NFObject * (*)(NFObject *, SEL))NFObject_retain,
+    .retain = (NPObject * (*)(NPObject *, SEL))NPObject_retain,
     .run = NULL,
     .setLabel_ = NULL,
     .setObject_atIndex_ = NULL,
@@ -3408,13 +3408,13 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_FsErrHigh = {
     .value = NULL,
 };
 
-/* VTable instance: NFMutableArray */
-__attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_NFMutableArray = {
+/* VTable instance: NPMutableArray */
+__attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_NPMutableArray = {
     .__sig = 0x4adeb6d807e3ebfaULL,
     .UTF8String = NULL,
     .addEntriesFromDictionary_ = NULL,
-    .addObject_ = (void (*)(NFObject *, SEL, NFObject *))NFMutableArray_addObject_,
-    .addObjectsFromArray_ = (void (*)(NFObject *, SEL, NFArray *))NFMutableArray_addObjectsFromArray_,
+    .addObject_ = (void (*)(NPObject *, SEL, NPObject *))NPMutableArray_addObject_,
+    .addObjectsFromArray_ = (void (*)(NPObject *, SEL, NPArray *))NPMutableArray_addObjectsFromArray_,
     .allKeys = NULL,
     .allValues = NULL,
     .appendString_ = NULL,
@@ -3426,44 +3426,44 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_NFMutableArray = {
     .color = NULL,
     .compare_ = NULL,
     .compute_ = NULL,
-    .containsObject_ = (_Bool (*)(NFObject *, SEL, NFObject *))NFArray_containsObject_,
-    .copy = (NFObject * (*)(NFObject *, SEL))NFArray_copy,
-    .count = (size_t (*)(NFObject *, SEL))NFArray_count,
-    .dealloc = (void (*)(NFObject *, SEL))NFArray_dealloc,
+    .containsObject_ = (_Bool (*)(NPObject *, SEL, NPObject *))NPArray_containsObject_,
+    .copy = (NPObject * (*)(NPObject *, SEL))NPArray_copy,
+    .count = (size_t (*)(NPObject *, SEL))NPArray_count,
+    .dealloc = (void (*)(NPObject *, SEL))NPArray_dealloc,
     .deleteCharactersInRange_ = NULL,
-    .description = (NFObject * (*)(NFObject *, SEL))NFArray_description,
+    .description = (NPObject * (*)(NPObject *, SEL))NPArray_description,
     .domain = NULL,
     .doubleValue = NULL,
     .draw = NULL,
-    .exchangeObjectAtIndex_withObjectAtIndex_ = (void (*)(NFObject *, SEL, size_t, size_t))NFMutableArray_exchangeObjectAtIndex_withObjectAtIndex_,
-    .firstObject = (NFObject * (*)(NFObject *, SEL))NFArray_firstObject,
+    .exchangeObjectAtIndex_withObjectAtIndex_ = (void (*)(NPObject *, SEL, size_t, size_t))NPMutableArray_exchangeObjectAtIndex_withObjectAtIndex_,
+    .firstObject = (NPObject * (*)(NPObject *, SEL))NPArray_firstObject,
     .hasPrefix_ = NULL,
     .hasSuffix_ = NULL,
     .hash = NULL,
     .helper_ = NULL,
-    .indexOfObject_ = (size_t (*)(NFObject *, SEL, NFObject *))NFArray_indexOfObject_,
-    .init = (NFObject * (*)(NFObject *, SEL))NFMutableArray_init,
-    .initWithArray_ = (NFMutableArray * (*)(NFObject *, SEL, NFArray *))NFMutableArray_initWithArray_,
-    .initWithCapacity_ = (NFMutableDictionary * (*)(NFObject *, SEL, size_t))NFMutableArray_initWithCapacity_,
+    .indexOfObject_ = (size_t (*)(NPObject *, SEL, NPObject *))NPArray_indexOfObject_,
+    .init = (NPObject * (*)(NPObject *, SEL))NPMutableArray_init,
+    .initWithArray_ = (NPMutableArray * (*)(NPObject *, SEL, NPArray *))NPMutableArray_initWithArray_,
+    .initWithCapacity_ = (NPMutableDictionary * (*)(NPObject *, SEL, size_t))NPMutableArray_initWithCapacity_,
     .initWithCode_domain_userInfo_ = NULL,
     .initWithDictionary_ = NULL,
     .initWithDouble_ = NULL,
     .initWithId_ = NULL,
     .initWithLongLong_ = NULL,
-    .initWithObjects_count_ = (NFMutableArray * (*)(NFObject *, SEL, NFObject * *, size_t))NFMutableArray_initWithObjects_count_,
+    .initWithObjects_count_ = (NPMutableArray * (*)(NPObject *, SEL, NPObject * *, size_t))NPMutableArray_initWithObjects_count_,
     .initWithString_ = NULL,
     .initWithUTF8String_ = NULL,
     .initWith_ = NULL,
-    .insertObject_atIndex_ = (void (*)(NFObject *, SEL, NFObject *, size_t))NFMutableArray_insertObject_atIndex_,
+    .insertObject_atIndex_ = (void (*)(NPObject *, SEL, NPObject *, size_t))NPMutableArray_insertObject_atIndex_,
     .insertString_atIndex_ = NULL,
     .intValue = NULL,
     .isEqualToNumber_ = NULL,
     .isEqualToString_ = NULL,
-    .isEqual_ = (_Bool (*)(NFObject *, SEL, NFObject *))nopa_root_isEqual_,
-    .isKindOfClass_ = (_Bool (*)(NFObject *, SEL, NFClass *))nopa_root_isKindOfClass_,
-    .isKindOf_ = (_Bool (*)(NFObject *, SEL, NFClass *))nopa_root_isKindOf_,
+    .isEqual_ = (_Bool (*)(NPObject *, SEL, NPObject *))nopa_root_isEqual_,
+    .isKindOfClass_ = (_Bool (*)(NPObject *, SEL, NPClass *))nopa_root_isKindOfClass_,
+    .isKindOf_ = (_Bool (*)(NPObject *, SEL, NPClass *))nopa_root_isKindOf_,
     .label = NULL,
-    .lastObject = (NFObject * (*)(NFObject *, SEL))NFArray_lastObject,
+    .lastObject = (NPObject * (*)(NPObject *, SEL))NPArray_lastObject,
     .length = NULL,
     .localizedDescription = NULL,
     .longLongValue = NULL,
@@ -3472,26 +3472,26 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_NFMutableArray = {
     .maybe = NULL,
     .maybeC = NULL,
     .mix_point_ = NULL,
-    .objectAtIndex_ = (NFObject * (*)(NFObject *, SEL, size_t))NFArray_objectAtIndex_,
+    .objectAtIndex_ = (NPObject * (*)(NPObject *, SEL, size_t))NPArray_objectAtIndex_,
     .objectForKey_ = NULL,
     .optOut_ = NULL,
     .poke = NULL,
     .pre_post_ = NULL,
     .produce = NULL,
     .rangeOfString_ = NULL,
-    .release = (void (*)(NFObject *, SEL))NFObject_release,
-    .removeAllObjects = (void (*)(NFObject *, SEL))NFMutableArray_removeAllObjects,
-    .removeLastObject = (void (*)(NFObject *, SEL))NFMutableArray_removeLastObject,
-    .removeObjectAtIndex_ = (void (*)(NFObject *, SEL, size_t))NFMutableArray_removeObjectAtIndex_,
+    .release = (void (*)(NPObject *, SEL))NPObject_release,
+    .removeAllObjects = (void (*)(NPObject *, SEL))NPMutableArray_removeAllObjects,
+    .removeLastObject = (void (*)(NPObject *, SEL))NPMutableArray_removeLastObject,
+    .removeObjectAtIndex_ = (void (*)(NPObject *, SEL, size_t))NPMutableArray_removeObjectAtIndex_,
     .removeObjectForKey_ = NULL,
-    .removeObject_ = (void (*)(NFObject *, SEL, NFObject *))NFMutableArray_removeObject_,
+    .removeObject_ = (void (*)(NPObject *, SEL, NPObject *))NPMutableArray_removeObject_,
     .render = NULL,
     .replaceCharactersInRange_withString_ = NULL,
-    .replaceObjectAtIndex_withObject_ = (void (*)(NFObject *, SEL, size_t, NFObject *))NFMutableArray_replaceObjectAtIndex_withObject_,
-    .retain = (NFObject * (*)(NFObject *, SEL))NFObject_retain,
+    .replaceObjectAtIndex_withObject_ = (void (*)(NPObject *, SEL, size_t, NPObject *))NPMutableArray_replaceObjectAtIndex_withObject_,
+    .retain = (NPObject * (*)(NPObject *, SEL))NPObject_retain,
     .run = NULL,
     .setLabel_ = NULL,
-    .setObject_atIndex_ = (void (*)(NFObject *, SEL, NFObject *, size_t))NFMutableArray_setObject_atIndex_,
+    .setObject_atIndex_ = (void (*)(NPObject *, SEL, NPObject *, size_t))NPMutableArray_setObject_atIndex_,
     .setObject_forKey_ = NULL,
     .setString_ = NULL,
     .setTag_ = NULL,
@@ -3510,13 +3510,13 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_NFMutableArray = {
     .value = NULL,
 };
 
-/* VTable instance: NFMutableArray<NFString *> */
-__attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_NFMutableArray_NFString_ptr = {
+/* VTable instance: NPMutableArray<NPString *> */
+__attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_NPMutableArray_NPString_ptr = {
     .__sig = 0x4adeb6d807e3ebfaULL,
     .UTF8String = NULL,
     .addEntriesFromDictionary_ = NULL,
-    .addObject_ = (void (*)(NFObject *, SEL, NFObject *))NFMutableArray_NFString_ptr_addObject_,
-    .addObjectsFromArray_ = (void (*)(NFObject *, SEL, NFArray *))NFMutableArray_NFString_ptr_addObjectsFromArray_,
+    .addObject_ = (void (*)(NPObject *, SEL, NPObject *))NPMutableArray_NPString_ptr_addObject_,
+    .addObjectsFromArray_ = (void (*)(NPObject *, SEL, NPArray *))NPMutableArray_NPString_ptr_addObjectsFromArray_,
     .allKeys = NULL,
     .allValues = NULL,
     .appendString_ = NULL,
@@ -3528,44 +3528,44 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_NFMutableArray_NFString_p
     .color = NULL,
     .compare_ = NULL,
     .compute_ = NULL,
-    .containsObject_ = (_Bool (*)(NFObject *, SEL, NFObject *))NFArray_containsObject_,
-    .copy = (NFObject * (*)(NFObject *, SEL))NFArray_copy,
-    .count = (size_t (*)(NFObject *, SEL))NFArray_count,
-    .dealloc = (void (*)(NFObject *, SEL))NFArray_dealloc,
+    .containsObject_ = (_Bool (*)(NPObject *, SEL, NPObject *))NPArray_containsObject_,
+    .copy = (NPObject * (*)(NPObject *, SEL))NPArray_copy,
+    .count = (size_t (*)(NPObject *, SEL))NPArray_count,
+    .dealloc = (void (*)(NPObject *, SEL))NPArray_dealloc,
     .deleteCharactersInRange_ = NULL,
-    .description = (NFObject * (*)(NFObject *, SEL))NFArray_description,
+    .description = (NPObject * (*)(NPObject *, SEL))NPArray_description,
     .domain = NULL,
     .doubleValue = NULL,
     .draw = NULL,
-    .exchangeObjectAtIndex_withObjectAtIndex_ = (void (*)(NFObject *, SEL, size_t, size_t))NFMutableArray_NFString_ptr_exchangeObjectAtIndex_withObjectAtIndex_,
-    .firstObject = (NFObject * (*)(NFObject *, SEL))NFArray_firstObject,
+    .exchangeObjectAtIndex_withObjectAtIndex_ = (void (*)(NPObject *, SEL, size_t, size_t))NPMutableArray_NPString_ptr_exchangeObjectAtIndex_withObjectAtIndex_,
+    .firstObject = (NPObject * (*)(NPObject *, SEL))NPArray_firstObject,
     .hasPrefix_ = NULL,
     .hasSuffix_ = NULL,
     .hash = NULL,
     .helper_ = NULL,
-    .indexOfObject_ = (size_t (*)(NFObject *, SEL, NFObject *))NFArray_indexOfObject_,
-    .init = (NFObject * (*)(NFObject *, SEL))NFMutableArray_NFString_ptr_init,
-    .initWithArray_ = (NFMutableArray * (*)(NFObject *, SEL, NFArray *))NFMutableArray_NFString_ptr_initWithArray_,
-    .initWithCapacity_ = (NFMutableDictionary * (*)(NFObject *, SEL, size_t))NFMutableArray_NFString_ptr_initWithCapacity_,
+    .indexOfObject_ = (size_t (*)(NPObject *, SEL, NPObject *))NPArray_indexOfObject_,
+    .init = (NPObject * (*)(NPObject *, SEL))NPMutableArray_NPString_ptr_init,
+    .initWithArray_ = (NPMutableArray * (*)(NPObject *, SEL, NPArray *))NPMutableArray_NPString_ptr_initWithArray_,
+    .initWithCapacity_ = (NPMutableDictionary * (*)(NPObject *, SEL, size_t))NPMutableArray_NPString_ptr_initWithCapacity_,
     .initWithCode_domain_userInfo_ = NULL,
     .initWithDictionary_ = NULL,
     .initWithDouble_ = NULL,
     .initWithId_ = NULL,
     .initWithLongLong_ = NULL,
-    .initWithObjects_count_ = (NFMutableArray * (*)(NFObject *, SEL, NFObject * *, size_t))NFMutableArray_NFString_ptr_initWithObjects_count_,
+    .initWithObjects_count_ = (NPMutableArray * (*)(NPObject *, SEL, NPObject * *, size_t))NPMutableArray_NPString_ptr_initWithObjects_count_,
     .initWithString_ = NULL,
     .initWithUTF8String_ = NULL,
     .initWith_ = NULL,
-    .insertObject_atIndex_ = (void (*)(NFObject *, SEL, NFObject *, size_t))NFMutableArray_NFString_ptr_insertObject_atIndex_,
+    .insertObject_atIndex_ = (void (*)(NPObject *, SEL, NPObject *, size_t))NPMutableArray_NPString_ptr_insertObject_atIndex_,
     .insertString_atIndex_ = NULL,
     .intValue = NULL,
     .isEqualToNumber_ = NULL,
     .isEqualToString_ = NULL,
-    .isEqual_ = (_Bool (*)(NFObject *, SEL, NFObject *))nopa_root_isEqual_,
-    .isKindOfClass_ = (_Bool (*)(NFObject *, SEL, NFClass *))nopa_root_isKindOfClass_,
-    .isKindOf_ = (_Bool (*)(NFObject *, SEL, NFClass *))nopa_root_isKindOf_,
+    .isEqual_ = (_Bool (*)(NPObject *, SEL, NPObject *))nopa_root_isEqual_,
+    .isKindOfClass_ = (_Bool (*)(NPObject *, SEL, NPClass *))nopa_root_isKindOfClass_,
+    .isKindOf_ = (_Bool (*)(NPObject *, SEL, NPClass *))nopa_root_isKindOf_,
     .label = NULL,
-    .lastObject = (NFObject * (*)(NFObject *, SEL))NFArray_lastObject,
+    .lastObject = (NPObject * (*)(NPObject *, SEL))NPArray_lastObject,
     .length = NULL,
     .localizedDescription = NULL,
     .longLongValue = NULL,
@@ -3574,26 +3574,26 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_NFMutableArray_NFString_p
     .maybe = NULL,
     .maybeC = NULL,
     .mix_point_ = NULL,
-    .objectAtIndex_ = (NFObject * (*)(NFObject *, SEL, size_t))NFArray_objectAtIndex_,
+    .objectAtIndex_ = (NPObject * (*)(NPObject *, SEL, size_t))NPArray_objectAtIndex_,
     .objectForKey_ = NULL,
     .optOut_ = NULL,
     .poke = NULL,
     .pre_post_ = NULL,
     .produce = NULL,
     .rangeOfString_ = NULL,
-    .release = (void (*)(NFObject *, SEL))NFObject_release,
-    .removeAllObjects = (void (*)(NFObject *, SEL))NFMutableArray_NFString_ptr_removeAllObjects,
-    .removeLastObject = (void (*)(NFObject *, SEL))NFMutableArray_NFString_ptr_removeLastObject,
-    .removeObjectAtIndex_ = (void (*)(NFObject *, SEL, size_t))NFMutableArray_NFString_ptr_removeObjectAtIndex_,
+    .release = (void (*)(NPObject *, SEL))NPObject_release,
+    .removeAllObjects = (void (*)(NPObject *, SEL))NPMutableArray_NPString_ptr_removeAllObjects,
+    .removeLastObject = (void (*)(NPObject *, SEL))NPMutableArray_NPString_ptr_removeLastObject,
+    .removeObjectAtIndex_ = (void (*)(NPObject *, SEL, size_t))NPMutableArray_NPString_ptr_removeObjectAtIndex_,
     .removeObjectForKey_ = NULL,
-    .removeObject_ = (void (*)(NFObject *, SEL, NFObject *))NFMutableArray_NFString_ptr_removeObject_,
+    .removeObject_ = (void (*)(NPObject *, SEL, NPObject *))NPMutableArray_NPString_ptr_removeObject_,
     .render = NULL,
     .replaceCharactersInRange_withString_ = NULL,
-    .replaceObjectAtIndex_withObject_ = (void (*)(NFObject *, SEL, size_t, NFObject *))NFMutableArray_NFString_ptr_replaceObjectAtIndex_withObject_,
-    .retain = (NFObject * (*)(NFObject *, SEL))NFObject_retain,
+    .replaceObjectAtIndex_withObject_ = (void (*)(NPObject *, SEL, size_t, NPObject *))NPMutableArray_NPString_ptr_replaceObjectAtIndex_withObject_,
+    .retain = (NPObject * (*)(NPObject *, SEL))NPObject_retain,
     .run = NULL,
     .setLabel_ = NULL,
-    .setObject_atIndex_ = (void (*)(NFObject *, SEL, NFObject *, size_t))NFMutableArray_NFString_ptr_setObject_atIndex_,
+    .setObject_atIndex_ = (void (*)(NPObject *, SEL, NPObject *, size_t))NPMutableArray_NPString_ptr_setObject_atIndex_,
     .setObject_forKey_ = NULL,
     .setString_ = NULL,
     .setTag_ = NULL,
@@ -3612,385 +3612,385 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_NFMutableArray_NFString_p
     .value = NULL,
 };
 
-/* Meta vtable instance: NFObject */
-__attribute__((weak)) struct NOPA_META_VTABLE_$_NFObject NOPA_META_VTABLE_$_NFObject_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
-    .class = NOPA_GETCLASS_$_NFObject,
+/* Meta vtable instance: NPObject */
+__attribute__((weak)) struct NOPA_META_VTABLE_$_NPObject NOPA_META_VTABLE_$_NPObject_inst = {
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
+    .class = NOPA_GETCLASS_$_NPObject,
 };
 
-/* Meta vtable instance: FsBox<NFMutableString *> */
-__attribute__((weak)) struct NOPA_META_VTABLE_$_FsBox_NFMutableString_ptr NOPA_META_VTABLE_$_FsBox_NFMutableString_ptr_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
-    .class = NOPA_GETCLASS_$_FsBox_NFMutableString_ptr,
+/* Meta vtable instance: FsBox<NPMutableString *> */
+__attribute__((weak)) struct NOPA_META_VTABLE_$_FsBox_NPMutableString_ptr NOPA_META_VTABLE_$_FsBox_NPMutableString_ptr_inst = {
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
+    .class = NOPA_GETCLASS_$_FsBox_NPMutableString_ptr,
 };
 
 /* Meta vtable instance: FsEngine::FsRenderable */
 __attribute__((weak)) struct NOPA_META_VTABLE_$_FsEngine__FsRenderable NOPA_META_VTABLE_$_FsEngine__FsRenderable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
     .class = NOPA_GETCLASS_$_FsEngine__FsRenderable,
 };
 
 /* Meta vtable instance: FsErrLow */
 __attribute__((weak)) struct NOPA_META_VTABLE_$_FsErrLow NOPA_META_VTABLE_$_FsErrLow_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
     .class = NOPA_GETCLASS_$_FsErrLow,
 };
 
 /* Meta vtable instance: FsFetcher */
 __attribute__((weak)) struct NOPA_META_VTABLE_$_FsFetcher NOPA_META_VTABLE_$_FsFetcher_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
     .runAll = FsFetcher_runAll,
     .class = NOPA_GETCLASS_$_FsFetcher,
 };
 
 /* Meta vtable instance: FsForwardUser */
 __attribute__((weak)) struct NOPA_META_VTABLE_$_FsForwardUser NOPA_META_VTABLE_$_FsForwardUser_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
     .class = NOPA_GETCLASS_$_FsForwardUser,
 };
 
 /* Meta vtable instance: FsGuarded */
 __attribute__((weak)) struct NOPA_META_VTABLE_$_FsGuarded NOPA_META_VTABLE_$_FsGuarded_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
     .class = NOPA_GETCLASS_$_FsGuarded,
 };
 
 /* Meta vtable instance: FsModes */
 __attribute__((weak)) struct NOPA_META_VTABLE_$_FsModes NOPA_META_VTABLE_$_FsModes_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
     .class = NOPA_GETCLASS_$_FsModes,
 };
 
 /* Meta vtable instance: FsParser */
 __attribute__((weak)) struct NOPA_META_VTABLE_$_FsParser NOPA_META_VTABLE_$_FsParser_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
     .class = NOPA_GETCLASS_$_FsParser,
 };
 
 /* Meta vtable instance: FsTypedStore */
 __attribute__((weak)) struct NOPA_META_VTABLE_$_FsTypedStore NOPA_META_VTABLE_$_FsTypedStore_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
     .class = NOPA_GETCLASS_$_FsTypedStore,
 };
 
-/* Meta vtable instance: NFArray */
-__attribute__((weak)) struct NOPA_META_VTABLE_$_NFArray NOPA_META_VTABLE_$_NFArray_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
-    .arrayWithObjects_count_ = NFArray_arrayWithObjects_count_,
-    .arrayWithObject_ = NFArray_arrayWithObject_,
-    .array = NFArray_array,
-    .class = NOPA_GETCLASS_$_NFArray,
+/* Meta vtable instance: NPArray */
+__attribute__((weak)) struct NOPA_META_VTABLE_$_NPArray NOPA_META_VTABLE_$_NPArray_inst = {
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
+    .arrayWithObjects_count_ = NPArray_arrayWithObjects_count_,
+    .arrayWithObject_ = NPArray_arrayWithObject_,
+    .array = NPArray_array,
+    .class = NOPA_GETCLASS_$_NPArray,
 };
 
-/* Meta vtable instance: NFArray<NFNumber *> */
-__attribute__((weak)) struct NOPA_META_VTABLE_$_NFArray_NFNumber_ptr NOPA_META_VTABLE_$_NFArray_NFNumber_ptr_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
-    .arrayWithObjects_count_ = NFArray_NFNumber_ptr_arrayWithObjects_count_,
-    .arrayWithObject_ = NFArray_NFNumber_ptr_arrayWithObject_,
-    .array = NFArray_NFNumber_ptr_array,
-    .class = NOPA_GETCLASS_$_NFArray_NFNumber_ptr,
+/* Meta vtable instance: NPArray<NPNumber *> */
+__attribute__((weak)) struct NOPA_META_VTABLE_$_NPArray_NPNumber_ptr NOPA_META_VTABLE_$_NPArray_NPNumber_ptr_inst = {
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
+    .arrayWithObjects_count_ = NPArray_NPNumber_ptr_arrayWithObjects_count_,
+    .arrayWithObject_ = NPArray_NPNumber_ptr_arrayWithObject_,
+    .array = NPArray_NPNumber_ptr_array,
+    .class = NOPA_GETCLASS_$_NPArray_NPNumber_ptr,
 };
 
-/* Meta vtable instance: NFDictionary */
-__attribute__((weak)) struct NOPA_META_VTABLE_$_NFDictionary NOPA_META_VTABLE_$_NFDictionary_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
-    .dictionary = NFDictionary_dictionary,
-    .dictionaryWithObject_forKey_ = NFDictionary_dictionaryWithObject_forKey_,
-    .dictionaryWithObjects_forKeys_count_ = NFDictionary_dictionaryWithObjects_forKeys_count_,
-    .class = NOPA_GETCLASS_$_NFDictionary,
+/* Meta vtable instance: NPDictionary */
+__attribute__((weak)) struct NOPA_META_VTABLE_$_NPDictionary NOPA_META_VTABLE_$_NPDictionary_inst = {
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
+    .dictionary = NPDictionary_dictionary,
+    .dictionaryWithObject_forKey_ = NPDictionary_dictionaryWithObject_forKey_,
+    .dictionaryWithObjects_forKeys_count_ = NPDictionary_dictionaryWithObjects_forKeys_count_,
+    .class = NOPA_GETCLASS_$_NPDictionary,
 };
 
-/* Meta vtable instance: NFError */
-__attribute__((weak)) struct NOPA_META_VTABLE_$_NFError NOPA_META_VTABLE_$_NFError_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
-    .errorWithCode_domain_ = NFError_errorWithCode_domain_,
-    .errorWithCode_domain_userInfo_ = NFError_errorWithCode_domain_userInfo_,
-    .parseErrorWithMessage_ = NFError_parseErrorWithMessage_,
-    .fileIOErrorWithMessage_ = NFError_fileIOErrorWithMessage_,
-    .class = NOPA_GETCLASS_$_NFError,
+/* Meta vtable instance: NPError */
+__attribute__((weak)) struct NOPA_META_VTABLE_$_NPError NOPA_META_VTABLE_$_NPError_inst = {
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
+    .errorWithCode_domain_ = NPError_errorWithCode_domain_,
+    .errorWithCode_domain_userInfo_ = NPError_errorWithCode_domain_userInfo_,
+    .parseErrorWithMessage_ = NPError_parseErrorWithMessage_,
+    .fileIOErrorWithMessage_ = NPError_fileIOErrorWithMessage_,
+    .class = NOPA_GETCLASS_$_NPError,
 };
 
-/* Meta vtable instance: NFNumber */
-__attribute__((weak)) struct NOPA_META_VTABLE_$_NFNumber NOPA_META_VTABLE_$_NFNumber_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
-    .numberWithInt_ = NFNumber_numberWithInt_,
-    .numberWithLongLong_ = NFNumber_numberWithLongLong_,
-    .numberWithDouble_ = NFNumber_numberWithDouble_,
-    .numberWithBool_ = NFNumber_numberWithBool_,
-    .numberWithChar_ = NFNumber_numberWithChar_,
-    .class = NOPA_GETCLASS_$_NFNumber,
+/* Meta vtable instance: NPNumber */
+__attribute__((weak)) struct NOPA_META_VTABLE_$_NPNumber NOPA_META_VTABLE_$_NPNumber_inst = {
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
+    .numberWithInt_ = NPNumber_numberWithInt_,
+    .numberWithLongLong_ = NPNumber_numberWithLongLong_,
+    .numberWithDouble_ = NPNumber_numberWithDouble_,
+    .numberWithBool_ = NPNumber_numberWithBool_,
+    .numberWithChar_ = NPNumber_numberWithChar_,
+    .class = NOPA_GETCLASS_$_NPNumber,
 };
 
 /* Meta vtable instance: FsAnnotated */
 __attribute__((weak)) struct NOPA_META_VTABLE_$_FsAnnotated NOPA_META_VTABLE_$_FsAnnotated_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
     .class = NOPA_GETCLASS_$_FsAnnotated,
 };
 
-/* Meta vtable instance: NFString */
-__attribute__((weak)) struct NOPA_META_VTABLE_$_NFString NOPA_META_VTABLE_$_NFString_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
-    .stringWithUTF8String_ = NFString_stringWithUTF8String_,
-    .stringWithString_ = NFString_stringWithString_,
-    .class = NOPA_GETCLASS_$_NFString,
+/* Meta vtable instance: NPString */
+__attribute__((weak)) struct NOPA_META_VTABLE_$_NPString NOPA_META_VTABLE_$_NPString_inst = {
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
+    .stringWithUTF8String_ = NPString_stringWithUTF8String_,
+    .stringWithString_ = NPString_stringWithString_,
+    .class = NOPA_GETCLASS_$_NPString,
 };
 
 /* Meta vtable instance: FsBox */
 __attribute__((weak)) struct NOPA_META_VTABLE_$_FsBox NOPA_META_VTABLE_$_FsBox_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
     .class = NOPA_GETCLASS_$_FsBox,
 };
 
-/* Meta vtable instance: NFMutableDictionary */
-__attribute__((weak)) struct NOPA_META_VTABLE_$_NFMutableDictionary NOPA_META_VTABLE_$_NFMutableDictionary_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
-    .dictionary = NFMutableDictionary_dictionary,
-    .dictionaryWithObject_forKey_ = NFMutableDictionary_dictionaryWithObject_forKey_,
-    .dictionaryWithObjects_forKeys_count_ = NFDictionary_dictionaryWithObjects_forKeys_count_,
-    .dictionaryWithCapacity_ = NFMutableDictionary_dictionaryWithCapacity_,
-    .class = NOPA_GETCLASS_$_NFMutableDictionary,
+/* Meta vtable instance: NPMutableDictionary */
+__attribute__((weak)) struct NOPA_META_VTABLE_$_NPMutableDictionary NOPA_META_VTABLE_$_NPMutableDictionary_inst = {
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
+    .dictionary = NPMutableDictionary_dictionary,
+    .dictionaryWithObject_forKey_ = NPMutableDictionary_dictionaryWithObject_forKey_,
+    .dictionaryWithObjects_forKeys_count_ = NPDictionary_dictionaryWithObjects_forKeys_count_,
+    .dictionaryWithCapacity_ = NPMutableDictionary_dictionaryWithCapacity_,
+    .class = NOPA_GETCLASS_$_NPMutableDictionary,
 };
 
-/* Meta vtable instance: NFMutableString */
-__attribute__((weak)) struct NOPA_META_VTABLE_$_NFMutableString NOPA_META_VTABLE_$_NFMutableString_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
-    .stringWithUTF8String_ = NFMutableString_stringWithUTF8String_,
-    .stringWithString_ = NFMutableString_stringWithString_,
-    .class = NOPA_GETCLASS_$_NFMutableString,
+/* Meta vtable instance: NPMutableString */
+__attribute__((weak)) struct NOPA_META_VTABLE_$_NPMutableString NOPA_META_VTABLE_$_NPMutableString_inst = {
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
+    .stringWithUTF8String_ = NPMutableString_stringWithUTF8String_,
+    .stringWithString_ = NPMutableString_stringWithString_,
+    .class = NOPA_GETCLASS_$_NPMutableString,
 };
 
 /* Meta vtable instance: FsSprite */
 __attribute__((weak)) struct NOPA_META_VTABLE_$_FsSprite NOPA_META_VTABLE_$_FsSprite_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
     .classSum_ = FsSprite_classSum_,
     .class = NOPA_GETCLASS_$_FsSprite,
 };
 
 /* Meta vtable instance: FsErrHigh */
 __attribute__((weak)) struct NOPA_META_VTABLE_$_FsErrHigh NOPA_META_VTABLE_$_FsErrHigh_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
     .class = NOPA_GETCLASS_$_FsErrHigh,
 };
 
-/* Meta vtable instance: NFMutableArray */
-__attribute__((weak)) struct NOPA_META_VTABLE_$_NFMutableArray NOPA_META_VTABLE_$_NFMutableArray_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
-    .arrayWithObjects_count_ = NFMutableArray_arrayWithObjects_count_,
-    .arrayWithObject_ = NFMutableArray_arrayWithObject_,
-    .array = NFMutableArray_array,
-    .arrayWithCapacity_ = NFMutableArray_arrayWithCapacity_,
-    .class = NOPA_GETCLASS_$_NFMutableArray,
+/* Meta vtable instance: NPMutableArray */
+__attribute__((weak)) struct NOPA_META_VTABLE_$_NPMutableArray NOPA_META_VTABLE_$_NPMutableArray_inst = {
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
+    .arrayWithObjects_count_ = NPMutableArray_arrayWithObjects_count_,
+    .arrayWithObject_ = NPMutableArray_arrayWithObject_,
+    .array = NPMutableArray_array,
+    .arrayWithCapacity_ = NPMutableArray_arrayWithCapacity_,
+    .class = NOPA_GETCLASS_$_NPMutableArray,
 };
 
-/* Meta vtable instance: NFMutableArray<NFString *> */
-__attribute__((weak)) struct NOPA_META_VTABLE_$_NFMutableArray_NFString_ptr NOPA_META_VTABLE_$_NFMutableArray_NFString_ptr_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
-    .arrayWithObjects_count_ = NFMutableArray_NFString_ptr_arrayWithObjects_count_,
-    .arrayWithObject_ = NFMutableArray_NFString_ptr_arrayWithObject_,
-    .array = NFMutableArray_NFString_ptr_array,
-    .arrayWithCapacity_ = NFMutableArray_NFString_ptr_arrayWithCapacity_,
-    .class = NOPA_GETCLASS_$_NFMutableArray_NFString_ptr,
+/* Meta vtable instance: NPMutableArray<NPString *> */
+__attribute__((weak)) struct NOPA_META_VTABLE_$_NPMutableArray_NPString_ptr NOPA_META_VTABLE_$_NPMutableArray_NPString_ptr_inst = {
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
+    .arrayWithObjects_count_ = NPMutableArray_NPString_ptr_arrayWithObjects_count_,
+    .arrayWithObject_ = NPMutableArray_NPString_ptr_arrayWithObject_,
+    .array = NPMutableArray_NPString_ptr_array,
+    .arrayWithCapacity_ = NPMutableArray_NPString_ptr_arrayWithCapacity_,
+    .class = NOPA_GETCLASS_$_NPMutableArray_NPString_ptr,
 };
 
-/* +getClass for NFObject */
-__attribute__((weak)) NFClass * NOPA_GETCLASS_$_NFObject(NFClass * self, SEL _cmd) {
+/* +getClass for NPObject */
+__attribute__((weak)) NPClass * NOPA_GETCLASS_$_NPObject(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
-/* +getClass for FsBox<NFMutableString *> */
-__attribute__((weak)) NFClass * NOPA_GETCLASS_$_FsBox_NFMutableString_ptr(NFClass * self, SEL _cmd) {
+/* +getClass for FsBox<NPMutableString *> */
+__attribute__((weak)) NPClass * NOPA_GETCLASS_$_FsBox_NPMutableString_ptr(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
 /* +getClass for FsEngine::FsRenderable */
-__attribute__((weak)) NFClass * NOPA_GETCLASS_$_FsEngine__FsRenderable(NFClass * self, SEL _cmd) {
+__attribute__((weak)) NPClass * NOPA_GETCLASS_$_FsEngine__FsRenderable(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
 /* +getClass for FsErrLow */
-__attribute__((weak)) NFClass * NOPA_GETCLASS_$_FsErrLow(NFClass * self, SEL _cmd) {
+__attribute__((weak)) NPClass * NOPA_GETCLASS_$_FsErrLow(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
 /* +getClass for FsFetcher */
-__attribute__((weak)) NFClass * NOPA_GETCLASS_$_FsFetcher(NFClass * self, SEL _cmd) {
+__attribute__((weak)) NPClass * NOPA_GETCLASS_$_FsFetcher(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
 /* +getClass for FsForwardUser */
-__attribute__((weak)) NFClass * NOPA_GETCLASS_$_FsForwardUser(NFClass * self, SEL _cmd) {
+__attribute__((weak)) NPClass * NOPA_GETCLASS_$_FsForwardUser(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
 /* +getClass for FsGuarded */
-__attribute__((weak)) NFClass * NOPA_GETCLASS_$_FsGuarded(NFClass * self, SEL _cmd) {
+__attribute__((weak)) NPClass * NOPA_GETCLASS_$_FsGuarded(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
 /* +getClass for FsModes */
-__attribute__((weak)) NFClass * NOPA_GETCLASS_$_FsModes(NFClass * self, SEL _cmd) {
+__attribute__((weak)) NPClass * NOPA_GETCLASS_$_FsModes(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
 /* +getClass for FsParser */
-__attribute__((weak)) NFClass * NOPA_GETCLASS_$_FsParser(NFClass * self, SEL _cmd) {
+__attribute__((weak)) NPClass * NOPA_GETCLASS_$_FsParser(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
 /* +getClass for FsTypedStore */
-__attribute__((weak)) NFClass * NOPA_GETCLASS_$_FsTypedStore(NFClass * self, SEL _cmd) {
+__attribute__((weak)) NPClass * NOPA_GETCLASS_$_FsTypedStore(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
-/* +getClass for NFArray */
-__attribute__((weak)) NFClass * NOPA_GETCLASS_$_NFArray(NFClass * self, SEL _cmd) {
+/* +getClass for NPArray */
+__attribute__((weak)) NPClass * NOPA_GETCLASS_$_NPArray(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
-/* +getClass for NFArray<NFNumber *> */
-__attribute__((weak)) NFClass * NOPA_GETCLASS_$_NFArray_NFNumber_ptr(NFClass * self, SEL _cmd) {
+/* +getClass for NPArray<NPNumber *> */
+__attribute__((weak)) NPClass * NOPA_GETCLASS_$_NPArray_NPNumber_ptr(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
-/* +getClass for NFDictionary */
-__attribute__((weak)) NFClass * NOPA_GETCLASS_$_NFDictionary(NFClass * self, SEL _cmd) {
+/* +getClass for NPDictionary */
+__attribute__((weak)) NPClass * NOPA_GETCLASS_$_NPDictionary(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
-/* +getClass for NFError */
-__attribute__((weak)) NFClass * NOPA_GETCLASS_$_NFError(NFClass * self, SEL _cmd) {
+/* +getClass for NPError */
+__attribute__((weak)) NPClass * NOPA_GETCLASS_$_NPError(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
-/* +getClass for NFNumber */
-__attribute__((weak)) NFClass * NOPA_GETCLASS_$_NFNumber(NFClass * self, SEL _cmd) {
+/* +getClass for NPNumber */
+__attribute__((weak)) NPClass * NOPA_GETCLASS_$_NPNumber(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
 /* +getClass for FsAnnotated */
-__attribute__((weak)) NFClass * NOPA_GETCLASS_$_FsAnnotated(NFClass * self, SEL _cmd) {
+__attribute__((weak)) NPClass * NOPA_GETCLASS_$_FsAnnotated(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
-/* +getClass for NFString */
-__attribute__((weak)) NFClass * NOPA_GETCLASS_$_NFString(NFClass * self, SEL _cmd) {
+/* +getClass for NPString */
+__attribute__((weak)) NPClass * NOPA_GETCLASS_$_NPString(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
 /* +getClass for FsBox */
-__attribute__((weak)) NFClass * NOPA_GETCLASS_$_FsBox(NFClass * self, SEL _cmd) {
+__attribute__((weak)) NPClass * NOPA_GETCLASS_$_FsBox(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
-/* +getClass for NFMutableDictionary */
-__attribute__((weak)) NFClass * NOPA_GETCLASS_$_NFMutableDictionary(NFClass * self, SEL _cmd) {
+/* +getClass for NPMutableDictionary */
+__attribute__((weak)) NPClass * NOPA_GETCLASS_$_NPMutableDictionary(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
-/* +getClass for NFMutableString */
-__attribute__((weak)) NFClass * NOPA_GETCLASS_$_NFMutableString(NFClass * self, SEL _cmd) {
+/* +getClass for NPMutableString */
+__attribute__((weak)) NPClass * NOPA_GETCLASS_$_NPMutableString(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
 /* +getClass for FsSprite */
-__attribute__((weak)) NFClass * NOPA_GETCLASS_$_FsSprite(NFClass * self, SEL _cmd) {
+__attribute__((weak)) NPClass * NOPA_GETCLASS_$_FsSprite(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
 /* +getClass for FsErrHigh */
-__attribute__((weak)) NFClass * NOPA_GETCLASS_$_FsErrHigh(NFClass * self, SEL _cmd) {
+__attribute__((weak)) NPClass * NOPA_GETCLASS_$_FsErrHigh(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
-/* +getClass for NFMutableArray */
-__attribute__((weak)) NFClass * NOPA_GETCLASS_$_NFMutableArray(NFClass * self, SEL _cmd) {
+/* +getClass for NPMutableArray */
+__attribute__((weak)) NPClass * NOPA_GETCLASS_$_NPMutableArray(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
-/* +getClass for NFMutableArray<NFString *> */
-__attribute__((weak)) NFClass * NOPA_GETCLASS_$_NFMutableArray_NFString_ptr(NFClass * self, SEL _cmd) {
+/* +getClass for NPMutableArray<NPString *> */
+__attribute__((weak)) NPClass * NOPA_GETCLASS_$_NPMutableArray_NPString_ptr(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
 /* -------- Section 11 · Class metadata initialization --------- */
-NFClass NOPA_CLASS_$_nopa_root;
-NFClass NOPA_CLASS_$_NFObject;
-NFClass NOPA_CLASS_$_FsBox_NFMutableString_ptr;
-NFClass NOPA_CLASS_$_FsEngine__FsRenderable;
-NFClass NOPA_CLASS_$_FsErrLow;
-NFClass NOPA_CLASS_$_FsFetcher;
-NFClass NOPA_CLASS_$_FsForwardUser;
-NFClass NOPA_CLASS_$_FsGuarded;
-NFClass NOPA_CLASS_$_FsModes;
-NFClass NOPA_CLASS_$_FsParser;
-NFClass NOPA_CLASS_$_FsTypedStore;
-NFClass NOPA_CLASS_$_NFArray;
-NFClass NOPA_CLASS_$_NFArray_NFNumber_ptr;
-NFClass NOPA_CLASS_$_NFDictionary;
-NFClass NOPA_CLASS_$_NFError;
-NFClass NOPA_CLASS_$_NFNumber;
-NFClass NOPA_CLASS_$_FsAnnotated;
-NFClass NOPA_CLASS_$_NFString;
-NFClass NOPA_CLASS_$_FsBox;
-NFClass NOPA_CLASS_$_NFMutableDictionary;
-NFClass NOPA_CLASS_$_NFMutableString;
-NFClass NOPA_CLASS_$_FsSprite;
-NFClass NOPA_CLASS_$_FsErrHigh;
-NFClass NOPA_CLASS_$_NFMutableArray;
-NFClass NOPA_CLASS_$_NFMutableArray_NFString_ptr;
+NPClass NOPA_CLASS_$_nopa_root;
+NPClass NOPA_CLASS_$_NPObject;
+NPClass NOPA_CLASS_$_FsBox_NPMutableString_ptr;
+NPClass NOPA_CLASS_$_FsEngine__FsRenderable;
+NPClass NOPA_CLASS_$_FsErrLow;
+NPClass NOPA_CLASS_$_FsFetcher;
+NPClass NOPA_CLASS_$_FsForwardUser;
+NPClass NOPA_CLASS_$_FsGuarded;
+NPClass NOPA_CLASS_$_FsModes;
+NPClass NOPA_CLASS_$_FsParser;
+NPClass NOPA_CLASS_$_FsTypedStore;
+NPClass NOPA_CLASS_$_NPArray;
+NPClass NOPA_CLASS_$_NPArray_NPNumber_ptr;
+NPClass NOPA_CLASS_$_NPDictionary;
+NPClass NOPA_CLASS_$_NPError;
+NPClass NOPA_CLASS_$_NPNumber;
+NPClass NOPA_CLASS_$_FsAnnotated;
+NPClass NOPA_CLASS_$_NPString;
+NPClass NOPA_CLASS_$_FsBox;
+NPClass NOPA_CLASS_$_NPMutableDictionary;
+NPClass NOPA_CLASS_$_NPMutableString;
+NPClass NOPA_CLASS_$_FsSprite;
+NPClass NOPA_CLASS_$_FsErrHigh;
+NPClass NOPA_CLASS_$_NPMutableArray;
+NPClass NOPA_CLASS_$_NPMutableArray_NPString_ptr;
 
 __attribute__((constructor)) static void __nopa_vtable_layout_check(void) {
     nopa_verify_vtable_sig((&NOPA_VTABLE_$_nopa_root)->__sig, 0x4adeb6d807e3ebfaULL, "UTF8String addEntriesFromDictionary_ addObject_ addObjectsFromArray_ allKeys allValues appendString_ appendUTF8String_ boolValue charValue characterAtIndex_ code color compare_ compute_ containsObject_ copy count dealloc deleteCharactersInRange_ description domain doubleValue draw exchangeObjectAtIndex_withObjectAtIndex_ firstObject hasPrefix_ hasSuffix_ hash helper_ indexOfObject_ init initWithArray_ initWithCapacity_ initWithCode_domain_userInfo_ initWithDictionary_ initWithDouble_ initWithId_ initWithLongLong_ initWithObjects_count_ initWithString_ initWithUTF8String_ initWith_ insertObject_atIndex_ insertString_atIndex_ intValue isEqualToNumber_ isEqualToString_ isEqual_ isKindOfClass_ isKindOf_ label lastObject length localizedDescription longLongValue looseParse_ lowercaseString maybe maybeC mix_point_ objectAtIndex_ objectForKey_ optOut_ poke pre_post_ produce rangeOfString_ release removeAllObjects removeLastObject removeObjectAtIndex_ removeObjectForKey_ removeObject_ render replaceCharactersInRange_withString_ replaceObjectAtIndex_withObject_ retain run setLabel_ setObject_atIndex_ setObject_forKey_ setString_ setTag_ setValue_ strictParse_ stringByAppendingString_ stringByAppendingUTF8String_ substringFromIndex_ substringToIndex_ substringWithRange_ sum_ tag take_ uppercaseString userInfo value | class nopa_root | tu tests/full_syntax_test.np");
-    nopa_verify_vtable_sig((&NOPA_VTABLE_$_NFObject)->__sig, 0x4adeb6d807e3ebfaULL, "UTF8String addEntriesFromDictionary_ addObject_ addObjectsFromArray_ allKeys allValues appendString_ appendUTF8String_ boolValue charValue characterAtIndex_ code color compare_ compute_ containsObject_ copy count dealloc deleteCharactersInRange_ description domain doubleValue draw exchangeObjectAtIndex_withObjectAtIndex_ firstObject hasPrefix_ hasSuffix_ hash helper_ indexOfObject_ init initWithArray_ initWithCapacity_ initWithCode_domain_userInfo_ initWithDictionary_ initWithDouble_ initWithId_ initWithLongLong_ initWithObjects_count_ initWithString_ initWithUTF8String_ initWith_ insertObject_atIndex_ insertString_atIndex_ intValue isEqualToNumber_ isEqualToString_ isEqual_ isKindOfClass_ isKindOf_ label lastObject length localizedDescription longLongValue looseParse_ lowercaseString maybe maybeC mix_point_ objectAtIndex_ objectForKey_ optOut_ poke pre_post_ produce rangeOfString_ release removeAllObjects removeLastObject removeObjectAtIndex_ removeObjectForKey_ removeObject_ render replaceCharactersInRange_withString_ replaceObjectAtIndex_withObject_ retain run setLabel_ setObject_atIndex_ setObject_forKey_ setString_ setTag_ setValue_ strictParse_ stringByAppendingString_ stringByAppendingUTF8String_ substringFromIndex_ substringToIndex_ substringWithRange_ sum_ tag take_ uppercaseString userInfo value | class NFObject | tu tests/full_syntax_test.np");
-    nopa_verify_vtable_sig((&NOPA_VTABLE_$_FsBox_NFMutableString_ptr)->__sig, 0x4adeb6d807e3ebfaULL, "UTF8String addEntriesFromDictionary_ addObject_ addObjectsFromArray_ allKeys allValues appendString_ appendUTF8String_ boolValue charValue characterAtIndex_ code color compare_ compute_ containsObject_ copy count dealloc deleteCharactersInRange_ description domain doubleValue draw exchangeObjectAtIndex_withObjectAtIndex_ firstObject hasPrefix_ hasSuffix_ hash helper_ indexOfObject_ init initWithArray_ initWithCapacity_ initWithCode_domain_userInfo_ initWithDictionary_ initWithDouble_ initWithId_ initWithLongLong_ initWithObjects_count_ initWithString_ initWithUTF8String_ initWith_ insertObject_atIndex_ insertString_atIndex_ intValue isEqualToNumber_ isEqualToString_ isEqual_ isKindOfClass_ isKindOf_ label lastObject length localizedDescription longLongValue looseParse_ lowercaseString maybe maybeC mix_point_ objectAtIndex_ objectForKey_ optOut_ poke pre_post_ produce rangeOfString_ release removeAllObjects removeLastObject removeObjectAtIndex_ removeObjectForKey_ removeObject_ render replaceCharactersInRange_withString_ replaceObjectAtIndex_withObject_ retain run setLabel_ setObject_atIndex_ setObject_forKey_ setString_ setTag_ setValue_ strictParse_ stringByAppendingString_ stringByAppendingUTF8String_ substringFromIndex_ substringToIndex_ substringWithRange_ sum_ tag take_ uppercaseString userInfo value | class FsBox<NFMutableString *> | tu tests/full_syntax_test.np");
+    nopa_verify_vtable_sig((&NOPA_VTABLE_$_NPObject)->__sig, 0x4adeb6d807e3ebfaULL, "UTF8String addEntriesFromDictionary_ addObject_ addObjectsFromArray_ allKeys allValues appendString_ appendUTF8String_ boolValue charValue characterAtIndex_ code color compare_ compute_ containsObject_ copy count dealloc deleteCharactersInRange_ description domain doubleValue draw exchangeObjectAtIndex_withObjectAtIndex_ firstObject hasPrefix_ hasSuffix_ hash helper_ indexOfObject_ init initWithArray_ initWithCapacity_ initWithCode_domain_userInfo_ initWithDictionary_ initWithDouble_ initWithId_ initWithLongLong_ initWithObjects_count_ initWithString_ initWithUTF8String_ initWith_ insertObject_atIndex_ insertString_atIndex_ intValue isEqualToNumber_ isEqualToString_ isEqual_ isKindOfClass_ isKindOf_ label lastObject length localizedDescription longLongValue looseParse_ lowercaseString maybe maybeC mix_point_ objectAtIndex_ objectForKey_ optOut_ poke pre_post_ produce rangeOfString_ release removeAllObjects removeLastObject removeObjectAtIndex_ removeObjectForKey_ removeObject_ render replaceCharactersInRange_withString_ replaceObjectAtIndex_withObject_ retain run setLabel_ setObject_atIndex_ setObject_forKey_ setString_ setTag_ setValue_ strictParse_ stringByAppendingString_ stringByAppendingUTF8String_ substringFromIndex_ substringToIndex_ substringWithRange_ sum_ tag take_ uppercaseString userInfo value | class NPObject | tu tests/full_syntax_test.np");
+    nopa_verify_vtable_sig((&NOPA_VTABLE_$_FsBox_NPMutableString_ptr)->__sig, 0x4adeb6d807e3ebfaULL, "UTF8String addEntriesFromDictionary_ addObject_ addObjectsFromArray_ allKeys allValues appendString_ appendUTF8String_ boolValue charValue characterAtIndex_ code color compare_ compute_ containsObject_ copy count dealloc deleteCharactersInRange_ description domain doubleValue draw exchangeObjectAtIndex_withObjectAtIndex_ firstObject hasPrefix_ hasSuffix_ hash helper_ indexOfObject_ init initWithArray_ initWithCapacity_ initWithCode_domain_userInfo_ initWithDictionary_ initWithDouble_ initWithId_ initWithLongLong_ initWithObjects_count_ initWithString_ initWithUTF8String_ initWith_ insertObject_atIndex_ insertString_atIndex_ intValue isEqualToNumber_ isEqualToString_ isEqual_ isKindOfClass_ isKindOf_ label lastObject length localizedDescription longLongValue looseParse_ lowercaseString maybe maybeC mix_point_ objectAtIndex_ objectForKey_ optOut_ poke pre_post_ produce rangeOfString_ release removeAllObjects removeLastObject removeObjectAtIndex_ removeObjectForKey_ removeObject_ render replaceCharactersInRange_withString_ replaceObjectAtIndex_withObject_ retain run setLabel_ setObject_atIndex_ setObject_forKey_ setString_ setTag_ setValue_ strictParse_ stringByAppendingString_ stringByAppendingUTF8String_ substringFromIndex_ substringToIndex_ substringWithRange_ sum_ tag take_ uppercaseString userInfo value | class FsBox<NPMutableString *> | tu tests/full_syntax_test.np");
     nopa_verify_vtable_sig((&NOPA_VTABLE_$_FsEngine__FsRenderable)->__sig, 0x4adeb6d807e3ebfaULL, "UTF8String addEntriesFromDictionary_ addObject_ addObjectsFromArray_ allKeys allValues appendString_ appendUTF8String_ boolValue charValue characterAtIndex_ code color compare_ compute_ containsObject_ copy count dealloc deleteCharactersInRange_ description domain doubleValue draw exchangeObjectAtIndex_withObjectAtIndex_ firstObject hasPrefix_ hasSuffix_ hash helper_ indexOfObject_ init initWithArray_ initWithCapacity_ initWithCode_domain_userInfo_ initWithDictionary_ initWithDouble_ initWithId_ initWithLongLong_ initWithObjects_count_ initWithString_ initWithUTF8String_ initWith_ insertObject_atIndex_ insertString_atIndex_ intValue isEqualToNumber_ isEqualToString_ isEqual_ isKindOfClass_ isKindOf_ label lastObject length localizedDescription longLongValue looseParse_ lowercaseString maybe maybeC mix_point_ objectAtIndex_ objectForKey_ optOut_ poke pre_post_ produce rangeOfString_ release removeAllObjects removeLastObject removeObjectAtIndex_ removeObjectForKey_ removeObject_ render replaceCharactersInRange_withString_ replaceObjectAtIndex_withObject_ retain run setLabel_ setObject_atIndex_ setObject_forKey_ setString_ setTag_ setValue_ strictParse_ stringByAppendingString_ stringByAppendingUTF8String_ substringFromIndex_ substringToIndex_ substringWithRange_ sum_ tag take_ uppercaseString userInfo value | class FsEngine::FsRenderable | tu tests/full_syntax_test.np");
     nopa_verify_vtable_sig((&NOPA_VTABLE_$_FsErrLow)->__sig, 0x4adeb6d807e3ebfaULL, "UTF8String addEntriesFromDictionary_ addObject_ addObjectsFromArray_ allKeys allValues appendString_ appendUTF8String_ boolValue charValue characterAtIndex_ code color compare_ compute_ containsObject_ copy count dealloc deleteCharactersInRange_ description domain doubleValue draw exchangeObjectAtIndex_withObjectAtIndex_ firstObject hasPrefix_ hasSuffix_ hash helper_ indexOfObject_ init initWithArray_ initWithCapacity_ initWithCode_domain_userInfo_ initWithDictionary_ initWithDouble_ initWithId_ initWithLongLong_ initWithObjects_count_ initWithString_ initWithUTF8String_ initWith_ insertObject_atIndex_ insertString_atIndex_ intValue isEqualToNumber_ isEqualToString_ isEqual_ isKindOfClass_ isKindOf_ label lastObject length localizedDescription longLongValue looseParse_ lowercaseString maybe maybeC mix_point_ objectAtIndex_ objectForKey_ optOut_ poke pre_post_ produce rangeOfString_ release removeAllObjects removeLastObject removeObjectAtIndex_ removeObjectForKey_ removeObject_ render replaceCharactersInRange_withString_ replaceObjectAtIndex_withObject_ retain run setLabel_ setObject_atIndex_ setObject_forKey_ setString_ setTag_ setValue_ strictParse_ stringByAppendingString_ stringByAppendingUTF8String_ substringFromIndex_ substringToIndex_ substringWithRange_ sum_ tag take_ uppercaseString userInfo value | class FsErrLow | tu tests/full_syntax_test.np");
     nopa_verify_vtable_sig((&NOPA_VTABLE_$_FsFetcher)->__sig, 0x4adeb6d807e3ebfaULL, "UTF8String addEntriesFromDictionary_ addObject_ addObjectsFromArray_ allKeys allValues appendString_ appendUTF8String_ boolValue charValue characterAtIndex_ code color compare_ compute_ containsObject_ copy count dealloc deleteCharactersInRange_ description domain doubleValue draw exchangeObjectAtIndex_withObjectAtIndex_ firstObject hasPrefix_ hasSuffix_ hash helper_ indexOfObject_ init initWithArray_ initWithCapacity_ initWithCode_domain_userInfo_ initWithDictionary_ initWithDouble_ initWithId_ initWithLongLong_ initWithObjects_count_ initWithString_ initWithUTF8String_ initWith_ insertObject_atIndex_ insertString_atIndex_ intValue isEqualToNumber_ isEqualToString_ isEqual_ isKindOfClass_ isKindOf_ label lastObject length localizedDescription longLongValue looseParse_ lowercaseString maybe maybeC mix_point_ objectAtIndex_ objectForKey_ optOut_ poke pre_post_ produce rangeOfString_ release removeAllObjects removeLastObject removeObjectAtIndex_ removeObjectForKey_ removeObject_ render replaceCharactersInRange_withString_ replaceObjectAtIndex_withObject_ retain run setLabel_ setObject_atIndex_ setObject_forKey_ setString_ setTag_ setValue_ strictParse_ stringByAppendingString_ stringByAppendingUTF8String_ substringFromIndex_ substringToIndex_ substringWithRange_ sum_ tag take_ uppercaseString userInfo value | class FsFetcher | tu tests/full_syntax_test.np");
@@ -3999,259 +3999,259 @@ __attribute__((constructor)) static void __nopa_vtable_layout_check(void) {
     nopa_verify_vtable_sig((&NOPA_VTABLE_$_FsModes)->__sig, 0x4adeb6d807e3ebfaULL, "UTF8String addEntriesFromDictionary_ addObject_ addObjectsFromArray_ allKeys allValues appendString_ appendUTF8String_ boolValue charValue characterAtIndex_ code color compare_ compute_ containsObject_ copy count dealloc deleteCharactersInRange_ description domain doubleValue draw exchangeObjectAtIndex_withObjectAtIndex_ firstObject hasPrefix_ hasSuffix_ hash helper_ indexOfObject_ init initWithArray_ initWithCapacity_ initWithCode_domain_userInfo_ initWithDictionary_ initWithDouble_ initWithId_ initWithLongLong_ initWithObjects_count_ initWithString_ initWithUTF8String_ initWith_ insertObject_atIndex_ insertString_atIndex_ intValue isEqualToNumber_ isEqualToString_ isEqual_ isKindOfClass_ isKindOf_ label lastObject length localizedDescription longLongValue looseParse_ lowercaseString maybe maybeC mix_point_ objectAtIndex_ objectForKey_ optOut_ poke pre_post_ produce rangeOfString_ release removeAllObjects removeLastObject removeObjectAtIndex_ removeObjectForKey_ removeObject_ render replaceCharactersInRange_withString_ replaceObjectAtIndex_withObject_ retain run setLabel_ setObject_atIndex_ setObject_forKey_ setString_ setTag_ setValue_ strictParse_ stringByAppendingString_ stringByAppendingUTF8String_ substringFromIndex_ substringToIndex_ substringWithRange_ sum_ tag take_ uppercaseString userInfo value | class FsModes | tu tests/full_syntax_test.np");
     nopa_verify_vtable_sig((&NOPA_VTABLE_$_FsParser)->__sig, 0x4adeb6d807e3ebfaULL, "UTF8String addEntriesFromDictionary_ addObject_ addObjectsFromArray_ allKeys allValues appendString_ appendUTF8String_ boolValue charValue characterAtIndex_ code color compare_ compute_ containsObject_ copy count dealloc deleteCharactersInRange_ description domain doubleValue draw exchangeObjectAtIndex_withObjectAtIndex_ firstObject hasPrefix_ hasSuffix_ hash helper_ indexOfObject_ init initWithArray_ initWithCapacity_ initWithCode_domain_userInfo_ initWithDictionary_ initWithDouble_ initWithId_ initWithLongLong_ initWithObjects_count_ initWithString_ initWithUTF8String_ initWith_ insertObject_atIndex_ insertString_atIndex_ intValue isEqualToNumber_ isEqualToString_ isEqual_ isKindOfClass_ isKindOf_ label lastObject length localizedDescription longLongValue looseParse_ lowercaseString maybe maybeC mix_point_ objectAtIndex_ objectForKey_ optOut_ poke pre_post_ produce rangeOfString_ release removeAllObjects removeLastObject removeObjectAtIndex_ removeObjectForKey_ removeObject_ render replaceCharactersInRange_withString_ replaceObjectAtIndex_withObject_ retain run setLabel_ setObject_atIndex_ setObject_forKey_ setString_ setTag_ setValue_ strictParse_ stringByAppendingString_ stringByAppendingUTF8String_ substringFromIndex_ substringToIndex_ substringWithRange_ sum_ tag take_ uppercaseString userInfo value | class FsParser | tu tests/full_syntax_test.np");
     nopa_verify_vtable_sig((&NOPA_VTABLE_$_FsTypedStore)->__sig, 0x4adeb6d807e3ebfaULL, "UTF8String addEntriesFromDictionary_ addObject_ addObjectsFromArray_ allKeys allValues appendString_ appendUTF8String_ boolValue charValue characterAtIndex_ code color compare_ compute_ containsObject_ copy count dealloc deleteCharactersInRange_ description domain doubleValue draw exchangeObjectAtIndex_withObjectAtIndex_ firstObject hasPrefix_ hasSuffix_ hash helper_ indexOfObject_ init initWithArray_ initWithCapacity_ initWithCode_domain_userInfo_ initWithDictionary_ initWithDouble_ initWithId_ initWithLongLong_ initWithObjects_count_ initWithString_ initWithUTF8String_ initWith_ insertObject_atIndex_ insertString_atIndex_ intValue isEqualToNumber_ isEqualToString_ isEqual_ isKindOfClass_ isKindOf_ label lastObject length localizedDescription longLongValue looseParse_ lowercaseString maybe maybeC mix_point_ objectAtIndex_ objectForKey_ optOut_ poke pre_post_ produce rangeOfString_ release removeAllObjects removeLastObject removeObjectAtIndex_ removeObjectForKey_ removeObject_ render replaceCharactersInRange_withString_ replaceObjectAtIndex_withObject_ retain run setLabel_ setObject_atIndex_ setObject_forKey_ setString_ setTag_ setValue_ strictParse_ stringByAppendingString_ stringByAppendingUTF8String_ substringFromIndex_ substringToIndex_ substringWithRange_ sum_ tag take_ uppercaseString userInfo value | class FsTypedStore | tu tests/full_syntax_test.np");
-    nopa_verify_vtable_sig((&NOPA_VTABLE_$_NFArray)->__sig, 0x4adeb6d807e3ebfaULL, "UTF8String addEntriesFromDictionary_ addObject_ addObjectsFromArray_ allKeys allValues appendString_ appendUTF8String_ boolValue charValue characterAtIndex_ code color compare_ compute_ containsObject_ copy count dealloc deleteCharactersInRange_ description domain doubleValue draw exchangeObjectAtIndex_withObjectAtIndex_ firstObject hasPrefix_ hasSuffix_ hash helper_ indexOfObject_ init initWithArray_ initWithCapacity_ initWithCode_domain_userInfo_ initWithDictionary_ initWithDouble_ initWithId_ initWithLongLong_ initWithObjects_count_ initWithString_ initWithUTF8String_ initWith_ insertObject_atIndex_ insertString_atIndex_ intValue isEqualToNumber_ isEqualToString_ isEqual_ isKindOfClass_ isKindOf_ label lastObject length localizedDescription longLongValue looseParse_ lowercaseString maybe maybeC mix_point_ objectAtIndex_ objectForKey_ optOut_ poke pre_post_ produce rangeOfString_ release removeAllObjects removeLastObject removeObjectAtIndex_ removeObjectForKey_ removeObject_ render replaceCharactersInRange_withString_ replaceObjectAtIndex_withObject_ retain run setLabel_ setObject_atIndex_ setObject_forKey_ setString_ setTag_ setValue_ strictParse_ stringByAppendingString_ stringByAppendingUTF8String_ substringFromIndex_ substringToIndex_ substringWithRange_ sum_ tag take_ uppercaseString userInfo value | class NFArray | tu tests/full_syntax_test.np");
-    nopa_verify_vtable_sig((&NOPA_VTABLE_$_NFArray_NFNumber_ptr)->__sig, 0x4adeb6d807e3ebfaULL, "UTF8String addEntriesFromDictionary_ addObject_ addObjectsFromArray_ allKeys allValues appendString_ appendUTF8String_ boolValue charValue characterAtIndex_ code color compare_ compute_ containsObject_ copy count dealloc deleteCharactersInRange_ description domain doubleValue draw exchangeObjectAtIndex_withObjectAtIndex_ firstObject hasPrefix_ hasSuffix_ hash helper_ indexOfObject_ init initWithArray_ initWithCapacity_ initWithCode_domain_userInfo_ initWithDictionary_ initWithDouble_ initWithId_ initWithLongLong_ initWithObjects_count_ initWithString_ initWithUTF8String_ initWith_ insertObject_atIndex_ insertString_atIndex_ intValue isEqualToNumber_ isEqualToString_ isEqual_ isKindOfClass_ isKindOf_ label lastObject length localizedDescription longLongValue looseParse_ lowercaseString maybe maybeC mix_point_ objectAtIndex_ objectForKey_ optOut_ poke pre_post_ produce rangeOfString_ release removeAllObjects removeLastObject removeObjectAtIndex_ removeObjectForKey_ removeObject_ render replaceCharactersInRange_withString_ replaceObjectAtIndex_withObject_ retain run setLabel_ setObject_atIndex_ setObject_forKey_ setString_ setTag_ setValue_ strictParse_ stringByAppendingString_ stringByAppendingUTF8String_ substringFromIndex_ substringToIndex_ substringWithRange_ sum_ tag take_ uppercaseString userInfo value | class NFArray<NFNumber *> | tu tests/full_syntax_test.np");
-    nopa_verify_vtable_sig((&NOPA_VTABLE_$_NFDictionary)->__sig, 0x4adeb6d807e3ebfaULL, "UTF8String addEntriesFromDictionary_ addObject_ addObjectsFromArray_ allKeys allValues appendString_ appendUTF8String_ boolValue charValue characterAtIndex_ code color compare_ compute_ containsObject_ copy count dealloc deleteCharactersInRange_ description domain doubleValue draw exchangeObjectAtIndex_withObjectAtIndex_ firstObject hasPrefix_ hasSuffix_ hash helper_ indexOfObject_ init initWithArray_ initWithCapacity_ initWithCode_domain_userInfo_ initWithDictionary_ initWithDouble_ initWithId_ initWithLongLong_ initWithObjects_count_ initWithString_ initWithUTF8String_ initWith_ insertObject_atIndex_ insertString_atIndex_ intValue isEqualToNumber_ isEqualToString_ isEqual_ isKindOfClass_ isKindOf_ label lastObject length localizedDescription longLongValue looseParse_ lowercaseString maybe maybeC mix_point_ objectAtIndex_ objectForKey_ optOut_ poke pre_post_ produce rangeOfString_ release removeAllObjects removeLastObject removeObjectAtIndex_ removeObjectForKey_ removeObject_ render replaceCharactersInRange_withString_ replaceObjectAtIndex_withObject_ retain run setLabel_ setObject_atIndex_ setObject_forKey_ setString_ setTag_ setValue_ strictParse_ stringByAppendingString_ stringByAppendingUTF8String_ substringFromIndex_ substringToIndex_ substringWithRange_ sum_ tag take_ uppercaseString userInfo value | class NFDictionary | tu tests/full_syntax_test.np");
-    nopa_verify_vtable_sig((&NOPA_VTABLE_$_NFError)->__sig, 0x4adeb6d807e3ebfaULL, "UTF8String addEntriesFromDictionary_ addObject_ addObjectsFromArray_ allKeys allValues appendString_ appendUTF8String_ boolValue charValue characterAtIndex_ code color compare_ compute_ containsObject_ copy count dealloc deleteCharactersInRange_ description domain doubleValue draw exchangeObjectAtIndex_withObjectAtIndex_ firstObject hasPrefix_ hasSuffix_ hash helper_ indexOfObject_ init initWithArray_ initWithCapacity_ initWithCode_domain_userInfo_ initWithDictionary_ initWithDouble_ initWithId_ initWithLongLong_ initWithObjects_count_ initWithString_ initWithUTF8String_ initWith_ insertObject_atIndex_ insertString_atIndex_ intValue isEqualToNumber_ isEqualToString_ isEqual_ isKindOfClass_ isKindOf_ label lastObject length localizedDescription longLongValue looseParse_ lowercaseString maybe maybeC mix_point_ objectAtIndex_ objectForKey_ optOut_ poke pre_post_ produce rangeOfString_ release removeAllObjects removeLastObject removeObjectAtIndex_ removeObjectForKey_ removeObject_ render replaceCharactersInRange_withString_ replaceObjectAtIndex_withObject_ retain run setLabel_ setObject_atIndex_ setObject_forKey_ setString_ setTag_ setValue_ strictParse_ stringByAppendingString_ stringByAppendingUTF8String_ substringFromIndex_ substringToIndex_ substringWithRange_ sum_ tag take_ uppercaseString userInfo value | class NFError | tu tests/full_syntax_test.np");
-    nopa_verify_vtable_sig((&NOPA_VTABLE_$_NFNumber)->__sig, 0x4adeb6d807e3ebfaULL, "UTF8String addEntriesFromDictionary_ addObject_ addObjectsFromArray_ allKeys allValues appendString_ appendUTF8String_ boolValue charValue characterAtIndex_ code color compare_ compute_ containsObject_ copy count dealloc deleteCharactersInRange_ description domain doubleValue draw exchangeObjectAtIndex_withObjectAtIndex_ firstObject hasPrefix_ hasSuffix_ hash helper_ indexOfObject_ init initWithArray_ initWithCapacity_ initWithCode_domain_userInfo_ initWithDictionary_ initWithDouble_ initWithId_ initWithLongLong_ initWithObjects_count_ initWithString_ initWithUTF8String_ initWith_ insertObject_atIndex_ insertString_atIndex_ intValue isEqualToNumber_ isEqualToString_ isEqual_ isKindOfClass_ isKindOf_ label lastObject length localizedDescription longLongValue looseParse_ lowercaseString maybe maybeC mix_point_ objectAtIndex_ objectForKey_ optOut_ poke pre_post_ produce rangeOfString_ release removeAllObjects removeLastObject removeObjectAtIndex_ removeObjectForKey_ removeObject_ render replaceCharactersInRange_withString_ replaceObjectAtIndex_withObject_ retain run setLabel_ setObject_atIndex_ setObject_forKey_ setString_ setTag_ setValue_ strictParse_ stringByAppendingString_ stringByAppendingUTF8String_ substringFromIndex_ substringToIndex_ substringWithRange_ sum_ tag take_ uppercaseString userInfo value | class NFNumber | tu tests/full_syntax_test.np");
+    nopa_verify_vtable_sig((&NOPA_VTABLE_$_NPArray)->__sig, 0x4adeb6d807e3ebfaULL, "UTF8String addEntriesFromDictionary_ addObject_ addObjectsFromArray_ allKeys allValues appendString_ appendUTF8String_ boolValue charValue characterAtIndex_ code color compare_ compute_ containsObject_ copy count dealloc deleteCharactersInRange_ description domain doubleValue draw exchangeObjectAtIndex_withObjectAtIndex_ firstObject hasPrefix_ hasSuffix_ hash helper_ indexOfObject_ init initWithArray_ initWithCapacity_ initWithCode_domain_userInfo_ initWithDictionary_ initWithDouble_ initWithId_ initWithLongLong_ initWithObjects_count_ initWithString_ initWithUTF8String_ initWith_ insertObject_atIndex_ insertString_atIndex_ intValue isEqualToNumber_ isEqualToString_ isEqual_ isKindOfClass_ isKindOf_ label lastObject length localizedDescription longLongValue looseParse_ lowercaseString maybe maybeC mix_point_ objectAtIndex_ objectForKey_ optOut_ poke pre_post_ produce rangeOfString_ release removeAllObjects removeLastObject removeObjectAtIndex_ removeObjectForKey_ removeObject_ render replaceCharactersInRange_withString_ replaceObjectAtIndex_withObject_ retain run setLabel_ setObject_atIndex_ setObject_forKey_ setString_ setTag_ setValue_ strictParse_ stringByAppendingString_ stringByAppendingUTF8String_ substringFromIndex_ substringToIndex_ substringWithRange_ sum_ tag take_ uppercaseString userInfo value | class NPArray | tu tests/full_syntax_test.np");
+    nopa_verify_vtable_sig((&NOPA_VTABLE_$_NPArray_NPNumber_ptr)->__sig, 0x4adeb6d807e3ebfaULL, "UTF8String addEntriesFromDictionary_ addObject_ addObjectsFromArray_ allKeys allValues appendString_ appendUTF8String_ boolValue charValue characterAtIndex_ code color compare_ compute_ containsObject_ copy count dealloc deleteCharactersInRange_ description domain doubleValue draw exchangeObjectAtIndex_withObjectAtIndex_ firstObject hasPrefix_ hasSuffix_ hash helper_ indexOfObject_ init initWithArray_ initWithCapacity_ initWithCode_domain_userInfo_ initWithDictionary_ initWithDouble_ initWithId_ initWithLongLong_ initWithObjects_count_ initWithString_ initWithUTF8String_ initWith_ insertObject_atIndex_ insertString_atIndex_ intValue isEqualToNumber_ isEqualToString_ isEqual_ isKindOfClass_ isKindOf_ label lastObject length localizedDescription longLongValue looseParse_ lowercaseString maybe maybeC mix_point_ objectAtIndex_ objectForKey_ optOut_ poke pre_post_ produce rangeOfString_ release removeAllObjects removeLastObject removeObjectAtIndex_ removeObjectForKey_ removeObject_ render replaceCharactersInRange_withString_ replaceObjectAtIndex_withObject_ retain run setLabel_ setObject_atIndex_ setObject_forKey_ setString_ setTag_ setValue_ strictParse_ stringByAppendingString_ stringByAppendingUTF8String_ substringFromIndex_ substringToIndex_ substringWithRange_ sum_ tag take_ uppercaseString userInfo value | class NPArray<NPNumber *> | tu tests/full_syntax_test.np");
+    nopa_verify_vtable_sig((&NOPA_VTABLE_$_NPDictionary)->__sig, 0x4adeb6d807e3ebfaULL, "UTF8String addEntriesFromDictionary_ addObject_ addObjectsFromArray_ allKeys allValues appendString_ appendUTF8String_ boolValue charValue characterAtIndex_ code color compare_ compute_ containsObject_ copy count dealloc deleteCharactersInRange_ description domain doubleValue draw exchangeObjectAtIndex_withObjectAtIndex_ firstObject hasPrefix_ hasSuffix_ hash helper_ indexOfObject_ init initWithArray_ initWithCapacity_ initWithCode_domain_userInfo_ initWithDictionary_ initWithDouble_ initWithId_ initWithLongLong_ initWithObjects_count_ initWithString_ initWithUTF8String_ initWith_ insertObject_atIndex_ insertString_atIndex_ intValue isEqualToNumber_ isEqualToString_ isEqual_ isKindOfClass_ isKindOf_ label lastObject length localizedDescription longLongValue looseParse_ lowercaseString maybe maybeC mix_point_ objectAtIndex_ objectForKey_ optOut_ poke pre_post_ produce rangeOfString_ release removeAllObjects removeLastObject removeObjectAtIndex_ removeObjectForKey_ removeObject_ render replaceCharactersInRange_withString_ replaceObjectAtIndex_withObject_ retain run setLabel_ setObject_atIndex_ setObject_forKey_ setString_ setTag_ setValue_ strictParse_ stringByAppendingString_ stringByAppendingUTF8String_ substringFromIndex_ substringToIndex_ substringWithRange_ sum_ tag take_ uppercaseString userInfo value | class NPDictionary | tu tests/full_syntax_test.np");
+    nopa_verify_vtable_sig((&NOPA_VTABLE_$_NPError)->__sig, 0x4adeb6d807e3ebfaULL, "UTF8String addEntriesFromDictionary_ addObject_ addObjectsFromArray_ allKeys allValues appendString_ appendUTF8String_ boolValue charValue characterAtIndex_ code color compare_ compute_ containsObject_ copy count dealloc deleteCharactersInRange_ description domain doubleValue draw exchangeObjectAtIndex_withObjectAtIndex_ firstObject hasPrefix_ hasSuffix_ hash helper_ indexOfObject_ init initWithArray_ initWithCapacity_ initWithCode_domain_userInfo_ initWithDictionary_ initWithDouble_ initWithId_ initWithLongLong_ initWithObjects_count_ initWithString_ initWithUTF8String_ initWith_ insertObject_atIndex_ insertString_atIndex_ intValue isEqualToNumber_ isEqualToString_ isEqual_ isKindOfClass_ isKindOf_ label lastObject length localizedDescription longLongValue looseParse_ lowercaseString maybe maybeC mix_point_ objectAtIndex_ objectForKey_ optOut_ poke pre_post_ produce rangeOfString_ release removeAllObjects removeLastObject removeObjectAtIndex_ removeObjectForKey_ removeObject_ render replaceCharactersInRange_withString_ replaceObjectAtIndex_withObject_ retain run setLabel_ setObject_atIndex_ setObject_forKey_ setString_ setTag_ setValue_ strictParse_ stringByAppendingString_ stringByAppendingUTF8String_ substringFromIndex_ substringToIndex_ substringWithRange_ sum_ tag take_ uppercaseString userInfo value | class NPError | tu tests/full_syntax_test.np");
+    nopa_verify_vtable_sig((&NOPA_VTABLE_$_NPNumber)->__sig, 0x4adeb6d807e3ebfaULL, "UTF8String addEntriesFromDictionary_ addObject_ addObjectsFromArray_ allKeys allValues appendString_ appendUTF8String_ boolValue charValue characterAtIndex_ code color compare_ compute_ containsObject_ copy count dealloc deleteCharactersInRange_ description domain doubleValue draw exchangeObjectAtIndex_withObjectAtIndex_ firstObject hasPrefix_ hasSuffix_ hash helper_ indexOfObject_ init initWithArray_ initWithCapacity_ initWithCode_domain_userInfo_ initWithDictionary_ initWithDouble_ initWithId_ initWithLongLong_ initWithObjects_count_ initWithString_ initWithUTF8String_ initWith_ insertObject_atIndex_ insertString_atIndex_ intValue isEqualToNumber_ isEqualToString_ isEqual_ isKindOfClass_ isKindOf_ label lastObject length localizedDescription longLongValue looseParse_ lowercaseString maybe maybeC mix_point_ objectAtIndex_ objectForKey_ optOut_ poke pre_post_ produce rangeOfString_ release removeAllObjects removeLastObject removeObjectAtIndex_ removeObjectForKey_ removeObject_ render replaceCharactersInRange_withString_ replaceObjectAtIndex_withObject_ retain run setLabel_ setObject_atIndex_ setObject_forKey_ setString_ setTag_ setValue_ strictParse_ stringByAppendingString_ stringByAppendingUTF8String_ substringFromIndex_ substringToIndex_ substringWithRange_ sum_ tag take_ uppercaseString userInfo value | class NPNumber | tu tests/full_syntax_test.np");
     nopa_verify_vtable_sig((&NOPA_VTABLE_$_FsAnnotated)->__sig, 0x4adeb6d807e3ebfaULL, "UTF8String addEntriesFromDictionary_ addObject_ addObjectsFromArray_ allKeys allValues appendString_ appendUTF8String_ boolValue charValue characterAtIndex_ code color compare_ compute_ containsObject_ copy count dealloc deleteCharactersInRange_ description domain doubleValue draw exchangeObjectAtIndex_withObjectAtIndex_ firstObject hasPrefix_ hasSuffix_ hash helper_ indexOfObject_ init initWithArray_ initWithCapacity_ initWithCode_domain_userInfo_ initWithDictionary_ initWithDouble_ initWithId_ initWithLongLong_ initWithObjects_count_ initWithString_ initWithUTF8String_ initWith_ insertObject_atIndex_ insertString_atIndex_ intValue isEqualToNumber_ isEqualToString_ isEqual_ isKindOfClass_ isKindOf_ label lastObject length localizedDescription longLongValue looseParse_ lowercaseString maybe maybeC mix_point_ objectAtIndex_ objectForKey_ optOut_ poke pre_post_ produce rangeOfString_ release removeAllObjects removeLastObject removeObjectAtIndex_ removeObjectForKey_ removeObject_ render replaceCharactersInRange_withString_ replaceObjectAtIndex_withObject_ retain run setLabel_ setObject_atIndex_ setObject_forKey_ setString_ setTag_ setValue_ strictParse_ stringByAppendingString_ stringByAppendingUTF8String_ substringFromIndex_ substringToIndex_ substringWithRange_ sum_ tag take_ uppercaseString userInfo value | class FsAnnotated | tu tests/full_syntax_test.np");
-    nopa_verify_vtable_sig((&NOPA_VTABLE_$_NFString)->__sig, 0x4adeb6d807e3ebfaULL, "UTF8String addEntriesFromDictionary_ addObject_ addObjectsFromArray_ allKeys allValues appendString_ appendUTF8String_ boolValue charValue characterAtIndex_ code color compare_ compute_ containsObject_ copy count dealloc deleteCharactersInRange_ description domain doubleValue draw exchangeObjectAtIndex_withObjectAtIndex_ firstObject hasPrefix_ hasSuffix_ hash helper_ indexOfObject_ init initWithArray_ initWithCapacity_ initWithCode_domain_userInfo_ initWithDictionary_ initWithDouble_ initWithId_ initWithLongLong_ initWithObjects_count_ initWithString_ initWithUTF8String_ initWith_ insertObject_atIndex_ insertString_atIndex_ intValue isEqualToNumber_ isEqualToString_ isEqual_ isKindOfClass_ isKindOf_ label lastObject length localizedDescription longLongValue looseParse_ lowercaseString maybe maybeC mix_point_ objectAtIndex_ objectForKey_ optOut_ poke pre_post_ produce rangeOfString_ release removeAllObjects removeLastObject removeObjectAtIndex_ removeObjectForKey_ removeObject_ render replaceCharactersInRange_withString_ replaceObjectAtIndex_withObject_ retain run setLabel_ setObject_atIndex_ setObject_forKey_ setString_ setTag_ setValue_ strictParse_ stringByAppendingString_ stringByAppendingUTF8String_ substringFromIndex_ substringToIndex_ substringWithRange_ sum_ tag take_ uppercaseString userInfo value | class NFString | tu tests/full_syntax_test.np");
+    nopa_verify_vtable_sig((&NOPA_VTABLE_$_NPString)->__sig, 0x4adeb6d807e3ebfaULL, "UTF8String addEntriesFromDictionary_ addObject_ addObjectsFromArray_ allKeys allValues appendString_ appendUTF8String_ boolValue charValue characterAtIndex_ code color compare_ compute_ containsObject_ copy count dealloc deleteCharactersInRange_ description domain doubleValue draw exchangeObjectAtIndex_withObjectAtIndex_ firstObject hasPrefix_ hasSuffix_ hash helper_ indexOfObject_ init initWithArray_ initWithCapacity_ initWithCode_domain_userInfo_ initWithDictionary_ initWithDouble_ initWithId_ initWithLongLong_ initWithObjects_count_ initWithString_ initWithUTF8String_ initWith_ insertObject_atIndex_ insertString_atIndex_ intValue isEqualToNumber_ isEqualToString_ isEqual_ isKindOfClass_ isKindOf_ label lastObject length localizedDescription longLongValue looseParse_ lowercaseString maybe maybeC mix_point_ objectAtIndex_ objectForKey_ optOut_ poke pre_post_ produce rangeOfString_ release removeAllObjects removeLastObject removeObjectAtIndex_ removeObjectForKey_ removeObject_ render replaceCharactersInRange_withString_ replaceObjectAtIndex_withObject_ retain run setLabel_ setObject_atIndex_ setObject_forKey_ setString_ setTag_ setValue_ strictParse_ stringByAppendingString_ stringByAppendingUTF8String_ substringFromIndex_ substringToIndex_ substringWithRange_ sum_ tag take_ uppercaseString userInfo value | class NPString | tu tests/full_syntax_test.np");
     nopa_verify_vtable_sig((&NOPA_VTABLE_$_FsBox)->__sig, 0x4adeb6d807e3ebfaULL, "UTF8String addEntriesFromDictionary_ addObject_ addObjectsFromArray_ allKeys allValues appendString_ appendUTF8String_ boolValue charValue characterAtIndex_ code color compare_ compute_ containsObject_ copy count dealloc deleteCharactersInRange_ description domain doubleValue draw exchangeObjectAtIndex_withObjectAtIndex_ firstObject hasPrefix_ hasSuffix_ hash helper_ indexOfObject_ init initWithArray_ initWithCapacity_ initWithCode_domain_userInfo_ initWithDictionary_ initWithDouble_ initWithId_ initWithLongLong_ initWithObjects_count_ initWithString_ initWithUTF8String_ initWith_ insertObject_atIndex_ insertString_atIndex_ intValue isEqualToNumber_ isEqualToString_ isEqual_ isKindOfClass_ isKindOf_ label lastObject length localizedDescription longLongValue looseParse_ lowercaseString maybe maybeC mix_point_ objectAtIndex_ objectForKey_ optOut_ poke pre_post_ produce rangeOfString_ release removeAllObjects removeLastObject removeObjectAtIndex_ removeObjectForKey_ removeObject_ render replaceCharactersInRange_withString_ replaceObjectAtIndex_withObject_ retain run setLabel_ setObject_atIndex_ setObject_forKey_ setString_ setTag_ setValue_ strictParse_ stringByAppendingString_ stringByAppendingUTF8String_ substringFromIndex_ substringToIndex_ substringWithRange_ sum_ tag take_ uppercaseString userInfo value | class FsBox | tu tests/full_syntax_test.np");
-    nopa_verify_vtable_sig((&NOPA_VTABLE_$_NFMutableDictionary)->__sig, 0x4adeb6d807e3ebfaULL, "UTF8String addEntriesFromDictionary_ addObject_ addObjectsFromArray_ allKeys allValues appendString_ appendUTF8String_ boolValue charValue characterAtIndex_ code color compare_ compute_ containsObject_ copy count dealloc deleteCharactersInRange_ description domain doubleValue draw exchangeObjectAtIndex_withObjectAtIndex_ firstObject hasPrefix_ hasSuffix_ hash helper_ indexOfObject_ init initWithArray_ initWithCapacity_ initWithCode_domain_userInfo_ initWithDictionary_ initWithDouble_ initWithId_ initWithLongLong_ initWithObjects_count_ initWithString_ initWithUTF8String_ initWith_ insertObject_atIndex_ insertString_atIndex_ intValue isEqualToNumber_ isEqualToString_ isEqual_ isKindOfClass_ isKindOf_ label lastObject length localizedDescription longLongValue looseParse_ lowercaseString maybe maybeC mix_point_ objectAtIndex_ objectForKey_ optOut_ poke pre_post_ produce rangeOfString_ release removeAllObjects removeLastObject removeObjectAtIndex_ removeObjectForKey_ removeObject_ render replaceCharactersInRange_withString_ replaceObjectAtIndex_withObject_ retain run setLabel_ setObject_atIndex_ setObject_forKey_ setString_ setTag_ setValue_ strictParse_ stringByAppendingString_ stringByAppendingUTF8String_ substringFromIndex_ substringToIndex_ substringWithRange_ sum_ tag take_ uppercaseString userInfo value | class NFMutableDictionary | tu tests/full_syntax_test.np");
-    nopa_verify_vtable_sig((&NOPA_VTABLE_$_NFMutableString)->__sig, 0x4adeb6d807e3ebfaULL, "UTF8String addEntriesFromDictionary_ addObject_ addObjectsFromArray_ allKeys allValues appendString_ appendUTF8String_ boolValue charValue characterAtIndex_ code color compare_ compute_ containsObject_ copy count dealloc deleteCharactersInRange_ description domain doubleValue draw exchangeObjectAtIndex_withObjectAtIndex_ firstObject hasPrefix_ hasSuffix_ hash helper_ indexOfObject_ init initWithArray_ initWithCapacity_ initWithCode_domain_userInfo_ initWithDictionary_ initWithDouble_ initWithId_ initWithLongLong_ initWithObjects_count_ initWithString_ initWithUTF8String_ initWith_ insertObject_atIndex_ insertString_atIndex_ intValue isEqualToNumber_ isEqualToString_ isEqual_ isKindOfClass_ isKindOf_ label lastObject length localizedDescription longLongValue looseParse_ lowercaseString maybe maybeC mix_point_ objectAtIndex_ objectForKey_ optOut_ poke pre_post_ produce rangeOfString_ release removeAllObjects removeLastObject removeObjectAtIndex_ removeObjectForKey_ removeObject_ render replaceCharactersInRange_withString_ replaceObjectAtIndex_withObject_ retain run setLabel_ setObject_atIndex_ setObject_forKey_ setString_ setTag_ setValue_ strictParse_ stringByAppendingString_ stringByAppendingUTF8String_ substringFromIndex_ substringToIndex_ substringWithRange_ sum_ tag take_ uppercaseString userInfo value | class NFMutableString | tu tests/full_syntax_test.np");
+    nopa_verify_vtable_sig((&NOPA_VTABLE_$_NPMutableDictionary)->__sig, 0x4adeb6d807e3ebfaULL, "UTF8String addEntriesFromDictionary_ addObject_ addObjectsFromArray_ allKeys allValues appendString_ appendUTF8String_ boolValue charValue characterAtIndex_ code color compare_ compute_ containsObject_ copy count dealloc deleteCharactersInRange_ description domain doubleValue draw exchangeObjectAtIndex_withObjectAtIndex_ firstObject hasPrefix_ hasSuffix_ hash helper_ indexOfObject_ init initWithArray_ initWithCapacity_ initWithCode_domain_userInfo_ initWithDictionary_ initWithDouble_ initWithId_ initWithLongLong_ initWithObjects_count_ initWithString_ initWithUTF8String_ initWith_ insertObject_atIndex_ insertString_atIndex_ intValue isEqualToNumber_ isEqualToString_ isEqual_ isKindOfClass_ isKindOf_ label lastObject length localizedDescription longLongValue looseParse_ lowercaseString maybe maybeC mix_point_ objectAtIndex_ objectForKey_ optOut_ poke pre_post_ produce rangeOfString_ release removeAllObjects removeLastObject removeObjectAtIndex_ removeObjectForKey_ removeObject_ render replaceCharactersInRange_withString_ replaceObjectAtIndex_withObject_ retain run setLabel_ setObject_atIndex_ setObject_forKey_ setString_ setTag_ setValue_ strictParse_ stringByAppendingString_ stringByAppendingUTF8String_ substringFromIndex_ substringToIndex_ substringWithRange_ sum_ tag take_ uppercaseString userInfo value | class NPMutableDictionary | tu tests/full_syntax_test.np");
+    nopa_verify_vtable_sig((&NOPA_VTABLE_$_NPMutableString)->__sig, 0x4adeb6d807e3ebfaULL, "UTF8String addEntriesFromDictionary_ addObject_ addObjectsFromArray_ allKeys allValues appendString_ appendUTF8String_ boolValue charValue characterAtIndex_ code color compare_ compute_ containsObject_ copy count dealloc deleteCharactersInRange_ description domain doubleValue draw exchangeObjectAtIndex_withObjectAtIndex_ firstObject hasPrefix_ hasSuffix_ hash helper_ indexOfObject_ init initWithArray_ initWithCapacity_ initWithCode_domain_userInfo_ initWithDictionary_ initWithDouble_ initWithId_ initWithLongLong_ initWithObjects_count_ initWithString_ initWithUTF8String_ initWith_ insertObject_atIndex_ insertString_atIndex_ intValue isEqualToNumber_ isEqualToString_ isEqual_ isKindOfClass_ isKindOf_ label lastObject length localizedDescription longLongValue looseParse_ lowercaseString maybe maybeC mix_point_ objectAtIndex_ objectForKey_ optOut_ poke pre_post_ produce rangeOfString_ release removeAllObjects removeLastObject removeObjectAtIndex_ removeObjectForKey_ removeObject_ render replaceCharactersInRange_withString_ replaceObjectAtIndex_withObject_ retain run setLabel_ setObject_atIndex_ setObject_forKey_ setString_ setTag_ setValue_ strictParse_ stringByAppendingString_ stringByAppendingUTF8String_ substringFromIndex_ substringToIndex_ substringWithRange_ sum_ tag take_ uppercaseString userInfo value | class NPMutableString | tu tests/full_syntax_test.np");
     nopa_verify_vtable_sig((&NOPA_VTABLE_$_FsSprite)->__sig, 0x4adeb6d807e3ebfaULL, "UTF8String addEntriesFromDictionary_ addObject_ addObjectsFromArray_ allKeys allValues appendString_ appendUTF8String_ boolValue charValue characterAtIndex_ code color compare_ compute_ containsObject_ copy count dealloc deleteCharactersInRange_ description domain doubleValue draw exchangeObjectAtIndex_withObjectAtIndex_ firstObject hasPrefix_ hasSuffix_ hash helper_ indexOfObject_ init initWithArray_ initWithCapacity_ initWithCode_domain_userInfo_ initWithDictionary_ initWithDouble_ initWithId_ initWithLongLong_ initWithObjects_count_ initWithString_ initWithUTF8String_ initWith_ insertObject_atIndex_ insertString_atIndex_ intValue isEqualToNumber_ isEqualToString_ isEqual_ isKindOfClass_ isKindOf_ label lastObject length localizedDescription longLongValue looseParse_ lowercaseString maybe maybeC mix_point_ objectAtIndex_ objectForKey_ optOut_ poke pre_post_ produce rangeOfString_ release removeAllObjects removeLastObject removeObjectAtIndex_ removeObjectForKey_ removeObject_ render replaceCharactersInRange_withString_ replaceObjectAtIndex_withObject_ retain run setLabel_ setObject_atIndex_ setObject_forKey_ setString_ setTag_ setValue_ strictParse_ stringByAppendingString_ stringByAppendingUTF8String_ substringFromIndex_ substringToIndex_ substringWithRange_ sum_ tag take_ uppercaseString userInfo value | class FsSprite | tu tests/full_syntax_test.np");
     nopa_verify_vtable_sig((&NOPA_VTABLE_$_FsErrHigh)->__sig, 0x4adeb6d807e3ebfaULL, "UTF8String addEntriesFromDictionary_ addObject_ addObjectsFromArray_ allKeys allValues appendString_ appendUTF8String_ boolValue charValue characterAtIndex_ code color compare_ compute_ containsObject_ copy count dealloc deleteCharactersInRange_ description domain doubleValue draw exchangeObjectAtIndex_withObjectAtIndex_ firstObject hasPrefix_ hasSuffix_ hash helper_ indexOfObject_ init initWithArray_ initWithCapacity_ initWithCode_domain_userInfo_ initWithDictionary_ initWithDouble_ initWithId_ initWithLongLong_ initWithObjects_count_ initWithString_ initWithUTF8String_ initWith_ insertObject_atIndex_ insertString_atIndex_ intValue isEqualToNumber_ isEqualToString_ isEqual_ isKindOfClass_ isKindOf_ label lastObject length localizedDescription longLongValue looseParse_ lowercaseString maybe maybeC mix_point_ objectAtIndex_ objectForKey_ optOut_ poke pre_post_ produce rangeOfString_ release removeAllObjects removeLastObject removeObjectAtIndex_ removeObjectForKey_ removeObject_ render replaceCharactersInRange_withString_ replaceObjectAtIndex_withObject_ retain run setLabel_ setObject_atIndex_ setObject_forKey_ setString_ setTag_ setValue_ strictParse_ stringByAppendingString_ stringByAppendingUTF8String_ substringFromIndex_ substringToIndex_ substringWithRange_ sum_ tag take_ uppercaseString userInfo value | class FsErrHigh | tu tests/full_syntax_test.np");
-    nopa_verify_vtable_sig((&NOPA_VTABLE_$_NFMutableArray)->__sig, 0x4adeb6d807e3ebfaULL, "UTF8String addEntriesFromDictionary_ addObject_ addObjectsFromArray_ allKeys allValues appendString_ appendUTF8String_ boolValue charValue characterAtIndex_ code color compare_ compute_ containsObject_ copy count dealloc deleteCharactersInRange_ description domain doubleValue draw exchangeObjectAtIndex_withObjectAtIndex_ firstObject hasPrefix_ hasSuffix_ hash helper_ indexOfObject_ init initWithArray_ initWithCapacity_ initWithCode_domain_userInfo_ initWithDictionary_ initWithDouble_ initWithId_ initWithLongLong_ initWithObjects_count_ initWithString_ initWithUTF8String_ initWith_ insertObject_atIndex_ insertString_atIndex_ intValue isEqualToNumber_ isEqualToString_ isEqual_ isKindOfClass_ isKindOf_ label lastObject length localizedDescription longLongValue looseParse_ lowercaseString maybe maybeC mix_point_ objectAtIndex_ objectForKey_ optOut_ poke pre_post_ produce rangeOfString_ release removeAllObjects removeLastObject removeObjectAtIndex_ removeObjectForKey_ removeObject_ render replaceCharactersInRange_withString_ replaceObjectAtIndex_withObject_ retain run setLabel_ setObject_atIndex_ setObject_forKey_ setString_ setTag_ setValue_ strictParse_ stringByAppendingString_ stringByAppendingUTF8String_ substringFromIndex_ substringToIndex_ substringWithRange_ sum_ tag take_ uppercaseString userInfo value | class NFMutableArray | tu tests/full_syntax_test.np");
-    nopa_verify_vtable_sig((&NOPA_VTABLE_$_NFMutableArray_NFString_ptr)->__sig, 0x4adeb6d807e3ebfaULL, "UTF8String addEntriesFromDictionary_ addObject_ addObjectsFromArray_ allKeys allValues appendString_ appendUTF8String_ boolValue charValue characterAtIndex_ code color compare_ compute_ containsObject_ copy count dealloc deleteCharactersInRange_ description domain doubleValue draw exchangeObjectAtIndex_withObjectAtIndex_ firstObject hasPrefix_ hasSuffix_ hash helper_ indexOfObject_ init initWithArray_ initWithCapacity_ initWithCode_domain_userInfo_ initWithDictionary_ initWithDouble_ initWithId_ initWithLongLong_ initWithObjects_count_ initWithString_ initWithUTF8String_ initWith_ insertObject_atIndex_ insertString_atIndex_ intValue isEqualToNumber_ isEqualToString_ isEqual_ isKindOfClass_ isKindOf_ label lastObject length localizedDescription longLongValue looseParse_ lowercaseString maybe maybeC mix_point_ objectAtIndex_ objectForKey_ optOut_ poke pre_post_ produce rangeOfString_ release removeAllObjects removeLastObject removeObjectAtIndex_ removeObjectForKey_ removeObject_ render replaceCharactersInRange_withString_ replaceObjectAtIndex_withObject_ retain run setLabel_ setObject_atIndex_ setObject_forKey_ setString_ setTag_ setValue_ strictParse_ stringByAppendingString_ stringByAppendingUTF8String_ substringFromIndex_ substringToIndex_ substringWithRange_ sum_ tag take_ uppercaseString userInfo value | class NFMutableArray<NFString *> | tu tests/full_syntax_test.np");
+    nopa_verify_vtable_sig((&NOPA_VTABLE_$_NPMutableArray)->__sig, 0x4adeb6d807e3ebfaULL, "UTF8String addEntriesFromDictionary_ addObject_ addObjectsFromArray_ allKeys allValues appendString_ appendUTF8String_ boolValue charValue characterAtIndex_ code color compare_ compute_ containsObject_ copy count dealloc deleteCharactersInRange_ description domain doubleValue draw exchangeObjectAtIndex_withObjectAtIndex_ firstObject hasPrefix_ hasSuffix_ hash helper_ indexOfObject_ init initWithArray_ initWithCapacity_ initWithCode_domain_userInfo_ initWithDictionary_ initWithDouble_ initWithId_ initWithLongLong_ initWithObjects_count_ initWithString_ initWithUTF8String_ initWith_ insertObject_atIndex_ insertString_atIndex_ intValue isEqualToNumber_ isEqualToString_ isEqual_ isKindOfClass_ isKindOf_ label lastObject length localizedDescription longLongValue looseParse_ lowercaseString maybe maybeC mix_point_ objectAtIndex_ objectForKey_ optOut_ poke pre_post_ produce rangeOfString_ release removeAllObjects removeLastObject removeObjectAtIndex_ removeObjectForKey_ removeObject_ render replaceCharactersInRange_withString_ replaceObjectAtIndex_withObject_ retain run setLabel_ setObject_atIndex_ setObject_forKey_ setString_ setTag_ setValue_ strictParse_ stringByAppendingString_ stringByAppendingUTF8String_ substringFromIndex_ substringToIndex_ substringWithRange_ sum_ tag take_ uppercaseString userInfo value | class NPMutableArray | tu tests/full_syntax_test.np");
+    nopa_verify_vtable_sig((&NOPA_VTABLE_$_NPMutableArray_NPString_ptr)->__sig, 0x4adeb6d807e3ebfaULL, "UTF8String addEntriesFromDictionary_ addObject_ addObjectsFromArray_ allKeys allValues appendString_ appendUTF8String_ boolValue charValue characterAtIndex_ code color compare_ compute_ containsObject_ copy count dealloc deleteCharactersInRange_ description domain doubleValue draw exchangeObjectAtIndex_withObjectAtIndex_ firstObject hasPrefix_ hasSuffix_ hash helper_ indexOfObject_ init initWithArray_ initWithCapacity_ initWithCode_domain_userInfo_ initWithDictionary_ initWithDouble_ initWithId_ initWithLongLong_ initWithObjects_count_ initWithString_ initWithUTF8String_ initWith_ insertObject_atIndex_ insertString_atIndex_ intValue isEqualToNumber_ isEqualToString_ isEqual_ isKindOfClass_ isKindOf_ label lastObject length localizedDescription longLongValue looseParse_ lowercaseString maybe maybeC mix_point_ objectAtIndex_ objectForKey_ optOut_ poke pre_post_ produce rangeOfString_ release removeAllObjects removeLastObject removeObjectAtIndex_ removeObjectForKey_ removeObject_ render replaceCharactersInRange_withString_ replaceObjectAtIndex_withObject_ retain run setLabel_ setObject_atIndex_ setObject_forKey_ setString_ setTag_ setValue_ strictParse_ stringByAppendingString_ stringByAppendingUTF8String_ substringFromIndex_ substringToIndex_ substringWithRange_ sum_ tag take_ uppercaseString userInfo value | class NPMutableArray<NPString *> | tu tests/full_syntax_test.np");
 }
 
 __attribute__((weak)) void nopa_metaInit(void) {
-    NOPA_CLASS_$_nopa_root = (NFClass){
+    NOPA_CLASS_$_nopa_root = (NPClass){
         .name = "nopa_root",
         .superclass = NULL,
         .instance_size = sizeof(struct nopa_root),
         .vtable = &NOPA_VTABLE_$_nopa_root,
         .class_vtable = NULL,
         .protocol_count = 0,
-        .dealloc = (void (*)(NFObject *, SEL))nopa_root_dealloc,
+        .dealloc = (void (*)(NPObject *, SEL))nopa_root_dealloc,
     };
-    NOPA_CLASS_$_NFObject = (NFClass){
-        .name = "NFObject",
+    NOPA_CLASS_$_NPObject = (NPClass){
+        .name = "NPObject",
         .superclass = &NOPA_CLASS_$_nopa_root,
-        .instance_size = sizeof(struct NFObject),
-        .vtable = &NOPA_VTABLE_$_NFObject,
-        .class_vtable = &NOPA_META_VTABLE_$_NFObject_inst,
+        .instance_size = sizeof(struct NPObject),
+        .vtable = &NOPA_VTABLE_$_NPObject,
+        .class_vtable = &NOPA_META_VTABLE_$_NPObject_inst,
         .protocol_count = 0,
-        .dealloc = (void (*)(NFObject *, SEL))NFObject_dealloc,
+        .dealloc = (void (*)(NPObject *, SEL))NPObject_dealloc,
     };
-    NOPA_CLASS_$_FsBox_NFMutableString_ptr = (NFClass){
-        .name = "FsBox<NFMutableString *>",
-        .superclass = &NOPA_CLASS_$_NFObject,
-        .instance_size = sizeof(struct FsBox_NFMutableString_ptr),
-        .vtable = &NOPA_VTABLE_$_FsBox_NFMutableString_ptr,
-        .class_vtable = &NOPA_META_VTABLE_$_FsBox_NFMutableString_ptr_inst,
+    NOPA_CLASS_$_FsBox_NPMutableString_ptr = (NPClass){
+        .name = "FsBox<NPMutableString *>",
+        .superclass = &NOPA_CLASS_$_NPObject,
+        .instance_size = sizeof(struct FsBox_NPMutableString_ptr),
+        .vtable = &NOPA_VTABLE_$_FsBox_NPMutableString_ptr,
+        .class_vtable = &NOPA_META_VTABLE_$_FsBox_NPMutableString_ptr_inst,
         .protocol_count = 0,
-        .dealloc = (void (*)(NFObject *, SEL))NFObject_dealloc,
+        .dealloc = (void (*)(NPObject *, SEL))NPObject_dealloc,
     };
-    NOPA_CLASS_$_FsEngine__FsRenderable = (NFClass){
+    NOPA_CLASS_$_FsEngine__FsRenderable = (NPClass){
         .name = "FsEngine::FsRenderable",
-        .superclass = &NOPA_CLASS_$_NFObject,
+        .superclass = &NOPA_CLASS_$_NPObject,
         .instance_size = sizeof(struct FsEngine__FsRenderable),
         .vtable = &NOPA_VTABLE_$_FsEngine__FsRenderable,
         .class_vtable = &NOPA_META_VTABLE_$_FsEngine__FsRenderable_inst,
         .protocol_count = 0,
-        .dealloc = (void (*)(NFObject *, SEL))NFObject_dealloc,
+        .dealloc = (void (*)(NPObject *, SEL))NPObject_dealloc,
     };
-    NOPA_CLASS_$_FsErrLow = (NFClass){
+    NOPA_CLASS_$_FsErrLow = (NPClass){
         .name = "FsErrLow",
-        .superclass = &NOPA_CLASS_$_NFObject,
+        .superclass = &NOPA_CLASS_$_NPObject,
         .instance_size = sizeof(struct FsErrLow),
         .vtable = &NOPA_VTABLE_$_FsErrLow,
         .class_vtable = &NOPA_META_VTABLE_$_FsErrLow_inst,
         .protocol_count = 0,
-        .dealloc = (void (*)(NFObject *, SEL))NFObject_dealloc,
+        .dealloc = (void (*)(NPObject *, SEL))NPObject_dealloc,
     };
-    NOPA_CLASS_$_FsFetcher = (NFClass){
+    NOPA_CLASS_$_FsFetcher = (NPClass){
         .name = "FsFetcher",
-        .superclass = &NOPA_CLASS_$_NFObject,
+        .superclass = &NOPA_CLASS_$_NPObject,
         .instance_size = sizeof(struct FsFetcher),
         .vtable = &NOPA_VTABLE_$_FsFetcher,
         .class_vtable = &NOPA_META_VTABLE_$_FsFetcher_inst,
         .protocol_count = 0,
-        .dealloc = (void (*)(NFObject *, SEL))NFObject_dealloc,
+        .dealloc = (void (*)(NPObject *, SEL))NPObject_dealloc,
     };
-    NOPA_CLASS_$_FsForwardUser = (NFClass){
+    NOPA_CLASS_$_FsForwardUser = (NPClass){
         .name = "FsForwardUser",
-        .superclass = &NOPA_CLASS_$_NFObject,
+        .superclass = &NOPA_CLASS_$_NPObject,
         .instance_size = sizeof(struct FsForwardUser),
         .vtable = &NOPA_VTABLE_$_FsForwardUser,
         .class_vtable = &NOPA_META_VTABLE_$_FsForwardUser_inst,
         .protocol_count = 0,
-        .dealloc = (void (*)(NFObject *, SEL))NFObject_dealloc,
+        .dealloc = (void (*)(NPObject *, SEL))NPObject_dealloc,
     };
-    NOPA_CLASS_$_FsGuarded = (NFClass){
+    NOPA_CLASS_$_FsGuarded = (NPClass){
         .name = "FsGuarded",
-        .superclass = &NOPA_CLASS_$_NFObject,
+        .superclass = &NOPA_CLASS_$_NPObject,
         .instance_size = sizeof(struct FsGuarded),
         .vtable = &NOPA_VTABLE_$_FsGuarded,
         .class_vtable = &NOPA_META_VTABLE_$_FsGuarded_inst,
         .protocol_count = 0,
-        .dealloc = (void (*)(NFObject *, SEL))NFObject_dealloc,
+        .dealloc = (void (*)(NPObject *, SEL))NPObject_dealloc,
     };
-    NOPA_CLASS_$_FsModes = (NFClass){
+    NOPA_CLASS_$_FsModes = (NPClass){
         .name = "FsModes",
-        .superclass = &NOPA_CLASS_$_NFObject,
+        .superclass = &NOPA_CLASS_$_NPObject,
         .instance_size = sizeof(struct FsModes),
         .vtable = &NOPA_VTABLE_$_FsModes,
         .class_vtable = &NOPA_META_VTABLE_$_FsModes_inst,
         .protocol_count = 0,
-        .dealloc = (void (*)(NFObject *, SEL))NFObject_dealloc,
+        .dealloc = (void (*)(NPObject *, SEL))NPObject_dealloc,
     };
-    NOPA_CLASS_$_FsParser = (NFClass){
+    NOPA_CLASS_$_FsParser = (NPClass){
         .name = "FsParser",
-        .superclass = &NOPA_CLASS_$_NFObject,
+        .superclass = &NOPA_CLASS_$_NPObject,
         .instance_size = sizeof(struct FsParser),
         .vtable = &NOPA_VTABLE_$_FsParser,
         .class_vtable = &NOPA_META_VTABLE_$_FsParser_inst,
         .protocol_count = 0,
-        .dealloc = (void (*)(NFObject *, SEL))NFObject_dealloc,
+        .dealloc = (void (*)(NPObject *, SEL))NPObject_dealloc,
     };
-    NOPA_CLASS_$_FsTypedStore = (NFClass){
+    NOPA_CLASS_$_FsTypedStore = (NPClass){
         .name = "FsTypedStore",
-        .superclass = &NOPA_CLASS_$_NFObject,
+        .superclass = &NOPA_CLASS_$_NPObject,
         .instance_size = sizeof(struct FsTypedStore),
         .vtable = &NOPA_VTABLE_$_FsTypedStore,
         .class_vtable = &NOPA_META_VTABLE_$_FsTypedStore_inst,
         .protocol_count = 0,
-        .dealloc = (void (*)(NFObject *, SEL))NFObject_dealloc,
+        .dealloc = (void (*)(NPObject *, SEL))NPObject_dealloc,
     };
-    NOPA_CLASS_$_NFArray = (NFClass){
-        .name = "NFArray",
-        .superclass = &NOPA_CLASS_$_NFObject,
-        .instance_size = sizeof(struct NFArray),
-        .vtable = &NOPA_VTABLE_$_NFArray,
-        .class_vtable = &NOPA_META_VTABLE_$_NFArray_inst,
+    NOPA_CLASS_$_NPArray = (NPClass){
+        .name = "NPArray",
+        .superclass = &NOPA_CLASS_$_NPObject,
+        .instance_size = sizeof(struct NPArray),
+        .vtable = &NOPA_VTABLE_$_NPArray,
+        .class_vtable = &NOPA_META_VTABLE_$_NPArray_inst,
         .protocol_count = 0,
-        .dealloc = (void (*)(NFObject *, SEL))NFArray_dealloc,
+        .dealloc = (void (*)(NPObject *, SEL))NPArray_dealloc,
     };
-    NOPA_CLASS_$_NFArray_NFNumber_ptr = (NFClass){
-        .name = "NFArray<NFNumber *>",
-        .superclass = &NOPA_CLASS_$_NFObject,
-        .instance_size = sizeof(struct NFArray_NFNumber_ptr),
-        .vtable = &NOPA_VTABLE_$_NFArray_NFNumber_ptr,
-        .class_vtable = &NOPA_META_VTABLE_$_NFArray_NFNumber_ptr_inst,
+    NOPA_CLASS_$_NPArray_NPNumber_ptr = (NPClass){
+        .name = "NPArray<NPNumber *>",
+        .superclass = &NOPA_CLASS_$_NPObject,
+        .instance_size = sizeof(struct NPArray_NPNumber_ptr),
+        .vtable = &NOPA_VTABLE_$_NPArray_NPNumber_ptr,
+        .class_vtable = &NOPA_META_VTABLE_$_NPArray_NPNumber_ptr_inst,
         .protocol_count = 0,
-        .dealloc = (void (*)(NFObject *, SEL))NFArray_NFNumber_ptr_dealloc,
+        .dealloc = (void (*)(NPObject *, SEL))NPArray_NPNumber_ptr_dealloc,
     };
-    NOPA_CLASS_$_NFDictionary = (NFClass){
-        .name = "NFDictionary",
-        .superclass = &NOPA_CLASS_$_NFObject,
-        .instance_size = sizeof(struct NFDictionary),
-        .vtable = &NOPA_VTABLE_$_NFDictionary,
-        .class_vtable = &NOPA_META_VTABLE_$_NFDictionary_inst,
+    NOPA_CLASS_$_NPDictionary = (NPClass){
+        .name = "NPDictionary",
+        .superclass = &NOPA_CLASS_$_NPObject,
+        .instance_size = sizeof(struct NPDictionary),
+        .vtable = &NOPA_VTABLE_$_NPDictionary,
+        .class_vtable = &NOPA_META_VTABLE_$_NPDictionary_inst,
         .protocol_count = 0,
-        .dealloc = (void (*)(NFObject *, SEL))NFDictionary_dealloc,
+        .dealloc = (void (*)(NPObject *, SEL))NPDictionary_dealloc,
     };
-    NOPA_CLASS_$_NFError = (NFClass){
-        .name = "NFError",
-        .superclass = &NOPA_CLASS_$_NFObject,
-        .instance_size = sizeof(struct NFError),
-        .vtable = &NOPA_VTABLE_$_NFError,
-        .class_vtable = &NOPA_META_VTABLE_$_NFError_inst,
+    NOPA_CLASS_$_NPError = (NPClass){
+        .name = "NPError",
+        .superclass = &NOPA_CLASS_$_NPObject,
+        .instance_size = sizeof(struct NPError),
+        .vtable = &NOPA_VTABLE_$_NPError,
+        .class_vtable = &NOPA_META_VTABLE_$_NPError_inst,
         .protocol_count = 0,
-        .dealloc = (void (*)(NFObject *, SEL))NFObject_dealloc,
+        .dealloc = (void (*)(NPObject *, SEL))NPObject_dealloc,
     };
-    NOPA_CLASS_$_NFNumber = (NFClass){
-        .name = "NFNumber",
-        .superclass = &NOPA_CLASS_$_NFObject,
-        .instance_size = sizeof(struct NFNumber),
-        .vtable = &NOPA_VTABLE_$_NFNumber,
-        .class_vtable = &NOPA_META_VTABLE_$_NFNumber_inst,
+    NOPA_CLASS_$_NPNumber = (NPClass){
+        .name = "NPNumber",
+        .superclass = &NOPA_CLASS_$_NPObject,
+        .instance_size = sizeof(struct NPNumber),
+        .vtable = &NOPA_VTABLE_$_NPNumber,
+        .class_vtable = &NOPA_META_VTABLE_$_NPNumber_inst,
         .protocol_count = 0,
-        .dealloc = (void (*)(NFObject *, SEL))NFObject_dealloc,
+        .dealloc = (void (*)(NPObject *, SEL))NPObject_dealloc,
     };
-    NOPA_CLASS_$_FsAnnotated = (NFClass){
+    NOPA_CLASS_$_FsAnnotated = (NPClass){
         .name = "FsAnnotated",
-        .superclass = &NOPA_CLASS_$_NFObject,
+        .superclass = &NOPA_CLASS_$_NPObject,
         .instance_size = sizeof(struct FsAnnotated),
         .vtable = &NOPA_VTABLE_$_FsAnnotated,
         .class_vtable = &NOPA_META_VTABLE_$_FsAnnotated_inst,
         .protocol_count = 0,
-        .dealloc = (void (*)(NFObject *, SEL))NFObject_dealloc,
+        .dealloc = (void (*)(NPObject *, SEL))NPObject_dealloc,
     };
-    NOPA_CLASS_$_NFString = (NFClass){
-        .name = "NFString",
-        .superclass = &NOPA_CLASS_$_NFObject,
-        .instance_size = sizeof(struct NFString),
-        .vtable = &NOPA_VTABLE_$_NFString,
-        .class_vtable = &NOPA_META_VTABLE_$_NFString_inst,
+    NOPA_CLASS_$_NPString = (NPClass){
+        .name = "NPString",
+        .superclass = &NOPA_CLASS_$_NPObject,
+        .instance_size = sizeof(struct NPString),
+        .vtable = &NOPA_VTABLE_$_NPString,
+        .class_vtable = &NOPA_META_VTABLE_$_NPString_inst,
         .protocol_count = 0,
-        .dealloc = (void (*)(NFObject *, SEL))NFString_dealloc,
+        .dealloc = (void (*)(NPObject *, SEL))NPString_dealloc,
     };
-    NOPA_CLASS_$_FsBox = (NFClass){
+    NOPA_CLASS_$_FsBox = (NPClass){
         .name = "FsBox",
-        .superclass = &NOPA_CLASS_$_NFObject,
+        .superclass = &NOPA_CLASS_$_NPObject,
         .instance_size = sizeof(struct FsBox),
         .vtable = &NOPA_VTABLE_$_FsBox,
         .class_vtable = &NOPA_META_VTABLE_$_FsBox_inst,
         .protocol_count = 0,
-        .dealloc = (void (*)(NFObject *, SEL))NFObject_dealloc,
+        .dealloc = (void (*)(NPObject *, SEL))NPObject_dealloc,
     };
-    NOPA_CLASS_$_NFMutableDictionary = (NFClass){
-        .name = "NFMutableDictionary",
-        .superclass = &NOPA_CLASS_$_NFDictionary,
-        .instance_size = sizeof(struct NFMutableDictionary),
-        .vtable = &NOPA_VTABLE_$_NFMutableDictionary,
-        .class_vtable = &NOPA_META_VTABLE_$_NFMutableDictionary_inst,
+    NOPA_CLASS_$_NPMutableDictionary = (NPClass){
+        .name = "NPMutableDictionary",
+        .superclass = &NOPA_CLASS_$_NPDictionary,
+        .instance_size = sizeof(struct NPMutableDictionary),
+        .vtable = &NOPA_VTABLE_$_NPMutableDictionary,
+        .class_vtable = &NOPA_META_VTABLE_$_NPMutableDictionary_inst,
         .protocol_count = 0,
-        .dealloc = (void (*)(NFObject *, SEL))NFDictionary_dealloc,
+        .dealloc = (void (*)(NPObject *, SEL))NPDictionary_dealloc,
     };
-    NOPA_CLASS_$_NFMutableString = (NFClass){
-        .name = "NFMutableString",
-        .superclass = &NOPA_CLASS_$_NFString,
-        .instance_size = sizeof(struct NFMutableString),
-        .vtable = &NOPA_VTABLE_$_NFMutableString,
-        .class_vtable = &NOPA_META_VTABLE_$_NFMutableString_inst,
+    NOPA_CLASS_$_NPMutableString = (NPClass){
+        .name = "NPMutableString",
+        .superclass = &NOPA_CLASS_$_NPString,
+        .instance_size = sizeof(struct NPMutableString),
+        .vtable = &NOPA_VTABLE_$_NPMutableString,
+        .class_vtable = &NOPA_META_VTABLE_$_NPMutableString_inst,
         .protocol_count = 0,
-        .dealloc = (void (*)(NFObject *, SEL))NFString_dealloc,
+        .dealloc = (void (*)(NPObject *, SEL))NPString_dealloc,
     };
-    NOPA_CLASS_$_FsSprite = (NFClass){
+    NOPA_CLASS_$_FsSprite = (NPClass){
         .name = "FsSprite",
         .superclass = &NOPA_CLASS_$_FsEngine__FsRenderable,
         .instance_size = sizeof(struct FsSprite),
         .vtable = &NOPA_VTABLE_$_FsSprite,
         .class_vtable = &NOPA_META_VTABLE_$_FsSprite_inst,
         .protocol_count = 0,
-        .dealloc = (void (*)(NFObject *, SEL))NFObject_dealloc,
+        .dealloc = (void (*)(NPObject *, SEL))NPObject_dealloc,
     };
-    NOPA_CLASS_$_FsErrHigh = (NFClass){
+    NOPA_CLASS_$_FsErrHigh = (NPClass){
         .name = "FsErrHigh",
         .superclass = &NOPA_CLASS_$_FsErrLow,
         .instance_size = sizeof(struct FsErrHigh),
         .vtable = &NOPA_VTABLE_$_FsErrHigh,
         .class_vtable = &NOPA_META_VTABLE_$_FsErrHigh_inst,
         .protocol_count = 0,
-        .dealloc = (void (*)(NFObject *, SEL))NFObject_dealloc,
+        .dealloc = (void (*)(NPObject *, SEL))NPObject_dealloc,
     };
-    NOPA_CLASS_$_NFMutableArray = (NFClass){
-        .name = "NFMutableArray",
-        .superclass = &NOPA_CLASS_$_NFArray,
-        .instance_size = sizeof(struct NFMutableArray),
-        .vtable = &NOPA_VTABLE_$_NFMutableArray,
-        .class_vtable = &NOPA_META_VTABLE_$_NFMutableArray_inst,
+    NOPA_CLASS_$_NPMutableArray = (NPClass){
+        .name = "NPMutableArray",
+        .superclass = &NOPA_CLASS_$_NPArray,
+        .instance_size = sizeof(struct NPMutableArray),
+        .vtable = &NOPA_VTABLE_$_NPMutableArray,
+        .class_vtable = &NOPA_META_VTABLE_$_NPMutableArray_inst,
         .protocol_count = 0,
-        .dealloc = (void (*)(NFObject *, SEL))NFArray_dealloc,
+        .dealloc = (void (*)(NPObject *, SEL))NPArray_dealloc,
     };
-    NOPA_CLASS_$_NFMutableArray_NFString_ptr = (NFClass){
-        .name = "NFMutableArray<NFString *>",
-        .superclass = &NOPA_CLASS_$_NFArray,
-        .instance_size = sizeof(struct NFMutableArray_NFString_ptr),
-        .vtable = &NOPA_VTABLE_$_NFMutableArray_NFString_ptr,
-        .class_vtable = &NOPA_META_VTABLE_$_NFMutableArray_NFString_ptr_inst,
+    NOPA_CLASS_$_NPMutableArray_NPString_ptr = (NPClass){
+        .name = "NPMutableArray<NPString *>",
+        .superclass = &NOPA_CLASS_$_NPArray,
+        .instance_size = sizeof(struct NPMutableArray_NPString_ptr),
+        .vtable = &NOPA_VTABLE_$_NPMutableArray_NPString_ptr,
+        .class_vtable = &NOPA_META_VTABLE_$_NPMutableArray_NPString_ptr_inst,
         .protocol_count = 0,
-        .dealloc = (void (*)(NFObject *, SEL))NFArray_dealloc,
+        .dealloc = (void (*)(NPObject *, SEL))NPArray_dealloc,
     };
 }
 
 __attribute__((weak)) void nopa_meta_init(void) { nopa_metaInit(); }
 
 /* --------------- Section 12 · Runtime support ---------------- */
-__attribute__((weak)) NFObject *nopa_stringFromCstr(const char *cstr) {
+__attribute__((weak)) NPObject *nopa_stringFromCstr(const char *cstr) {
 #ifdef __NOPA_FREESTANDING
     if (!cstr) cstr = "";
-    NFObject *obj = nopa_alloc(&NOPA_CLASS_$_NFString);
+    NPObject *obj = nopa_alloc(&NOPA_CLASS_$_NPString);
     if (!obj) return NULL;
-    struct NFString *str = (struct NFString *)obj;
+    struct NPString *str = (struct NPString *)obj;
     size_t len = strlen(cstr);
     str->_cstr = (char *)malloc(len + 1);
     if (str->_cstr) strcpy(str->_cstr, cstr);
@@ -4261,15 +4261,15 @@ __attribute__((weak)) NFObject *nopa_stringFromCstr(const char *cstr) {
     return nopa_autorelease(obj);
 #else
     if (!cstr) cstr = "";
-    static struct { const char *cstr; NFObject *obj; } nopa_intern_table[256];
+    static struct { const char *cstr; NPObject *obj; } nopa_intern_table[256];
     static int nopa_intern_count = 0;
     for (int i = 0; i < nopa_intern_count; i++) {
         if (nopa_intern_table[i].cstr == cstr || strcmp(nopa_intern_table[i].cstr, cstr) == 0)
             return nopa_intern_table[i].obj;
     }
-    NFObject *obj = nopa_alloc(&NOPA_CLASS_$_NFString);
+    NPObject *obj = nopa_alloc(&NOPA_CLASS_$_NPString);
     if (!obj) return NULL;
-    struct NFString *str = (struct NFString *)obj;
+    struct NPString *str = (struct NPString *)obj;
     size_t len = strlen(cstr);
     str->_cstr = (char *)malloc(len + 1);
     if (str->_cstr) strcpy(str->_cstr, cstr);
@@ -4285,17 +4285,17 @@ __attribute__((weak)) NFObject *nopa_stringFromCstr(const char *cstr) {
 #endif
 }
 
-__attribute__((weak)) NFObject *nopa_array_create(size_t count, ...) {
-    NFObject *arr = nopa_alloc(&NOPA_CLASS_$_NFArray);
+__attribute__((weak)) NPObject *nopa_array_create(size_t count, ...) {
+    NPObject *arr = nopa_alloc(&NOPA_CLASS_$_NPArray);
     if (!arr) return NULL;
-    struct NFArray *a = (struct NFArray *)arr;
+    struct NPArray *a = (struct NPArray *)arr;
     if (count > 0) {
-        a->_items = (NFObject **)malloc(count * sizeof(NFObject *));
+        a->_items = (NPObject **)malloc(count * sizeof(NPObject *));
         if (a->_items) {
             va_list ap;
             va_start(ap, count);
             for (size_t i = 0; i < count; i++) {
-                NFObject *obj = va_arg(ap, NFObject *);
+                NPObject *obj = va_arg(ap, NPObject *);
                 a->_items[i] = obj ? nopa_retain(obj) : NULL;
             }
             va_end(ap);
@@ -4306,20 +4306,20 @@ __attribute__((weak)) NFObject *nopa_array_create(size_t count, ...) {
     return nopa_autorelease(arr);
 }
 
-__attribute__((weak)) NFObject *nopa_dictionary_create(size_t count, ...) {
-    NFObject *obj = nopa_alloc(&NOPA_CLASS_$_NFDictionary);
+__attribute__((weak)) NPObject *nopa_dictionary_create(size_t count, ...) {
+    NPObject *obj = nopa_alloc(&NOPA_CLASS_$_NPDictionary);
     if (!obj) return NULL;
-    struct NFDictionary *dict = (struct NFDictionary *)obj;
+    struct NPDictionary *dict = (struct NPDictionary *)obj;
     if (count > 0) {
-        dict->_keys = (NFObject **)calloc(count, sizeof(NFObject *));
-        dict->_values = (NFObject **)calloc(count, sizeof(NFObject *));
+        dict->_keys = (NPObject **)calloc(count, sizeof(NPObject *));
+        dict->_values = (NPObject **)calloc(count, sizeof(NPObject *));
         if (dict->_keys && dict->_values) {
             va_list ap;
             va_start(ap, count);
             size_t stored = 0;
             for (size_t i = 0; i < count; i++) {
-                NFObject *k = va_arg(ap, NFObject *);
-                NFObject *v = va_arg(ap, NFObject *);
+                NPObject *k = va_arg(ap, NPObject *);
+                NPObject *v = va_arg(ap, NPObject *);
                 if (!k) continue;
                 dict->_keys[stored] = nopa_retain(k);
                 dict->_values[stored] = v ? nopa_retain(v) : NULL;
@@ -4335,183 +4335,183 @@ __attribute__((weak)) NFObject *nopa_dictionary_create(size_t count, ...) {
 
 /* --------------- Section 13 · Function bodies ---------------- */
 /* -[nopa_root init] */
-__attribute__((weak)) NFObject * nopa_root_init(NFObject * self, SEL _cmd) {
+__attribute__((weak)) NPObject * nopa_root_init(NPObject * self, SEL _cmd) {
     return nopa_init(self);
 }
 
 /* -[nopa_root dealloc] */
-__attribute__((weak)) void nopa_root_dealloc(NFObject * self, SEL _cmd) {
+__attribute__((weak)) void nopa_root_dealloc(NPObject * self, SEL _cmd) {
     return;
 }
 
 /* -[nopa_root release] */
-__attribute__((weak)) void nopa_root_release(NFObject * self, SEL _cmd) {
+__attribute__((weak)) void nopa_root_release(NPObject * self, SEL _cmd) {
     nopa_release(self);
 }
 
 /* -[nopa_root retain] */
-__attribute__((weak)) NFObject * nopa_root_retain(NFObject * self, SEL _cmd) {
+__attribute__((weak)) NPObject * nopa_root_retain(NPObject * self, SEL _cmd) {
     return nopa_retain(self);
 }
 
 /* -[nopa_root isKindOf:] */
-__attribute__((weak)) _Bool nopa_root_isKindOf_(NFObject * self, SEL _cmd, NFClass * cls) {
+__attribute__((weak)) _Bool nopa_root_isKindOf_(NPObject * self, SEL _cmd, NPClass * cls) {
     return nopa_isKindOf(self, cls);
 }
 
 /* -[nopa_root isKindOfClass:] */
-__attribute__((weak)) _Bool nopa_root_isKindOfClass_(NFObject * self, SEL _cmd, NFClass * cls) {
+__attribute__((weak)) _Bool nopa_root_isKindOfClass_(NPObject * self, SEL _cmd, NPClass * cls) {
     return nopa_isKindOfClass(self, cls);
 }
 
 /* -[nopa_root isEqual:] */
-__attribute__((weak)) _Bool nopa_root_isEqual_(NFObject * self, SEL _cmd, NFObject * object) {
+__attribute__((weak)) _Bool nopa_root_isEqual_(NPObject * self, SEL _cmd, NPObject * object) {
     return (self == object);
 }
 
 /* -[nopa_root description] */
-__attribute__((weak)) NFObject * nopa_root_description(NFObject * self, SEL _cmd) {
+__attribute__((weak)) NPObject * nopa_root_description(NPObject * self, SEL _cmd) {
     return NULL;
 }
 
-/* +[NFObject alloc] */
-__attribute__((weak)) NFObject * NFObject_alloc(NFClass * self, SEL _cmd) {
+/* +[NPObject alloc] */
+__attribute__((weak)) NPObject * NPObject_alloc(NPClass * self, SEL _cmd) {
     return nopa_alloc(self);
 }
 
-/* +[NFObject new] */
-__attribute__((weak)) NFObject * NFObject_new(NFClass * self, SEL _cmd) {
-    NFObject * obj = nopa_alloc(self);
+/* +[NPObject new] */
+__attribute__((weak)) NPObject * NPObject_new(NPClass * self, SEL _cmd) {
+    NPObject * obj = nopa_alloc(self);
     return nopa_init(obj);
 }
 
-/* -[NFObject alloc] */
-__attribute__((weak)) NFObject * NFObject_init(NFObject * self, SEL _cmd) {
+/* -[NPObject alloc] */
+__attribute__((weak)) NPObject * NPObject_init(NPObject * self, SEL _cmd) {
     return nopa_init(self);
 }
 
-/* -[NFObject new] */
-__attribute__((weak)) void NFObject_dealloc(NFObject * self, SEL _cmd) {
+/* -[NPObject new] */
+__attribute__((weak)) void NPObject_dealloc(NPObject * self, SEL _cmd) {
     return;
 }
 
-/* -[NFObject init] */
-__attribute__((weak)) void NFObject_release(NFObject * self, SEL _cmd) {
+/* -[NPObject init] */
+__attribute__((weak)) void NPObject_release(NPObject * self, SEL _cmd) {
     nopa_release(self);
 }
 
-/* -[NFObject dealloc] */
-__attribute__((weak)) NFObject * NFObject_retain(NFObject * self, SEL _cmd) {
+/* -[NPObject dealloc] */
+__attribute__((weak)) NPObject * NPObject_retain(NPObject * self, SEL _cmd) {
     return nopa_retain(self);
 }
 
-/* -[NFObject description] */
-__attribute__((weak)) NFObject * NFObject_description(NFObject * self, SEL _cmd) {
+/* -[NPObject description] */
+__attribute__((weak)) NPObject * NPObject_description(NPObject * self, SEL _cmd) {
     return NULL;
 }
 
-/* +[NFString hasPrefix:] */
-__attribute__((weak)) NFString * NFString_stringWithUTF8String_(NFClass * self, SEL _cmd, const char * cstr) {
+/* +[NPString hasPrefix:] */
+__attribute__((weak)) NPString * NPString_stringWithUTF8String_(NPClass * self, SEL _cmd, const char * cstr) {
     {
-        return (NFString *)({ NFObject *__nopa_tmp_5 = ((NFObject *)(NFObject_alloc(self, __nopa_sel_alloc))); __nopa_tmp_5 ? ((NFMutableString * (*)(NFObject *, SEL, const char *))((struct nopa_vtable *)__nopa_tmp_5->isa->vtable)->initWithUTF8String_)(__nopa_tmp_5, __nopa_sel_initWithUTF8String_, cstr) : 0; });
+        return (NPString *)({ NPObject *__nopa_tmp_5 = ((NPObject *)(NPObject_alloc(self, __nopa_sel_alloc))); __nopa_tmp_5 ? ((NPMutableString * (*)(NPObject *, SEL, const char *))((struct nopa_vtable *)__nopa_tmp_5->isa->vtable)->initWithUTF8String_)(__nopa_tmp_5, __nopa_sel_initWithUTF8String_, cstr) : 0; });
     }
 }
 
-/* +[NFString hasSuffix:] */
-__attribute__((weak)) NFString * NFString_stringWithString_(NFClass * self, SEL _cmd, NFString * str) {
+/* +[NPString hasSuffix:] */
+__attribute__((weak)) NPString * NPString_stringWithString_(NPClass * self, SEL _cmd, NPString * str) {
     {
-        return (NFString *)({ NFObject *__nopa_tmp_6 = ((NFObject *)(NFObject_alloc(self, __nopa_sel_alloc))); __nopa_tmp_6 ? ((NFMutableString * (*)(NFObject *, SEL, NFString *))((struct nopa_vtable *)__nopa_tmp_6->isa->vtable)->initWithString_)(__nopa_tmp_6, __nopa_sel_initWithString_, (NFString *)(str)) : 0; });
+        return (NPString *)({ NPObject *__nopa_tmp_6 = ((NPObject *)(NPObject_alloc(self, __nopa_sel_alloc))); __nopa_tmp_6 ? ((NPMutableString * (*)(NPObject *, SEL, NPString *))((struct nopa_vtable *)__nopa_tmp_6->isa->vtable)->initWithString_)(__nopa_tmp_6, __nopa_sel_initWithString_, (NPString *)(str)) : 0; });
     }
 }
 
-/* -[NFString rangeOfString:] */
-__attribute__((weak)) NFString * NFString_initWithUTF8String_(NFObject * self, SEL _cmd, const char * cstr) {
-    self = (&NOPA_VTABLE_$_NFObject)->init(self, __nopa_sel_init);
+/* -[NPString rangeOfString:] */
+__attribute__((weak)) NPString * NPString_initWithUTF8String_(NPObject * self, SEL _cmd, const char * cstr) {
+    self = (&NOPA_VTABLE_$_NPObject)->init(self, __nopa_sel_init);
     if ((self && cstr)) {
-        ((struct NFString *)self)->_length = strlen(cstr);
-        ((struct NFString *)self)->_cstr = (char *)malloc((((struct NFString *)self)->_length + 1));
-        if (((struct NFString *)self)->_cstr) {
-            strcpy(((struct NFString *)self)->_cstr, cstr);
+        ((struct NPString *)self)->_length = strlen(cstr);
+        ((struct NPString *)self)->_cstr = (char *)malloc((((struct NPString *)self)->_length + 1));
+        if (((struct NPString *)self)->_cstr) {
+            strcpy(((struct NPString *)self)->_cstr, cstr);
         }
-        ((struct NFString *)self)->_hash = 0;
-        ((struct NFString *)self)->_hashIsValid = 0;
+        ((struct NPString *)self)->_hash = 0;
+        ((struct NPString *)self)->_hashIsValid = 0;
     }
-    return (NFString *)self;
+    return (NPString *)self;
 }
 
-/* -[NFString substringFromIndex:] */
-__attribute__((weak)) NFString * NFString_initWithString_(NFObject * self, SEL _cmd, NFString * str) {
-    self = (&NOPA_VTABLE_$_NFObject)->init(self, __nopa_sel_init);
+/* -[NPString substringFromIndex:] */
+__attribute__((weak)) NPString * NPString_initWithString_(NPObject * self, SEL _cmd, NPString * str) {
+    self = (&NOPA_VTABLE_$_NPObject)->init(self, __nopa_sel_init);
     if ((self && str)) {
-        char * src = (char *)(({ NFObject *__nopa_tmp_7 = ((NFObject *)(str)); __nopa_tmp_7 ? ((const char * (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_7->isa->vtable)->UTF8String)(__nopa_tmp_7, __nopa_sel_UTF8String) : 0; }));
+        char * src = (char *)(({ NPObject *__nopa_tmp_7 = ((NPObject *)(str)); __nopa_tmp_7 ? ((const char * (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_7->isa->vtable)->UTF8String)(__nopa_tmp_7, __nopa_sel_UTF8String) : 0; }));
         if (src) {
-            ((struct NFString *)self)->_length = strlen(src);
-            ((struct NFString *)self)->_cstr = (char *)malloc((((struct NFString *)self)->_length + 1));
-            if (((struct NFString *)self)->_cstr) {
-                strcpy(((struct NFString *)self)->_cstr, src);
+            ((struct NPString *)self)->_length = strlen(src);
+            ((struct NPString *)self)->_cstr = (char *)malloc((((struct NPString *)self)->_length + 1));
+            if (((struct NPString *)self)->_cstr) {
+                strcpy(((struct NPString *)self)->_cstr, src);
             }
         }
-        ((struct NFString *)self)->_hash = 0;
-        ((struct NFString *)self)->_hashIsValid = 0;
+        ((struct NPString *)self)->_hash = 0;
+        ((struct NPString *)self)->_hashIsValid = 0;
     }
-    return (NFString *)self;
+    return (NPString *)self;
 }
 
-/* -[NFString substringToIndex:] */
-__attribute__((weak)) size_t NFString_length(NFObject * self, SEL _cmd) {
-    return ((struct NFString *)self)->_length;
+/* -[NPString substringToIndex:] */
+__attribute__((weak)) size_t NPString_length(NPObject * self, SEL _cmd) {
+    return ((struct NPString *)self)->_length;
 }
 
-/* -[NFString substringWithRange:] */
-__attribute__((weak)) const char * NFString_UTF8String(NFObject * self, SEL _cmd) {
-    return ((struct NFString *)self)->_cstr ? ((struct NFString *)self)->_cstr : "";
+/* -[NPString substringWithRange:] */
+__attribute__((weak)) const char * NPString_UTF8String(NPObject * self, SEL _cmd) {
+    return ((struct NPString *)self)->_cstr ? ((struct NPString *)self)->_cstr : "";
 }
 
-/* -[NFString stringByAppendingString:] */
-__attribute__((weak)) char NFString_characterAtIndex_(NFObject * self, SEL _cmd, size_t index) {
-    if ((((struct NFString *)self)->_cstr && (index < ((struct NFString *)self)->_length))) {
-        return ((struct NFString *)self)->_cstr[index];
+/* -[NPString stringByAppendingString:] */
+__attribute__((weak)) char NPString_characterAtIndex_(NPObject * self, SEL _cmd, size_t index) {
+    if ((((struct NPString *)self)->_cstr && (index < ((struct NPString *)self)->_length))) {
+        return ((struct NPString *)self)->_cstr[index];
     }
     return '\x00';
 }
 
-/* -[NFString characterAtIndex:] */
-__attribute__((weak)) _Bool NFString_isEqual_(NFObject * self, SEL _cmd, NFObject * object) {
-    if ((self == (NFObject *)object)) {
+/* -[NPString characterAtIndex:] */
+__attribute__((weak)) _Bool NPString_isEqual_(NPObject * self, SEL _cmd, NPObject * object) {
+    if ((self == (NPObject *)object)) {
         return 1;
     }
     if (!object) {
         return 0;
     }
-    if (({ NFObject *__nopa_tmp_8 = ((NFObject *)(object)); __nopa_tmp_8 ? ((_Bool (*)(NFObject *, SEL, NFClass *))((struct nopa_vtable *)__nopa_tmp_8->isa->vtable)->isKindOfClass_)(__nopa_tmp_8, __nopa_sel_isKindOfClass_, (NFClass *)(&NOPA_CLASS_$_NFString)) : (_Bool){0}; })) {
-        return ({ NFObject *__nopa_tmp_9 = ((NFObject *)(self)); __nopa_tmp_9 ? ((int (*)(NFObject *, SEL, NFString *))((struct nopa_vtable *)__nopa_tmp_9->isa->vtable)->isEqualToString_)(__nopa_tmp_9, __nopa_sel_isEqualToString_, (NFString *)((NFString *)object)) : (int){0}; });
+    if (({ NPObject *__nopa_tmp_8 = ((NPObject *)(object)); __nopa_tmp_8 ? ((_Bool (*)(NPObject *, SEL, NPClass *))((struct nopa_vtable *)__nopa_tmp_8->isa->vtable)->isKindOfClass_)(__nopa_tmp_8, __nopa_sel_isKindOfClass_, (NPClass *)(&NOPA_CLASS_$_NPString)) : (_Bool){0}; })) {
+        return ({ NPObject *__nopa_tmp_9 = ((NPObject *)(self)); __nopa_tmp_9 ? ((int (*)(NPObject *, SEL, NPString *))((struct nopa_vtable *)__nopa_tmp_9->isa->vtable)->isEqualToString_)(__nopa_tmp_9, __nopa_sel_isEqualToString_, (NPString *)((NPString *)object)) : (int){0}; });
     }
-    return (&NOPA_VTABLE_$_nopa_root)->isEqual_(self, __nopa_sel_isEqual_, (NFObject *)(object));
+    return (&NOPA_VTABLE_$_nopa_root)->isEqual_(self, __nopa_sel_isEqual_, (NPObject *)(object));
 }
 
-/* -[NFString stringByAppendingUTF8String:] */
-__attribute__((weak)) int NFString_isEqualToString_(NFObject * self, SEL _cmd, NFString * other) {
-    if ((self == (NFObject *)other)) {
+/* -[NPString stringByAppendingUTF8String:] */
+__attribute__((weak)) int NPString_isEqualToString_(NPObject * self, SEL _cmd, NPString * other) {
+    if ((self == (NPObject *)other)) {
         return 1;
     }
     if ((!self || !other)) {
         return 0;
     }
-    char * s1 = (char *)(({ NFObject *__nopa_tmp_10 = ((NFObject *)(self)); __nopa_tmp_10 ? ((const char * (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_10->isa->vtable)->UTF8String)(__nopa_tmp_10, __nopa_sel_UTF8String) : 0; }));
-    char * s2 = (char *)(({ NFObject *__nopa_tmp_11 = ((NFObject *)(other)); __nopa_tmp_11 ? ((const char * (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_11->isa->vtable)->UTF8String)(__nopa_tmp_11, __nopa_sel_UTF8String) : 0; }));
+    char * s1 = (char *)(({ NPObject *__nopa_tmp_10 = ((NPObject *)(self)); __nopa_tmp_10 ? ((const char * (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_10->isa->vtable)->UTF8String)(__nopa_tmp_10, __nopa_sel_UTF8String) : 0; }));
+    char * s2 = (char *)(({ NPObject *__nopa_tmp_11 = ((NPObject *)(other)); __nopa_tmp_11 ? ((const char * (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_11->isa->vtable)->UTF8String)(__nopa_tmp_11, __nopa_sel_UTF8String) : 0; }));
     if ((!s1 || !s2)) {
         return (s1 == s2);
     }
     return (strcmp(s1, s2) == 0);
 }
 
-/* -[NFString uppercaseString] */
-__attribute__((weak)) int NFString_compare_(NFObject * self, SEL _cmd, NFString * other) {
+/* -[NPString uppercaseString] */
+__attribute__((weak)) int NPString_compare_(NPObject * self, SEL _cmd, NPString * other) {
     if (!other) {
         return 1;
     }
-    char * s1 = (char *)(({ NFObject *__nopa_tmp_12 = ((NFObject *)(self)); __nopa_tmp_12 ? ((const char * (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_12->isa->vtable)->UTF8String)(__nopa_tmp_12, __nopa_sel_UTF8String) : 0; }));
-    char * s2 = (char *)(({ NFObject *__nopa_tmp_13 = ((NFObject *)(other)); __nopa_tmp_13 ? ((const char * (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_13->isa->vtable)->UTF8String)(__nopa_tmp_13, __nopa_sel_UTF8String) : 0; }));
+    char * s1 = (char *)(({ NPObject *__nopa_tmp_12 = ((NPObject *)(self)); __nopa_tmp_12 ? ((const char * (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_12->isa->vtable)->UTF8String)(__nopa_tmp_12, __nopa_sel_UTF8String) : 0; }));
+    char * s2 = (char *)(({ NPObject *__nopa_tmp_13 = ((NPObject *)(other)); __nopa_tmp_13 ? ((const char * (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_13->isa->vtable)->UTF8String)(__nopa_tmp_13, __nopa_sel_UTF8String) : 0; }));
     if (!s1) {
         return s2 ? -1 : 0;
     }
@@ -4521,13 +4521,13 @@ __attribute__((weak)) int NFString_compare_(NFObject * self, SEL _cmd, NFString 
     return strcmp(s1, s2);
 }
 
-/* -[NFString lowercaseString] */
-__attribute__((weak)) int NFString_hasPrefix_(NFObject * self, SEL _cmd, NFString * prefix) {
+/* -[NPString lowercaseString] */
+__attribute__((weak)) int NPString_hasPrefix_(NPObject * self, SEL _cmd, NPString * prefix) {
     if ((!self || !prefix)) {
         return 0;
     }
-    char * pre = (char *)(({ NFObject *__nopa_tmp_14 = ((NFObject *)(prefix)); __nopa_tmp_14 ? ((const char * (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_14->isa->vtable)->UTF8String)(__nopa_tmp_14, __nopa_sel_UTF8String) : 0; }));
-    char * str = (char *)(({ NFObject *__nopa_tmp_15 = ((NFObject *)(self)); __nopa_tmp_15 ? ((const char * (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_15->isa->vtable)->UTF8String)(__nopa_tmp_15, __nopa_sel_UTF8String) : 0; }));
+    char * pre = (char *)(({ NPObject *__nopa_tmp_14 = ((NPObject *)(prefix)); __nopa_tmp_14 ? ((const char * (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_14->isa->vtable)->UTF8String)(__nopa_tmp_14, __nopa_sel_UTF8String) : 0; }));
+    char * str = (char *)(({ NPObject *__nopa_tmp_15 = ((NPObject *)(self)); __nopa_tmp_15 ? ((const char * (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_15->isa->vtable)->UTF8String)(__nopa_tmp_15, __nopa_sel_UTF8String) : 0; }));
     if ((!pre || !str)) {
         return 0;
     }
@@ -4535,13 +4535,13 @@ __attribute__((weak)) int NFString_hasPrefix_(NFObject * self, SEL _cmd, NFStrin
     return (strncmp(str, pre, preLen) == 0);
 }
 
-/* -[NFString hash] */
-__attribute__((weak)) int NFString_hasSuffix_(NFObject * self, SEL _cmd, NFString * suffix) {
+/* -[NPString hash] */
+__attribute__((weak)) int NPString_hasSuffix_(NPObject * self, SEL _cmd, NPString * suffix) {
     if ((!self || !suffix)) {
         return 0;
     }
-    char * suf = (char *)(({ NFObject *__nopa_tmp_16 = ((NFObject *)(suffix)); __nopa_tmp_16 ? ((const char * (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_16->isa->vtable)->UTF8String)(__nopa_tmp_16, __nopa_sel_UTF8String) : 0; }));
-    char * str = (char *)(({ NFObject *__nopa_tmp_17 = ((NFObject *)(self)); __nopa_tmp_17 ? ((const char * (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_17->isa->vtable)->UTF8String)(__nopa_tmp_17, __nopa_sel_UTF8String) : 0; }));
+    char * suf = (char *)(({ NPObject *__nopa_tmp_16 = ((NPObject *)(suffix)); __nopa_tmp_16 ? ((const char * (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_16->isa->vtable)->UTF8String)(__nopa_tmp_16, __nopa_sel_UTF8String) : 0; }));
+    char * str = (char *)(({ NPObject *__nopa_tmp_17 = ((NPObject *)(self)); __nopa_tmp_17 ? ((const char * (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_17->isa->vtable)->UTF8String)(__nopa_tmp_17, __nopa_sel_UTF8String) : 0; }));
     if ((!suf || !str)) {
         return 0;
     }
@@ -4553,19 +4553,19 @@ __attribute__((weak)) int NFString_hasSuffix_(NFObject * self, SEL _cmd, NFStrin
     return (strcmp(((str + strLen) - sufLen), suf) == 0);
 }
 
-/* -[NFString description] */
-__attribute__((weak)) NFRange NFString_rangeOfString_(NFObject * self, SEL _cmd, NFString * substring) {
-    NFRange range = { 0, 0 };
-    if ((!substring || !((struct NFString *)self)->_cstr)) {
+/* -[NPString description] */
+__attribute__((weak)) NPRange NPString_rangeOfString_(NPObject * self, SEL _cmd, NPString * substring) {
+    NPRange range = { 0, 0 };
+    if ((!substring || !((struct NPString *)self)->_cstr)) {
         return range;
     }
-    char * sub = (char *)(({ NFObject *__nopa_tmp_18 = ((NFObject *)(substring)); __nopa_tmp_18 ? ((const char * (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_18->isa->vtable)->UTF8String)(__nopa_tmp_18, __nopa_sel_UTF8String) : 0; }));
+    char * sub = (char *)(({ NPObject *__nopa_tmp_18 = ((NPObject *)(substring)); __nopa_tmp_18 ? ((const char * (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_18->isa->vtable)->UTF8String)(__nopa_tmp_18, __nopa_sel_UTF8String) : 0; }));
     if (!sub) {
         return range;
     }
-    char * found = (char *)(strstr(((struct NFString *)self)->_cstr, sub));
+    char * found = (char *)(strstr(((struct NPString *)self)->_cstr, sub));
     if (found) {
-        range.location = (size_t)((found - ((struct NFString *)self)->_cstr));
+        range.location = (size_t)((found - ((struct NPString *)self)->_cstr));
         range.length = strlen(sub);
     }
     else {
@@ -4575,193 +4575,193 @@ __attribute__((weak)) NFRange NFString_rangeOfString_(NFObject * self, SEL _cmd,
     return range;
 }
 
-/* -[NFString copy] */
-__attribute__((weak)) NFString * NFString_substringFromIndex_(NFObject * self, SEL _cmd, size_t from) {
-    if ((!((struct NFString *)self)->_cstr || (from > ((struct NFString *)self)->_length))) {
+/* -[NPString copy] */
+__attribute__((weak)) NPString * NPString_substringFromIndex_(NPObject * self, SEL _cmd, size_t from) {
+    if ((!((struct NPString *)self)->_cstr || (from > ((struct NPString *)self)->_length))) {
         return NULL;
     }
-    return (NFString *)NFString_stringWithUTF8String_(&NOPA_CLASS_$_NFString, __nopa_sel_stringWithUTF8String_, (((struct NFString *)self)->_cstr + from));
+    return (NPString *)NPString_stringWithUTF8String_(&NOPA_CLASS_$_NPString, __nopa_sel_stringWithUTF8String_, (((struct NPString *)self)->_cstr + from));
 }
 
-/* -[NFString dealloc] */
-__attribute__((weak)) NFString * NFString_substringToIndex_(NFObject * self, SEL _cmd, size_t to) {
-    if (!((struct NFString *)self)->_cstr) {
+/* -[NPString dealloc] */
+__attribute__((weak)) NPString * NPString_substringToIndex_(NPObject * self, SEL _cmd, size_t to) {
+    if (!((struct NPString *)self)->_cstr) {
         return NULL;
     }
-    if ((to > ((struct NFString *)self)->_length)) {
-        to = ((struct NFString *)self)->_length;
+    if ((to > ((struct NPString *)self)->_length)) {
+        to = ((struct NPString *)self)->_length;
     }
     char * buf = (char *)malloc((to + 1));
-    strncpy(buf, ((struct NFString *)self)->_cstr, to);
+    strncpy(buf, ((struct NPString *)self)->_cstr, to);
     buf[to] = '\x00';
-    NFString * result = (NFString *)(NFString_stringWithUTF8String_(&NOPA_CLASS_$_NFString, __nopa_sel_stringWithUTF8String_, buf));
+    NPString * result = (NPString *)(NPString_stringWithUTF8String_(&NOPA_CLASS_$_NPString, __nopa_sel_stringWithUTF8String_, buf));
     free(buf);
     return result;
 }
 
-/* -[NFString substringWithRange_] */
-__attribute__((weak)) NFString * NFString_substringWithRange_(NFObject * self, SEL _cmd, NFRange range) {
-    if (!((struct NFString *)self)->_cstr) {
+/* -[NPString substringWithRange_] */
+__attribute__((weak)) NPString * NPString_substringWithRange_(NPObject * self, SEL _cmd, NPRange range) {
+    if (!((struct NPString *)self)->_cstr) {
         return NULL;
     }
-    if (((range.location > ((struct NFString *)self)->_length) || ((range.location + range.length) > ((struct NFString *)self)->_length))) {
+    if (((range.location > ((struct NPString *)self)->_length) || ((range.location + range.length) > ((struct NPString *)self)->_length))) {
         return NULL;
     }
     char * buf = (char *)malloc((range.length + 1));
-    strncpy(buf, (((struct NFString *)self)->_cstr + range.location), range.length);
+    strncpy(buf, (((struct NPString *)self)->_cstr + range.location), range.length);
     buf[range.length] = '\x00';
-    NFString * result = (NFString *)(NFString_stringWithUTF8String_(&NOPA_CLASS_$_NFString, __nopa_sel_stringWithUTF8String_, buf));
+    NPString * result = (NPString *)(NPString_stringWithUTF8String_(&NOPA_CLASS_$_NPString, __nopa_sel_stringWithUTF8String_, buf));
     free(buf);
     return result;
 }
 
-/* -[NFString stringByAppendingString_] */
-__attribute__((weak)) NFString * NFString_stringByAppendingString_(NFObject * self, SEL _cmd, NFString * other) {
+/* -[NPString stringByAppendingString_] */
+__attribute__((weak)) NPString * NPString_stringByAppendingString_(NPObject * self, SEL _cmd, NPString * other) {
     if (!self) {
-        return (NFString *)NFString_stringWithString_(&NOPA_CLASS_$_NFString, __nopa_sel_stringWithString_, other);
+        return (NPString *)NPString_stringWithString_(&NOPA_CLASS_$_NPString, __nopa_sel_stringWithString_, other);
     }
     if (!other) {
-        return (NFString *)NFString_stringWithString_(&NOPA_CLASS_$_NFString, __nopa_sel_stringWithString_, self);
+        return (NPString *)NPString_stringWithString_(&NOPA_CLASS_$_NPString, __nopa_sel_stringWithString_, self);
     }
-    char * s1 = (char *)(({ NFObject *__nopa_tmp_19 = ((NFObject *)(self)); __nopa_tmp_19 ? ((const char * (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_19->isa->vtable)->UTF8String)(__nopa_tmp_19, __nopa_sel_UTF8String) : 0; }));
-    char * s2 = (char *)(({ NFObject *__nopa_tmp_20 = ((NFObject *)(other)); __nopa_tmp_20 ? ((const char * (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_20->isa->vtable)->UTF8String)(__nopa_tmp_20, __nopa_sel_UTF8String) : 0; }));
+    char * s1 = (char *)(({ NPObject *__nopa_tmp_19 = ((NPObject *)(self)); __nopa_tmp_19 ? ((const char * (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_19->isa->vtable)->UTF8String)(__nopa_tmp_19, __nopa_sel_UTF8String) : 0; }));
+    char * s2 = (char *)(({ NPObject *__nopa_tmp_20 = ((NPObject *)(other)); __nopa_tmp_20 ? ((const char * (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_20->isa->vtable)->UTF8String)(__nopa_tmp_20, __nopa_sel_UTF8String) : 0; }));
     if ((!s1 || !s2)) {
-        return (NFString *)NFString_stringWithString_(&NOPA_CLASS_$_NFString, __nopa_sel_stringWithString_, s1 ? self : other);
+        return (NPString *)NPString_stringWithString_(&NOPA_CLASS_$_NPString, __nopa_sel_stringWithString_, s1 ? self : other);
     }
     size_t len1 = strlen(s1);
     size_t len2 = strlen(s2);
     char * buf = (char *)malloc(((len1 + len2) + 1));
     strcpy(buf, s1);
     strcat(buf, s2);
-    NFString * result = (NFString *)(NFString_stringWithUTF8String_(&NOPA_CLASS_$_NFString, __nopa_sel_stringWithUTF8String_, buf));
+    NPString * result = (NPString *)(NPString_stringWithUTF8String_(&NOPA_CLASS_$_NPString, __nopa_sel_stringWithUTF8String_, buf));
     free(buf);
     return result;
 }
 
-/* -[NFString stringByAppendingUTF8String_] */
-__attribute__((weak)) NFString * NFString_stringByAppendingUTF8String_(NFObject * self, SEL _cmd, const char * cstr) {
+/* -[NPString stringByAppendingUTF8String_] */
+__attribute__((weak)) NPString * NPString_stringByAppendingUTF8String_(NPObject * self, SEL _cmd, const char * cstr) {
     if ((!self || !cstr)) {
-        return (NFString *)NFString_stringWithString_(&NOPA_CLASS_$_NFString, __nopa_sel_stringWithString_, self);
+        return (NPString *)NPString_stringWithString_(&NOPA_CLASS_$_NPString, __nopa_sel_stringWithString_, self);
     }
-    char * s1 = (char *)(({ NFObject *__nopa_tmp_21 = ((NFObject *)(self)); __nopa_tmp_21 ? ((const char * (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_21->isa->vtable)->UTF8String)(__nopa_tmp_21, __nopa_sel_UTF8String) : 0; }));
+    char * s1 = (char *)(({ NPObject *__nopa_tmp_21 = ((NPObject *)(self)); __nopa_tmp_21 ? ((const char * (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_21->isa->vtable)->UTF8String)(__nopa_tmp_21, __nopa_sel_UTF8String) : 0; }));
     if (!s1) {
-        return (NFString *)NFString_stringWithString_(&NOPA_CLASS_$_NFString, __nopa_sel_stringWithString_, self);
+        return (NPString *)NPString_stringWithString_(&NOPA_CLASS_$_NPString, __nopa_sel_stringWithString_, self);
     }
     size_t len1 = strlen(s1);
     size_t len2 = strlen(cstr);
     char * buf = (char *)malloc(((len1 + len2) + 1));
     strcpy(buf, s1);
     strcat(buf, cstr);
-    NFString * result = (NFString *)(NFString_stringWithUTF8String_(&NOPA_CLASS_$_NFString, __nopa_sel_stringWithUTF8String_, buf));
+    NPString * result = (NPString *)(NPString_stringWithUTF8String_(&NOPA_CLASS_$_NPString, __nopa_sel_stringWithUTF8String_, buf));
     free(buf);
     return result;
 }
 
-/* -[NFString uppercaseString] */
-__attribute__((weak)) NFString * NFString_uppercaseString(NFObject * self, SEL _cmd) {
-    if (!((struct NFString *)self)->_cstr) {
+/* -[NPString uppercaseString] */
+__attribute__((weak)) NPString * NPString_uppercaseString(NPObject * self, SEL _cmd) {
+    if (!((struct NPString *)self)->_cstr) {
         return NULL;
     }
-    char * buf = (char *)malloc((((struct NFString *)self)->_length + 1));
-    for (unsigned long i = 0;  (i <= ((struct NFString *)self)->_length); (i)++) {
-        buf[i] = (char)toupper((unsigned char)((struct NFString *)self)->_cstr[i]);
+    char * buf = (char *)malloc((((struct NPString *)self)->_length + 1));
+    for (unsigned long i = 0;  (i <= ((struct NPString *)self)->_length); (i)++) {
+        buf[i] = (char)toupper((unsigned char)((struct NPString *)self)->_cstr[i]);
     }
-    NFString * result = (NFString *)(NFString_stringWithUTF8String_(&NOPA_CLASS_$_NFString, __nopa_sel_stringWithUTF8String_, buf));
+    NPString * result = (NPString *)(NPString_stringWithUTF8String_(&NOPA_CLASS_$_NPString, __nopa_sel_stringWithUTF8String_, buf));
     free(buf);
     return result;
 }
 
-/* -[NFString lowercaseString] */
-__attribute__((weak)) NFString * NFString_lowercaseString(NFObject * self, SEL _cmd) {
-    if (!((struct NFString *)self)->_cstr) {
+/* -[NPString lowercaseString] */
+__attribute__((weak)) NPString * NPString_lowercaseString(NPObject * self, SEL _cmd) {
+    if (!((struct NPString *)self)->_cstr) {
         return NULL;
     }
-    char * buf = (char *)malloc((((struct NFString *)self)->_length + 1));
-    for (unsigned long i = 0;  (i <= ((struct NFString *)self)->_length); (i)++) {
-        buf[i] = (char)tolower((unsigned char)((struct NFString *)self)->_cstr[i]);
+    char * buf = (char *)malloc((((struct NPString *)self)->_length + 1));
+    for (unsigned long i = 0;  (i <= ((struct NPString *)self)->_length); (i)++) {
+        buf[i] = (char)tolower((unsigned char)((struct NPString *)self)->_cstr[i]);
     }
-    NFString * result = (NFString *)(NFString_stringWithUTF8String_(&NOPA_CLASS_$_NFString, __nopa_sel_stringWithUTF8String_, buf));
+    NPString * result = (NPString *)(NPString_stringWithUTF8String_(&NOPA_CLASS_$_NPString, __nopa_sel_stringWithUTF8String_, buf));
     free(buf);
     return result;
 }
 
-/* -[NFString hash] */
-__attribute__((weak)) uint32_t NFString_hash(NFObject * self, SEL _cmd) {
-    if (((struct NFString *)self)->_hashIsValid) {
-        return ((struct NFString *)self)->_hash;
+/* -[NPString hash] */
+__attribute__((weak)) uint32_t NPString_hash(NPObject * self, SEL _cmd) {
+    if (((struct NPString *)self)->_hashIsValid) {
+        return ((struct NPString *)self)->_hash;
     }
     uint32_t h = 2166136261;
-    if (((struct NFString *)self)->_cstr) {
-        for (unsigned long i = 0;  (i < ((struct NFString *)self)->_length); (i)++) {
-            (h ^= (uint8_t)((struct NFString *)self)->_cstr[i]);
+    if (((struct NPString *)self)->_cstr) {
+        for (unsigned long i = 0;  (i < ((struct NPString *)self)->_length); (i)++) {
+            (h ^= (uint8_t)((struct NPString *)self)->_cstr[i]);
             (h *= 16777619);
         }
     }
-    ((struct NFString *)self)->_hash = h;
-    ((struct NFString *)self)->_hashIsValid = 1;
+    ((struct NPString *)self)->_hash = h;
+    ((struct NPString *)self)->_hashIsValid = 1;
     return h;
 }
 
-/* -[NFString isEqual:] */
-__attribute__((weak)) NFString * NFString_description(NFObject * self, SEL _cmd) {
-    return (NFString *)NFString_stringWithString_(&NOPA_CLASS_$_NFString, __nopa_sel_stringWithString_, self);
+/* -[NPString isEqual:] */
+__attribute__((weak)) NPString * NPString_description(NPObject * self, SEL _cmd) {
+    return (NPString *)NPString_stringWithString_(&NOPA_CLASS_$_NPString, __nopa_sel_stringWithString_, self);
 }
 
-/* -[NFString copy] */
-__attribute__((weak)) NFString * NFString_copy(NFObject * self, SEL _cmd) {
-    return (NFString *)({ NFObject *__nopa_tmp_22 = ((NFObject *)(NFObject_alloc(&NOPA_CLASS_$_NFString, __nopa_sel_alloc))); __nopa_tmp_22 ? ((NFMutableString * (*)(NFObject *, SEL, NFString *))((struct nopa_vtable *)__nopa_tmp_22->isa->vtable)->initWithString_)(__nopa_tmp_22, __nopa_sel_initWithString_, (NFString *)(self)) : 0; });
+/* -[NPString copy] */
+__attribute__((weak)) NPString * NPString_copy(NPObject * self, SEL _cmd) {
+    return (NPString *)({ NPObject *__nopa_tmp_22 = ((NPObject *)(NPObject_alloc(&NOPA_CLASS_$_NPString, __nopa_sel_alloc))); __nopa_tmp_22 ? ((NPMutableString * (*)(NPObject *, SEL, NPString *))((struct nopa_vtable *)__nopa_tmp_22->isa->vtable)->initWithString_)(__nopa_tmp_22, __nopa_sel_initWithString_, (NPString *)(self)) : 0; });
 }
 
-/* -[NFString stringWithString:] */
-__attribute__((weak)) void NFString_dealloc(NFObject * self, SEL _cmd) {
-    if (((struct NFString *)self)->_cstr) {
-        free(((struct NFString *)self)->_cstr);
-        ((struct NFString *)self)->_cstr = NULL;
+/* -[NPString stringWithString:] */
+__attribute__((weak)) void NPString_dealloc(NPObject * self, SEL _cmd) {
+    if (((struct NPString *)self)->_cstr) {
+        free(((struct NPString *)self)->_cstr);
+        ((struct NPString *)self)->_cstr = NULL;
     }
-    ((struct NFString *)self)->_length = 0;
-    (&NOPA_VTABLE_$_NFObject)->dealloc(self, __nopa_sel_dealloc);
+    ((struct NPString *)self)->_length = 0;
+    (&NOPA_VTABLE_$_NPObject)->dealloc(self, __nopa_sel_dealloc);
 }
 
-/* +[NFMutableString stringWithUTF8String_] */
-__attribute__((weak)) NFMutableString * NFMutableString_stringWithUTF8String_(NFClass * self, SEL _cmd, const char * cstr) {
+/* +[NPMutableString stringWithUTF8String_] */
+__attribute__((weak)) NPMutableString * NPMutableString_stringWithUTF8String_(NPClass * self, SEL _cmd, const char * cstr) {
     {
-        return (NFMutableString *)({ NFObject *__nopa_tmp_23 = ((NFObject *)(NFObject_alloc(self, __nopa_sel_alloc))); __nopa_tmp_23 ? ((NFMutableString * (*)(NFObject *, SEL, const char *))((struct nopa_vtable *)__nopa_tmp_23->isa->vtable)->initWithUTF8String_)(__nopa_tmp_23, __nopa_sel_initWithUTF8String_, cstr) : 0; });
+        return (NPMutableString *)({ NPObject *__nopa_tmp_23 = ((NPObject *)(NPObject_alloc(self, __nopa_sel_alloc))); __nopa_tmp_23 ? ((NPMutableString * (*)(NPObject *, SEL, const char *))((struct nopa_vtable *)__nopa_tmp_23->isa->vtable)->initWithUTF8String_)(__nopa_tmp_23, __nopa_sel_initWithUTF8String_, cstr) : 0; });
     }
 }
 
-/* +[NFMutableString stringWithString_] */
-__attribute__((weak)) NFMutableString * NFMutableString_stringWithString_(NFClass * self, SEL _cmd, NFString * str) {
+/* +[NPMutableString stringWithString_] */
+__attribute__((weak)) NPMutableString * NPMutableString_stringWithString_(NPClass * self, SEL _cmd, NPString * str) {
     {
-        return (NFMutableString *)({ NFObject *__nopa_tmp_24 = ((NFObject *)(NFObject_alloc(self, __nopa_sel_alloc))); __nopa_tmp_24 ? ((NFMutableString * (*)(NFObject *, SEL, NFString *))((struct nopa_vtable *)__nopa_tmp_24->isa->vtable)->initWithString_)(__nopa_tmp_24, __nopa_sel_initWithString_, (NFString *)(str)) : 0; });
+        return (NPMutableString *)({ NPObject *__nopa_tmp_24 = ((NPObject *)(NPObject_alloc(self, __nopa_sel_alloc))); __nopa_tmp_24 ? ((NPMutableString * (*)(NPObject *, SEL, NPString *))((struct nopa_vtable *)__nopa_tmp_24->isa->vtable)->initWithString_)(__nopa_tmp_24, __nopa_sel_initWithString_, (NPString *)(str)) : 0; });
     }
 }
 
-/* -[NFMutableString initWithUTF8String_] */
-__attribute__((weak)) NFMutableString * NFMutableString_initWithUTF8String_(NFObject * self, SEL _cmd, const char * cstr) {
-    self = (&NOPA_VTABLE_$_NFString)->initWithUTF8String_(self, __nopa_sel_initWithUTF8String_, cstr);
-    return (NFMutableString *)self;
+/* -[NPMutableString initWithUTF8String_] */
+__attribute__((weak)) NPMutableString * NPMutableString_initWithUTF8String_(NPObject * self, SEL _cmd, const char * cstr) {
+    self = (&NOPA_VTABLE_$_NPString)->initWithUTF8String_(self, __nopa_sel_initWithUTF8String_, cstr);
+    return (NPMutableString *)self;
 }
 
-/* -[NFMutableString initWithString_] */
-__attribute__((weak)) NFMutableString * NFMutableString_initWithString_(NFObject * self, SEL _cmd, NFString * str) {
-    self = (&NOPA_VTABLE_$_NFString)->initWithString_(self, __nopa_sel_initWithString_, (NFString *)(str));
-    return (NFMutableString *)self;
+/* -[NPMutableString initWithString_] */
+__attribute__((weak)) NPMutableString * NPMutableString_initWithString_(NPObject * self, SEL _cmd, NPString * str) {
+    self = (&NOPA_VTABLE_$_NPString)->initWithString_(self, __nopa_sel_initWithString_, (NPString *)(str));
+    return (NPMutableString *)self;
 }
 
-/* -[NFMutableString appendString_] */
-__attribute__((weak)) void NFMutableString_appendString_(NFObject * self, SEL _cmd, NFString * str) {
+/* -[NPMutableString appendString_] */
+__attribute__((weak)) void NPMutableString_appendString_(NPObject * self, SEL _cmd, NPString * str) {
     if (!str) {
         return;
     }
-    char * src = (char *)(({ NFObject *__nopa_tmp_25 = ((NFObject *)(str)); __nopa_tmp_25 ? ((const char * (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_25->isa->vtable)->UTF8String)(__nopa_tmp_25, __nopa_sel_UTF8String) : 0; }));
+    char * src = (char *)(({ NPObject *__nopa_tmp_25 = ((NPObject *)(str)); __nopa_tmp_25 ? ((const char * (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_25->isa->vtable)->UTF8String)(__nopa_tmp_25, __nopa_sel_UTF8String) : 0; }));
     if (!src) {
         return;
     }
-    ({ NFObject *__nopa_tmp_26 = ((NFObject *)(self)); __nopa_tmp_26 ? ((void (*)(NFObject *, SEL, const char *))((struct nopa_vtable *)__nopa_tmp_26->isa->vtable)->appendUTF8String_)(__nopa_tmp_26, __nopa_sel_appendUTF8String_, src) : 0; });
+    ({ NPObject *__nopa_tmp_26 = ((NPObject *)(self)); __nopa_tmp_26 ? ((void (*)(NPObject *, SEL, const char *))((struct nopa_vtable *)__nopa_tmp_26->isa->vtable)->appendUTF8String_)(__nopa_tmp_26, __nopa_sel_appendUTF8String_, src) : 0; });
 }
 
-/* -[NFMutableString appendUTF8String_] */
-__attribute__((weak)) void NFMutableString_appendUTF8String_(NFObject * self, SEL _cmd, const char * cstr) {
+/* -[NPMutableString appendUTF8String_] */
+__attribute__((weak)) void NPMutableString_appendUTF8String_(NPObject * self, SEL _cmd, const char * cstr) {
     if (!cstr) {
         return;
     }
@@ -4769,115 +4769,115 @@ __attribute__((weak)) void NFMutableString_appendUTF8String_(NFObject * self, SE
     if ((add == 0)) {
         return;
     }
-    char * nbuf = (char *)realloc(((struct NFMutableString *)self)->_cstr, ((((struct NFMutableString *)self)->_length + add) + 1));
+    char * nbuf = (char *)realloc(((struct NPMutableString *)self)->_cstr, ((((struct NPMutableString *)self)->_length + add) + 1));
     if (!nbuf) {
         return;
     }
-    ((struct NFMutableString *)self)->_cstr = nbuf;
-    memcpy((((struct NFMutableString *)self)->_cstr + ((struct NFMutableString *)self)->_length), cstr, (add + 1));
-    (((struct NFMutableString *)self)->_length += add);
-    ((struct NFMutableString *)self)->_hashIsValid = 0;
+    ((struct NPMutableString *)self)->_cstr = nbuf;
+    memcpy((((struct NPMutableString *)self)->_cstr + ((struct NPMutableString *)self)->_length), cstr, (add + 1));
+    (((struct NPMutableString *)self)->_length += add);
+    ((struct NPMutableString *)self)->_hashIsValid = 0;
 }
 
-/* -[NFMutableString insertString_atIndex_] */
-__attribute__((weak)) void NFMutableString_insertString_atIndex_(NFObject * self, SEL _cmd, NFString * str, size_t idx) {
+/* -[NPMutableString insertString_atIndex_] */
+__attribute__((weak)) void NPMutableString_insertString_atIndex_(NPObject * self, SEL _cmd, NPString * str, size_t idx) {
     if (!str) {
         return;
     }
-    char * src = (char *)(({ NFObject *__nopa_tmp_27 = ((NFObject *)(str)); __nopa_tmp_27 ? ((const char * (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_27->isa->vtable)->UTF8String)(__nopa_tmp_27, __nopa_sel_UTF8String) : 0; }));
+    char * src = (char *)(({ NPObject *__nopa_tmp_27 = ((NPObject *)(str)); __nopa_tmp_27 ? ((const char * (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_27->isa->vtable)->UTF8String)(__nopa_tmp_27, __nopa_sel_UTF8String) : 0; }));
     if (!src) {
         return;
     }
-    if ((idx > ((struct NFMutableString *)self)->_length)) {
-        idx = ((struct NFMutableString *)self)->_length;
+    if ((idx > ((struct NPMutableString *)self)->_length)) {
+        idx = ((struct NPMutableString *)self)->_length;
     }
     size_t add = strlen(src);
     if ((add == 0)) {
         return;
     }
-    char * nbuf = (char *)realloc(((struct NFMutableString *)self)->_cstr, ((((struct NFMutableString *)self)->_length + add) + 1));
+    char * nbuf = (char *)realloc(((struct NPMutableString *)self)->_cstr, ((((struct NPMutableString *)self)->_length + add) + 1));
     if (!nbuf) {
         return;
     }
-    ((struct NFMutableString *)self)->_cstr = nbuf;
-    memmove(((((struct NFMutableString *)self)->_cstr + idx) + add), (((struct NFMutableString *)self)->_cstr + idx), ((((struct NFMutableString *)self)->_length - idx) + 1));
-    memcpy((((struct NFMutableString *)self)->_cstr + idx), src, add);
-    (((struct NFMutableString *)self)->_length += add);
-    ((struct NFMutableString *)self)->_hashIsValid = 0;
+    ((struct NPMutableString *)self)->_cstr = nbuf;
+    memmove(((((struct NPMutableString *)self)->_cstr + idx) + add), (((struct NPMutableString *)self)->_cstr + idx), ((((struct NPMutableString *)self)->_length - idx) + 1));
+    memcpy((((struct NPMutableString *)self)->_cstr + idx), src, add);
+    (((struct NPMutableString *)self)->_length += add);
+    ((struct NPMutableString *)self)->_hashIsValid = 0;
 }
 
-/* -[NFMutableString deleteCharactersInRange_] */
-__attribute__((weak)) void NFMutableString_deleteCharactersInRange_(NFObject * self, SEL _cmd, NFRange range) {
-    if (!((struct NFMutableString *)self)->_cstr) {
+/* -[NPMutableString deleteCharactersInRange_] */
+__attribute__((weak)) void NPMutableString_deleteCharactersInRange_(NPObject * self, SEL _cmd, NPRange range) {
+    if (!((struct NPMutableString *)self)->_cstr) {
         return;
     }
-    if ((range.location > ((struct NFMutableString *)self)->_length)) {
+    if ((range.location > ((struct NPMutableString *)self)->_length)) {
         return;
     }
-    if (((range.location + range.length) > ((struct NFMutableString *)self)->_length)) {
-        range.length = (((struct NFMutableString *)self)->_length - range.location);
+    if (((range.location + range.length) > ((struct NPMutableString *)self)->_length)) {
+        range.length = (((struct NPMutableString *)self)->_length - range.location);
     }
     if ((range.length == 0)) {
         return;
     }
-    memmove((((struct NFMutableString *)self)->_cstr + range.location), ((((struct NFMutableString *)self)->_cstr + range.location) + range.length), (((((struct NFMutableString *)self)->_length - range.location) - range.length) + 1));
-    (((struct NFMutableString *)self)->_length -= range.length);
-    ((struct NFMutableString *)self)->_hashIsValid = 0;
+    memmove((((struct NPMutableString *)self)->_cstr + range.location), ((((struct NPMutableString *)self)->_cstr + range.location) + range.length), (((((struct NPMutableString *)self)->_length - range.location) - range.length) + 1));
+    (((struct NPMutableString *)self)->_length -= range.length);
+    ((struct NPMutableString *)self)->_hashIsValid = 0;
 }
 
-/* -[NFMutableString replaceCharactersInRange_withString_] */
-__attribute__((weak)) void NFMutableString_replaceCharactersInRange_withString_(NFObject * self, SEL _cmd, NFRange range, NFString * str) {
+/* -[NPMutableString replaceCharactersInRange_withString_] */
+__attribute__((weak)) void NPMutableString_replaceCharactersInRange_withString_(NPObject * self, SEL _cmd, NPRange range, NPString * str) {
     if (!str) {
         return;
     }
-    char * src = (char *)(({ NFObject *__nopa_tmp_28 = ((NFObject *)(str)); __nopa_tmp_28 ? ((const char * (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_28->isa->vtable)->UTF8String)(__nopa_tmp_28, __nopa_sel_UTF8String) : 0; }));
+    char * src = (char *)(({ NPObject *__nopa_tmp_28 = ((NPObject *)(str)); __nopa_tmp_28 ? ((const char * (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_28->isa->vtable)->UTF8String)(__nopa_tmp_28, __nopa_sel_UTF8String) : 0; }));
     if (!src) {
         return;
     }
-    if ((range.location > ((struct NFMutableString *)self)->_length)) {
+    if ((range.location > ((struct NPMutableString *)self)->_length)) {
         return;
     }
-    if (((range.location + range.length) > ((struct NFMutableString *)self)->_length)) {
-        range.length = (((struct NFMutableString *)self)->_length - range.location);
+    if (((range.location + range.length) > ((struct NPMutableString *)self)->_length)) {
+        range.length = (((struct NPMutableString *)self)->_length - range.location);
     }
     size_t nlen = strlen(src);
-    size_t tail = ((((struct NFMutableString *)self)->_length - range.location) - range.length);
+    size_t tail = ((((struct NPMutableString *)self)->_length - range.location) - range.length);
     size_t newlen = ((range.location + nlen) + tail);
-    char * nbuf = (char *)realloc(((struct NFMutableString *)self)->_cstr, (newlen + 1));
+    char * nbuf = (char *)realloc(((struct NPMutableString *)self)->_cstr, (newlen + 1));
     if (!nbuf) {
         return;
     }
-    ((struct NFMutableString *)self)->_cstr = nbuf;
-    memmove(((((struct NFMutableString *)self)->_cstr + range.location) + nlen), ((((struct NFMutableString *)self)->_cstr + range.location) + range.length), (tail + 1));
-    memcpy((((struct NFMutableString *)self)->_cstr + range.location), src, nlen);
-    ((struct NFMutableString *)self)->_length = newlen;
-    ((struct NFMutableString *)self)->_hashIsValid = 0;
+    ((struct NPMutableString *)self)->_cstr = nbuf;
+    memmove(((((struct NPMutableString *)self)->_cstr + range.location) + nlen), ((((struct NPMutableString *)self)->_cstr + range.location) + range.length), (tail + 1));
+    memcpy((((struct NPMutableString *)self)->_cstr + range.location), src, nlen);
+    ((struct NPMutableString *)self)->_length = newlen;
+    ((struct NPMutableString *)self)->_hashIsValid = 0;
 }
 
-/* -[NFMutableString setString_] */
-__attribute__((weak)) void NFMutableString_setString_(NFObject * self, SEL _cmd, NFString * str) {
-    char * src = (char *)(str ? ({ NFObject *__nopa_tmp_29 = ((NFObject *)(str)); __nopa_tmp_29 ? ((const char * (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_29->isa->vtable)->UTF8String)(__nopa_tmp_29, __nopa_sel_UTF8String) : 0; }) : "");
+/* -[NPMutableString setString_] */
+__attribute__((weak)) void NPMutableString_setString_(NPObject * self, SEL _cmd, NPString * str) {
+    char * src = (char *)(str ? ({ NPObject *__nopa_tmp_29 = ((NPObject *)(str)); __nopa_tmp_29 ? ((const char * (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_29->isa->vtable)->UTF8String)(__nopa_tmp_29, __nopa_sel_UTF8String) : 0; }) : "");
     size_t nlen = strlen(src);
-    char * nbuf = (char *)realloc(((struct NFMutableString *)self)->_cstr, (nlen + 1));
+    char * nbuf = (char *)realloc(((struct NPMutableString *)self)->_cstr, (nlen + 1));
     if (!nbuf) {
         return;
     }
-    ((struct NFMutableString *)self)->_cstr = nbuf;
-    memcpy(((struct NFMutableString *)self)->_cstr, src, (nlen + 1));
-    ((struct NFMutableString *)self)->_length = nlen;
-    ((struct NFMutableString *)self)->_hashIsValid = 0;
+    ((struct NPMutableString *)self)->_cstr = nbuf;
+    memcpy(((struct NPMutableString *)self)->_cstr, src, (nlen + 1));
+    ((struct NPMutableString *)self)->_length = nlen;
+    ((struct NPMutableString *)self)->_hashIsValid = 0;
 }
 
-/* +[NFArray description] */
-__attribute__((weak)) NFObject * NFArray_arrayWithObjects_count_(NFClass * self, SEL _cmd, NFObject * * objs, size_t n) {
-    NFObject *__nopa_tmp_30 = (NFObject_alloc(self, __nopa_sel_alloc));
-    NFArray * arr = (NFArray *)(__nopa_tmp_30 ? ((struct nopa_vtable *)__nopa_tmp_30->isa->vtable)->init(__nopa_tmp_30, __nopa_sel_init) : 0);
+/* +[NPArray description] */
+__attribute__((weak)) NPObject * NPArray_arrayWithObjects_count_(NPClass * self, SEL _cmd, NPObject * * objs, size_t n) {
+    NPObject *__nopa_tmp_30 = (NPObject_alloc(self, __nopa_sel_alloc));
+    NPArray * arr = (NPArray *)(__nopa_tmp_30 ? ((struct nopa_vtable *)__nopa_tmp_30->isa->vtable)->init(__nopa_tmp_30, __nopa_sel_init) : 0);
     if (!arr) {
         nopa_release(arr);
         return NULL;
     }
     if ((n > 0)) {
-        arr->_items = (NFObject * *)malloc((n * sizeof(NFObject *)));
+        arr->_items = (NPObject * *)malloc((n * sizeof(NPObject *)));
         if (arr->_items) {
             for (size_t i = 0;  (i < n); (i)++) {
                 arr->_items[i] = objs[i] ? nopa_retain(objs[i]) : NULL;
@@ -4889,129 +4889,129 @@ __attribute__((weak)) NFObject * NFArray_arrayWithObjects_count_(NFClass * self,
     return nopa_autorelease(arr);
 }
 
-/* +[NFArray dealloc] */
-__attribute__((weak)) NFObject * NFArray_arrayWithObject_(NFClass * self, SEL _cmd, NFObject * obj) {
-    return NFArray_arrayWithObjects_count_(self, __nopa_sel_arrayWithObjects_count_, &obj, 1);
+/* +[NPArray dealloc] */
+__attribute__((weak)) NPObject * NPArray_arrayWithObject_(NPClass * self, SEL _cmd, NPObject * obj) {
+    return NPArray_arrayWithObjects_count_(self, __nopa_sel_arrayWithObjects_count_, &obj, 1);
 }
 
-/* +[NFArray array] */
-__attribute__((weak)) NFObject * NFArray_array(NFClass * self, SEL _cmd) {
-    return NFArray_arrayWithObjects_count_(self, __nopa_sel_arrayWithObjects_count_, NULL, 0);
+/* +[NPArray array] */
+__attribute__((weak)) NPObject * NPArray_array(NPClass * self, SEL _cmd) {
+    return NPArray_arrayWithObjects_count_(self, __nopa_sel_arrayWithObjects_count_, NULL, 0);
 }
 
-/* -[NFArray count] */
-__attribute__((weak)) size_t NFArray_count(NFObject * self, SEL _cmd) {
-    return ((struct NFArray *)self)->_count;
+/* -[NPArray count] */
+__attribute__((weak)) size_t NPArray_count(NPObject * self, SEL _cmd) {
+    return ((struct NPArray *)self)->_count;
 }
 
-/* -[NFArray objectAtIndex_] */
-__attribute__((weak)) NFObject * NFArray_objectAtIndex_(NFObject * self, SEL _cmd, size_t index) {
-    if ((index >= ((struct NFArray *)self)->_count)) {
+/* -[NPArray objectAtIndex_] */
+__attribute__((weak)) NPObject * NPArray_objectAtIndex_(NPObject * self, SEL _cmd, size_t index) {
+    if ((index >= ((struct NPArray *)self)->_count)) {
         return NULL;
     }
-    return ((struct NFArray *)self)->_items[index];
+    return ((struct NPArray *)self)->_items[index];
 }
 
-/* -[NFArray firstObject] */
-__attribute__((weak)) NFObject * NFArray_firstObject(NFObject * self, SEL _cmd) {
-    return (((struct NFArray *)self)->_count > 0) ? ((struct NFArray *)self)->_items[0] : NULL;
+/* -[NPArray firstObject] */
+__attribute__((weak)) NPObject * NPArray_firstObject(NPObject * self, SEL _cmd) {
+    return (((struct NPArray *)self)->_count > 0) ? ((struct NPArray *)self)->_items[0] : NULL;
 }
 
-/* -[NFArray lastObject] */
-__attribute__((weak)) NFObject * NFArray_lastObject(NFObject * self, SEL _cmd) {
-    return (((struct NFArray *)self)->_count > 0) ? ((struct NFArray *)self)->_items[(((struct NFArray *)self)->_count - 1)] : NULL;
+/* -[NPArray lastObject] */
+__attribute__((weak)) NPObject * NPArray_lastObject(NPObject * self, SEL _cmd) {
+    return (((struct NPArray *)self)->_count > 0) ? ((struct NPArray *)self)->_items[(((struct NPArray *)self)->_count - 1)] : NULL;
 }
 
-/* -[NFArray containsObject_] */
-__attribute__((weak)) _Bool NFArray_containsObject_(NFObject * self, SEL _cmd, NFObject * obj) {
-    for (size_t i = 0;  (i < ((struct NFArray *)self)->_count); (i)++) {
-        if ((((struct NFArray *)self)->_items[i] == obj)) {
+/* -[NPArray containsObject_] */
+__attribute__((weak)) _Bool NPArray_containsObject_(NPObject * self, SEL _cmd, NPObject * obj) {
+    for (size_t i = 0;  (i < ((struct NPArray *)self)->_count); (i)++) {
+        if ((((struct NPArray *)self)->_items[i] == obj)) {
             return 1;
         }
     }
     return 0;
 }
 
-/* -[NFArray indexOfObject_] */
-__attribute__((weak)) size_t NFArray_indexOfObject_(NFObject * self, SEL _cmd, NFObject * obj) {
-    for (size_t i = 0;  (i < ((struct NFArray *)self)->_count); (i)++) {
-        if ((((struct NFArray *)self)->_items[i] == obj)) {
+/* -[NPArray indexOfObject_] */
+__attribute__((weak)) size_t NPArray_indexOfObject_(NPObject * self, SEL _cmd, NPObject * obj) {
+    for (size_t i = 0;  (i < ((struct NPArray *)self)->_count); (i)++) {
+        if ((((struct NPArray *)self)->_items[i] == obj)) {
             return i;
         }
     }
     return (size_t)-1;
 }
 
-/* -[NFArray copy] */
-__attribute__((weak)) NFObject * NFArray_copy(NFObject * self, SEL _cmd) {
-    return nopa_retain(NFArray_arrayWithObjects_count_(&NOPA_CLASS_$_NFArray, __nopa_sel_arrayWithObjects_count_, ((struct NFArray *)self)->_items, ((struct NFArray *)self)->_count));
+/* -[NPArray copy] */
+__attribute__((weak)) NPObject * NPArray_copy(NPObject * self, SEL _cmd) {
+    return nopa_retain(NPArray_arrayWithObjects_count_(&NOPA_CLASS_$_NPArray, __nopa_sel_arrayWithObjects_count_, ((struct NPArray *)self)->_items, ((struct NPArray *)self)->_count));
 }
 
-/* -[NFArray containsObject:] */
-__attribute__((weak)) NFString * NFArray_description(NFObject * self, SEL _cmd) {
-    NFString * result = (NFString *)(NFString_stringWithUTF8String_(&NOPA_CLASS_$_NFString, __nopa_sel_stringWithUTF8String_, "["));
-    for (size_t i = 0;  (i < ((struct NFArray *)self)->_count); (i)++) {
+/* -[NPArray containsObject:] */
+__attribute__((weak)) NPString * NPArray_description(NPObject * self, SEL _cmd) {
+    NPString * result = (NPString *)(NPString_stringWithUTF8String_(&NOPA_CLASS_$_NPString, __nopa_sel_stringWithUTF8String_, "["));
+    for (size_t i = 0;  (i < ((struct NPArray *)self)->_count); (i)++) {
         if ((i > 0)) {
-            result = ({ NFObject *__nopa_tmp_31 = ((NFObject *)(result)); __nopa_tmp_31 ? ((NFString * (*)(NFObject *, SEL, const char *))((struct nopa_vtable *)__nopa_tmp_31->isa->vtable)->stringByAppendingUTF8String_)(__nopa_tmp_31, __nopa_sel_stringByAppendingUTF8String_, ", ") : 0; });
+            result = ({ NPObject *__nopa_tmp_31 = ((NPObject *)(result)); __nopa_tmp_31 ? ((NPString * (*)(NPObject *, SEL, const char *))((struct nopa_vtable *)__nopa_tmp_31->isa->vtable)->stringByAppendingUTF8String_)(__nopa_tmp_31, __nopa_sel_stringByAppendingUTF8String_, ", ") : 0; });
         }
-        if (((struct NFArray *)self)->_items[i]) {
-            result = ({ NFObject *__nopa_tmp_32 = ((NFObject *)(result)); __nopa_tmp_32 ? ((NFString * (*)(NFObject *, SEL, NFString *))((struct nopa_vtable *)__nopa_tmp_32->isa->vtable)->stringByAppendingString_)(__nopa_tmp_32, __nopa_sel_stringByAppendingString_, (NFString *)(({ NFObject *__nopa_tmp_33 = ((NFObject *)(((struct NFArray *)self)->_items[i])); __nopa_tmp_33 ? ((NFString * (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_33->isa->vtable)->description)(__nopa_tmp_33, __nopa_sel_description) : 0; }))) : 0; });
+        if (((struct NPArray *)self)->_items[i]) {
+            result = ({ NPObject *__nopa_tmp_32 = ((NPObject *)(result)); __nopa_tmp_32 ? ((NPString * (*)(NPObject *, SEL, NPString *))((struct nopa_vtable *)__nopa_tmp_32->isa->vtable)->stringByAppendingString_)(__nopa_tmp_32, __nopa_sel_stringByAppendingString_, (NPString *)(({ NPObject *__nopa_tmp_33 = ((NPObject *)(((struct NPArray *)self)->_items[i])); __nopa_tmp_33 ? ((NPString * (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_33->isa->vtable)->description)(__nopa_tmp_33, __nopa_sel_description) : 0; }))) : 0; });
         }
         else {
-            result = ({ NFObject *__nopa_tmp_34 = ((NFObject *)(result)); __nopa_tmp_34 ? ((NFString * (*)(NFObject *, SEL, const char *))((struct nopa_vtable *)__nopa_tmp_34->isa->vtable)->stringByAppendingUTF8String_)(__nopa_tmp_34, __nopa_sel_stringByAppendingUTF8String_, "(null)") : 0; });
+            result = ({ NPObject *__nopa_tmp_34 = ((NPObject *)(result)); __nopa_tmp_34 ? ((NPString * (*)(NPObject *, SEL, const char *))((struct nopa_vtable *)__nopa_tmp_34->isa->vtable)->stringByAppendingUTF8String_)(__nopa_tmp_34, __nopa_sel_stringByAppendingUTF8String_, "(null)") : 0; });
         }
     }
-    result = ({ NFObject *__nopa_tmp_35 = ((NFObject *)(result)); __nopa_tmp_35 ? ((NFString * (*)(NFObject *, SEL, const char *))((struct nopa_vtable *)__nopa_tmp_35->isa->vtable)->stringByAppendingUTF8String_)(__nopa_tmp_35, __nopa_sel_stringByAppendingUTF8String_, "]") : 0; });
+    result = ({ NPObject *__nopa_tmp_35 = ((NPObject *)(result)); __nopa_tmp_35 ? ((NPString * (*)(NPObject *, SEL, const char *))((struct nopa_vtable *)__nopa_tmp_35->isa->vtable)->stringByAppendingUTF8String_)(__nopa_tmp_35, __nopa_sel_stringByAppendingUTF8String_, "]") : 0; });
     return result;
 }
 
-/* -[NFArray arrayWithObject:] */
-__attribute__((weak)) void NFArray_dealloc(NFObject * self, SEL _cmd) {
-    for (size_t i = 0;  (i < ((struct NFArray *)self)->_count); (i)++) {
-        if (((struct NFArray *)self)->_items[i]) {
-            nopa_release(((struct NFArray *)self)->_items[i]);
+/* -[NPArray arrayWithObject:] */
+__attribute__((weak)) void NPArray_dealloc(NPObject * self, SEL _cmd) {
+    for (size_t i = 0;  (i < ((struct NPArray *)self)->_count); (i)++) {
+        if (((struct NPArray *)self)->_items[i]) {
+            nopa_release(((struct NPArray *)self)->_items[i]);
         }
     }
-    free(((struct NFArray *)self)->_items);
-    ((struct NFArray *)self)->_items = NULL;
-    ((struct NFArray *)self)->_count = 0;
-    ((struct NFArray *)self)->_capacity = 0;
-    (&NOPA_VTABLE_$_NFObject)->dealloc(self, __nopa_sel_dealloc);
+    free(((struct NPArray *)self)->_items);
+    ((struct NPArray *)self)->_items = NULL;
+    ((struct NPArray *)self)->_count = 0;
+    ((struct NPArray *)self)->_capacity = 0;
+    (&NOPA_VTABLE_$_NPObject)->dealloc(self, __nopa_sel_dealloc);
 }
 
-/* +[NFMutableArray arrayWithCapacity_] */
-__attribute__((weak)) NFMutableArray * NFMutableArray_arrayWithCapacity_(NFClass * self, SEL _cmd, size_t capacity) {
+/* +[NPMutableArray arrayWithCapacity_] */
+__attribute__((weak)) NPMutableArray * NPMutableArray_arrayWithCapacity_(NPClass * self, SEL _cmd, size_t capacity) {
     {
-        return (NFMutableArray *)({ NFObject *__nopa_tmp_36 = ((NFObject *)(NFObject_alloc(self, __nopa_sel_alloc))); __nopa_tmp_36 ? ((NFMutableArray * (*)(NFObject *, SEL, size_t))((struct nopa_vtable *)__nopa_tmp_36->isa->vtable)->initWithCapacity_)(__nopa_tmp_36, __nopa_sel_initWithCapacity_, capacity) : 0; });
+        return (NPMutableArray *)({ NPObject *__nopa_tmp_36 = ((NPObject *)(NPObject_alloc(self, __nopa_sel_alloc))); __nopa_tmp_36 ? ((NPMutableArray * (*)(NPObject *, SEL, size_t))((struct nopa_vtable *)__nopa_tmp_36->isa->vtable)->initWithCapacity_)(__nopa_tmp_36, __nopa_sel_initWithCapacity_, capacity) : 0; });
     }
 }
 
-/* +[NFMutableArray removeLastObject] */
-__attribute__((weak)) NFMutableArray * NFMutableArray_array(NFClass * self, SEL _cmd) {
+/* +[NPMutableArray removeLastObject] */
+__attribute__((weak)) NPMutableArray * NPMutableArray_array(NPClass * self, SEL _cmd) {
     {
-        return (NFMutableArray *)({ NFObject *__nopa_tmp_37 = ((NFObject *)(NFObject_alloc(self, __nopa_sel_alloc))); __nopa_tmp_37 ? ((NFMutableArray * (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_37->isa->vtable)->init)(__nopa_tmp_37, __nopa_sel_init) : 0; });
+        return (NPMutableArray *)({ NPObject *__nopa_tmp_37 = ((NPObject *)(NPObject_alloc(self, __nopa_sel_alloc))); __nopa_tmp_37 ? ((NPMutableArray * (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_37->isa->vtable)->init)(__nopa_tmp_37, __nopa_sel_init) : 0; });
     }
 }
 
-/* +[NFMutableArray removeObjectAtIndex:] */
-__attribute__((weak)) NFMutableArray * NFMutableArray_arrayWithObject_(NFClass * self, SEL _cmd, NFObject * obj) {
+/* +[NPMutableArray removeObjectAtIndex:] */
+__attribute__((weak)) NPMutableArray * NPMutableArray_arrayWithObject_(NPClass * self, SEL _cmd, NPObject * obj) {
     {
-        NFMutableArray * arr = (NFMutableArray *)(NFMutableArray_arrayWithCapacity_(self, __nopa_sel_arrayWithCapacity_, 1));
+        NPMutableArray * arr = (NPMutableArray *)(NPMutableArray_arrayWithCapacity_(self, __nopa_sel_arrayWithCapacity_, 1));
         if ((arr && obj)) {
-            ({ NFObject *__nopa_tmp_38 = ((NFObject *)(arr)); __nopa_tmp_38 ? ((void (*)(NFObject *, SEL, NFObject *))((struct nopa_vtable *)__nopa_tmp_38->isa->vtable)->addObject_)(__nopa_tmp_38, __nopa_sel_addObject_, obj) : 0; });
+            ({ NPObject *__nopa_tmp_38 = ((NPObject *)(arr)); __nopa_tmp_38 ? ((void (*)(NPObject *, SEL, NPObject *))((struct nopa_vtable *)__nopa_tmp_38->isa->vtable)->addObject_)(__nopa_tmp_38, __nopa_sel_addObject_, obj) : 0; });
         }
         return arr;
     }
 }
 
-/* +[NFMutableArray insertObject:atIndex:] */
-__attribute__((weak)) NFMutableArray * NFMutableArray_arrayWithObjects_count_(NFClass * self, SEL _cmd, NFObject * * objs, size_t n) {
+/* +[NPMutableArray insertObject:atIndex:] */
+__attribute__((weak)) NPMutableArray * NPMutableArray_arrayWithObjects_count_(NPClass * self, SEL _cmd, NPObject * * objs, size_t n) {
     {
-        NFMutableArray * arr = (NFMutableArray *)(NFMutableArray_arrayWithCapacity_(self, __nopa_sel_arrayWithCapacity_, n));
+        NPMutableArray * arr = (NPMutableArray *)(NPMutableArray_arrayWithCapacity_(self, __nopa_sel_arrayWithCapacity_, n));
         if (arr) {
             for (size_t i = 0;  (i < n); (i)++) {
                 if (objs[i]) {
-                    ({ NFObject *__nopa_tmp_39 = ((NFObject *)(arr)); __nopa_tmp_39 ? ((void (*)(NFObject *, SEL, NFObject *))((struct nopa_vtable *)__nopa_tmp_39->isa->vtable)->addObject_)(__nopa_tmp_39, __nopa_sel_addObject_, objs[i]) : 0; });
+                    ({ NPObject *__nopa_tmp_39 = ((NPObject *)(arr)); __nopa_tmp_39 ? ((void (*)(NPObject *, SEL, NPObject *))((struct nopa_vtable *)__nopa_tmp_39->isa->vtable)->addObject_)(__nopa_tmp_39, __nopa_sel_addObject_, objs[i]) : 0; });
                 }
             }
         }
@@ -5019,196 +5019,196 @@ __attribute__((weak)) NFMutableArray * NFMutableArray_arrayWithObjects_count_(NF
     }
 }
 
-/* -[NFMutableArray arrayWithCapacity:] */
-__attribute__((weak)) NFMutableArray * NFMutableArray_init(NFObject * self, SEL _cmd) {
-    return (NFMutableArray *)({ NFObject *__nopa_tmp_40 = ((NFObject *)(self)); __nopa_tmp_40 ? ((NFMutableArray * (*)(NFObject *, SEL, size_t))((struct nopa_vtable *)__nopa_tmp_40->isa->vtable)->initWithCapacity_)(__nopa_tmp_40, __nopa_sel_initWithCapacity_, 0) : 0; });
+/* -[NPMutableArray arrayWithCapacity:] */
+__attribute__((weak)) NPMutableArray * NPMutableArray_init(NPObject * self, SEL _cmd) {
+    return (NPMutableArray *)({ NPObject *__nopa_tmp_40 = ((NPObject *)(self)); __nopa_tmp_40 ? ((NPMutableArray * (*)(NPObject *, SEL, size_t))((struct nopa_vtable *)__nopa_tmp_40->isa->vtable)->initWithCapacity_)(__nopa_tmp_40, __nopa_sel_initWithCapacity_, 0) : 0; });
 }
 
-/* -[NFMutableArray initWithCapacity_] */
-__attribute__((weak)) NFMutableArray * NFMutableArray_initWithCapacity_(NFObject * self, SEL _cmd, size_t capacity) {
-    self = (&NOPA_VTABLE_$_NFObject)->init(self, __nopa_sel_init);
+/* -[NPMutableArray initWithCapacity_] */
+__attribute__((weak)) NPMutableArray * NPMutableArray_initWithCapacity_(NPObject * self, SEL _cmd, size_t capacity) {
+    self = (&NOPA_VTABLE_$_NPObject)->init(self, __nopa_sel_init);
     if (self) {
-        ((struct NFMutableArray *)self)->_items = NULL;
-        ((struct NFMutableArray *)self)->_count = 0;
-        ((struct NFMutableArray *)self)->_capacity = 0;
+        ((struct NPMutableArray *)self)->_items = NULL;
+        ((struct NPMutableArray *)self)->_count = 0;
+        ((struct NPMutableArray *)self)->_capacity = 0;
         if ((capacity > 0)) {
-            NFObject * * items = (NFObject * *)malloc((capacity * sizeof(NFObject *)));
+            NPObject * * items = (NPObject * *)malloc((capacity * sizeof(NPObject *)));
             if (items) {
-                ((struct NFMutableArray *)self)->_items = items;
-                ((struct NFMutableArray *)self)->_capacity = capacity;
+                ((struct NPMutableArray *)self)->_items = items;
+                ((struct NPMutableArray *)self)->_capacity = capacity;
             }
         }
     }
-    return (NFMutableArray *)self;
+    return (NPMutableArray *)self;
 }
 
-/* -[NFMutableArray initWithArray_] */
-__attribute__((weak)) NFMutableArray * NFMutableArray_initWithArray_(NFObject * self, SEL _cmd, NFArray * other) {
-    self = ({ NFObject *__nopa_tmp_41 = ((NFObject *)(self)); __nopa_tmp_41 ? ((NFMutableArray * (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_41->isa->vtable)->init)(__nopa_tmp_41, __nopa_sel_init) : 0; });
+/* -[NPMutableArray initWithArray_] */
+__attribute__((weak)) NPMutableArray * NPMutableArray_initWithArray_(NPObject * self, SEL _cmd, NPArray * other) {
+    self = ({ NPObject *__nopa_tmp_41 = ((NPObject *)(self)); __nopa_tmp_41 ? ((NPMutableArray * (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_41->isa->vtable)->init)(__nopa_tmp_41, __nopa_sel_init) : 0; });
     if ((self && other)) {
-        size_t n = ({ NFObject *__nopa_tmp_42 = ((NFObject *)(other)); __nopa_tmp_42 ? ((size_t (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_42->isa->vtable)->count)(__nopa_tmp_42, __nopa_sel_count) : (size_t){0}; });
+        size_t n = ({ NPObject *__nopa_tmp_42 = ((NPObject *)(other)); __nopa_tmp_42 ? ((size_t (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_42->isa->vtable)->count)(__nopa_tmp_42, __nopa_sel_count) : (size_t){0}; });
         for (size_t i = 0;  (i < n); (i)++) {
-            ({ NFObject *__nopa_tmp_43 = ((NFObject *)(self)); __nopa_tmp_43 ? ((void (*)(NFObject *, SEL, NFObject *))((struct nopa_vtable *)__nopa_tmp_43->isa->vtable)->addObject_)(__nopa_tmp_43, __nopa_sel_addObject_, ({ NFObject *__nopa_tmp_44 = ((NFObject *)(other)); __nopa_tmp_44 ? ((NFObject * (*)(NFObject *, SEL, size_t))((struct nopa_vtable *)__nopa_tmp_44->isa->vtable)->objectAtIndex_)(__nopa_tmp_44, __nopa_sel_objectAtIndex_, i) : (NFObject *){0}; })) : 0; });
+            ({ NPObject *__nopa_tmp_43 = ((NPObject *)(self)); __nopa_tmp_43 ? ((void (*)(NPObject *, SEL, NPObject *))((struct nopa_vtable *)__nopa_tmp_43->isa->vtable)->addObject_)(__nopa_tmp_43, __nopa_sel_addObject_, ({ NPObject *__nopa_tmp_44 = ((NPObject *)(other)); __nopa_tmp_44 ? ((NPObject * (*)(NPObject *, SEL, size_t))((struct nopa_vtable *)__nopa_tmp_44->isa->vtable)->objectAtIndex_)(__nopa_tmp_44, __nopa_sel_objectAtIndex_, i) : (NPObject *){0}; })) : 0; });
         }
     }
-    return (NFMutableArray *)self;
+    return (NPMutableArray *)self;
 }
 
-/* -[NFMutableArray initWithObjects_count_] */
-__attribute__((weak)) NFMutableArray * NFMutableArray_initWithObjects_count_(NFObject * self, SEL _cmd, NFObject * * objs, size_t n) {
-    self = ({ NFObject *__nopa_tmp_45 = ((NFObject *)(self)); __nopa_tmp_45 ? ((NFMutableArray * (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_45->isa->vtable)->init)(__nopa_tmp_45, __nopa_sel_init) : 0; });
+/* -[NPMutableArray initWithObjects_count_] */
+__attribute__((weak)) NPMutableArray * NPMutableArray_initWithObjects_count_(NPObject * self, SEL _cmd, NPObject * * objs, size_t n) {
+    self = ({ NPObject *__nopa_tmp_45 = ((NPObject *)(self)); __nopa_tmp_45 ? ((NPMutableArray * (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_45->isa->vtable)->init)(__nopa_tmp_45, __nopa_sel_init) : 0; });
     if (((self && (n > 0)) && objs)) {
         for (size_t i = 0;  (i < n); (i)++) {
-            ({ NFObject *__nopa_tmp_46 = ((NFObject *)(self)); __nopa_tmp_46 ? ((void (*)(NFObject *, SEL, NFObject *))((struct nopa_vtable *)__nopa_tmp_46->isa->vtable)->addObject_)(__nopa_tmp_46, __nopa_sel_addObject_, objs[i]) : 0; });
+            ({ NPObject *__nopa_tmp_46 = ((NPObject *)(self)); __nopa_tmp_46 ? ((void (*)(NPObject *, SEL, NPObject *))((struct nopa_vtable *)__nopa_tmp_46->isa->vtable)->addObject_)(__nopa_tmp_46, __nopa_sel_addObject_, objs[i]) : 0; });
         }
     }
-    return (NFMutableArray *)self;
+    return (NPMutableArray *)self;
 }
 
-/* -[NFMutableArray addObject_] */
-__attribute__((weak)) void NFMutableArray_addObject_(NFObject * self, SEL _cmd, NFObject * obj) {
+/* -[NPMutableArray addObject_] */
+__attribute__((weak)) void NPMutableArray_addObject_(NPObject * self, SEL _cmd, NPObject * obj) {
     if (!obj) {
         return;
     }
-    if ((((struct NFMutableArray *)self)->_count >= ((struct NFMutableArray *)self)->_capacity)) {
-        size_t newcap = (((struct NFMutableArray *)self)->_capacity == 0) ? 4 : (((struct NFMutableArray *)self)->_capacity * 2);
-        NFObject * * items = (NFObject * *)realloc(((struct NFMutableArray *)self)->_items, (newcap * sizeof(NFObject *)));
+    if ((((struct NPMutableArray *)self)->_count >= ((struct NPMutableArray *)self)->_capacity)) {
+        size_t newcap = (((struct NPMutableArray *)self)->_capacity == 0) ? 4 : (((struct NPMutableArray *)self)->_capacity * 2);
+        NPObject * * items = (NPObject * *)realloc(((struct NPMutableArray *)self)->_items, (newcap * sizeof(NPObject *)));
         if (!items) {
             return;
         }
-        ((struct NFMutableArray *)self)->_items = items;
-        ((struct NFMutableArray *)self)->_capacity = newcap;
+        ((struct NPMutableArray *)self)->_items = items;
+        ((struct NPMutableArray *)self)->_capacity = newcap;
     }
-    ((struct NFMutableArray *)self)->_items[((struct NFMutableArray *)self)->_count] = nopa_retain(obj);
-    (((struct NFMutableArray *)self)->_count)++;
+    ((struct NPMutableArray *)self)->_items[((struct NPMutableArray *)self)->_count] = nopa_retain(obj);
+    (((struct NPMutableArray *)self)->_count)++;
 }
 
-/* -[NFMutableArray addObjectsFromArray_] */
-__attribute__((weak)) void NFMutableArray_addObjectsFromArray_(NFObject * self, SEL _cmd, NFArray * other) {
+/* -[NPMutableArray addObjectsFromArray_] */
+__attribute__((weak)) void NPMutableArray_addObjectsFromArray_(NPObject * self, SEL _cmd, NPArray * other) {
     if (!other) {
         return;
     }
-    size_t n = ({ NFObject *__nopa_tmp_47 = ((NFObject *)(other)); __nopa_tmp_47 ? ((size_t (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_47->isa->vtable)->count)(__nopa_tmp_47, __nopa_sel_count) : (size_t){0}; });
+    size_t n = ({ NPObject *__nopa_tmp_47 = ((NPObject *)(other)); __nopa_tmp_47 ? ((size_t (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_47->isa->vtable)->count)(__nopa_tmp_47, __nopa_sel_count) : (size_t){0}; });
     for (size_t i = 0;  (i < n); (i)++) {
-        ({ NFObject *__nopa_tmp_48 = ((NFObject *)(self)); __nopa_tmp_48 ? ((void (*)(NFObject *, SEL, NFObject *))((struct nopa_vtable *)__nopa_tmp_48->isa->vtable)->addObject_)(__nopa_tmp_48, __nopa_sel_addObject_, ({ NFObject *__nopa_tmp_49 = ((NFObject *)(other)); __nopa_tmp_49 ? ((NFObject * (*)(NFObject *, SEL, size_t))((struct nopa_vtable *)__nopa_tmp_49->isa->vtable)->objectAtIndex_)(__nopa_tmp_49, __nopa_sel_objectAtIndex_, i) : (NFObject *){0}; })) : 0; });
+        ({ NPObject *__nopa_tmp_48 = ((NPObject *)(self)); __nopa_tmp_48 ? ((void (*)(NPObject *, SEL, NPObject *))((struct nopa_vtable *)__nopa_tmp_48->isa->vtable)->addObject_)(__nopa_tmp_48, __nopa_sel_addObject_, ({ NPObject *__nopa_tmp_49 = ((NPObject *)(other)); __nopa_tmp_49 ? ((NPObject * (*)(NPObject *, SEL, size_t))((struct nopa_vtable *)__nopa_tmp_49->isa->vtable)->objectAtIndex_)(__nopa_tmp_49, __nopa_sel_objectAtIndex_, i) : (NPObject *){0}; })) : 0; });
     }
 }
 
-/* -[NFMutableArray insertObject_atIndex_] */
-__attribute__((weak)) void NFMutableArray_insertObject_atIndex_(NFObject * self, SEL _cmd, NFObject * obj, size_t index) {
+/* -[NPMutableArray insertObject_atIndex_] */
+__attribute__((weak)) void NPMutableArray_insertObject_atIndex_(NPObject * self, SEL _cmd, NPObject * obj, size_t index) {
     if (!obj) {
         return;
     }
-    if ((index > ((struct NFMutableArray *)self)->_count)) {
-        index = ((struct NFMutableArray *)self)->_count;
+    if ((index > ((struct NPMutableArray *)self)->_count)) {
+        index = ((struct NPMutableArray *)self)->_count;
     }
-    if ((((struct NFMutableArray *)self)->_count >= ((struct NFMutableArray *)self)->_capacity)) {
-        size_t newcap = (((struct NFMutableArray *)self)->_capacity == 0) ? 4 : (((struct NFMutableArray *)self)->_capacity * 2);
-        NFObject * * items = (NFObject * *)realloc(((struct NFMutableArray *)self)->_items, (newcap * sizeof(NFObject *)));
+    if ((((struct NPMutableArray *)self)->_count >= ((struct NPMutableArray *)self)->_capacity)) {
+        size_t newcap = (((struct NPMutableArray *)self)->_capacity == 0) ? 4 : (((struct NPMutableArray *)self)->_capacity * 2);
+        NPObject * * items = (NPObject * *)realloc(((struct NPMutableArray *)self)->_items, (newcap * sizeof(NPObject *)));
         if (!items) {
             return;
         }
-        ((struct NFMutableArray *)self)->_items = items;
-        ((struct NFMutableArray *)self)->_capacity = newcap;
+        ((struct NPMutableArray *)self)->_items = items;
+        ((struct NPMutableArray *)self)->_capacity = newcap;
     }
-    memmove(((((struct NFMutableArray *)self)->_items + index) + 1), (((struct NFMutableArray *)self)->_items + index), (((((struct NFMutableArray *)self)->_count - index)) * sizeof(NFObject *)));
-    ((struct NFMutableArray *)self)->_items[index] = nopa_retain(obj);
-    (((struct NFMutableArray *)self)->_count)++;
+    memmove(((((struct NPMutableArray *)self)->_items + index) + 1), (((struct NPMutableArray *)self)->_items + index), (((((struct NPMutableArray *)self)->_count - index)) * sizeof(NPObject *)));
+    ((struct NPMutableArray *)self)->_items[index] = nopa_retain(obj);
+    (((struct NPMutableArray *)self)->_count)++;
 }
 
-/* -[NFMutableArray removeObjectAtIndex_] */
-__attribute__((weak)) void NFMutableArray_removeObjectAtIndex_(NFObject * self, SEL _cmd, size_t index) {
-    if ((index >= ((struct NFMutableArray *)self)->_count)) {
+/* -[NPMutableArray removeObjectAtIndex_] */
+__attribute__((weak)) void NPMutableArray_removeObjectAtIndex_(NPObject * self, SEL _cmd, size_t index) {
+    if ((index >= ((struct NPMutableArray *)self)->_count)) {
         return;
     }
-    NFObject * removed = ((struct NFMutableArray *)self)->_items[index];
-    memmove((((struct NFMutableArray *)self)->_items + index), ((((struct NFMutableArray *)self)->_items + index) + 1), ((((((struct NFMutableArray *)self)->_count - index) - 1)) * sizeof(NFObject *)));
-    (((struct NFMutableArray *)self)->_count)--;
+    NPObject * removed = ((struct NPMutableArray *)self)->_items[index];
+    memmove((((struct NPMutableArray *)self)->_items + index), ((((struct NPMutableArray *)self)->_items + index) + 1), ((((((struct NPMutableArray *)self)->_count - index) - 1)) * sizeof(NPObject *)));
+    (((struct NPMutableArray *)self)->_count)--;
     if (removed) {
         nopa_release(removed);
     }
 }
 
-/* -[NFMutableArray removeLastObject] */
-__attribute__((weak)) void NFMutableArray_removeLastObject(NFObject * self, SEL _cmd) {
-    if ((((struct NFMutableArray *)self)->_count == 0)) {
+/* -[NPMutableArray removeLastObject] */
+__attribute__((weak)) void NPMutableArray_removeLastObject(NPObject * self, SEL _cmd) {
+    if ((((struct NPMutableArray *)self)->_count == 0)) {
         return;
     }
-    ({ NFObject *__nopa_tmp_50 = ((NFObject *)(self)); __nopa_tmp_50 ? ((void (*)(NFObject *, SEL, size_t))((struct nopa_vtable *)__nopa_tmp_50->isa->vtable)->removeObjectAtIndex_)(__nopa_tmp_50, __nopa_sel_removeObjectAtIndex_, (((struct NFMutableArray *)self)->_count - 1)) : 0; });
+    ({ NPObject *__nopa_tmp_50 = ((NPObject *)(self)); __nopa_tmp_50 ? ((void (*)(NPObject *, SEL, size_t))((struct nopa_vtable *)__nopa_tmp_50->isa->vtable)->removeObjectAtIndex_)(__nopa_tmp_50, __nopa_sel_removeObjectAtIndex_, (((struct NPMutableArray *)self)->_count - 1)) : 0; });
 }
 
-/* -[NFMutableArray removeObject_] */
-__attribute__((weak)) void NFMutableArray_removeObject_(NFObject * self, SEL _cmd, NFObject * obj) {
+/* -[NPMutableArray removeObject_] */
+__attribute__((weak)) void NPMutableArray_removeObject_(NPObject * self, SEL _cmd, NPObject * obj) {
     if (!obj) {
         return;
     }
-    for (size_t i = 0;  (i < ((struct NFMutableArray *)self)->_count); (i)++) {
-        if ((((struct NFMutableArray *)self)->_items[i] == obj)) {
-            ({ NFObject *__nopa_tmp_51 = ((NFObject *)(self)); __nopa_tmp_51 ? ((void (*)(NFObject *, SEL, size_t))((struct nopa_vtable *)__nopa_tmp_51->isa->vtable)->removeObjectAtIndex_)(__nopa_tmp_51, __nopa_sel_removeObjectAtIndex_, i) : 0; });
+    for (size_t i = 0;  (i < ((struct NPMutableArray *)self)->_count); (i)++) {
+        if ((((struct NPMutableArray *)self)->_items[i] == obj)) {
+            ({ NPObject *__nopa_tmp_51 = ((NPObject *)(self)); __nopa_tmp_51 ? ((void (*)(NPObject *, SEL, size_t))((struct nopa_vtable *)__nopa_tmp_51->isa->vtable)->removeObjectAtIndex_)(__nopa_tmp_51, __nopa_sel_removeObjectAtIndex_, i) : 0; });
             return;
         }
     }
 }
 
-/* -[NFMutableArray removeAllObjects] */
-__attribute__((weak)) void NFMutableArray_removeAllObjects(NFObject * self, SEL _cmd) {
-    for (size_t i = 0;  (i < ((struct NFMutableArray *)self)->_count); (i)++) {
-        if (((struct NFMutableArray *)self)->_items[i]) {
-            nopa_release(((struct NFMutableArray *)self)->_items[i]);
+/* -[NPMutableArray removeAllObjects] */
+__attribute__((weak)) void NPMutableArray_removeAllObjects(NPObject * self, SEL _cmd) {
+    for (size_t i = 0;  (i < ((struct NPMutableArray *)self)->_count); (i)++) {
+        if (((struct NPMutableArray *)self)->_items[i]) {
+            nopa_release(((struct NPMutableArray *)self)->_items[i]);
         }
     }
-    ((struct NFMutableArray *)self)->_count = 0;
+    ((struct NPMutableArray *)self)->_count = 0;
 }
 
-/* -[NFMutableArray replaceObjectAtIndex_withObject_] */
-__attribute__((weak)) void NFMutableArray_replaceObjectAtIndex_withObject_(NFObject * self, SEL _cmd, size_t index, NFObject * obj) {
-    if ((!obj || (index >= ((struct NFMutableArray *)self)->_count))) {
+/* -[NPMutableArray replaceObjectAtIndex_withObject_] */
+__attribute__((weak)) void NPMutableArray_replaceObjectAtIndex_withObject_(NPObject * self, SEL _cmd, size_t index, NPObject * obj) {
+    if ((!obj || (index >= ((struct NPMutableArray *)self)->_count))) {
         return;
     }
-    NFObject * old = ((struct NFMutableArray *)self)->_items[index];
-    ((struct NFMutableArray *)self)->_items[index] = nopa_retain(obj);
+    NPObject * old = ((struct NPMutableArray *)self)->_items[index];
+    ((struct NPMutableArray *)self)->_items[index] = nopa_retain(obj);
     if (old) {
         nopa_release(old);
     }
 }
 
-/* -[NFMutableArray exchangeObjectAtIndex_withObjectAtIndex_] */
-__attribute__((weak)) void NFMutableArray_exchangeObjectAtIndex_withObjectAtIndex_(NFObject * self, SEL _cmd, size_t a, size_t b) {
-    if (((a >= ((struct NFMutableArray *)self)->_count) || (b >= ((struct NFMutableArray *)self)->_count))) {
+/* -[NPMutableArray exchangeObjectAtIndex_withObjectAtIndex_] */
+__attribute__((weak)) void NPMutableArray_exchangeObjectAtIndex_withObjectAtIndex_(NPObject * self, SEL _cmd, size_t a, size_t b) {
+    if (((a >= ((struct NPMutableArray *)self)->_count) || (b >= ((struct NPMutableArray *)self)->_count))) {
         return;
     }
-    NFObject * tmp = ((struct NFMutableArray *)self)->_items[a];
-    ((struct NFMutableArray *)self)->_items[a] = ((struct NFMutableArray *)self)->_items[b];
-    ((struct NFMutableArray *)self)->_items[b] = tmp;
+    NPObject * tmp = ((struct NPMutableArray *)self)->_items[a];
+    ((struct NPMutableArray *)self)->_items[a] = ((struct NPMutableArray *)self)->_items[b];
+    ((struct NPMutableArray *)self)->_items[b] = tmp;
 }
 
-/* -[NFMutableArray setObject_atIndex_] */
-__attribute__((weak)) void NFMutableArray_setObject_atIndex_(NFObject * self, SEL _cmd, NFObject * obj, size_t index) {
-    if ((!obj || (index >= ((struct NFMutableArray *)self)->_count))) {
+/* -[NPMutableArray setObject_atIndex_] */
+__attribute__((weak)) void NPMutableArray_setObject_atIndex_(NPObject * self, SEL _cmd, NPObject * obj, size_t index) {
+    if ((!obj || (index >= ((struct NPMutableArray *)self)->_count))) {
         return;
     }
-    ({ NFObject *__nopa_tmp_52 = ((NFObject *)(self)); __nopa_tmp_52 ? ((void (*)(NFObject *, SEL, size_t, NFObject *))((struct nopa_vtable *)__nopa_tmp_52->isa->vtable)->replaceObjectAtIndex_withObject_)(__nopa_tmp_52, __nopa_sel_replaceObjectAtIndex_withObject_, index, obj) : 0; });
+    ({ NPObject *__nopa_tmp_52 = ((NPObject *)(self)); __nopa_tmp_52 ? ((void (*)(NPObject *, SEL, size_t, NPObject *))((struct nopa_vtable *)__nopa_tmp_52->isa->vtable)->replaceObjectAtIndex_withObject_)(__nopa_tmp_52, __nopa_sel_replaceObjectAtIndex_withObject_, index, obj) : 0; });
 }
 
-/* +[NFDictionary dealloc] */
-__attribute__((weak)) NFDictionary * NFDictionary_dictionary(NFClass * self, SEL _cmd) {
-    return (NFDictionary *)NFDictionary_dictionaryWithObjects_forKeys_count_(self, __nopa_sel_dictionaryWithObjects_forKeys_count_, NULL, NULL, 0);
+/* +[NPDictionary dealloc] */
+__attribute__((weak)) NPDictionary * NPDictionary_dictionary(NPClass * self, SEL _cmd) {
+    return (NPDictionary *)NPDictionary_dictionaryWithObjects_forKeys_count_(self, __nopa_sel_dictionaryWithObjects_forKeys_count_, NULL, NULL, 0);
 }
 
-/* +[NFDictionary dictionaryWithObject_forKey_] */
-__attribute__((weak)) NFDictionary * NFDictionary_dictionaryWithObject_forKey_(NFClass * self, SEL _cmd, NFObject * value, NFObject * key) {
-    return (NFDictionary *)NFDictionary_dictionaryWithObjects_forKeys_count_(self, __nopa_sel_dictionaryWithObjects_forKeys_count_, &value, &key, 1);
+/* +[NPDictionary dictionaryWithObject_forKey_] */
+__attribute__((weak)) NPDictionary * NPDictionary_dictionaryWithObject_forKey_(NPClass * self, SEL _cmd, NPObject * value, NPObject * key) {
+    return (NPDictionary *)NPDictionary_dictionaryWithObjects_forKeys_count_(self, __nopa_sel_dictionaryWithObjects_forKeys_count_, &value, &key, 1);
 }
 
-/* +[NFDictionary dictionaryWithObjects_forKeys_count_] */
-__attribute__((weak)) NFDictionary * NFDictionary_dictionaryWithObjects_forKeys_count_(NFClass * self, SEL _cmd, NFObject * * values, NFObject * * keys, size_t n) {
+/* +[NPDictionary dictionaryWithObjects_forKeys_count_] */
+__attribute__((weak)) NPDictionary * NPDictionary_dictionaryWithObjects_forKeys_count_(NPClass * self, SEL _cmd, NPObject * * values, NPObject * * keys, size_t n) {
     {
-        NFObject *__nopa_tmp_53 = (NFObject_alloc(self, __nopa_sel_alloc));
-        NFDictionary * dict = (NFDictionary *)(__nopa_tmp_53 ? ((struct nopa_vtable *)__nopa_tmp_53->isa->vtable)->init(__nopa_tmp_53, __nopa_sel_init) : 0);
+        NPObject *__nopa_tmp_53 = (NPObject_alloc(self, __nopa_sel_alloc));
+        NPDictionary * dict = (NPDictionary *)(__nopa_tmp_53 ? ((struct nopa_vtable *)__nopa_tmp_53->isa->vtable)->init(__nopa_tmp_53, __nopa_sel_init) : 0);
         if (!dict)         return NULL;
         if ((((n > 0) && values) && keys)) {
-            NFObject * * ks = (NFObject * *)calloc(n, sizeof(NFObject *));
-            NFObject * * vs = (NFObject * *)calloc(n, sizeof(NFObject *));
+            NPObject * * ks = (NPObject * *)calloc(n, sizeof(NPObject *));
+            NPObject * * vs = (NPObject * *)calloc(n, sizeof(NPObject *));
             if ((ks && vs)) {
                 size_t stored = 0;
                 for (size_t i = 0;  (i < n); (i)++) {
@@ -5229,163 +5229,163 @@ __attribute__((weak)) NFDictionary * NFDictionary_dictionaryWithObjects_forKeys_
                 free(vs);
             }
         }
-        return (NFDictionary *)dict;
+        return (NPDictionary *)dict;
     }
 }
 
-/* -[NFDictionary count] */
-__attribute__((weak)) size_t NFDictionary_count(NFObject * self, SEL _cmd) {
-    return ((struct NFDictionary *)self)->_count;
+/* -[NPDictionary count] */
+__attribute__((weak)) size_t NPDictionary_count(NPObject * self, SEL _cmd) {
+    return ((struct NPDictionary *)self)->_count;
 }
 
-/* -[NFDictionary objectForKey_] */
-__attribute__((weak)) NFObject * NFDictionary_objectForKey_(NFObject * self, SEL _cmd, NFObject * key) {
+/* -[NPDictionary objectForKey_] */
+__attribute__((weak)) NPObject * NPDictionary_objectForKey_(NPObject * self, SEL _cmd, NPObject * key) {
     if (!key) {
         return NULL;
     }
-    for (size_t i = 0;  (i < ((struct NFDictionary *)self)->_count); (i)++) {
-        if ((((struct NFDictionary *)self)->_keys[i] && ({ NFObject *__nopa_tmp_54 = ((NFObject *)(((struct NFDictionary *)self)->_keys[i])); __nopa_tmp_54 ? ((_Bool (*)(NFObject *, SEL, NFObject *))((struct nopa_vtable *)__nopa_tmp_54->isa->vtable)->isEqual_)(__nopa_tmp_54, __nopa_sel_isEqual_, (NFObject *)(key)) : (_Bool){0}; }))) {
-            return ((struct NFDictionary *)self)->_values[i];
+    for (size_t i = 0;  (i < ((struct NPDictionary *)self)->_count); (i)++) {
+        if ((((struct NPDictionary *)self)->_keys[i] && ({ NPObject *__nopa_tmp_54 = ((NPObject *)(((struct NPDictionary *)self)->_keys[i])); __nopa_tmp_54 ? ((_Bool (*)(NPObject *, SEL, NPObject *))((struct nopa_vtable *)__nopa_tmp_54->isa->vtable)->isEqual_)(__nopa_tmp_54, __nopa_sel_isEqual_, (NPObject *)(key)) : (_Bool){0}; }))) {
+            return ((struct NPDictionary *)self)->_values[i];
         }
     }
     return NULL;
 }
 
-/* -[NFDictionary allKeys] */
-__attribute__((weak)) NFArray * NFDictionary_allKeys(NFObject * self, SEL _cmd) {
-    return (NFArray *)NFArray_arrayWithObjects_count_(&NOPA_CLASS_$_NFArray, __nopa_sel_arrayWithObjects_count_, ((struct NFDictionary *)self)->_keys, ((struct NFDictionary *)self)->_count);
+/* -[NPDictionary allKeys] */
+__attribute__((weak)) NPArray * NPDictionary_allKeys(NPObject * self, SEL _cmd) {
+    return (NPArray *)NPArray_arrayWithObjects_count_(&NOPA_CLASS_$_NPArray, __nopa_sel_arrayWithObjects_count_, ((struct NPDictionary *)self)->_keys, ((struct NPDictionary *)self)->_count);
 }
 
-/* -[NFDictionary allValues] */
-__attribute__((weak)) NFArray * NFDictionary_allValues(NFObject * self, SEL _cmd) {
-    return (NFArray *)NFArray_arrayWithObjects_count_(&NOPA_CLASS_$_NFArray, __nopa_sel_arrayWithObjects_count_, ((struct NFDictionary *)self)->_values, ((struct NFDictionary *)self)->_count);
+/* -[NPDictionary allValues] */
+__attribute__((weak)) NPArray * NPDictionary_allValues(NPObject * self, SEL _cmd) {
+    return (NPArray *)NPArray_arrayWithObjects_count_(&NOPA_CLASS_$_NPArray, __nopa_sel_arrayWithObjects_count_, ((struct NPDictionary *)self)->_values, ((struct NPDictionary *)self)->_count);
 }
 
-/* -[NFDictionary allValues] */
-__attribute__((weak)) _Bool NFDictionary_isEqual_(NFObject * self, SEL _cmd, NFObject * object) {
-    if ((self == (NFObject *)object)) {
+/* -[NPDictionary allValues] */
+__attribute__((weak)) _Bool NPDictionary_isEqual_(NPObject * self, SEL _cmd, NPObject * object) {
+    if ((self == (NPObject *)object)) {
         return 1;
     }
     if (!object) {
         return 0;
     }
-    if (!({ NFObject *__nopa_tmp_55 = ((NFObject *)(object)); __nopa_tmp_55 ? ((_Bool (*)(NFObject *, SEL, NFClass *))((struct nopa_vtable *)__nopa_tmp_55->isa->vtable)->isKindOfClass_)(__nopa_tmp_55, __nopa_sel_isKindOfClass_, (NFClass *)(&NOPA_CLASS_$_NFDictionary)) : (_Bool){0}; })) {
-        return (&NOPA_VTABLE_$_nopa_root)->isEqual_(self, __nopa_sel_isEqual_, (NFObject *)(object));
+    if (!({ NPObject *__nopa_tmp_55 = ((NPObject *)(object)); __nopa_tmp_55 ? ((_Bool (*)(NPObject *, SEL, NPClass *))((struct nopa_vtable *)__nopa_tmp_55->isa->vtable)->isKindOfClass_)(__nopa_tmp_55, __nopa_sel_isKindOfClass_, (NPClass *)(&NOPA_CLASS_$_NPDictionary)) : (_Bool){0}; })) {
+        return (&NOPA_VTABLE_$_nopa_root)->isEqual_(self, __nopa_sel_isEqual_, (NPObject *)(object));
     }
-    NFDictionary * other = (NFDictionary *)object;
-    if ((({ NFObject *__nopa_tmp_56 = ((NFObject *)(other)); __nopa_tmp_56 ? ((size_t (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_56->isa->vtable)->count)(__nopa_tmp_56, __nopa_sel_count) : (size_t){0}; }) != ((struct NFDictionary *)self)->_count)) {
+    NPDictionary * other = (NPDictionary *)object;
+    if ((({ NPObject *__nopa_tmp_56 = ((NPObject *)(other)); __nopa_tmp_56 ? ((size_t (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_56->isa->vtable)->count)(__nopa_tmp_56, __nopa_sel_count) : (size_t){0}; }) != ((struct NPDictionary *)self)->_count)) {
         return 0;
     }
-    for (size_t i = 0;  (i < ((struct NFDictionary *)self)->_count); (i)++) {
-        NFObject * mine = ((struct NFDictionary *)self)->_values[i];
-        NFObject * theirs = ({ NFObject *__nopa_tmp_57 = ((NFObject *)(other)); __nopa_tmp_57 ? ((NFObject * (*)(NFObject *, SEL, NFObject *))((struct nopa_vtable *)__nopa_tmp_57->isa->vtable)->objectForKey_)(__nopa_tmp_57, __nopa_sel_objectForKey_, ((struct NFDictionary *)self)->_keys[i]) : (NFObject *){0}; });
+    for (size_t i = 0;  (i < ((struct NPDictionary *)self)->_count); (i)++) {
+        NPObject * mine = ((struct NPDictionary *)self)->_values[i];
+        NPObject * theirs = ({ NPObject *__nopa_tmp_57 = ((NPObject *)(other)); __nopa_tmp_57 ? ((NPObject * (*)(NPObject *, SEL, NPObject *))((struct nopa_vtable *)__nopa_tmp_57->isa->vtable)->objectForKey_)(__nopa_tmp_57, __nopa_sel_objectForKey_, ((struct NPDictionary *)self)->_keys[i]) : (NPObject *){0}; });
         if ((mine == theirs)) {
             continue;
         }
         if ((!mine || !theirs)) {
             return 0;
         }
-        if (!({ NFObject *__nopa_tmp_58 = ((NFObject *)(mine)); __nopa_tmp_58 ? ((_Bool (*)(NFObject *, SEL, NFObject *))((struct nopa_vtable *)__nopa_tmp_58->isa->vtable)->isEqual_)(__nopa_tmp_58, __nopa_sel_isEqual_, (NFObject *)(theirs)) : (_Bool){0}; })) {
+        if (!({ NPObject *__nopa_tmp_58 = ((NPObject *)(mine)); __nopa_tmp_58 ? ((_Bool (*)(NPObject *, SEL, NPObject *))((struct nopa_vtable *)__nopa_tmp_58->isa->vtable)->isEqual_)(__nopa_tmp_58, __nopa_sel_isEqual_, (NPObject *)(theirs)) : (_Bool){0}; })) {
             return 0;
         }
     }
     return 1;
 }
 
-/* -[NFDictionary copy] */
-__attribute__((weak)) NFObject * NFDictionary_copy(NFObject * self, SEL _cmd) {
-    return nopa_retain(NFDictionary_dictionaryWithObjects_forKeys_count_(&NOPA_CLASS_$_NFDictionary, __nopa_sel_dictionaryWithObjects_forKeys_count_, ((struct NFDictionary *)self)->_values, ((struct NFDictionary *)self)->_keys, ((struct NFDictionary *)self)->_count));
+/* -[NPDictionary copy] */
+__attribute__((weak)) NPObject * NPDictionary_copy(NPObject * self, SEL _cmd) {
+    return nopa_retain(NPDictionary_dictionaryWithObjects_forKeys_count_(&NOPA_CLASS_$_NPDictionary, __nopa_sel_dictionaryWithObjects_forKeys_count_, ((struct NPDictionary *)self)->_values, ((struct NPDictionary *)self)->_keys, ((struct NPDictionary *)self)->_count));
 }
 
-/* -[NFDictionary isEqual:] */
-__attribute__((weak)) NFString * NFDictionary_description(NFObject * self, SEL _cmd) {
-    NFString * result = (NFString *)(NFString_stringWithUTF8String_(&NOPA_CLASS_$_NFString, __nopa_sel_stringWithUTF8String_, "{"));
-    for (size_t i = 0;  (i < ((struct NFDictionary *)self)->_count); (i)++) {
+/* -[NPDictionary isEqual:] */
+__attribute__((weak)) NPString * NPDictionary_description(NPObject * self, SEL _cmd) {
+    NPString * result = (NPString *)(NPString_stringWithUTF8String_(&NOPA_CLASS_$_NPString, __nopa_sel_stringWithUTF8String_, "{"));
+    for (size_t i = 0;  (i < ((struct NPDictionary *)self)->_count); (i)++) {
         if ((i > 0)) {
-            result = ({ NFObject *__nopa_tmp_59 = ((NFObject *)(result)); __nopa_tmp_59 ? ((NFString * (*)(NFObject *, SEL, const char *))((struct nopa_vtable *)__nopa_tmp_59->isa->vtable)->stringByAppendingUTF8String_)(__nopa_tmp_59, __nopa_sel_stringByAppendingUTF8String_, ", ") : 0; });
+            result = ({ NPObject *__nopa_tmp_59 = ((NPObject *)(result)); __nopa_tmp_59 ? ((NPString * (*)(NPObject *, SEL, const char *))((struct nopa_vtable *)__nopa_tmp_59->isa->vtable)->stringByAppendingUTF8String_)(__nopa_tmp_59, __nopa_sel_stringByAppendingUTF8String_, ", ") : 0; });
         }
-        if (((struct NFDictionary *)self)->_keys[i]) {
-            result = ({ NFObject *__nopa_tmp_60 = ((NFObject *)(result)); __nopa_tmp_60 ? ((NFString * (*)(NFObject *, SEL, NFString *))((struct nopa_vtable *)__nopa_tmp_60->isa->vtable)->stringByAppendingString_)(__nopa_tmp_60, __nopa_sel_stringByAppendingString_, (NFString *)(({ NFObject *__nopa_tmp_61 = ((NFObject *)(((struct NFDictionary *)self)->_keys[i])); __nopa_tmp_61 ? ((NFString * (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_61->isa->vtable)->description)(__nopa_tmp_61, __nopa_sel_description) : 0; }))) : 0; });
-        }
-        else {
-            result = ({ NFObject *__nopa_tmp_62 = ((NFObject *)(result)); __nopa_tmp_62 ? ((NFString * (*)(NFObject *, SEL, const char *))((struct nopa_vtable *)__nopa_tmp_62->isa->vtable)->stringByAppendingUTF8String_)(__nopa_tmp_62, __nopa_sel_stringByAppendingUTF8String_, "(null)") : 0; });
-        }
-        result = ({ NFObject *__nopa_tmp_63 = ((NFObject *)(result)); __nopa_tmp_63 ? ((NFString * (*)(NFObject *, SEL, const char *))((struct nopa_vtable *)__nopa_tmp_63->isa->vtable)->stringByAppendingUTF8String_)(__nopa_tmp_63, __nopa_sel_stringByAppendingUTF8String_, " = ") : 0; });
-        if (((struct NFDictionary *)self)->_values[i]) {
-            result = ({ NFObject *__nopa_tmp_64 = ((NFObject *)(result)); __nopa_tmp_64 ? ((NFString * (*)(NFObject *, SEL, NFString *))((struct nopa_vtable *)__nopa_tmp_64->isa->vtable)->stringByAppendingString_)(__nopa_tmp_64, __nopa_sel_stringByAppendingString_, (NFString *)(({ NFObject *__nopa_tmp_65 = ((NFObject *)(((struct NFDictionary *)self)->_values[i])); __nopa_tmp_65 ? ((NFString * (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_65->isa->vtable)->description)(__nopa_tmp_65, __nopa_sel_description) : 0; }))) : 0; });
+        if (((struct NPDictionary *)self)->_keys[i]) {
+            result = ({ NPObject *__nopa_tmp_60 = ((NPObject *)(result)); __nopa_tmp_60 ? ((NPString * (*)(NPObject *, SEL, NPString *))((struct nopa_vtable *)__nopa_tmp_60->isa->vtable)->stringByAppendingString_)(__nopa_tmp_60, __nopa_sel_stringByAppendingString_, (NPString *)(({ NPObject *__nopa_tmp_61 = ((NPObject *)(((struct NPDictionary *)self)->_keys[i])); __nopa_tmp_61 ? ((NPString * (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_61->isa->vtable)->description)(__nopa_tmp_61, __nopa_sel_description) : 0; }))) : 0; });
         }
         else {
-            result = ({ NFObject *__nopa_tmp_66 = ((NFObject *)(result)); __nopa_tmp_66 ? ((NFString * (*)(NFObject *, SEL, const char *))((struct nopa_vtable *)__nopa_tmp_66->isa->vtable)->stringByAppendingUTF8String_)(__nopa_tmp_66, __nopa_sel_stringByAppendingUTF8String_, "(null)") : 0; });
+            result = ({ NPObject *__nopa_tmp_62 = ((NPObject *)(result)); __nopa_tmp_62 ? ((NPString * (*)(NPObject *, SEL, const char *))((struct nopa_vtable *)__nopa_tmp_62->isa->vtable)->stringByAppendingUTF8String_)(__nopa_tmp_62, __nopa_sel_stringByAppendingUTF8String_, "(null)") : 0; });
+        }
+        result = ({ NPObject *__nopa_tmp_63 = ((NPObject *)(result)); __nopa_tmp_63 ? ((NPString * (*)(NPObject *, SEL, const char *))((struct nopa_vtable *)__nopa_tmp_63->isa->vtable)->stringByAppendingUTF8String_)(__nopa_tmp_63, __nopa_sel_stringByAppendingUTF8String_, " = ") : 0; });
+        if (((struct NPDictionary *)self)->_values[i]) {
+            result = ({ NPObject *__nopa_tmp_64 = ((NPObject *)(result)); __nopa_tmp_64 ? ((NPString * (*)(NPObject *, SEL, NPString *))((struct nopa_vtable *)__nopa_tmp_64->isa->vtable)->stringByAppendingString_)(__nopa_tmp_64, __nopa_sel_stringByAppendingString_, (NPString *)(({ NPObject *__nopa_tmp_65 = ((NPObject *)(((struct NPDictionary *)self)->_values[i])); __nopa_tmp_65 ? ((NPString * (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_65->isa->vtable)->description)(__nopa_tmp_65, __nopa_sel_description) : 0; }))) : 0; });
+        }
+        else {
+            result = ({ NPObject *__nopa_tmp_66 = ((NPObject *)(result)); __nopa_tmp_66 ? ((NPString * (*)(NPObject *, SEL, const char *))((struct nopa_vtable *)__nopa_tmp_66->isa->vtable)->stringByAppendingUTF8String_)(__nopa_tmp_66, __nopa_sel_stringByAppendingUTF8String_, "(null)") : 0; });
         }
     }
-    result = ({ NFObject *__nopa_tmp_67 = ((NFObject *)(result)); __nopa_tmp_67 ? ((NFString * (*)(NFObject *, SEL, const char *))((struct nopa_vtable *)__nopa_tmp_67->isa->vtable)->stringByAppendingUTF8String_)(__nopa_tmp_67, __nopa_sel_stringByAppendingUTF8String_, "}") : 0; });
+    result = ({ NPObject *__nopa_tmp_67 = ((NPObject *)(result)); __nopa_tmp_67 ? ((NPString * (*)(NPObject *, SEL, const char *))((struct nopa_vtable *)__nopa_tmp_67->isa->vtable)->stringByAppendingUTF8String_)(__nopa_tmp_67, __nopa_sel_stringByAppendingUTF8String_, "}") : 0; });
     return result;
 }
 
-/* -[NFDictionary dictionaryWithObject:forKey:] */
-__attribute__((weak)) void NFDictionary_dealloc(NFObject * self, SEL _cmd) {
-    for (size_t i = 0;  (i < ((struct NFDictionary *)self)->_count); (i)++) {
-        if (((struct NFDictionary *)self)->_keys[i]) {
-            nopa_release(((struct NFDictionary *)self)->_keys[i]);
+/* -[NPDictionary dictionaryWithObject:forKey:] */
+__attribute__((weak)) void NPDictionary_dealloc(NPObject * self, SEL _cmd) {
+    for (size_t i = 0;  (i < ((struct NPDictionary *)self)->_count); (i)++) {
+        if (((struct NPDictionary *)self)->_keys[i]) {
+            nopa_release(((struct NPDictionary *)self)->_keys[i]);
         }
-        if (((struct NFDictionary *)self)->_values[i]) {
-            nopa_release(((struct NFDictionary *)self)->_values[i]);
+        if (((struct NPDictionary *)self)->_values[i]) {
+            nopa_release(((struct NPDictionary *)self)->_values[i]);
         }
     }
-    free(((struct NFDictionary *)self)->_keys);
-    free(((struct NFDictionary *)self)->_values);
-    ((struct NFDictionary *)self)->_keys = NULL;
-    ((struct NFDictionary *)self)->_values = NULL;
-    ((struct NFDictionary *)self)->_count = 0;
-    ((struct NFDictionary *)self)->_capacity = 0;
-    (&NOPA_VTABLE_$_NFObject)->dealloc(self, __nopa_sel_dealloc);
+    free(((struct NPDictionary *)self)->_keys);
+    free(((struct NPDictionary *)self)->_values);
+    ((struct NPDictionary *)self)->_keys = NULL;
+    ((struct NPDictionary *)self)->_values = NULL;
+    ((struct NPDictionary *)self)->_count = 0;
+    ((struct NPDictionary *)self)->_capacity = 0;
+    (&NOPA_VTABLE_$_NPObject)->dealloc(self, __nopa_sel_dealloc);
 }
 
-/* +[NFMutableDictionary dictionary] */
-__attribute__((weak)) NFMutableDictionary * NFMutableDictionary_dictionary(NFClass * self, SEL _cmd) {
+/* +[NPMutableDictionary dictionary] */
+__attribute__((weak)) NPMutableDictionary * NPMutableDictionary_dictionary(NPClass * self, SEL _cmd) {
     {
-        return (NFMutableDictionary *)({ NFObject *__nopa_tmp_68 = ((NFObject *)(NFObject_alloc(self, __nopa_sel_alloc))); __nopa_tmp_68 ? ((NFMutableArray * (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_68->isa->vtable)->init)(__nopa_tmp_68, __nopa_sel_init) : 0; });
+        return (NPMutableDictionary *)({ NPObject *__nopa_tmp_68 = ((NPObject *)(NPObject_alloc(self, __nopa_sel_alloc))); __nopa_tmp_68 ? ((NPMutableArray * (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_68->isa->vtable)->init)(__nopa_tmp_68, __nopa_sel_init) : 0; });
     }
 }
 
-/* +[NFMutableDictionary dictionaryWithCapacity_] */
-__attribute__((weak)) NFMutableDictionary * NFMutableDictionary_dictionaryWithCapacity_(NFClass * self, SEL _cmd, size_t capacity) {
+/* +[NPMutableDictionary dictionaryWithCapacity_] */
+__attribute__((weak)) NPMutableDictionary * NPMutableDictionary_dictionaryWithCapacity_(NPClass * self, SEL _cmd, size_t capacity) {
     {
-        return (NFMutableDictionary *)({ NFObject *__nopa_tmp_69 = ((NFObject *)(NFObject_alloc(self, __nopa_sel_alloc))); __nopa_tmp_69 ? ((NFMutableArray * (*)(NFObject *, SEL, size_t))((struct nopa_vtable *)__nopa_tmp_69->isa->vtable)->initWithCapacity_)(__nopa_tmp_69, __nopa_sel_initWithCapacity_, capacity) : 0; });
+        return (NPMutableDictionary *)({ NPObject *__nopa_tmp_69 = ((NPObject *)(NPObject_alloc(self, __nopa_sel_alloc))); __nopa_tmp_69 ? ((NPMutableArray * (*)(NPObject *, SEL, size_t))((struct nopa_vtable *)__nopa_tmp_69->isa->vtable)->initWithCapacity_)(__nopa_tmp_69, __nopa_sel_initWithCapacity_, capacity) : 0; });
     }
 }
 
-/* +[NFMutableDictionary dictionaryWithObject_forKey_] */
-__attribute__((weak)) NFMutableDictionary * NFMutableDictionary_dictionaryWithObject_forKey_(NFClass * self, SEL _cmd, NFObject * value, NFObject * key) {
+/* +[NPMutableDictionary dictionaryWithObject_forKey_] */
+__attribute__((weak)) NPMutableDictionary * NPMutableDictionary_dictionaryWithObject_forKey_(NPClass * self, SEL _cmd, NPObject * value, NPObject * key) {
     {
-        NFMutableDictionary * dict = (NFMutableDictionary *)(NFMutableDictionary_dictionaryWithCapacity_(self, __nopa_sel_dictionaryWithCapacity_, 1));
+        NPMutableDictionary * dict = (NPMutableDictionary *)(NPMutableDictionary_dictionaryWithCapacity_(self, __nopa_sel_dictionaryWithCapacity_, 1));
         if (((dict && key) && value)) {
-            ({ NFObject *__nopa_tmp_70 = ((NFObject *)(dict)); __nopa_tmp_70 ? ((void (*)(NFObject *, SEL, NFObject *, NFObject *))((struct nopa_vtable *)__nopa_tmp_70->isa->vtable)->setObject_forKey_)(__nopa_tmp_70, __nopa_sel_setObject_forKey_, value, key) : 0; });
+            ({ NPObject *__nopa_tmp_70 = ((NPObject *)(dict)); __nopa_tmp_70 ? ((void (*)(NPObject *, SEL, NPObject *, NPObject *))((struct nopa_vtable *)__nopa_tmp_70->isa->vtable)->setObject_forKey_)(__nopa_tmp_70, __nopa_sel_setObject_forKey_, value, key) : 0; });
         }
         return dict;
     }
 }
 
-/* -[NFMutableDictionary dictionary] */
-__attribute__((weak)) NFMutableDictionary * NFMutableDictionary_init(NFObject * self, SEL _cmd) {
-    return (NFMutableDictionary *)({ NFObject *__nopa_tmp_71 = ((NFObject *)(self)); __nopa_tmp_71 ? ((NFMutableArray * (*)(NFObject *, SEL, size_t))((struct nopa_vtable *)__nopa_tmp_71->isa->vtable)->initWithCapacity_)(__nopa_tmp_71, __nopa_sel_initWithCapacity_, 0) : 0; });
+/* -[NPMutableDictionary dictionary] */
+__attribute__((weak)) NPMutableDictionary * NPMutableDictionary_init(NPObject * self, SEL _cmd) {
+    return (NPMutableDictionary *)({ NPObject *__nopa_tmp_71 = ((NPObject *)(self)); __nopa_tmp_71 ? ((NPMutableArray * (*)(NPObject *, SEL, size_t))((struct nopa_vtable *)__nopa_tmp_71->isa->vtable)->initWithCapacity_)(__nopa_tmp_71, __nopa_sel_initWithCapacity_, 0) : 0; });
 }
 
-/* -[NFMutableDictionary initWithCapacity_] */
-__attribute__((weak)) NFMutableDictionary * NFMutableDictionary_initWithCapacity_(NFObject * self, SEL _cmd, size_t capacity) {
-    self = (&NOPA_VTABLE_$_NFObject)->init(self, __nopa_sel_init);
+/* -[NPMutableDictionary initWithCapacity_] */
+__attribute__((weak)) NPMutableDictionary * NPMutableDictionary_initWithCapacity_(NPObject * self, SEL _cmd, size_t capacity) {
+    self = (&NOPA_VTABLE_$_NPObject)->init(self, __nopa_sel_init);
     if (self) {
-        ((struct NFMutableDictionary *)self)->_keys = NULL;
-        ((struct NFMutableDictionary *)self)->_values = NULL;
-        ((struct NFMutableDictionary *)self)->_count = 0;
-        ((struct NFMutableDictionary *)self)->_capacity = 0;
+        ((struct NPMutableDictionary *)self)->_keys = NULL;
+        ((struct NPMutableDictionary *)self)->_values = NULL;
+        ((struct NPMutableDictionary *)self)->_count = 0;
+        ((struct NPMutableDictionary *)self)->_capacity = 0;
         if ((capacity > 0)) {
-            NFObject * * ks = (NFObject * *)calloc(capacity, sizeof(NFObject *));
-            NFObject * * vs = (NFObject * *)calloc(capacity, sizeof(NFObject *));
+            NPObject * * ks = (NPObject * *)calloc(capacity, sizeof(NPObject *));
+            NPObject * * vs = (NPObject * *)calloc(capacity, sizeof(NPObject *));
             if ((ks && vs)) {
-                ((struct NFMutableDictionary *)self)->_keys = ks;
-                ((struct NFMutableDictionary *)self)->_values = vs;
-                ((struct NFMutableDictionary *)self)->_capacity = capacity;
+                ((struct NPMutableDictionary *)self)->_keys = ks;
+                ((struct NPMutableDictionary *)self)->_values = vs;
+                ((struct NPMutableDictionary *)self)->_capacity = capacity;
             }
             else {
                 free(ks);
@@ -5393,28 +5393,28 @@ __attribute__((weak)) NFMutableDictionary * NFMutableDictionary_initWithCapacity
             }
         }
     }
-    return (NFMutableDictionary *)self;
+    return (NPMutableDictionary *)self;
 }
 
-/* -[NFMutableDictionary initWithDictionary_] */
-__attribute__((weak)) NFMutableDictionary * NFMutableDictionary_initWithDictionary_(NFObject * self, SEL _cmd, NFDictionary * other) {
-    self = ({ NFObject *__nopa_tmp_72 = ((NFObject *)(self)); __nopa_tmp_72 ? ((NFMutableArray * (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_72->isa->vtable)->init)(__nopa_tmp_72, __nopa_sel_init) : 0; });
+/* -[NPMutableDictionary initWithDictionary_] */
+__attribute__((weak)) NPMutableDictionary * NPMutableDictionary_initWithDictionary_(NPObject * self, SEL _cmd, NPDictionary * other) {
+    self = ({ NPObject *__nopa_tmp_72 = ((NPObject *)(self)); __nopa_tmp_72 ? ((NPMutableArray * (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_72->isa->vtable)->init)(__nopa_tmp_72, __nopa_sel_init) : 0; });
     if ((self && other)) {
-        ({ NFObject *__nopa_tmp_73 = ((NFObject *)(self)); __nopa_tmp_73 ? ((void (*)(NFObject *, SEL, NFDictionary *))((struct nopa_vtable *)__nopa_tmp_73->isa->vtable)->addEntriesFromDictionary_)(__nopa_tmp_73, __nopa_sel_addEntriesFromDictionary_, (NFDictionary *)(other)) : 0; });
+        ({ NPObject *__nopa_tmp_73 = ((NPObject *)(self)); __nopa_tmp_73 ? ((void (*)(NPObject *, SEL, NPDictionary *))((struct nopa_vtable *)__nopa_tmp_73->isa->vtable)->addEntriesFromDictionary_)(__nopa_tmp_73, __nopa_sel_addEntriesFromDictionary_, (NPDictionary *)(other)) : 0; });
     }
-    return (NFMutableDictionary *)self;
+    return (NPMutableDictionary *)self;
 }
 
-/* -[NFMutableDictionary setObject_forKey_] */
-__attribute__((weak)) void NFMutableDictionary_setObject_forKey_(NFObject * self, SEL _cmd, NFObject * value, NFObject * key) {
+/* -[NPMutableDictionary setObject_forKey_] */
+__attribute__((weak)) void NPMutableDictionary_setObject_forKey_(NPObject * self, SEL _cmd, NPObject * value, NPObject * key) {
     if ((!key || !value)) {
         return;
     }
-    for (size_t i = 0;  (i < ((struct NFMutableDictionary *)self)->_count); (i)++) {
-        if ((((struct NFMutableDictionary *)self)->_keys[i] && ({ NFObject *__nopa_tmp_74 = ((NFObject *)(((struct NFMutableDictionary *)self)->_keys[i])); __nopa_tmp_74 ? ((_Bool (*)(NFObject *, SEL, NFObject *))((struct nopa_vtable *)__nopa_tmp_74->isa->vtable)->isEqual_)(__nopa_tmp_74, __nopa_sel_isEqual_, (NFObject *)(key)) : (_Bool){0}; }))) {
-            if ((((struct NFMutableDictionary *)self)->_values[i] != value)) {
-                NFObject * old = ((struct NFMutableDictionary *)self)->_values[i];
-                ((struct NFMutableDictionary *)self)->_values[i] = nopa_retain(value);
+    for (size_t i = 0;  (i < ((struct NPMutableDictionary *)self)->_count); (i)++) {
+        if ((((struct NPMutableDictionary *)self)->_keys[i] && ({ NPObject *__nopa_tmp_74 = ((NPObject *)(((struct NPMutableDictionary *)self)->_keys[i])); __nopa_tmp_74 ? ((_Bool (*)(NPObject *, SEL, NPObject *))((struct nopa_vtable *)__nopa_tmp_74->isa->vtable)->isEqual_)(__nopa_tmp_74, __nopa_sel_isEqual_, (NPObject *)(key)) : (_Bool){0}; }))) {
+            if ((((struct NPMutableDictionary *)self)->_values[i] != value)) {
+                NPObject * old = ((struct NPMutableDictionary *)self)->_values[i];
+                ((struct NPMutableDictionary *)self)->_values[i] = nopa_retain(value);
                 if (old) {
                     nopa_release(old);
                 }
@@ -5422,50 +5422,50 @@ __attribute__((weak)) void NFMutableDictionary_setObject_forKey_(NFObject * self
             return;
         }
     }
-    if ((((struct NFMutableDictionary *)self)->_count >= ((struct NFMutableDictionary *)self)->_capacity)) {
-        size_t newcap = (((struct NFMutableDictionary *)self)->_capacity == 0) ? 4 : (((struct NFMutableDictionary *)self)->_capacity * 2);
-        NFObject * * ks = (NFObject * *)realloc(((struct NFMutableDictionary *)self)->_keys, (newcap * sizeof(NFObject *)));
+    if ((((struct NPMutableDictionary *)self)->_count >= ((struct NPMutableDictionary *)self)->_capacity)) {
+        size_t newcap = (((struct NPMutableDictionary *)self)->_capacity == 0) ? 4 : (((struct NPMutableDictionary *)self)->_capacity * 2);
+        NPObject * * ks = (NPObject * *)realloc(((struct NPMutableDictionary *)self)->_keys, (newcap * sizeof(NPObject *)));
         if (!ks) {
             return;
         }
-        ((struct NFMutableDictionary *)self)->_keys = ks;
-        NFObject * * vs = (NFObject * *)realloc(((struct NFMutableDictionary *)self)->_values, (newcap * sizeof(NFObject *)));
+        ((struct NPMutableDictionary *)self)->_keys = ks;
+        NPObject * * vs = (NPObject * *)realloc(((struct NPMutableDictionary *)self)->_values, (newcap * sizeof(NPObject *)));
         if (!vs) {
             return;
         }
-        ((struct NFMutableDictionary *)self)->_values = vs;
-        ((struct NFMutableDictionary *)self)->_capacity = newcap;
+        ((struct NPMutableDictionary *)self)->_values = vs;
+        ((struct NPMutableDictionary *)self)->_capacity = newcap;
     }
-    ((struct NFMutableDictionary *)self)->_keys[((struct NFMutableDictionary *)self)->_count] = nopa_retain(key);
-    ((struct NFMutableDictionary *)self)->_values[((struct NFMutableDictionary *)self)->_count] = nopa_retain(value);
-    (((struct NFMutableDictionary *)self)->_count)++;
+    ((struct NPMutableDictionary *)self)->_keys[((struct NPMutableDictionary *)self)->_count] = nopa_retain(key);
+    ((struct NPMutableDictionary *)self)->_values[((struct NPMutableDictionary *)self)->_count] = nopa_retain(value);
+    (((struct NPMutableDictionary *)self)->_count)++;
 }
 
-/* -[NFMutableDictionary addEntriesFromDictionary_] */
-__attribute__((weak)) void NFMutableDictionary_addEntriesFromDictionary_(NFObject * self, SEL _cmd, NFDictionary * other) {
+/* -[NPMutableDictionary addEntriesFromDictionary_] */
+__attribute__((weak)) void NPMutableDictionary_addEntriesFromDictionary_(NPObject * self, SEL _cmd, NPDictionary * other) {
     if (!other) {
         return;
     }
-    NFArray * ks = (NFArray *)(({ NFObject *__nopa_tmp_75 = ((NFObject *)(other)); __nopa_tmp_75 ? ((NFArray * (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_75->isa->vtable)->allKeys)(__nopa_tmp_75, __nopa_sel_allKeys) : 0; }));
-    size_t n = ({ NFObject *__nopa_tmp_76 = ((NFObject *)(ks)); __nopa_tmp_76 ? ((size_t (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_76->isa->vtable)->count)(__nopa_tmp_76, __nopa_sel_count) : (size_t){0}; });
+    NPArray * ks = (NPArray *)(({ NPObject *__nopa_tmp_75 = ((NPObject *)(other)); __nopa_tmp_75 ? ((NPArray * (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_75->isa->vtable)->allKeys)(__nopa_tmp_75, __nopa_sel_allKeys) : 0; }));
+    size_t n = ({ NPObject *__nopa_tmp_76 = ((NPObject *)(ks)); __nopa_tmp_76 ? ((size_t (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_76->isa->vtable)->count)(__nopa_tmp_76, __nopa_sel_count) : (size_t){0}; });
     for (size_t i = 0;  (i < n); (i)++) {
-        NFObject * k = ({ NFObject *__nopa_tmp_77 = ((NFObject *)(ks)); __nopa_tmp_77 ? ((NFObject * (*)(NFObject *, SEL, size_t))((struct nopa_vtable *)__nopa_tmp_77->isa->vtable)->objectAtIndex_)(__nopa_tmp_77, __nopa_sel_objectAtIndex_, i) : (NFObject *){0}; });
-        ({ NFObject *__nopa_tmp_78 = ((NFObject *)(self)); __nopa_tmp_78 ? ((void (*)(NFObject *, SEL, NFObject *, NFObject *))((struct nopa_vtable *)__nopa_tmp_78->isa->vtable)->setObject_forKey_)(__nopa_tmp_78, __nopa_sel_setObject_forKey_, ({ NFObject *__nopa_tmp_79 = ((NFObject *)(other)); __nopa_tmp_79 ? ((NFObject * (*)(NFObject *, SEL, NFObject *))((struct nopa_vtable *)__nopa_tmp_79->isa->vtable)->objectForKey_)(__nopa_tmp_79, __nopa_sel_objectForKey_, k) : (NFObject *){0}; }), k) : 0; });
+        NPObject * k = ({ NPObject *__nopa_tmp_77 = ((NPObject *)(ks)); __nopa_tmp_77 ? ((NPObject * (*)(NPObject *, SEL, size_t))((struct nopa_vtable *)__nopa_tmp_77->isa->vtable)->objectAtIndex_)(__nopa_tmp_77, __nopa_sel_objectAtIndex_, i) : (NPObject *){0}; });
+        ({ NPObject *__nopa_tmp_78 = ((NPObject *)(self)); __nopa_tmp_78 ? ((void (*)(NPObject *, SEL, NPObject *, NPObject *))((struct nopa_vtable *)__nopa_tmp_78->isa->vtable)->setObject_forKey_)(__nopa_tmp_78, __nopa_sel_setObject_forKey_, ({ NPObject *__nopa_tmp_79 = ((NPObject *)(other)); __nopa_tmp_79 ? ((NPObject * (*)(NPObject *, SEL, NPObject *))((struct nopa_vtable *)__nopa_tmp_79->isa->vtable)->objectForKey_)(__nopa_tmp_79, __nopa_sel_objectForKey_, k) : (NPObject *){0}; }), k) : 0; });
     }
 }
 
-/* -[NFMutableDictionary removeObjectForKey_] */
-__attribute__((weak)) void NFMutableDictionary_removeObjectForKey_(NFObject * self, SEL _cmd, NFObject * key) {
+/* -[NPMutableDictionary removeObjectForKey_] */
+__attribute__((weak)) void NPMutableDictionary_removeObjectForKey_(NPObject * self, SEL _cmd, NPObject * key) {
     if (!key) {
         return;
     }
-    for (size_t i = 0;  (i < ((struct NFMutableDictionary *)self)->_count); (i)++) {
-        if ((((struct NFMutableDictionary *)self)->_keys[i] && ({ NFObject *__nopa_tmp_80 = ((NFObject *)(((struct NFMutableDictionary *)self)->_keys[i])); __nopa_tmp_80 ? ((_Bool (*)(NFObject *, SEL, NFObject *))((struct nopa_vtable *)__nopa_tmp_80->isa->vtable)->isEqual_)(__nopa_tmp_80, __nopa_sel_isEqual_, (NFObject *)(key)) : (_Bool){0}; }))) {
-            NFObject * k = ((struct NFMutableDictionary *)self)->_keys[i];
-            NFObject * v = ((struct NFMutableDictionary *)self)->_values[i];
-            memmove((((struct NFMutableDictionary *)self)->_keys + i), ((((struct NFMutableDictionary *)self)->_keys + i) + 1), ((((((struct NFMutableDictionary *)self)->_count - i) - 1)) * sizeof(NFObject *)));
-            memmove((((struct NFMutableDictionary *)self)->_values + i), ((((struct NFMutableDictionary *)self)->_values + i) + 1), ((((((struct NFMutableDictionary *)self)->_count - i) - 1)) * sizeof(NFObject *)));
-            (((struct NFMutableDictionary *)self)->_count)--;
+    for (size_t i = 0;  (i < ((struct NPMutableDictionary *)self)->_count); (i)++) {
+        if ((((struct NPMutableDictionary *)self)->_keys[i] && ({ NPObject *__nopa_tmp_80 = ((NPObject *)(((struct NPMutableDictionary *)self)->_keys[i])); __nopa_tmp_80 ? ((_Bool (*)(NPObject *, SEL, NPObject *))((struct nopa_vtable *)__nopa_tmp_80->isa->vtable)->isEqual_)(__nopa_tmp_80, __nopa_sel_isEqual_, (NPObject *)(key)) : (_Bool){0}; }))) {
+            NPObject * k = ((struct NPMutableDictionary *)self)->_keys[i];
+            NPObject * v = ((struct NPMutableDictionary *)self)->_values[i];
+            memmove((((struct NPMutableDictionary *)self)->_keys + i), ((((struct NPMutableDictionary *)self)->_keys + i) + 1), ((((((struct NPMutableDictionary *)self)->_count - i) - 1)) * sizeof(NPObject *)));
+            memmove((((struct NPMutableDictionary *)self)->_values + i), ((((struct NPMutableDictionary *)self)->_values + i) + 1), ((((((struct NPMutableDictionary *)self)->_count - i) - 1)) * sizeof(NPObject *)));
+            (((struct NPMutableDictionary *)self)->_count)--;
             if (k) {
                 nopa_release(k);
             }
@@ -5477,211 +5477,211 @@ __attribute__((weak)) void NFMutableDictionary_removeObjectForKey_(NFObject * se
     }
 }
 
-/* -[NFMutableDictionary removeAllObjects] */
-__attribute__((weak)) void NFMutableDictionary_removeAllObjects(NFObject * self, SEL _cmd) {
-    for (size_t i = 0;  (i < ((struct NFMutableDictionary *)self)->_count); (i)++) {
-        if (((struct NFMutableDictionary *)self)->_keys[i]) {
-            nopa_release(((struct NFMutableDictionary *)self)->_keys[i]);
+/* -[NPMutableDictionary removeAllObjects] */
+__attribute__((weak)) void NPMutableDictionary_removeAllObjects(NPObject * self, SEL _cmd) {
+    for (size_t i = 0;  (i < ((struct NPMutableDictionary *)self)->_count); (i)++) {
+        if (((struct NPMutableDictionary *)self)->_keys[i]) {
+            nopa_release(((struct NPMutableDictionary *)self)->_keys[i]);
         }
-        if (((struct NFMutableDictionary *)self)->_values[i]) {
-            nopa_release(((struct NFMutableDictionary *)self)->_values[i]);
+        if (((struct NPMutableDictionary *)self)->_values[i]) {
+            nopa_release(((struct NPMutableDictionary *)self)->_values[i]);
         }
     }
-    ((struct NFMutableDictionary *)self)->_count = 0;
+    ((struct NPMutableDictionary *)self)->_count = 0;
 }
 
-/* +[NFNumber boolValue] */
-__attribute__((weak)) NFNumber * NFNumber_numberWithInt_(NFClass * self, SEL _cmd, int value) {
+/* +[NPNumber boolValue] */
+__attribute__((weak)) NPNumber * NPNumber_numberWithInt_(NPClass * self, SEL _cmd, int value) {
     {
-        return (NFNumber *)({ NFObject *__nopa_tmp_81 = ((NFObject *)(NFObject_alloc(self, __nopa_sel_alloc))); __nopa_tmp_81 ? ((NFNumber * (*)(NFObject *, SEL, long long))((struct nopa_vtable *)__nopa_tmp_81->isa->vtable)->initWithLongLong_)(__nopa_tmp_81, __nopa_sel_initWithLongLong_, (long long)value) : 0; });
+        return (NPNumber *)({ NPObject *__nopa_tmp_81 = ((NPObject *)(NPObject_alloc(self, __nopa_sel_alloc))); __nopa_tmp_81 ? ((NPNumber * (*)(NPObject *, SEL, long long))((struct nopa_vtable *)__nopa_tmp_81->isa->vtable)->initWithLongLong_)(__nopa_tmp_81, __nopa_sel_initWithLongLong_, (long long)value) : 0; });
     }
 }
 
-/* +[NFNumber charValue] */
-__attribute__((weak)) NFNumber * NFNumber_numberWithLongLong_(NFClass * self, SEL _cmd, long long value) {
+/* +[NPNumber charValue] */
+__attribute__((weak)) NPNumber * NPNumber_numberWithLongLong_(NPClass * self, SEL _cmd, long long value) {
     {
-        return (NFNumber *)({ NFObject *__nopa_tmp_82 = ((NFObject *)(NFObject_alloc(self, __nopa_sel_alloc))); __nopa_tmp_82 ? ((NFNumber * (*)(NFObject *, SEL, long long))((struct nopa_vtable *)__nopa_tmp_82->isa->vtable)->initWithLongLong_)(__nopa_tmp_82, __nopa_sel_initWithLongLong_, value) : 0; });
+        return (NPNumber *)({ NPObject *__nopa_tmp_82 = ((NPObject *)(NPObject_alloc(self, __nopa_sel_alloc))); __nopa_tmp_82 ? ((NPNumber * (*)(NPObject *, SEL, long long))((struct nopa_vtable *)__nopa_tmp_82->isa->vtable)->initWithLongLong_)(__nopa_tmp_82, __nopa_sel_initWithLongLong_, value) : 0; });
     }
 }
 
-/* +[NFNumber description] */
-__attribute__((weak)) NFNumber * NFNumber_numberWithDouble_(NFClass * self, SEL _cmd, double value) {
+/* +[NPNumber description] */
+__attribute__((weak)) NPNumber * NPNumber_numberWithDouble_(NPClass * self, SEL _cmd, double value) {
     {
-        return (NFNumber *)({ NFObject *__nopa_tmp_83 = ((NFObject *)(NFObject_alloc(self, __nopa_sel_alloc))); __nopa_tmp_83 ? ((NFNumber * (*)(NFObject *, SEL, double))((struct nopa_vtable *)__nopa_tmp_83->isa->vtable)->initWithDouble_)(__nopa_tmp_83, __nopa_sel_initWithDouble_, value) : 0; });
+        return (NPNumber *)({ NPObject *__nopa_tmp_83 = ((NPObject *)(NPObject_alloc(self, __nopa_sel_alloc))); __nopa_tmp_83 ? ((NPNumber * (*)(NPObject *, SEL, double))((struct nopa_vtable *)__nopa_tmp_83->isa->vtable)->initWithDouble_)(__nopa_tmp_83, __nopa_sel_initWithDouble_, value) : 0; });
     }
 }
 
-/* +[NFNumber isEqual:] */
-__attribute__((weak)) NFNumber * NFNumber_numberWithBool_(NFClass * self, SEL _cmd, int value) {
+/* +[NPNumber isEqual:] */
+__attribute__((weak)) NPNumber * NPNumber_numberWithBool_(NPClass * self, SEL _cmd, int value) {
     {
-        return (NFNumber *)({ NFObject *__nopa_tmp_84 = ((NFObject *)(NFObject_alloc(self, __nopa_sel_alloc))); __nopa_tmp_84 ? ((NFNumber * (*)(NFObject *, SEL, long long))((struct nopa_vtable *)__nopa_tmp_84->isa->vtable)->initWithLongLong_)(__nopa_tmp_84, __nopa_sel_initWithLongLong_, (long long)(value ? 1 : 0)) : 0; });
+        return (NPNumber *)({ NPObject *__nopa_tmp_84 = ((NPObject *)(NPObject_alloc(self, __nopa_sel_alloc))); __nopa_tmp_84 ? ((NPNumber * (*)(NPObject *, SEL, long long))((struct nopa_vtable *)__nopa_tmp_84->isa->vtable)->initWithLongLong_)(__nopa_tmp_84, __nopa_sel_initWithLongLong_, (long long)(value ? 1 : 0)) : 0; });
     }
 }
 
-/* +[NFNumber isEqualToNumber:] */
-__attribute__((weak)) NFNumber * NFNumber_numberWithChar_(NFClass * self, SEL _cmd, char value) {
+/* +[NPNumber isEqualToNumber:] */
+__attribute__((weak)) NPNumber * NPNumber_numberWithChar_(NPClass * self, SEL _cmd, char value) {
     {
-        return (NFNumber *)({ NFObject *__nopa_tmp_85 = ((NFObject *)(NFObject_alloc(self, __nopa_sel_alloc))); __nopa_tmp_85 ? ((NFNumber * (*)(NFObject *, SEL, long long))((struct nopa_vtable *)__nopa_tmp_85->isa->vtable)->initWithLongLong_)(__nopa_tmp_85, __nopa_sel_initWithLongLong_, (long long)value) : 0; });
+        return (NPNumber *)({ NPObject *__nopa_tmp_85 = ((NPObject *)(NPObject_alloc(self, __nopa_sel_alloc))); __nopa_tmp_85 ? ((NPNumber * (*)(NPObject *, SEL, long long))((struct nopa_vtable *)__nopa_tmp_85->isa->vtable)->initWithLongLong_)(__nopa_tmp_85, __nopa_sel_initWithLongLong_, (long long)value) : 0; });
     }
 }
 
-/* -[NFNumber initWithLongLong_] */
-__attribute__((weak)) NFNumber * NFNumber_initWithLongLong_(NFObject * self, SEL _cmd, long long value) {
-    self = (&NOPA_VTABLE_$_NFObject)->init(self, __nopa_sel_init);
+/* -[NPNumber initWithLongLong_] */
+__attribute__((weak)) NPNumber * NPNumber_initWithLongLong_(NPObject * self, SEL _cmd, long long value) {
+    self = (&NOPA_VTABLE_$_NPObject)->init(self, __nopa_sel_init);
     if (self) {
-        ((struct NFNumber *)self)->_isDouble = 0;
-        ((struct NFNumber *)self)->_intValue = value;
-        ((struct NFNumber *)self)->_doubleValue = (double)value;
+        ((struct NPNumber *)self)->_isDouble = 0;
+        ((struct NPNumber *)self)->_intValue = value;
+        ((struct NPNumber *)self)->_doubleValue = (double)value;
     }
-    return (NFNumber *)self;
+    return (NPNumber *)self;
 }
 
-/* -[NFNumber initWithDouble_] */
-__attribute__((weak)) NFNumber * NFNumber_initWithDouble_(NFObject * self, SEL _cmd, double value) {
-    self = (&NOPA_VTABLE_$_NFObject)->init(self, __nopa_sel_init);
+/* -[NPNumber initWithDouble_] */
+__attribute__((weak)) NPNumber * NPNumber_initWithDouble_(NPObject * self, SEL _cmd, double value) {
+    self = (&NOPA_VTABLE_$_NPObject)->init(self, __nopa_sel_init);
     if (self) {
-        ((struct NFNumber *)self)->_isDouble = 1;
-        ((struct NFNumber *)self)->_doubleValue = value;
-        ((struct NFNumber *)self)->_intValue = (long long)value;
+        ((struct NPNumber *)self)->_isDouble = 1;
+        ((struct NPNumber *)self)->_doubleValue = value;
+        ((struct NPNumber *)self)->_intValue = (long long)value;
     }
-    return (NFNumber *)self;
+    return (NPNumber *)self;
 }
 
-/* -[NFNumber intValue] */
-__attribute__((weak)) int NFNumber_intValue(NFObject * self, SEL _cmd) {
-    return (int)((struct NFNumber *)self)->_intValue;
+/* -[NPNumber intValue] */
+__attribute__((weak)) int NPNumber_intValue(NPObject * self, SEL _cmd) {
+    return (int)((struct NPNumber *)self)->_intValue;
 }
 
-/* -[NFNumber longLongValue] */
-__attribute__((weak)) long long NFNumber_longLongValue(NFObject * self, SEL _cmd) {
-    return ((struct NFNumber *)self)->_intValue;
+/* -[NPNumber longLongValue] */
+__attribute__((weak)) long long NPNumber_longLongValue(NPObject * self, SEL _cmd) {
+    return ((struct NPNumber *)self)->_intValue;
 }
 
-/* -[NFNumber doubleValue] */
-__attribute__((weak)) double NFNumber_doubleValue(NFObject * self, SEL _cmd) {
-    return ((struct NFNumber *)self)->_isDouble ? ((struct NFNumber *)self)->_doubleValue : (double)((struct NFNumber *)self)->_intValue;
+/* -[NPNumber doubleValue] */
+__attribute__((weak)) double NPNumber_doubleValue(NPObject * self, SEL _cmd) {
+    return ((struct NPNumber *)self)->_isDouble ? ((struct NPNumber *)self)->_doubleValue : (double)((struct NPNumber *)self)->_intValue;
 }
 
-/* -[NFNumber boolValue] */
-__attribute__((weak)) int NFNumber_boolValue(NFObject * self, SEL _cmd) {
-    return ((struct NFNumber *)self)->_isDouble ? ((((struct NFNumber *)self)->_doubleValue != 0.0f)) : ((((struct NFNumber *)self)->_intValue != 0));
+/* -[NPNumber boolValue] */
+__attribute__((weak)) int NPNumber_boolValue(NPObject * self, SEL _cmd) {
+    return ((struct NPNumber *)self)->_isDouble ? ((((struct NPNumber *)self)->_doubleValue != 0.0f)) : ((((struct NPNumber *)self)->_intValue != 0));
 }
 
-/* -[NFNumber charValue] */
-__attribute__((weak)) char NFNumber_charValue(NFObject * self, SEL _cmd) {
-    return (char)((struct NFNumber *)self)->_intValue;
+/* -[NPNumber charValue] */
+__attribute__((weak)) char NPNumber_charValue(NPObject * self, SEL _cmd) {
+    return (char)((struct NPNumber *)self)->_intValue;
 }
 
-/* -[NFNumber intValue] */
-__attribute__((weak)) NFString * NFNumber_description(NFObject * self, SEL _cmd) {
+/* -[NPNumber intValue] */
+__attribute__((weak)) NPString * NPNumber_description(NPObject * self, SEL _cmd) {
     char buf[64];
-    if (((struct NFNumber *)self)->_isDouble) {
-        snprintf(buf, sizeof(buf), "%g", ((struct NFNumber *)self)->_doubleValue);
+    if (((struct NPNumber *)self)->_isDouble) {
+        snprintf(buf, sizeof(buf), "%g", ((struct NPNumber *)self)->_doubleValue);
     }
     else {
-        snprintf(buf, sizeof(buf), "%lld", ((struct NFNumber *)self)->_intValue);
+        snprintf(buf, sizeof(buf), "%lld", ((struct NPNumber *)self)->_intValue);
     }
-    return (NFString *)NFString_stringWithUTF8String_(&NOPA_CLASS_$_NFString, __nopa_sel_stringWithUTF8String_, buf);
+    return (NPString *)NPString_stringWithUTF8String_(&NOPA_CLASS_$_NPString, __nopa_sel_stringWithUTF8String_, buf);
 }
 
-/* -[NFNumber initWithDouble:] */
-__attribute__((weak)) _Bool NFNumber_isEqual_(NFObject * self, SEL _cmd, NFObject * object) {
-    if ((self == (NFObject *)object)) {
+/* -[NPNumber initWithDouble:] */
+__attribute__((weak)) _Bool NPNumber_isEqual_(NPObject * self, SEL _cmd, NPObject * object) {
+    if ((self == (NPObject *)object)) {
         return 1;
     }
     if (!object) {
         return 0;
     }
-    if (({ NFObject *__nopa_tmp_86 = ((NFObject *)(object)); __nopa_tmp_86 ? ((_Bool (*)(NFObject *, SEL, NFClass *))((struct nopa_vtable *)__nopa_tmp_86->isa->vtable)->isKindOfClass_)(__nopa_tmp_86, __nopa_sel_isKindOfClass_, (NFClass *)(&NOPA_CLASS_$_NFNumber)) : (_Bool){0}; })) {
-        return ({ NFObject *__nopa_tmp_87 = ((NFObject *)(self)); __nopa_tmp_87 ? ((int (*)(NFObject *, SEL, NFNumber *))((struct nopa_vtable *)__nopa_tmp_87->isa->vtable)->isEqualToNumber_)(__nopa_tmp_87, __nopa_sel_isEqualToNumber_, (NFNumber *)((NFNumber *)object)) : (int){0}; });
+    if (({ NPObject *__nopa_tmp_86 = ((NPObject *)(object)); __nopa_tmp_86 ? ((_Bool (*)(NPObject *, SEL, NPClass *))((struct nopa_vtable *)__nopa_tmp_86->isa->vtable)->isKindOfClass_)(__nopa_tmp_86, __nopa_sel_isKindOfClass_, (NPClass *)(&NOPA_CLASS_$_NPNumber)) : (_Bool){0}; })) {
+        return ({ NPObject *__nopa_tmp_87 = ((NPObject *)(self)); __nopa_tmp_87 ? ((int (*)(NPObject *, SEL, NPNumber *))((struct nopa_vtable *)__nopa_tmp_87->isa->vtable)->isEqualToNumber_)(__nopa_tmp_87, __nopa_sel_isEqualToNumber_, (NPNumber *)((NPNumber *)object)) : (int){0}; });
     }
-    return (&NOPA_VTABLE_$_nopa_root)->isEqual_(self, __nopa_sel_isEqual_, (NFObject *)(object));
+    return (&NOPA_VTABLE_$_nopa_root)->isEqual_(self, __nopa_sel_isEqual_, (NPObject *)(object));
 }
 
-/* -[NFNumber isEqualToNumber_] */
-__attribute__((weak)) int NFNumber_isEqualToNumber_(NFObject * self, SEL _cmd, NFNumber * other) {
+/* -[NPNumber isEqualToNumber_] */
+__attribute__((weak)) int NPNumber_isEqualToNumber_(NPObject * self, SEL _cmd, NPNumber * other) {
     if (!other) {
         return 0;
     }
-    return (({ NFObject *__nopa_tmp_88 = ((NFObject *)(self)); __nopa_tmp_88 ? ((double (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_88->isa->vtable)->doubleValue)(__nopa_tmp_88, __nopa_sel_doubleValue) : (double){0}; }) == ({ NFObject *__nopa_tmp_89 = ((NFObject *)(other)); __nopa_tmp_89 ? ((double (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_89->isa->vtable)->doubleValue)(__nopa_tmp_89, __nopa_sel_doubleValue) : (double){0}; }));
+    return (({ NPObject *__nopa_tmp_88 = ((NPObject *)(self)); __nopa_tmp_88 ? ((double (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_88->isa->vtable)->doubleValue)(__nopa_tmp_88, __nopa_sel_doubleValue) : (double){0}; }) == ({ NPObject *__nopa_tmp_89 = ((NPObject *)(other)); __nopa_tmp_89 ? ((double (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_89->isa->vtable)->doubleValue)(__nopa_tmp_89, __nopa_sel_doubleValue) : (double){0}; }));
 }
 
-/* +[NFError errorWithCode_domain_] */
-__attribute__((weak)) NFError * NFError_errorWithCode_domain_(NFClass * self, SEL _cmd, int code, NFString * domain) {
-    return (NFError *)NFError_errorWithCode_domain_userInfo_(self, __nopa_sel_errorWithCode_domain_userInfo_, code, domain, NULL);
+/* +[NPError errorWithCode_domain_] */
+__attribute__((weak)) NPError * NPError_errorWithCode_domain_(NPClass * self, SEL _cmd, int code, NPString * domain) {
+    return (NPError *)NPError_errorWithCode_domain_userInfo_(self, __nopa_sel_errorWithCode_domain_userInfo_, code, domain, NULL);
 }
 
-/* +[NFError errorWithCode_domain_userInfo_] */
-__attribute__((weak)) NFError * NFError_errorWithCode_domain_userInfo_(NFClass * self, SEL _cmd, int code, NFString * domain, NFDictionary * userInfo) {
-    return (NFError *)({ NFObject *__nopa_tmp_90 = ((NFObject *)(NFObject_alloc(self, __nopa_sel_alloc))); __nopa_tmp_90 ? ((NFError * (*)(NFObject *, SEL, int, NFString *, NFDictionary *))((struct nopa_vtable *)__nopa_tmp_90->isa->vtable)->initWithCode_domain_userInfo_)(__nopa_tmp_90, __nopa_sel_initWithCode_domain_userInfo_, code, (NFString *)(domain), (NFDictionary *)(userInfo)) : 0; });
+/* +[NPError errorWithCode_domain_userInfo_] */
+__attribute__((weak)) NPError * NPError_errorWithCode_domain_userInfo_(NPClass * self, SEL _cmd, int code, NPString * domain, NPDictionary * userInfo) {
+    return (NPError *)({ NPObject *__nopa_tmp_90 = ((NPObject *)(NPObject_alloc(self, __nopa_sel_alloc))); __nopa_tmp_90 ? ((NPError * (*)(NPObject *, SEL, int, NPString *, NPDictionary *))((struct nopa_vtable *)__nopa_tmp_90->isa->vtable)->initWithCode_domain_userInfo_)(__nopa_tmp_90, __nopa_sel_initWithCode_domain_userInfo_, code, (NPString *)(domain), (NPDictionary *)(userInfo)) : 0; });
 }
 
-/* -[NFError initWithCode_domain_userInfo_] */
-__attribute__((weak)) NFError * NFError_initWithCode_domain_userInfo_(NFObject * self, SEL _cmd, int code, NFString * domain, NFDictionary * userInfo) {
-    self = (&NOPA_VTABLE_$_NFObject)->init(self, __nopa_sel_init);
+/* -[NPError initWithCode_domain_userInfo_] */
+__attribute__((weak)) NPError * NPError_initWithCode_domain_userInfo_(NPObject * self, SEL _cmd, int code, NPString * domain, NPDictionary * userInfo) {
+    self = (&NOPA_VTABLE_$_NPObject)->init(self, __nopa_sel_init);
     if (self) {
-        ((struct NFError *)self)->_code = code;
-        ((struct NFError *)self)->_domain = domain;
-        ((struct NFError *)self)->_userInfo = userInfo;
+        ((struct NPError *)self)->_code = code;
+        ((struct NPError *)self)->_domain = domain;
+        ((struct NPError *)self)->_userInfo = userInfo;
     }
-    return (NFError *)self;
+    return (NPError *)self;
 }
 
-/* +[NFError parseErrorWithMessage_] */
-__attribute__((weak)) NFError * NFError_parseErrorWithMessage_(NFClass * self, SEL _cmd, NFString * message) {
-    NFDictionary * info = (NFDictionary *)(nopa_dictionary_create(1, nopa_stringFromCstr("NSLocalizedDescription"), message));
-    return (NFError *)NFError_errorWithCode_domain_userInfo_(self, __nopa_sel_errorWithCode_domain_userInfo_, 1, nopa_stringFromCstr("NFErrorParse"), info);
+/* +[NPError parseErrorWithMessage_] */
+__attribute__((weak)) NPError * NPError_parseErrorWithMessage_(NPClass * self, SEL _cmd, NPString * message) {
+    NPDictionary * info = (NPDictionary *)(nopa_dictionary_create(1, nopa_stringFromCstr("NSLocalizedDescription"), message));
+    return (NPError *)NPError_errorWithCode_domain_userInfo_(self, __nopa_sel_errorWithCode_domain_userInfo_, 1, nopa_stringFromCstr("NPErrorParse"), info);
 }
 
-/* +[NFError fileIOErrorWithMessage_] */
-__attribute__((weak)) NFError * NFError_fileIOErrorWithMessage_(NFClass * self, SEL _cmd, NFString * message) {
-    NFDictionary * info = (NFDictionary *)(nopa_dictionary_create(1, nopa_stringFromCstr("NSLocalizedDescription"), message));
-    return (NFError *)NFError_errorWithCode_domain_userInfo_(self, __nopa_sel_errorWithCode_domain_userInfo_, 2, nopa_stringFromCstr("NFErrorFileIO"), info);
+/* +[NPError fileIOErrorWithMessage_] */
+__attribute__((weak)) NPError * NPError_fileIOErrorWithMessage_(NPClass * self, SEL _cmd, NPString * message) {
+    NPDictionary * info = (NPDictionary *)(nopa_dictionary_create(1, nopa_stringFromCstr("NSLocalizedDescription"), message));
+    return (NPError *)NPError_errorWithCode_domain_userInfo_(self, __nopa_sel_errorWithCode_domain_userInfo_, 2, nopa_stringFromCstr("NPErrorFileIO"), info);
 }
 
-/* -[NFError code] */
-__attribute__((weak)) int NFError_code(NFObject * self, SEL _cmd) {
-    return ((struct NFError *)self)->_code;
+/* -[NPError code] */
+__attribute__((weak)) int NPError_code(NPObject * self, SEL _cmd) {
+    return ((struct NPError *)self)->_code;
 }
 
-/* -[NFError domain] */
-__attribute__((weak)) NFString * NFError_domain(NFObject * self, SEL _cmd) {
-    return ((struct NFError *)self)->_domain ? ((struct NFError *)self)->_domain : nopa_stringFromCstr("");
+/* -[NPError domain] */
+__attribute__((weak)) NPString * NPError_domain(NPObject * self, SEL _cmd) {
+    return ((struct NPError *)self)->_domain ? ((struct NPError *)self)->_domain : nopa_stringFromCstr("");
 }
 
-/* -[NFError userInfo] */
-__attribute__((weak)) NFDictionary * NFError_userInfo(NFObject * self, SEL _cmd) {
-    return ((struct NFError *)self)->_userInfo;
+/* -[NPError userInfo] */
+__attribute__((weak)) NPDictionary * NPError_userInfo(NPObject * self, SEL _cmd) {
+    return ((struct NPError *)self)->_userInfo;
 }
 
-/* -[NFError localizedDescription] */
-__attribute__((weak)) NFString * NFError_localizedDescription(NFObject * self, SEL _cmd) {
-    if (((struct NFError *)self)->_userInfo) {
-        NFString * msg = (NFString *)(({ NFObject *__nopa_tmp_91 = ((NFObject *)(((struct NFError *)self)->_userInfo)); __nopa_tmp_91 ? ((NFObject * (*)(NFObject *, SEL, NFObject *))((struct nopa_vtable *)__nopa_tmp_91->isa->vtable)->objectForKey_)(__nopa_tmp_91, __nopa_sel_objectForKey_, nopa_stringFromCstr("NSLocalizedDescription")) : (NFObject *){0}; }));
+/* -[NPError localizedDescription] */
+__attribute__((weak)) NPString * NPError_localizedDescription(NPObject * self, SEL _cmd) {
+    if (((struct NPError *)self)->_userInfo) {
+        NPString * msg = (NPString *)(({ NPObject *__nopa_tmp_91 = ((NPObject *)(((struct NPError *)self)->_userInfo)); __nopa_tmp_91 ? ((NPObject * (*)(NPObject *, SEL, NPObject *))((struct nopa_vtable *)__nopa_tmp_91->isa->vtable)->objectForKey_)(__nopa_tmp_91, __nopa_sel_objectForKey_, nopa_stringFromCstr("NSLocalizedDescription")) : (NPObject *){0}; }));
         if (msg) {
             return msg;
         }
     }
     char buf[128];
-    snprintf(buf, sizeof(buf), "%s error %d", ({ NFObject *__nopa_tmp_92 = ((NFObject *)(({ NFObject *__nopa_tmp_93 = ((NFObject *)(self)); __nopa_tmp_93 ? ((NFString * (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_93->isa->vtable)->domain)(__nopa_tmp_93, __nopa_sel_domain) : 0; }))); __nopa_tmp_92 ? ((const char * (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_92->isa->vtable)->UTF8String)(__nopa_tmp_92, __nopa_sel_UTF8String) : 0; }), ((struct NFError *)self)->_code);
-    return (NFString *)NFString_stringWithUTF8String_(&NOPA_CLASS_$_NFString, __nopa_sel_stringWithUTF8String_, buf);
+    snprintf(buf, sizeof(buf), "%s error %d", ({ NPObject *__nopa_tmp_92 = ((NPObject *)(({ NPObject *__nopa_tmp_93 = ((NPObject *)(self)); __nopa_tmp_93 ? ((NPString * (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_93->isa->vtable)->domain)(__nopa_tmp_93, __nopa_sel_domain) : 0; }))); __nopa_tmp_92 ? ((const char * (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_92->isa->vtable)->UTF8String)(__nopa_tmp_92, __nopa_sel_UTF8String) : 0; }), ((struct NPError *)self)->_code);
+    return (NPString *)NPString_stringWithUTF8String_(&NOPA_CLASS_$_NPString, __nopa_sel_stringWithUTF8String_, buf);
 }
 
-/* -[NFError userInfo] */
-__attribute__((weak)) NFString * NFError_description(NFObject * self, SEL _cmd) {
+/* -[NPError userInfo] */
+__attribute__((weak)) NPString * NPError_description(NPObject * self, SEL _cmd) {
     char buf[160];
-    snprintf(buf, sizeof(buf), "Error %d in %s: %s", ((struct NFError *)self)->_code, ({ NFObject *__nopa_tmp_94 = ((NFObject *)(({ NFObject *__nopa_tmp_95 = ((NFObject *)(self)); __nopa_tmp_95 ? ((NFString * (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_95->isa->vtable)->domain)(__nopa_tmp_95, __nopa_sel_domain) : 0; }))); __nopa_tmp_94 ? ((const char * (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_94->isa->vtable)->UTF8String)(__nopa_tmp_94, __nopa_sel_UTF8String) : 0; }), ({ NFObject *__nopa_tmp_96 = ((NFObject *)(({ NFObject *__nopa_tmp_97 = ((NFObject *)(self)); __nopa_tmp_97 ? ((NFString * (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_97->isa->vtable)->localizedDescription)(__nopa_tmp_97, __nopa_sel_localizedDescription) : 0; }))); __nopa_tmp_96 ? ((const char * (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_96->isa->vtable)->UTF8String)(__nopa_tmp_96, __nopa_sel_UTF8String) : 0; }));
-    return (NFString *)NFString_stringWithUTF8String_(&NOPA_CLASS_$_NFString, __nopa_sel_stringWithUTF8String_, buf);
+    snprintf(buf, sizeof(buf), "Error %d in %s: %s", ((struct NPError *)self)->_code, ({ NPObject *__nopa_tmp_94 = ((NPObject *)(({ NPObject *__nopa_tmp_95 = ((NPObject *)(self)); __nopa_tmp_95 ? ((NPString * (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_95->isa->vtable)->domain)(__nopa_tmp_95, __nopa_sel_domain) : 0; }))); __nopa_tmp_94 ? ((const char * (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_94->isa->vtable)->UTF8String)(__nopa_tmp_94, __nopa_sel_UTF8String) : 0; }), ({ NPObject *__nopa_tmp_96 = ((NPObject *)(({ NPObject *__nopa_tmp_97 = ((NPObject *)(self)); __nopa_tmp_97 ? ((NPString * (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_97->isa->vtable)->localizedDescription)(__nopa_tmp_97, __nopa_sel_localizedDescription) : 0; }))); __nopa_tmp_96 ? ((const char * (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_96->isa->vtable)->UTF8String)(__nopa_tmp_96, __nopa_sel_UTF8String) : 0; }));
+    return (NPString *)NPString_stringWithUTF8String_(&NOPA_CLASS_$_NPString, __nopa_sel_stringWithUTF8String_, buf);
 }
 
 /* -[FsForwardUser poke] */
-__attribute__((weak)) int FsForwardUser_poke(NFObject * self, SEL _cmd) {
+__attribute__((weak)) int FsForwardUser_poke(NPObject * self, SEL _cmd) {
     return 7;
 }
 
 /* -[FsBox initWith_] */
-__attribute__((weak)) FsBox * FsBox_initWith_(NFObject * self, SEL _cmd, NFObject * v) {
-    self = (&NOPA_VTABLE_$_NFObject)->init(self, __nopa_sel_init);
+__attribute__((weak)) FsBox * FsBox_initWith_(NPObject * self, SEL _cmd, NPObject * v) {
+    self = (&NOPA_VTABLE_$_NPObject)->init(self, __nopa_sel_init);
     if (self) {
         ((struct FsBox *)self)->_value = v;
     }
@@ -5689,23 +5689,23 @@ __attribute__((weak)) FsBox * FsBox_initWith_(NFObject * self, SEL _cmd, NFObjec
 }
 
 /* -[FsBox value] */
-__attribute__((weak)) NFObject * FsBox_value(NFObject * self, SEL _cmd) {
+__attribute__((weak)) NPObject * FsBox_value(NPObject * self, SEL _cmd) {
     return ((struct FsBox *)self)->_value;
 }
 
 /* -[FsBox setValue_] */
-__attribute__((weak)) void FsBox_setValue_(NFObject * self, SEL _cmd, NFObject * v) {
+__attribute__((weak)) void FsBox_setValue_(NPObject * self, SEL _cmd, NPObject * v) {
     ((struct FsBox *)self)->_value = v;
 }
 
 /* -[FsRenderable render] */
-__attribute__((weak)) int FsEngine__FsRenderable_render(NFObject * self, SEL _cmd) {
+__attribute__((weak)) int FsEngine__FsRenderable_render(NPObject * self, SEL _cmd) {
     return 1;
 }
 
 /* -[FsSprite initWithId_] */
-__attribute__((weak)) FsSprite * FsSprite_initWithId_(NFObject * self, SEL _cmd, int i) {
-    self = (&NOPA_VTABLE_$_NFObject)->init(self, __nopa_sel_init);
+__attribute__((weak)) FsSprite * FsSprite_initWithId_(NPObject * self, SEL _cmd, int i) {
+    self = (&NOPA_VTABLE_$_NPObject)->init(self, __nopa_sel_init);
     if (self) {
         ((struct FsSprite *)self)->_id = i;
     }
@@ -5713,7 +5713,7 @@ __attribute__((weak)) FsSprite * FsSprite_initWithId_(NFObject * self, SEL _cmd,
 }
 
 /* -[FsSprite sum_] */
-__attribute__((weak)) int FsSprite_sum_(NFObject * self, SEL _cmd, int first, ...) {
+__attribute__((weak)) int FsSprite_sum_(NPObject * self, SEL _cmd, int first, ...) {
     va_list ap;
     va_start(ap, first);
     int total = first;
@@ -5726,7 +5726,7 @@ __attribute__((weak)) int FsSprite_sum_(NFObject * self, SEL _cmd, int first, ..
 }
 
 /* +[FsSprite classSum_] */
-__attribute__((weak)) int FsSprite_classSum_(NFClass * self, SEL _cmd, int first, ...) {
+__attribute__((weak)) int FsSprite_classSum_(NPClass * self, SEL _cmd, int first, ...) {
     va_list ap;
     va_start(ap, first);
     int total = first;
@@ -5738,107 +5738,107 @@ __attribute__((weak)) int FsSprite_classSum_(NFClass * self, SEL _cmd, int first
 }
 
 /* -[FsSprite label] */
-__attribute__((weak)) NFString * FsSprite_label(NFObject * self, SEL _cmd) {
+__attribute__((weak)) NPString * FsSprite_label(NPObject * self, SEL _cmd) {
     return ((struct FsSprite *)self)->_label;
 }
 
 /* -[FsSprite setLabel_] */
-__attribute__((weak)) void FsSprite_setLabel_(NFObject * self, SEL _cmd, NFString * value) {
+__attribute__((weak)) void FsSprite_setLabel_(NPObject * self, SEL _cmd, NPString * value) {
     ((struct FsSprite *)self)->_label = value;
 }
 
 /* -[FsSprite tag] */
-__attribute__((weak)) NFString * FsSprite_tag(NFObject * self, SEL _cmd) {
+__attribute__((weak)) NPString * FsSprite_tag(NPObject * self, SEL _cmd) {
     return ((struct FsSprite *)self)->_tag;
 }
 
 /* -[FsSprite setTag_] */
-__attribute__((weak)) void FsSprite_setTag_(NFObject * self, SEL _cmd, NFString * value) {
+__attribute__((weak)) void FsSprite_setTag_(NPObject * self, SEL _cmd, NPString * value) {
     ((struct FsSprite *)self)->_tag = value;
 }
 
 /* -[FsSprite draw] */
-__attribute__((weak)) void FsSprite_draw(NFObject * self, SEL _cmd) {
+__attribute__((weak)) void FsSprite_draw(NPObject * self, SEL _cmd) {
     printf("2.x draw sprite\n");
 }
 
 /* -[FsSprite color] */
-__attribute__((weak)) int FsSprite_color(NFObject * self, SEL _cmd) {
+__attribute__((weak)) int FsSprite_color(NPObject * self, SEL _cmd) {
     return 65280;
 }
 
 /* -[FsSprite render] */
-__attribute__((weak)) int FsSprite_render(NFObject * self, SEL _cmd) {
+__attribute__((weak)) int FsSprite_render(NPObject * self, SEL _cmd) {
     return (10 + (&NOPA_VTABLE_$_FsEngine__FsRenderable)->render(self, __nopa_sel_render));
 }
 
 /* -[FsTypedStore run] */
-__attribute__((weak)) void FsTypedStore_run(NFObject * self, SEL _cmd) {
-    NFMutableArray * arr = (NFMutableArray *)(NFMutableArray_array(&NOPA_CLASS_$_NFMutableArray, __nopa_sel_array));
-    ({ NFObject *__nopa_tmp_98 = ((NFObject *)(arr)); __nopa_tmp_98 ? ((void (*)(NFObject *, SEL, NFObject *))((struct nopa_vtable *)__nopa_tmp_98->isa->vtable)->addObject_)(__nopa_tmp_98, __nopa_sel_addObject_, nopa_stringFromCstr("one")) : 0; });
-    ({ NFObject *__nopa_tmp_99 = ((NFObject *)(arr)); __nopa_tmp_99 ? ((void (*)(NFObject *, SEL, NFObject *))((struct nopa_vtable *)__nopa_tmp_99->isa->vtable)->addObject_)(__nopa_tmp_99, __nopa_sel_addObject_, nopa_stringFromCstr("two")) : 0; });
-    NFString * s0 = (NFString *)(({ NFObject *__nopa_tmp_100 = ((NFObject *)(arr)); __nopa_tmp_100 ? ((NFObject * (*)(NFObject *, SEL, size_t))((struct nopa_vtable *)__nopa_tmp_100->isa->vtable)->objectAtIndex_)(__nopa_tmp_100, __nopa_sel_objectAtIndex_, 0) : (NFObject *){0}; }));
-    NFString * s1 = (NFString *)(({ NFObject *__nopa_tmp_101 = ((NFObject *)(arr)); __nopa_tmp_101 ? ((NFObject * (*)(NFObject *, SEL, size_t))((struct nopa_vtable *)__nopa_tmp_101->isa->vtable)->objectAtIndex_)(__nopa_tmp_101, __nopa_sel_objectAtIndex_, 1) : (NFObject *){0}; }));
-    printf("2.6 typed %s %s %zu\n", ({ NFObject *__nopa_tmp_102 = ((NFObject *)(s0)); __nopa_tmp_102 ? ((const char * (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_102->isa->vtable)->UTF8String)(__nopa_tmp_102, __nopa_sel_UTF8String) : 0; }), ({ NFObject *__nopa_tmp_103 = ((NFObject *)(s1)); __nopa_tmp_103 ? ((const char * (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_103->isa->vtable)->UTF8String)(__nopa_tmp_103, __nopa_sel_UTF8String) : 0; }), ({ NFObject *__nopa_tmp_104 = ((NFObject *)(arr)); __nopa_tmp_104 ? ((size_t (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_104->isa->vtable)->count)(__nopa_tmp_104, __nopa_sel_count) : (size_t){0}; }));
-    NFObject *__nopa_tmp_105 = (NFObject_alloc(&NOPA_CLASS_$_FsBox, __nopa_sel_alloc));
-    FsBox * box = (FsBox *)(__nopa_tmp_105 ? ((struct nopa_vtable *)__nopa_tmp_105->isa->vtable)->initWith_(__nopa_tmp_105, __nopa_sel_initWith_, NFMutableString_stringWithUTF8String_(&NOPA_CLASS_$_NFMutableString, __nopa_sel_stringWithUTF8String_, "boxed")) : 0);
-    printf("2.7 box %s\n", ({ NFObject *__nopa_tmp_106 = ((NFObject *)(({ NFObject *__nopa_tmp_107 = ((NFObject *)(box)); __nopa_tmp_107 ? ((NFObject * (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_107->isa->vtable)->value)(__nopa_tmp_107, __nopa_sel_value) : (NFObject *){0}; }))); __nopa_tmp_106 ? ((const char * (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_106->isa->vtable)->UTF8String)(__nopa_tmp_106, __nopa_sel_UTF8String) : 0; }));
-    ({ NFObject *__nopa_tmp_108 = ((NFObject *)(box)); __nopa_tmp_108 ? ((void (*)(NFObject *, SEL, NFObject *))((struct nopa_vtable *)__nopa_tmp_108->isa->vtable)->setValue_)(__nopa_tmp_108, __nopa_sel_setValue_, NFMutableString_stringWithUTF8String_(&NOPA_CLASS_$_NFMutableString, __nopa_sel_stringWithUTF8String_, "reboxed")) : 0; });
-    printf("2.8 box %s\n", ({ NFObject *__nopa_tmp_109 = ((NFObject *)(({ NFObject *__nopa_tmp_110 = ((NFObject *)(box)); __nopa_tmp_110 ? ((NFObject * (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_110->isa->vtable)->value)(__nopa_tmp_110, __nopa_sel_value) : (NFObject *){0}; }))); __nopa_tmp_109 ? ((const char * (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_109->isa->vtable)->UTF8String)(__nopa_tmp_109, __nopa_sel_UTF8String) : 0; }));
+__attribute__((weak)) void FsTypedStore_run(NPObject * self, SEL _cmd) {
+    NPMutableArray * arr = (NPMutableArray *)(NPMutableArray_array(&NOPA_CLASS_$_NPMutableArray, __nopa_sel_array));
+    ({ NPObject *__nopa_tmp_98 = ((NPObject *)(arr)); __nopa_tmp_98 ? ((void (*)(NPObject *, SEL, NPObject *))((struct nopa_vtable *)__nopa_tmp_98->isa->vtable)->addObject_)(__nopa_tmp_98, __nopa_sel_addObject_, nopa_stringFromCstr("one")) : 0; });
+    ({ NPObject *__nopa_tmp_99 = ((NPObject *)(arr)); __nopa_tmp_99 ? ((void (*)(NPObject *, SEL, NPObject *))((struct nopa_vtable *)__nopa_tmp_99->isa->vtable)->addObject_)(__nopa_tmp_99, __nopa_sel_addObject_, nopa_stringFromCstr("two")) : 0; });
+    NPString * s0 = (NPString *)(({ NPObject *__nopa_tmp_100 = ((NPObject *)(arr)); __nopa_tmp_100 ? ((NPObject * (*)(NPObject *, SEL, size_t))((struct nopa_vtable *)__nopa_tmp_100->isa->vtable)->objectAtIndex_)(__nopa_tmp_100, __nopa_sel_objectAtIndex_, 0) : (NPObject *){0}; }));
+    NPString * s1 = (NPString *)(({ NPObject *__nopa_tmp_101 = ((NPObject *)(arr)); __nopa_tmp_101 ? ((NPObject * (*)(NPObject *, SEL, size_t))((struct nopa_vtable *)__nopa_tmp_101->isa->vtable)->objectAtIndex_)(__nopa_tmp_101, __nopa_sel_objectAtIndex_, 1) : (NPObject *){0}; }));
+    printf("2.6 typed %s %s %zu\n", ({ NPObject *__nopa_tmp_102 = ((NPObject *)(s0)); __nopa_tmp_102 ? ((const char * (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_102->isa->vtable)->UTF8String)(__nopa_tmp_102, __nopa_sel_UTF8String) : 0; }), ({ NPObject *__nopa_tmp_103 = ((NPObject *)(s1)); __nopa_tmp_103 ? ((const char * (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_103->isa->vtable)->UTF8String)(__nopa_tmp_103, __nopa_sel_UTF8String) : 0; }), ({ NPObject *__nopa_tmp_104 = ((NPObject *)(arr)); __nopa_tmp_104 ? ((size_t (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_104->isa->vtable)->count)(__nopa_tmp_104, __nopa_sel_count) : (size_t){0}; }));
+    NPObject *__nopa_tmp_105 = (NPObject_alloc(&NOPA_CLASS_$_FsBox, __nopa_sel_alloc));
+    FsBox * box = (FsBox *)(__nopa_tmp_105 ? ((struct nopa_vtable *)__nopa_tmp_105->isa->vtable)->initWith_(__nopa_tmp_105, __nopa_sel_initWith_, NPMutableString_stringWithUTF8String_(&NOPA_CLASS_$_NPMutableString, __nopa_sel_stringWithUTF8String_, "boxed")) : 0);
+    printf("2.7 box %s\n", ({ NPObject *__nopa_tmp_106 = ((NPObject *)(({ NPObject *__nopa_tmp_107 = ((NPObject *)(box)); __nopa_tmp_107 ? ((NPObject * (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_107->isa->vtable)->value)(__nopa_tmp_107, __nopa_sel_value) : (NPObject *){0}; }))); __nopa_tmp_106 ? ((const char * (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_106->isa->vtable)->UTF8String)(__nopa_tmp_106, __nopa_sel_UTF8String) : 0; }));
+    ({ NPObject *__nopa_tmp_108 = ((NPObject *)(box)); __nopa_tmp_108 ? ((void (*)(NPObject *, SEL, NPObject *))((struct nopa_vtable *)__nopa_tmp_108->isa->vtable)->setValue_)(__nopa_tmp_108, __nopa_sel_setValue_, NPMutableString_stringWithUTF8String_(&NOPA_CLASS_$_NPMutableString, __nopa_sel_stringWithUTF8String_, "reboxed")) : 0; });
+    printf("2.8 box %s\n", ({ NPObject *__nopa_tmp_109 = ((NPObject *)(({ NPObject *__nopa_tmp_110 = ((NPObject *)(box)); __nopa_tmp_110 ? ((NPObject * (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_110->isa->vtable)->value)(__nopa_tmp_110, __nopa_sel_value) : (NPObject *){0}; }))); __nopa_tmp_109 ? ((const char * (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_109->isa->vtable)->UTF8String)(__nopa_tmp_109, __nopa_sel_UTF8String) : 0; }));
     nopa_release(box);
 }
 
 /* -[FsGuarded take_] */
-__attribute__((weak)) void FsGuarded_take_(NFObject * self, SEL _cmd, NFString * s) {
-    printf("5.1 region take %s\n", ({ NFObject *__nopa_tmp_111 = ((NFObject *)(s)); __nopa_tmp_111 ? ((const char * (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_111->isa->vtable)->UTF8String)(__nopa_tmp_111, __nopa_sel_UTF8String) : 0; }));
+__attribute__((weak)) void FsGuarded_take_(NPObject * self, SEL _cmd, NPString * s) {
+    printf("5.1 region take %s\n", ({ NPObject *__nopa_tmp_111 = ((NPObject *)(s)); __nopa_tmp_111 ? ((const char * (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_111->isa->vtable)->UTF8String)(__nopa_tmp_111, __nopa_sel_UTF8String) : 0; }));
 }
 
 /* -[FsGuarded optOut_] */
-__attribute__((weak)) void FsGuarded_optOut_(NFObject * self, SEL _cmd, NFString * s) {
-    printf("5.2 opt %s\n", s ? ({ NFObject *__nopa_tmp_112 = ((NFObject *)(s)); __nopa_tmp_112 ? ((const char * (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_112->isa->vtable)->UTF8String)(__nopa_tmp_112, __nopa_sel_UTF8String) : 0; }) : "(nil)");
+__attribute__((weak)) void FsGuarded_optOut_(NPObject * self, SEL _cmd, NPString * s) {
+    printf("5.2 opt %s\n", s ? ({ NPObject *__nopa_tmp_112 = ((NPObject *)(s)); __nopa_tmp_112 ? ((const char * (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_112->isa->vtable)->UTF8String)(__nopa_tmp_112, __nopa_sel_UTF8String) : 0; }) : "(nil)");
 }
 
 /* -[FsGuarded produce] */
-__attribute__((weak)) NFString * FsGuarded_produce(NFObject * self, SEL _cmd) {
+__attribute__((weak)) NPString * FsGuarded_produce(NPObject * self, SEL _cmd) {
     return nopa_stringFromCstr("made");
 }
 
 /* -[FsAnnotated pre_post_] */
-__attribute__((weak)) void FsAnnotated_pre_post_(NFObject * self, SEL _cmd, NFString * a, NFString * b) {
-    printf("5.3 anno %s %s\n", ({ NFObject *__nopa_tmp_113 = ((NFObject *)(a)); __nopa_tmp_113 ? ((const char * (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_113->isa->vtable)->UTF8String)(__nopa_tmp_113, __nopa_sel_UTF8String) : 0; }), ({ NFObject *__nopa_tmp_114 = ((NFObject *)(b)); __nopa_tmp_114 ? ((const char * (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_114->isa->vtable)->UTF8String)(__nopa_tmp_114, __nopa_sel_UTF8String) : 0; }));
+__attribute__((weak)) void FsAnnotated_pre_post_(NPObject * self, SEL _cmd, NPString * a, NPString * b) {
+    printf("5.3 anno %s %s\n", ({ NPObject *__nopa_tmp_113 = ((NPObject *)(a)); __nopa_tmp_113 ? ((const char * (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_113->isa->vtable)->UTF8String)(__nopa_tmp_113, __nopa_sel_UTF8String) : 0; }), ({ NPObject *__nopa_tmp_114 = ((NPObject *)(b)); __nopa_tmp_114 ? ((const char * (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_114->isa->vtable)->UTF8String)(__nopa_tmp_114, __nopa_sel_UTF8String) : 0; }));
 }
 
 /* -[FsAnnotated maybe] */
-__attribute__((weak)) NFString * FsAnnotated_maybe(NFObject * self, SEL _cmd) {
+__attribute__((weak)) NPString * FsAnnotated_maybe(NPObject * self, SEL _cmd) {
     return NULL;
 }
 
 /* -[FsAnnotated maybeC] */
-__attribute__((weak)) NFString * FsAnnotated_maybeC(NFObject * self, SEL _cmd) {
+__attribute__((weak)) NPString * FsAnnotated_maybeC(NPObject * self, SEL _cmd) {
     return nopa_stringFromCstr("c");
 }
 
 /* -[FsModes mix_point_] */
-__attribute__((weak)) int FsModes_mix_point_(NFObject * self, SEL _cmd, FsMode m, struct FsPoint p) {
+__attribute__((weak)) int FsModes_mix_point_(NPObject * self, SEL _cmd, FsMode m, struct FsPoint p) {
     return (((int)m + (p.x * 10)) + p.y);
 }
 
 /* -[FsParser strictParse_] */
-__attribute__((weak)) int FsParser_strictParse_(NFObject * self, SEL _cmd, NFString * s) {
-    if ((({ NFObject *__nopa_tmp_115 = ((NFObject *)(s)); __nopa_tmp_115 ? ((size_t (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_115->isa->vtable)->length)(__nopa_tmp_115, __nopa_sel_length) : (size_t){0}; }) > 3)) {
+__attribute__((weak)) int FsParser_strictParse_(NPObject * self, SEL _cmd, NPString * s) {
+    if ((({ NPObject *__nopa_tmp_115 = ((NPObject *)(s)); __nopa_tmp_115 ? ((size_t (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_115->isa->vtable)->length)(__nopa_tmp_115, __nopa_sel_length) : (size_t){0}; }) > 3)) {
         {
-            __nopa_exception_value = ({ NFObject *__nopa_tmp_116 = ((NFObject *)(NFObject_alloc(&NOPA_CLASS_$_FsErrLow, __nopa_sel_alloc))); __nopa_tmp_116 ? ((NFMutableArray * (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_116->isa->vtable)->init)(__nopa_tmp_116, __nopa_sel_init) : 0; });
+            __nopa_exception_value = ({ NPObject *__nopa_tmp_116 = ((NPObject *)(NPObject_alloc(&NOPA_CLASS_$_FsErrLow, __nopa_sel_alloc))); __nopa_tmp_116 ? ((NPMutableArray * (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_116->isa->vtable)->init)(__nopa_tmp_116, __nopa_sel_init) : 0; });
             longjmp(__nopa_exception_buf, 1);
         }
     }
-    return ({ NFObject *__nopa_tmp_117 = ((NFObject *)(s)); __nopa_tmp_117 ? ((size_t (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_117->isa->vtable)->length)(__nopa_tmp_117, __nopa_sel_length) : (size_t){0}; });
+    return ({ NPObject *__nopa_tmp_117 = ((NPObject *)(s)); __nopa_tmp_117 ? ((size_t (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_117->isa->vtable)->length)(__nopa_tmp_117, __nopa_sel_length) : (size_t){0}; });
 }
 
 /* -[FsParser looseParse_] */
-__attribute__((weak)) int FsParser_looseParse_(NFObject * self, SEL _cmd, NFString * s) {
+__attribute__((weak)) int FsParser_looseParse_(NPObject * self, SEL _cmd, NPString * s) {
     if ((s == NULL)) {
         {
-            __nopa_exception_value = ({ NFObject *__nopa_tmp_118 = ((NFObject *)(NFObject_alloc(&NOPA_CLASS_$_FsErrLow, __nopa_sel_alloc))); __nopa_tmp_118 ? ((NFMutableArray * (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_118->isa->vtable)->init)(__nopa_tmp_118, __nopa_sel_init) : 0; });
+            __nopa_exception_value = ({ NPObject *__nopa_tmp_118 = ((NPObject *)(NPObject_alloc(&NOPA_CLASS_$_FsErrLow, __nopa_sel_alloc))); __nopa_tmp_118 ? ((NPMutableArray * (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_118->isa->vtable)->init)(__nopa_tmp_118, __nopa_sel_init) : 0; });
             longjmp(__nopa_exception_buf, 1);
         }
     }
@@ -5846,30 +5846,30 @@ __attribute__((weak)) int FsParser_looseParse_(NFObject * self, SEL _cmd, NFStri
 }
 
 /* -[FsFetcher compute_] */
-__attribute__((weak)) int FsFetcher_compute_(NFObject * self, SEL _cmd, int n) {
-    NFTask * __nopa_task = (NFTask *)(nopa_task_create(nopa_async_state_compute_, self, sizeof(struct compute__frame)));
+__attribute__((weak)) int FsFetcher_compute_(NPObject * self, SEL _cmd, int n) {
+    NPTask * __nopa_task = (NPTask *)(nopa_task_create(nopa_async_state_compute_, self, sizeof(struct compute__frame)));
     ((struct compute__frame *)__nopa_task->frame)->n = n;
     long __nopa_r = (long)nopa_task_join(__nopa_task);
     return (int)__nopa_r;
 }
 
 /* -[FsFetcher helper_] */
-__attribute__((weak)) int FsFetcher_helper_(NFObject * self, SEL _cmd, int n) {
+__attribute__((weak)) int FsFetcher_helper_(NPObject * self, SEL _cmd, int n) {
     return (n + 1);
 }
 
 /* +[FsFetcher runAll] */
-__attribute__((weak)) void FsFetcher_runAll(NFClass * self, SEL _cmd) {
-    NFTask * __nopa_task = (NFTask *)(nopa_task_create(nopa_async_state_runAll, self, sizeof(struct runAll_frame)));
+__attribute__((weak)) void FsFetcher_runAll(NPClass * self, SEL _cmd) {
+    NPTask * __nopa_task = (NPTask *)(nopa_task_create(nopa_async_state_runAll, self, sizeof(struct runAll_frame)));
     nopa_task_join(__nopa_task);
 }
 
-__attribute__((weak)) int nopa_async_state_compute_(NFTask * t) {
+__attribute__((weak)) int nopa_async_state_compute_(NPTask * t) {
     switch (t->state) {
         case 1:
             {
                 struct compute__frame * __nopa_f = (struct compute__frame *)t->frame;
-                int a = (t->state = 2, ({ NFObject *__nopa_tmp_119 = ((NFObject *)(t->self_obj)); __nopa_tmp_119 ? ((int (*)(NFObject *, SEL, int))((struct nopa_vtable *)__nopa_tmp_119->isa->vtable)->helper_)(__nopa_tmp_119, __nopa_sel_helper_, __nopa_f->n) : (int){0}; }));
+                int a = (t->state = 2, ({ NPObject *__nopa_tmp_119 = ((NPObject *)(t->self_obj)); __nopa_tmp_119 ? ((int (*)(NPObject *, SEL, int))((struct nopa_vtable *)__nopa_tmp_119->isa->vtable)->helper_)(__nopa_tmp_119, __nopa_sel_helper_, __nopa_f->n) : (int){0}; }));
                 {
                     t->result = (void *)(unsigned)(a * 2);
                     t->state = -1;
@@ -5888,14 +5888,14 @@ __attribute__((weak)) int nopa_async_state_compute_(NFTask * t) {
     return 1;
 }
 
-__attribute__((weak)) int nopa_async_state_runAll(NFTask * t) {
+__attribute__((weak)) int nopa_async_state_runAll(NPTask * t) {
     switch (t->state) {
         case 1:
             {
                 struct runAll_frame * __nopa_f = (struct runAll_frame *)t->frame;
-                NFObject *__nopa_tmp_120 = (NFObject_alloc(&NOPA_CLASS_$_FsFetcher, __nopa_sel_alloc));
+                NPObject *__nopa_tmp_120 = (NPObject_alloc(&NOPA_CLASS_$_FsFetcher, __nopa_sel_alloc));
                 FsFetcher * f = (FsFetcher *)(__nopa_tmp_120 ? ((struct nopa_vtable *)__nopa_tmp_120->isa->vtable)->init(__nopa_tmp_120, __nopa_sel_init) : 0);
-                int x = (t->state = 2, ({ NFObject *__nopa_tmp_121 = ((NFObject *)(f)); __nopa_tmp_121 ? ((int (*)(NFObject *, SEL, int))((struct nopa_vtable *)__nopa_tmp_121->isa->vtable)->compute_)(__nopa_tmp_121, __nopa_sel_compute_, 20) : (int){0}; }));
+                int x = (t->state = 2, ({ NPObject *__nopa_tmp_121 = ((NPObject *)(f)); __nopa_tmp_121 ? ((int (*)(NPObject *, SEL, int))((struct nopa_vtable *)__nopa_tmp_121->isa->vtable)->compute_)(__nopa_tmp_121, __nopa_sel_compute_, 20) : (int){0}; }));
                 printf("5.7 async %d\n", x);
                 nopa_release(f);
                 t->state = -1;
@@ -6026,35 +6026,35 @@ skip:
 
 __attribute__((weak)) void sec2_objects(void ) {
     printf("== §2 objects ==\n");
-    NFObject *__nopa_tmp_122 = (NFObject_alloc(&NOPA_CLASS_$_FsSprite, __nopa_sel_alloc));
+    NPObject *__nopa_tmp_122 = (NPObject_alloc(&NOPA_CLASS_$_FsSprite, __nopa_sel_alloc));
     FsSprite * sp = (FsSprite *)(__nopa_tmp_122 ? ((struct nopa_vtable *)__nopa_tmp_122->isa->vtable)->initWithId_(__nopa_tmp_122, __nopa_sel_initWithId_, 42) : 0);
-    printf("2.1 render %d color %d\n", ({ NFObject *__nopa_tmp_123 = ((NFObject *)(sp)); __nopa_tmp_123 ? ((int (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_123->isa->vtable)->render)(__nopa_tmp_123, __nopa_sel_render) : (int){0}; }), ({ NFObject *__nopa_tmp_124 = ((NFObject *)(sp)); __nopa_tmp_124 ? ((int (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_124->isa->vtable)->color)(__nopa_tmp_124, __nopa_sel_color) : (int){0}; }));
-    ({ NFObject *__nopa_tmp_125 = ((NFObject *)(sp)); __nopa_tmp_125 ? ((void (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_125->isa->vtable)->draw)(__nopa_tmp_125, __nopa_sel_draw) : 0; });
+    printf("2.1 render %d color %d\n", ({ NPObject *__nopa_tmp_123 = ((NPObject *)(sp)); __nopa_tmp_123 ? ((int (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_123->isa->vtable)->render)(__nopa_tmp_123, __nopa_sel_render) : (int){0}; }), ({ NPObject *__nopa_tmp_124 = ((NPObject *)(sp)); __nopa_tmp_124 ? ((int (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_124->isa->vtable)->color)(__nopa_tmp_124, __nopa_sel_color) : (int){0}; }));
+    ({ NPObject *__nopa_tmp_125 = ((NPObject *)(sp)); __nopa_tmp_125 ? ((void (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_125->isa->vtable)->draw)(__nopa_tmp_125, __nopa_sel_draw) : 0; });
     sp->_label = NULL;
     sp->_tag = nopa_stringFromCstr("t");
-    printf("2.2 prop %s %s\n", ({ NFObject *__nopa_tmp_126 = ((NFObject *)(sp)); __nopa_tmp_126 ? ((NFString * (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_126->isa->vtable)->label)(__nopa_tmp_126, __nopa_sel_label) : 0; }) ? "n" : "nil", ({ NFObject *__nopa_tmp_127 = ((NFObject *)(({ NFObject *__nopa_tmp_128 = ((NFObject *)(sp)); __nopa_tmp_128 ? ((NFString * (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_128->isa->vtable)->tag)(__nopa_tmp_128, __nopa_sel_tag) : 0; }))); __nopa_tmp_127 ? ((const char * (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_127->isa->vtable)->UTF8String)(__nopa_tmp_127, __nopa_sel_UTF8String) : 0; }));
-    _Bool kind = ({ NFObject *__nopa_tmp_129 = ((NFObject *)(sp)); __nopa_tmp_129 ? ((_Bool (*)(NFObject *, SEL, NFClass *))((struct nopa_vtable *)__nopa_tmp_129->isa->vtable)->isKindOfClass_)(__nopa_tmp_129, __nopa_sel_isKindOfClass_, (NFClass *)(&NOPA_CLASS_$_FsSprite)) : (_Bool){0}; });
-    _Bool kindSuper = ({ NFObject *__nopa_tmp_130 = ((NFObject *)(sp)); __nopa_tmp_130 ? ((_Bool (*)(NFObject *, SEL, NFClass *))((struct nopa_vtable *)__nopa_tmp_130->isa->vtable)->isKindOfClass_)(__nopa_tmp_130, __nopa_sel_isKindOfClass_, (NFClass *)(&NOPA_CLASS_$_FsEngine__FsRenderable)) : (_Bool){0}; });
+    printf("2.2 prop %s %s\n", ({ NPObject *__nopa_tmp_126 = ((NPObject *)(sp)); __nopa_tmp_126 ? ((NPString * (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_126->isa->vtable)->label)(__nopa_tmp_126, __nopa_sel_label) : 0; }) ? "n" : "nil", ({ NPObject *__nopa_tmp_127 = ((NPObject *)(({ NPObject *__nopa_tmp_128 = ((NPObject *)(sp)); __nopa_tmp_128 ? ((NPString * (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_128->isa->vtable)->tag)(__nopa_tmp_128, __nopa_sel_tag) : 0; }))); __nopa_tmp_127 ? ((const char * (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_127->isa->vtable)->UTF8String)(__nopa_tmp_127, __nopa_sel_UTF8String) : 0; }));
+    _Bool kind = ({ NPObject *__nopa_tmp_129 = ((NPObject *)(sp)); __nopa_tmp_129 ? ((_Bool (*)(NPObject *, SEL, NPClass *))((struct nopa_vtable *)__nopa_tmp_129->isa->vtable)->isKindOfClass_)(__nopa_tmp_129, __nopa_sel_isKindOfClass_, (NPClass *)(&NOPA_CLASS_$_FsSprite)) : (_Bool){0}; });
+    _Bool kindSuper = ({ NPObject *__nopa_tmp_130 = ((NPObject *)(sp)); __nopa_tmp_130 ? ((_Bool (*)(NPObject *, SEL, NPClass *))((struct nopa_vtable *)__nopa_tmp_130->isa->vtable)->isKindOfClass_)(__nopa_tmp_130, __nopa_sel_isKindOfClass_, (NPClass *)(&NOPA_CLASS_$_FsEngine__FsRenderable)) : (_Bool){0}; });
     _Bool resp = nopa_resp_color(sp);
     _Bool respMissing = 0;
-    _Bool eqSelf = ({ NFObject *__nopa_tmp_131 = ((NFObject *)(sp)); __nopa_tmp_131 ? ((_Bool (*)(NFObject *, SEL, NFObject *))((struct nopa_vtable *)__nopa_tmp_131->isa->vtable)->isEqual_)(__nopa_tmp_131, __nopa_sel_isEqual_, (NFObject *)(sp)) : (_Bool){0}; });
-    _Bool eqOther = ({ NFObject *__nopa_tmp_132 = ((NFObject *)(sp)); __nopa_tmp_132 ? ((_Bool (*)(NFObject *, SEL, NFObject *))((struct nopa_vtable *)__nopa_tmp_132->isa->vtable)->isEqual_)(__nopa_tmp_132, __nopa_sel_isEqual_, (NFObject *)((({ NFObject *__nopa_tmp_133 = ((NFObject *)(NFObject_alloc(&NOPA_CLASS_$_FsSprite, __nopa_sel_alloc))); __nopa_tmp_133 ? ((FsSprite * (*)(NFObject *, SEL, int))((struct nopa_vtable *)__nopa_tmp_133->isa->vtable)->initWithId_)(__nopa_tmp_133, __nopa_sel_initWithId_, 42) : 0; })))) : (_Bool){0}; });
+    _Bool eqSelf = ({ NPObject *__nopa_tmp_131 = ((NPObject *)(sp)); __nopa_tmp_131 ? ((_Bool (*)(NPObject *, SEL, NPObject *))((struct nopa_vtable *)__nopa_tmp_131->isa->vtable)->isEqual_)(__nopa_tmp_131, __nopa_sel_isEqual_, (NPObject *)(sp)) : (_Bool){0}; });
+    _Bool eqOther = ({ NPObject *__nopa_tmp_132 = ((NPObject *)(sp)); __nopa_tmp_132 ? ((_Bool (*)(NPObject *, SEL, NPObject *))((struct nopa_vtable *)__nopa_tmp_132->isa->vtable)->isEqual_)(__nopa_tmp_132, __nopa_sel_isEqual_, (NPObject *)((({ NPObject *__nopa_tmp_133 = ((NPObject *)(NPObject_alloc(&NOPA_CLASS_$_FsSprite, __nopa_sel_alloc))); __nopa_tmp_133 ? ((FsSprite * (*)(NPObject *, SEL, int))((struct nopa_vtable *)__nopa_tmp_133->isa->vtable)->initWithId_)(__nopa_tmp_133, __nopa_sel_initWithId_, 42) : 0; })))) : (_Bool){0}; });
     printf("2.3 dispatch %d %d %d %d %d %d\n", kind, kindSuper, resp, respMissing, eqSelf, eqOther);
-    printf("2.4 variadic %d %d\n", ({ NFObject *__nopa_tmp_134 = ((NFObject *)(sp)); __nopa_tmp_134 ? ((int (*)(NFObject *, SEL, int, ...))((struct nopa_vtable *)__nopa_tmp_134->isa->vtable)->sum_)(__nopa_tmp_134, __nopa_sel_sum_, 1, 2, 3, 0) : (int){0}; }), FsSprite_classSum_(&NOPA_CLASS_$_FsSprite, __nopa_sel_classSum_, 10, 20, 0));
-    NFObject *__nopa_tmp_135 = (NFObject_alloc(&NOPA_CLASS_$_FsEngine__FsRenderable, __nopa_sel_alloc));
+    printf("2.4 variadic %d %d\n", ({ NPObject *__nopa_tmp_134 = ((NPObject *)(sp)); __nopa_tmp_134 ? ((int (*)(NPObject *, SEL, int, ...))((struct nopa_vtable *)__nopa_tmp_134->isa->vtable)->sum_)(__nopa_tmp_134, __nopa_sel_sum_, 1, 2, 3, 0) : (int){0}; }), FsSprite_classSum_(&NOPA_CLASS_$_FsSprite, __nopa_sel_classSum_, 10, 20, 0));
+    NPObject *__nopa_tmp_135 = (NPObject_alloc(&NOPA_CLASS_$_FsEngine__FsRenderable, __nopa_sel_alloc));
     FsEngine__FsRenderable * r = (FsEngine__FsRenderable *)(__nopa_tmp_135 ? ((struct nopa_vtable *)__nopa_tmp_135->isa->vtable)->init(__nopa_tmp_135, __nopa_sel_init) : 0);
-    printf("2.5 ns %d\n", ({ NFObject *__nopa_tmp_136 = ((NFObject *)(r)); __nopa_tmp_136 ? ((int (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_136->isa->vtable)->render)(__nopa_tmp_136, __nopa_sel_render) : (int){0}; }));
-    NFObject *__nopa_tmp_137 = (NFObject_alloc(&NOPA_CLASS_$_FsForwardUser, __nopa_sel_alloc));
+    printf("2.5 ns %d\n", ({ NPObject *__nopa_tmp_136 = ((NPObject *)(r)); __nopa_tmp_136 ? ((int (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_136->isa->vtable)->render)(__nopa_tmp_136, __nopa_sel_render) : (int){0}; }));
+    NPObject *__nopa_tmp_137 = (NPObject_alloc(&NOPA_CLASS_$_FsForwardUser, __nopa_sel_alloc));
     FsForwardUser * fu = (FsForwardUser *)(__nopa_tmp_137 ? ((struct nopa_vtable *)__nopa_tmp_137->isa->vtable)->init(__nopa_tmp_137, __nopa_sel_init) : 0);
-    printf("2.5b fwd %d\n", ({ NFObject *__nopa_tmp_138 = ((NFObject *)(fu)); __nopa_tmp_138 ? ((int (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_138->isa->vtable)->poke)(__nopa_tmp_138, __nopa_sel_poke) : (int){0}; }));
-    NFObject *__nopa_tmp_139 = (NFObject_alloc(&NOPA_CLASS_$_FsTypedStore, __nopa_sel_alloc));
+    printf("2.5b fwd %d\n", ({ NPObject *__nopa_tmp_138 = ((NPObject *)(fu)); __nopa_tmp_138 ? ((int (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_138->isa->vtable)->poke)(__nopa_tmp_138, __nopa_sel_poke) : (int){0}; }));
+    NPObject *__nopa_tmp_139 = (NPObject_alloc(&NOPA_CLASS_$_FsTypedStore, __nopa_sel_alloc));
     FsTypedStore * store = (FsTypedStore *)(__nopa_tmp_139 ? ((struct nopa_vtable *)__nopa_tmp_139->isa->vtable)->init(__nopa_tmp_139, __nopa_sel_init) : 0);
-    ({ NFObject *__nopa_tmp_140 = ((NFObject *)(store)); __nopa_tmp_140 ? ((void (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_140->isa->vtable)->run)(__nopa_tmp_140, __nopa_sel_run) : 0; });
-    NFObject * asId = (NFObject *)(sp);
+    ({ NPObject *__nopa_tmp_140 = ((NPObject *)(store)); __nopa_tmp_140 ? ((void (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_140->isa->vtable)->run)(__nopa_tmp_140, __nopa_sel_run) : 0; });
+    NPObject * asId = (NPObject *)(sp);
     FsSprite * back = (FsSprite *)asId;
     printf("2.9 id %d\n", back->_id);
     FsSprite * nilsp = NULL;
-    printf("2.10 nilmsg %d %d\n", ({ NFObject *__nopa_tmp_141 = ((NFObject *)(nilsp)); __nopa_tmp_141 ? ((int (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_141->isa->vtable)->render)(__nopa_tmp_141, __nopa_sel_render) : (int){0}; }), nopa_resp_color(nilsp));
+    printf("2.10 nilmsg %d %d\n", ({ NPObject *__nopa_tmp_141 = ((NPObject *)(nilsp)); __nopa_tmp_141 ? ((int (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_141->isa->vtable)->render)(__nopa_tmp_141, __nopa_sel_render) : (int){0}; }), nopa_resp_color(nilsp));
     nopa_release(store);
     nopa_release(fu);
     nopa_release(r);
@@ -6067,41 +6067,41 @@ __attribute__((weak)) int fs_call_block(FsIntBlock b, int x, int y) {
 
 __attribute__((weak)) void sec3_expressions(void ) {
     printf("== §3 expressions ==\n");
-    NFObject *__nopa_tmp_142 = (NFObject_alloc(&NOPA_CLASS_$_FsSprite, __nopa_sel_alloc));
+    NPObject *__nopa_tmp_142 = (NPObject_alloc(&NOPA_CLASS_$_FsSprite, __nopa_sel_alloc));
     FsSprite * sp = (FsSprite *)(__nopa_tmp_142 ? ((struct nopa_vtable *)__nopa_tmp_142->isa->vtable)->initWithId_(__nopa_tmp_142, __nopa_sel_initWithId_, 3) : 0);
-    NFNumber * ni = (NFNumber *)(NFNumber_numberWithInt_(&NOPA_CLASS_$_NFNumber, __nopa_sel_numberWithInt_, 42));
-    NFNumber * nd = (NFNumber *)(NFNumber_numberWithDouble_(&NOPA_CLASS_$_NFNumber, __nopa_sel_numberWithDouble_, 1.5f));
-    NFNumber * nb = (NFNumber *)(NFNumber_numberWithInt_(&NOPA_CLASS_$_NFNumber, __nopa_sel_numberWithInt_, 1));
-    NFNumber * nc = (NFNumber *)(NFNumber_numberWithChar_(&NOPA_CLASS_$_NFNumber, __nopa_sel_numberWithChar_, 'A'));
+    NPNumber * ni = (NPNumber *)(NPNumber_numberWithInt_(&NOPA_CLASS_$_NPNumber, __nopa_sel_numberWithInt_, 42));
+    NPNumber * nd = (NPNumber *)(NPNumber_numberWithDouble_(&NOPA_CLASS_$_NPNumber, __nopa_sel_numberWithDouble_, 1.5f));
+    NPNumber * nb = (NPNumber *)(NPNumber_numberWithInt_(&NOPA_CLASS_$_NPNumber, __nopa_sel_numberWithInt_, 1));
+    NPNumber * nc = (NPNumber *)(NPNumber_numberWithChar_(&NOPA_CLASS_$_NPNumber, __nopa_sel_numberWithChar_, 'A'));
     int xv = 20;
-    NFNumber * ne = (NFNumber *)(NFNumber_numberWithInt_(&NOPA_CLASS_$_NFNumber, __nopa_sel_numberWithInt_, ((xv * 2) + 1)));
-    printf("3.1 box %d %.1f %d %d %d\n", ({ NFObject *__nopa_tmp_143 = ((NFObject *)(ni)); __nopa_tmp_143 ? ((int (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_143->isa->vtable)->intValue)(__nopa_tmp_143, __nopa_sel_intValue) : (int){0}; }), ({ NFObject *__nopa_tmp_144 = ((NFObject *)(nd)); __nopa_tmp_144 ? ((double (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_144->isa->vtable)->doubleValue)(__nopa_tmp_144, __nopa_sel_doubleValue) : (double){0}; }), ({ NFObject *__nopa_tmp_145 = ((NFObject *)(nb)); __nopa_tmp_145 ? ((int (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_145->isa->vtable)->boolValue)(__nopa_tmp_145, __nopa_sel_boolValue) : (int){0}; }), ({ NFObject *__nopa_tmp_146 = ((NFObject *)(nc)); __nopa_tmp_146 ? ((char (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_146->isa->vtable)->charValue)(__nopa_tmp_146, __nopa_sel_charValue) : (char){0}; }), ({ NFObject *__nopa_tmp_147 = ((NFObject *)(ne)); __nopa_tmp_147 ? ((int (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_147->isa->vtable)->intValue)(__nopa_tmp_147, __nopa_sel_intValue) : (int){0}; }));
-    NFArray * nums = (NFArray *)(nopa_array_create(3, NFNumber_numberWithInt_(&NOPA_CLASS_$_NFNumber, __nopa_sel_numberWithInt_, 1), NFNumber_numberWithInt_(&NOPA_CLASS_$_NFNumber, __nopa_sel_numberWithInt_, 2), NFNumber_numberWithInt_(&NOPA_CLASS_$_NFNumber, __nopa_sel_numberWithInt_, 3)));
-    NFNumber * head = (NFNumber *)({ NFObject *__nopa_tmp_148 = ((NFObject *)(nums)); __nopa_tmp_148 ? ((NFObject * (*)(NFObject *, SEL, size_t))((struct nopa_vtable *)__nopa_tmp_148->isa->vtable)->objectAtIndex_)(__nopa_tmp_148, __nopa_sel_objectAtIndex_, 0) : (NFObject *){0}; });
-    printf("3.2 arr %zu %d\n", ({ NFObject *__nopa_tmp_149 = ((NFObject *)(nums)); __nopa_tmp_149 ? ((size_t (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_149->isa->vtable)->count)(__nopa_tmp_149, __nopa_sel_count) : (size_t){0}; }), ({ NFObject *__nopa_tmp_150 = ((NFObject *)(head)); __nopa_tmp_150 ? ((int (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_150->isa->vtable)->intValue)(__nopa_tmp_150, __nopa_sel_intValue) : (int){0}; }));
-    NFDictionary * d = (NFDictionary *)(nopa_dictionary_create(3, nopa_stringFromCstr("a"), NFNumber_numberWithInt_(&NOPA_CLASS_$_NFNumber, __nopa_sel_numberWithInt_, 1), nopa_stringFromCstr("b"), NFNumber_numberWithInt_(&NOPA_CLASS_$_NFNumber, __nopa_sel_numberWithInt_, xv), nopa_stringFromCstr("c"), nopa_stringFromCstr("cee")));
-    NFDictionary * empty = (NFDictionary *)(nopa_dictionary_create(0));
-    NFNumber * dv = (NFNumber *)(({ NFObject *__nopa_tmp_151 = ((NFObject *)(d)); __nopa_tmp_151 ? ((NFObject * (*)(NFObject *, SEL, NFObject *))((struct nopa_vtable *)__nopa_tmp_151->isa->vtable)->objectForKey_)(__nopa_tmp_151, __nopa_sel_objectForKey_, nopa_stringFromCstr("b")) : (NFObject *){0}; }));
-    NFString * dc = (NFString *)(({ NFObject *__nopa_tmp_152 = ((NFObject *)(d)); __nopa_tmp_152 ? ((NFObject * (*)(NFObject *, SEL, NFObject *))((struct nopa_vtable *)__nopa_tmp_152->isa->vtable)->objectForKey_)(__nopa_tmp_152, __nopa_sel_objectForKey_, nopa_stringFromCstr("c")) : (NFObject *){0}; }));
-    printf("3.3 dict %zu %zu %d %s\n", ({ NFObject *__nopa_tmp_153 = ((NFObject *)(d)); __nopa_tmp_153 ? ((size_t (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_153->isa->vtable)->count)(__nopa_tmp_153, __nopa_sel_count) : (size_t){0}; }), ({ NFObject *__nopa_tmp_154 = ((NFObject *)(empty)); __nopa_tmp_154 ? ((size_t (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_154->isa->vtable)->count)(__nopa_tmp_154, __nopa_sel_count) : (size_t){0}; }), ({ NFObject *__nopa_tmp_155 = ((NFObject *)(dv)); __nopa_tmp_155 ? ((int (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_155->isa->vtable)->intValue)(__nopa_tmp_155, __nopa_sel_intValue) : (int){0}; }), ({ NFObject *__nopa_tmp_156 = ((NFObject *)(dc)); __nopa_tmp_156 ? ((const char * (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_156->isa->vtable)->UTF8String)(__nopa_tmp_156, __nopa_sel_UTF8String) : 0; }));
-    NFMutableArray * ma = (NFMutableArray *)(NFMutableArray_arrayWithCapacity_(&NOPA_CLASS_$_NFMutableArray, __nopa_sel_arrayWithCapacity_, 4));
-    NFString * z = (NFString *)(nopa_stringFromCstr("z"));
-    ({ NFObject *__nopa_tmp_157 = ((NFObject *)(ma)); __nopa_tmp_157 ? ((void (*)(NFObject *, SEL, NFObject *))((struct nopa_vtable *)__nopa_tmp_157->isa->vtable)->addObject_)(__nopa_tmp_157, __nopa_sel_addObject_, nopa_stringFromCstr("x")) : 0; });
-    ({ NFObject *__nopa_tmp_158 = ((NFObject *)(ma)); __nopa_tmp_158 ? ((void (*)(NFObject *, SEL, NFObject *, size_t))((struct nopa_vtable *)__nopa_tmp_158->isa->vtable)->insertObject_atIndex_)(__nopa_tmp_158, __nopa_sel_insertObject_atIndex_, nopa_stringFromCstr("y"), 0) : 0; });
-    ({ NFObject *__nopa_tmp_159 = ((NFObject *)(ma)); __nopa_tmp_159 ? ((void (*)(NFObject *, SEL, size_t, NFObject *))((struct nopa_vtable *)__nopa_tmp_159->isa->vtable)->replaceObjectAtIndex_withObject_)(__nopa_tmp_159, __nopa_sel_replaceObjectAtIndex_withObject_, 1, z) : 0; });
-    _Bool has = ({ NFObject *__nopa_tmp_160 = ((NFObject *)(ma)); __nopa_tmp_160 ? ((_Bool (*)(NFObject *, SEL, NFObject *))((struct nopa_vtable *)__nopa_tmp_160->isa->vtable)->containsObject_)(__nopa_tmp_160, __nopa_sel_containsObject_, nopa_stringFromCstr("z")) : (_Bool){0}; });
-    int idx = (int)({ NFObject *__nopa_tmp_161 = ((NFObject *)(ma)); __nopa_tmp_161 ? ((size_t (*)(NFObject *, SEL, NFObject *))((struct nopa_vtable *)__nopa_tmp_161->isa->vtable)->indexOfObject_)(__nopa_tmp_161, __nopa_sel_indexOfObject_, nopa_stringFromCstr("z")) : (size_t){0}; });
-    ({ NFObject *__nopa_tmp_162 = ((NFObject *)(ma)); __nopa_tmp_162 ? ((void (*)(NFObject *, SEL, size_t))((struct nopa_vtable *)__nopa_tmp_162->isa->vtable)->removeObjectAtIndex_)(__nopa_tmp_162, __nopa_sel_removeObjectAtIndex_, 0) : 0; });
-    ({ NFObject *__nopa_tmp_163 = ((NFObject *)(ma)); __nopa_tmp_163 ? ((void (*)(NFObject *, SEL, NFObject *, size_t))((struct nopa_vtable *)__nopa_tmp_163->isa->vtable)->setObject_atIndex_)(__nopa_tmp_163, __nopa_sel_setObject_atIndex_, nopa_stringFromCstr("w"), 0) : 0; });
-    NFString * m0 = (NFString *)(({ NFObject *__nopa_tmp_164 = ((NFObject *)(ma)); __nopa_tmp_164 ? ((NFObject * (*)(NFObject *, SEL, size_t))((struct nopa_vtable *)__nopa_tmp_164->isa->vtable)->objectAtIndex_)(__nopa_tmp_164, __nopa_sel_objectAtIndex_, 0) : (NFObject *){0}; }));
-    printf("3.4 marr %d %d %s\n", has, idx, ({ NFObject *__nopa_tmp_165 = ((NFObject *)(m0)); __nopa_tmp_165 ? ((const char * (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_165->isa->vtable)->UTF8String)(__nopa_tmp_165, __nopa_sel_UTF8String) : 0; }));
-    NFMutableDictionary * md = (NFMutableDictionary *)(NFMutableDictionary_dictionary(&NOPA_CLASS_$_NFMutableDictionary, __nopa_sel_dictionary));
-    ({ NFObject *__nopa_tmp_166 = ((NFObject *)(md)); __nopa_tmp_166 ? ((void (*)(NFObject *, SEL, NFObject *, NFObject *))((struct nopa_vtable *)__nopa_tmp_166->isa->vtable)->setObject_forKey_)(__nopa_tmp_166, __nopa_sel_setObject_forKey_, NFNumber_numberWithInt_(&NOPA_CLASS_$_NFNumber, __nopa_sel_numberWithInt_, 1), nopa_stringFromCstr("k1")) : 0; });
-    ({ NFObject *__nopa_tmp_167 = ((NFObject *)(md)); __nopa_tmp_167 ? ((void (*)(NFObject *, SEL, NFObject *, NFObject *))((struct nopa_vtable *)__nopa_tmp_167->isa->vtable)->setObject_forKey_)(__nopa_tmp_167, __nopa_sel_setObject_forKey_, NFNumber_numberWithInt_(&NOPA_CLASS_$_NFNumber, __nopa_sel_numberWithInt_, 2), nopa_stringFromCstr("k2")) : 0; });
-    ({ NFObject *__nopa_tmp_168 = ((NFObject *)(md)); __nopa_tmp_168 ? ((void (*)(NFObject *, SEL, NFObject *, NFObject *))((struct nopa_vtable *)__nopa_tmp_168->isa->vtable)->setObject_forKey_)(__nopa_tmp_168, __nopa_sel_setObject_forKey_, NFNumber_numberWithInt_(&NOPA_CLASS_$_NFNumber, __nopa_sel_numberWithInt_, 9), nopa_stringFromCstr("k1")) : 0; });
-    NFArray * keys = (NFArray *)(({ NFObject *__nopa_tmp_169 = ((NFObject *)(md)); __nopa_tmp_169 ? ((NFArray * (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_169->isa->vtable)->allKeys)(__nopa_tmp_169, __nopa_sel_allKeys) : 0; }));
-    ({ NFObject *__nopa_tmp_170 = ((NFObject *)(md)); __nopa_tmp_170 ? ((void (*)(NFObject *, SEL, NFObject *))((struct nopa_vtable *)__nopa_tmp_170->isa->vtable)->removeObjectForKey_)(__nopa_tmp_170, __nopa_sel_removeObjectForKey_, nopa_stringFromCstr("k2")) : 0; });
-    printf("3.5 mdict %zu %zu %d\n", ({ NFObject *__nopa_tmp_171 = ((NFObject *)(keys)); __nopa_tmp_171 ? ((size_t (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_171->isa->vtable)->count)(__nopa_tmp_171, __nopa_sel_count) : (size_t){0}; }), ({ NFObject *__nopa_tmp_172 = ((NFObject *)(md)); __nopa_tmp_172 ? ((size_t (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_172->isa->vtable)->count)(__nopa_tmp_172, __nopa_sel_count) : (size_t){0}; }), ({ NFObject *__nopa_tmp_173 = ((NFObject *)(({ NFObject *__nopa_tmp_174 = ((NFObject *)(md)); __nopa_tmp_174 ? ((NFObject * (*)(NFObject *, SEL, NFObject *))((struct nopa_vtable *)__nopa_tmp_174->isa->vtable)->objectForKey_)(__nopa_tmp_174, __nopa_sel_objectForKey_, nopa_stringFromCstr("k1")) : (NFObject *){0}; }))); __nopa_tmp_173 ? ((int (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_173->isa->vtable)->intValue)(__nopa_tmp_173, __nopa_sel_intValue) : (int){0}; }));
+    NPNumber * ne = (NPNumber *)(NPNumber_numberWithInt_(&NOPA_CLASS_$_NPNumber, __nopa_sel_numberWithInt_, ((xv * 2) + 1)));
+    printf("3.1 box %d %.1f %d %d %d\n", ({ NPObject *__nopa_tmp_143 = ((NPObject *)(ni)); __nopa_tmp_143 ? ((int (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_143->isa->vtable)->intValue)(__nopa_tmp_143, __nopa_sel_intValue) : (int){0}; }), ({ NPObject *__nopa_tmp_144 = ((NPObject *)(nd)); __nopa_tmp_144 ? ((double (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_144->isa->vtable)->doubleValue)(__nopa_tmp_144, __nopa_sel_doubleValue) : (double){0}; }), ({ NPObject *__nopa_tmp_145 = ((NPObject *)(nb)); __nopa_tmp_145 ? ((int (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_145->isa->vtable)->boolValue)(__nopa_tmp_145, __nopa_sel_boolValue) : (int){0}; }), ({ NPObject *__nopa_tmp_146 = ((NPObject *)(nc)); __nopa_tmp_146 ? ((char (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_146->isa->vtable)->charValue)(__nopa_tmp_146, __nopa_sel_charValue) : (char){0}; }), ({ NPObject *__nopa_tmp_147 = ((NPObject *)(ne)); __nopa_tmp_147 ? ((int (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_147->isa->vtable)->intValue)(__nopa_tmp_147, __nopa_sel_intValue) : (int){0}; }));
+    NPArray * nums = (NPArray *)(nopa_array_create(3, NPNumber_numberWithInt_(&NOPA_CLASS_$_NPNumber, __nopa_sel_numberWithInt_, 1), NPNumber_numberWithInt_(&NOPA_CLASS_$_NPNumber, __nopa_sel_numberWithInt_, 2), NPNumber_numberWithInt_(&NOPA_CLASS_$_NPNumber, __nopa_sel_numberWithInt_, 3)));
+    NPNumber * head = (NPNumber *)({ NPObject *__nopa_tmp_148 = ((NPObject *)(nums)); __nopa_tmp_148 ? ((NPObject * (*)(NPObject *, SEL, size_t))((struct nopa_vtable *)__nopa_tmp_148->isa->vtable)->objectAtIndex_)(__nopa_tmp_148, __nopa_sel_objectAtIndex_, 0) : (NPObject *){0}; });
+    printf("3.2 arr %zu %d\n", ({ NPObject *__nopa_tmp_149 = ((NPObject *)(nums)); __nopa_tmp_149 ? ((size_t (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_149->isa->vtable)->count)(__nopa_tmp_149, __nopa_sel_count) : (size_t){0}; }), ({ NPObject *__nopa_tmp_150 = ((NPObject *)(head)); __nopa_tmp_150 ? ((int (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_150->isa->vtable)->intValue)(__nopa_tmp_150, __nopa_sel_intValue) : (int){0}; }));
+    NPDictionary * d = (NPDictionary *)(nopa_dictionary_create(3, nopa_stringFromCstr("a"), NPNumber_numberWithInt_(&NOPA_CLASS_$_NPNumber, __nopa_sel_numberWithInt_, 1), nopa_stringFromCstr("b"), NPNumber_numberWithInt_(&NOPA_CLASS_$_NPNumber, __nopa_sel_numberWithInt_, xv), nopa_stringFromCstr("c"), nopa_stringFromCstr("cee")));
+    NPDictionary * empty = (NPDictionary *)(nopa_dictionary_create(0));
+    NPNumber * dv = (NPNumber *)(({ NPObject *__nopa_tmp_151 = ((NPObject *)(d)); __nopa_tmp_151 ? ((NPObject * (*)(NPObject *, SEL, NPObject *))((struct nopa_vtable *)__nopa_tmp_151->isa->vtable)->objectForKey_)(__nopa_tmp_151, __nopa_sel_objectForKey_, nopa_stringFromCstr("b")) : (NPObject *){0}; }));
+    NPString * dc = (NPString *)(({ NPObject *__nopa_tmp_152 = ((NPObject *)(d)); __nopa_tmp_152 ? ((NPObject * (*)(NPObject *, SEL, NPObject *))((struct nopa_vtable *)__nopa_tmp_152->isa->vtable)->objectForKey_)(__nopa_tmp_152, __nopa_sel_objectForKey_, nopa_stringFromCstr("c")) : (NPObject *){0}; }));
+    printf("3.3 dict %zu %zu %d %s\n", ({ NPObject *__nopa_tmp_153 = ((NPObject *)(d)); __nopa_tmp_153 ? ((size_t (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_153->isa->vtable)->count)(__nopa_tmp_153, __nopa_sel_count) : (size_t){0}; }), ({ NPObject *__nopa_tmp_154 = ((NPObject *)(empty)); __nopa_tmp_154 ? ((size_t (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_154->isa->vtable)->count)(__nopa_tmp_154, __nopa_sel_count) : (size_t){0}; }), ({ NPObject *__nopa_tmp_155 = ((NPObject *)(dv)); __nopa_tmp_155 ? ((int (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_155->isa->vtable)->intValue)(__nopa_tmp_155, __nopa_sel_intValue) : (int){0}; }), ({ NPObject *__nopa_tmp_156 = ((NPObject *)(dc)); __nopa_tmp_156 ? ((const char * (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_156->isa->vtable)->UTF8String)(__nopa_tmp_156, __nopa_sel_UTF8String) : 0; }));
+    NPMutableArray * ma = (NPMutableArray *)(NPMutableArray_arrayWithCapacity_(&NOPA_CLASS_$_NPMutableArray, __nopa_sel_arrayWithCapacity_, 4));
+    NPString * z = (NPString *)(nopa_stringFromCstr("z"));
+    ({ NPObject *__nopa_tmp_157 = ((NPObject *)(ma)); __nopa_tmp_157 ? ((void (*)(NPObject *, SEL, NPObject *))((struct nopa_vtable *)__nopa_tmp_157->isa->vtable)->addObject_)(__nopa_tmp_157, __nopa_sel_addObject_, nopa_stringFromCstr("x")) : 0; });
+    ({ NPObject *__nopa_tmp_158 = ((NPObject *)(ma)); __nopa_tmp_158 ? ((void (*)(NPObject *, SEL, NPObject *, size_t))((struct nopa_vtable *)__nopa_tmp_158->isa->vtable)->insertObject_atIndex_)(__nopa_tmp_158, __nopa_sel_insertObject_atIndex_, nopa_stringFromCstr("y"), 0) : 0; });
+    ({ NPObject *__nopa_tmp_159 = ((NPObject *)(ma)); __nopa_tmp_159 ? ((void (*)(NPObject *, SEL, size_t, NPObject *))((struct nopa_vtable *)__nopa_tmp_159->isa->vtable)->replaceObjectAtIndex_withObject_)(__nopa_tmp_159, __nopa_sel_replaceObjectAtIndex_withObject_, 1, z) : 0; });
+    _Bool has = ({ NPObject *__nopa_tmp_160 = ((NPObject *)(ma)); __nopa_tmp_160 ? ((_Bool (*)(NPObject *, SEL, NPObject *))((struct nopa_vtable *)__nopa_tmp_160->isa->vtable)->containsObject_)(__nopa_tmp_160, __nopa_sel_containsObject_, nopa_stringFromCstr("z")) : (_Bool){0}; });
+    int idx = (int)({ NPObject *__nopa_tmp_161 = ((NPObject *)(ma)); __nopa_tmp_161 ? ((size_t (*)(NPObject *, SEL, NPObject *))((struct nopa_vtable *)__nopa_tmp_161->isa->vtable)->indexOfObject_)(__nopa_tmp_161, __nopa_sel_indexOfObject_, nopa_stringFromCstr("z")) : (size_t){0}; });
+    ({ NPObject *__nopa_tmp_162 = ((NPObject *)(ma)); __nopa_tmp_162 ? ((void (*)(NPObject *, SEL, size_t))((struct nopa_vtable *)__nopa_tmp_162->isa->vtable)->removeObjectAtIndex_)(__nopa_tmp_162, __nopa_sel_removeObjectAtIndex_, 0) : 0; });
+    ({ NPObject *__nopa_tmp_163 = ((NPObject *)(ma)); __nopa_tmp_163 ? ((void (*)(NPObject *, SEL, NPObject *, size_t))((struct nopa_vtable *)__nopa_tmp_163->isa->vtable)->setObject_atIndex_)(__nopa_tmp_163, __nopa_sel_setObject_atIndex_, nopa_stringFromCstr("w"), 0) : 0; });
+    NPString * m0 = (NPString *)(({ NPObject *__nopa_tmp_164 = ((NPObject *)(ma)); __nopa_tmp_164 ? ((NPObject * (*)(NPObject *, SEL, size_t))((struct nopa_vtable *)__nopa_tmp_164->isa->vtable)->objectAtIndex_)(__nopa_tmp_164, __nopa_sel_objectAtIndex_, 0) : (NPObject *){0}; }));
+    printf("3.4 marr %d %d %s\n", has, idx, ({ NPObject *__nopa_tmp_165 = ((NPObject *)(m0)); __nopa_tmp_165 ? ((const char * (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_165->isa->vtable)->UTF8String)(__nopa_tmp_165, __nopa_sel_UTF8String) : 0; }));
+    NPMutableDictionary * md = (NPMutableDictionary *)(NPMutableDictionary_dictionary(&NOPA_CLASS_$_NPMutableDictionary, __nopa_sel_dictionary));
+    ({ NPObject *__nopa_tmp_166 = ((NPObject *)(md)); __nopa_tmp_166 ? ((void (*)(NPObject *, SEL, NPObject *, NPObject *))((struct nopa_vtable *)__nopa_tmp_166->isa->vtable)->setObject_forKey_)(__nopa_tmp_166, __nopa_sel_setObject_forKey_, NPNumber_numberWithInt_(&NOPA_CLASS_$_NPNumber, __nopa_sel_numberWithInt_, 1), nopa_stringFromCstr("k1")) : 0; });
+    ({ NPObject *__nopa_tmp_167 = ((NPObject *)(md)); __nopa_tmp_167 ? ((void (*)(NPObject *, SEL, NPObject *, NPObject *))((struct nopa_vtable *)__nopa_tmp_167->isa->vtable)->setObject_forKey_)(__nopa_tmp_167, __nopa_sel_setObject_forKey_, NPNumber_numberWithInt_(&NOPA_CLASS_$_NPNumber, __nopa_sel_numberWithInt_, 2), nopa_stringFromCstr("k2")) : 0; });
+    ({ NPObject *__nopa_tmp_168 = ((NPObject *)(md)); __nopa_tmp_168 ? ((void (*)(NPObject *, SEL, NPObject *, NPObject *))((struct nopa_vtable *)__nopa_tmp_168->isa->vtable)->setObject_forKey_)(__nopa_tmp_168, __nopa_sel_setObject_forKey_, NPNumber_numberWithInt_(&NOPA_CLASS_$_NPNumber, __nopa_sel_numberWithInt_, 9), nopa_stringFromCstr("k1")) : 0; });
+    NPArray * keys = (NPArray *)(({ NPObject *__nopa_tmp_169 = ((NPObject *)(md)); __nopa_tmp_169 ? ((NPArray * (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_169->isa->vtable)->allKeys)(__nopa_tmp_169, __nopa_sel_allKeys) : 0; }));
+    ({ NPObject *__nopa_tmp_170 = ((NPObject *)(md)); __nopa_tmp_170 ? ((void (*)(NPObject *, SEL, NPObject *))((struct nopa_vtable *)__nopa_tmp_170->isa->vtable)->removeObjectForKey_)(__nopa_tmp_170, __nopa_sel_removeObjectForKey_, nopa_stringFromCstr("k2")) : 0; });
+    printf("3.5 mdict %zu %zu %d\n", ({ NPObject *__nopa_tmp_171 = ((NPObject *)(keys)); __nopa_tmp_171 ? ((size_t (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_171->isa->vtable)->count)(__nopa_tmp_171, __nopa_sel_count) : (size_t){0}; }), ({ NPObject *__nopa_tmp_172 = ((NPObject *)(md)); __nopa_tmp_172 ? ((size_t (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_172->isa->vtable)->count)(__nopa_tmp_172, __nopa_sel_count) : (size_t){0}; }), ({ NPObject *__nopa_tmp_173 = ((NPObject *)(({ NPObject *__nopa_tmp_174 = ((NPObject *)(md)); __nopa_tmp_174 ? ((NPObject * (*)(NPObject *, SEL, NPObject *))((struct nopa_vtable *)__nopa_tmp_174->isa->vtable)->objectForKey_)(__nopa_tmp_174, __nopa_sel_objectForKey_, nopa_stringFromCstr("k1")) : (NPObject *){0}; }))); __nopa_tmp_173 ? ((int (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_173->isa->vtable)->intValue)(__nopa_tmp_173, __nopa_sel_intValue) : (int){0}; }));
     FsIntBlock mul = ^int(int a, int b) { return (a * b); };
     FsIntBlock add = ^int(int a, int b) { return (a + b); };
     struct __nopa_byref_counter {
@@ -6124,16 +6124,16 @@ __attribute__((weak)) void sec3_expressions(void ) {
     SEL s1 = __nopa_sel_poke;
     (void)s1;
     printf("3.8 sel %d %d\n", nopa_resp_poke(sp), nopa_resp_color(sp));
-    NFString * base = (NFString *)(NFString_stringWithUTF8String_(&NOPA_CLASS_$_NFString, __nopa_sel_stringWithUTF8String_, "nopa"));
-    NFString * joined = (NFString *)(({ NFObject *__nopa_tmp_175 = ((NFObject *)(base)); __nopa_tmp_175 ? ((NFString * (*)(NFObject *, SEL, NFString *))((struct nopa_vtable *)__nopa_tmp_175->isa->vtable)->stringByAppendingString_)(__nopa_tmp_175, __nopa_sel_stringByAppendingString_, (NFString *)(nopa_stringFromCstr("-full"))) : 0; }));
-    _Bool eq = ({ NFObject *__nopa_tmp_176 = ((NFObject *)(joined)); __nopa_tmp_176 ? ((int (*)(NFObject *, SEL, NFString *))((struct nopa_vtable *)__nopa_tmp_176->isa->vtable)->isEqualToString_)(__nopa_tmp_176, __nopa_sel_isEqualToString_, (NFString *)(nopa_stringFromCstr("nopa-full"))) : (int){0}; });
-    NFString * desc = (NFString *)(({ NFObject *__nopa_tmp_177 = ((NFObject *)(joined)); __nopa_tmp_177 ? ((NFString * (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_177->isa->vtable)->description)(__nopa_tmp_177, __nopa_sel_description) : 0; }));
-    printf("3.9 str %s %d %zu %s\n", ({ NFObject *__nopa_tmp_178 = ((NFObject *)(joined)); __nopa_tmp_178 ? ((const char * (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_178->isa->vtable)->UTF8String)(__nopa_tmp_178, __nopa_sel_UTF8String) : 0; }), eq, ({ NFObject *__nopa_tmp_179 = ((NFObject *)(joined)); __nopa_tmp_179 ? ((size_t (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_179->isa->vtable)->length)(__nopa_tmp_179, __nopa_sel_length) : (size_t){0}; }), ({ NFObject *__nopa_tmp_180 = ((NFObject *)(desc)); __nopa_tmp_180 ? ((const char * (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_180->isa->vtable)->UTF8String)(__nopa_tmp_180, __nopa_sel_UTF8String) : 0; }));
-    NFMutableString * mstr = (NFMutableString *)(NFMutableString_stringWithUTF8String_(&NOPA_CLASS_$_NFMutableString, __nopa_sel_stringWithUTF8String_, "a"));
-    ({ NFObject *__nopa_tmp_181 = ((NFObject *)(mstr)); __nopa_tmp_181 ? ((void (*)(NFObject *, SEL, NFString *))((struct nopa_vtable *)__nopa_tmp_181->isa->vtable)->appendString_)(__nopa_tmp_181, __nopa_sel_appendString_, (NFString *)(nopa_stringFromCstr("b"))) : 0; });
-    ({ NFObject *__nopa_tmp_182 = ((NFObject *)(mstr)); __nopa_tmp_182 ? ((void (*)(NFObject *, SEL, NFString *))((struct nopa_vtable *)__nopa_tmp_182->isa->vtable)->appendString_)(__nopa_tmp_182, __nopa_sel_appendString_, (NFString *)(nopa_stringFromCstr("c"))) : 0; });
-    printf("3.10 mstr %s %zu\n", ({ NFObject *__nopa_tmp_183 = ((NFObject *)(mstr)); __nopa_tmp_183 ? ((const char * (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_183->isa->vtable)->UTF8String)(__nopa_tmp_183, __nopa_sel_UTF8String) : 0; }), ({ NFObject *__nopa_tmp_184 = ((NFObject *)(mstr)); __nopa_tmp_184 ? ((size_t (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_184->isa->vtable)->length)(__nopa_tmp_184, __nopa_sel_length) : (size_t){0}; }));
-    printf("3.11 nested %d\n", ({ NFObject *__nopa_tmp_185 = ((NFObject *)(sp)); __nopa_tmp_185 ? ((int (*)(NFObject *, SEL, int, ...))((struct nopa_vtable *)__nopa_tmp_185->isa->vtable)->sum_)(__nopa_tmp_185, __nopa_sel_sum_, ({ NFObject *__nopa_tmp_186 = ((NFObject *)(sp)); __nopa_tmp_186 ? ((int (*)(NFObject *, SEL, int, ...))((struct nopa_vtable *)__nopa_tmp_186->isa->vtable)->sum_)(__nopa_tmp_186, __nopa_sel_sum_, 1, 2, 0) : (int){0}; }), 10, 0) : (int){0}; }));
+    NPString * base = (NPString *)(NPString_stringWithUTF8String_(&NOPA_CLASS_$_NPString, __nopa_sel_stringWithUTF8String_, "nopa"));
+    NPString * joined = (NPString *)(({ NPObject *__nopa_tmp_175 = ((NPObject *)(base)); __nopa_tmp_175 ? ((NPString * (*)(NPObject *, SEL, NPString *))((struct nopa_vtable *)__nopa_tmp_175->isa->vtable)->stringByAppendingString_)(__nopa_tmp_175, __nopa_sel_stringByAppendingString_, (NPString *)(nopa_stringFromCstr("-full"))) : 0; }));
+    _Bool eq = ({ NPObject *__nopa_tmp_176 = ((NPObject *)(joined)); __nopa_tmp_176 ? ((int (*)(NPObject *, SEL, NPString *))((struct nopa_vtable *)__nopa_tmp_176->isa->vtable)->isEqualToString_)(__nopa_tmp_176, __nopa_sel_isEqualToString_, (NPString *)(nopa_stringFromCstr("nopa-full"))) : (int){0}; });
+    NPString * desc = (NPString *)(({ NPObject *__nopa_tmp_177 = ((NPObject *)(joined)); __nopa_tmp_177 ? ((NPString * (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_177->isa->vtable)->description)(__nopa_tmp_177, __nopa_sel_description) : 0; }));
+    printf("3.9 str %s %d %zu %s\n", ({ NPObject *__nopa_tmp_178 = ((NPObject *)(joined)); __nopa_tmp_178 ? ((const char * (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_178->isa->vtable)->UTF8String)(__nopa_tmp_178, __nopa_sel_UTF8String) : 0; }), eq, ({ NPObject *__nopa_tmp_179 = ((NPObject *)(joined)); __nopa_tmp_179 ? ((size_t (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_179->isa->vtable)->length)(__nopa_tmp_179, __nopa_sel_length) : (size_t){0}; }), ({ NPObject *__nopa_tmp_180 = ((NPObject *)(desc)); __nopa_tmp_180 ? ((const char * (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_180->isa->vtable)->UTF8String)(__nopa_tmp_180, __nopa_sel_UTF8String) : 0; }));
+    NPMutableString * mstr = (NPMutableString *)(NPMutableString_stringWithUTF8String_(&NOPA_CLASS_$_NPMutableString, __nopa_sel_stringWithUTF8String_, "a"));
+    ({ NPObject *__nopa_tmp_181 = ((NPObject *)(mstr)); __nopa_tmp_181 ? ((void (*)(NPObject *, SEL, NPString *))((struct nopa_vtable *)__nopa_tmp_181->isa->vtable)->appendString_)(__nopa_tmp_181, __nopa_sel_appendString_, (NPString *)(nopa_stringFromCstr("b"))) : 0; });
+    ({ NPObject *__nopa_tmp_182 = ((NPObject *)(mstr)); __nopa_tmp_182 ? ((void (*)(NPObject *, SEL, NPString *))((struct nopa_vtable *)__nopa_tmp_182->isa->vtable)->appendString_)(__nopa_tmp_182, __nopa_sel_appendString_, (NPString *)(nopa_stringFromCstr("c"))) : 0; });
+    printf("3.10 mstr %s %zu\n", ({ NPObject *__nopa_tmp_183 = ((NPObject *)(mstr)); __nopa_tmp_183 ? ((const char * (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_183->isa->vtable)->UTF8String)(__nopa_tmp_183, __nopa_sel_UTF8String) : 0; }), ({ NPObject *__nopa_tmp_184 = ((NPObject *)(mstr)); __nopa_tmp_184 ? ((size_t (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_184->isa->vtable)->length)(__nopa_tmp_184, __nopa_sel_length) : (size_t){0}; }));
+    printf("3.11 nested %d\n", ({ NPObject *__nopa_tmp_185 = ((NPObject *)(sp)); __nopa_tmp_185 ? ((int (*)(NPObject *, SEL, int, ...))((struct nopa_vtable *)__nopa_tmp_185->isa->vtable)->sum_)(__nopa_tmp_185, __nopa_sel_sum_, ({ NPObject *__nopa_tmp_186 = ((NPObject *)(sp)); __nopa_tmp_186 ? ((int (*)(NPObject *, SEL, int, ...))((struct nopa_vtable *)__nopa_tmp_186->isa->vtable)->sum_)(__nopa_tmp_186, __nopa_sel_sum_, 1, 2, 0) : (int){0}; }), 10, 0) : (int){0}; }));
     int bits = 240;
     (bits |= 15);
     (bits &= 60);
@@ -6151,47 +6151,47 @@ __attribute__((weak)) void sec3_expressions(void ) {
     int * pip = &post;
     ((*pip))--;
     printf("3.13 incdec %d %d %d\n", po, pr, post);
-    NFClass * cls = (NFClass *)(&NOPA_CLASS_$_FsSprite);
-    printf("3.14 class %d %d\n", (cls == &NOPA_CLASS_$_FsSprite), ((NFClass *)((nopa_root *)sp)->isa == cls));
-    NFLog((NFString *)nopa_stringFromCstr("3.15 nflog %s %d"), joined ? ({ NFObject *__nopa_tmp_187 = ((NFObject *)(({ NFObject *__nopa_tmp_188 = ((NFObject *)(joined)); __nopa_tmp_188 ? ((NFString * (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_188->isa->vtable)->description)(__nopa_tmp_188, __nopa_sel_description) : 0; }))); __nopa_tmp_187 ? ((const char * (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_187->isa->vtable)->UTF8String)(__nopa_tmp_187, __nopa_sel_UTF8String) : 0; }) : "(null)", 7);
+    NPClass * cls = (NPClass *)(&NOPA_CLASS_$_FsSprite);
+    printf("3.14 class %d %d\n", (cls == &NOPA_CLASS_$_FsSprite), ((NPClass *)((nopa_root *)sp)->isa == cls));
+    NPLog((NPString *)nopa_stringFromCstr("3.15 nplog %s %d"), joined ? ({ NPObject *__nopa_tmp_187 = ((NPObject *)(({ NPObject *__nopa_tmp_188 = ((NPObject *)(joined)); __nopa_tmp_188 ? ((NPString * (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_188->isa->vtable)->description)(__nopa_tmp_188, __nopa_sel_description) : 0; }))); __nopa_tmp_187 ? ((const char * (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_187->isa->vtable)->UTF8String)(__nopa_tmp_187, __nopa_sel_UTF8String) : 0; }) : "(null)", 7);
     nopa_release(sp);
 }
 
 __attribute__((weak)) void sec4_control_runtime(void ) {
     printf("== §4 control/runtime ==\n");
-    NFArray * arr = (NFArray *)(nopa_array_create(3, nopa_stringFromCstr("aa"), nopa_stringFromCstr("bb"), nopa_stringFromCstr("cc")));
+    NPArray * arr = (NPArray *)(nopa_array_create(3, nopa_stringFromCstr("aa"), nopa_stringFromCstr("bb"), nopa_stringFromCstr("cc")));
     int seen = 0;
-    NFString * last = NULL;
+    NPString * last = NULL;
     {
-        NFObject * * __nopa_fi = arr;
-        for (unsigned long __nopa_fi_i = 0;  (__nopa_fi_i < ({ NFObject *__nopa_tmp_189 = ((NFObject *)(__nopa_fi)); __nopa_tmp_189 ? ((size_t (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_189->isa->vtable)->count)(__nopa_tmp_189, __nopa_sel_count) : (size_t){0}; })); (__nopa_fi_i)++) {
-            NFString * item = (NFString *)(({ NFObject *__nopa_tmp_190 = ((NFObject *)(__nopa_fi)); __nopa_tmp_190 ? ((NFObject * (*)(NFObject *, SEL, size_t))((struct nopa_vtable *)__nopa_tmp_190->isa->vtable)->objectAtIndex_)(__nopa_tmp_190, __nopa_sel_objectAtIndex_, __nopa_fi_i) : (NFObject *){0}; }));
+        NPObject * * __nopa_fi = arr;
+        for (unsigned long __nopa_fi_i = 0;  (__nopa_fi_i < ({ NPObject *__nopa_tmp_189 = ((NPObject *)(__nopa_fi)); __nopa_tmp_189 ? ((size_t (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_189->isa->vtable)->count)(__nopa_tmp_189, __nopa_sel_count) : (size_t){0}; })); (__nopa_fi_i)++) {
+            NPString * item = (NPString *)(({ NPObject *__nopa_tmp_190 = ((NPObject *)(__nopa_fi)); __nopa_tmp_190 ? ((NPObject * (*)(NPObject *, SEL, size_t))((struct nopa_vtable *)__nopa_tmp_190->isa->vtable)->objectAtIndex_)(__nopa_tmp_190, __nopa_sel_objectAtIndex_, __nopa_fi_i) : (NPObject *){0}; }));
             (seen)++;
             last = item;
         }
     }
-    printf("4.1 forin %d %s\n", seen, ({ NFObject *__nopa_tmp_191 = ((NFObject *)(last)); __nopa_tmp_191 ? ((const char * (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_191->isa->vtable)->UTF8String)(__nopa_tmp_191, __nopa_sel_UTF8String) : 0; }));
-    NFArray * outer = (NFArray *)(nopa_array_create(2, NFNumber_numberWithInt_(&NOPA_CLASS_$_NFNumber, __nopa_sel_numberWithInt_, 1), NFNumber_numberWithInt_(&NOPA_CLASS_$_NFNumber, __nopa_sel_numberWithInt_, 2)));
+    printf("4.1 forin %d %s\n", seen, ({ NPObject *__nopa_tmp_191 = ((NPObject *)(last)); __nopa_tmp_191 ? ((const char * (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_191->isa->vtable)->UTF8String)(__nopa_tmp_191, __nopa_sel_UTF8String) : 0; }));
+    NPArray * outer = (NPArray *)(nopa_array_create(2, NPNumber_numberWithInt_(&NOPA_CLASS_$_NPNumber, __nopa_sel_numberWithInt_, 1), NPNumber_numberWithInt_(&NOPA_CLASS_$_NPNumber, __nopa_sel_numberWithInt_, 2)));
     int pairs = 0;
     {
-        NFObject * * __nopa_fi = outer;
-        for (unsigned long __nopa_fi_i = 0;  (__nopa_fi_i < ({ NFObject *__nopa_tmp_192 = ((NFObject *)(__nopa_fi)); __nopa_tmp_192 ? ((size_t (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_192->isa->vtable)->count)(__nopa_tmp_192, __nopa_sel_count) : (size_t){0}; })); (__nopa_fi_i)++) {
-            NFNumber * o = (NFNumber *)(({ NFObject *__nopa_tmp_193 = ((NFObject *)(__nopa_fi)); __nopa_tmp_193 ? ((NFObject * (*)(NFObject *, SEL, size_t))((struct nopa_vtable *)__nopa_tmp_193->isa->vtable)->objectAtIndex_)(__nopa_tmp_193, __nopa_sel_objectAtIndex_, __nopa_fi_i) : (NFObject *){0}; }));
+        NPObject * * __nopa_fi = outer;
+        for (unsigned long __nopa_fi_i = 0;  (__nopa_fi_i < ({ NPObject *__nopa_tmp_192 = ((NPObject *)(__nopa_fi)); __nopa_tmp_192 ? ((size_t (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_192->isa->vtable)->count)(__nopa_tmp_192, __nopa_sel_count) : (size_t){0}; })); (__nopa_fi_i)++) {
+            NPNumber * o = (NPNumber *)(({ NPObject *__nopa_tmp_193 = ((NPObject *)(__nopa_fi)); __nopa_tmp_193 ? ((NPObject * (*)(NPObject *, SEL, size_t))((struct nopa_vtable *)__nopa_tmp_193->isa->vtable)->objectAtIndex_)(__nopa_tmp_193, __nopa_sel_objectAtIndex_, __nopa_fi_i) : (NPObject *){0}; }));
             {
-                NFObject * * __nopa_fi = arr;
-                for (unsigned long __nopa_fi_i = 0;  (__nopa_fi_i < ({ NFObject *__nopa_tmp_194 = ((NFObject *)(__nopa_fi)); __nopa_tmp_194 ? ((size_t (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_194->isa->vtable)->count)(__nopa_tmp_194, __nopa_sel_count) : (size_t){0}; })); (__nopa_fi_i)++) {
-                    NFString * i = (NFString *)(({ NFObject *__nopa_tmp_195 = ((NFObject *)(__nopa_fi)); __nopa_tmp_195 ? ((NFObject * (*)(NFObject *, SEL, size_t))((struct nopa_vtable *)__nopa_tmp_195->isa->vtable)->objectAtIndex_)(__nopa_tmp_195, __nopa_sel_objectAtIndex_, __nopa_fi_i) : (NFObject *){0}; }));
+                NPObject * * __nopa_fi = arr;
+                for (unsigned long __nopa_fi_i = 0;  (__nopa_fi_i < ({ NPObject *__nopa_tmp_194 = ((NPObject *)(__nopa_fi)); __nopa_tmp_194 ? ((size_t (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_194->isa->vtable)->count)(__nopa_tmp_194, __nopa_sel_count) : (size_t){0}; })); (__nopa_fi_i)++) {
+                    NPString * i = (NPString *)(({ NPObject *__nopa_tmp_195 = ((NPObject *)(__nopa_fi)); __nopa_tmp_195 ? ((NPObject * (*)(NPObject *, SEL, size_t))((struct nopa_vtable *)__nopa_tmp_195->isa->vtable)->objectAtIndex_)(__nopa_tmp_195, __nopa_sel_objectAtIndex_, __nopa_fi_i) : (NPObject *){0}; }));
                     (pairs)++;
                 }
             }
         }
     }
-    NFArray * empty = (NFArray *)(nopa_array_create(0));
+    NPArray * empty = (NPArray *)(nopa_array_create(0));
     int empt = 0;
     {
-        NFObject * * __nopa_fi = empty;
-        for (unsigned long __nopa_fi_i = 0;  (__nopa_fi_i < ({ NFObject *__nopa_tmp_196 = ((NFObject *)(__nopa_fi)); __nopa_tmp_196 ? ((size_t (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_196->isa->vtable)->count)(__nopa_tmp_196, __nopa_sel_count) : (size_t){0}; })); (__nopa_fi_i)++) {
-            NFString * i = (NFString *)(({ NFObject *__nopa_tmp_197 = ((NFObject *)(__nopa_fi)); __nopa_tmp_197 ? ((NFObject * (*)(NFObject *, SEL, size_t))((struct nopa_vtable *)__nopa_tmp_197->isa->vtable)->objectAtIndex_)(__nopa_tmp_197, __nopa_sel_objectAtIndex_, __nopa_fi_i) : (NFObject *){0}; }));
+        NPObject * * __nopa_fi = empty;
+        for (unsigned long __nopa_fi_i = 0;  (__nopa_fi_i < ({ NPObject *__nopa_tmp_196 = ((NPObject *)(__nopa_fi)); __nopa_tmp_196 ? ((size_t (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_196->isa->vtable)->count)(__nopa_tmp_196, __nopa_sel_count) : (size_t){0}; })); (__nopa_fi_i)++) {
+            NPString * i = (NPString *)(({ NPObject *__nopa_tmp_197 = ((NPObject *)(__nopa_fi)); __nopa_tmp_197 ? ((NPObject * (*)(NPObject *, SEL, size_t))((struct nopa_vtable *)__nopa_tmp_197->isa->vtable)->objectAtIndex_)(__nopa_tmp_197, __nopa_sel_objectAtIndex_, __nopa_fi_i) : (NPObject *){0}; }));
             (empt)++;
         }
     }
@@ -6213,17 +6213,17 @@ __attribute__((weak)) void sec4_control_runtime(void ) {
         (cont += i);
     }
     printf("4.3 loops %d %d %d\n", w, dw, cont);
-    NFObject *__nopa_tmp_198 = (NFObject_alloc(&NOPA_CLASS_$_FsSprite, __nopa_sel_alloc));
-    NFObject * subj = __nopa_tmp_198 ? ((struct nopa_vtable *)__nopa_tmp_198->isa->vtable)->initWithId_(__nopa_tmp_198, __nopa_sel_initWithId_, 5) : 0;
+    NPObject *__nopa_tmp_198 = (NPObject_alloc(&NOPA_CLASS_$_FsSprite, __nopa_sel_alloc));
+    NPObject * subj = __nopa_tmp_198 ? ((struct nopa_vtable *)__nopa_tmp_198->isa->vtable)->initWithId_(__nopa_tmp_198, __nopa_sel_initWithId_, 5) : 0;
     int t1 = 0;
     {
-        NFObject * __nopa_sw = (NFObject *)subj;
-        FsErrHigh * e = (FsErrHigh *)(NFObject *)__nopa_sw;
-        FsSprite * s = (FsSprite *)(NFObject *)__nopa_sw;
-        if (nopa_isKindOfClass((NFObject *)__nopa_sw, &NOPA_CLASS_$_FsErrHigh)) {
+        NPObject * __nopa_sw = (NPObject *)subj;
+        FsErrHigh * e = (FsErrHigh *)(NPObject *)__nopa_sw;
+        FsSprite * s = (FsSprite *)(NPObject *)__nopa_sw;
+        if (nopa_isKindOfClass((NPObject *)__nopa_sw, &NOPA_CLASS_$_FsErrHigh)) {
             goto __nopa_case_0_0;
         }
-        if (nopa_isKindOfClass((NFObject *)__nopa_sw, &NOPA_CLASS_$_FsSprite)) {
+        if (nopa_isKindOfClass((NPObject *)__nopa_sw, &NOPA_CLASS_$_FsSprite)) {
             goto __nopa_case_0_1;
         }
         goto __nopa_case_0_d;
@@ -6255,14 +6255,14 @@ __nopa_sw0_end:
         }
     }
     printf("4.4 pat-bind %d\n", t1);
-    NFString * sv = (NFString *)(nopa_stringFromCstr("hit"));
+    NPString * sv = (NPString *)(nopa_stringFromCstr("hit"));
     int t2 = 0;
     {
-        NFObject * __nopa_sw = (NFObject *)sv;
-        if (({ NFObject *__nopa_tmp_199 = ((NFObject *)(__nopa_sw)); __nopa_tmp_199 ? ((_Bool (*)(NFObject *, SEL, NFObject *))((struct nopa_vtable *)__nopa_tmp_199->isa->vtable)->isEqual_)(__nopa_tmp_199, __nopa_sel_isEqual_, (NFObject *)(nopa_stringFromCstr("no"))) : (_Bool){0}; })) {
+        NPObject * __nopa_sw = (NPObject *)sv;
+        if (({ NPObject *__nopa_tmp_199 = ((NPObject *)(__nopa_sw)); __nopa_tmp_199 ? ((_Bool (*)(NPObject *, SEL, NPObject *))((struct nopa_vtable *)__nopa_tmp_199->isa->vtable)->isEqual_)(__nopa_tmp_199, __nopa_sel_isEqual_, (NPObject *)(nopa_stringFromCstr("no"))) : (_Bool){0}; })) {
             goto __nopa_case_1_0;
         }
-        if (({ NFObject *__nopa_tmp_200 = ((NFObject *)(__nopa_sw)); __nopa_tmp_200 ? ((_Bool (*)(NFObject *, SEL, NFObject *))((struct nopa_vtable *)__nopa_tmp_200->isa->vtable)->isEqual_)(__nopa_tmp_200, __nopa_sel_isEqual_, (NFObject *)(nopa_stringFromCstr("hit"))) : (_Bool){0}; })) {
+        if (({ NPObject *__nopa_tmp_200 = ((NPObject *)(__nopa_sw)); __nopa_tmp_200 ? ((_Bool (*)(NPObject *, SEL, NPObject *))((struct nopa_vtable *)__nopa_tmp_200->isa->vtable)->isEqual_)(__nopa_tmp_200, __nopa_sel_isEqual_, (NPObject *)(nopa_stringFromCstr("hit"))) : (_Bool){0}; })) {
             goto __nopa_case_1_1;
         }
         goto __nopa_case_1_d;
@@ -6345,12 +6345,12 @@ __nopa_sw2_end:
     }
     int t5 = 0;
     {
-        NFObject * __nopa_sw = (NFObject *)subj;
-        FsSprite * s = (FsSprite *)(NFObject *)__nopa_sw;
-        if ((nopa_isKindOfClass((NFObject *)__nopa_sw, &NOPA_CLASS_$_FsSprite) && (s->_id == 999))) {
+        NPObject * __nopa_sw = (NPObject *)subj;
+        FsSprite * s = (FsSprite *)(NPObject *)__nopa_sw;
+        if ((nopa_isKindOfClass((NPObject *)__nopa_sw, &NOPA_CLASS_$_FsSprite) && (s->_id == 999))) {
             goto __nopa_case_3_0;
         }
-        if ((nopa_isKindOfClass((NFObject *)__nopa_sw, &NOPA_CLASS_$_FsSprite) && (s->_id == 5))) {
+        if ((nopa_isKindOfClass((NPObject *)__nopa_sw, &NOPA_CLASS_$_FsSprite) && (s->_id == 5))) {
             goto __nopa_case_3_1;
         }
         goto __nopa_case_3_d;
@@ -6364,7 +6364,7 @@ __nopa_case_3_0:
         {
 __nopa_case_3_1:
             {
-                FsSprite * s = (FsSprite *)(NFObject *)__nopa_sw;
+                FsSprite * s = (FsSprite *)(NPObject *)__nopa_sw;
                 t5 = 2;
                 goto __nopa_sw3_end;
             }
@@ -6424,13 +6424,13 @@ __nopa_sw4_end:
             (order += 1);
             nopa_release(subj);
             {
-                __nopa_exception_value = ({ NFObject *__nopa_tmp_201 = ((NFObject *)(NFObject_alloc(&NOPA_CLASS_$_FsErrHigh, __nopa_sel_alloc))); __nopa_tmp_201 ? ((NFMutableArray * (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_201->isa->vtable)->init)(__nopa_tmp_201, __nopa_sel_init) : 0; });
+                __nopa_exception_value = ({ NPObject *__nopa_tmp_201 = ((NPObject *)(NPObject_alloc(&NOPA_CLASS_$_FsErrHigh, __nopa_sel_alloc))); __nopa_tmp_201 ? ((NPMutableArray * (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_201->isa->vtable)->init)(__nopa_tmp_201, __nopa_sel_init) : 0; });
                 longjmp(__nopa_exception_buf, 1);
             }
             (order += 100);
         }
         memcpy(__nopa_exception_buf, __nopa_saved, sizeof(jmp_buf));
-        if ((__nopa_state == 1))         if (__nopa_eh_isa((NFObject *)__nopa_exception_value, &NOPA_CLASS_$_FsErrLow)) {
+        if ((__nopa_state == 1))         if (__nopa_eh_isa((NPObject *)__nopa_exception_value, &NOPA_CLASS_$_FsErrLow)) {
             __nopa_state = 2;
             FsErrLow * e;
             (void)e;
@@ -6438,7 +6438,7 @@ __nopa_sw4_end:
                 (order += 10);
             }
         }
-        if ((__nopa_state == 1))         if (__nopa_eh_isa((NFObject *)__nopa_exception_value, &NOPA_CLASS_$_FsErrHigh)) {
+        if ((__nopa_state == 1))         if (__nopa_eh_isa((NPObject *)__nopa_exception_value, &NOPA_CLASS_$_FsErrHigh)) {
             __nopa_state = 2;
             FsErrHigh * e;
             (void)e;
@@ -6467,7 +6467,7 @@ __nopa_sw4_end:
                 if ((setjmp(__nopa_exception_buf) != 0))                 __nopa_state = 1;
                 if ((__nopa_state == 0)) {
                     {
-                        __nopa_exception_value = ({ NFObject *__nopa_tmp_202 = ((NFObject *)(NFObject_alloc(&NOPA_CLASS_$_FsErrLow, __nopa_sel_alloc))); __nopa_tmp_202 ? ((NFMutableArray * (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_202->isa->vtable)->init)(__nopa_tmp_202, __nopa_sel_init) : 0; });
+                        __nopa_exception_value = ({ NPObject *__nopa_tmp_202 = ((NPObject *)(NPObject_alloc(&NOPA_CLASS_$_FsErrLow, __nopa_sel_alloc))); __nopa_tmp_202 ? ((NPMutableArray * (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_202->isa->vtable)->init)(__nopa_tmp_202, __nopa_sel_init) : 0; });
                         longjmp(__nopa_exception_buf, 1);
                     }
                 }
@@ -6480,7 +6480,7 @@ __nopa_sw4_end:
             }
         }
         memcpy(__nopa_exception_buf, __nopa_saved, sizeof(jmp_buf));
-        if ((__nopa_state == 1))         if (__nopa_eh_isa((NFObject *)__nopa_exception_value, &NOPA_CLASS_$_FsErrLow)) {
+        if ((__nopa_state == 1))         if (__nopa_eh_isa((NPObject *)__nopa_exception_value, &NOPA_CLASS_$_FsErrLow)) {
             __nopa_state = 2;
             FsErrLow * e;
             (void)e;
@@ -6506,12 +6506,12 @@ __nopa_sw4_end:
                 if ((setjmp(__nopa_exception_buf) != 0))                 __nopa_state = 1;
                 if ((__nopa_state == 0)) {
                     {
-                        __nopa_exception_value = ({ NFObject *__nopa_tmp_203 = ((NFObject *)(NFObject_alloc(&NOPA_CLASS_$_FsErrLow, __nopa_sel_alloc))); __nopa_tmp_203 ? ((NFMutableArray * (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_203->isa->vtable)->init)(__nopa_tmp_203, __nopa_sel_init) : 0; });
+                        __nopa_exception_value = ({ NPObject *__nopa_tmp_203 = ((NPObject *)(NPObject_alloc(&NOPA_CLASS_$_FsErrLow, __nopa_sel_alloc))); __nopa_tmp_203 ? ((NPMutableArray * (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_203->isa->vtable)->init)(__nopa_tmp_203, __nopa_sel_init) : 0; });
                         longjmp(__nopa_exception_buf, 1);
                     }
                 }
                 memcpy(__nopa_exception_buf, __nopa_saved, sizeof(jmp_buf));
-                if ((__nopa_state == 1))                 if (__nopa_eh_isa((NFObject *)__nopa_exception_value, &NOPA_CLASS_$_FsErrLow)) {
+                if ((__nopa_state == 1))                 if (__nopa_eh_isa((NPObject *)__nopa_exception_value, &NOPA_CLASS_$_FsErrLow)) {
                     __nopa_state = 2;
                     FsErrLow * e = (FsErrLow *)__nopa_exception_value;
                     {
@@ -6527,7 +6527,7 @@ __nopa_sw4_end:
             }
         }
         memcpy(__nopa_exception_buf, __nopa_saved, sizeof(jmp_buf));
-        if ((__nopa_state == 1))         if (__nopa_eh_isa((NFObject *)__nopa_exception_value, &NOPA_CLASS_$_FsErrLow)) {
+        if ((__nopa_state == 1))         if (__nopa_eh_isa((NPObject *)__nopa_exception_value, &NOPA_CLASS_$_FsErrLow)) {
             __nopa_state = 2;
             FsErrLow * e;
             (void)e;
@@ -6539,7 +6539,7 @@ __nopa_sw4_end:
         if ((__nopa_state == 1))         longjmp(__nopa_exception_buf, 1);
     }
     printf("4.10 rethrow %d\n", rethrown);
-    NFObject *__nopa_tmp_204 = (NFObject_alloc(&NOPA_CLASS_$_FsSprite, __nopa_sel_alloc));
+    NPObject *__nopa_tmp_204 = (NPObject_alloc(&NOPA_CLASS_$_FsSprite, __nopa_sel_alloc));
     FsSprite * lock = (FsSprite *)(__nopa_tmp_204 ? ((struct nopa_vtable *)__nopa_tmp_204->isa->vtable)->initWithId_(__nopa_tmp_204, __nopa_sel_initWithId_, 1) : 0);
     int guarded = 0;
     {
@@ -6550,14 +6550,14 @@ __nopa_sw4_end:
     int pooled = 0;
     {
         nopa_autoreleasepool_t * __nopa_pool = nopa_autoreleasepoolPush();
-        NFString * p1 = (NFString *)(NFString_stringWithUTF8String_(&NOPA_CLASS_$_NFString, __nopa_sel_stringWithUTF8String_, "pool1"));
+        NPString * p1 = (NPString *)(NPString_stringWithUTF8String_(&NOPA_CLASS_$_NPString, __nopa_sel_stringWithUTF8String_, "pool1"));
         {
             nopa_autoreleasepool_t * __nopa_pool = nopa_autoreleasepoolPush();
-            NFString * p2 = (NFString *)(NFString_stringWithUTF8String_(&NOPA_CLASS_$_NFString, __nopa_sel_stringWithUTF8String_, "pool2"));
-            (pooled += ({ NFObject *__nopa_tmp_205 = ((NFObject *)(p2)); __nopa_tmp_205 ? ((size_t (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_205->isa->vtable)->length)(__nopa_tmp_205, __nopa_sel_length) : (size_t){0}; }));
+            NPString * p2 = (NPString *)(NPString_stringWithUTF8String_(&NOPA_CLASS_$_NPString, __nopa_sel_stringWithUTF8String_, "pool2"));
+            (pooled += ({ NPObject *__nopa_tmp_205 = ((NPObject *)(p2)); __nopa_tmp_205 ? ((size_t (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_205->isa->vtable)->length)(__nopa_tmp_205, __nopa_sel_length) : (size_t){0}; }));
             nopa_autoreleasepoolPop(__nopa_pool);
         }
-        (pooled += ({ NFObject *__nopa_tmp_206 = ((NFObject *)(p1)); __nopa_tmp_206 ? ((size_t (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_206->isa->vtable)->length)(__nopa_tmp_206, __nopa_sel_length) : (size_t){0}; }));
+        (pooled += ({ NPObject *__nopa_tmp_206 = ((NPObject *)(p1)); __nopa_tmp_206 ? ((size_t (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_206->isa->vtable)->length)(__nopa_tmp_206, __nopa_sel_length) : (size_t){0}; }));
         nopa_autoreleasepoolPop(__nopa_pool);
     }
     printf("4.12 pool %d\n", pooled);
@@ -6581,23 +6581,23 @@ __nopa_sw4_end:
     }
     printf("4.14 deferloop %d\n", defer_loop);
     {
-        NFObject *__nopa_tmp_207 = (NFObject_alloc(&NOPA_CLASS_$_NFObject, __nopa_sel_alloc));
-        NFObject * owned = __nopa_tmp_207 ? ((struct nopa_vtable *)__nopa_tmp_207->isa->vtable)->init(__nopa_tmp_207, __nopa_sel_init) : 0;
-        ({ NFObject *__nopa_tmp_208 = ((NFObject *)(owned)); __nopa_tmp_208 ? ((NFObject * (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_208->isa->vtable)->retain)(__nopa_tmp_208, __nopa_sel_retain) : 0; });
-        ({ NFObject *__nopa_tmp_209 = ((NFObject *)(owned)); __nopa_tmp_209 ? ((void (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_209->isa->vtable)->release)(__nopa_tmp_209, __nopa_sel_release) : 0; });
-        ({ NFObject *__nopa_tmp_210 = ((NFObject *)(owned)); __nopa_tmp_210 ? ((void (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_210->isa->vtable)->release)(__nopa_tmp_210, __nopa_sel_release) : 0; });
+        NPObject *__nopa_tmp_207 = (NPObject_alloc(&NOPA_CLASS_$_NPObject, __nopa_sel_alloc));
+        NPObject * owned = __nopa_tmp_207 ? ((struct nopa_vtable *)__nopa_tmp_207->isa->vtable)->init(__nopa_tmp_207, __nopa_sel_init) : 0;
+        ({ NPObject *__nopa_tmp_208 = ((NPObject *)(owned)); __nopa_tmp_208 ? ((NPObject * (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_208->isa->vtable)->retain)(__nopa_tmp_208, __nopa_sel_retain) : 0; });
+        ({ NPObject *__nopa_tmp_209 = ((NPObject *)(owned)); __nopa_tmp_209 ? ((void (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_209->isa->vtable)->release)(__nopa_tmp_209, __nopa_sel_release) : 0; });
+        ({ NPObject *__nopa_tmp_210 = ((NPObject *)(owned)); __nopa_tmp_210 ? ((void (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_210->isa->vtable)->release)(__nopa_tmp_210, __nopa_sel_release) : 0; });
     }
     printf("4.15 noarc ok\n");
-    __block NFString * __attribute__((cleanup(nopa_weakAutoCleanup))) weakref = NULL;
-    nopa_weakRegister((NFObject **)&weakref, (NFObject *)NULL);
+    __block NPString * __attribute__((cleanup(nopa_weakAutoCleanup))) weakref = NULL;
+    nopa_weakRegister((NPObject **)&weakref, (NPObject *)NULL);
     {
-        NFObject *__nopa_tmp_211 = (NFObject_alloc(&NOPA_CLASS_$_NFString, __nopa_sel_alloc));
-        NFString * strong = (NFString *)(__nopa_tmp_211 ? ((struct nopa_vtable *)__nopa_tmp_211->isa->vtable)->initWithUTF8String_(__nopa_tmp_211, __nopa_sel_initWithUTF8String_, "weak-target") : 0);
+        NPObject *__nopa_tmp_211 = (NPObject_alloc(&NOPA_CLASS_$_NPString, __nopa_sel_alloc));
+        NPString * strong = (NPString *)(__nopa_tmp_211 ? ((struct nopa_vtable *)__nopa_tmp_211->isa->vtable)->initWithUTF8String_(__nopa_tmp_211, __nopa_sel_initWithUTF8String_, "weak-target") : 0);
         {
             __auto_type __nopa_weak_val_4 = strong;
-            nopa_weakUnregister((NFObject **)&weakref);
+            nopa_weakUnregister((NPObject **)&weakref);
             weakref = __nopa_weak_val_4;
-            nopa_weakRegister((NFObject **)&weakref, (NFObject *)__nopa_weak_val_4);
+            nopa_weakRegister((NPObject **)&weakref, (NPObject *)__nopa_weak_val_4);
         }
         printf("4.16 weak %d\n", (weakref != NULL));
         nopa_release(strong);
@@ -6606,35 +6606,35 @@ __nopa_sw4_end:
     nopa_release(lock);
 }
 
-__attribute__((weak)) NFString * fs_maybe_fn(void ) {
+__attribute__((weak)) NPString * fs_maybe_fn(void ) {
     return NULL;
 }
 
-__attribute__((weak)) void fs_take_fn(NFString * s) {
-    printf("5.4 fn %s\n", ({ NFObject *__nopa_tmp_212 = ((NFObject *)(s)); __nopa_tmp_212 ? ((const char * (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_212->isa->vtable)->UTF8String)(__nopa_tmp_212, __nopa_sel_UTF8String) : 0; }));
+__attribute__((weak)) void fs_take_fn(NPString * s) {
+    printf("5.4 fn %s\n", ({ NPObject *__nopa_tmp_212 = ((NPObject *)(s)); __nopa_tmp_212 ? ((const char * (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_212->isa->vtable)->UTF8String)(__nopa_tmp_212, __nopa_sel_UTF8String) : 0; }));
 }
 
 __attribute__((weak)) void sec5_misc(void ) {
     printf("== §5 nullability/throws/async/asm ==\n");
-    NFObject *__nopa_tmp_213 = (NFObject_alloc(&NOPA_CLASS_$_FsGuarded, __nopa_sel_alloc));
+    NPObject *__nopa_tmp_213 = (NPObject_alloc(&NOPA_CLASS_$_FsGuarded, __nopa_sel_alloc));
     FsGuarded * g = (FsGuarded *)(__nopa_tmp_213 ? ((struct nopa_vtable *)__nopa_tmp_213->isa->vtable)->init(__nopa_tmp_213, __nopa_sel_init) : 0);
-    ({ NFObject *__nopa_tmp_214 = ((NFObject *)(g)); __nopa_tmp_214 ? ((void (*)(NFObject *, SEL, NFString *))((struct nopa_vtable *)__nopa_tmp_214->isa->vtable)->take_)(__nopa_tmp_214, __nopa_sel_take_, (NFString *)(nopa_stringFromCstr("region"))) : 0; });
-    ({ NFObject *__nopa_tmp_215 = ((NFObject *)(g)); __nopa_tmp_215 ? ((void (*)(NFObject *, SEL, NFString *))((struct nopa_vtable *)__nopa_tmp_215->isa->vtable)->optOut_)(__nopa_tmp_215, __nopa_sel_optOut_, (NFString *)(NULL)) : 0; });
-    printf("5.2b produce %s\n", ({ NFObject *__nopa_tmp_216 = ((NFObject *)(({ NFObject *__nopa_tmp_217 = ((NFObject *)(g)); __nopa_tmp_217 ? ((NFString * (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_217->isa->vtable)->produce)(__nopa_tmp_217, __nopa_sel_produce) : 0; }))); __nopa_tmp_216 ? ((const char * (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_216->isa->vtable)->UTF8String)(__nopa_tmp_216, __nopa_sel_UTF8String) : 0; }));
-    g->inRegion = (NFString *)(nopa_stringFromCstr("ivar"));
+    ({ NPObject *__nopa_tmp_214 = ((NPObject *)(g)); __nopa_tmp_214 ? ((void (*)(NPObject *, SEL, NPString *))((struct nopa_vtable *)__nopa_tmp_214->isa->vtable)->take_)(__nopa_tmp_214, __nopa_sel_take_, (NPString *)(nopa_stringFromCstr("region"))) : 0; });
+    ({ NPObject *__nopa_tmp_215 = ((NPObject *)(g)); __nopa_tmp_215 ? ((void (*)(NPObject *, SEL, NPString *))((struct nopa_vtable *)__nopa_tmp_215->isa->vtable)->optOut_)(__nopa_tmp_215, __nopa_sel_optOut_, (NPString *)(NULL)) : 0; });
+    printf("5.2b produce %s\n", ({ NPObject *__nopa_tmp_216 = ((NPObject *)(({ NPObject *__nopa_tmp_217 = ((NPObject *)(g)); __nopa_tmp_217 ? ((NPString * (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_217->isa->vtable)->produce)(__nopa_tmp_217, __nopa_sel_produce) : 0; }))); __nopa_tmp_216 ? ((const char * (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_216->isa->vtable)->UTF8String)(__nopa_tmp_216, __nopa_sel_UTF8String) : 0; }));
+    g->inRegion = (NPString *)(nopa_stringFromCstr("ivar"));
     g->optIvar = NULL;
-    printf("5.2c ivar %s %d\n", ({ NFObject *__nopa_tmp_218 = ((NFObject *)(g->inRegion)); __nopa_tmp_218 ? ((const char * (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_218->isa->vtable)->UTF8String)(__nopa_tmp_218, __nopa_sel_UTF8String) : 0; }), (g->optIvar == NULL));
-    NFObject *__nopa_tmp_219 = (NFObject_alloc(&NOPA_CLASS_$_FsAnnotated, __nopa_sel_alloc));
+    printf("5.2c ivar %s %d\n", ({ NPObject *__nopa_tmp_218 = ((NPObject *)(g->inRegion)); __nopa_tmp_218 ? ((const char * (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_218->isa->vtable)->UTF8String)(__nopa_tmp_218, __nopa_sel_UTF8String) : 0; }), (g->optIvar == NULL));
+    NPObject *__nopa_tmp_219 = (NPObject_alloc(&NOPA_CLASS_$_FsAnnotated, __nopa_sel_alloc));
     FsAnnotated * a = (FsAnnotated *)(__nopa_tmp_219 ? ((struct nopa_vtable *)__nopa_tmp_219->isa->vtable)->init(__nopa_tmp_219, __nopa_sel_init) : 0);
-    ({ NFObject *__nopa_tmp_220 = ((NFObject *)(a)); __nopa_tmp_220 ? ((void (*)(NFObject *, SEL, NFString *, NFString *))((struct nopa_vtable *)__nopa_tmp_220->isa->vtable)->pre_post_)(__nopa_tmp_220, __nopa_sel_pre_post_, (NFString *)(nopa_stringFromCstr("x")), (NFString *)(nopa_stringFromCstr("y"))) : 0; });
-    printf("5.4b fns %d %s\n", (({ NFObject *__nopa_tmp_221 = ((NFObject *)(a)); __nopa_tmp_221 ? ((NFString * (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_221->isa->vtable)->maybe)(__nopa_tmp_221, __nopa_sel_maybe) : 0; }) == NULL), ({ NFObject *__nopa_tmp_222 = ((NFObject *)(({ NFObject *__nopa_tmp_223 = ((NFObject *)(a)); __nopa_tmp_223 ? ((NFString * (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_223->isa->vtable)->maybeC)(__nopa_tmp_223, __nopa_sel_maybeC) : 0; }))); __nopa_tmp_222 ? ((const char * (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_222->isa->vtable)->UTF8String)(__nopa_tmp_222, __nopa_sel_UTF8String) : 0; }));
+    ({ NPObject *__nopa_tmp_220 = ((NPObject *)(a)); __nopa_tmp_220 ? ((void (*)(NPObject *, SEL, NPString *, NPString *))((struct nopa_vtable *)__nopa_tmp_220->isa->vtable)->pre_post_)(__nopa_tmp_220, __nopa_sel_pre_post_, (NPString *)(nopa_stringFromCstr("x")), (NPString *)(nopa_stringFromCstr("y"))) : 0; });
+    printf("5.4b fns %d %s\n", (({ NPObject *__nopa_tmp_221 = ((NPObject *)(a)); __nopa_tmp_221 ? ((NPString * (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_221->isa->vtable)->maybe)(__nopa_tmp_221, __nopa_sel_maybe) : 0; }) == NULL), ({ NPObject *__nopa_tmp_222 = ((NPObject *)(({ NPObject *__nopa_tmp_223 = ((NPObject *)(a)); __nopa_tmp_223 ? ((NPString * (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_223->isa->vtable)->maybeC)(__nopa_tmp_223, __nopa_sel_maybeC) : 0; }))); __nopa_tmp_222 ? ((const char * (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_222->isa->vtable)->UTF8String)(__nopa_tmp_222, __nopa_sel_UTF8String) : 0; }));
     fs_take_fn(nopa_stringFromCstr("fnarg"));
     printf("5.4c fnret %d\n", (fs_maybe_fn() == NULL));
-    NFObject *__nopa_tmp_224 = (NFObject_alloc(&NOPA_CLASS_$_FsModes, __nopa_sel_alloc));
+    NPObject *__nopa_tmp_224 = (NPObject_alloc(&NOPA_CLASS_$_FsModes, __nopa_sel_alloc));
     FsModes * mo = (FsModes *)(__nopa_tmp_224 ? ((struct nopa_vtable *)__nopa_tmp_224->isa->vtable)->init(__nopa_tmp_224, __nopa_sel_init) : 0);
     struct FsPoint pp = { 1, 2 };
-    printf("5.5 mix %d\n", ({ NFObject *__nopa_tmp_225 = ((NFObject *)(mo)); __nopa_tmp_225 ? ((int (*)(NFObject *, SEL, FsMode, struct FsPoint))((struct nopa_vtable *)__nopa_tmp_225->isa->vtable)->mix_point_)(__nopa_tmp_225, __nopa_sel_mix_point_, FS_MODE_LOW, pp) : (int){0}; }));
-    NFObject *__nopa_tmp_226 = (NFObject_alloc(&NOPA_CLASS_$_FsParser, __nopa_sel_alloc));
+    printf("5.5 mix %d\n", ({ NPObject *__nopa_tmp_225 = ((NPObject *)(mo)); __nopa_tmp_225 ? ((int (*)(NPObject *, SEL, FsMode, struct FsPoint))((struct nopa_vtable *)__nopa_tmp_225->isa->vtable)->mix_point_)(__nopa_tmp_225, __nopa_sel_mix_point_, FS_MODE_LOW, pp) : (int){0}; }));
+    NPObject *__nopa_tmp_226 = (NPObject_alloc(&NOPA_CLASS_$_FsParser, __nopa_sel_alloc));
     FsParser * ps = (FsParser *)(__nopa_tmp_226 ? ((struct nopa_vtable *)__nopa_tmp_226->isa->vtable)->init(__nopa_tmp_226, __nopa_sel_init) : 0);
     int caught = 0;
     {
@@ -6643,10 +6643,10 @@ __attribute__((weak)) void sec5_misc(void ) {
         volatile int __nopa_state = 0;
         if ((setjmp(__nopa_exception_buf) != 0))         __nopa_state = 1;
         if ((__nopa_state == 0)) {
-            ({ NFObject *__nopa_tmp_227 = ((NFObject *)(ps)); __nopa_tmp_227 ? ((int (*)(NFObject *, SEL, NFString *))((struct nopa_vtable *)__nopa_tmp_227->isa->vtable)->strictParse_)(__nopa_tmp_227, __nopa_sel_strictParse_, (NFString *)(nopa_stringFromCstr("toolong"))) : (int){0}; });
+            ({ NPObject *__nopa_tmp_227 = ((NPObject *)(ps)); __nopa_tmp_227 ? ((int (*)(NPObject *, SEL, NPString *))((struct nopa_vtable *)__nopa_tmp_227->isa->vtable)->strictParse_)(__nopa_tmp_227, __nopa_sel_strictParse_, (NPString *)(nopa_stringFromCstr("toolong"))) : (int){0}; });
         }
         memcpy(__nopa_exception_buf, __nopa_saved, sizeof(jmp_buf));
-        if ((__nopa_state == 1))         if (__nopa_eh_isa((NFObject *)__nopa_exception_value, &NOPA_CLASS_$_FsErrLow)) {
+        if ((__nopa_state == 1))         if (__nopa_eh_isa((NPObject *)__nopa_exception_value, &NOPA_CLASS_$_FsErrLow)) {
             __nopa_state = 2;
             FsErrLow * e;
             (void)e;
@@ -6663,10 +6663,10 @@ __attribute__((weak)) void sec5_misc(void ) {
         volatile int __nopa_state = 0;
         if ((setjmp(__nopa_exception_buf) != 0))         __nopa_state = 1;
         if ((__nopa_state == 0)) {
-            ({ NFObject *__nopa_tmp_228 = ((NFObject *)(ps)); __nopa_tmp_228 ? ((int (*)(NFObject *, SEL, NFString *))((struct nopa_vtable *)__nopa_tmp_228->isa->vtable)->looseParse_)(__nopa_tmp_228, __nopa_sel_looseParse_, (NFString *)(NULL)) : (int){0}; });
+            ({ NPObject *__nopa_tmp_228 = ((NPObject *)(ps)); __nopa_tmp_228 ? ((int (*)(NPObject *, SEL, NPString *))((struct nopa_vtable *)__nopa_tmp_228->isa->vtable)->looseParse_)(__nopa_tmp_228, __nopa_sel_looseParse_, (NPString *)(NULL)) : (int){0}; });
         }
         memcpy(__nopa_exception_buf, __nopa_saved, sizeof(jmp_buf));
-        if ((__nopa_state == 1))         if (__nopa_eh_isa((NFObject *)__nopa_exception_value, &NOPA_CLASS_$_FsErrLow)) {
+        if ((__nopa_state == 1))         if (__nopa_eh_isa((NPObject *)__nopa_exception_value, &NOPA_CLASS_$_FsErrLow)) {
             __nopa_state = 2;
             FsErrLow * e;
             (void)e;
@@ -6683,11 +6683,11 @@ __attribute__((weak)) void sec5_misc(void ) {
         volatile int __nopa_state = 0;
         if ((setjmp(__nopa_exception_buf) != 0))         __nopa_state = 1;
         if ((__nopa_state == 0)) {
-            ({ NFObject *__nopa_tmp_229 = ((NFObject *)(ps)); __nopa_tmp_229 ? ((int (*)(NFObject *, SEL, NFString *))((struct nopa_vtable *)__nopa_tmp_229->isa->vtable)->looseParse_)(__nopa_tmp_229, __nopa_sel_looseParse_, (NFString *)(nopa_stringFromCstr("ok"))) : (int){0}; });
+            ({ NPObject *__nopa_tmp_229 = ((NPObject *)(ps)); __nopa_tmp_229 ? ((int (*)(NPObject *, SEL, NPString *))((struct nopa_vtable *)__nopa_tmp_229->isa->vtable)->looseParse_)(__nopa_tmp_229, __nopa_sel_looseParse_, (NPString *)(nopa_stringFromCstr("ok"))) : (int){0}; });
             (caught += 100);
         }
         memcpy(__nopa_exception_buf, __nopa_saved, sizeof(jmp_buf));
-        if ((__nopa_state == 1))         if (__nopa_eh_isa((NFObject *)__nopa_exception_value, &NOPA_CLASS_$_FsErrLow)) {
+        if ((__nopa_state == 1))         if (__nopa_eh_isa((NPObject *)__nopa_exception_value, &NOPA_CLASS_$_FsErrLow)) {
             __nopa_state = 2;
             FsErrLow * e;
             (void)e;
@@ -6717,15 +6717,15 @@ z:
     printf("5.8 asmgoto hit\n");
 after:
     printf("5.8 asm %d %d %d\n", ao, sh, rw);
-    NFNumber * n1 = (NFNumber *)(NFNumber_numberWithInt_(&NOPA_CLASS_$_NFNumber, __nopa_sel_numberWithInt_, 7));
-    NFNumber * n2 = (NFNumber *)(NFNumber_numberWithInt_(&NOPA_CLASS_$_NFNumber, __nopa_sel_numberWithInt_, 7));
-    printf("5.9 num %lld %.2f %d %d\n", ({ NFObject *__nopa_tmp_230 = ((NFObject *)(n1)); __nopa_tmp_230 ? ((long long (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_230->isa->vtable)->longLongValue)(__nopa_tmp_230, __nopa_sel_longLongValue) : (long long){0}; }), ({ NFObject *__nopa_tmp_231 = ((NFObject *)(NFNumber_numberWithDouble_(&NOPA_CLASS_$_NFNumber, __nopa_sel_numberWithDouble_, 2.5f))); __nopa_tmp_231 ? ((double (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_231->isa->vtable)->doubleValue)(__nopa_tmp_231, __nopa_sel_doubleValue) : (double){0}; }), ({ NFObject *__nopa_tmp_232 = ((NFObject *)(n1)); __nopa_tmp_232 ? ((int (*)(NFObject *, SEL, NFNumber *))((struct nopa_vtable *)__nopa_tmp_232->isa->vtable)->isEqualToNumber_)(__nopa_tmp_232, __nopa_sel_isEqualToNumber_, (NFNumber *)(n2)) : (int){0}; }), ({ NFObject *__nopa_tmp_233 = ((NFObject *)(NFNumber_numberWithInt_(&NOPA_CLASS_$_NFNumber, __nopa_sel_numberWithInt_, 1))); __nopa_tmp_233 ? ((int (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_233->isa->vtable)->boolValue)(__nopa_tmp_233, __nopa_sel_boolValue) : (int){0}; }));
-    NFString * orig = (NFString *)(NFString_stringWithUTF8String_(&NOPA_CLASS_$_NFString, __nopa_sel_stringWithUTF8String_, "cp"));
-    NFString * cp = (NFString *)(({ NFObject *__nopa_tmp_234 = ((NFObject *)(orig)); __nopa_tmp_234 ? ((NFString * (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_234->isa->vtable)->copy)(__nopa_tmp_234, __nopa_sel_copy) : 0; }));
-    printf("5.9b strcopy %s %d\n", ({ NFObject *__nopa_tmp_235 = ((NFObject *)(cp)); __nopa_tmp_235 ? ((const char * (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_235->isa->vtable)->UTF8String)(__nopa_tmp_235, __nopa_sel_UTF8String) : 0; }), (({ NFObject *__nopa_tmp_236 = ((NFObject *)(orig)); __nopa_tmp_236 ? ((_Bool (*)(NFObject *, SEL, NFObject *))((struct nopa_vtable *)__nopa_tmp_236->isa->vtable)->isEqual_)(__nopa_tmp_236, __nopa_sel_isEqual_, (NFObject *)(cp)) : (_Bool){0}; }) == 0));
-    NFArray * src = (NFArray *)(nopa_array_create(2, nopa_stringFromCstr("p"), nopa_stringFromCstr("q")));
-    NFArray * arrcp = (NFArray *)(({ NFObject *__nopa_tmp_237 = ((NFObject *)(src)); __nopa_tmp_237 ? ((NFObject * (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_237->isa->vtable)->copy)(__nopa_tmp_237, __nopa_sel_copy) : 0; }));
-    printf("5.9c arrcopy %zu %s\n", ({ NFObject *__nopa_tmp_238 = ((NFObject *)(arrcp)); __nopa_tmp_238 ? ((size_t (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_238->isa->vtable)->count)(__nopa_tmp_238, __nopa_sel_count) : (size_t){0}; }), ({ NFObject *__nopa_tmp_239 = ((NFObject *)(({ NFObject *__nopa_tmp_240 = ((NFObject *)(arrcp)); __nopa_tmp_240 ? ((NFObject * (*)(NFObject *, SEL, size_t))((struct nopa_vtable *)__nopa_tmp_240->isa->vtable)->objectAtIndex_)(__nopa_tmp_240, __nopa_sel_objectAtIndex_, 1) : (NFObject *){0}; }))); __nopa_tmp_239 ? ((const char * (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_239->isa->vtable)->UTF8String)(__nopa_tmp_239, __nopa_sel_UTF8String) : 0; }));
+    NPNumber * n1 = (NPNumber *)(NPNumber_numberWithInt_(&NOPA_CLASS_$_NPNumber, __nopa_sel_numberWithInt_, 7));
+    NPNumber * n2 = (NPNumber *)(NPNumber_numberWithInt_(&NOPA_CLASS_$_NPNumber, __nopa_sel_numberWithInt_, 7));
+    printf("5.9 num %lld %.2f %d %d\n", ({ NPObject *__nopa_tmp_230 = ((NPObject *)(n1)); __nopa_tmp_230 ? ((long long (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_230->isa->vtable)->longLongValue)(__nopa_tmp_230, __nopa_sel_longLongValue) : (long long){0}; }), ({ NPObject *__nopa_tmp_231 = ((NPObject *)(NPNumber_numberWithDouble_(&NOPA_CLASS_$_NPNumber, __nopa_sel_numberWithDouble_, 2.5f))); __nopa_tmp_231 ? ((double (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_231->isa->vtable)->doubleValue)(__nopa_tmp_231, __nopa_sel_doubleValue) : (double){0}; }), ({ NPObject *__nopa_tmp_232 = ((NPObject *)(n1)); __nopa_tmp_232 ? ((int (*)(NPObject *, SEL, NPNumber *))((struct nopa_vtable *)__nopa_tmp_232->isa->vtable)->isEqualToNumber_)(__nopa_tmp_232, __nopa_sel_isEqualToNumber_, (NPNumber *)(n2)) : (int){0}; }), ({ NPObject *__nopa_tmp_233 = ((NPObject *)(NPNumber_numberWithInt_(&NOPA_CLASS_$_NPNumber, __nopa_sel_numberWithInt_, 1))); __nopa_tmp_233 ? ((int (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_233->isa->vtable)->boolValue)(__nopa_tmp_233, __nopa_sel_boolValue) : (int){0}; }));
+    NPString * orig = (NPString *)(NPString_stringWithUTF8String_(&NOPA_CLASS_$_NPString, __nopa_sel_stringWithUTF8String_, "cp"));
+    NPString * cp = (NPString *)(({ NPObject *__nopa_tmp_234 = ((NPObject *)(orig)); __nopa_tmp_234 ? ((NPString * (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_234->isa->vtable)->copy)(__nopa_tmp_234, __nopa_sel_copy) : 0; }));
+    printf("5.9b strcopy %s %d\n", ({ NPObject *__nopa_tmp_235 = ((NPObject *)(cp)); __nopa_tmp_235 ? ((const char * (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_235->isa->vtable)->UTF8String)(__nopa_tmp_235, __nopa_sel_UTF8String) : 0; }), (({ NPObject *__nopa_tmp_236 = ((NPObject *)(orig)); __nopa_tmp_236 ? ((_Bool (*)(NPObject *, SEL, NPObject *))((struct nopa_vtable *)__nopa_tmp_236->isa->vtable)->isEqual_)(__nopa_tmp_236, __nopa_sel_isEqual_, (NPObject *)(cp)) : (_Bool){0}; }) == 0));
+    NPArray * src = (NPArray *)(nopa_array_create(2, nopa_stringFromCstr("p"), nopa_stringFromCstr("q")));
+    NPArray * arrcp = (NPArray *)(({ NPObject *__nopa_tmp_237 = ((NPObject *)(src)); __nopa_tmp_237 ? ((NPObject * (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_237->isa->vtable)->copy)(__nopa_tmp_237, __nopa_sel_copy) : 0; }));
+    printf("5.9c arrcopy %zu %s\n", ({ NPObject *__nopa_tmp_238 = ((NPObject *)(arrcp)); __nopa_tmp_238 ? ((size_t (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_238->isa->vtable)->count)(__nopa_tmp_238, __nopa_sel_count) : (size_t){0}; }), ({ NPObject *__nopa_tmp_239 = ((NPObject *)(({ NPObject *__nopa_tmp_240 = ((NPObject *)(arrcp)); __nopa_tmp_240 ? ((NPObject * (*)(NPObject *, SEL, size_t))((struct nopa_vtable *)__nopa_tmp_240->isa->vtable)->objectAtIndex_)(__nopa_tmp_240, __nopa_sel_objectAtIndex_, 1) : (NPObject *){0}; }))); __nopa_tmp_239 ? ((const char * (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_239->isa->vtable)->UTF8String)(__nopa_tmp_239, __nopa_sel_UTF8String) : 0; }));
     nopa_release(arrcp);
     nopa_release(cp);
     nopa_release(ps);
@@ -6745,39 +6745,39 @@ __attribute__((weak)) int main(void ) {
     return 0;
 }
 
-/* +[NFMutableArray<NFString *> arrayWithCapacity_] */
-__attribute__((weak)) NFMutableArray * NFMutableArray_NFString_ptr_arrayWithCapacity_(NFClass * self, SEL _cmd, size_t capacity) {
+/* +[NPMutableArray<NPString *> arrayWithCapacity_] */
+__attribute__((weak)) NPMutableArray * NPMutableArray_NPString_ptr_arrayWithCapacity_(NPClass * self, SEL _cmd, size_t capacity) {
     {
-        return (NFMutableArray *)({ NFObject *__nopa_tmp_241 = ((NFObject *)(NFObject_alloc(self, __nopa_sel_alloc))); __nopa_tmp_241 ? ((NFMutableArray * (*)(NFObject *, SEL, size_t))((struct nopa_vtable *)__nopa_tmp_241->isa->vtable)->initWithCapacity_)(__nopa_tmp_241, __nopa_sel_initWithCapacity_, capacity) : 0; });
+        return (NPMutableArray *)({ NPObject *__nopa_tmp_241 = ((NPObject *)(NPObject_alloc(self, __nopa_sel_alloc))); __nopa_tmp_241 ? ((NPMutableArray * (*)(NPObject *, SEL, size_t))((struct nopa_vtable *)__nopa_tmp_241->isa->vtable)->initWithCapacity_)(__nopa_tmp_241, __nopa_sel_initWithCapacity_, capacity) : 0; });
     }
 }
 
-/* +[NFMutableArray<NFString *> removeLastObject] */
-__attribute__((weak)) NFMutableArray * NFMutableArray_NFString_ptr_array(NFClass * self, SEL _cmd) {
+/* +[NPMutableArray<NPString *> removeLastObject] */
+__attribute__((weak)) NPMutableArray * NPMutableArray_NPString_ptr_array(NPClass * self, SEL _cmd) {
     {
-        return (NFMutableArray *)({ NFObject *__nopa_tmp_242 = ((NFObject *)(NFObject_alloc(self, __nopa_sel_alloc))); __nopa_tmp_242 ? ((NFMutableArray * (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_242->isa->vtable)->init)(__nopa_tmp_242, __nopa_sel_init) : 0; });
+        return (NPMutableArray *)({ NPObject *__nopa_tmp_242 = ((NPObject *)(NPObject_alloc(self, __nopa_sel_alloc))); __nopa_tmp_242 ? ((NPMutableArray * (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_242->isa->vtable)->init)(__nopa_tmp_242, __nopa_sel_init) : 0; });
     }
 }
 
-/* +[NFMutableArray<NFString *> removeObjectAtIndex:] */
-__attribute__((weak)) NFMutableArray * NFMutableArray_NFString_ptr_arrayWithObject_(NFClass * self, SEL _cmd, NFString * obj) {
+/* +[NPMutableArray<NPString *> removeObjectAtIndex:] */
+__attribute__((weak)) NPMutableArray * NPMutableArray_NPString_ptr_arrayWithObject_(NPClass * self, SEL _cmd, NPString * obj) {
     {
-        NFMutableArray * arr = (NFMutableArray *)(NFMutableArray_NFString_ptr_arrayWithCapacity_(self, __nopa_sel_arrayWithCapacity_, 1));
+        NPMutableArray * arr = (NPMutableArray *)(NPMutableArray_NPString_ptr_arrayWithCapacity_(self, __nopa_sel_arrayWithCapacity_, 1));
         if ((arr && obj)) {
-            ({ NFObject *__nopa_tmp_243 = ((NFObject *)(arr)); __nopa_tmp_243 ? ((void (*)(NFObject *, SEL, NFString *))((struct nopa_vtable *)__nopa_tmp_243->isa->vtable)->addObject_)(__nopa_tmp_243, __nopa_sel_addObject_, (NFString *)(obj)) : 0; });
+            ({ NPObject *__nopa_tmp_243 = ((NPObject *)(arr)); __nopa_tmp_243 ? ((void (*)(NPObject *, SEL, NPString *))((struct nopa_vtable *)__nopa_tmp_243->isa->vtable)->addObject_)(__nopa_tmp_243, __nopa_sel_addObject_, (NPString *)(obj)) : 0; });
         }
         return arr;
     }
 }
 
-/* +[NFMutableArray<NFString *> insertObject:atIndex:] */
-__attribute__((weak)) NFMutableArray * NFMutableArray_NFString_ptr_arrayWithObjects_count_(NFClass * self, SEL _cmd, NFObject * * objs, size_t n) {
+/* +[NPMutableArray<NPString *> insertObject:atIndex:] */
+__attribute__((weak)) NPMutableArray * NPMutableArray_NPString_ptr_arrayWithObjects_count_(NPClass * self, SEL _cmd, NPObject * * objs, size_t n) {
     {
-        NFMutableArray * arr = (NFMutableArray *)(NFMutableArray_NFString_ptr_arrayWithCapacity_(self, __nopa_sel_arrayWithCapacity_, n));
+        NPMutableArray * arr = (NPMutableArray *)(NPMutableArray_NPString_ptr_arrayWithCapacity_(self, __nopa_sel_arrayWithCapacity_, n));
         if (arr) {
             for (size_t i = 0;  (i < n); (i)++) {
                 if (objs[i]) {
-                    ({ NFObject *__nopa_tmp_244 = ((NFObject *)(arr)); __nopa_tmp_244 ? ((void (*)(NFObject *, SEL, NFString *))((struct nopa_vtable *)__nopa_tmp_244->isa->vtable)->addObject_)(__nopa_tmp_244, __nopa_sel_addObject_, (NFString *)(objs[i])) : 0; });
+                    ({ NPObject *__nopa_tmp_244 = ((NPObject *)(arr)); __nopa_tmp_244 ? ((void (*)(NPObject *, SEL, NPString *))((struct nopa_vtable *)__nopa_tmp_244->isa->vtable)->addObject_)(__nopa_tmp_244, __nopa_sel_addObject_, (NPString *)(objs[i])) : 0; });
                 }
             }
         }
@@ -6785,206 +6785,206 @@ __attribute__((weak)) NFMutableArray * NFMutableArray_NFString_ptr_arrayWithObje
     }
 }
 
-/* -[NFMutableArray<NFString *> arrayWithCapacity:] */
-__attribute__((weak)) NFMutableArray * NFMutableArray_NFString_ptr_init(NFObject * self, SEL _cmd) {
-    return (NFMutableArray *)({ NFObject *__nopa_tmp_245 = ((NFObject *)(self)); __nopa_tmp_245 ? ((NFMutableArray * (*)(NFObject *, SEL, size_t))((struct nopa_vtable *)__nopa_tmp_245->isa->vtable)->initWithCapacity_)(__nopa_tmp_245, __nopa_sel_initWithCapacity_, 0) : 0; });
+/* -[NPMutableArray<NPString *> arrayWithCapacity:] */
+__attribute__((weak)) NPMutableArray * NPMutableArray_NPString_ptr_init(NPObject * self, SEL _cmd) {
+    return (NPMutableArray *)({ NPObject *__nopa_tmp_245 = ((NPObject *)(self)); __nopa_tmp_245 ? ((NPMutableArray * (*)(NPObject *, SEL, size_t))((struct nopa_vtable *)__nopa_tmp_245->isa->vtable)->initWithCapacity_)(__nopa_tmp_245, __nopa_sel_initWithCapacity_, 0) : 0; });
 }
 
-/* -[NFMutableArray<NFString *> initWithCapacity_] */
-__attribute__((weak)) NFMutableArray * NFMutableArray_NFString_ptr_initWithCapacity_(NFObject * self, SEL _cmd, size_t capacity) {
-    self = (&NOPA_VTABLE_$_NFObject)->init(self, __nopa_sel_init);
+/* -[NPMutableArray<NPString *> initWithCapacity_] */
+__attribute__((weak)) NPMutableArray * NPMutableArray_NPString_ptr_initWithCapacity_(NPObject * self, SEL _cmd, size_t capacity) {
+    self = (&NOPA_VTABLE_$_NPObject)->init(self, __nopa_sel_init);
     if (self) {
-        ((struct NFMutableArray_NFString_ptr *)self)->_items = NULL;
-        ((struct NFMutableArray_NFString_ptr *)self)->_count = 0;
-        ((struct NFMutableArray_NFString_ptr *)self)->_capacity = 0;
+        ((struct NPMutableArray_NPString_ptr *)self)->_items = NULL;
+        ((struct NPMutableArray_NPString_ptr *)self)->_count = 0;
+        ((struct NPMutableArray_NPString_ptr *)self)->_capacity = 0;
         if ((capacity > 0)) {
-            NFObject * * items = (NFObject * *)malloc((capacity * sizeof(NFObject *)));
+            NPObject * * items = (NPObject * *)malloc((capacity * sizeof(NPObject *)));
             if (items) {
-                ((struct NFMutableArray_NFString_ptr *)self)->_items = items;
-                ((struct NFMutableArray_NFString_ptr *)self)->_capacity = capacity;
+                ((struct NPMutableArray_NPString_ptr *)self)->_items = items;
+                ((struct NPMutableArray_NPString_ptr *)self)->_capacity = capacity;
             }
         }
     }
-    return (NFMutableArray *)self;
+    return (NPMutableArray *)self;
 }
 
-/* -[NFMutableArray<NFString *> initWithArray_] */
-__attribute__((weak)) NFMutableArray * NFMutableArray_NFString_ptr_initWithArray_(NFObject * self, SEL _cmd, NFArray * other) {
-    self = ({ NFObject *__nopa_tmp_246 = ((NFObject *)(self)); __nopa_tmp_246 ? ((NFMutableArray * (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_246->isa->vtable)->init)(__nopa_tmp_246, __nopa_sel_init) : 0; });
+/* -[NPMutableArray<NPString *> initWithArray_] */
+__attribute__((weak)) NPMutableArray * NPMutableArray_NPString_ptr_initWithArray_(NPObject * self, SEL _cmd, NPArray * other) {
+    self = ({ NPObject *__nopa_tmp_246 = ((NPObject *)(self)); __nopa_tmp_246 ? ((NPMutableArray * (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_246->isa->vtable)->init)(__nopa_tmp_246, __nopa_sel_init) : 0; });
     if ((self && other)) {
-        size_t n = ({ NFObject *__nopa_tmp_247 = ((NFObject *)(other)); __nopa_tmp_247 ? ((size_t (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_247->isa->vtable)->count)(__nopa_tmp_247, __nopa_sel_count) : (size_t){0}; });
+        size_t n = ({ NPObject *__nopa_tmp_247 = ((NPObject *)(other)); __nopa_tmp_247 ? ((size_t (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_247->isa->vtable)->count)(__nopa_tmp_247, __nopa_sel_count) : (size_t){0}; });
         for (size_t i = 0;  (i < n); (i)++) {
-            ({ NFObject *__nopa_tmp_248 = ((NFObject *)(self)); __nopa_tmp_248 ? ((void (*)(NFObject *, SEL, NFString *))((struct nopa_vtable *)__nopa_tmp_248->isa->vtable)->addObject_)(__nopa_tmp_248, __nopa_sel_addObject_, (NFString *)(({ NFObject *__nopa_tmp_249 = ((NFObject *)(other)); __nopa_tmp_249 ? ((NFObject * (*)(NFObject *, SEL, size_t))((struct nopa_vtable *)__nopa_tmp_249->isa->vtable)->objectAtIndex_)(__nopa_tmp_249, __nopa_sel_objectAtIndex_, i) : (NFObject *){0}; }))) : 0; });
+            ({ NPObject *__nopa_tmp_248 = ((NPObject *)(self)); __nopa_tmp_248 ? ((void (*)(NPObject *, SEL, NPString *))((struct nopa_vtable *)__nopa_tmp_248->isa->vtable)->addObject_)(__nopa_tmp_248, __nopa_sel_addObject_, (NPString *)(({ NPObject *__nopa_tmp_249 = ((NPObject *)(other)); __nopa_tmp_249 ? ((NPObject * (*)(NPObject *, SEL, size_t))((struct nopa_vtable *)__nopa_tmp_249->isa->vtable)->objectAtIndex_)(__nopa_tmp_249, __nopa_sel_objectAtIndex_, i) : (NPObject *){0}; }))) : 0; });
         }
     }
-    return (NFMutableArray *)self;
+    return (NPMutableArray *)self;
 }
 
-/* -[NFMutableArray<NFString *> initWithObjects_count_] */
-__attribute__((weak)) NFMutableArray * NFMutableArray_NFString_ptr_initWithObjects_count_(NFObject * self, SEL _cmd, NFObject * * objs, size_t n) {
-    self = ({ NFObject *__nopa_tmp_250 = ((NFObject *)(self)); __nopa_tmp_250 ? ((NFMutableArray * (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_250->isa->vtable)->init)(__nopa_tmp_250, __nopa_sel_init) : 0; });
+/* -[NPMutableArray<NPString *> initWithObjects_count_] */
+__attribute__((weak)) NPMutableArray * NPMutableArray_NPString_ptr_initWithObjects_count_(NPObject * self, SEL _cmd, NPObject * * objs, size_t n) {
+    self = ({ NPObject *__nopa_tmp_250 = ((NPObject *)(self)); __nopa_tmp_250 ? ((NPMutableArray * (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_250->isa->vtable)->init)(__nopa_tmp_250, __nopa_sel_init) : 0; });
     if (((self && (n > 0)) && objs)) {
         for (size_t i = 0;  (i < n); (i)++) {
-            ({ NFObject *__nopa_tmp_251 = ((NFObject *)(self)); __nopa_tmp_251 ? ((void (*)(NFObject *, SEL, NFString *))((struct nopa_vtable *)__nopa_tmp_251->isa->vtable)->addObject_)(__nopa_tmp_251, __nopa_sel_addObject_, (NFString *)(objs[i])) : 0; });
+            ({ NPObject *__nopa_tmp_251 = ((NPObject *)(self)); __nopa_tmp_251 ? ((void (*)(NPObject *, SEL, NPString *))((struct nopa_vtable *)__nopa_tmp_251->isa->vtable)->addObject_)(__nopa_tmp_251, __nopa_sel_addObject_, (NPString *)(objs[i])) : 0; });
         }
     }
-    return (NFMutableArray *)self;
+    return (NPMutableArray *)self;
 }
 
-/* -[NFMutableArray<NFString *> addObject_] */
-__attribute__((weak)) void NFMutableArray_NFString_ptr_addObject_(NFObject * self, SEL _cmd, NFString * obj) {
+/* -[NPMutableArray<NPString *> addObject_] */
+__attribute__((weak)) void NPMutableArray_NPString_ptr_addObject_(NPObject * self, SEL _cmd, NPString * obj) {
     if (!obj) {
         return;
     }
-    if ((((struct NFMutableArray_NFString_ptr *)self)->_count >= ((struct NFMutableArray_NFString_ptr *)self)->_capacity)) {
-        size_t newcap = (((struct NFMutableArray_NFString_ptr *)self)->_capacity == 0) ? 4 : (((struct NFMutableArray_NFString_ptr *)self)->_capacity * 2);
-        NFObject * * items = (NFObject * *)realloc(((struct NFMutableArray_NFString_ptr *)self)->_items, (newcap * sizeof(NFObject *)));
+    if ((((struct NPMutableArray_NPString_ptr *)self)->_count >= ((struct NPMutableArray_NPString_ptr *)self)->_capacity)) {
+        size_t newcap = (((struct NPMutableArray_NPString_ptr *)self)->_capacity == 0) ? 4 : (((struct NPMutableArray_NPString_ptr *)self)->_capacity * 2);
+        NPObject * * items = (NPObject * *)realloc(((struct NPMutableArray_NPString_ptr *)self)->_items, (newcap * sizeof(NPObject *)));
         if (!items) {
             return;
         }
-        ((struct NFMutableArray_NFString_ptr *)self)->_items = items;
-        ((struct NFMutableArray_NFString_ptr *)self)->_capacity = newcap;
+        ((struct NPMutableArray_NPString_ptr *)self)->_items = items;
+        ((struct NPMutableArray_NPString_ptr *)self)->_capacity = newcap;
     }
-    ((struct NFMutableArray_NFString_ptr *)self)->_items[((struct NFMutableArray_NFString_ptr *)self)->_count] = nopa_retain(obj);
-    (((struct NFMutableArray_NFString_ptr *)self)->_count)++;
+    ((struct NPMutableArray_NPString_ptr *)self)->_items[((struct NPMutableArray_NPString_ptr *)self)->_count] = nopa_retain(obj);
+    (((struct NPMutableArray_NPString_ptr *)self)->_count)++;
 }
 
-/* -[NFMutableArray<NFString *> addObjectsFromArray_] */
-__attribute__((weak)) void NFMutableArray_NFString_ptr_addObjectsFromArray_(NFObject * self, SEL _cmd, NFArray * other) {
+/* -[NPMutableArray<NPString *> addObjectsFromArray_] */
+__attribute__((weak)) void NPMutableArray_NPString_ptr_addObjectsFromArray_(NPObject * self, SEL _cmd, NPArray * other) {
     if (!other) {
         return;
     }
-    size_t n = ({ NFObject *__nopa_tmp_252 = ((NFObject *)(other)); __nopa_tmp_252 ? ((size_t (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_252->isa->vtable)->count)(__nopa_tmp_252, __nopa_sel_count) : (size_t){0}; });
+    size_t n = ({ NPObject *__nopa_tmp_252 = ((NPObject *)(other)); __nopa_tmp_252 ? ((size_t (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_252->isa->vtable)->count)(__nopa_tmp_252, __nopa_sel_count) : (size_t){0}; });
     for (size_t i = 0;  (i < n); (i)++) {
-        ({ NFObject *__nopa_tmp_253 = ((NFObject *)(self)); __nopa_tmp_253 ? ((void (*)(NFObject *, SEL, NFString *))((struct nopa_vtable *)__nopa_tmp_253->isa->vtable)->addObject_)(__nopa_tmp_253, __nopa_sel_addObject_, (NFString *)(({ NFObject *__nopa_tmp_254 = ((NFObject *)(other)); __nopa_tmp_254 ? ((NFObject * (*)(NFObject *, SEL, size_t))((struct nopa_vtable *)__nopa_tmp_254->isa->vtable)->objectAtIndex_)(__nopa_tmp_254, __nopa_sel_objectAtIndex_, i) : (NFObject *){0}; }))) : 0; });
+        ({ NPObject *__nopa_tmp_253 = ((NPObject *)(self)); __nopa_tmp_253 ? ((void (*)(NPObject *, SEL, NPString *))((struct nopa_vtable *)__nopa_tmp_253->isa->vtable)->addObject_)(__nopa_tmp_253, __nopa_sel_addObject_, (NPString *)(({ NPObject *__nopa_tmp_254 = ((NPObject *)(other)); __nopa_tmp_254 ? ((NPObject * (*)(NPObject *, SEL, size_t))((struct nopa_vtable *)__nopa_tmp_254->isa->vtable)->objectAtIndex_)(__nopa_tmp_254, __nopa_sel_objectAtIndex_, i) : (NPObject *){0}; }))) : 0; });
     }
 }
 
-/* -[NFMutableArray<NFString *> insertObject_atIndex_] */
-__attribute__((weak)) void NFMutableArray_NFString_ptr_insertObject_atIndex_(NFObject * self, SEL _cmd, NFString * obj, size_t index) {
+/* -[NPMutableArray<NPString *> insertObject_atIndex_] */
+__attribute__((weak)) void NPMutableArray_NPString_ptr_insertObject_atIndex_(NPObject * self, SEL _cmd, NPString * obj, size_t index) {
     if (!obj) {
         return;
     }
-    if ((index > ((struct NFMutableArray_NFString_ptr *)self)->_count)) {
-        index = ((struct NFMutableArray_NFString_ptr *)self)->_count;
+    if ((index > ((struct NPMutableArray_NPString_ptr *)self)->_count)) {
+        index = ((struct NPMutableArray_NPString_ptr *)self)->_count;
     }
-    if ((((struct NFMutableArray_NFString_ptr *)self)->_count >= ((struct NFMutableArray_NFString_ptr *)self)->_capacity)) {
-        size_t newcap = (((struct NFMutableArray_NFString_ptr *)self)->_capacity == 0) ? 4 : (((struct NFMutableArray_NFString_ptr *)self)->_capacity * 2);
-        NFObject * * items = (NFObject * *)realloc(((struct NFMutableArray_NFString_ptr *)self)->_items, (newcap * sizeof(NFObject *)));
+    if ((((struct NPMutableArray_NPString_ptr *)self)->_count >= ((struct NPMutableArray_NPString_ptr *)self)->_capacity)) {
+        size_t newcap = (((struct NPMutableArray_NPString_ptr *)self)->_capacity == 0) ? 4 : (((struct NPMutableArray_NPString_ptr *)self)->_capacity * 2);
+        NPObject * * items = (NPObject * *)realloc(((struct NPMutableArray_NPString_ptr *)self)->_items, (newcap * sizeof(NPObject *)));
         if (!items) {
             return;
         }
-        ((struct NFMutableArray_NFString_ptr *)self)->_items = items;
-        ((struct NFMutableArray_NFString_ptr *)self)->_capacity = newcap;
+        ((struct NPMutableArray_NPString_ptr *)self)->_items = items;
+        ((struct NPMutableArray_NPString_ptr *)self)->_capacity = newcap;
     }
-    memmove(((((struct NFMutableArray_NFString_ptr *)self)->_items + index) + 1), (((struct NFMutableArray_NFString_ptr *)self)->_items + index), (((((struct NFMutableArray_NFString_ptr *)self)->_count - index)) * sizeof(NFObject *)));
-    ((struct NFMutableArray_NFString_ptr *)self)->_items[index] = nopa_retain(obj);
-    (((struct NFMutableArray_NFString_ptr *)self)->_count)++;
+    memmove(((((struct NPMutableArray_NPString_ptr *)self)->_items + index) + 1), (((struct NPMutableArray_NPString_ptr *)self)->_items + index), (((((struct NPMutableArray_NPString_ptr *)self)->_count - index)) * sizeof(NPObject *)));
+    ((struct NPMutableArray_NPString_ptr *)self)->_items[index] = nopa_retain(obj);
+    (((struct NPMutableArray_NPString_ptr *)self)->_count)++;
 }
 
-/* -[NFMutableArray<NFString *> removeObjectAtIndex_] */
-__attribute__((weak)) void NFMutableArray_NFString_ptr_removeObjectAtIndex_(NFObject * self, SEL _cmd, size_t index) {
-    if ((index >= ((struct NFMutableArray_NFString_ptr *)self)->_count)) {
+/* -[NPMutableArray<NPString *> removeObjectAtIndex_] */
+__attribute__((weak)) void NPMutableArray_NPString_ptr_removeObjectAtIndex_(NPObject * self, SEL _cmd, size_t index) {
+    if ((index >= ((struct NPMutableArray_NPString_ptr *)self)->_count)) {
         return;
     }
-    NFObject * removed = ((struct NFMutableArray_NFString_ptr *)self)->_items[index];
-    memmove((((struct NFMutableArray_NFString_ptr *)self)->_items + index), ((((struct NFMutableArray_NFString_ptr *)self)->_items + index) + 1), ((((((struct NFMutableArray_NFString_ptr *)self)->_count - index) - 1)) * sizeof(NFObject *)));
-    (((struct NFMutableArray_NFString_ptr *)self)->_count)--;
+    NPObject * removed = ((struct NPMutableArray_NPString_ptr *)self)->_items[index];
+    memmove((((struct NPMutableArray_NPString_ptr *)self)->_items + index), ((((struct NPMutableArray_NPString_ptr *)self)->_items + index) + 1), ((((((struct NPMutableArray_NPString_ptr *)self)->_count - index) - 1)) * sizeof(NPObject *)));
+    (((struct NPMutableArray_NPString_ptr *)self)->_count)--;
     if (removed) {
         nopa_release(removed);
     }
 }
 
-/* -[NFMutableArray<NFString *> removeLastObject] */
-__attribute__((weak)) void NFMutableArray_NFString_ptr_removeLastObject(NFObject * self, SEL _cmd) {
-    if ((((struct NFMutableArray_NFString_ptr *)self)->_count == 0)) {
+/* -[NPMutableArray<NPString *> removeLastObject] */
+__attribute__((weak)) void NPMutableArray_NPString_ptr_removeLastObject(NPObject * self, SEL _cmd) {
+    if ((((struct NPMutableArray_NPString_ptr *)self)->_count == 0)) {
         return;
     }
-    ({ NFObject *__nopa_tmp_255 = ((NFObject *)(self)); __nopa_tmp_255 ? ((void (*)(NFObject *, SEL, size_t))((struct nopa_vtable *)__nopa_tmp_255->isa->vtable)->removeObjectAtIndex_)(__nopa_tmp_255, __nopa_sel_removeObjectAtIndex_, (((struct NFMutableArray_NFString_ptr *)self)->_count - 1)) : 0; });
+    ({ NPObject *__nopa_tmp_255 = ((NPObject *)(self)); __nopa_tmp_255 ? ((void (*)(NPObject *, SEL, size_t))((struct nopa_vtable *)__nopa_tmp_255->isa->vtable)->removeObjectAtIndex_)(__nopa_tmp_255, __nopa_sel_removeObjectAtIndex_, (((struct NPMutableArray_NPString_ptr *)self)->_count - 1)) : 0; });
 }
 
-/* -[NFMutableArray<NFString *> removeObject_] */
-__attribute__((weak)) void NFMutableArray_NFString_ptr_removeObject_(NFObject * self, SEL _cmd, NFString * obj) {
+/* -[NPMutableArray<NPString *> removeObject_] */
+__attribute__((weak)) void NPMutableArray_NPString_ptr_removeObject_(NPObject * self, SEL _cmd, NPString * obj) {
     if (!obj) {
         return;
     }
-    for (size_t i = 0;  (i < ((struct NFMutableArray_NFString_ptr *)self)->_count); (i)++) {
-        if ((((struct NFMutableArray_NFString_ptr *)self)->_items[i] == obj)) {
-            ({ NFObject *__nopa_tmp_256 = ((NFObject *)(self)); __nopa_tmp_256 ? ((void (*)(NFObject *, SEL, size_t))((struct nopa_vtable *)__nopa_tmp_256->isa->vtable)->removeObjectAtIndex_)(__nopa_tmp_256, __nopa_sel_removeObjectAtIndex_, i) : 0; });
+    for (size_t i = 0;  (i < ((struct NPMutableArray_NPString_ptr *)self)->_count); (i)++) {
+        if ((((struct NPMutableArray_NPString_ptr *)self)->_items[i] == obj)) {
+            ({ NPObject *__nopa_tmp_256 = ((NPObject *)(self)); __nopa_tmp_256 ? ((void (*)(NPObject *, SEL, size_t))((struct nopa_vtable *)__nopa_tmp_256->isa->vtable)->removeObjectAtIndex_)(__nopa_tmp_256, __nopa_sel_removeObjectAtIndex_, i) : 0; });
             return;
         }
     }
 }
 
-/* -[NFMutableArray<NFString *> removeAllObjects] */
-__attribute__((weak)) void NFMutableArray_NFString_ptr_removeAllObjects(NFObject * self, SEL _cmd) {
-    for (size_t i = 0;  (i < ((struct NFMutableArray_NFString_ptr *)self)->_count); (i)++) {
-        if (((struct NFMutableArray_NFString_ptr *)self)->_items[i]) {
-            nopa_release(((struct NFMutableArray_NFString_ptr *)self)->_items[i]);
+/* -[NPMutableArray<NPString *> removeAllObjects] */
+__attribute__((weak)) void NPMutableArray_NPString_ptr_removeAllObjects(NPObject * self, SEL _cmd) {
+    for (size_t i = 0;  (i < ((struct NPMutableArray_NPString_ptr *)self)->_count); (i)++) {
+        if (((struct NPMutableArray_NPString_ptr *)self)->_items[i]) {
+            nopa_release(((struct NPMutableArray_NPString_ptr *)self)->_items[i]);
         }
     }
-    ((struct NFMutableArray_NFString_ptr *)self)->_count = 0;
+    ((struct NPMutableArray_NPString_ptr *)self)->_count = 0;
 }
 
-/* -[NFMutableArray<NFString *> replaceObjectAtIndex_withObject_] */
-__attribute__((weak)) void NFMutableArray_NFString_ptr_replaceObjectAtIndex_withObject_(NFObject * self, SEL _cmd, size_t index, NFString * obj) {
-    if ((!obj || (index >= ((struct NFMutableArray_NFString_ptr *)self)->_count))) {
+/* -[NPMutableArray<NPString *> replaceObjectAtIndex_withObject_] */
+__attribute__((weak)) void NPMutableArray_NPString_ptr_replaceObjectAtIndex_withObject_(NPObject * self, SEL _cmd, size_t index, NPString * obj) {
+    if ((!obj || (index >= ((struct NPMutableArray_NPString_ptr *)self)->_count))) {
         return;
     }
-    NFObject * old = ((struct NFMutableArray_NFString_ptr *)self)->_items[index];
-    ((struct NFMutableArray_NFString_ptr *)self)->_items[index] = nopa_retain(obj);
+    NPObject * old = ((struct NPMutableArray_NPString_ptr *)self)->_items[index];
+    ((struct NPMutableArray_NPString_ptr *)self)->_items[index] = nopa_retain(obj);
     if (old) {
         nopa_release(old);
     }
 }
 
-/* -[NFMutableArray<NFString *> exchangeObjectAtIndex_withObjectAtIndex_] */
-__attribute__((weak)) void NFMutableArray_NFString_ptr_exchangeObjectAtIndex_withObjectAtIndex_(NFObject * self, SEL _cmd, size_t a, size_t b) {
-    if (((a >= ((struct NFMutableArray_NFString_ptr *)self)->_count) || (b >= ((struct NFMutableArray_NFString_ptr *)self)->_count))) {
+/* -[NPMutableArray<NPString *> exchangeObjectAtIndex_withObjectAtIndex_] */
+__attribute__((weak)) void NPMutableArray_NPString_ptr_exchangeObjectAtIndex_withObjectAtIndex_(NPObject * self, SEL _cmd, size_t a, size_t b) {
+    if (((a >= ((struct NPMutableArray_NPString_ptr *)self)->_count) || (b >= ((struct NPMutableArray_NPString_ptr *)self)->_count))) {
         return;
     }
-    NFObject * tmp = ((struct NFMutableArray_NFString_ptr *)self)->_items[a];
-    ((struct NFMutableArray_NFString_ptr *)self)->_items[a] = ((struct NFMutableArray_NFString_ptr *)self)->_items[b];
-    ((struct NFMutableArray_NFString_ptr *)self)->_items[b] = tmp;
+    NPObject * tmp = ((struct NPMutableArray_NPString_ptr *)self)->_items[a];
+    ((struct NPMutableArray_NPString_ptr *)self)->_items[a] = ((struct NPMutableArray_NPString_ptr *)self)->_items[b];
+    ((struct NPMutableArray_NPString_ptr *)self)->_items[b] = tmp;
 }
 
-/* -[NFMutableArray<NFString *> setObject_atIndex_] */
-__attribute__((weak)) void NFMutableArray_NFString_ptr_setObject_atIndex_(NFObject * self, SEL _cmd, NFString * obj, size_t index) {
-    if ((!obj || (index >= ((struct NFMutableArray_NFString_ptr *)self)->_count))) {
+/* -[NPMutableArray<NPString *> setObject_atIndex_] */
+__attribute__((weak)) void NPMutableArray_NPString_ptr_setObject_atIndex_(NPObject * self, SEL _cmd, NPString * obj, size_t index) {
+    if ((!obj || (index >= ((struct NPMutableArray_NPString_ptr *)self)->_count))) {
         return;
     }
-    ({ NFObject *__nopa_tmp_257 = ((NFObject *)(self)); __nopa_tmp_257 ? ((void (*)(NFObject *, SEL, size_t, NFString *))((struct nopa_vtable *)__nopa_tmp_257->isa->vtable)->replaceObjectAtIndex_withObject_)(__nopa_tmp_257, __nopa_sel_replaceObjectAtIndex_withObject_, index, (NFString *)(obj)) : 0; });
+    ({ NPObject *__nopa_tmp_257 = ((NPObject *)(self)); __nopa_tmp_257 ? ((void (*)(NPObject *, SEL, size_t, NPString *))((struct nopa_vtable *)__nopa_tmp_257->isa->vtable)->replaceObjectAtIndex_withObject_)(__nopa_tmp_257, __nopa_sel_replaceObjectAtIndex_withObject_, index, (NPString *)(obj)) : 0; });
 }
 
-/* -[FsBox<NFMutableString *> initWith_] */
-__attribute__((weak)) FsBox * FsBox_NFMutableString_ptr_initWith_(NFObject * self, SEL _cmd, NFMutableString * v) {
-    self = (&NOPA_VTABLE_$_NFObject)->init(self, __nopa_sel_init);
+/* -[FsBox<NPMutableString *> initWith_] */
+__attribute__((weak)) FsBox * FsBox_NPMutableString_ptr_initWith_(NPObject * self, SEL _cmd, NPMutableString * v) {
+    self = (&NOPA_VTABLE_$_NPObject)->init(self, __nopa_sel_init);
     if (self) {
-        ((struct FsBox_NFMutableString_ptr *)self)->_value = v;
+        ((struct FsBox_NPMutableString_ptr *)self)->_value = v;
     }
     return (FsBox *)self;
 }
 
-/* -[FsBox<NFMutableString *> value] */
-__attribute__((weak)) NFMutableString * FsBox_NFMutableString_ptr_value(NFObject * self, SEL _cmd) {
-    return ((struct FsBox_NFMutableString_ptr *)self)->_value;
+/* -[FsBox<NPMutableString *> value] */
+__attribute__((weak)) NPMutableString * FsBox_NPMutableString_ptr_value(NPObject * self, SEL _cmd) {
+    return ((struct FsBox_NPMutableString_ptr *)self)->_value;
 }
 
-/* -[FsBox<NFMutableString *> setValue_] */
-__attribute__((weak)) void FsBox_NFMutableString_ptr_setValue_(NFObject * self, SEL _cmd, NFMutableString * v) {
-    ((struct FsBox_NFMutableString_ptr *)self)->_value = v;
+/* -[FsBox<NPMutableString *> setValue_] */
+__attribute__((weak)) void FsBox_NPMutableString_ptr_setValue_(NPObject * self, SEL _cmd, NPMutableString * v) {
+    ((struct FsBox_NPMutableString_ptr *)self)->_value = v;
 }
 
-/* +[NFArray<NFNumber *> description] */
-__attribute__((weak)) NFObject * NFArray_NFNumber_ptr_arrayWithObjects_count_(NFClass * self, SEL _cmd, NFObject * * objs, size_t n) {
-    NFObject *__nopa_tmp_258 = (NFObject_alloc(self, __nopa_sel_alloc));
-    NFArray * arr = (NFArray *)(__nopa_tmp_258 ? ((struct nopa_vtable *)__nopa_tmp_258->isa->vtable)->init(__nopa_tmp_258, __nopa_sel_init) : 0);
+/* +[NPArray<NPNumber *> description] */
+__attribute__((weak)) NPObject * NPArray_NPNumber_ptr_arrayWithObjects_count_(NPClass * self, SEL _cmd, NPObject * * objs, size_t n) {
+    NPObject *__nopa_tmp_258 = (NPObject_alloc(self, __nopa_sel_alloc));
+    NPArray * arr = (NPArray *)(__nopa_tmp_258 ? ((struct nopa_vtable *)__nopa_tmp_258->isa->vtable)->init(__nopa_tmp_258, __nopa_sel_init) : 0);
     if (!arr) {
         nopa_release(arr);
         return NULL;
     }
     if ((n > 0)) {
-        arr->_items = (NFObject * *)malloc((n * sizeof(NFObject *)));
+        arr->_items = (NPObject * *)malloc((n * sizeof(NPObject *)));
         if (arr->_items) {
             for (size_t i = 0;  (i < n); (i)++) {
                 arr->_items[i] = objs[i] ? nopa_retain(objs[i]) : NULL;
@@ -6996,93 +6996,93 @@ __attribute__((weak)) NFObject * NFArray_NFNumber_ptr_arrayWithObjects_count_(NF
     return nopa_autorelease(arr);
 }
 
-/* +[NFArray<NFNumber *> dealloc] */
-__attribute__((weak)) NFObject * NFArray_NFNumber_ptr_arrayWithObject_(NFClass * self, SEL _cmd, NFNumber * obj) {
-    return NFArray_NFNumber_ptr_arrayWithObjects_count_(self, __nopa_sel_arrayWithObjects_count_, &obj, 1);
+/* +[NPArray<NPNumber *> dealloc] */
+__attribute__((weak)) NPObject * NPArray_NPNumber_ptr_arrayWithObject_(NPClass * self, SEL _cmd, NPNumber * obj) {
+    return NPArray_NPNumber_ptr_arrayWithObjects_count_(self, __nopa_sel_arrayWithObjects_count_, &obj, 1);
 }
 
-/* +[NFArray<NFNumber *> array] */
-__attribute__((weak)) NFObject * NFArray_NFNumber_ptr_array(NFClass * self, SEL _cmd) {
-    return NFArray_NFNumber_ptr_arrayWithObjects_count_(self, __nopa_sel_arrayWithObjects_count_, NULL, 0);
+/* +[NPArray<NPNumber *> array] */
+__attribute__((weak)) NPObject * NPArray_NPNumber_ptr_array(NPClass * self, SEL _cmd) {
+    return NPArray_NPNumber_ptr_arrayWithObjects_count_(self, __nopa_sel_arrayWithObjects_count_, NULL, 0);
 }
 
-/* -[NFArray<NFNumber *> count] */
-__attribute__((weak)) size_t NFArray_NFNumber_ptr_count(NFObject * self, SEL _cmd) {
-    return ((struct NFArray_NFNumber_ptr *)self)->_count;
+/* -[NPArray<NPNumber *> count] */
+__attribute__((weak)) size_t NPArray_NPNumber_ptr_count(NPObject * self, SEL _cmd) {
+    return ((struct NPArray_NPNumber_ptr *)self)->_count;
 }
 
-/* -[NFArray<NFNumber *> objectAtIndex_] */
-__attribute__((weak)) NFNumber * NFArray_NFNumber_ptr_objectAtIndex_(NFObject * self, SEL _cmd, size_t index) {
-    if ((index >= ((struct NFArray_NFNumber_ptr *)self)->_count)) {
+/* -[NPArray<NPNumber *> objectAtIndex_] */
+__attribute__((weak)) NPNumber * NPArray_NPNumber_ptr_objectAtIndex_(NPObject * self, SEL _cmd, size_t index) {
+    if ((index >= ((struct NPArray_NPNumber_ptr *)self)->_count)) {
         return NULL;
     }
-    return ((struct NFArray_NFNumber_ptr *)self)->_items[index];
+    return ((struct NPArray_NPNumber_ptr *)self)->_items[index];
 }
 
-/* -[NFArray<NFNumber *> firstObject] */
-__attribute__((weak)) NFNumber * NFArray_NFNumber_ptr_firstObject(NFObject * self, SEL _cmd) {
-    return (((struct NFArray_NFNumber_ptr *)self)->_count > 0) ? ((struct NFArray_NFNumber_ptr *)self)->_items[0] : NULL;
+/* -[NPArray<NPNumber *> firstObject] */
+__attribute__((weak)) NPNumber * NPArray_NPNumber_ptr_firstObject(NPObject * self, SEL _cmd) {
+    return (((struct NPArray_NPNumber_ptr *)self)->_count > 0) ? ((struct NPArray_NPNumber_ptr *)self)->_items[0] : NULL;
 }
 
-/* -[NFArray<NFNumber *> lastObject] */
-__attribute__((weak)) NFNumber * NFArray_NFNumber_ptr_lastObject(NFObject * self, SEL _cmd) {
-    return (((struct NFArray_NFNumber_ptr *)self)->_count > 0) ? ((struct NFArray_NFNumber_ptr *)self)->_items[(((struct NFArray_NFNumber_ptr *)self)->_count - 1)] : NULL;
+/* -[NPArray<NPNumber *> lastObject] */
+__attribute__((weak)) NPNumber * NPArray_NPNumber_ptr_lastObject(NPObject * self, SEL _cmd) {
+    return (((struct NPArray_NPNumber_ptr *)self)->_count > 0) ? ((struct NPArray_NPNumber_ptr *)self)->_items[(((struct NPArray_NPNumber_ptr *)self)->_count - 1)] : NULL;
 }
 
-/* -[NFArray<NFNumber *> containsObject_] */
-__attribute__((weak)) _Bool NFArray_NFNumber_ptr_containsObject_(NFObject * self, SEL _cmd, NFNumber * obj) {
-    for (size_t i = 0;  (i < ((struct NFArray_NFNumber_ptr *)self)->_count); (i)++) {
-        if ((((struct NFArray_NFNumber_ptr *)self)->_items[i] == obj)) {
+/* -[NPArray<NPNumber *> containsObject_] */
+__attribute__((weak)) _Bool NPArray_NPNumber_ptr_containsObject_(NPObject * self, SEL _cmd, NPNumber * obj) {
+    for (size_t i = 0;  (i < ((struct NPArray_NPNumber_ptr *)self)->_count); (i)++) {
+        if ((((struct NPArray_NPNumber_ptr *)self)->_items[i] == obj)) {
             return 1;
         }
     }
     return 0;
 }
 
-/* -[NFArray<NFNumber *> indexOfObject_] */
-__attribute__((weak)) size_t NFArray_NFNumber_ptr_indexOfObject_(NFObject * self, SEL _cmd, NFNumber * obj) {
-    for (size_t i = 0;  (i < ((struct NFArray_NFNumber_ptr *)self)->_count); (i)++) {
-        if ((((struct NFArray_NFNumber_ptr *)self)->_items[i] == obj)) {
+/* -[NPArray<NPNumber *> indexOfObject_] */
+__attribute__((weak)) size_t NPArray_NPNumber_ptr_indexOfObject_(NPObject * self, SEL _cmd, NPNumber * obj) {
+    for (size_t i = 0;  (i < ((struct NPArray_NPNumber_ptr *)self)->_count); (i)++) {
+        if ((((struct NPArray_NPNumber_ptr *)self)->_items[i] == obj)) {
             return i;
         }
     }
     return (size_t)-1;
 }
 
-/* -[NFArray<NFNumber *> copy] */
-__attribute__((weak)) NFObject * NFArray_NFNumber_ptr_copy(NFObject * self, SEL _cmd) {
-    return nopa_retain(NFArray_NFNumber_ptr_arrayWithObjects_count_(&NOPA_CLASS_$_NFArray, __nopa_sel_arrayWithObjects_count_, ((struct NFArray_NFNumber_ptr *)self)->_items, ((struct NFArray_NFNumber_ptr *)self)->_count));
+/* -[NPArray<NPNumber *> copy] */
+__attribute__((weak)) NPObject * NPArray_NPNumber_ptr_copy(NPObject * self, SEL _cmd) {
+    return nopa_retain(NPArray_NPNumber_ptr_arrayWithObjects_count_(&NOPA_CLASS_$_NPArray, __nopa_sel_arrayWithObjects_count_, ((struct NPArray_NPNumber_ptr *)self)->_items, ((struct NPArray_NPNumber_ptr *)self)->_count));
 }
 
-/* -[NFArray<NFNumber *> containsObject:] */
-__attribute__((weak)) NFString * NFArray_NFNumber_ptr_description(NFObject * self, SEL _cmd) {
-    NFString * result = (NFString *)(NFString_stringWithUTF8String_(&NOPA_CLASS_$_NFString, __nopa_sel_stringWithUTF8String_, "["));
-    for (size_t i = 0;  (i < ((struct NFArray_NFNumber_ptr *)self)->_count); (i)++) {
+/* -[NPArray<NPNumber *> containsObject:] */
+__attribute__((weak)) NPString * NPArray_NPNumber_ptr_description(NPObject * self, SEL _cmd) {
+    NPString * result = (NPString *)(NPString_stringWithUTF8String_(&NOPA_CLASS_$_NPString, __nopa_sel_stringWithUTF8String_, "["));
+    for (size_t i = 0;  (i < ((struct NPArray_NPNumber_ptr *)self)->_count); (i)++) {
         if ((i > 0)) {
-            result = ({ NFObject *__nopa_tmp_259 = ((NFObject *)(result)); __nopa_tmp_259 ? ((NFString * (*)(NFObject *, SEL, const char *))((struct nopa_vtable *)__nopa_tmp_259->isa->vtable)->stringByAppendingUTF8String_)(__nopa_tmp_259, __nopa_sel_stringByAppendingUTF8String_, ", ") : 0; });
+            result = ({ NPObject *__nopa_tmp_259 = ((NPObject *)(result)); __nopa_tmp_259 ? ((NPString * (*)(NPObject *, SEL, const char *))((struct nopa_vtable *)__nopa_tmp_259->isa->vtable)->stringByAppendingUTF8String_)(__nopa_tmp_259, __nopa_sel_stringByAppendingUTF8String_, ", ") : 0; });
         }
-        if (((struct NFArray_NFNumber_ptr *)self)->_items[i]) {
-            result = ({ NFObject *__nopa_tmp_260 = ((NFObject *)(result)); __nopa_tmp_260 ? ((NFString * (*)(NFObject *, SEL, NFString *))((struct nopa_vtable *)__nopa_tmp_260->isa->vtable)->stringByAppendingString_)(__nopa_tmp_260, __nopa_sel_stringByAppendingString_, (NFString *)(({ NFObject *__nopa_tmp_261 = ((NFObject *)(((struct NFArray_NFNumber_ptr *)self)->_items[i])); __nopa_tmp_261 ? ((NFString * (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_261->isa->vtable)->description)(__nopa_tmp_261, __nopa_sel_description) : 0; }))) : 0; });
+        if (((struct NPArray_NPNumber_ptr *)self)->_items[i]) {
+            result = ({ NPObject *__nopa_tmp_260 = ((NPObject *)(result)); __nopa_tmp_260 ? ((NPString * (*)(NPObject *, SEL, NPString *))((struct nopa_vtable *)__nopa_tmp_260->isa->vtable)->stringByAppendingString_)(__nopa_tmp_260, __nopa_sel_stringByAppendingString_, (NPString *)(({ NPObject *__nopa_tmp_261 = ((NPObject *)(((struct NPArray_NPNumber_ptr *)self)->_items[i])); __nopa_tmp_261 ? ((NPString * (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_261->isa->vtable)->description)(__nopa_tmp_261, __nopa_sel_description) : 0; }))) : 0; });
         }
         else {
-            result = ({ NFObject *__nopa_tmp_262 = ((NFObject *)(result)); __nopa_tmp_262 ? ((NFString * (*)(NFObject *, SEL, const char *))((struct nopa_vtable *)__nopa_tmp_262->isa->vtable)->stringByAppendingUTF8String_)(__nopa_tmp_262, __nopa_sel_stringByAppendingUTF8String_, "(null)") : 0; });
+            result = ({ NPObject *__nopa_tmp_262 = ((NPObject *)(result)); __nopa_tmp_262 ? ((NPString * (*)(NPObject *, SEL, const char *))((struct nopa_vtable *)__nopa_tmp_262->isa->vtable)->stringByAppendingUTF8String_)(__nopa_tmp_262, __nopa_sel_stringByAppendingUTF8String_, "(null)") : 0; });
         }
     }
-    result = ({ NFObject *__nopa_tmp_263 = ((NFObject *)(result)); __nopa_tmp_263 ? ((NFString * (*)(NFObject *, SEL, const char *))((struct nopa_vtable *)__nopa_tmp_263->isa->vtable)->stringByAppendingUTF8String_)(__nopa_tmp_263, __nopa_sel_stringByAppendingUTF8String_, "]") : 0; });
+    result = ({ NPObject *__nopa_tmp_263 = ((NPObject *)(result)); __nopa_tmp_263 ? ((NPString * (*)(NPObject *, SEL, const char *))((struct nopa_vtable *)__nopa_tmp_263->isa->vtable)->stringByAppendingUTF8String_)(__nopa_tmp_263, __nopa_sel_stringByAppendingUTF8String_, "]") : 0; });
     return result;
 }
 
-/* -[NFArray<NFNumber *> arrayWithObject:] */
-__attribute__((weak)) void NFArray_NFNumber_ptr_dealloc(NFObject * self, SEL _cmd) {
-    for (size_t i = 0;  (i < ((struct NFArray_NFNumber_ptr *)self)->_count); (i)++) {
-        if (((struct NFArray_NFNumber_ptr *)self)->_items[i]) {
-            nopa_release(((struct NFArray_NFNumber_ptr *)self)->_items[i]);
+/* -[NPArray<NPNumber *> arrayWithObject:] */
+__attribute__((weak)) void NPArray_NPNumber_ptr_dealloc(NPObject * self, SEL _cmd) {
+    for (size_t i = 0;  (i < ((struct NPArray_NPNumber_ptr *)self)->_count); (i)++) {
+        if (((struct NPArray_NPNumber_ptr *)self)->_items[i]) {
+            nopa_release(((struct NPArray_NPNumber_ptr *)self)->_items[i]);
         }
     }
-    free(((struct NFArray_NFNumber_ptr *)self)->_items);
-    ((struct NFArray_NFNumber_ptr *)self)->_items = NULL;
-    ((struct NFArray_NFNumber_ptr *)self)->_count = 0;
-    ((struct NFArray_NFNumber_ptr *)self)->_capacity = 0;
-    (&NOPA_VTABLE_$_NFObject)->dealloc(self, __nopa_sel_dealloc);
+    free(((struct NPArray_NPNumber_ptr *)self)->_items);
+    ((struct NPArray_NPNumber_ptr *)self)->_items = NULL;
+    ((struct NPArray_NPNumber_ptr *)self)->_count = 0;
+    ((struct NPArray_NPNumber_ptr *)self)->_capacity = 0;
+    (&NOPA_VTABLE_$_NPObject)->dealloc(self, __nopa_sel_dealloc);
 }
 

@@ -3,13 +3,13 @@
 // ARC order 10: `goto` leaving TWO nested scopes releases both, innermost
 // first (reverse declaration / stack order).
 
-@interface AO10Item : NFObject
+@interface AO10Item : NPObject
 - (int)value;
 @end
 
 @implementation AO10Item
 - (void)dealloc {
-    NFLog(@"ao10 dealloc");
+    NPLog(@"ao10 dealloc");
     [super dealloc];
 }
 - (int)value { return 10; }
@@ -23,9 +23,9 @@ int main() {
             goto out;
         }
     }
-    NFLog(@"ao10 unreachable");
+    NPLog(@"ao10 unreachable");
 
 out:
-    NFLog(@"ao10 done");
+    NPLog(@"ao10 done");
     return 0;
 }

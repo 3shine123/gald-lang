@@ -79,7 +79,7 @@ cargo test --workspace           # Rust unit tests
 
 - Project: **Nopa**; compiler binary: **nopac**; runtime lib: **libnopa.a**;
   Foundation library: **libnopafoundation.a**.
-- Classes keep the NF prefix: `NFObject`, `NFString`, `NFArray`, …
+- Classes keep the NP prefix: `NPObject`, `NPString`, `NPArray`, …
 - Mode names: **self-contained / unity mode** (`#import <Foundation/Foundation.np>`) and
   **precompiled Foundation / multi-TU mode** (`#import <Foundation/Foundation.nh>` +
   auto-linked `libnopafoundation.a`) — the recommended mode for real projects.
@@ -103,7 +103,7 @@ cargo test --workspace           # Rust unit tests
    only**; private tail differences are legal. A mismatch aborts loudly (never
    silently misdispatches).
 4. **`nopa_metaInit`** is an idempotent compat backfill for self-contained umbrella
-   builds only; owner/multi-TU paths rely on statically initialized `NFClass`
+   builds only; owner/multi-TU paths rely on statically initialized `NPClass`
    metadata and do **not** call it.
 5. **Static dispatch:** there is no `objc_msgSend`. All message sends compile to
    static vtable indexing; selector symbols are stored with **every colon stripped**

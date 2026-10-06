@@ -4,19 +4,19 @@
 int main() {
     @try {
         @try {
-            NFLog(@"inner try");
+            NPLog(@"inner try");
             @throw @"inner-err";
         }
         @finally {
-            NFLog(@"inner finally");
+            NPLog(@"inner finally");
         }
     }
-    @catch (NFString *e) {
-        NFLog(@"outer caught");
+    @catch (NPString *e) {
+        NPLog(@"outer caught");
     }
     @finally {
-        NFLog(@"outer finally");
+        NPLog(@"outer finally");
     }
-    NFLog(@"end");
+    NPLog(@"end");
     return 0;
 }

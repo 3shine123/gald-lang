@@ -81,7 +81,7 @@ echo "[1/4] transpile + compile each Foundation TU (wrapper = decl surface + imp
 # references to sibling implementations resolve from the archive at final
 # link. The source .np files stay UNPOLLUTED — self-contained TUs that inline
 # them keep exactly the declaration surface they asked for.
-# Note: NFObject.np imports "NFObject.nh" in quoted form; the extra
+# Note: NPObject.np imports "NPObject.nh" in quoted form; the extra
 # -I include/Foundation keeps that resolvable from the wrapper's location.
 objs=()
 tus="$outdir/_tus"

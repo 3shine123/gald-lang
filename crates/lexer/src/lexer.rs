@@ -59,7 +59,7 @@ const KW_TABLE: &[(&str, KeywordKind)] = &[
     ("SEL", KeywordKind::Sel),
     ("BOOL", KeywordKind::Bool),
     ("IMP", KeywordKind::Imp),
-    ("NFZone", KeywordKind::NpZone),
+    ("NPZone", KeywordKind::NpZone),
     ("return", KeywordKind::Return),
     ("if", KeywordKind::If),
     ("else", KeywordKind::Else),
@@ -388,7 +388,7 @@ impl<'a> Lexer<'a> {
                     };
                 }
                 Some(b'\'') => {
-                    // `@'c'` — boxed character literal (NFNumber char).
+                    // `@'c'` — boxed character literal (NPNumber char).
                     self.advance(); // consume opening '
                     let mut val = match self.advance() {
                         Some(v) => v,
@@ -471,7 +471,7 @@ impl<'a> Lexer<'a> {
                     return self.make_token(TokenKind::Keyword, start, self.pos - start, kw);
                 }
                 Some(nc) if nc.is_ascii_digit() => {
-                    // `@123` / `@1.5` — NFNumber boxing literal. The `@` has
+                    // `@123` / `@1.5` — NPNumber boxing literal. The `@` has
                     // already been consumed; scan the numeric text.
                     while self.pos < self.source.len()
                         && self.source.as_bytes()[self.pos].is_ascii_digit() {

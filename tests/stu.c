@@ -10,24 +10,24 @@
 
 #include <string.h>
 
-struct nopa_NFObject_vtable;
-struct nopa_NFStudent_vtable;
-struct nopa_NFDataCollector_vtable;
+struct nopa_NPObject_vtable;
+struct nopa_NPStudent_vtable;
+struct nopa_NPDataCollector_vtable;
 
-#define nopa_NFObject_vtable_index_init 2
-#define nopa_NFObject_vtable_index_dealloc 3
-#define nopa_NFStudent_vtable_index_initWithName_studentId_score_ 4
-#define nopa_NFStudent_vtable_index_getName 5
-#define nopa_NFStudent_vtable_index_getStudentId 6
-#define nopa_NFStudent_vtable_index_getScore 7
-#define nopa_NFStudent_vtable_index_displayInfo 8
-#define nopa_NFDataCollector_vtable_index_initWithClassName_ 4
-#define nopa_NFDataCollector_vtable_index_addStudent_ 5
-#define nopa_NFDataCollector_vtable_index_printAllRecords 6
-#define nopa_NFDataCollector_vtable_index_calculateAverageScore 7
-#define nopa_NFDataCollector_vtable_index_findHighestScorer 8
-#define nopa_NFDataCollector_vtable_index_clearAllRecords 9
-#define nopa_NFDataCollector_vtable_index_dealloc 3
+#define nopa_NPObject_vtable_index_init 2
+#define nopa_NPObject_vtable_index_dealloc 3
+#define nopa_NPStudent_vtable_index_initWithName_studentId_score_ 4
+#define nopa_NPStudent_vtable_index_getName 5
+#define nopa_NPStudent_vtable_index_getStudentId 6
+#define nopa_NPStudent_vtable_index_getScore 7
+#define nopa_NPStudent_vtable_index_displayInfo 8
+#define nopa_NPDataCollector_vtable_index_initWithClassName_ 4
+#define nopa_NPDataCollector_vtable_index_addStudent_ 5
+#define nopa_NPDataCollector_vtable_index_printAllRecords 6
+#define nopa_NPDataCollector_vtable_index_calculateAverageScore 7
+#define nopa_NPDataCollector_vtable_index_findHighestScorer 8
+#define nopa_NPDataCollector_vtable_index_clearAllRecords 9
+#define nopa_NPDataCollector_vtable_index_dealloc 3
 
 static const SEL __nopa_sel_init = {.name = "init", .hash = 0x16B1D373};
 static const SEL __nopa_sel_displayInfo = {.name = "displayInfo", .hash = 0x8AEC1735};
@@ -42,177 +42,177 @@ static const SEL __nopa_sel_calculateAverageScore = {.name = "calculateAverageSc
 static const SEL __nopa_sel_findHighestScorer = {.name = "findHighestScorer", .hash = 0x3A81618E};
 static const SEL __nopa_sel_getName = {.name = "getName", .hash = 0x1F1B2F34};
 
-typedef struct NFObject NFObject;
-typedef struct NFStudent NFStudent;
-typedef struct NFDataCollector NFDataCollector;
+typedef struct NPObject NPObject;
+typedef struct NPStudent NPStudent;
+typedef struct NPDataCollector NPDataCollector;
 
 
 
-NFObject * NFObject_alloc(NFClass * self, SEL _cmd);
-NFObject * NFObject_new(NFClass * self, SEL _cmd);
-NFObject * NFObject_init(NFObject * self, SEL _cmd);
-void NFObject_dealloc(NFObject * self, SEL _cmd);
-NFClass * NFObject_getClass(NFClass * self, SEL _cmd);
-NFObject * NFStudent_initWithName_studentId_score_(NFObject * self, SEL _cmd, const char * aName, int sId, int aScore);
-const char * NFStudent_getName(NFObject * self, SEL _cmd);
-int NFStudent_getStudentId(NFObject * self, SEL _cmd);
-int NFStudent_getScore(NFObject * self, SEL _cmd);
-void NFStudent_displayInfo(NFObject * self, SEL _cmd);
-NFClass * NFStudent_getClass(NFClass * self, SEL _cmd);
-NFObject * NFDataCollector_initWithClassName_(NFObject * self, SEL _cmd, const char * cName);
-_Bool NFDataCollector_addStudent_(NFObject * self, SEL _cmd, NFStudent * student);
-void NFDataCollector_printAllRecords(NFObject * self, SEL _cmd);
-double NFDataCollector_calculateAverageScore(NFObject * self, SEL _cmd);
-NFStudent * NFDataCollector_findHighestScorer(NFObject * self, SEL _cmd);
-void NFDataCollector_clearAllRecords(NFObject * self, SEL _cmd);
-void NFDataCollector_dealloc(NFObject * self, SEL _cmd);
-NFClass * NFDataCollector_getClass(NFClass * self, SEL _cmd);
+NPObject * NPObject_alloc(NPClass * self, SEL _cmd);
+NPObject * NPObject_new(NPClass * self, SEL _cmd);
+NPObject * NPObject_init(NPObject * self, SEL _cmd);
+void NPObject_dealloc(NPObject * self, SEL _cmd);
+NPClass * NPObject_getClass(NPClass * self, SEL _cmd);
+NPObject * NPStudent_initWithName_studentId_score_(NPObject * self, SEL _cmd, const char * aName, int sId, int aScore);
+const char * NPStudent_getName(NPObject * self, SEL _cmd);
+int NPStudent_getStudentId(NPObject * self, SEL _cmd);
+int NPStudent_getScore(NPObject * self, SEL _cmd);
+void NPStudent_displayInfo(NPObject * self, SEL _cmd);
+NPClass * NPStudent_getClass(NPClass * self, SEL _cmd);
+NPObject * NPDataCollector_initWithClassName_(NPObject * self, SEL _cmd, const char * cName);
+_Bool NPDataCollector_addStudent_(NPObject * self, SEL _cmd, NPStudent * student);
+void NPDataCollector_printAllRecords(NPObject * self, SEL _cmd);
+double NPDataCollector_calculateAverageScore(NPObject * self, SEL _cmd);
+NPStudent * NPDataCollector_findHighestScorer(NPObject * self, SEL _cmd);
+void NPDataCollector_clearAllRecords(NPObject * self, SEL _cmd);
+void NPDataCollector_dealloc(NPObject * self, SEL _cmd);
+NPClass * NPDataCollector_getClass(NPClass * self, SEL _cmd);
 int main(int argc, const char * * argv);
 
-extern NFClass nopa_NFObject_class;
-extern NFClass nopa_NFStudent_class;
-extern NFClass nopa_NFDataCollector_class;
+extern NPClass nopa_NPObject_class;
+extern NPClass nopa_NPStudent_class;
+extern NPClass nopa_NPDataCollector_class;
 void nopa_meta_init(void);
 
-// struct NFClass defined in runtime.h
-// struct NFObject defined in runtime.h
-struct nopa_NFObject_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
+// struct NPClass defined in runtime.h
+// struct NPObject defined in runtime.h
+struct nopa_NPObject_vtable {
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
 };
-struct nopa_NFObject_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+struct nopa_NPObject_meta_vtable {
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
-struct NFStudent {
-    struct NFClass *isa;
+struct NPStudent {
+    struct NPClass *isa;
     uint32_t retain_count;
     const char * name;
     int score;
     int studentId;
 };
-typedef struct NFStudent NFStudent;
-struct nopa_NFStudent_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    NFObject * (*initWithName_studentId_score_)(NFObject *, SEL, const char *, int, int);
-    const char * (*getName)(NFObject *, SEL);
-    int (*getStudentId)(NFObject *, SEL);
-    int (*getScore)(NFObject *, SEL);
-    void (*displayInfo)(NFObject *, SEL);
+typedef struct NPStudent NPStudent;
+struct nopa_NPStudent_vtable {
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    NPObject * (*initWithName_studentId_score_)(NPObject *, SEL, const char *, int, int);
+    const char * (*getName)(NPObject *, SEL);
+    int (*getStudentId)(NPObject *, SEL);
+    int (*getScore)(NPObject *, SEL);
+    void (*displayInfo)(NPObject *, SEL);
 };
-struct nopa_NFStudent_meta_vtable {
-    NFClass * (*class)(NFClass *, SEL);
+struct nopa_NPStudent_meta_vtable {
+    NPClass * (*class)(NPClass *, SEL);
 };
-struct NFDataCollector {
-    struct NFClass *isa;
+struct NPDataCollector {
+    struct NPClass *isa;
     uint32_t retain_count;
-    NFStudent * records[20];
+    NPStudent * records[20];
     int currentCount;
     const char * className;
 };
-typedef struct NFDataCollector NFDataCollector;
-struct nopa_NFDataCollector_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    NFObject * (*initWithClassName_)(NFObject *, SEL, const char *);
-    _Bool (*addStudent_)(NFObject *, SEL, NFStudent *);
-    void (*printAllRecords)(NFObject *, SEL);
-    double (*calculateAverageScore)(NFObject *, SEL);
-    NFStudent * (*findHighestScorer)(NFObject *, SEL);
-    void (*clearAllRecords)(NFObject *, SEL);
+typedef struct NPDataCollector NPDataCollector;
+struct nopa_NPDataCollector_vtable {
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    NPObject * (*initWithClassName_)(NPObject *, SEL, const char *);
+    _Bool (*addStudent_)(NPObject *, SEL, NPStudent *);
+    void (*printAllRecords)(NPObject *, SEL);
+    double (*calculateAverageScore)(NPObject *, SEL);
+    NPStudent * (*findHighestScorer)(NPObject *, SEL);
+    void (*clearAllRecords)(NPObject *, SEL);
 };
-struct nopa_NFDataCollector_meta_vtable {
-    NFClass * (*class)(NFClass *, SEL);
+struct nopa_NPDataCollector_meta_vtable {
+    NPClass * (*class)(NPClass *, SEL);
 };
-NFObject * NFObject_alloc(NFClass * self, SEL _cmd) {
+NPObject * NPObject_alloc(NPClass * self, SEL _cmd) {
     return nopa_alloc(self);
 }
 
-NFObject * NFObject_new(NFClass * self, SEL _cmd) {
-    NFObject * obj = nopa_alloc(self);
+NPObject * NPObject_new(NPClass * self, SEL _cmd) {
+    NPObject * obj = nopa_alloc(self);
     return nopa_init(obj);
 }
 
-NFObject * NFObject_init(NFObject * self, SEL _cmd) {
-    struct NFObject * _self = ((struct NFObject *)(self));
+NPObject * NPObject_init(NPObject * self, SEL _cmd) {
+    struct NPObject * _self = ((struct NPObject *)(self));
     {
         return nopa_init(self);
     }
 }
 
-void NFObject_dealloc(NFObject * self, SEL _cmd) {
-    struct NFObject * _self = ((struct NFObject *)(self));
+void NPObject_dealloc(NPObject * self, SEL _cmd) {
+    struct NPObject * _self = ((struct NPObject *)(self));
     {
         return;
     }
 }
 
-NFClass * NFObject_getClass(NFClass * self, SEL _cmd) {
-    return &nopa_NFObject_class;
+NPClass * NPObject_getClass(NPClass * self, SEL _cmd) {
+    return &nopa_NPObject_class;
 }
 
-NFObject * nopa_alloc(struct NFClass * cls);
-NFObject * nopa_init(NFObject * );
-NFObject * NFStudent_initWithName_studentId_score_(NFObject * self, SEL _cmd, const char * aName, int sId, int aScore) {
-    struct NFStudent * _self = ((struct NFStudent *)(self));
+NPObject * nopa_alloc(struct NPClass * cls);
+NPObject * nopa_init(NPObject * );
+NPObject * NPStudent_initWithName_studentId_score_(NPObject * self, SEL _cmd, const char * aName, int sId, int aScore) {
+    struct NPStudent * _self = ((struct NPStudent *)(self));
     {
-        self = NFObject_init(self, __nopa_sel_init);
+        self = NPObject_init(self, __nopa_sel_init);
         if (self) {
             {
-                ((struct NFStudent *)(self))->name = aName;
-                ((struct NFStudent *)(self))->studentId = sId;
-                ((struct NFStudent *)(self))->score = aScore;
+                ((struct NPStudent *)(self))->name = aName;
+                ((struct NPStudent *)(self))->studentId = sId;
+                ((struct NPStudent *)(self))->score = aScore;
             }
         }
         return self;
     }
 }
 
-const char * NFStudent_getName(NFObject * self, SEL _cmd) {
-    struct NFStudent * _self = ((struct NFStudent *)(self));
+const char * NPStudent_getName(NPObject * self, SEL _cmd) {
+    struct NPStudent * _self = ((struct NPStudent *)(self));
     {
-        return ((struct NFStudent *)(self))->name;
+        return ((struct NPStudent *)(self))->name;
     }
 }
 
-int NFStudent_getStudentId(NFObject * self, SEL _cmd) {
-    struct NFStudent * _self = ((struct NFStudent *)(self));
+int NPStudent_getStudentId(NPObject * self, SEL _cmd) {
+    struct NPStudent * _self = ((struct NPStudent *)(self));
     {
-        return ((struct NFStudent *)(self))->studentId;
+        return ((struct NPStudent *)(self))->studentId;
     }
 }
 
-int NFStudent_getScore(NFObject * self, SEL _cmd) {
-    struct NFStudent * _self = ((struct NFStudent *)(self));
+int NPStudent_getScore(NPObject * self, SEL _cmd) {
+    struct NPStudent * _self = ((struct NPStudent *)(self));
     {
-        return ((struct NFStudent *)(self))->score;
+        return ((struct NPStudent *)(self))->score;
     }
 }
 
-void NFStudent_displayInfo(NFObject * self, SEL _cmd) {
-    struct NFStudent * _self = ((struct NFStudent *)(self));
+void NPStudent_displayInfo(NPObject * self, SEL _cmd) {
+    struct NPStudent * _self = ((struct NPStudent *)(self));
     {
-        printf("[学号: %04d] 姓名: %-8s | 分数: %d\n", ((struct NFStudent *)(self))->studentId, ((struct NFStudent *)(self))->name, ((struct NFStudent *)(self))->score);
+        printf("[学号: %04d] 姓名: %-8s | 分数: %d\n", ((struct NPStudent *)(self))->studentId, ((struct NPStudent *)(self))->name, ((struct NPStudent *)(self))->score);
     }
 }
 
-NFClass * NFStudent_getClass(NFClass * self, SEL _cmd) {
-    return &nopa_NFStudent_class;
+NPClass * NPStudent_getClass(NPClass * self, SEL _cmd) {
+    return &nopa_NPStudent_class;
 }
 
-NFObject * NFDataCollector_initWithClassName_(NFObject * self, SEL _cmd, const char * cName) {
-    struct NFDataCollector * _self = ((struct NFDataCollector *)(self));
+NPObject * NPDataCollector_initWithClassName_(NPObject * self, SEL _cmd, const char * cName) {
+    struct NPDataCollector * _self = ((struct NPDataCollector *)(self));
     {
-        self = NFObject_init(self, __nopa_sel_init);
+        self = NPObject_init(self, __nopa_sel_init);
         if (self) {
             {
-                ((struct NFDataCollector *)(self))->className = cName;
-                ((struct NFDataCollector *)(self))->currentCount = 0;
+                ((struct NPDataCollector *)(self))->className = cName;
+                ((struct NPDataCollector *)(self))->currentCount = 0;
                 for (int i = 0; i < MAX_RECORDS; i++) {
                     {
-                        ((struct NFDataCollector *)(self))->records[i] = NULL;
+                        ((struct NPDataCollector *)(self))->records[i] = NULL;
                     }
                 }
             }
@@ -221,29 +221,29 @@ NFObject * NFDataCollector_initWithClassName_(NFObject * self, SEL _cmd, const c
     }
 }
 
-_Bool NFDataCollector_addStudent_(NFObject * self, SEL _cmd, NFStudent * student) {
-    struct NFDataCollector * _self = ((struct NFDataCollector *)(self));
+_Bool NPDataCollector_addStudent_(NPObject * self, SEL _cmd, NPStudent * student) {
+    struct NPDataCollector * _self = ((struct NPDataCollector *)(self));
     {
-        if (((struct NFDataCollector *)(self))->currentCount >= MAX_RECORDS || student == NULL) {
+        if (((struct NPDataCollector *)(self))->currentCount >= MAX_RECORDS || student == NULL) {
             {
                 return 0;
             }
         }
-        ((struct NFDataCollector *)(self))->records[((struct NFDataCollector *)(self))->currentCount] = student;
-        ((struct NFDataCollector *)(self))->currentCount++;
+        ((struct NPDataCollector *)(self))->records[((struct NPDataCollector *)(self))->currentCount] = student;
+        ((struct NPDataCollector *)(self))->currentCount++;
         return 1;
     }
 }
 
-void NFDataCollector_printAllRecords(NFObject * self, SEL _cmd) {
-    struct NFDataCollector * _self = ((struct NFDataCollector *)(self));
+void NPDataCollector_printAllRecords(NPObject * self, SEL _cmd) {
+    struct NPDataCollector * _self = ((struct NPDataCollector *)(self));
     {
-        printf("\n=== 班级: %s (当前总人数: %d) ===\n", ((struct NFDataCollector *)(self))->className, ((struct NFDataCollector *)(self))->currentCount);
-        for (int i = 0; i < ((struct NFDataCollector *)(self))->currentCount; i++) {
+        printf("\n=== 班级: %s (当前总人数: %d) ===\n", ((struct NPDataCollector *)(self))->className, ((struct NPDataCollector *)(self))->currentCount);
+        for (int i = 0; i < ((struct NPDataCollector *)(self))->currentCount; i++) {
             {
-                if (((struct NFDataCollector *)(self))->records[i]) {
+                if (((struct NPDataCollector *)(self))->records[i]) {
                     {
-                        ({ NFObject *__nopa_tmp_0 = (((struct NFDataCollector *)(self))->records[i]); ((struct nopa_NFStudent_vtable *)__nopa_tmp_0->isa->vtable)->displayInfo(__nopa_tmp_0, __nopa_sel_displayInfo); });
+                        ({ NPObject *__nopa_tmp_0 = (((struct NPDataCollector *)(self))->records[i]); ((struct nopa_NPStudent_vtable *)__nopa_tmp_0->isa->vtable)->displayInfo(__nopa_tmp_0, __nopa_sel_displayInfo); });
                     }
                 }
             }
@@ -252,34 +252,34 @@ void NFDataCollector_printAllRecords(NFObject * self, SEL _cmd) {
     }
 }
 
-double NFDataCollector_calculateAverageScore(NFObject * self, SEL _cmd) {
-    struct NFDataCollector * _self = ((struct NFDataCollector *)(self));
+double NPDataCollector_calculateAverageScore(NPObject * self, SEL _cmd) {
+    struct NPDataCollector * _self = ((struct NPDataCollector *)(self));
     {
-        if (((struct NFDataCollector *)(self))->currentCount == 0) {
+        if (((struct NPDataCollector *)(self))->currentCount == 0) {
             return 0;
         }
         int totalScore = 0;
-        for (int i = 0; i < ((struct NFDataCollector *)(self))->currentCount; i++) {
+        for (int i = 0; i < ((struct NPDataCollector *)(self))->currentCount; i++) {
             {
-                totalScore = totalScore + ({ NFObject *__nopa_tmp_1 = (((struct NFDataCollector *)(self))->records[i]); ((struct nopa_NFStudent_vtable *)__nopa_tmp_1->isa->vtable)->getScore(__nopa_tmp_1, __nopa_sel_getScore); });
+                totalScore = totalScore + ({ NPObject *__nopa_tmp_1 = (((struct NPDataCollector *)(self))->records[i]); ((struct nopa_NPStudent_vtable *)__nopa_tmp_1->isa->vtable)->getScore(__nopa_tmp_1, __nopa_sel_getScore); });
             }
         }
-        return ((double)(totalScore)) / ((struct NFDataCollector *)(self))->currentCount;
+        return ((double)(totalScore)) / ((struct NPDataCollector *)(self))->currentCount;
     }
 }
 
-NFStudent * NFDataCollector_findHighestScorer(NFObject * self, SEL _cmd) {
-    struct NFDataCollector * _self = ((struct NFDataCollector *)(self));
+NPStudent * NPDataCollector_findHighestScorer(NPObject * self, SEL _cmd) {
+    struct NPDataCollector * _self = ((struct NPDataCollector *)(self));
     {
-        if (((struct NFDataCollector *)(self))->currentCount == 0) {
+        if (((struct NPDataCollector *)(self))->currentCount == 0) {
             return NULL;
         }
-        NFStudent * topStudent = ((struct NFDataCollector *)(self))->records[0];
-        for (int i = 1; i < ((struct NFDataCollector *)(self))->currentCount; i++) {
+        NPStudent * topStudent = ((struct NPDataCollector *)(self))->records[0];
+        for (int i = 1; i < ((struct NPDataCollector *)(self))->currentCount; i++) {
             {
-                if (({ NFObject *__nopa_tmp_2 = (((struct NFDataCollector *)(self))->records[i]); ((struct nopa_NFStudent_vtable *)__nopa_tmp_2->isa->vtable)->getScore(__nopa_tmp_2, __nopa_sel_getScore); }) > ((struct nopa_NFStudent_vtable *)topStudent->isa->vtable)->getScore(topStudent, __nopa_sel_getScore)) {
+                if (({ NPObject *__nopa_tmp_2 = (((struct NPDataCollector *)(self))->records[i]); ((struct nopa_NPStudent_vtable *)__nopa_tmp_2->isa->vtable)->getScore(__nopa_tmp_2, __nopa_sel_getScore); }) > ((struct nopa_NPStudent_vtable *)topStudent->isa->vtable)->getScore(topStudent, __nopa_sel_getScore)) {
                     {
-                        topStudent = ((struct NFDataCollector *)(self))->records[i];
+                        topStudent = ((struct NPDataCollector *)(self))->records[i];
                     }
                 }
             }
@@ -288,33 +288,33 @@ NFStudent * NFDataCollector_findHighestScorer(NFObject * self, SEL _cmd) {
     }
 }
 
-void NFDataCollector_clearAllRecords(NFObject * self, SEL _cmd) {
-    struct NFDataCollector * _self = ((struct NFDataCollector *)(self));
+void NPDataCollector_clearAllRecords(NPObject * self, SEL _cmd) {
+    struct NPDataCollector * _self = ((struct NPDataCollector *)(self));
     {
-        for (int i = 0; i < ((struct NFDataCollector *)(self))->currentCount; i++) {
+        for (int i = 0; i < ((struct NPDataCollector *)(self))->currentCount; i++) {
             {
-                if (((struct NFDataCollector *)(self))->records[i]) {
+                if (((struct NPDataCollector *)(self))->records[i]) {
                     {
-                        nopa_release(((struct NFDataCollector *)(self))->records[i]);
-                        ((struct NFDataCollector *)(self))->records[i] = NULL;
+                        nopa_release(((struct NPDataCollector *)(self))->records[i]);
+                        ((struct NPDataCollector *)(self))->records[i] = NULL;
                     }
                 }
             }
         }
-        ((struct NFDataCollector *)(self))->currentCount = 0;
+        ((struct NPDataCollector *)(self))->currentCount = 0;
     }
 }
 
-void NFDataCollector_dealloc(NFObject * self, SEL _cmd) {
-    struct NFDataCollector * _self = ((struct NFDataCollector *)(self));
+void NPDataCollector_dealloc(NPObject * self, SEL _cmd) {
+    struct NPDataCollector * _self = ((struct NPDataCollector *)(self));
     {
-        ((struct nopa_NFDataCollector_vtable *)self->isa->vtable)->clearAllRecords(self, __nopa_sel_clearAllRecords);
+        ((struct nopa_NPDataCollector_vtable *)self->isa->vtable)->clearAllRecords(self, __nopa_sel_clearAllRecords);
         nopa_object_dealloc(self);
     }
 }
 
-NFClass * NFDataCollector_getClass(NFClass * self, SEL _cmd) {
-    return &nopa_NFDataCollector_class;
+NPClass * NPDataCollector_getClass(NPClass * self, SEL _cmd) {
+    return &nopa_NPDataCollector_class;
 }
 
 int main(int argc, const char * * argv) {
@@ -323,28 +323,28 @@ int main(int argc, const char * * argv) {
     {
         nopa_autoreleasepool_t * __pool = nopa_autoreleasepool_push();
         {
-            printf(">>> 开始 NFFoundation 工具类测试 <<<\n");
-            NFObject *__nopa_tmp_3 = (NFObject_alloc(&nopa_NFDataCollector_class, __nopa_sel_alloc));
-            NFDataCollector * collector = ((struct nopa_NFDataCollector_vtable *)__nopa_tmp_3->isa->vtable)->initWithClassName_(__nopa_tmp_3, __nopa_sel_initWithClassName_, "宇宙航天一班");
-            NFObject *__nopa_tmp_4 = (NFObject_alloc(&nopa_NFStudent_class, __nopa_sel_alloc));
-            NFStudent * s1 = ((struct nopa_NFStudent_vtable *)__nopa_tmp_4->isa->vtable)->initWithName_studentId_score_(__nopa_tmp_4, __nopa_sel_initWithName_studentId_score_, "艾伦", 1001, 95);
-            NFObject *__nopa_tmp_5 = (NFObject_alloc(&nopa_NFStudent_class, __nopa_sel_alloc));
-            NFStudent * s2 = ((struct nopa_NFStudent_vtable *)__nopa_tmp_5->isa->vtable)->initWithName_studentId_score_(__nopa_tmp_5, __nopa_sel_initWithName_studentId_score_, "三笠", 1002, 98);
-            NFObject *__nopa_tmp_6 = (NFObject_alloc(&nopa_NFStudent_class, __nopa_sel_alloc));
-            NFStudent * s3 = ((struct nopa_NFStudent_vtable *)__nopa_tmp_6->isa->vtable)->initWithName_studentId_score_(__nopa_tmp_6, __nopa_sel_initWithName_studentId_score_, "阿尔敏", 1003, 92);
-            NFObject *__nopa_tmp_7 = (NFObject_alloc(&nopa_NFStudent_class, __nopa_sel_alloc));
-            NFStudent * s4 = ((struct nopa_NFStudent_vtable *)__nopa_tmp_7->isa->vtable)->initWithName_studentId_score_(__nopa_tmp_7, __nopa_sel_initWithName_studentId_score_, "利威尔", 1004, 100);
-            ((struct nopa_NFDataCollector_vtable *)collector->isa->vtable)->addStudent_(collector, __nopa_sel_addStudent_, s1);
-            ((struct nopa_NFDataCollector_vtable *)collector->isa->vtable)->addStudent_(collector, __nopa_sel_addStudent_, s2);
-            ((struct nopa_NFDataCollector_vtable *)collector->isa->vtable)->addStudent_(collector, __nopa_sel_addStudent_, s3);
-            ((struct nopa_NFDataCollector_vtable *)collector->isa->vtable)->addStudent_(collector, __nopa_sel_addStudent_, s4);
-            ((struct nopa_NFDataCollector_vtable *)collector->isa->vtable)->printAllRecords(collector, __nopa_sel_printAllRecords);
-            double avg = ((struct nopa_NFDataCollector_vtable *)collector->isa->vtable)->calculateAverageScore(collector, __nopa_sel_calculateAverageScore);
+            printf(">>> 开始 NPFoundation 工具类测试 <<<\n");
+            NPObject *__nopa_tmp_3 = (NPObject_alloc(&nopa_NPDataCollector_class, __nopa_sel_alloc));
+            NPDataCollector * collector = ((struct nopa_NPDataCollector_vtable *)__nopa_tmp_3->isa->vtable)->initWithClassName_(__nopa_tmp_3, __nopa_sel_initWithClassName_, "宇宙航天一班");
+            NPObject *__nopa_tmp_4 = (NPObject_alloc(&nopa_NPStudent_class, __nopa_sel_alloc));
+            NPStudent * s1 = ((struct nopa_NPStudent_vtable *)__nopa_tmp_4->isa->vtable)->initWithName_studentId_score_(__nopa_tmp_4, __nopa_sel_initWithName_studentId_score_, "艾伦", 1001, 95);
+            NPObject *__nopa_tmp_5 = (NPObject_alloc(&nopa_NPStudent_class, __nopa_sel_alloc));
+            NPStudent * s2 = ((struct nopa_NPStudent_vtable *)__nopa_tmp_5->isa->vtable)->initWithName_studentId_score_(__nopa_tmp_5, __nopa_sel_initWithName_studentId_score_, "三笠", 1002, 98);
+            NPObject *__nopa_tmp_6 = (NPObject_alloc(&nopa_NPStudent_class, __nopa_sel_alloc));
+            NPStudent * s3 = ((struct nopa_NPStudent_vtable *)__nopa_tmp_6->isa->vtable)->initWithName_studentId_score_(__nopa_tmp_6, __nopa_sel_initWithName_studentId_score_, "阿尔敏", 1003, 92);
+            NPObject *__nopa_tmp_7 = (NPObject_alloc(&nopa_NPStudent_class, __nopa_sel_alloc));
+            NPStudent * s4 = ((struct nopa_NPStudent_vtable *)__nopa_tmp_7->isa->vtable)->initWithName_studentId_score_(__nopa_tmp_7, __nopa_sel_initWithName_studentId_score_, "利威尔", 1004, 100);
+            ((struct nopa_NPDataCollector_vtable *)collector->isa->vtable)->addStudent_(collector, __nopa_sel_addStudent_, s1);
+            ((struct nopa_NPDataCollector_vtable *)collector->isa->vtable)->addStudent_(collector, __nopa_sel_addStudent_, s2);
+            ((struct nopa_NPDataCollector_vtable *)collector->isa->vtable)->addStudent_(collector, __nopa_sel_addStudent_, s3);
+            ((struct nopa_NPDataCollector_vtable *)collector->isa->vtable)->addStudent_(collector, __nopa_sel_addStudent_, s4);
+            ((struct nopa_NPDataCollector_vtable *)collector->isa->vtable)->printAllRecords(collector, __nopa_sel_printAllRecords);
+            double avg = ((struct nopa_NPDataCollector_vtable *)collector->isa->vtable)->calculateAverageScore(collector, __nopa_sel_calculateAverageScore);
             printf("\n[统计结果] 班级平均分: %.2f\n", avg);
-            NFStudent * top = ((struct nopa_NFDataCollector_vtable *)collector->isa->vtable)->findHighestScorer(collector, __nopa_sel_findHighestScorer);
+            NPStudent * top = ((struct nopa_NPDataCollector_vtable *)collector->isa->vtable)->findHighestScorer(collector, __nopa_sel_findHighestScorer);
             if (top != NULL) {
                 {
-                    printf("[荣誉榜] 最高分获得者: %s (%d分)\n", ((struct nopa_NFStudent_vtable *)top->isa->vtable)->getName(top, __nopa_sel_getName), ((struct nopa_NFStudent_vtable *)top->isa->vtable)->getScore(top, __nopa_sel_getScore));
+                    printf("[荣誉榜] 最高分获得者: %s (%d分)\n", ((struct nopa_NPStudent_vtable *)top->isa->vtable)->getName(top, __nopa_sel_getName), ((struct nopa_NPStudent_vtable *)top->isa->vtable)->getScore(top, __nopa_sel_getScore));
                 }
             }
             printf("\n>>> 正在释放内存... <<<\n");
@@ -364,73 +364,73 @@ int main(int argc, const char * * argv) {
 
 // ─── Class metadata ─────────────────────────────────────
 
-struct nopa_NFObject_vtable nopa_NFObject_vtable_inst = {
-    .init = NFObject_init,
-    .dealloc = NFObject_dealloc,
+struct nopa_NPObject_vtable nopa_NPObject_vtable_inst = {
+    .init = NPObject_init,
+    .dealloc = NPObject_dealloc,
 };
 
-struct nopa_NFStudent_vtable nopa_NFStudent_vtable_inst = {
-    .init = NFObject_init,
-    .dealloc = NFObject_dealloc,
-    .initWithName_studentId_score_ = NFStudent_initWithName_studentId_score_,
-    .getName = NFStudent_getName,
-    .getStudentId = NFStudent_getStudentId,
-    .getScore = NFStudent_getScore,
-    .displayInfo = NFStudent_displayInfo,
+struct nopa_NPStudent_vtable nopa_NPStudent_vtable_inst = {
+    .init = NPObject_init,
+    .dealloc = NPObject_dealloc,
+    .initWithName_studentId_score_ = NPStudent_initWithName_studentId_score_,
+    .getName = NPStudent_getName,
+    .getStudentId = NPStudent_getStudentId,
+    .getScore = NPStudent_getScore,
+    .displayInfo = NPStudent_displayInfo,
 };
 
-struct nopa_NFDataCollector_vtable nopa_NFDataCollector_vtable_inst = {
-    .init = NFObject_init,
-    .dealloc = NFDataCollector_dealloc,
-    .initWithClassName_ = NFDataCollector_initWithClassName_,
-    .addStudent_ = NFDataCollector_addStudent_,
-    .printAllRecords = NFDataCollector_printAllRecords,
-    .calculateAverageScore = NFDataCollector_calculateAverageScore,
-    .findHighestScorer = NFDataCollector_findHighestScorer,
-    .clearAllRecords = NFDataCollector_clearAllRecords,
+struct nopa_NPDataCollector_vtable nopa_NPDataCollector_vtable_inst = {
+    .init = NPObject_init,
+    .dealloc = NPDataCollector_dealloc,
+    .initWithClassName_ = NPDataCollector_initWithClassName_,
+    .addStudent_ = NPDataCollector_addStudent_,
+    .printAllRecords = NPDataCollector_printAllRecords,
+    .calculateAverageScore = NPDataCollector_calculateAverageScore,
+    .findHighestScorer = NPDataCollector_findHighestScorer,
+    .clearAllRecords = NPDataCollector_clearAllRecords,
 };
 
-struct nopa_NFObject_meta_vtable nopa_NFObject_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
-    .class = NFObject_getClass,
+struct nopa_NPObject_meta_vtable nopa_NPObject_meta_vtable_inst = {
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
+    .class = NPObject_getClass,
 };
 
-struct nopa_NFStudent_meta_vtable nopa_NFStudent_meta_vtable_inst = {
-    .class = NFStudent_getClass,
+struct nopa_NPStudent_meta_vtable nopa_NPStudent_meta_vtable_inst = {
+    .class = NPStudent_getClass,
 };
 
-struct nopa_NFDataCollector_meta_vtable nopa_NFDataCollector_meta_vtable_inst = {
-    .class = NFDataCollector_getClass,
+struct nopa_NPDataCollector_meta_vtable nopa_NPDataCollector_meta_vtable_inst = {
+    .class = NPDataCollector_getClass,
 };
 
-NFClass nopa_NFObject_class;
-NFClass nopa_NFStudent_class;
-NFClass nopa_NFDataCollector_class;
+NPClass nopa_NPObject_class;
+NPClass nopa_NPStudent_class;
+NPClass nopa_NPDataCollector_class;
 
 void nopa_meta_init(void) {
-    nopa_NFObject_class = (NFClass){
-        .name = "NFObject",
+    nopa_NPObject_class = (NPClass){
+        .name = "NPObject",
         .superclass = NULL,
-        .instance_size = sizeof(struct NFObject),
-        .vtable = &nopa_NFObject_vtable_inst,
-        .class_vtable = &nopa_NFObject_meta_vtable_inst,
+        .instance_size = sizeof(struct NPObject),
+        .vtable = &nopa_NPObject_vtable_inst,
+        .class_vtable = &nopa_NPObject_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_NFStudent_class = (NFClass){
-        .name = "NFStudent",
-        .superclass = &nopa_NFObject_class,
-        .instance_size = sizeof(struct NFStudent),
-        .vtable = &nopa_NFStudent_vtable_inst,
-        .class_vtable = &nopa_NFStudent_meta_vtable_inst,
+    nopa_NPStudent_class = (NPClass){
+        .name = "NPStudent",
+        .superclass = &nopa_NPObject_class,
+        .instance_size = sizeof(struct NPStudent),
+        .vtable = &nopa_NPStudent_vtable_inst,
+        .class_vtable = &nopa_NPStudent_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_NFDataCollector_class = (NFClass){
-        .name = "NFDataCollector",
-        .superclass = &nopa_NFObject_class,
-        .instance_size = sizeof(struct NFDataCollector),
-        .vtable = &nopa_NFDataCollector_vtable_inst,
-        .class_vtable = &nopa_NFDataCollector_meta_vtable_inst,
+    nopa_NPDataCollector_class = (NPClass){
+        .name = "NPDataCollector",
+        .superclass = &nopa_NPObject_class,
+        .instance_size = sizeof(struct NPDataCollector),
+        .vtable = &nopa_NPDataCollector_vtable_inst,
+        .class_vtable = &nopa_NPDataCollector_meta_vtable_inst,
         .protocol_count = 0,
     };
 }

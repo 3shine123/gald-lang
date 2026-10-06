@@ -8,7 +8,7 @@
 
    Note the reference is inside a method BODY here, not in a class-method
    return type — the scanner walks statements and variable declarations. */
-@implementation Stack : NFObject
+@implementation Stack : NPObject
 - (void)push:(int *)item {
     if (_count < 4) _storage[_count++] = item;
 }

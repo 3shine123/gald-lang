@@ -4,7 +4,7 @@
 
 @namespace Game
     @namespace Entities
-        @interface Player : NFObject {
+        @interface Player : NPObject {
             @public
             int id;
         }
@@ -19,7 +19,7 @@
         }
         @end
 
-        @interface Enemy : NFObject {
+        @interface Enemy : NPObject {
             @public
             int level;
         }
@@ -36,7 +36,7 @@
     @endnamespace
 
     @namespace Items
-        @interface Potion : NFObject {
+        @interface Potion : NPObject {
             @public
             int healAmount;
         }

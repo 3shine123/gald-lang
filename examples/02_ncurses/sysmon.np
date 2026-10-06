@@ -43,10 +43,10 @@ int main() {
             memset(buf, ' ', 20); buf[20] = '\0';
             for (int i = 0; i < cpu_bars && i < 20; i++) buf[i] = '#';
             wattron([win handle], A_REVERSE);
-            [win print:3 x:4 text:[NFString stringWithUTF8String:buf]];
+            [win print:3 x:4 text:[NPString stringWithUTF8String:buf]];
             wattroff([win handle], A_REVERSE);
             snprintf(buf, sizeof(buf), "  %.1f%%", cpu);
-            [win print:3 x:26 text:[NFString stringWithUTF8String:buf]];
+            [win print:3 x:26 text:[NPString stringWithUTF8String:buf]];
 
             /* ── Memory ── */
             [win print:5 x:2 text:@"Memory"];
@@ -56,10 +56,10 @@ int main() {
             memset(buf, ' ', 20); buf[20] = '\0';
             for (int i = 0; i < mem_bars && i < 20; i++) buf[i] = '#';
             wattron([win handle], A_REVERSE);
-            [win print:6 x:4 text:[NFString stringWithUTF8String:buf]];
+            [win print:6 x:4 text:[NPString stringWithUTF8String:buf]];
             wattroff([win handle], A_REVERSE);
             snprintf(buf, sizeof(buf), "  %.1f%%  (%llu MB / %llu MB)", mem_pct, mem_used / 1000000, mem_total / 1000000);
-            [win print:6 x:26 text:[NFString stringWithUTF8String:buf]];
+            [win print:6 x:26 text:[NPString stringWithUTF8String:buf]];
 
             /* ── Disk ── */
             [win print:8 x:2 text:@"Disk"];
@@ -69,10 +69,10 @@ int main() {
             memset(buf, ' ', 20); buf[20] = '\0';
             for (int i = 0; i < disk_bars && i < 20; i++) buf[i] = '#';
             wattron([win handle], A_REVERSE);
-            [win print:9 x:4 text:[NFString stringWithUTF8String:buf]];
+            [win print:9 x:4 text:[NPString stringWithUTF8String:buf]];
             wattroff([win handle], A_REVERSE);
             snprintf(buf, sizeof(buf), "  %.1f%%  (%llu GB / %llu GB)", disk_pct, disk_used / 1000000000, disk_total / 1000000000);
-            [win print:9 x:26 text:[NFString stringWithUTF8String:buf]];
+            [win print:9 x:26 text:[NPString stringWithUTF8String:buf]];
 
             [quitBtn draw];
             [win update];

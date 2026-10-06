@@ -123,7 +123,7 @@ static int nk_fire_win_close(void *w, void *data) {
 
 /* ══════════════════════════════ Control ══════════════════════════════ */
 
-@implementation Control : NFObject
+@implementation Control : NPObject
 - (void)show { uiControlShow(_handle); }
 - (void)hide { uiControlHide(_handle); }
 - (void)setEnabled:(int)enabled { if (enabled) uiControlEnable(_handle); else uiControlDisable(_handle); }
@@ -332,7 +332,7 @@ static int nk_fire_win_close(void *w, void *data) {
 
 static unsigned long nk_ui_init_options[2] = {0, 0};   /* uiInitOptions {Size} */
 
-@implementation App : NFObject
+@implementation App : NPObject
 + (void)start {
     const char *err = uiInit(nk_ui_init_options);
     if (err) {

@@ -3,8 +3,8 @@
 #include <stdint.h>
 #include <stddef.h>
 #include "nopa/runtime.h"
-struct nopa_NFObject_vtable;
-struct nopa_NFObject_meta_vtable;
+struct nopa_NPObject_vtable;
+struct nopa_NPObject_meta_vtable;
 struct nopa_Engine__Physics__Collider_vtable;
 struct nopa_Engine__Physics__Collider_meta_vtable;
 struct nopa_GameWorld_vtable;
@@ -28,7 +28,7 @@ static const SEL __nopa_sel_initWithTexture_ = {.name = "initWithTexture:", .has
 static const SEL __nopa_sel_drawAtX_y_ = {.name = "drawAtX:y:", .hash = 0xBFBC1653};
 static const SEL __nopa_sel_runLoop = {.name = "runLoop", .hash = 0x90B524F8};
 
-typedef struct NFObject NFObject;
+typedef struct NPObject NPObject;
 typedef struct Engine__Physics__Collider Engine__Physics__Collider;
 typedef struct GameWorld GameWorld;
 typedef struct Engine__Core__Transform Engine__Core__Transform;
@@ -37,96 +37,96 @@ typedef struct Render__Sprite Render__Sprite;
 typedef void (^CollisionCallback)(int) ;
 typedef void (^Engine__Physics__CollisionCallback)(int) ;
 
-NFObject * NFObject_alloc(NFClass * self, SEL _cmd);
-NFObject * NFObject_new(NFClass * self, SEL _cmd);
-NFObject * NFObject_init(NFObject * self, SEL _cmd);
-void NFObject_dealloc(NFObject * self, SEL _cmd);
-void NFObject_release(NFObject * self, SEL _cmd);
-NFObject * NFObject_retain(NFObject * self, SEL _cmd);
-NFObject * Engine__Core__Transform_initWithX_y_(NFObject * self, SEL _cmd, int posX, int posY);
-void Engine__Core__Transform_translateByX_y_(NFObject * self, SEL _cmd, int dx, int dy);
-NFObject * Engine__Physics__Collider_initWithType_callback_(NFObject * self, SEL _cmd, const char * type, Engine__Physics__CollisionCallback cb);
-void Engine__Physics__Collider_triggerCollisionWithForce_(NFObject * self, SEL _cmd, int force);
-NFObject * Render__Sprite_initWithTexture_(NFObject * self, SEL _cmd, const char * tex);
-void Render__Sprite_drawAtX_y_(NFObject * self, SEL _cmd, int x, int y);
-void GameWorld_runLoop(NFObject * self, SEL _cmd);
-NFObject * nopa_alloc(struct NFClass * cls);
-NFObject * nopa_init(NFObject * self);
-void nopa_release(NFObject * obj);
-NFObject * nopa_retain(NFObject * obj);
+NPObject * NPObject_alloc(NPClass * self, SEL _cmd);
+NPObject * NPObject_new(NPClass * self, SEL _cmd);
+NPObject * NPObject_init(NPObject * self, SEL _cmd);
+void NPObject_dealloc(NPObject * self, SEL _cmd);
+void NPObject_release(NPObject * self, SEL _cmd);
+NPObject * NPObject_retain(NPObject * self, SEL _cmd);
+NPObject * Engine__Core__Transform_initWithX_y_(NPObject * self, SEL _cmd, int posX, int posY);
+void Engine__Core__Transform_translateByX_y_(NPObject * self, SEL _cmd, int dx, int dy);
+NPObject * Engine__Physics__Collider_initWithType_callback_(NPObject * self, SEL _cmd, const char * type, Engine__Physics__CollisionCallback cb);
+void Engine__Physics__Collider_triggerCollisionWithForce_(NPObject * self, SEL _cmd, int force);
+NPObject * Render__Sprite_initWithTexture_(NPObject * self, SEL _cmd, const char * tex);
+void Render__Sprite_drawAtX_y_(NPObject * self, SEL _cmd, int x, int y);
+void GameWorld_runLoop(NPObject * self, SEL _cmd);
+NPObject * nopa_alloc(struct NPClass * cls);
+NPObject * nopa_init(NPObject * self);
+void nopa_release(NPObject * obj);
+NPObject * nopa_retain(NPObject * obj);
 int main(int argc, const char * argv[]);
 
-NFClass * NFObject_getClass(NFClass * self, SEL _cmd);
-NFClass * Engine__Physics__Collider_getClass(NFClass * self, SEL _cmd);
-NFClass * GameWorld_getClass(NFClass * self, SEL _cmd);
-NFClass * Engine__Core__Transform_getClass(NFClass * self, SEL _cmd);
-NFClass * Render__Sprite_getClass(NFClass * self, SEL _cmd);
+NPClass * NPObject_getClass(NPClass * self, SEL _cmd);
+NPClass * Engine__Physics__Collider_getClass(NPClass * self, SEL _cmd);
+NPClass * GameWorld_getClass(NPClass * self, SEL _cmd);
+NPClass * Engine__Core__Transform_getClass(NPClass * self, SEL _cmd);
+NPClass * Render__Sprite_getClass(NPClass * self, SEL _cmd);
 
-struct nopa_NFObject_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    void (*release)(NFObject *, SEL);
-    NFObject * (*retain)(NFObject *, SEL);
+struct nopa_NPObject_vtable {
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    void (*release)(NPObject *, SEL);
+    NPObject * (*retain)(NPObject *, SEL);
 };
-struct nopa_NFObject_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+struct nopa_NPObject_meta_vtable {
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct nopa_Engine__Physics__Collider_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    void (*release)(NFObject *, SEL);
-    NFObject * (*retain)(NFObject *, SEL);
-    NFObject * (*initWithType_callback_)(NFObject *, SEL, const char *, Engine__Physics__CollisionCallback);
-    void (*triggerCollisionWithForce_)(NFObject *, SEL, int);
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    void (*release)(NPObject *, SEL);
+    NPObject * (*retain)(NPObject *, SEL);
+    NPObject * (*initWithType_callback_)(NPObject *, SEL, const char *, Engine__Physics__CollisionCallback);
+    void (*triggerCollisionWithForce_)(NPObject *, SEL, int);
 };
 struct nopa_Engine__Physics__Collider_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct nopa_GameWorld_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    void (*release)(NFObject *, SEL);
-    NFObject * (*retain)(NFObject *, SEL);
-    void (*runLoop)(NFObject *, SEL);
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    void (*release)(NPObject *, SEL);
+    NPObject * (*retain)(NPObject *, SEL);
+    void (*runLoop)(NPObject *, SEL);
 };
 struct nopa_GameWorld_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct nopa_Engine__Core__Transform_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    void (*release)(NFObject *, SEL);
-    NFObject * (*retain)(NFObject *, SEL);
-    NFObject * (*initWithX_y_)(NFObject *, SEL, int, int);
-    void (*translateByX_y_)(NFObject *, SEL, int, int);
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    void (*release)(NPObject *, SEL);
+    NPObject * (*retain)(NPObject *, SEL);
+    NPObject * (*initWithX_y_)(NPObject *, SEL, int, int);
+    void (*translateByX_y_)(NPObject *, SEL, int, int);
 };
 struct nopa_Engine__Core__Transform_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct nopa_Render__Sprite_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    void (*release)(NFObject *, SEL);
-    NFObject * (*retain)(NFObject *, SEL);
-    NFObject * (*initWithTexture_)(NFObject *, SEL, const char *);
-    void (*drawAtX_y_)(NFObject *, SEL, int, int);
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    void (*release)(NPObject *, SEL);
+    NPObject * (*retain)(NPObject *, SEL);
+    NPObject * (*initWithTexture_)(NPObject *, SEL, const char *);
+    void (*drawAtX_y_)(NPObject *, SEL, int, int);
 };
 struct nopa_Render__Sprite_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 
 struct Engine__Physics__Collider {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     const char * typeName;
     CollisionCallback onCollision;
@@ -134,13 +134,13 @@ struct Engine__Physics__Collider {
 typedef struct Engine__Physics__Collider Engine__Physics__Collider;
 
 struct GameWorld {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
 };
 typedef struct GameWorld GameWorld;
 
 struct Engine__Core__Transform {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     int x;
     int y;
@@ -148,205 +148,205 @@ struct Engine__Core__Transform {
 typedef struct Engine__Core__Transform Engine__Core__Transform;
 
 struct Render__Sprite {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     const char * textureName;
 };
 typedef struct Render__Sprite Render__Sprite;
 
-extern NFClass nopa_NFObject_class;
-extern NFClass nopa_Engine__Physics__Collider_class;
-extern NFClass nopa_GameWorld_class;
-extern NFClass nopa_Engine__Core__Transform_class;
-extern NFClass nopa_Render__Sprite_class;
+extern NPClass nopa_NPObject_class;
+extern NPClass nopa_Engine__Physics__Collider_class;
+extern NPClass nopa_GameWorld_class;
+extern NPClass nopa_Engine__Core__Transform_class;
+extern NPClass nopa_Render__Sprite_class;
 void nopa_meta_init(void);
 
-struct nopa_NFObject_vtable nopa_NFObject_vtable_inst = {
-    .init = NFObject_init,
-    .dealloc = NFObject_dealloc,
-    .release = NFObject_release,
-    .retain = NFObject_retain,
+struct nopa_NPObject_vtable nopa_NPObject_vtable_inst = {
+    .init = NPObject_init,
+    .dealloc = NPObject_dealloc,
+    .release = NPObject_release,
+    .retain = NPObject_retain,
 };
 
 struct nopa_Engine__Physics__Collider_vtable nopa_Engine__Physics__Collider_vtable_inst = {
-    .init = NFObject_init,
-    .dealloc = NFObject_dealloc,
-    .release = NFObject_release,
-    .retain = NFObject_retain,
+    .init = NPObject_init,
+    .dealloc = NPObject_dealloc,
+    .release = NPObject_release,
+    .retain = NPObject_retain,
     .initWithType_callback_ = Engine__Physics__Collider_initWithType_callback_,
     .triggerCollisionWithForce_ = Engine__Physics__Collider_triggerCollisionWithForce_,
 };
 
 struct nopa_GameWorld_vtable nopa_GameWorld_vtable_inst = {
-    .init = NFObject_init,
-    .dealloc = NFObject_dealloc,
-    .release = NFObject_release,
-    .retain = NFObject_retain,
+    .init = NPObject_init,
+    .dealloc = NPObject_dealloc,
+    .release = NPObject_release,
+    .retain = NPObject_retain,
     .runLoop = GameWorld_runLoop,
 };
 
 struct nopa_Engine__Core__Transform_vtable nopa_Engine__Core__Transform_vtable_inst = {
-    .init = NFObject_init,
-    .dealloc = NFObject_dealloc,
-    .release = NFObject_release,
-    .retain = NFObject_retain,
+    .init = NPObject_init,
+    .dealloc = NPObject_dealloc,
+    .release = NPObject_release,
+    .retain = NPObject_retain,
     .initWithX_y_ = Engine__Core__Transform_initWithX_y_,
     .translateByX_y_ = Engine__Core__Transform_translateByX_y_,
 };
 
 struct nopa_Render__Sprite_vtable nopa_Render__Sprite_vtable_inst = {
-    .init = NFObject_init,
-    .dealloc = NFObject_dealloc,
-    .release = NFObject_release,
-    .retain = NFObject_retain,
+    .init = NPObject_init,
+    .dealloc = NPObject_dealloc,
+    .release = NPObject_release,
+    .retain = NPObject_retain,
     .initWithTexture_ = Render__Sprite_initWithTexture_,
     .drawAtX_y_ = Render__Sprite_drawAtX_y_,
 };
 
-struct nopa_NFObject_meta_vtable nopa_NFObject_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
-    .class = NFObject_getClass,
+struct nopa_NPObject_meta_vtable nopa_NPObject_meta_vtable_inst = {
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
+    .class = NPObject_getClass,
 };
 
 struct nopa_Engine__Physics__Collider_meta_vtable nopa_Engine__Physics__Collider_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
     .class = Engine__Physics__Collider_getClass,
 };
 
 struct nopa_GameWorld_meta_vtable nopa_GameWorld_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
     .class = GameWorld_getClass,
 };
 
 struct nopa_Engine__Core__Transform_meta_vtable nopa_Engine__Core__Transform_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
     .class = Engine__Core__Transform_getClass,
 };
 
 struct nopa_Render__Sprite_meta_vtable nopa_Render__Sprite_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
     .class = Render__Sprite_getClass,
 };
 
-NFClass * NFObject_getClass(NFClass * self, SEL _cmd) {
+NPClass * NPObject_getClass(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
-NFClass * Engine__Physics__Collider_getClass(NFClass * self, SEL _cmd) {
+NPClass * Engine__Physics__Collider_getClass(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
-NFClass * GameWorld_getClass(NFClass * self, SEL _cmd) {
+NPClass * GameWorld_getClass(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
-NFClass * Engine__Core__Transform_getClass(NFClass * self, SEL _cmd) {
+NPClass * Engine__Core__Transform_getClass(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
-NFClass * Render__Sprite_getClass(NFClass * self, SEL _cmd) {
+NPClass * Render__Sprite_getClass(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
-NFClass nopa_NFObject_class;
-NFClass nopa_Engine__Physics__Collider_class;
-NFClass nopa_GameWorld_class;
-NFClass nopa_Engine__Core__Transform_class;
-NFClass nopa_Render__Sprite_class;
+NPClass nopa_NPObject_class;
+NPClass nopa_Engine__Physics__Collider_class;
+NPClass nopa_GameWorld_class;
+NPClass nopa_Engine__Core__Transform_class;
+NPClass nopa_Render__Sprite_class;
 
 void nopa_meta_init(void) {
-    nopa_NFObject_class = (NFClass){
-        .name = "NFObject",
+    nopa_NPObject_class = (NPClass){
+        .name = "NPObject",
         .superclass = NULL,
-        .instance_size = sizeof(struct NFObject),
-        .vtable = &nopa_NFObject_vtable_inst,
-        .class_vtable = &nopa_NFObject_meta_vtable_inst,
+        .instance_size = sizeof(struct NPObject),
+        .vtable = &nopa_NPObject_vtable_inst,
+        .class_vtable = &nopa_NPObject_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_Engine__Physics__Collider_class = (NFClass){
+    nopa_Engine__Physics__Collider_class = (NPClass){
         .name = "Engine::Physics::Collider",
-        .superclass = &nopa_NFObject_class,
+        .superclass = &nopa_NPObject_class,
         .instance_size = sizeof(struct Engine__Physics__Collider),
         .vtable = &nopa_Engine__Physics__Collider_vtable_inst,
         .class_vtable = &nopa_Engine__Physics__Collider_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_GameWorld_class = (NFClass){
+    nopa_GameWorld_class = (NPClass){
         .name = "GameWorld",
-        .superclass = &nopa_NFObject_class,
+        .superclass = &nopa_NPObject_class,
         .instance_size = sizeof(struct GameWorld),
         .vtable = &nopa_GameWorld_vtable_inst,
         .class_vtable = &nopa_GameWorld_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_Engine__Core__Transform_class = (NFClass){
+    nopa_Engine__Core__Transform_class = (NPClass){
         .name = "Engine::Core::Transform",
-        .superclass = &nopa_NFObject_class,
+        .superclass = &nopa_NPObject_class,
         .instance_size = sizeof(struct Engine__Core__Transform),
         .vtable = &nopa_Engine__Core__Transform_vtable_inst,
         .class_vtable = &nopa_Engine__Core__Transform_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_Render__Sprite_class = (NFClass){
+    nopa_Render__Sprite_class = (NPClass){
         .name = "Render::Sprite",
-        .superclass = &nopa_NFObject_class,
+        .superclass = &nopa_NPObject_class,
         .instance_size = sizeof(struct Render__Sprite),
         .vtable = &nopa_Render__Sprite_vtable_inst,
         .class_vtable = &nopa_Render__Sprite_meta_vtable_inst,
         .protocol_count = 0,
     };
 }
-NFObject * NFObject_alloc(NFClass * self, SEL _cmd) {
+NPObject * NPObject_alloc(NPClass * self, SEL _cmd) {
   return nopa_alloc(self);
 }
 
-NFObject * NFObject_new(NFClass * self, SEL _cmd) {
-  NFObject * obj = nopa_alloc(self);
+NPObject * NPObject_new(NPClass * self, SEL _cmd) {
+  NPObject * obj = nopa_alloc(self);
   return nopa_init(obj);
 }
 
-NFObject * NFObject_init(NFObject * self, SEL _cmd) {
-  struct NFObject * _self = (struct NFObject *)self;
+NPObject * NPObject_init(NPObject * self, SEL _cmd) {
+  struct NPObject * _self = (struct NPObject *)self;
   {
     return nopa_init(self);
   }
 }
 
-void NFObject_dealloc(NFObject * self, SEL _cmd) {
-  struct NFObject * _self = (struct NFObject *)self;
+void NPObject_dealloc(NPObject * self, SEL _cmd) {
+  struct NPObject * _self = (struct NPObject *)self;
   {
     return;
   }
 }
 
-void NFObject_release(NFObject * self, SEL _cmd) {
-  struct NFObject * _self = (struct NFObject *)self;
+void NPObject_release(NPObject * self, SEL _cmd) {
+  struct NPObject * _self = (struct NPObject *)self;
   {
     nopa_release(self);
   }
 }
 
-NFObject * NFObject_retain(NFObject * self, SEL _cmd) {
-  struct NFObject * _self = (struct NFObject *)self;
+NPObject * NPObject_retain(NPObject * self, SEL _cmd) {
+  struct NPObject * _self = (struct NPObject *)self;
   {
     return nopa_retain(self);
   }
 }
 
-NFObject * Engine__Core__Transform_initWithX_y_(NFObject * self, SEL _cmd, int posX, int posY) {
+NPObject * Engine__Core__Transform_initWithX_y_(NPObject * self, SEL _cmd, int posX, int posY) {
   struct Engine__Core__Transform * _self = (struct Engine__Core__Transform *)self;
   {
-    self = NFObject_init(self, sel_registerName("init"));
+    self = NPObject_init(self, sel_registerName("init"));
     if (self)     {
       _self->x = posX;
       _self->y = posY;
@@ -355,7 +355,7 @@ NFObject * Engine__Core__Transform_initWithX_y_(NFObject * self, SEL _cmd, int p
   }
 }
 
-void Engine__Core__Transform_translateByX_y_(NFObject * self, SEL _cmd, int dx, int dy) {
+void Engine__Core__Transform_translateByX_y_(NPObject * self, SEL _cmd, int dx, int dy) {
   struct Engine__Core__Transform * _self = (struct Engine__Core__Transform *)self;
   {
     (_self->x += dx);
@@ -363,10 +363,10 @@ void Engine__Core__Transform_translateByX_y_(NFObject * self, SEL _cmd, int dx, 
   }
 }
 
-NFObject * Engine__Physics__Collider_initWithType_callback_(NFObject * self, SEL _cmd, const char * type, Engine__Physics__CollisionCallback cb) {
+NPObject * Engine__Physics__Collider_initWithType_callback_(NPObject * self, SEL _cmd, const char * type, Engine__Physics__CollisionCallback cb) {
   struct Engine__Physics__Collider * _self = (struct Engine__Physics__Collider *)self;
   {
-    self = NFObject_init(self, sel_registerName("init"));
+    self = NPObject_init(self, sel_registerName("init"));
     if (self)     {
       _self->typeName = type;
       _self->onCollision = cb;
@@ -375,7 +375,7 @@ NFObject * Engine__Physics__Collider_initWithType_callback_(NFObject * self, SEL
   }
 }
 
-void Engine__Physics__Collider_triggerCollisionWithForce_(NFObject * self, SEL _cmd, int force) {
+void Engine__Physics__Collider_triggerCollisionWithForce_(NPObject * self, SEL _cmd, int force) {
   struct Engine__Physics__Collider * _self = (struct Engine__Physics__Collider *)self;
   {
     if (_self->onCollision)     {
@@ -384,10 +384,10 @@ void Engine__Physics__Collider_triggerCollisionWithForce_(NFObject * self, SEL _
   }
 }
 
-NFObject * Render__Sprite_initWithTexture_(NFObject * self, SEL _cmd, const char * tex) {
+NPObject * Render__Sprite_initWithTexture_(NPObject * self, SEL _cmd, const char * tex) {
   struct Render__Sprite * _self = (struct Render__Sprite *)self;
   {
-    self = NFObject_init(self, sel_registerName("init"));
+    self = NPObject_init(self, sel_registerName("init"));
     if (self)     {
       _self->textureName = tex;
     }
@@ -395,26 +395,26 @@ NFObject * Render__Sprite_initWithTexture_(NFObject * self, SEL _cmd, const char
   }
 }
 
-void Render__Sprite_drawAtX_y_(NFObject * self, SEL _cmd, int x, int y) {
+void Render__Sprite_drawAtX_y_(NPObject * self, SEL _cmd, int x, int y) {
   struct Render__Sprite * _self = (struct Render__Sprite *)self;
   {
     printf("[渲染器] 在坐标 (%d, %d) 绘制贴图: %s\n", x, y, _self->textureName);
   }
 }
 
-void GameWorld_runLoop(NFObject * self, SEL _cmd) {
+void GameWorld_runLoop(NPObject * self, SEL _cmd) {
   struct GameWorld * _self = (struct GameWorld *)self;
   {
     printf("[游戏世界] 初始化游戏对象...\n");
-    NFObject *__nopa_tmp_1 = (NFObject_alloc(&nopa_Engine__Core__Transform_class, sel_registerName("alloc")));
+    NPObject *__nopa_tmp_1 = (NPObject_alloc(&nopa_Engine__Core__Transform_class, sel_registerName("alloc")));
     Engine__Core__Transform * position = ((struct nopa_Engine__Core__Transform_vtable *)__nopa_tmp_1->isa->vtable)->initWithX_y_(__nopa_tmp_1, sel_registerName("initWithX:y:"), 10, 20);
-    NFObject *__nopa_tmp_2 = (NFObject_alloc(&nopa_Engine__Physics__Collider_class, sel_registerName("alloc")));
+    NPObject *__nopa_tmp_2 = (NPObject_alloc(&nopa_Engine__Physics__Collider_class, sel_registerName("alloc")));
     Engine__Physics__Collider * boxCollider = ((struct nopa_Engine__Physics__Collider_vtable *)__nopa_tmp_2->isa->vtable)->initWithType_callback_(__nopa_tmp_2, sel_registerName("initWithType:callback:"), "Box", ^void(int velocity) {
   printf("[碰撞警告] 触发碰撞！撞击速度: %d\n", velocity);
   ((struct nopa_Engine__Core__Transform_vtable *)(position)->isa->vtable)->translateByX_y_(position, sel_registerName("translateByX:y:"), 5, -5);
 }
 );
-    NFObject *__nopa_tmp_3 = (NFObject_alloc(&nopa_Render__Sprite_class, sel_registerName("alloc")));
+    NPObject *__nopa_tmp_3 = (NPObject_alloc(&nopa_Render__Sprite_class, sel_registerName("alloc")));
     Render__Sprite * heroSprite = ((struct nopa_Render__Sprite_vtable *)__nopa_tmp_3->isa->vtable)->initWithTexture_(__nopa_tmp_3, sel_registerName("initWithTexture:"), "hero_idle.png");
     printf("\n--- [第 1 帧] 初始状态渲染 ---\n");
     ((struct nopa_Render__Sprite_vtable *)(heroSprite)->isa->vtable)->drawAtX_y_(heroSprite, sel_registerName("drawAtX:y:"), position->x, position->y);
@@ -422,19 +422,19 @@ void GameWorld_runLoop(NFObject * self, SEL _cmd) {
     ((struct nopa_Engine__Physics__Collider_vtable *)(boxCollider)->isa->vtable)->triggerCollisionWithForce_(boxCollider, sel_registerName("triggerCollisionWithForce:"), 80);
     printf("\n--- [第 3 帧] 碰撞后的重新渲染 ---\n");
     ((struct nopa_Render__Sprite_vtable *)(heroSprite)->isa->vtable)->drawAtX_y_(heroSprite, sel_registerName("drawAtX:y:"), position->x, position->y);
-    ((struct nopa_NFObject_vtable *)(position)->isa->vtable)->release(position, sel_registerName("release"));
-    ((struct nopa_NFObject_vtable *)(boxCollider)->isa->vtable)->release(boxCollider, sel_registerName("release"));
-    ((struct nopa_NFObject_vtable *)(heroSprite)->isa->vtable)->release(heroSprite, sel_registerName("release"));
+    ((struct nopa_NPObject_vtable *)(position)->isa->vtable)->release(position, sel_registerName("release"));
+    ((struct nopa_NPObject_vtable *)(boxCollider)->isa->vtable)->release(boxCollider, sel_registerName("release"));
+    ((struct nopa_NPObject_vtable *)(heroSprite)->isa->vtable)->release(heroSprite, sel_registerName("release"));
   }
 }
 
-NFObject * nopa_alloc(struct NFClass * cls);
+NPObject * nopa_alloc(struct NPClass * cls);
 
-NFObject * nopa_init(NFObject * self);
+NPObject * nopa_init(NPObject * self);
 
-void nopa_release(NFObject * obj);
+void nopa_release(NPObject * obj);
 
-NFObject * nopa_retain(NFObject * obj);
+NPObject * nopa_retain(NPObject * obj);
 
 typedef void (^CollisionCallback)(int) ;
 
@@ -446,10 +446,10 @@ int main(int argc, const char * argv[]) {
     printf("==================================================\n");
     printf(">>>    nopac 编译器「@namespace & @using」新特性压测  <<<\n");
     printf("==================================================\n\n");
-    NFObject *__nopa_tmp_4 = (NFObject_alloc(&nopa_GameWorld_class, sel_registerName("alloc")));
-    GameWorld * world = ((struct nopa_NFObject_vtable *)__nopa_tmp_4->isa->vtable)->init(__nopa_tmp_4, sel_registerName("init"));
+    NPObject *__nopa_tmp_4 = (NPObject_alloc(&nopa_GameWorld_class, sel_registerName("alloc")));
+    GameWorld * world = ((struct nopa_NPObject_vtable *)__nopa_tmp_4->isa->vtable)->init(__nopa_tmp_4, sel_registerName("init"));
     ((struct nopa_GameWorld_vtable *)(world)->isa->vtable)->runLoop(world, sel_registerName("runLoop"));
-    ((struct nopa_NFObject_vtable *)(world)->isa->vtable)->release(world, sel_registerName("release"));
+    ((struct nopa_NPObject_vtable *)(world)->isa->vtable)->release(world, sel_registerName("release"));
     printf("\n==================================================\n");
     printf(">>>        恭喜！新命名空间与导入系统跑通！        <<<\n");
     printf("==================================================\n");

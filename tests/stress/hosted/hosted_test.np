@@ -74,7 +74,7 @@ static void check_struct_eq(void) {
 @end
 
 // ── async classes (declared like plain ObjC; @await in the body) ──
-@interface Fetcher : NFObject {
+@interface Fetcher : NPObject {
     int _base;
 }
 - (int) compute:(int)n;
@@ -105,7 +105,7 @@ static void check_struct_eq(void) {
     - (void) speak;
     @end
 
-    @interface Animal : NFObject {
+    @interface Animal : NPObject {
         @public int legs;
     }
     - (id) init;
@@ -149,7 +149,7 @@ static void check_struct_eq(void) {
     @end
 
     // Robot conforms to Renderable (composed: Drawable & Serializable)
-    @interface Robot : NFObject <Renderable>
+    @interface Robot : NPObject <Renderable>
     - (id) init;
     - (void) draw;
     - (int) serialize;
@@ -161,7 +161,7 @@ static void check_struct_eq(void) {
     @end
 
     // conformance is checked: removing speak() from Dog breaks the build.
-    @interface ErrBoom : NFObject {
+    @interface ErrBoom : NPObject {
         int code;
     }
     - (id) init;
@@ -175,7 +175,7 @@ static void check_struct_eq(void) {
     @end
 
     // weak-ref holder
-    @interface Holder : NFObject {
+    @interface Holder : NPObject {
         __weak Animal *_weakRef;
     }
     - (id) init;
@@ -191,7 +191,7 @@ static void check_struct_eq(void) {
 @endnamespace
 
 // ── generics (top level; namespace-qualified receivers don't specialize) ──
-@interface Box<T> : NFObject {
+@interface Box<T> : NPObject {
     T _v;
 }
 - (void) set:(T)v;
@@ -206,13 +206,13 @@ static void check_struct_eq(void) {
 static int poke_speak(id<Stress::Speaker> s) { [s speak]; return 1; }
 
 // ── @throws 声明标注：typed / bare / 本地 @try 豁免（编译期对账） ──
-@interface Thrower : NFObject
-- (int) risky:(int)n @throws(NFString *);   // typed
+@interface Thrower : NPObject
+- (int) risky:(int)n @throws(NPString *);   // typed
 - (int) bare:(int)n @throws;                // bare
 @end
 
 @implementation Thrower
-- (int) risky:(int)n @throws(NFString *) {
+- (int) risky:(int)n @throws(NPString *) {
     if (n < 0) {
         @throw @"risky-fail";
     }
@@ -233,7 +233,7 @@ static int local_throw_catch(int n) {
             @throw @"local-fail";
         }
         return n * 3;
-    } @catch (NFString *e) {
+    } @catch (NPString *e) {
         return -1;
     }
 }
@@ -247,20 +247,20 @@ int main() {
            mode_name(MODE_TURBO), c_add(2, 3), (int)sizeof(struct Ops));
 
     // ── 2. Foundation: strings, arrays, boxing, variadic ctor ──
-    NFString *s1 = @"hello";
-    NFString *s2 = [s1 stringByAppendingString:@" world"];
+    NPString *s1 = @"hello";
+    NPString *s2 = [s1 stringByAppendingString:@" world"];
     printf("[F1] string: %s (len %zu)\n", [s2 UTF8String], [s2 length]);
 
-    // BUG NOTE: `NFString *a = @"one", *b = @"two";` (pointer declarators in a
+    // BUG NOTE: `NPString *a = @"one", *b = @"two";` (pointer declarators in a
     // comma list with initializers) fails to parse — split declarations.
-    NFString *a = @"one";
-    NFString *b = @"two";
-    NFString *c = @"three";
-    NFArray *arr = [NFArray arrayWithObjects:a, b, c, nil];   // variadic
+    NPString *a = @"one";
+    NPString *b = @"two";
+    NPString *c = @"three";
+    NPArray *arr = [NPArray arrayWithObjects:a, b, c, nil];   // variadic
     printf("[F2] array count=%zu first=%s\n", [arr count],
            [[arr objectAtIndex:0] UTF8String]);
 
-    NFMutableArray *marr = [NFMutableArray arrayWithCapacity:4];
+    NPMutableArray *marr = [NPMutableArray arrayWithCapacity:4];
     [marr addObject:@"x"];
     [marr addObject:@"y"];
     [marr insertObject:@"w" atIndex:0];
@@ -269,23 +269,23 @@ int main() {
            [[marr objectAtIndex:1] UTF8String],
            [[marr objectAtIndex:2] UTF8String]);
 
-    NFNumber *n = @42;                       // boxed literal
+    NPNumber *n = @42;                       // boxed literal
     printf("[F4] @42 → %d  double @1.5 → %.1f\n", [n intValue], [@1.5 doubleValue]);
 
-    printf("[F5] NFLog: ");
-    NFLog(@"%@ has %zu items", s2, [arr count]);
+    printf("[F5] NPLog: ");
+    NPLog(@"%@ has %zu items", s2, [arr count]);
 
-    // ── 3. for-in over NFArray + nested ──
+    // ── 3. for-in over NPArray + nested ──
     printf("[L1] for-in:");
-    for (NFString *item in arr) {
+    for (NPString *item in arr) {
         printf(" %s", [item UTF8String]);
     }
     printf("\n");
 
-    NFArray *rows = @[ @[ @"a", @"b" ], @[ @"c" ] ];
+    NPArray *rows = @[ @[ @"a", @"b" ], @[ @"c" ] ];
     printf("[L2] nested:");
-    for (NFObject *row in rows) {
-        for (NFString *cell in (NFArray *)row) {
+    for (NPObject *row in rows) {
+        for (NPString *cell in (NPArray *)row) {
             printf(" %s", [cell UTF8String]);
         }
     }
@@ -295,7 +295,7 @@ int main() {
     Stress::Dog *dog = [[Stress::Dog alloc] init];
     Stress::Cat *cat = [[Stress::Cat alloc] init];
     Stress::Robot *robot = [[Stress::Robot alloc] init];
-    NFArray *zoo = [NFArray arrayWithObjects:dog, cat, robot, nil];
+    NPArray *zoo = [NPArray arrayWithObjects:dog, cat, robot, nil];
     printf("[D1] dispatch:");
     for (id item in zoo) {
         if ([item isKindOfClass:[Stress::Dog class]]) {
@@ -320,9 +320,9 @@ int main() {
            [(id<Stress::Renderable>)robot serialize]);
 
     // ── 6. generics: two specializations ──
-    Box<NFString *> *sb = [[Box alloc] init];
+    Box<NPString *> *sb = [[Box alloc] init];
     [sb set:s1];
-    printf("[G1] box<NFString*> = %s\n", [[sb value] UTF8String]);
+    printf("[G1] box<NPString*> = %s\n", [[sb value] UTF8String]);
 
     Box<int *> *ib = [[Box alloc] init];
     int stored = 555;
@@ -381,7 +381,7 @@ int main() {
            [t8 risky:21], [t8 bare:41], local_throw_catch(7));
     @try {
         [t8 risky:-1];                     // 抛出路径
-    } @catch (NFString *e3) {
+    } @catch (NPString *e3) {
         printf("[E3] throws caught %s\n", [e3 UTF8String]);
     }
 

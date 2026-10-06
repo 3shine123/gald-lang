@@ -4,8 +4,8 @@
 
 ```objc
 switch (subject) {
-    case NFString *s:      // 类型绑定 → isKindOfClass:
-        ...                //   体内 `s` 已是 (NFString *)subject
+    case NPString *s:      // 类型绑定 → isKindOfClass:
+        ...                //   体内 `s` 已是 (NPString *)subject
     case > 100:            // 悬空比较 → `subject > 100`
     case > 0 && < 100:     // 区间
     case @"literal":       // 对象字面量 → isEqual:（值语义）
@@ -24,7 +24,7 @@ parser 识别 `case` 标签形态 → 含任一模式臂时整个 switch 降级�
 之前改写成 `goto`/`if` 状态机 + C 标签。**codegen 零改动**。
 
 ```
-{ NFObject *__nopa_sw = (NFObject *)subject;      /* 对象 subject */
+{ NPObject *__nopa_sw = (NPObject *)subject;      /* 对象 subject */
   __auto_type __nopa_sw = subject;                /* 标量 subject */
   if (<arm0 test>) goto __nopa_case_0_1;
   ...
@@ -39,7 +39,7 @@ parser 识别 `case` 标签形态 → 含任一模式臂时整个 switch 降级�
   arm 体内的嵌套循环/内层 switch 的 `break` 不受影响。
 - **fallthrough 保持 C 语义**：臂体末尾不追加隐式跳转，无 `break` 即落入下
   一臂（用例 7 验证 `t7=11`）。
-- **对象 subject 声明为 `NFObject *`**（不是 `__auto_type`）：本 pass 跑在
+- **对象 subject 声明为 `NPObject *`**（不是 `__auto_type`）：本 pass 跑在
   checker 之前，静态类型未知，`__auto_type` 会继承指针类型并被 checker
   判为"对象初始化标量"。标量 subject 保持 `__auto_type`（eh pass 先例）。
 
@@ -72,4 +72,4 @@ parser 识别 `case` 标签形态 → 含任一模式臂时整个 switch 降级�
 - 常量臂与模式臂混合降级（`switch` 保留原始 body，按臂分流）。
 - 穷尽性分析（对象 subject + `Bind` 臂缺 `default` 时警告）。
 - `case is` / `case as` 模式（as 需类型转换语义）。
-- 或模式（`case NFString *s, NFNumber *n:`）。
+- 或模式（`case NPString *s, NPNumber *n:`）。

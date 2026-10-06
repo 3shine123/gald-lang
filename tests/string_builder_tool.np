@@ -4,14 +4,14 @@
 #import <Foundation/Foundation.np>
 
 // 定义一个“可配置/可描述”的协议
-@protocol NFStringParsable
+@protocol NPStringParsable
 - (char *)toString;
 @end
 
 // ==========================================
-// @interface: NFStringBuilder
+// @interface: NPStringBuilder
 // ==========================================
-@interface NFStringBuilder : NFObject <NFStringParsable> {
+@interface NPStringBuilder : NPObject <NPStringParsable> {
 @private
     char *_buffer;
     int _length;
@@ -35,9 +35,9 @@
 @end
 
 // ==========================================
-// @implementation: NFStringBuilder
+// @implementation: NPStringBuilder
 // ==========================================
-@implementation NFStringBuilder
+@implementation NPStringBuilder
 
 - (instancetype)init {
     self = [super init];
@@ -68,7 +68,7 @@
         free(self->_buffer);
         self->_buffer = NULL;
     }
-    printf("[Tool Log] NFStringBuilder deallocated, dynamic memory freed.\n");
+    printf("[Tool Log] NPStringBuilder deallocated, dynamic memory freed.\n");
 }
 
 - (int)length {
@@ -114,7 +114,7 @@
 // ==========================================
 // 工具函数的静态多态测试 (接受 id 类型)
 // ==========================================
-void PrintParsedToolObject(id <NFStringParsable> obj) {
+void PrintParsedToolObject(id <NPStringParsable> obj) {
     // 静态转译器会通过 Universal Vtable 动态派发 -toString
     printf("[Parsed Output]: %s\n", [obj toString]);
 }
@@ -126,7 +126,7 @@ int main() {
     printf("=== Micrit Tooling Test: String Builder ===\n\n");
 
     // 1. 初始化工具对象
-NFStringBuilder *sb = [[NFStringBuilder alloc] initWithString:"BaseURL: https://api.micrit.org"];
+NPStringBuilder *sb = [[NPStringBuilder alloc] initWithString:"BaseURL: https://api.micrit.org"];
 
     // 2. 链式/连续调用工具方法拼装数据
     [sb appendStr:"/v1/user/"];

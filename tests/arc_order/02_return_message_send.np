@@ -9,25 +9,25 @@
 // Kept deliberately single-assertion: owning the dealloc of an *ivar* is a
 // separate, still-open ARC gap (see tests/arc_order/README.md).
 
-@interface AO02Wrap : NFObject
-- (NFString *)text;
+@interface AO02Wrap : NPObject
+- (NPString *)text;
 @end
 
 @implementation AO02Wrap
 - (void)dealloc {
-    NFLog(@"ao02 wrap dealloc");
+    NPLog(@"ao02 wrap dealloc");
     [super dealloc];
 }
-- (NFString *)text { return [NFString stringWithUTF8String:"world"]; }
+- (NPString *)text { return [NPString stringWithUTF8String:"world"]; }
 @end
 
-NFString *ao02_fetch(void) {
+NPString *ao02_fetch(void) {
     AO02Wrap *w = [[AO02Wrap alloc] init];
     return [w text];
 }
 
 int main() {
-    NFString *s = ao02_fetch();
-    NFLog(@"ao02 len=%d", (int)[s length]);
+    NPString *s = ao02_fetch();
+    NPLog(@"ao02 len=%d", (int)[s length]);
     return [s length] == 5 ? 0 : 1;
 }

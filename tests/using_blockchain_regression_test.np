@@ -12,7 +12,7 @@
 // ============================================================================
 @namespace Ledger
     @namespace Core
-        @interface TransactionBlock : NFObject {
+        @interface TransactionBlock : NPObject {
             @public
             int _txCount; // 交易笔数
             const char* _blockHash;
@@ -58,7 +58,7 @@
         // 声明共识签名校验的高阶回调 Block
         typedef int (^SignatureVerifyBlock)(int rawCount);
 
-        @interface ValidatorEngine : NFObject {
+        @interface ValidatorEngine : NPObject {
             @public
             const char* _nodeIdentity;
             int _stakeAmount; // 权益质押代币数量
@@ -108,7 +108,7 @@
 // ============================================================================
 @namespace Network
     @namespace Extensions
-        @interface RouterPlugin : NFObject {
+        @interface RouterPlugin : NPObject {
             @public
             const char* _pluginName;
             int _bandwidthMultiplier;

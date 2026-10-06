@@ -2,15 +2,15 @@
 // (clang 与 nopa codegen 实际均按左到右求值;本用例锁定该行为,见 README)
 #import <Foundation/Foundation.np>
 
-@interface T : NFObject @end
+@interface T : NPObject @end
 @implementation T
 + (int)boom {
-    NFLog(@"about to throw");
+    NPLog(@"about to throw");
     @throw @"err";
     return 0;
 }
 + (int)bar {
-    NFLog(@"bar executed");
+    NPLog(@"bar executed");
     return 2;
 }
 @end
@@ -20,9 +20,9 @@ int main() {
     @try {
         x = [T boom] + [T bar];
     }
-    @catch (NFString *e) {
-        NFLog(@"caught");
+    @catch (NPString *e) {
+        NPLog(@"caught");
     }
-    NFLog(@"x=%d", x);
+    NPLog(@"x=%d", x);
     return 0;
 }

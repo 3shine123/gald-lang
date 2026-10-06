@@ -9,19 +9,19 @@
 
 #include <string.h>
 
-struct nopa_NFObject_vtable;
-struct nopa_NFStringBuilder_vtable;
+struct nopa_NPObject_vtable;
+struct nopa_NPStringBuilder_vtable;
 
-#define nopa_NFObject_vtable_index_init 2
-#define nopa_NFObject_vtable_index_dealloc 3
-#define nopa_NFStringBuilder_vtable_index_init 2
-#define nopa_NFStringBuilder_vtable_index_initWithString_ 4
-#define nopa_NFStringBuilder_vtable_index_dealloc 3
-#define nopa_NFStringBuilder_vtable_index_appendStr_ 5
-#define nopa_NFStringBuilder_vtable_index_appendInt_ 6
-#define nopa_NFStringBuilder_vtable_index_clear 7
-#define nopa_NFStringBuilder_vtable_index_toString 8
-#define nopa_NFStringBuilder_vtable_index_length 9
+#define nopa_NPObject_vtable_index_init 2
+#define nopa_NPObject_vtable_index_dealloc 3
+#define nopa_NPStringBuilder_vtable_index_init 2
+#define nopa_NPStringBuilder_vtable_index_initWithString_ 4
+#define nopa_NPStringBuilder_vtable_index_dealloc 3
+#define nopa_NPStringBuilder_vtable_index_appendStr_ 5
+#define nopa_NPStringBuilder_vtable_index_appendInt_ 6
+#define nopa_NPStringBuilder_vtable_index_clear 7
+#define nopa_NPStringBuilder_vtable_index_toString 8
+#define nopa_NPStringBuilder_vtable_index_length 9
 
 static const SEL __nopa_sel_init = {.name = "init", .hash = 0x16B1D373};
 static const SEL __nopa_sel_appendStr_ = {.name = "appendStr_", .hash = 0xBAF82199};
@@ -32,224 +32,224 @@ static const SEL __nopa_sel_appendInt_ = {.name = "appendInt_", .hash = 0xAB6905
 static const SEL __nopa_sel_length = {.name = "length", .hash = 0x83D03615};
 static const SEL __nopa_sel_clear = {.name = "clear", .hash = 0x5C6E1222};
 
-typedef struct NFObject NFObject;
-typedef struct NFStringBuilder NFStringBuilder;
+typedef struct NPObject NPObject;
+typedef struct NPStringBuilder NPStringBuilder;
 
 
 
-NFObject * NFObject_alloc(NFClass * self, SEL _cmd);
-NFObject * NFObject_new(NFClass * self, SEL _cmd);
-NFObject * NFObject_init(NFObject * self, SEL _cmd);
-void NFObject_dealloc(NFObject * self, SEL _cmd);
-NFClass * NFObject_getClass(NFClass * self, SEL _cmd);
-NFObject * NFStringBuilder_init(NFObject * self, SEL _cmd);
-NFObject * NFStringBuilder_initWithString_(NFObject * self, SEL _cmd, char * initialStr);
-void NFStringBuilder_dealloc(NFObject * self, SEL _cmd);
-void NFStringBuilder_appendStr_(NFObject * self, SEL _cmd, char * str);
-void NFStringBuilder_appendInt_(NFObject * self, SEL _cmd, int num);
-void NFStringBuilder_clear(NFObject * self, SEL _cmd);
-char * NFStringBuilder_toString(NFObject * self, SEL _cmd);
-int NFStringBuilder_length(NFObject * self, SEL _cmd);
-void NFStringBuilder_setLength_(NFObject * self, SEL _cmd, int value);
-NFClass * NFStringBuilder_getClass(NFClass * self, SEL _cmd);
-void PrintParsedToolObject(NFObject * obj);
+NPObject * NPObject_alloc(NPClass * self, SEL _cmd);
+NPObject * NPObject_new(NPClass * self, SEL _cmd);
+NPObject * NPObject_init(NPObject * self, SEL _cmd);
+void NPObject_dealloc(NPObject * self, SEL _cmd);
+NPClass * NPObject_getClass(NPClass * self, SEL _cmd);
+NPObject * NPStringBuilder_init(NPObject * self, SEL _cmd);
+NPObject * NPStringBuilder_initWithString_(NPObject * self, SEL _cmd, char * initialStr);
+void NPStringBuilder_dealloc(NPObject * self, SEL _cmd);
+void NPStringBuilder_appendStr_(NPObject * self, SEL _cmd, char * str);
+void NPStringBuilder_appendInt_(NPObject * self, SEL _cmd, int num);
+void NPStringBuilder_clear(NPObject * self, SEL _cmd);
+char * NPStringBuilder_toString(NPObject * self, SEL _cmd);
+int NPStringBuilder_length(NPObject * self, SEL _cmd);
+void NPStringBuilder_setLength_(NPObject * self, SEL _cmd, int value);
+NPClass * NPStringBuilder_getClass(NPClass * self, SEL _cmd);
+void PrintParsedToolObject(NPObject * obj);
 int main();
 
-extern NFClass nopa_NFObject_class;
-extern NFClass nopa_NFStringBuilder_class;
+extern NPClass nopa_NPObject_class;
+extern NPClass nopa_NPStringBuilder_class;
 void nopa_meta_init(void);
 
-// struct NFClass defined in runtime.h
-// struct NFObject defined in runtime.h
-struct nopa_NFObject_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
+// struct NPClass defined in runtime.h
+// struct NPObject defined in runtime.h
+struct nopa_NPObject_vtable {
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
 };
-struct nopa_NFObject_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+struct nopa_NPObject_meta_vtable {
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
-struct NFStringBuilder {
-    struct NFClass *isa;
+struct NPStringBuilder {
+    struct NPClass *isa;
     uint32_t retain_count;
     char * _buffer;
     int _length;
     int _capacity;
 };
-typedef struct NFStringBuilder NFStringBuilder;
-struct nopa_NFStringBuilder_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    NFObject * (*initWithString_)(NFObject *, SEL, char *);
-    void (*appendStr_)(NFObject *, SEL, char *);
-    void (*appendInt_)(NFObject *, SEL, int);
-    void (*clear)(NFObject *, SEL);
-    char * (*toString)(NFObject *, SEL);
-    int (*length)(NFObject *, SEL);
-    void (*setLength_)(NFObject *, SEL, int);
+typedef struct NPStringBuilder NPStringBuilder;
+struct nopa_NPStringBuilder_vtable {
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    NPObject * (*initWithString_)(NPObject *, SEL, char *);
+    void (*appendStr_)(NPObject *, SEL, char *);
+    void (*appendInt_)(NPObject *, SEL, int);
+    void (*clear)(NPObject *, SEL);
+    char * (*toString)(NPObject *, SEL);
+    int (*length)(NPObject *, SEL);
+    void (*setLength_)(NPObject *, SEL, int);
 };
-struct nopa_NFStringBuilder_meta_vtable {
-    NFClass * (*class)(NFClass *, SEL);
+struct nopa_NPStringBuilder_meta_vtable {
+    NPClass * (*class)(NPClass *, SEL);
 };
-NFObject * NFObject_alloc(NFClass * self, SEL _cmd) {
+NPObject * NPObject_alloc(NPClass * self, SEL _cmd) {
     return nopa_alloc(self);
 }
 
-NFObject * NFObject_new(NFClass * self, SEL _cmd) {
-    NFObject * obj = nopa_alloc(self);
+NPObject * NPObject_new(NPClass * self, SEL _cmd) {
+    NPObject * obj = nopa_alloc(self);
     return nopa_init(obj);
 }
 
-NFObject * NFObject_init(NFObject * self, SEL _cmd) {
-    struct NFObject * _self = ((struct NFObject *)(self));
+NPObject * NPObject_init(NPObject * self, SEL _cmd) {
+    struct NPObject * _self = ((struct NPObject *)(self));
     {
         return nopa_init(self);
     }
 }
 
-void NFObject_dealloc(NFObject * self, SEL _cmd) {
-    struct NFObject * _self = ((struct NFObject *)(self));
+void NPObject_dealloc(NPObject * self, SEL _cmd) {
+    struct NPObject * _self = ((struct NPObject *)(self));
     {
         return;
     }
 }
 
-NFClass * NFObject_getClass(NFClass * self, SEL _cmd) {
-    return &nopa_NFObject_class;
+NPClass * NPObject_getClass(NPClass * self, SEL _cmd) {
+    return &nopa_NPObject_class;
 }
 
-NFObject * nopa_alloc(struct NFClass * cls);
-NFObject * nopa_init(NFObject * );
-NFObject * NFStringBuilder_init(NFObject * self, SEL _cmd) {
-    struct NFStringBuilder * _self = ((struct NFStringBuilder *)(self));
+NPObject * nopa_alloc(struct NPClass * cls);
+NPObject * nopa_init(NPObject * );
+NPObject * NPStringBuilder_init(NPObject * self, SEL _cmd) {
+    struct NPStringBuilder * _self = ((struct NPStringBuilder *)(self));
     {
-        self = NFObject_init(self, __nopa_sel_init);
+        self = NPObject_init(self, __nopa_sel_init);
         if (self) {
             {
-                ((struct NFStringBuilder *)(self))->_capacity = 16;
-                ((struct NFStringBuilder *)(self))->_buffer = ((char *)(malloc(((struct NFStringBuilder *)(self))->_capacity)));
-                ((struct NFStringBuilder *)(self))->_buffer[0] = 0;
-                ((struct NFStringBuilder *)(self))->_length = 0;
+                ((struct NPStringBuilder *)(self))->_capacity = 16;
+                ((struct NPStringBuilder *)(self))->_buffer = ((char *)(malloc(((struct NPStringBuilder *)(self))->_capacity)));
+                ((struct NPStringBuilder *)(self))->_buffer[0] = 0;
+                ((struct NPStringBuilder *)(self))->_length = 0;
             }
         }
         return self;
     }
 }
 
-NFObject * NFStringBuilder_initWithString_(NFObject * self, SEL _cmd, char * initialStr) {
-    struct NFStringBuilder * _self = ((struct NFStringBuilder *)(self));
+NPObject * NPStringBuilder_initWithString_(NPObject * self, SEL _cmd, char * initialStr) {
+    struct NPStringBuilder * _self = ((struct NPStringBuilder *)(self));
     {
-        self = NFObject_init(self, __nopa_sel_init);
+        self = NPObject_init(self, __nopa_sel_init);
         if (self) {
             {
                 int initLen = strlen(initialStr);
-                ((struct NFStringBuilder *)(self))->_capacity = initLen > 16 ? initLen * 2 : 32;
-                ((struct NFStringBuilder *)(self))->_buffer = ((char *)(malloc(((struct NFStringBuilder *)(self))->_capacity)));
-                strcpy(((struct NFStringBuilder *)(self))->_buffer, initialStr);
-                ((struct NFStringBuilder *)(self))->_length = initLen;
+                ((struct NPStringBuilder *)(self))->_capacity = initLen > 16 ? initLen * 2 : 32;
+                ((struct NPStringBuilder *)(self))->_buffer = ((char *)(malloc(((struct NPStringBuilder *)(self))->_capacity)));
+                strcpy(((struct NPStringBuilder *)(self))->_buffer, initialStr);
+                ((struct NPStringBuilder *)(self))->_length = initLen;
             }
         }
         return self;
     }
 }
 
-void NFStringBuilder_dealloc(NFObject * self, SEL _cmd) {
-    struct NFStringBuilder * _self = ((struct NFStringBuilder *)(self));
+void NPStringBuilder_dealloc(NPObject * self, SEL _cmd) {
+    struct NPStringBuilder * _self = ((struct NPStringBuilder *)(self));
     {
-        if (((struct NFStringBuilder *)(self))->_buffer) {
+        if (((struct NPStringBuilder *)(self))->_buffer) {
             {
-                free(((struct NFStringBuilder *)(self))->_buffer);
-                ((struct NFStringBuilder *)(self))->_buffer = NULL;
+                free(((struct NPStringBuilder *)(self))->_buffer);
+                ((struct NPStringBuilder *)(self))->_buffer = NULL;
             }
         }
-        printf("[Tool Log] NFStringBuilder deallocated, dynamic memory freed.\n");
+        printf("[Tool Log] NPStringBuilder deallocated, dynamic memory freed.\n");
     }
 }
 
-void NFStringBuilder_appendStr_(NFObject * self, SEL _cmd, char * str) {
-    struct NFStringBuilder * _self = ((struct NFStringBuilder *)(self));
+void NPStringBuilder_appendStr_(NPObject * self, SEL _cmd, char * str) {
+    struct NPStringBuilder * _self = ((struct NPStringBuilder *)(self));
     {
         if (!str) {
             return;
         }
         int appendLen = strlen(str);
-        int needed = ((struct NFStringBuilder *)(self))->_length + appendLen + 1;
-        if (needed > ((struct NFStringBuilder *)(self))->_capacity) {
+        int needed = ((struct NPStringBuilder *)(self))->_length + appendLen + 1;
+        if (needed > ((struct NPStringBuilder *)(self))->_capacity) {
             {
-                while (((struct NFStringBuilder *)(self))->_capacity < needed) {
+                while (((struct NPStringBuilder *)(self))->_capacity < needed) {
                     {
-                        ((struct NFStringBuilder *)(self))->_capacity = ((struct NFStringBuilder *)(self))->_capacity * 2;
+                        ((struct NPStringBuilder *)(self))->_capacity = ((struct NPStringBuilder *)(self))->_capacity * 2;
                     }
                 }
-                ((struct NFStringBuilder *)(self))->_buffer = ((char *)(realloc(((struct NFStringBuilder *)(self))->_buffer, ((struct NFStringBuilder *)(self))->_capacity)));
+                ((struct NPStringBuilder *)(self))->_buffer = ((char *)(realloc(((struct NPStringBuilder *)(self))->_buffer, ((struct NPStringBuilder *)(self))->_capacity)));
             }
         }
-        strcat(((struct NFStringBuilder *)(self))->_buffer, str);
-        ((struct NFStringBuilder *)(self))->_length = ((struct NFStringBuilder *)(self))->_length + appendLen;
+        strcat(((struct NPStringBuilder *)(self))->_buffer, str);
+        ((struct NPStringBuilder *)(self))->_length = ((struct NPStringBuilder *)(self))->_length + appendLen;
     }
 }
 
-void NFStringBuilder_appendInt_(NFObject * self, SEL _cmd, int num) {
-    struct NFStringBuilder * _self = ((struct NFStringBuilder *)(self));
+void NPStringBuilder_appendInt_(NPObject * self, SEL _cmd, int num) {
+    struct NPStringBuilder * _self = ((struct NPStringBuilder *)(self));
     {
         char tmp[32];
         sprintf(tmp, "%d", num);
-        ((struct nopa_NFStringBuilder_vtable *)self->isa->vtable)->appendStr_(self, __nopa_sel_appendStr_, tmp);
+        ((struct nopa_NPStringBuilder_vtable *)self->isa->vtable)->appendStr_(self, __nopa_sel_appendStr_, tmp);
     }
 }
 
-void NFStringBuilder_clear(NFObject * self, SEL _cmd) {
-    struct NFStringBuilder * _self = ((struct NFStringBuilder *)(self));
+void NPStringBuilder_clear(NPObject * self, SEL _cmd) {
+    struct NPStringBuilder * _self = ((struct NPStringBuilder *)(self));
     {
-        if (((struct NFStringBuilder *)(self))->_buffer) {
+        if (((struct NPStringBuilder *)(self))->_buffer) {
             {
-                ((struct NFStringBuilder *)(self))->_buffer[0] = 0;
-                ((struct NFStringBuilder *)(self))->_length = 0;
+                ((struct NPStringBuilder *)(self))->_buffer[0] = 0;
+                ((struct NPStringBuilder *)(self))->_length = 0;
             }
         }
     }
 }
 
-char * NFStringBuilder_toString(NFObject * self, SEL _cmd) {
-    struct NFStringBuilder * _self = ((struct NFStringBuilder *)(self));
+char * NPStringBuilder_toString(NPObject * self, SEL _cmd) {
+    struct NPStringBuilder * _self = ((struct NPStringBuilder *)(self));
     {
-        return ((struct NFStringBuilder *)(self))->_buffer;
+        return ((struct NPStringBuilder *)(self))->_buffer;
     }
 }
 
-int NFStringBuilder_length(NFObject * self, SEL _cmd) {
-    return ((struct NFStringBuilder *)(self))->_length;
+int NPStringBuilder_length(NPObject * self, SEL _cmd) {
+    return ((struct NPStringBuilder *)(self))->_length;
 }
 
-void NFStringBuilder_setLength_(NFObject * self, SEL _cmd, int value) {
-    ((struct NFStringBuilder *)(self))->_length = value;
+void NPStringBuilder_setLength_(NPObject * self, SEL _cmd, int value) {
+    ((struct NPStringBuilder *)(self))->_length = value;
 }
 
-NFClass * NFStringBuilder_getClass(NFClass * self, SEL _cmd) {
-    return &nopa_NFStringBuilder_class;
+NPClass * NPStringBuilder_getClass(NPClass * self, SEL _cmd) {
+    return &nopa_NPStringBuilder_class;
 }
 
-void PrintParsedToolObject(NFObject * obj) {
-    printf("[Parsed Output]: %s\n", ((struct nopa_NFStringBuilder_vtable *)obj->isa->vtable)->toString(obj, __nopa_sel_toString));
+void PrintParsedToolObject(NPObject * obj) {
+    printf("[Parsed Output]: %s\n", ((struct nopa_NPStringBuilder_vtable *)obj->isa->vtable)->toString(obj, __nopa_sel_toString));
 }
 
 int main() {
     nopa_autoreleasepool_t *__pool = nopa_autoreleasepool_push();
     nopa_meta_init();
     printf("=== Micrit Tooling Test: String Builder ===\n\n");
-    NFObject *__nopa_tmp_0 = (NFObject_alloc(&nopa_NFStringBuilder_class, __nopa_sel_alloc));
-    NFStringBuilder * sb = ((struct nopa_NFStringBuilder_vtable *)__nopa_tmp_0->isa->vtable)->initWithString_(__nopa_tmp_0, __nopa_sel_initWithString_, "BaseURL: https://api.micrit.org");
-    ((struct nopa_NFStringBuilder_vtable *)sb->isa->vtable)->appendStr_(sb, __nopa_sel_appendStr_, "/v1/user/");
-    ((struct nopa_NFStringBuilder_vtable *)sb->isa->vtable)->appendInt_(sb, __nopa_sel_appendInt_, 8888);
-    ((struct nopa_NFStringBuilder_vtable *)sb->isa->vtable)->appendStr_(sb, __nopa_sel_appendStr_, "?status=");
-    ((struct nopa_NFStringBuilder_vtable *)sb->isa->vtable)->appendStr_(sb, __nopa_sel_appendStr_, "active");
-    printf("Generated URL Length: %d\n", ((struct nopa_NFStringBuilder_vtable *)sb->isa->vtable)->length(sb, __nopa_sel_length));
+    NPObject *__nopa_tmp_0 = (NPObject_alloc(&nopa_NPStringBuilder_class, __nopa_sel_alloc));
+    NPStringBuilder * sb = ((struct nopa_NPStringBuilder_vtable *)__nopa_tmp_0->isa->vtable)->initWithString_(__nopa_tmp_0, __nopa_sel_initWithString_, "BaseURL: https://api.micrit.org");
+    ((struct nopa_NPStringBuilder_vtable *)sb->isa->vtable)->appendStr_(sb, __nopa_sel_appendStr_, "/v1/user/");
+    ((struct nopa_NPStringBuilder_vtable *)sb->isa->vtable)->appendInt_(sb, __nopa_sel_appendInt_, 8888);
+    ((struct nopa_NPStringBuilder_vtable *)sb->isa->vtable)->appendStr_(sb, __nopa_sel_appendStr_, "?status=");
+    ((struct nopa_NPStringBuilder_vtable *)sb->isa->vtable)->appendStr_(sb, __nopa_sel_appendStr_, "active");
+    printf("Generated URL Length: %d\n", ((struct nopa_NPStringBuilder_vtable *)sb->isa->vtable)->length(sb, __nopa_sel_length));
     PrintParsedToolObject(sb);
-    ((struct nopa_NFStringBuilder_vtable *)sb->isa->vtable)->clear(sb, __nopa_sel_clear);
-    ((struct nopa_NFStringBuilder_vtable *)sb->isa->vtable)->appendStr_(sb, __nopa_sel_appendStr_, "[Log] System status OK. CPU: ");
-    ((struct nopa_NFStringBuilder_vtable *)sb->isa->vtable)->appendInt_(sb, __nopa_sel_appendInt_, 42);
-    ((struct nopa_NFStringBuilder_vtable *)sb->isa->vtable)->appendStr_(sb, __nopa_sel_appendStr_, "%");
+    ((struct nopa_NPStringBuilder_vtable *)sb->isa->vtable)->clear(sb, __nopa_sel_clear);
+    ((struct nopa_NPStringBuilder_vtable *)sb->isa->vtable)->appendStr_(sb, __nopa_sel_appendStr_, "[Log] System status OK. CPU: ");
+    ((struct nopa_NPStringBuilder_vtable *)sb->isa->vtable)->appendInt_(sb, __nopa_sel_appendInt_, 42);
+    ((struct nopa_NPStringBuilder_vtable *)sb->isa->vtable)->appendStr_(sb, __nopa_sel_appendStr_, "%");
     PrintParsedToolObject(sb);
     printf("\n=== Exiting Main (ARC should auto-trigger dealloc) ===\n");
     return 0;
@@ -259,12 +259,12 @@ int main() {
 
 // ─── Protocol metadata ─────────────────────────────────
 
-extern NFProtocol nopa_protocol_NFStringParsable;
+extern NPProtocol nopa_protocol_NPStringParsable;
 
-NFProtocol nopa_protocol_NFStringParsable = {
-    .name = "NFStringParsable",
+NPProtocol nopa_protocol_NPStringParsable = {
+    .name = "NPStringParsable",
     .parent_count = 0,
-    .required_methods = (NFProtocolMethod[]){
+    .required_methods = (NPProtocolMethod[]){
         { .name = "toString", .encoding = "@" },
     },
     .required_count = 1,
@@ -274,52 +274,52 @@ NFProtocol nopa_protocol_NFStringParsable = {
 
 // ─── Class metadata ─────────────────────────────────────
 
-struct nopa_NFObject_vtable nopa_NFObject_vtable_inst = {
-    .init = NFObject_init,
-    .dealloc = NFObject_dealloc,
+struct nopa_NPObject_vtable nopa_NPObject_vtable_inst = {
+    .init = NPObject_init,
+    .dealloc = NPObject_dealloc,
 };
 
-struct nopa_NFStringBuilder_vtable nopa_NFStringBuilder_vtable_inst = {
-    .init = NFStringBuilder_init,
-    .dealloc = NFStringBuilder_dealloc,
-    .initWithString_ = NFStringBuilder_initWithString_,
-    .appendStr_ = NFStringBuilder_appendStr_,
-    .appendInt_ = NFStringBuilder_appendInt_,
-    .clear = NFStringBuilder_clear,
-    .toString = NFStringBuilder_toString,
-    .length = NFStringBuilder_length,
-    .setLength_ = NFStringBuilder_setLength_,
+struct nopa_NPStringBuilder_vtable nopa_NPStringBuilder_vtable_inst = {
+    .init = NPStringBuilder_init,
+    .dealloc = NPStringBuilder_dealloc,
+    .initWithString_ = NPStringBuilder_initWithString_,
+    .appendStr_ = NPStringBuilder_appendStr_,
+    .appendInt_ = NPStringBuilder_appendInt_,
+    .clear = NPStringBuilder_clear,
+    .toString = NPStringBuilder_toString,
+    .length = NPStringBuilder_length,
+    .setLength_ = NPStringBuilder_setLength_,
 };
 
-struct nopa_NFObject_meta_vtable nopa_NFObject_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
-    .class = NFObject_getClass,
+struct nopa_NPObject_meta_vtable nopa_NPObject_meta_vtable_inst = {
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
+    .class = NPObject_getClass,
 };
 
-struct nopa_NFStringBuilder_meta_vtable nopa_NFStringBuilder_meta_vtable_inst = {
-    .class = NFStringBuilder_getClass,
+struct nopa_NPStringBuilder_meta_vtable nopa_NPStringBuilder_meta_vtable_inst = {
+    .class = NPStringBuilder_getClass,
 };
 
-NFClass nopa_NFObject_class;
-NFClass nopa_NFStringBuilder_class;
+NPClass nopa_NPObject_class;
+NPClass nopa_NPStringBuilder_class;
 
 void nopa_meta_init(void) {
-    nopa_NFObject_class = (NFClass){
-        .name = "NFObject",
+    nopa_NPObject_class = (NPClass){
+        .name = "NPObject",
         .superclass = NULL,
-        .instance_size = sizeof(struct NFObject),
-        .vtable = &nopa_NFObject_vtable_inst,
-        .class_vtable = &nopa_NFObject_meta_vtable_inst,
+        .instance_size = sizeof(struct NPObject),
+        .vtable = &nopa_NPObject_vtable_inst,
+        .class_vtable = &nopa_NPObject_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_NFStringBuilder_class = (NFClass){
-        .name = "NFStringBuilder",
-        .superclass = &nopa_NFObject_class,
-        .instance_size = sizeof(struct NFStringBuilder),
-        .vtable = &nopa_NFStringBuilder_vtable_inst,
-        .class_vtable = &nopa_NFStringBuilder_meta_vtable_inst,
-        .protocols = (NFProtocol *[]){
+    nopa_NPStringBuilder_class = (NPClass){
+        .name = "NPStringBuilder",
+        .superclass = &nopa_NPObject_class,
+        .instance_size = sizeof(struct NPStringBuilder),
+        .vtable = &nopa_NPStringBuilder_vtable_inst,
+        .class_vtable = &nopa_NPStringBuilder_meta_vtable_inst,
+        .protocols = (NPProtocol *[]){
         },
         .protocol_count = 1,
     };

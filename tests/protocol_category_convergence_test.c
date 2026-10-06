@@ -5,8 +5,8 @@
 #include <stdint.h>
 #include <stddef.h>
 #include "nopa/runtime.h"
-struct nopa_NFObject_vtable;
-struct nopa_NFObject_meta_vtable;
+struct nopa_NPObject_vtable;
+struct nopa_NPObject_meta_vtable;
 struct nopa_MaglevTrain_vtable;
 struct nopa_MaglevTrain_meta_vtable;
 
@@ -30,78 +30,78 @@ static const SEL __nopa_sel_accelerateToSpeed_ = {.name = "accelerateToSpeed:", 
 static const SEL __nopa_sel_getVehicleStatusJSON = {.name = "getVehicleStatusJSON", .hash = 0x52312035};
 static const SEL __nopa_sel_getEmergencyBrakeTriggerCount = {.name = "getEmergencyBrakeTriggerCount", .hash = 0xCAFC44F4};
 
-typedef struct NFObject NFObject;
+typedef struct NPObject NPObject;
 typedef struct MaglevTrain MaglevTrain;
 
-NFObject * NFObject_alloc(NFClass * self, SEL _cmd);
-NFObject * NFObject_new(NFClass * self, SEL _cmd);
-NFObject * NFObject_init(NFObject * self, SEL _cmd);
-void NFObject_dealloc(NFObject * self, SEL _cmd);
-void NFObject_release(NFObject * self, SEL _cmd);
-NFObject * NFObject_retain(NFObject * self, SEL _cmd);
-NFObject * MaglevTrain_initWithTrainId_(NFObject * self, SEL _cmd, int tid);
-int MaglevTrain_trainId(NFObject * self, SEL _cmd);
-void MaglevTrain_setTrainId_(NFObject * self, SEL _cmd, int value);
-double MaglevTrain_currentSpeed(NFObject * self, SEL _cmd);
-void MaglevTrain_setCurrentSpeed_(NFObject * self, SEL _cmd, double value);
-void MaglevTrain_executeTelemetryRoutineWithBlock_(NFObject * self, SEL _cmd, void (^telemetryBlock)(const char *));
-double MaglevTrain_trackTemperature(NFObject * self, SEL _cmd);
-void MaglevTrain_setTrackTemperature_(NFObject * self, SEL _cmd, double temp);
-const char * MaglevTrain_autopilotFirmware(NFObject * self, SEL _cmd);
-void MaglevTrain_setAutopilotFirmware_(NFObject * self, SEL _cmd, const char * fw);
-void MaglevTrain_accelerateToSpeed_(NFObject * self, SEL _cmd, double targetSpeed);
-const char * MaglevTrain_getVehicleStatusJSON(NFObject * self, SEL _cmd);
-int MaglevTrain_getEmergencyBrakeTriggerCount(NFObject * self, SEL _cmd);
-NFObject * nopa_alloc(struct NFClass * cls);
-NFObject * nopa_init(NFObject * self);
-void nopa_release(NFObject * obj);
-NFObject * nopa_retain(NFObject * obj);
+NPObject * NPObject_alloc(NPClass * self, SEL _cmd);
+NPObject * NPObject_new(NPClass * self, SEL _cmd);
+NPObject * NPObject_init(NPObject * self, SEL _cmd);
+void NPObject_dealloc(NPObject * self, SEL _cmd);
+void NPObject_release(NPObject * self, SEL _cmd);
+NPObject * NPObject_retain(NPObject * self, SEL _cmd);
+NPObject * MaglevTrain_initWithTrainId_(NPObject * self, SEL _cmd, int tid);
+int MaglevTrain_trainId(NPObject * self, SEL _cmd);
+void MaglevTrain_setTrainId_(NPObject * self, SEL _cmd, int value);
+double MaglevTrain_currentSpeed(NPObject * self, SEL _cmd);
+void MaglevTrain_setCurrentSpeed_(NPObject * self, SEL _cmd, double value);
+void MaglevTrain_executeTelemetryRoutineWithBlock_(NPObject * self, SEL _cmd, void (^telemetryBlock)(const char *));
+double MaglevTrain_trackTemperature(NPObject * self, SEL _cmd);
+void MaglevTrain_setTrackTemperature_(NPObject * self, SEL _cmd, double temp);
+const char * MaglevTrain_autopilotFirmware(NPObject * self, SEL _cmd);
+void MaglevTrain_setAutopilotFirmware_(NPObject * self, SEL _cmd, const char * fw);
+void MaglevTrain_accelerateToSpeed_(NPObject * self, SEL _cmd, double targetSpeed);
+const char * MaglevTrain_getVehicleStatusJSON(NPObject * self, SEL _cmd);
+int MaglevTrain_getEmergencyBrakeTriggerCount(NPObject * self, SEL _cmd);
+NPObject * nopa_alloc(struct NPClass * cls);
+NPObject * nopa_init(NPObject * self);
+void nopa_release(NPObject * obj);
+NPObject * nopa_retain(NPObject * obj);
 int main(int argc, const char * argv[]);
 
 static double g_Convergence_TrackTemp = 25.5f;
 static const char * g_Convergence_Firmware = "MagOS-v9.9";
 
-NFClass * NFObject_getClass(NFClass * self, SEL _cmd);
-NFClass * MaglevTrain_getClass(NFClass * self, SEL _cmd);
+NPClass * NPObject_getClass(NPClass * self, SEL _cmd);
+NPClass * MaglevTrain_getClass(NPClass * self, SEL _cmd);
 
-struct nopa_NFObject_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    void (*release)(NFObject *, SEL);
-    NFObject * (*retain)(NFObject *, SEL);
+struct nopa_NPObject_vtable {
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    void (*release)(NPObject *, SEL);
+    NPObject * (*retain)(NPObject *, SEL);
 };
-struct nopa_NFObject_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+struct nopa_NPObject_meta_vtable {
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct nopa_MaglevTrain_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    void (*release)(NFObject *, SEL);
-    NFObject * (*retain)(NFObject *, SEL);
-    NFObject * (*initWithTrainId_)(NFObject *, SEL, int);
-    void (*executeTelemetryRoutineWithBlock_)(NFObject *, SEL, void (^)(const char *));
-    double (*trackTemperature)(NFObject *, SEL);
-    void (*setTrackTemperature_)(NFObject *, SEL, double);
-    const char * (*autopilotFirmware)(NFObject *, SEL);
-    void (*setAutopilotFirmware_)(NFObject *, SEL, const char *);
-    void (*accelerateToSpeed_)(NFObject *, SEL, double);
-    const char * (*getVehicleStatusJSON)(NFObject *, SEL);
-    int (*getEmergencyBrakeTriggerCount)(NFObject *, SEL);
-    int (*trainId)(NFObject *, SEL);
-    void (*setTrainId_)(NFObject *, SEL, int);
-    double (*currentSpeed)(NFObject *, SEL);
-    void (*setCurrentSpeed_)(NFObject *, SEL, double);
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    void (*release)(NPObject *, SEL);
+    NPObject * (*retain)(NPObject *, SEL);
+    NPObject * (*initWithTrainId_)(NPObject *, SEL, int);
+    void (*executeTelemetryRoutineWithBlock_)(NPObject *, SEL, void (^)(const char *));
+    double (*trackTemperature)(NPObject *, SEL);
+    void (*setTrackTemperature_)(NPObject *, SEL, double);
+    const char * (*autopilotFirmware)(NPObject *, SEL);
+    void (*setAutopilotFirmware_)(NPObject *, SEL, const char *);
+    void (*accelerateToSpeed_)(NPObject *, SEL, double);
+    const char * (*getVehicleStatusJSON)(NPObject *, SEL);
+    int (*getEmergencyBrakeTriggerCount)(NPObject *, SEL);
+    int (*trainId)(NPObject *, SEL);
+    void (*setTrainId_)(NPObject *, SEL, int);
+    double (*currentSpeed)(NPObject *, SEL);
+    void (*setCurrentSpeed_)(NPObject *, SEL, double);
 };
 struct nopa_MaglevTrain_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 
 struct MaglevTrain {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     int _trainId;
     double _currentSpeed;
@@ -110,22 +110,22 @@ struct MaglevTrain {
 };
 typedef struct MaglevTrain MaglevTrain;
 
-extern NFClass nopa_NFObject_class;
-extern NFClass nopa_MaglevTrain_class;
+extern NPClass nopa_NPObject_class;
+extern NPClass nopa_MaglevTrain_class;
 void nopa_meta_init(void);
 
-struct nopa_NFObject_vtable nopa_NFObject_vtable_inst = {
-    .init = NFObject_init,
-    .dealloc = NFObject_dealloc,
-    .release = NFObject_release,
-    .retain = NFObject_retain,
+struct nopa_NPObject_vtable nopa_NPObject_vtable_inst = {
+    .init = NPObject_init,
+    .dealloc = NPObject_dealloc,
+    .release = NPObject_release,
+    .retain = NPObject_retain,
 };
 
 struct nopa_MaglevTrain_vtable nopa_MaglevTrain_vtable_inst = {
-    .init = NFObject_init,
-    .dealloc = NFObject_dealloc,
-    .release = NFObject_release,
-    .retain = NFObject_retain,
+    .init = NPObject_init,
+    .dealloc = NPObject_dealloc,
+    .release = NPObject_release,
+    .retain = NPObject_retain,
     .initWithTrainId_ = MaglevTrain_initWithTrainId_,
     .executeTelemetryRoutineWithBlock_ = MaglevTrain_executeTelemetryRoutineWithBlock_,
     .trackTemperature = MaglevTrain_trackTemperature,
@@ -141,90 +141,90 @@ struct nopa_MaglevTrain_vtable nopa_MaglevTrain_vtable_inst = {
     .setCurrentSpeed_ = MaglevTrain_setCurrentSpeed_,
 };
 
-struct nopa_NFObject_meta_vtable nopa_NFObject_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
-    .class = NFObject_getClass,
+struct nopa_NPObject_meta_vtable nopa_NPObject_meta_vtable_inst = {
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
+    .class = NPObject_getClass,
 };
 
 struct nopa_MaglevTrain_meta_vtable nopa_MaglevTrain_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
     .class = MaglevTrain_getClass,
 };
 
-NFClass * NFObject_getClass(NFClass * self, SEL _cmd) {
+NPClass * NPObject_getClass(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
-NFClass * MaglevTrain_getClass(NFClass * self, SEL _cmd) {
+NPClass * MaglevTrain_getClass(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
-NFClass nopa_NFObject_class;
-NFClass nopa_MaglevTrain_class;
+NPClass nopa_NPObject_class;
+NPClass nopa_MaglevTrain_class;
 
 void nopa_meta_init(void) {
-    nopa_NFObject_class = (NFClass){
-        .name = "NFObject",
+    nopa_NPObject_class = (NPClass){
+        .name = "NPObject",
         .superclass = NULL,
-        .instance_size = sizeof(struct NFObject),
-        .vtable = &nopa_NFObject_vtable_inst,
-        .class_vtable = &nopa_NFObject_meta_vtable_inst,
+        .instance_size = sizeof(struct NPObject),
+        .vtable = &nopa_NPObject_vtable_inst,
+        .class_vtable = &nopa_NPObject_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_MaglevTrain_class = (NFClass){
+    nopa_MaglevTrain_class = (NPClass){
         .name = "MaglevTrain",
-        .superclass = &nopa_NFObject_class,
+        .superclass = &nopa_NPObject_class,
         .instance_size = sizeof(struct MaglevTrain),
         .vtable = &nopa_MaglevTrain_vtable_inst,
         .class_vtable = &nopa_MaglevTrain_meta_vtable_inst,
         .protocol_count = 0,
     };
 }
-NFObject * NFObject_alloc(NFClass * self, SEL _cmd) {
+NPObject * NPObject_alloc(NPClass * self, SEL _cmd) {
   return nopa_alloc(self);
 }
 
-NFObject * NFObject_new(NFClass * self, SEL _cmd) {
-  NFObject * obj = nopa_alloc(self);
+NPObject * NPObject_new(NPClass * self, SEL _cmd) {
+  NPObject * obj = nopa_alloc(self);
   return nopa_init(obj);
 }
 
-NFObject * NFObject_init(NFObject * self, SEL _cmd) {
-  struct NFObject * _self = (struct NFObject *)self;
+NPObject * NPObject_init(NPObject * self, SEL _cmd) {
+  struct NPObject * _self = (struct NPObject *)self;
   {
     return nopa_init(self);
   }
 }
 
-void NFObject_dealloc(NFObject * self, SEL _cmd) {
-  struct NFObject * _self = (struct NFObject *)self;
+void NPObject_dealloc(NPObject * self, SEL _cmd) {
+  struct NPObject * _self = (struct NPObject *)self;
   {
     return;
   }
 }
 
-void NFObject_release(NFObject * self, SEL _cmd) {
-  struct NFObject * _self = (struct NFObject *)self;
+void NPObject_release(NPObject * self, SEL _cmd) {
+  struct NPObject * _self = (struct NPObject *)self;
   {
     nopa_release(self);
   }
 }
 
-NFObject * NFObject_retain(NFObject * self, SEL _cmd) {
-  struct NFObject * _self = (struct NFObject *)self;
+NPObject * NPObject_retain(NPObject * self, SEL _cmd) {
+  struct NPObject * _self = (struct NPObject *)self;
   {
     return nopa_retain(self);
   }
 }
 
-NFObject * MaglevTrain_initWithTrainId_(NFObject * self, SEL _cmd, int tid) {
+NPObject * MaglevTrain_initWithTrainId_(NPObject * self, SEL _cmd, int tid) {
   struct MaglevTrain * _self = (struct MaglevTrain *)self;
   {
-    self = NFObject_init(self, sel_registerName("init"));
+    self = NPObject_init(self, sel_registerName("init"));
     if (self)     {
       _self->_trainId = tid;
       _self->_currentSpeed = 0.0f;
@@ -233,23 +233,23 @@ NFObject * MaglevTrain_initWithTrainId_(NFObject * self, SEL _cmd, int tid) {
   }
 }
 
-int MaglevTrain_trainId(NFObject * self, SEL _cmd) {
+int MaglevTrain_trainId(NPObject * self, SEL _cmd) {
   return ((struct MaglevTrain *)self)->_trainId;
 }
 
-void MaglevTrain_setTrainId_(NFObject * self, SEL _cmd, int value) {
+void MaglevTrain_setTrainId_(NPObject * self, SEL _cmd, int value) {
   ((struct MaglevTrain *)self)->_trainId = value;
 }
 
-double MaglevTrain_currentSpeed(NFObject * self, SEL _cmd) {
+double MaglevTrain_currentSpeed(NPObject * self, SEL _cmd) {
   return ((struct MaglevTrain *)self)->_currentSpeed;
 }
 
-void MaglevTrain_setCurrentSpeed_(NFObject * self, SEL _cmd, double value) {
+void MaglevTrain_setCurrentSpeed_(NPObject * self, SEL _cmd, double value) {
   ((struct MaglevTrain *)self)->_currentSpeed = value;
 }
 
-void MaglevTrain_executeTelemetryRoutineWithBlock_(NFObject * self, SEL _cmd, void (^telemetryBlock)(const char *)) {
+void MaglevTrain_executeTelemetryRoutineWithBlock_(NPObject * self, SEL _cmd, void (^telemetryBlock)(const char *)) {
   struct MaglevTrain * _self = (struct MaglevTrain *)self;
   {
     printf("[系统扩展] 正在读取固件 [%s] 进行多维交叉数据测算...\n", ((struct nopa_MaglevTrain_vtable *)(self)->isa->vtable)->autopilotFirmware(self, sel_registerName("autopilotFirmware")));
@@ -259,35 +259,35 @@ void MaglevTrain_executeTelemetryRoutineWithBlock_(NFObject * self, SEL _cmd, vo
   }
 }
 
-double MaglevTrain_trackTemperature(NFObject * self, SEL _cmd) {
+double MaglevTrain_trackTemperature(NPObject * self, SEL _cmd) {
   struct MaglevTrain * _self = (struct MaglevTrain *)self;
   {
     return g_Convergence_TrackTemp;
   }
 }
 
-void MaglevTrain_setTrackTemperature_(NFObject * self, SEL _cmd, double temp) {
+void MaglevTrain_setTrackTemperature_(NPObject * self, SEL _cmd, double temp) {
   struct MaglevTrain * _self = (struct MaglevTrain *)self;
   {
     g_Convergence_TrackTemp = temp;
   }
 }
 
-const char * MaglevTrain_autopilotFirmware(NFObject * self, SEL _cmd) {
+const char * MaglevTrain_autopilotFirmware(NPObject * self, SEL _cmd) {
   struct MaglevTrain * _self = (struct MaglevTrain *)self;
   {
     return g_Convergence_Firmware;
   }
 }
 
-void MaglevTrain_setAutopilotFirmware_(NFObject * self, SEL _cmd, const char * fw) {
+void MaglevTrain_setAutopilotFirmware_(NPObject * self, SEL _cmd, const char * fw) {
   struct MaglevTrain * _self = (struct MaglevTrain *)self;
   {
     g_Convergence_Firmware = fw;
   }
 }
 
-void MaglevTrain_accelerateToSpeed_(NFObject * self, SEL _cmd, double targetSpeed) {
+void MaglevTrain_accelerateToSpeed_(NPObject * self, SEL _cmd, double targetSpeed) {
   struct MaglevTrain * _self = (struct MaglevTrain *)self;
   {
     _self->_currentSpeed = targetSpeed;
@@ -295,7 +295,7 @@ void MaglevTrain_accelerateToSpeed_(NFObject * self, SEL _cmd, double targetSpee
   }
 }
 
-const char * MaglevTrain_getVehicleStatusJSON(NFObject * self, SEL _cmd) {
+const char * MaglevTrain_getVehicleStatusJSON(NPObject * self, SEL _cmd) {
   struct MaglevTrain * _self = (struct MaglevTrain *)self;
   {
     static char convergenceBuffer[128];
@@ -304,20 +304,20 @@ const char * MaglevTrain_getVehicleStatusJSON(NFObject * self, SEL _cmd) {
   }
 }
 
-int MaglevTrain_getEmergencyBrakeTriggerCount(NFObject * self, SEL _cmd) {
+int MaglevTrain_getEmergencyBrakeTriggerCount(NPObject * self, SEL _cmd) {
   struct MaglevTrain * _self = (struct MaglevTrain *)self;
   {
     return 0;
   }
 }
 
-NFObject * nopa_alloc(struct NFClass * cls);
+NPObject * nopa_alloc(struct NPClass * cls);
 
-NFObject * nopa_init(NFObject * self);
+NPObject * nopa_init(NPObject * self);
 
-void nopa_release(NFObject * obj);
+void nopa_release(NPObject * obj);
 
-NFObject * nopa_retain(NFObject * obj);
+NPObject * nopa_retain(NPObject * obj);
 
 int main(int argc, const char * argv[]) {
   nopa_meta_init();
@@ -326,13 +326,13 @@ int main(int argc, const char * argv[]) {
     printf(">>>    nopac 编译器「协议+Category+别名」多维交叉收敛压测        <<<\n");
     printf("====================================================================\n\n");
     printf("--- 1. 验证 Category 中补全的协议方法静态拼装 ---\n");
-    NFObject *__nopa_tmp_1 = (NFObject_alloc(&nopa_MaglevTrain_class, sel_registerName("alloc")));
+    NPObject *__nopa_tmp_1 = (NPObject_alloc(&nopa_MaglevTrain_class, sel_registerName("alloc")));
     MaglevTrain * trainInstance = ((struct nopa_MaglevTrain_vtable *)__nopa_tmp_1->isa->vtable)->initWithTrainId_(__nopa_tmp_1, sel_registerName("initWithTrainId:"), 501);
     ((struct nopa_MaglevTrain_vtable *)(trainInstance)->isa->vtable)->setTrackTemperature_(trainInstance, sel_registerName("setTrackTemperature:"), 42.8f);
     ((struct nopa_MaglevTrain_vtable *)(trainInstance)->isa->vtable)->setAutopilotFirmware_(trainInstance, sel_registerName("setAutopilotFirmware:"), "MagOS-v10.0.1-Beta");
     ((struct nopa_MaglevTrain_vtable *)(trainInstance)->isa->vtable)->accelerateToSpeed_(trainInstance, sel_registerName("accelerateToSpeed:"), 350.5f);
     printf("\n--- 2. 验证 @using 协议别名 IntelligentNode (id<TransitVehicle>) 的转译 ---\n");
-    NFObject * nodeController = (NFObject *)trainInstance;
+    NPObject * nodeController = (NPObject *)trainInstance;
     printf("[协议别名断言] 成功通过别名对象调用 Category 侧实现的协议方法：\n");
     printf("          -> 状态快照: %s\n", ((struct nopa_MaglevTrain_vtable *)(nodeController)->isa->vtable)->getVehicleStatusJSON(nodeController, sel_registerName("getVehicleStatusJSON")));
     printf("\n--- 3. 验证协议别名指针调用 @optional 方法的稳定性 ---\n");
@@ -354,12 +354,12 @@ int main(int argc, const char * argv[]) {
     printf("\n--- 5. 终极收敛守门员：协议别名、Category 属性与复合副作用大融合 ---\n");
     int isGridTelemetryValid = 1;
     int convergenceStepCounter = 9999;
-    char * finalReportString = (isGridTelemetryValid > 0) ? ({ NFObject *__nopa_tmp_2 = ((convergenceStepCounter++, nodeController)); ((struct nopa_MaglevTrain_vtable *)__nopa_tmp_2->isa->vtable)->getVehicleStatusJSON(__nopa_tmp_2, sel_registerName("getVehicleStatusJSON")); }) : "{}";
+    char * finalReportString = (isGridTelemetryValid > 0) ? ({ NPObject *__nopa_tmp_2 = ((convergenceStepCounter++, nodeController)); ((struct nopa_MaglevTrain_vtable *)__nopa_tmp_2->isa->vtable)->getVehicleStatusJSON(__nopa_tmp_2, sel_registerName("getVehicleStatusJSON")); }) : "{}";
     printf("[收敛性总断言] 恭喜！语法规约树完全收敛，无任何退化现象！\n");
     printf("          -> 副作用计数器最终值: %d (预期: 10000)\n", convergenceStepCounter);
     printf("          -> 动态抓取的交叉整合序列化数据: %s\n", finalReportString);
     printf("\n--- 6. 正在释放全收敛智能工厂网络拓扑资源... ---\n");
-    ((struct nopa_NFObject_vtable *)(trainInstance)->isa->vtable)->release(trainInstance, sel_registerName("release"));
+    ((struct nopa_NPObject_vtable *)(trainInstance)->isa->vtable)->release(trainInstance, sel_registerName("release"));
     printf("\n====================================================================\n");
     printf(">>>  奇迹！协议 + Category + 别名 三位一体终极收敛压测全线飘绿！  <<<\n");
     printf("====================================================================\n");

@@ -30,7 +30,7 @@ typedef struct {
 // ============ 命名空间 + 协议实现 + 类继承 ============
 @namespace Kernel::Crypto
 
-    @interface BlockHasher : NFObject <IChecksum> {
+    @interface BlockHasher : NPObject <IChecksum> {
         @public
         unsigned _state;
         unsigned _digest;
@@ -115,7 +115,7 @@ typedef struct {
 
     - (void)corruptAndThrow @throws {
         printf("    [%s] 检测到管线损坏，准备抛异常...\n", _label);
-        @throw [NFObject alloc];
+        @throw [NPObject alloc];
     }
 
     - (void)dealloc {

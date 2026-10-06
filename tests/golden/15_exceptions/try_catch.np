@@ -3,7 +3,7 @@
 #include <string.h>
 #import <Foundation/Foundation.np>
 
-@interface MathError : NFObject {
+@interface MathError : NPObject {
     char *_msg;
 }
 - (instancetype)initWithMessage:(const char *)msg;

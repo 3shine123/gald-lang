@@ -2,7 +2,7 @@
 #import <Foundation/Foundation.np>
 
 // Test: generic class with get/set methods
-@interface Holder<T> : NFObject {
+@interface Holder<T> : NPObject {
     @public
     T _data[4];
     int _count;
@@ -21,7 +21,7 @@
 }
 @end
 
-@interface Item : NFObject @end
+@interface Item : NPObject @end
 @implementation Item @end
 
 int main() {

@@ -5,8 +5,8 @@
 #include <stdint.h>
 #include <stddef.h>
 #include "nopa/runtime.h"
-struct nopa_NFObject_vtable;
-struct nopa_NFObject_meta_vtable;
+struct nopa_NPObject_vtable;
+struct nopa_NPObject_meta_vtable;
 struct nopa_StealthDrone_vtable;
 struct nopa_StealthDrone_meta_vtable;
 
@@ -30,78 +30,78 @@ static const SEL __nopa_sel_engageTargetWithCoordinates_ = {.name = "engageTarge
 static const SEL __nopa_sel_getCombatTelemetryJSON = {.name = "getCombatTelemetryJSON", .hash = 0xE3C2852C};
 static const SEL __nopa_sel_getAmmunitionCountRemaining = {.name = "getAmmunitionCountRemaining", .hash = 0x049F7069};
 
-typedef struct NFObject NFObject;
+typedef struct NPObject NPObject;
 typedef struct StealthDrone StealthDrone;
 
-NFObject * NFObject_alloc(NFClass * self, SEL _cmd);
-NFObject * NFObject_new(NFClass * self, SEL _cmd);
-NFObject * NFObject_init(NFObject * self, SEL _cmd);
-void NFObject_dealloc(NFObject * self, SEL _cmd);
-void NFObject_release(NFObject * self, SEL _cmd);
-NFObject * NFObject_retain(NFObject * self, SEL _cmd);
-NFObject * StealthDrone_initWithDroneId_battery_(NFObject * self, SEL _cmd, int did, int bat);
-int StealthDrone_droneId(NFObject * self, SEL _cmd);
-void StealthDrone_setDroneId_(NFObject * self, SEL _cmd, int value);
-int StealthDrone_batteryPercentage(NFObject * self, SEL _cmd);
-void StealthDrone_setBatteryPercentage_(NFObject * self, SEL _cmd, int value);
-void StealthDrone_runDiagnosticsWithFeedbackBlock_(NFObject * self, SEL _cmd, void (^feedbackBlock)(const char *));
-float StealthDrone_weaponTemperature(NFObject * self, SEL _cmd);
-void StealthDrone_setWeaponTemperature_(NFObject * self, SEL _cmd, float temp);
-const char * StealthDrone_encryptionKey(NFObject * self, SEL _cmd);
-void StealthDrone_setEncryptionKey_(NFObject * self, SEL _cmd, const char * key);
-void StealthDrone_engageTargetWithCoordinates_(NFObject * self, SEL _cmd, const char * targetId);
-const char * StealthDrone_getCombatTelemetryJSON(NFObject * self, SEL _cmd);
-int StealthDrone_getAmmunitionCountRemaining(NFObject * self, SEL _cmd);
-NFObject * nopa_alloc(struct NFClass * cls);
-NFObject * nopa_init(NFObject * self);
-void nopa_release(NFObject * obj);
-NFObject * nopa_retain(NFObject * obj);
+NPObject * NPObject_alloc(NPClass * self, SEL _cmd);
+NPObject * NPObject_new(NPClass * self, SEL _cmd);
+NPObject * NPObject_init(NPObject * self, SEL _cmd);
+void NPObject_dealloc(NPObject * self, SEL _cmd);
+void NPObject_release(NPObject * self, SEL _cmd);
+NPObject * NPObject_retain(NPObject * self, SEL _cmd);
+NPObject * StealthDrone_initWithDroneId_battery_(NPObject * self, SEL _cmd, int did, int bat);
+int StealthDrone_droneId(NPObject * self, SEL _cmd);
+void StealthDrone_setDroneId_(NPObject * self, SEL _cmd, int value);
+int StealthDrone_batteryPercentage(NPObject * self, SEL _cmd);
+void StealthDrone_setBatteryPercentage_(NPObject * self, SEL _cmd, int value);
+void StealthDrone_runDiagnosticsWithFeedbackBlock_(NPObject * self, SEL _cmd, void (^feedbackBlock)(const char *));
+float StealthDrone_weaponTemperature(NPObject * self, SEL _cmd);
+void StealthDrone_setWeaponTemperature_(NPObject * self, SEL _cmd, float temp);
+const char * StealthDrone_encryptionKey(NPObject * self, SEL _cmd);
+void StealthDrone_setEncryptionKey_(NPObject * self, SEL _cmd, const char * key);
+void StealthDrone_engageTargetWithCoordinates_(NPObject * self, SEL _cmd, const char * targetId);
+const char * StealthDrone_getCombatTelemetryJSON(NPObject * self, SEL _cmd);
+int StealthDrone_getAmmunitionCountRemaining(NPObject * self, SEL _cmd);
+NPObject * nopa_alloc(struct NPClass * cls);
+NPObject * nopa_init(NPObject * self);
+void nopa_release(NPObject * obj);
+NPObject * nopa_retain(NPObject * obj);
 int main(int argc, const char * argv[]);
 
 static float g_Swarm_WeaponTemp = 18.5f;
 static const char * g_Swarm_CryptoKey = "AES-256-GCM-COMBAT";
 
-NFClass * NFObject_getClass(NFClass * self, SEL _cmd);
-NFClass * StealthDrone_getClass(NFClass * self, SEL _cmd);
+NPClass * NPObject_getClass(NPClass * self, SEL _cmd);
+NPClass * StealthDrone_getClass(NPClass * self, SEL _cmd);
 
-struct nopa_NFObject_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    void (*release)(NFObject *, SEL);
-    NFObject * (*retain)(NFObject *, SEL);
+struct nopa_NPObject_vtable {
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    void (*release)(NPObject *, SEL);
+    NPObject * (*retain)(NPObject *, SEL);
 };
-struct nopa_NFObject_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+struct nopa_NPObject_meta_vtable {
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct nopa_StealthDrone_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    void (*release)(NFObject *, SEL);
-    NFObject * (*retain)(NFObject *, SEL);
-    NFObject * (*initWithDroneId_battery_)(NFObject *, SEL, int, int);
-    void (*runDiagnosticsWithFeedbackBlock_)(NFObject *, SEL, void (^)(const char *));
-    float (*weaponTemperature)(NFObject *, SEL);
-    void (*setWeaponTemperature_)(NFObject *, SEL, float);
-    const char * (*encryptionKey)(NFObject *, SEL);
-    void (*setEncryptionKey_)(NFObject *, SEL, const char *);
-    void (*engageTargetWithCoordinates_)(NFObject *, SEL, const char *);
-    const char * (*getCombatTelemetryJSON)(NFObject *, SEL);
-    int (*getAmmunitionCountRemaining)(NFObject *, SEL);
-    int (*droneId)(NFObject *, SEL);
-    void (*setDroneId_)(NFObject *, SEL, int);
-    int (*batteryPercentage)(NFObject *, SEL);
-    void (*setBatteryPercentage_)(NFObject *, SEL, int);
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    void (*release)(NPObject *, SEL);
+    NPObject * (*retain)(NPObject *, SEL);
+    NPObject * (*initWithDroneId_battery_)(NPObject *, SEL, int, int);
+    void (*runDiagnosticsWithFeedbackBlock_)(NPObject *, SEL, void (^)(const char *));
+    float (*weaponTemperature)(NPObject *, SEL);
+    void (*setWeaponTemperature_)(NPObject *, SEL, float);
+    const char * (*encryptionKey)(NPObject *, SEL);
+    void (*setEncryptionKey_)(NPObject *, SEL, const char *);
+    void (*engageTargetWithCoordinates_)(NPObject *, SEL, const char *);
+    const char * (*getCombatTelemetryJSON)(NPObject *, SEL);
+    int (*getAmmunitionCountRemaining)(NPObject *, SEL);
+    int (*droneId)(NPObject *, SEL);
+    void (*setDroneId_)(NPObject *, SEL, int);
+    int (*batteryPercentage)(NPObject *, SEL);
+    void (*setBatteryPercentage_)(NPObject *, SEL, int);
 };
 struct nopa_StealthDrone_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 
 struct StealthDrone {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     int _droneId;
     int _batteryPercentage;
@@ -110,22 +110,22 @@ struct StealthDrone {
 };
 typedef struct StealthDrone StealthDrone;
 
-extern NFClass nopa_NFObject_class;
-extern NFClass nopa_StealthDrone_class;
+extern NPClass nopa_NPObject_class;
+extern NPClass nopa_StealthDrone_class;
 void nopa_meta_init(void);
 
-struct nopa_NFObject_vtable nopa_NFObject_vtable_inst = {
-    .init = NFObject_init,
-    .dealloc = NFObject_dealloc,
-    .release = NFObject_release,
-    .retain = NFObject_retain,
+struct nopa_NPObject_vtable nopa_NPObject_vtable_inst = {
+    .init = NPObject_init,
+    .dealloc = NPObject_dealloc,
+    .release = NPObject_release,
+    .retain = NPObject_retain,
 };
 
 struct nopa_StealthDrone_vtable nopa_StealthDrone_vtable_inst = {
-    .init = NFObject_init,
-    .dealloc = NFObject_dealloc,
-    .release = NFObject_release,
-    .retain = NFObject_retain,
+    .init = NPObject_init,
+    .dealloc = NPObject_dealloc,
+    .release = NPObject_release,
+    .retain = NPObject_retain,
     .initWithDroneId_battery_ = StealthDrone_initWithDroneId_battery_,
     .runDiagnosticsWithFeedbackBlock_ = StealthDrone_runDiagnosticsWithFeedbackBlock_,
     .weaponTemperature = StealthDrone_weaponTemperature,
@@ -141,90 +141,90 @@ struct nopa_StealthDrone_vtable nopa_StealthDrone_vtable_inst = {
     .setBatteryPercentage_ = StealthDrone_setBatteryPercentage_,
 };
 
-struct nopa_NFObject_meta_vtable nopa_NFObject_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
-    .class = NFObject_getClass,
+struct nopa_NPObject_meta_vtable nopa_NPObject_meta_vtable_inst = {
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
+    .class = NPObject_getClass,
 };
 
 struct nopa_StealthDrone_meta_vtable nopa_StealthDrone_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
     .class = StealthDrone_getClass,
 };
 
-NFClass * NFObject_getClass(NFClass * self, SEL _cmd) {
+NPClass * NPObject_getClass(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
-NFClass * StealthDrone_getClass(NFClass * self, SEL _cmd) {
+NPClass * StealthDrone_getClass(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
-NFClass nopa_NFObject_class;
-NFClass nopa_StealthDrone_class;
+NPClass nopa_NPObject_class;
+NPClass nopa_StealthDrone_class;
 
 void nopa_meta_init(void) {
-    nopa_NFObject_class = (NFClass){
-        .name = "NFObject",
+    nopa_NPObject_class = (NPClass){
+        .name = "NPObject",
         .superclass = NULL,
-        .instance_size = sizeof(struct NFObject),
-        .vtable = &nopa_NFObject_vtable_inst,
-        .class_vtable = &nopa_NFObject_meta_vtable_inst,
+        .instance_size = sizeof(struct NPObject),
+        .vtable = &nopa_NPObject_vtable_inst,
+        .class_vtable = &nopa_NPObject_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_StealthDrone_class = (NFClass){
+    nopa_StealthDrone_class = (NPClass){
         .name = "StealthDrone",
-        .superclass = &nopa_NFObject_class,
+        .superclass = &nopa_NPObject_class,
         .instance_size = sizeof(struct StealthDrone),
         .vtable = &nopa_StealthDrone_vtable_inst,
         .class_vtable = &nopa_StealthDrone_meta_vtable_inst,
         .protocol_count = 0,
     };
 }
-NFObject * NFObject_alloc(NFClass * self, SEL _cmd) {
+NPObject * NPObject_alloc(NPClass * self, SEL _cmd) {
   return nopa_alloc(self);
 }
 
-NFObject * NFObject_new(NFClass * self, SEL _cmd) {
-  NFObject * obj = nopa_alloc(self);
+NPObject * NPObject_new(NPClass * self, SEL _cmd) {
+  NPObject * obj = nopa_alloc(self);
   return nopa_init(obj);
 }
 
-NFObject * NFObject_init(NFObject * self, SEL _cmd) {
-  struct NFObject * _self = (struct NFObject *)self;
+NPObject * NPObject_init(NPObject * self, SEL _cmd) {
+  struct NPObject * _self = (struct NPObject *)self;
   {
     return nopa_init(self);
   }
 }
 
-void NFObject_dealloc(NFObject * self, SEL _cmd) {
-  struct NFObject * _self = (struct NFObject *)self;
+void NPObject_dealloc(NPObject * self, SEL _cmd) {
+  struct NPObject * _self = (struct NPObject *)self;
   {
     return;
   }
 }
 
-void NFObject_release(NFObject * self, SEL _cmd) {
-  struct NFObject * _self = (struct NFObject *)self;
+void NPObject_release(NPObject * self, SEL _cmd) {
+  struct NPObject * _self = (struct NPObject *)self;
   {
     nopa_release(self);
   }
 }
 
-NFObject * NFObject_retain(NFObject * self, SEL _cmd) {
-  struct NFObject * _self = (struct NFObject *)self;
+NPObject * NPObject_retain(NPObject * self, SEL _cmd) {
+  struct NPObject * _self = (struct NPObject *)self;
   {
     return nopa_retain(self);
   }
 }
 
-NFObject * StealthDrone_initWithDroneId_battery_(NFObject * self, SEL _cmd, int did, int bat) {
+NPObject * StealthDrone_initWithDroneId_battery_(NPObject * self, SEL _cmd, int did, int bat) {
   struct StealthDrone * _self = (struct StealthDrone *)self;
   {
-    self = NFObject_init(self, sel_registerName("init"));
+    self = NPObject_init(self, sel_registerName("init"));
     if (self)     {
       _self->_droneId = did;
       _self->_batteryPercentage = bat;
@@ -233,23 +233,23 @@ NFObject * StealthDrone_initWithDroneId_battery_(NFObject * self, SEL _cmd, int 
   }
 }
 
-int StealthDrone_droneId(NFObject * self, SEL _cmd) {
+int StealthDrone_droneId(NPObject * self, SEL _cmd) {
   return ((struct StealthDrone *)self)->_droneId;
 }
 
-void StealthDrone_setDroneId_(NFObject * self, SEL _cmd, int value) {
+void StealthDrone_setDroneId_(NPObject * self, SEL _cmd, int value) {
   ((struct StealthDrone *)self)->_droneId = value;
 }
 
-int StealthDrone_batteryPercentage(NFObject * self, SEL _cmd) {
+int StealthDrone_batteryPercentage(NPObject * self, SEL _cmd) {
   return ((struct StealthDrone *)self)->_batteryPercentage;
 }
 
-void StealthDrone_setBatteryPercentage_(NFObject * self, SEL _cmd, int value) {
+void StealthDrone_setBatteryPercentage_(NPObject * self, SEL _cmd, int value) {
   ((struct StealthDrone *)self)->_batteryPercentage = value;
 }
 
-void StealthDrone_runDiagnosticsWithFeedbackBlock_(NFObject * self, SEL _cmd, void (^feedbackBlock)(const char *)) {
+void StealthDrone_runDiagnosticsWithFeedbackBlock_(NPObject * self, SEL _cmd, void (^feedbackBlock)(const char *)) {
   struct StealthDrone * _self = (struct StealthDrone *)self;
   {
     printf("[扩展模块] 正在验证安全密钥 [%s] 并读取多维遥测数据...\n", ((struct nopa_StealthDrone_vtable *)(self)->isa->vtable)->encryptionKey(self, sel_registerName("encryptionKey")));
@@ -259,42 +259,42 @@ void StealthDrone_runDiagnosticsWithFeedbackBlock_(NFObject * self, SEL _cmd, vo
   }
 }
 
-float StealthDrone_weaponTemperature(NFObject * self, SEL _cmd) {
+float StealthDrone_weaponTemperature(NPObject * self, SEL _cmd) {
   struct StealthDrone * _self = (struct StealthDrone *)self;
   {
     return g_Swarm_WeaponTemp;
   }
 }
 
-void StealthDrone_setWeaponTemperature_(NFObject * self, SEL _cmd, float temp) {
+void StealthDrone_setWeaponTemperature_(NPObject * self, SEL _cmd, float temp) {
   struct StealthDrone * _self = (struct StealthDrone *)self;
   {
     g_Swarm_WeaponTemp = temp;
   }
 }
 
-const char * StealthDrone_encryptionKey(NFObject * self, SEL _cmd) {
+const char * StealthDrone_encryptionKey(NPObject * self, SEL _cmd) {
   struct StealthDrone * _self = (struct StealthDrone *)self;
   {
     return g_Swarm_CryptoKey;
   }
 }
 
-void StealthDrone_setEncryptionKey_(NFObject * self, SEL _cmd, const char * key) {
+void StealthDrone_setEncryptionKey_(NPObject * self, SEL _cmd, const char * key) {
   struct StealthDrone * _self = (struct StealthDrone *)self;
   {
     g_Swarm_CryptoKey = key;
   }
 }
 
-void StealthDrone_engageTargetWithCoordinates_(NFObject * self, SEL _cmd, const char * targetId) {
+void StealthDrone_engageTargetWithCoordinates_(NPObject * self, SEL _cmd, const char * targetId) {
   struct StealthDrone * _self = (struct StealthDrone *)self;
   {
     printf("[无人机-%d] 接收到 Category 协议指令，武器系统已锁定目标: %s\n", _self->_droneId, targetId);
   }
 }
 
-const char * StealthDrone_getCombatTelemetryJSON(NFObject * self, SEL _cmd) {
+const char * StealthDrone_getCombatTelemetryJSON(NPObject * self, SEL _cmd) {
   struct StealthDrone * _self = (struct StealthDrone *)self;
   {
     static char swarmBuffer[128];
@@ -303,20 +303,20 @@ const char * StealthDrone_getCombatTelemetryJSON(NFObject * self, SEL _cmd) {
   }
 }
 
-int StealthDrone_getAmmunitionCountRemaining(NFObject * self, SEL _cmd) {
+int StealthDrone_getAmmunitionCountRemaining(NPObject * self, SEL _cmd) {
   struct StealthDrone * _self = (struct StealthDrone *)self;
   {
     return 12;
   }
 }
 
-NFObject * nopa_alloc(struct NFClass * cls);
+NPObject * nopa_alloc(struct NPClass * cls);
 
-NFObject * nopa_init(NFObject * self);
+NPObject * nopa_init(NPObject * self);
 
-void nopa_release(NFObject * obj);
+void nopa_release(NPObject * obj);
 
-NFObject * nopa_retain(NFObject * obj);
+NPObject * nopa_retain(NPObject * obj);
 
 int main(int argc, const char * argv[]) {
   nopa_meta_init();
@@ -325,13 +325,13 @@ int main(int argc, const char * argv[]) {
     printf(">>>    nopac 编译器「协议+Category+别名」终极健壮性镜像压测    <<<\n");
     printf("====================================================================\n\n");
     printf("--- 1. 验证镜像 Category 中补全的协议方法及 Ivar 穿透访问 ---\n");
-    NFObject *__nopa_tmp_1 = (NFObject_alloc(&nopa_StealthDrone_class, sel_registerName("alloc")));
+    NPObject *__nopa_tmp_1 = (NPObject_alloc(&nopa_StealthDrone_class, sel_registerName("alloc")));
     StealthDrone * strikeDrone = ((struct nopa_StealthDrone_vtable *)__nopa_tmp_1->isa->vtable)->initWithDroneId_battery_(__nopa_tmp_1, sel_registerName("initWithDroneId:battery:"), 808, 92);
     ((struct nopa_StealthDrone_vtable *)(strikeDrone)->isa->vtable)->setWeaponTemperature_(strikeDrone, sel_registerName("setWeaponTemperature:"), 56.4f);
     ((struct nopa_StealthDrone_vtable *)(strikeDrone)->isa->vtable)->setEncryptionKey_(strikeDrone, sel_registerName("setEncryptionKey:"), "RSA-4096-DYNAMIC-SEC");
     ((struct nopa_StealthDrone_vtable *)(strikeDrone)->isa->vtable)->engageTargetWithCoordinates_(strikeDrone, sel_registerName("engageTargetWithCoordinates:"), "GRID_ALPHA_MARK_IV");
     printf("\n--- 2. 验证 @using 协议别名 TacticalNode (id<SwarmCombatant>) 的转译 ---\n");
-    NFObject * combatNode = (NFObject *)strikeDrone;
+    NPObject * combatNode = (NPObject *)strikeDrone;
     printf("[协议别名断言] 成功通过别名对象调用 Category 侧实现的协议方法：\n");
     printf("          -> 战术数据快照: %s\n", ((struct nopa_StealthDrone_vtable *)(combatNode)->isa->vtable)->getCombatTelemetryJSON(combatNode, sel_registerName("getCombatTelemetryJSON")));
     printf("\n--- 3. 验证协议别名指针调用 @optional 方法的稳定性 ---\n");
@@ -351,12 +351,12 @@ int main(int argc, const char * argv[]) {
     printf("\n--- 5. 终极收敛守门员：协议别名、Category 属性与复合副作用镜像大融合 ---\n");
     int isSwarmDataSynced = 1;
     int swarmConvergenceStep = 11111;
-    char * finalSwarmReport = (isSwarmDataSynced > 0) ? ({ NFObject *__nopa_tmp_2 = ((swarmConvergenceStep++, combatNode)); ((struct nopa_StealthDrone_vtable *)__nopa_tmp_2->isa->vtable)->getCombatTelemetryJSON(__nopa_tmp_2, sel_registerName("getCombatTelemetryJSON")); }) : "{}";
+    char * finalSwarmReport = (isSwarmDataSynced > 0) ? ({ NPObject *__nopa_tmp_2 = ((swarmConvergenceStep++, combatNode)); ((struct nopa_StealthDrone_vtable *)__nopa_tmp_2->isa->vtable)->getCombatTelemetryJSON(__nopa_tmp_2, sel_registerName("getCombatTelemetryJSON")); }) : "{}";
     printf("[收敛性总断言] 架构稳如磐石，完全通过终极镜像一致性校验！\n");
     printf("          -> 副作用计数器最终值: %d (预期: 11112)\n", swarmConvergenceStep);
     printf("          -> 动态抓取的交叉整合序列化数据: %s\n", finalSwarmReport);
     printf("\n--- 6. 正在释放全收敛无人机蜂群网络拓扑资源... ---\n");
-    ((struct nopa_NFObject_vtable *)(strikeDrone)->isa->vtable)->release(strikeDrone, sel_registerName("release"));
+    ((struct nopa_NPObject_vtable *)(strikeDrone)->isa->vtable)->release(strikeDrone, sel_registerName("release"));
     printf("\n====================================================================\n");
     printf(">>> 奇迹！「协议+Category+别名」终极镜像测试 100% 完美通关！ <<<\n");
     printf("====================================================================\n");

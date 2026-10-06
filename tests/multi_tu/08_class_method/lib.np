@@ -1,6 +1,6 @@
 #import "model.nh"
 
-@implementation Factory : NFObject
+@implementation Factory : NPObject
 + (Factory *)make {
     /* ARC forbids a bare autorelease; the convention here is to hand the
        object back and let the caller's ARC deal with it. `+make` is named
@@ -12,7 +12,7 @@
 + (const char *)tag { return "factory"; }
 @end
 
-@implementation Widget : NFObject
+@implementation Widget : NPObject
 + (Widget *)create { return [[Widget alloc] init]; }
 - (int)widgetId { return 7; }
 @end

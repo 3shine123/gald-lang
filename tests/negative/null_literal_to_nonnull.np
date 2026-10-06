@@ -14,12 +14,12 @@
  */
 #import <Foundation/Foundation.np>
 
-@interface Greeter : NFObject
-- (void)greet:(nonnull NFString *)name;
+@interface Greeter : NPObject
+- (void)greet:(nonnull NPString *)name;
 @end
 
 @implementation Greeter
-- (void)greet:(nonnull NFString *)name { NFLog(@"hi %s", [name UTF8String]); }
+- (void)greet:(nonnull NPString *)name { NPLog(@"hi %s", [name UTF8String]); }
 @end
 
 int main(void) {

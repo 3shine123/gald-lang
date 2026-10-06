@@ -1,0 +1,138 @@
+#import <Foundation/NPMutableDictionary.nh>
+#import <Foundation/NPDictionary.np>
+#include <string.h>
+#include <stdlib.h>
+
+@implementation NPMutableDictionary
+
+- (NPMutableDictionary *)initWithCapacity:(size_t)capacity {
+    self = [super init];
+    if (self) {
+        _keys = NULL;
+        _values = NULL;
+        _count = 0;
+        _capacity = 0;
+        if (capacity > 0) {
+            NPObject **ks = (NPObject **)calloc(capacity, sizeof(NPObject *));
+            NPObject **vs = (NPObject **)calloc(capacity, sizeof(NPObject *));
+            if (ks && vs) {
+                _keys = ks;
+                _values = vs;
+                _capacity = capacity;
+            } else {
+                free(ks);
+                free(vs);
+            }
+        }
+    }
+    return self;
+}
+
+- (NPMutableDictionary *)init {
+    return [self initWithCapacity:0];
+}
+
+- (NPMutableDictionary *)initWithDictionary:(NPDictionary *)other {
+    self = [self init];
+    if (self && other) {
+        [self addEntriesFromDictionary:other];
+    }
+    return self;
+}
+
++ (NPMutableDictionary *)dictionaryWithCapacity:(size_t)capacity {
+    @noarc {
+        return [[[self alloc] initWithCapacity:capacity] autorelease];
+    }
+}
+
++ (NPMutableDictionary *)dictionary {
+    @noarc {
+        return [[[self alloc] init] autorelease];
+    }
+}
+
++ (NPMutableDictionary *)dictionaryWithObject:(V)value forKey:(K)key {
+    @noarc {
+        NPMutableDictionary *dict = [self dictionaryWithCapacity:1];
+        if (dict && key && value) {
+            [dict setObject:value forKey:key];
+        }
+        return dict;
+    }
+}
+
+// An equal key (isEqual:) is replaced in place, never appended, so the
+// dictionary can never hold two keys that compare equal.
+- (void)setObject:(V)value forKey:(K)key {
+    if (!key || !value) return;
+    for (size_t i = 0; i < _count; i++) {
+        if (_keys[i] && [_keys[i] isEqual:key]) {
+            if (_values[i] != value) {
+                NPObject *old = _values[i];
+                _values[i] = nopa_retain(value);
+                if (old) {
+                    nopa_release(old);
+                }
+            }
+            return;
+        }
+    }
+    if (_count >= _capacity) {
+        size_t newcap = _capacity == 0 ? 4 : _capacity * 2;
+        NPObject **ks = (NPObject **)realloc(_keys, newcap * sizeof(NPObject *));
+        if (!ks) return;
+        _keys = ks;
+        NPObject **vs = (NPObject **)realloc(_values, newcap * sizeof(NPObject *));
+        if (!vs) return;
+        _values = vs;
+        _capacity = newcap;
+    }
+    _keys[_count] = nopa_retain(key);
+    _values[_count] = nopa_retain(value);
+    _count++;
+}
+
+- (void)addEntriesFromDictionary:(NPDictionary *)other {
+    if (!other) return;
+    NPArray *ks = [other allKeys];
+    size_t n = [ks count];
+    for (size_t i = 0; i < n; i++) {
+        id k = [ks objectAtIndex:i];
+        [self setObject:[other objectForKey:k] forKey:k];
+    }
+}
+
+- (void)removeObjectForKey:(K)key {
+    if (!key) return;
+    for (size_t i = 0; i < _count; i++) {
+        if (_keys[i] && [_keys[i] isEqual:key]) {
+            NPObject *k = _keys[i];
+            NPObject *v = _values[i];
+            memmove(_keys + i, _keys + i + 1, (_count - i - 1) * sizeof(NPObject *));
+            memmove(_values + i, _values + i + 1, (_count - i - 1) * sizeof(NPObject *));
+            _count--;
+            if (k) {
+                nopa_release(k);
+            }
+            if (v) {
+                nopa_release(v);
+            }
+            return;
+        }
+    }
+}
+
+- (void)removeAllObjects {
+    for (size_t i = 0; i < _count; i++) {
+        if (_keys[i]) {
+            nopa_release(_keys[i]);
+        }
+        if (_values[i]) {
+            nopa_release(_values[i]);
+        }
+    }
+    _count = 0;
+}
+
+@end

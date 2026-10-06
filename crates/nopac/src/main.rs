@@ -263,7 +263,7 @@ fn import_quoted_target(t: &str) -> Option<&str> {
 
 /// True when this TU — or anything it transitively `#import`s — pulls in a
 /// Foundation IMPLEMENTATION file (`*.np` under Foundation: the
-/// self-contained umbrella `Foundation.np` or a per-class `NFString.np`).
+/// self-contained umbrella `Foundation.np` or a per-class `NPString.np`).
 /// Such a TU already carries the full Foundation code; auto-linking the
 /// precompiled library would add a competing strong copy of the class
 /// tables whose Foundation-only vtable sig wins the weak merge and trips
@@ -274,7 +274,7 @@ fn import_quoted_target(t: &str) -> Option<&str> {
 ///
 /// Checked at the SOURCE level on purpose: generated-C text markers cannot
 /// distinguish definitions from references (prototypes, vtable slots and
-/// stub instances all mention `NF<Class>_*`). Resolution mirrors the
+/// stub instances all mention `NP<Class>_*`). Resolution mirrors the
 /// preprocessor's search roots (the importing file's directory, bundle
 /// `include/` + `include/Foundation/`), and only imports resolving INTO the
 /// real Foundation count — a user's own `X.np` or a shadowing directory is

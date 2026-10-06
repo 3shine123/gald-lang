@@ -7,7 +7,7 @@
 //   error: goto 'inside' jumps into a nested scope; an owned object declared
 //          there could be released before it is initialized
 
-@interface NegGotoItem : NFObject
+@interface NegGotoItem : NPObject
 @end
 
 @implementation NegGotoItem
@@ -20,7 +20,7 @@ int main() {
     {
         NegGotoItem *x = [[NegGotoItem alloc] init];
 inside:
-        NFLog(@"at label");
+        NPLog(@"at label");
     }
     return 0;
 }

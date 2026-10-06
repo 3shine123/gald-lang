@@ -5,35 +5,35 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#define _NF_INT_CODING   "i"
-#define _NF_STR_CODING   "*"
-#define _NF_OBJ_CODING   "@"
+#define _NP_INT_CODING   "i"
+#define _NP_STR_CODING   "*"
+#define _NP_OBJ_CODING   "@"
 
 
 #include <string.h>
 
-struct nopa_NFObject_vtable;
-struct nopa_NFException_vtable;
-struct nopa_NFJsonNode_vtable;
-struct nopa_NFJsonStringNode_vtable;
-struct nopa_NFJsonNumberNode_vtable;
-struct nopa_NFJsonParser_vtable;
+struct nopa_NPObject_vtable;
+struct nopa_NPException_vtable;
+struct nopa_NPJsonNode_vtable;
+struct nopa_NPJsonStringNode_vtable;
+struct nopa_NPJsonNumberNode_vtable;
+struct nopa_NPJsonParser_vtable;
 
-#define nopa_NFObject_vtable_index_init 2
-#define nopa_NFObject_vtable_index_dealloc 3
-#define nopa_NFException_vtable_index_initWithName_reason_ 4
-#define nopa_NFJsonNode_vtable_index_typeSignature 5
-#define nopa_NFJsonNode_vtable_index_asString 6
-#define nopa_NFJsonNode_vtable_index_asInteger 7
-#define nopa_NFJsonStringNode_vtable_index_initWithString_ 8
-#define nopa_NFJsonStringNode_vtable_index_typeSignature 5
-#define nopa_NFJsonStringNode_vtable_index_asString 6
-#define nopa_NFJsonStringNode_vtable_index_asInteger 7
-#define nopa_NFJsonNumberNode_vtable_index_initWithInteger_ 8
-#define nopa_NFJsonNumberNode_vtable_index_typeSignature 5
-#define nopa_NFJsonNumberNode_vtable_index_asInteger 7
-#define nopa_NFJsonNumberNode_vtable_index_asString 6
-#define nopa_NFJsonParser_vtable_index_parseRawTokens_node_ 4
+#define nopa_NPObject_vtable_index_init 2
+#define nopa_NPObject_vtable_index_dealloc 3
+#define nopa_NPException_vtable_index_initWithName_reason_ 4
+#define nopa_NPJsonNode_vtable_index_typeSignature 5
+#define nopa_NPJsonNode_vtable_index_asString 6
+#define nopa_NPJsonNode_vtable_index_asInteger 7
+#define nopa_NPJsonStringNode_vtable_index_initWithString_ 8
+#define nopa_NPJsonStringNode_vtable_index_typeSignature 5
+#define nopa_NPJsonStringNode_vtable_index_asString 6
+#define nopa_NPJsonStringNode_vtable_index_asInteger 7
+#define nopa_NPJsonNumberNode_vtable_index_initWithInteger_ 8
+#define nopa_NPJsonNumberNode_vtable_index_typeSignature 5
+#define nopa_NPJsonNumberNode_vtable_index_asInteger 7
+#define nopa_NPJsonNumberNode_vtable_index_asString 6
+#define nopa_NPJsonParser_vtable_index_parseRawTokens_node_ 4
 
 static const SEL __nopa_sel_init = {.name = "init", .hash = 0x16B1D373};
 static const SEL __nopa_sel_initWithString_ = {.name = "initWithString_", .hash = 0x5515BD13};
@@ -47,342 +47,342 @@ static const SEL __nopa_sel_nodeWithSerializableObject_ = {.name = "nodeWithSeri
 static const SEL __nopa_sel_initWithInteger_ = {.name = "initWithInteger_", .hash = 0x28D4726C};
 static const SEL __nopa_sel_parseRawTokens_node_ = {.name = "parseRawTokens_node_", .hash = 0xE23634CA};
 
-typedef struct NFObject NFObject;
-typedef struct NFException NFException;
-typedef struct NFJsonNode NFJsonNode;
-typedef struct NFJsonStringNode NFJsonStringNode;
-typedef struct NFJsonNumberNode NFJsonNumberNode;
-typedef struct NFJsonParser NFJsonParser;
+typedef struct NPObject NPObject;
+typedef struct NPException NPException;
+typedef struct NPJsonNode NPJsonNode;
+typedef struct NPJsonStringNode NPJsonStringNode;
+typedef struct NPJsonNumberNode NPJsonNumberNode;
+typedef struct NPJsonParser NPJsonParser;
 
 
 
-NFObject * NFObject_alloc(NFClass * self, SEL _cmd);
-NFObject * NFObject_new(NFClass * self, SEL _cmd);
-NFObject * NFObject_init(NFObject * self, SEL _cmd);
-void NFObject_dealloc(NFObject * self, SEL _cmd);
-NFClass * NFObject_getClass(NFClass * self, SEL _cmd);
-NFObject * NFException_initWithName_reason_(NFObject * self, SEL _cmd, const char * aName, const char * aReason);
-const char * NFException_name(NFObject * self, SEL _cmd);
-const char * NFException_reason(NFObject * self, SEL _cmd);
-NFClass * NFException_getClass(NFClass * self, SEL _cmd);
-NFJsonNode * NFJsonNode_nodeWithSerializableObject_(NFClass * self, SEL _cmd, NFObject * obj);
-const char * NFJsonNode_typeSignature(NFObject * self, SEL _cmd);
-const char * NFJsonNode_asString(NFObject * self, SEL _cmd);
-int NFJsonNode_asInteger(NFObject * self, SEL _cmd);
-NFClass * NFJsonNode_getClass(NFClass * self, SEL _cmd);
-NFObject * NFJsonStringNode_initWithString_(NFObject * self, SEL _cmd, const char * str);
-const char * NFJsonStringNode_typeSignature(NFObject * self, SEL _cmd);
-const char * NFJsonStringNode_asString(NFObject * self, SEL _cmd);
-int NFJsonStringNode_asInteger(NFObject * self, SEL _cmd);
-NFClass * NFJsonStringNode_getClass(NFClass * self, SEL _cmd);
-NFObject * NFJsonNumberNode_initWithInteger_(NFObject * self, SEL _cmd, int val);
-const char * NFJsonNumberNode_typeSignature(NFObject * self, SEL _cmd);
-int NFJsonNumberNode_asInteger(NFObject * self, SEL _cmd);
-const char * NFJsonNumberNode_asString(NFObject * self, SEL _cmd);
-NFClass * NFJsonNumberNode_getClass(NFClass * self, SEL _cmd);
-void NFJsonParser_parseRawTokens_node_(NFObject * self, SEL _cmd, const char * tokens, NFJsonNode * node);
-NFClass * NFJsonParser_getClass(NFClass * self, SEL _cmd);
+NPObject * NPObject_alloc(NPClass * self, SEL _cmd);
+NPObject * NPObject_new(NPClass * self, SEL _cmd);
+NPObject * NPObject_init(NPObject * self, SEL _cmd);
+void NPObject_dealloc(NPObject * self, SEL _cmd);
+NPClass * NPObject_getClass(NPClass * self, SEL _cmd);
+NPObject * NPException_initWithName_reason_(NPObject * self, SEL _cmd, const char * aName, const char * aReason);
+const char * NPException_name(NPObject * self, SEL _cmd);
+const char * NPException_reason(NPObject * self, SEL _cmd);
+NPClass * NPException_getClass(NPClass * self, SEL _cmd);
+NPJsonNode * NPJsonNode_nodeWithSerializableObject_(NPClass * self, SEL _cmd, NPObject * obj);
+const char * NPJsonNode_typeSignature(NPObject * self, SEL _cmd);
+const char * NPJsonNode_asString(NPObject * self, SEL _cmd);
+int NPJsonNode_asInteger(NPObject * self, SEL _cmd);
+NPClass * NPJsonNode_getClass(NPClass * self, SEL _cmd);
+NPObject * NPJsonStringNode_initWithString_(NPObject * self, SEL _cmd, const char * str);
+const char * NPJsonStringNode_typeSignature(NPObject * self, SEL _cmd);
+const char * NPJsonStringNode_asString(NPObject * self, SEL _cmd);
+int NPJsonStringNode_asInteger(NPObject * self, SEL _cmd);
+NPClass * NPJsonStringNode_getClass(NPClass * self, SEL _cmd);
+NPObject * NPJsonNumberNode_initWithInteger_(NPObject * self, SEL _cmd, int val);
+const char * NPJsonNumberNode_typeSignature(NPObject * self, SEL _cmd);
+int NPJsonNumberNode_asInteger(NPObject * self, SEL _cmd);
+const char * NPJsonNumberNode_asString(NPObject * self, SEL _cmd);
+NPClass * NPJsonNumberNode_getClass(NPClass * self, SEL _cmd);
+void NPJsonParser_parseRawTokens_node_(NPObject * self, SEL _cmd, const char * tokens, NPJsonNode * node);
+NPClass * NPJsonParser_getClass(NPClass * self, SEL _cmd);
 int main(int argc, const char * * argv);
 
-extern NFClass nopa_NFObject_class;
-extern NFClass nopa_NFException_class;
-extern NFClass nopa_NFJsonNode_class;
-extern NFClass nopa_NFJsonStringNode_class;
-extern NFClass nopa_NFJsonNumberNode_class;
-extern NFClass nopa_NFJsonParser_class;
+extern NPClass nopa_NPObject_class;
+extern NPClass nopa_NPException_class;
+extern NPClass nopa_NPJsonNode_class;
+extern NPClass nopa_NPJsonStringNode_class;
+extern NPClass nopa_NPJsonNumberNode_class;
+extern NPClass nopa_NPJsonParser_class;
 void nopa_meta_init(void);
 
-// struct NFClass defined in runtime.h
-// struct NFObject defined in runtime.h
-struct nopa_NFObject_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
+// struct NPClass defined in runtime.h
+// struct NPObject defined in runtime.h
+struct nopa_NPObject_vtable {
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
 };
-struct nopa_NFObject_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+struct nopa_NPObject_meta_vtable {
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
-struct NFException {
-    struct NFClass *isa;
+struct NPException {
+    struct NPClass *isa;
     uint32_t retain_count;
     const char * _name;
     const char * _reason;
-    NFObject * _userInfo;
+    NPObject * _userInfo;
 };
-typedef struct NFException NFException;
-struct nopa_NFException_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    NFObject * (*initWithName_reason_)(NFObject *, SEL, const char *, const char *);
-    const char * (*name)(NFObject *, SEL);
-    const char * (*reason)(NFObject *, SEL);
+typedef struct NPException NPException;
+struct nopa_NPException_vtable {
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    NPObject * (*initWithName_reason_)(NPObject *, SEL, const char *, const char *);
+    const char * (*name)(NPObject *, SEL);
+    const char * (*reason)(NPObject *, SEL);
 };
-struct nopa_NFException_meta_vtable {
-    NFClass * (*class)(NFClass *, SEL);
+struct nopa_NPException_meta_vtable {
+    NPClass * (*class)(NPClass *, SEL);
 };
-struct NFJsonNode {
-    struct NFClass *isa;
+struct NPJsonNode {
+    struct NPClass *isa;
     uint32_t retain_count;
     int _nodeType;
 };
-typedef struct NFJsonNode NFJsonNode;
-struct nopa_NFJsonNode_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    const char * (*typeSignature)(NFObject *, SEL);
-    const char * (*asString)(NFObject *, SEL);
-    int (*asInteger)(NFObject *, SEL);
+typedef struct NPJsonNode NPJsonNode;
+struct nopa_NPJsonNode_vtable {
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    const char * (*typeSignature)(NPObject *, SEL);
+    const char * (*asString)(NPObject *, SEL);
+    int (*asInteger)(NPObject *, SEL);
 };
-struct nopa_NFJsonNode_meta_vtable {
-    NFJsonNode * (*nodeWithSerializableObject_)(NFClass *, SEL, NFObject *);
-    NFClass * (*class)(NFClass *, SEL);
+struct nopa_NPJsonNode_meta_vtable {
+    NPJsonNode * (*nodeWithSerializableObject_)(NPClass *, SEL, NPObject *);
+    NPClass * (*class)(NPClass *, SEL);
 };
-struct NFJsonStringNode {
-    struct NFClass *isa;
+struct NPJsonStringNode {
+    struct NPClass *isa;
     uint32_t retain_count;
     int _nodeType;
     const char * _stringValue;
 };
-typedef struct NFJsonStringNode NFJsonStringNode;
-struct nopa_NFJsonStringNode_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    const char * (*typeSignature)(NFObject *, SEL);
-    const char * (*asString)(NFObject *, SEL);
-    int (*asInteger)(NFObject *, SEL);
-    NFObject * (*initWithString_)(NFObject *, SEL, const char *);
+typedef struct NPJsonStringNode NPJsonStringNode;
+struct nopa_NPJsonStringNode_vtable {
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    const char * (*typeSignature)(NPObject *, SEL);
+    const char * (*asString)(NPObject *, SEL);
+    int (*asInteger)(NPObject *, SEL);
+    NPObject * (*initWithString_)(NPObject *, SEL, const char *);
 };
-struct nopa_NFJsonStringNode_meta_vtable {
-    NFClass * (*class)(NFClass *, SEL);
+struct nopa_NPJsonStringNode_meta_vtable {
+    NPClass * (*class)(NPClass *, SEL);
 };
-struct NFJsonNumberNode {
-    struct NFClass *isa;
+struct NPJsonNumberNode {
+    struct NPClass *isa;
     uint32_t retain_count;
     int _nodeType;
     int _intValue;
 };
-typedef struct NFJsonNumberNode NFJsonNumberNode;
-struct nopa_NFJsonNumberNode_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    const char * (*typeSignature)(NFObject *, SEL);
-    const char * (*asString)(NFObject *, SEL);
-    int (*asInteger)(NFObject *, SEL);
-    NFObject * (*initWithInteger_)(NFObject *, SEL, int);
+typedef struct NPJsonNumberNode NPJsonNumberNode;
+struct nopa_NPJsonNumberNode_vtable {
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    const char * (*typeSignature)(NPObject *, SEL);
+    const char * (*asString)(NPObject *, SEL);
+    int (*asInteger)(NPObject *, SEL);
+    NPObject * (*initWithInteger_)(NPObject *, SEL, int);
 };
-struct nopa_NFJsonNumberNode_meta_vtable {
-    NFClass * (*class)(NFClass *, SEL);
+struct nopa_NPJsonNumberNode_meta_vtable {
+    NPClass * (*class)(NPClass *, SEL);
 };
-struct NFJsonParser {
-    struct NFClass *isa;
+struct NPJsonParser {
+    struct NPClass *isa;
     uint32_t retain_count;
     int parseState;
 };
-typedef struct NFJsonParser NFJsonParser;
-struct nopa_NFJsonParser_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    void (*parseRawTokens_node_)(NFObject *, SEL, const char *, NFJsonNode *);
+typedef struct NPJsonParser NPJsonParser;
+struct nopa_NPJsonParser_vtable {
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    void (*parseRawTokens_node_)(NPObject *, SEL, const char *, NPJsonNode *);
 };
-struct nopa_NFJsonParser_meta_vtable {
-    NFClass * (*class)(NFClass *, SEL);
+struct nopa_NPJsonParser_meta_vtable {
+    NPClass * (*class)(NPClass *, SEL);
 };
-NFObject * NFObject_alloc(NFClass * self, SEL _cmd) {
+NPObject * NPObject_alloc(NPClass * self, SEL _cmd) {
     return nopa_alloc(self);
 }
 
-NFObject * NFObject_new(NFClass * self, SEL _cmd) {
-    NFObject * obj = nopa_alloc(self);
+NPObject * NPObject_new(NPClass * self, SEL _cmd) {
+    NPObject * obj = nopa_alloc(self);
     return nopa_init(obj);
 }
 
-NFObject * NFObject_init(NFObject * self, SEL _cmd) {
-    struct NFObject * _self = ((struct NFObject *)(self));
+NPObject * NPObject_init(NPObject * self, SEL _cmd) {
+    struct NPObject * _self = ((struct NPObject *)(self));
     {
         return nopa_init(self);
     }
 }
 
-void NFObject_dealloc(NFObject * self, SEL _cmd) {
-    struct NFObject * _self = ((struct NFObject *)(self));
+void NPObject_dealloc(NPObject * self, SEL _cmd) {
+    struct NPObject * _self = ((struct NPObject *)(self));
     {
         return;
     }
 }
 
-NFClass * NFObject_getClass(NFClass * self, SEL _cmd) {
-    return &nopa_NFObject_class;
+NPClass * NPObject_getClass(NPClass * self, SEL _cmd) {
+    return &nopa_NPObject_class;
 }
 
-NFObject * nopa_alloc(struct NFClass * cls);
-NFObject * nopa_init(NFObject * );
-NFObject * NFException_initWithName_reason_(NFObject * self, SEL _cmd, const char * aName, const char * aReason) {
-    struct NFException * _self = ((struct NFException *)(self));
+NPObject * nopa_alloc(struct NPClass * cls);
+NPObject * nopa_init(NPObject * );
+NPObject * NPException_initWithName_reason_(NPObject * self, SEL _cmd, const char * aName, const char * aReason) {
+    struct NPException * _self = ((struct NPException *)(self));
     {
-        self = NFObject_init(self, __nopa_sel_init);
+        self = NPObject_init(self, __nopa_sel_init);
         if (self) {
             {
-                ((struct NFException *)(self))->_name = aName;
-                ((struct NFException *)(self))->_reason = aReason;
-                ((struct NFException *)(self))->_userInfo = NULL;
+                ((struct NPException *)(self))->_name = aName;
+                ((struct NPException *)(self))->_reason = aReason;
+                ((struct NPException *)(self))->_userInfo = NULL;
             }
         }
         return self;
     }
 }
 
-const char * NFException_name(NFObject * self, SEL _cmd) {
-    return ((struct NFException *)(self))->_name;
+const char * NPException_name(NPObject * self, SEL _cmd) {
+    return ((struct NPException *)(self))->_name;
 }
 
-const char * NFException_reason(NFObject * self, SEL _cmd) {
-    return ((struct NFException *)(self))->_reason;
+const char * NPException_reason(NPObject * self, SEL _cmd) {
+    return ((struct NPException *)(self))->_reason;
 }
 
-NFClass * NFException_getClass(NFClass * self, SEL _cmd) {
-    return &nopa_NFException_class;
+NPClass * NPException_getClass(NPClass * self, SEL _cmd) {
+    return &nopa_NPException_class;
 }
 
-NFJsonNode * NFJsonNode_nodeWithSerializableObject_(NFClass * self, SEL _cmd, NFObject * obj) {
+NPJsonNode * NPJsonNode_nodeWithSerializableObject_(NPClass * self, SEL _cmd, NPObject * obj) {
     if (obj == NULL) {
         return NULL;
     }
-    return ({ NFObject *__nopa_tmp_0 = (NFObject_alloc(&nopa_NFJsonStringNode_class, __nopa_sel_alloc)); ((struct nopa_NFJsonStringNode_vtable *)__nopa_tmp_0->isa->vtable)->initWithString_(__nopa_tmp_0, __nopa_sel_initWithString_, ((const char *)(obj))); });
+    return ({ NPObject *__nopa_tmp_0 = (NPObject_alloc(&nopa_NPJsonStringNode_class, __nopa_sel_alloc)); ((struct nopa_NPJsonStringNode_vtable *)__nopa_tmp_0->isa->vtable)->initWithString_(__nopa_tmp_0, __nopa_sel_initWithString_, ((const char *)(obj))); });
 }
 
-const char * NFJsonNode_typeSignature(NFObject * self, SEL _cmd) {
-    struct NFJsonNode * _self = ((struct NFJsonNode *)(self));
+const char * NPJsonNode_typeSignature(NPObject * self, SEL _cmd) {
+    struct NPJsonNode * _self = ((struct NPJsonNode *)(self));
     {
-        return _NF_OBJ_CODING;
+        return _NP_OBJ_CODING;
     }
 }
 
-const char * NFJsonNode_asString(NFObject * self, SEL _cmd) {
-    struct NFJsonNode * _self = ((struct NFJsonNode *)(self));
+const char * NPJsonNode_asString(NPObject * self, SEL _cmd) {
+    struct NPJsonNode * _self = ((struct NPJsonNode *)(self));
     {
         return "";
     }
 }
 
-int NFJsonNode_asInteger(NFObject * self, SEL _cmd) {
-    struct NFJsonNode * _self = ((struct NFJsonNode *)(self));
+int NPJsonNode_asInteger(NPObject * self, SEL _cmd) {
+    struct NPJsonNode * _self = ((struct NPJsonNode *)(self));
     {
         return 0;
     }
 }
 
-NFClass * NFJsonNode_getClass(NFClass * self, SEL _cmd) {
-    return &nopa_NFJsonNode_class;
+NPClass * NPJsonNode_getClass(NPClass * self, SEL _cmd) {
+    return &nopa_NPJsonNode_class;
 }
 
-NFObject * NFJsonStringNode_initWithString_(NFObject * self, SEL _cmd, const char * str) {
-    struct NFJsonStringNode * _self = ((struct NFJsonStringNode *)(self));
+NPObject * NPJsonStringNode_initWithString_(NPObject * self, SEL _cmd, const char * str) {
+    struct NPJsonStringNode * _self = ((struct NPJsonStringNode *)(self));
     {
-        self = NFObject_init(self, __nopa_sel_init);
+        self = NPObject_init(self, __nopa_sel_init);
         if (self) {
             {
-                ((struct NFJsonStringNode *)(self))->_nodeType = 1;
-                ((struct NFJsonStringNode *)(self))->_stringValue = str;
+                ((struct NPJsonStringNode *)(self))->_nodeType = 1;
+                ((struct NPJsonStringNode *)(self))->_stringValue = str;
             }
         }
         return self;
     }
 }
 
-const char * NFJsonStringNode_typeSignature(NFObject * self, SEL _cmd) {
-    struct NFJsonStringNode * _self = ((struct NFJsonStringNode *)(self));
+const char * NPJsonStringNode_typeSignature(NPObject * self, SEL _cmd) {
+    struct NPJsonStringNode * _self = ((struct NPJsonStringNode *)(self));
     {
-        return _NF_STR_CODING;
+        return _NP_STR_CODING;
     }
 }
 
-const char * NFJsonStringNode_asString(NFObject * self, SEL _cmd) {
-    struct NFJsonStringNode * _self = ((struct NFJsonStringNode *)(self));
+const char * NPJsonStringNode_asString(NPObject * self, SEL _cmd) {
+    struct NPJsonStringNode * _self = ((struct NPJsonStringNode *)(self));
     {
-        return ((struct NFJsonStringNode *)(self))->_stringValue;
+        return ((struct NPJsonStringNode *)(self))->_stringValue;
     }
 }
 
-int NFJsonStringNode_asInteger(NFObject * self, SEL _cmd) {
-    struct NFJsonStringNode * _self = ((struct NFJsonStringNode *)(self));
+int NPJsonStringNode_asInteger(NPObject * self, SEL _cmd) {
+    struct NPJsonStringNode * _self = ((struct NPJsonStringNode *)(self));
     {
-        return atoi(((struct NFJsonStringNode *)(self))->_stringValue);
+        return atoi(((struct NPJsonStringNode *)(self))->_stringValue);
     }
 }
 
-NFClass * NFJsonStringNode_getClass(NFClass * self, SEL _cmd) {
-    return &nopa_NFJsonStringNode_class;
+NPClass * NPJsonStringNode_getClass(NPClass * self, SEL _cmd) {
+    return &nopa_NPJsonStringNode_class;
 }
 
-NFObject * NFJsonNumberNode_initWithInteger_(NFObject * self, SEL _cmd, int val) {
-    struct NFJsonNumberNode * _self = ((struct NFJsonNumberNode *)(self));
+NPObject * NPJsonNumberNode_initWithInteger_(NPObject * self, SEL _cmd, int val) {
+    struct NPJsonNumberNode * _self = ((struct NPJsonNumberNode *)(self));
     {
-        self = NFObject_init(self, __nopa_sel_init);
+        self = NPObject_init(self, __nopa_sel_init);
         if (self) {
             {
-                ((struct NFJsonNumberNode *)(self))->_nodeType = 2;
-                ((struct NFJsonNumberNode *)(self))->_intValue = val;
+                ((struct NPJsonNumberNode *)(self))->_nodeType = 2;
+                ((struct NPJsonNumberNode *)(self))->_intValue = val;
             }
         }
         return self;
     }
 }
 
-const char * NFJsonNumberNode_typeSignature(NFObject * self, SEL _cmd) {
-    struct NFJsonNumberNode * _self = ((struct NFJsonNumberNode *)(self));
+const char * NPJsonNumberNode_typeSignature(NPObject * self, SEL _cmd) {
+    struct NPJsonNumberNode * _self = ((struct NPJsonNumberNode *)(self));
     {
-        return _NF_INT_CODING;
+        return _NP_INT_CODING;
     }
 }
 
-int NFJsonNumberNode_asInteger(NFObject * self, SEL _cmd) {
-    struct NFJsonNumberNode * _self = ((struct NFJsonNumberNode *)(self));
+int NPJsonNumberNode_asInteger(NPObject * self, SEL _cmd) {
+    struct NPJsonNumberNode * _self = ((struct NPJsonNumberNode *)(self));
     {
-        return ((struct NFJsonNumberNode *)(self))->_intValue;
+        return ((struct NPJsonNumberNode *)(self))->_intValue;
     }
 }
 
-const char * NFJsonNumberNode_asString(NFObject * self, SEL _cmd) {
-    struct NFJsonNumberNode * _self = ((struct NFJsonNumberNode *)(self));
+const char * NPJsonNumberNode_asString(NPObject * self, SEL _cmd) {
+    struct NPJsonNumberNode * _self = ((struct NPJsonNumberNode *)(self));
     {
         char buf[16];
-        sprintf(buf, "%d", ((struct NFJsonNumberNode *)(self))->_intValue);
+        sprintf(buf, "%d", ((struct NPJsonNumberNode *)(self))->_intValue);
         return buf;
     }
 }
 
-NFClass * NFJsonNumberNode_getClass(NFClass * self, SEL _cmd) {
-    return &nopa_NFJsonNumberNode_class;
+NPClass * NPJsonNumberNode_getClass(NPClass * self, SEL _cmd) {
+    return &nopa_NPJsonNumberNode_class;
 }
 
-void NFJsonParser_parseRawTokens_node_(NFObject * self, SEL _cmd, const char * tokens, NFJsonNode * node) {
-    struct NFJsonParser * _self = ((struct NFJsonParser *)(self));
+void NPJsonParser_parseRawTokens_node_(NPObject * self, SEL _cmd, const char * tokens, NPJsonNode * node) {
+    struct NPJsonParser * _self = ((struct NPJsonParser *)(self));
     {
         printf("[解析器] 开始解析 Token 序列: %s\n", tokens);
         {
             id __nopa_exception_0 = NULL;
             __nopa_try_0:
             {
-                ((struct NFJsonParser *)(self))->parseState = 1;
+                ((struct NPJsonParser *)(self))->parseState = 1;
                 if (tokens == NULL || strlen(tokens) == 0) {
                     {
-                        NFObject *__nopa_tmp_1 = (NFObject_alloc(&nopa_NFException_class, __nopa_sel_alloc));
-                        NFException * ex = ((struct nopa_NFException_vtable *)__nopa_tmp_1->isa->vtable)->initWithName_reason_(__nopa_tmp_1, __nopa_sel_initWithName_reason_, "NFJsonParseException", "Token 序列为空，无法解析结构");
+                        NPObject *__nopa_tmp_1 = (NPObject_alloc(&nopa_NPException_class, __nopa_sel_alloc));
+                        NPException * ex = ((struct nopa_NPException_vtable *)__nopa_tmp_1->isa->vtable)->initWithName_reason_(__nopa_tmp_1, __nopa_sel_initWithName_reason_, "NPJsonParseException", "Token 序列为空，无法解析结构");
                         {
                             __nopa_exception_0 = ex;
                             goto __nopa_catch_0;
                         }
                     }
                 }
-                if (strcmp(((struct nopa_NFJsonNode_vtable *)node->isa->vtable)->typeSignature(node, __nopa_sel_typeSignature), _NF_STR_CODING) == 0) {
+                if (strcmp(((struct nopa_NPJsonNode_vtable *)node->isa->vtable)->typeSignature(node, __nopa_sel_typeSignature), _NP_STR_CODING) == 0) {
                     {
-                        printf("[解析器断言] 目标是一个字符串类簇节点，安全转换值: %s\n", ((struct nopa_NFJsonNode_vtable *)node->isa->vtable)->asString(node, __nopa_sel_asString));
+                        printf("[解析器断言] 目标是一个字符串类簇节点，安全转换值: %s\n", ((struct nopa_NPJsonNode_vtable *)node->isa->vtable)->asString(node, __nopa_sel_asString));
                     }
                 } else {
                     {
-                        NFObject *__nopa_tmp_2 = (NFObject_alloc(&nopa_NFException_class, __nopa_sel_alloc));
-                        NFException * ex = ((struct nopa_NFException_vtable *)__nopa_tmp_2->isa->vtable)->initWithName_reason_(__nopa_tmp_2, __nopa_sel_initWithName_reason_, "NFMismatchTypeException", "预期需要 String 类型节点，但收到了不匹配的节点签名");
+                        NPObject *__nopa_tmp_2 = (NPObject_alloc(&nopa_NPException_class, __nopa_sel_alloc));
+                        NPException * ex = ((struct nopa_NPException_vtable *)__nopa_tmp_2->isa->vtable)->initWithName_reason_(__nopa_tmp_2, __nopa_sel_initWithName_reason_, "NPMismatchTypeException", "预期需要 String 类型节点，但收到了不匹配的节点签名");
                         {
                             __nopa_exception_0 = ex;
                             goto __nopa_catch_0;
@@ -396,9 +396,9 @@ void NFJsonParser_parseRawTokens_node_(NFObject * self, SEL _cmd, const char * t
             exception = __nopa_exception_0;
             {
                 printf("\n【@catch 捕获异常】\n");
-                printf("异常名称: %s\n", ((struct nopa_NFException_vtable *)exception->isa->vtable)->name(exception, __nopa_sel_name));
-                printf("错误原因: %s\n", ((struct nopa_NFException_vtable *)exception->isa->vtable)->reason(exception, __nopa_sel_reason));
-                ((struct NFJsonParser *)(self))->parseState = -1;
+                printf("异常名称: %s\n", ((struct nopa_NPException_vtable *)exception->isa->vtable)->name(exception, __nopa_sel_name));
+                printf("错误原因: %s\n", ((struct nopa_NPException_vtable *)exception->isa->vtable)->reason(exception, __nopa_sel_reason));
+                ((struct NPJsonParser *)(self))->parseState = -1;
                 nopa_release(exception);
             }
             goto __nopa_finally_0;
@@ -407,7 +407,7 @@ void NFJsonParser_parseRawTokens_node_(NFObject * self, SEL _cmd, const char * t
             unknownException = __nopa_exception_0;
             {
                 printf("【@catch 捕获未知错误】\n");
-                ((struct NFJsonParser *)(self))->parseState = -2;
+                ((struct NPJsonParser *)(self))->parseState = -2;
             }
             goto __nopa_finally_0;
             __nopa_finally_0:
@@ -416,8 +416,8 @@ void NFJsonParser_parseRawTokens_node_(NFObject * self, SEL _cmd, const char * t
     }
 }
 
-NFClass * NFJsonParser_getClass(NFClass * self, SEL _cmd) {
-    return &nopa_NFJsonParser_class;
+NPClass * NPJsonParser_getClass(NPClass * self, SEL _cmd) {
+    return &nopa_NPJsonParser_class;
 }
 
 int main(int argc, const char * * argv) {
@@ -426,19 +426,19 @@ int main(int argc, const char * * argv) {
     {
         nopa_autoreleasepool_t * __pool = nopa_autoreleasepool_push();
         {
-            printf(">>> 开始 NFFoundation 终极运行时与异常黑魔法测试 <<<\n\n");
-            NFObject *__nopa_tmp_3 = (NFObject_alloc(&nopa_NFJsonParser_class, __nopa_sel_alloc));
-            NFJsonParser * parser = ((struct nopa_NFObject_vtable *)__nopa_tmp_3->isa->vtable)->init(__nopa_tmp_3, __nopa_sel_init);
+            printf(">>> 开始 NPFoundation 终极运行时与异常黑魔法测试 <<<\n\n");
+            NPObject *__nopa_tmp_3 = (NPObject_alloc(&nopa_NPJsonParser_class, __nopa_sel_alloc));
+            NPJsonParser * parser = ((struct nopa_NPObject_vtable *)__nopa_tmp_3->isa->vtable)->init(__nopa_tmp_3, __nopa_sel_init);
             printf("--- 测试点 1: 类簇动态工厂创建 ---\n");
-            NFJsonNode * strNode = NFJsonNode_nodeWithSerializableObject_(&nopa_NFJsonNode_class, __nopa_sel_nodeWithSerializableObject_, "2026-Spaceship");
-            NFObject *__nopa_tmp_4 = (NFObject_alloc(&nopa_NFJsonNumberNode_class, __nopa_sel_alloc));
-            NFJsonNode * numNode = ((struct nopa_NFJsonNumberNode_vtable *)__nopa_tmp_4->isa->vtable)->initWithInteger_(__nopa_tmp_4, __nopa_sel_initWithInteger_, 888);
+            NPJsonNode * strNode = NPJsonNode_nodeWithSerializableObject_(&nopa_NPJsonNode_class, __nopa_sel_nodeWithSerializableObject_, "2026-Spaceship");
+            NPObject *__nopa_tmp_4 = (NPObject_alloc(&nopa_NPJsonNumberNode_class, __nopa_sel_alloc));
+            NPJsonNode * numNode = ((struct nopa_NPJsonNumberNode_vtable *)__nopa_tmp_4->isa->vtable)->initWithInteger_(__nopa_tmp_4, __nopa_sel_initWithInteger_, 888);
             printf("\n--- 测试点 2: 正常解析（匹配签名） ---\n");
-            ((struct nopa_NFJsonParser_vtable *)parser->isa->vtable)->parseRawTokens_node_(parser, __nopa_sel_parseRawTokens_node_, "{\"ship\": \"2026-Spaceship\"}", strNode);
+            ((struct nopa_NPJsonParser_vtable *)parser->isa->vtable)->parseRawTokens_node_(parser, __nopa_sel_parseRawTokens_node_, "{\"ship\": \"2026-Spaceship\"}", strNode);
             printf("\n--- 测试点 3: 异常触发（将数字节点送入需要字符串的解析器） ---\n");
-            ((struct nopa_NFJsonParser_vtable *)parser->isa->vtable)->parseRawTokens_node_(parser, __nopa_sel_parseRawTokens_node_, "{\"count\": 888}", numNode);
+            ((struct nopa_NPJsonParser_vtable *)parser->isa->vtable)->parseRawTokens_node_(parser, __nopa_sel_parseRawTokens_node_, "{\"count\": 888}", numNode);
             printf("\n--- 测试点 4: 异常触发（送入空字符串，测试 @throw 逻辑） ---\n");
-            ((struct nopa_NFJsonParser_vtable *)parser->isa->vtable)->parseRawTokens_node_(parser, __nopa_sel_parseRawTokens_node_, NULL, strNode);
+            ((struct nopa_NPJsonParser_vtable *)parser->isa->vtable)->parseRawTokens_node_(parser, __nopa_sel_parseRawTokens_node_, NULL, strNode);
             printf("\n>>> 正在注销运行时上下文并回收内存... <<<\n");
             nopa_release(strNode);
             nopa_release(numNode);
@@ -454,132 +454,132 @@ int main(int argc, const char * * argv) {
 
 // ─── Class metadata ─────────────────────────────────────
 
-struct nopa_NFObject_vtable nopa_NFObject_vtable_inst = {
-    .init = NFObject_init,
-    .dealloc = NFObject_dealloc,
+struct nopa_NPObject_vtable nopa_NPObject_vtable_inst = {
+    .init = NPObject_init,
+    .dealloc = NPObject_dealloc,
 };
 
-struct nopa_NFException_vtable nopa_NFException_vtable_inst = {
-    .init = NFObject_init,
-    .dealloc = NFObject_dealloc,
-    .initWithName_reason_ = NFException_initWithName_reason_,
-    .name = NFException_name,
-    .reason = NFException_reason,
+struct nopa_NPException_vtable nopa_NPException_vtable_inst = {
+    .init = NPObject_init,
+    .dealloc = NPObject_dealloc,
+    .initWithName_reason_ = NPException_initWithName_reason_,
+    .name = NPException_name,
+    .reason = NPException_reason,
 };
 
-struct nopa_NFJsonNode_vtable nopa_NFJsonNode_vtable_inst = {
-    .init = NFObject_init,
-    .dealloc = NFObject_dealloc,
-    .typeSignature = NFJsonNode_typeSignature,
-    .asString = NFJsonNode_asString,
-    .asInteger = NFJsonNode_asInteger,
+struct nopa_NPJsonNode_vtable nopa_NPJsonNode_vtable_inst = {
+    .init = NPObject_init,
+    .dealloc = NPObject_dealloc,
+    .typeSignature = NPJsonNode_typeSignature,
+    .asString = NPJsonNode_asString,
+    .asInteger = NPJsonNode_asInteger,
 };
 
-struct nopa_NFJsonStringNode_vtable nopa_NFJsonStringNode_vtable_inst = {
-    .init = NFObject_init,
-    .dealloc = NFObject_dealloc,
-    .typeSignature = NFJsonStringNode_typeSignature,
-    .asString = NFJsonStringNode_asString,
-    .asInteger = NFJsonStringNode_asInteger,
-    .initWithString_ = NFJsonStringNode_initWithString_,
+struct nopa_NPJsonStringNode_vtable nopa_NPJsonStringNode_vtable_inst = {
+    .init = NPObject_init,
+    .dealloc = NPObject_dealloc,
+    .typeSignature = NPJsonStringNode_typeSignature,
+    .asString = NPJsonStringNode_asString,
+    .asInteger = NPJsonStringNode_asInteger,
+    .initWithString_ = NPJsonStringNode_initWithString_,
 };
 
-struct nopa_NFJsonNumberNode_vtable nopa_NFJsonNumberNode_vtable_inst = {
-    .init = NFObject_init,
-    .dealloc = NFObject_dealloc,
-    .typeSignature = NFJsonNumberNode_typeSignature,
-    .asString = NFJsonNumberNode_asString,
-    .asInteger = NFJsonNumberNode_asInteger,
-    .initWithInteger_ = NFJsonNumberNode_initWithInteger_,
+struct nopa_NPJsonNumberNode_vtable nopa_NPJsonNumberNode_vtable_inst = {
+    .init = NPObject_init,
+    .dealloc = NPObject_dealloc,
+    .typeSignature = NPJsonNumberNode_typeSignature,
+    .asString = NPJsonNumberNode_asString,
+    .asInteger = NPJsonNumberNode_asInteger,
+    .initWithInteger_ = NPJsonNumberNode_initWithInteger_,
 };
 
-struct nopa_NFJsonParser_vtable nopa_NFJsonParser_vtable_inst = {
-    .init = NFObject_init,
-    .dealloc = NFObject_dealloc,
-    .parseRawTokens_node_ = NFJsonParser_parseRawTokens_node_,
+struct nopa_NPJsonParser_vtable nopa_NPJsonParser_vtable_inst = {
+    .init = NPObject_init,
+    .dealloc = NPObject_dealloc,
+    .parseRawTokens_node_ = NPJsonParser_parseRawTokens_node_,
 };
 
-struct nopa_NFObject_meta_vtable nopa_NFObject_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
-    .class = NFObject_getClass,
+struct nopa_NPObject_meta_vtable nopa_NPObject_meta_vtable_inst = {
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
+    .class = NPObject_getClass,
 };
 
-struct nopa_NFException_meta_vtable nopa_NFException_meta_vtable_inst = {
-    .class = NFException_getClass,
+struct nopa_NPException_meta_vtable nopa_NPException_meta_vtable_inst = {
+    .class = NPException_getClass,
 };
 
-struct nopa_NFJsonNode_meta_vtable nopa_NFJsonNode_meta_vtable_inst = {
-    .nodeWithSerializableObject_ = NFJsonNode_nodeWithSerializableObject_,
-    .class = NFJsonNode_getClass,
+struct nopa_NPJsonNode_meta_vtable nopa_NPJsonNode_meta_vtable_inst = {
+    .nodeWithSerializableObject_ = NPJsonNode_nodeWithSerializableObject_,
+    .class = NPJsonNode_getClass,
 };
 
-struct nopa_NFJsonStringNode_meta_vtable nopa_NFJsonStringNode_meta_vtable_inst = {
-    .class = NFJsonStringNode_getClass,
+struct nopa_NPJsonStringNode_meta_vtable nopa_NPJsonStringNode_meta_vtable_inst = {
+    .class = NPJsonStringNode_getClass,
 };
 
-struct nopa_NFJsonNumberNode_meta_vtable nopa_NFJsonNumberNode_meta_vtable_inst = {
-    .class = NFJsonNumberNode_getClass,
+struct nopa_NPJsonNumberNode_meta_vtable nopa_NPJsonNumberNode_meta_vtable_inst = {
+    .class = NPJsonNumberNode_getClass,
 };
 
-struct nopa_NFJsonParser_meta_vtable nopa_NFJsonParser_meta_vtable_inst = {
-    .class = NFJsonParser_getClass,
+struct nopa_NPJsonParser_meta_vtable nopa_NPJsonParser_meta_vtable_inst = {
+    .class = NPJsonParser_getClass,
 };
 
-NFClass nopa_NFObject_class;
-NFClass nopa_NFException_class;
-NFClass nopa_NFJsonNode_class;
-NFClass nopa_NFJsonStringNode_class;
-NFClass nopa_NFJsonNumberNode_class;
-NFClass nopa_NFJsonParser_class;
+NPClass nopa_NPObject_class;
+NPClass nopa_NPException_class;
+NPClass nopa_NPJsonNode_class;
+NPClass nopa_NPJsonStringNode_class;
+NPClass nopa_NPJsonNumberNode_class;
+NPClass nopa_NPJsonParser_class;
 
 void nopa_meta_init(void) {
-    nopa_NFObject_class = (NFClass){
-        .name = "NFObject",
+    nopa_NPObject_class = (NPClass){
+        .name = "NPObject",
         .superclass = NULL,
-        .instance_size = sizeof(struct NFObject),
-        .vtable = &nopa_NFObject_vtable_inst,
-        .class_vtable = &nopa_NFObject_meta_vtable_inst,
+        .instance_size = sizeof(struct NPObject),
+        .vtable = &nopa_NPObject_vtable_inst,
+        .class_vtable = &nopa_NPObject_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_NFException_class = (NFClass){
-        .name = "NFException",
-        .superclass = &nopa_NFObject_class,
-        .instance_size = sizeof(struct NFException),
-        .vtable = &nopa_NFException_vtable_inst,
-        .class_vtable = &nopa_NFException_meta_vtable_inst,
+    nopa_NPException_class = (NPClass){
+        .name = "NPException",
+        .superclass = &nopa_NPObject_class,
+        .instance_size = sizeof(struct NPException),
+        .vtable = &nopa_NPException_vtable_inst,
+        .class_vtable = &nopa_NPException_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_NFJsonNode_class = (NFClass){
-        .name = "NFJsonNode",
-        .superclass = &nopa_NFObject_class,
-        .instance_size = sizeof(struct NFJsonNode),
-        .vtable = &nopa_NFJsonNode_vtable_inst,
-        .class_vtable = &nopa_NFJsonNode_meta_vtable_inst,
+    nopa_NPJsonNode_class = (NPClass){
+        .name = "NPJsonNode",
+        .superclass = &nopa_NPObject_class,
+        .instance_size = sizeof(struct NPJsonNode),
+        .vtable = &nopa_NPJsonNode_vtable_inst,
+        .class_vtable = &nopa_NPJsonNode_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_NFJsonStringNode_class = (NFClass){
-        .name = "NFJsonStringNode",
-        .superclass = &nopa_NFJsonNode_class,
-        .instance_size = sizeof(struct NFJsonStringNode),
-        .vtable = &nopa_NFJsonStringNode_vtable_inst,
-        .class_vtable = &nopa_NFJsonStringNode_meta_vtable_inst,
+    nopa_NPJsonStringNode_class = (NPClass){
+        .name = "NPJsonStringNode",
+        .superclass = &nopa_NPJsonNode_class,
+        .instance_size = sizeof(struct NPJsonStringNode),
+        .vtable = &nopa_NPJsonStringNode_vtable_inst,
+        .class_vtable = &nopa_NPJsonStringNode_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_NFJsonNumberNode_class = (NFClass){
-        .name = "NFJsonNumberNode",
-        .superclass = &nopa_NFJsonNode_class,
-        .instance_size = sizeof(struct NFJsonNumberNode),
-        .vtable = &nopa_NFJsonNumberNode_vtable_inst,
-        .class_vtable = &nopa_NFJsonNumberNode_meta_vtable_inst,
+    nopa_NPJsonNumberNode_class = (NPClass){
+        .name = "NPJsonNumberNode",
+        .superclass = &nopa_NPJsonNode_class,
+        .instance_size = sizeof(struct NPJsonNumberNode),
+        .vtable = &nopa_NPJsonNumberNode_vtable_inst,
+        .class_vtable = &nopa_NPJsonNumberNode_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_NFJsonParser_class = (NFClass){
-        .name = "NFJsonParser",
-        .superclass = &nopa_NFObject_class,
-        .instance_size = sizeof(struct NFJsonParser),
-        .vtable = &nopa_NFJsonParser_vtable_inst,
-        .class_vtable = &nopa_NFJsonParser_meta_vtable_inst,
+    nopa_NPJsonParser_class = (NPClass){
+        .name = "NPJsonParser",
+        .superclass = &nopa_NPObject_class,
+        .instance_size = sizeof(struct NPJsonParser),
+        .vtable = &nopa_NPJsonParser_vtable_inst,
+        .class_vtable = &nopa_NPJsonParser_meta_vtable_inst,
         .protocol_count = 0,
     };
 }

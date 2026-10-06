@@ -8,7 +8,7 @@
 #import <Foundation/Foundation.np>
 
 // ============================================================================
-// 1. 隐式根类：自定义轻量级根类，不继承 NFObject
+// 1. 隐式根类：自定义轻量级根类，不继承 NPObject
 // ============================================================================
 
 @interface LightNode {
@@ -46,7 +46,7 @@
 }
 @end
 
-@interface HeavyNode : NFObject {
+@interface HeavyNode : NPObject {
     @public
     int _value;
     const char* _tag;
@@ -71,7 +71,7 @@
 }
 
 - (void)dealloc {
-    printf("[HeavyNode] NFObject 节点 [%s] 销毁\n", _tag);
+    printf("[HeavyNode] NPObject 节点 [%s] 销毁\n", _tag);
     [super dealloc];
 }
 @end
@@ -172,8 +172,8 @@ int main(int argc, const char* argv[]) {
         printf("  value=%d, double=%d, tag=%s\n",
                [light value], [light valueDouble], [light tag]);
 
-        // --- 2. NFObject 对比 ---
-        printf("\n--- 2. NFObject 继承对比 ---\n");
+        // --- 2. NPObject 对比 ---
+        printf("\n--- 2. NPObject 继承对比 ---\n");
         HeavyNode* heavy = [[HeavyNode alloc] initHeavyWithValue:99 tag:"heavy"];
         printf("  HeavyNode value=%d\n", [heavy value]);
 

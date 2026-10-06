@@ -7,7 +7,7 @@
    Note: ivars are declared on the @interface (Nopa's convention — the
    @implementation body is for methods, not for a second ivar list). */
 @namespace Geo
-    @interface Point : NFObject {
+    @interface Point : NPObject {
         @public
         int _x;
         int _y;

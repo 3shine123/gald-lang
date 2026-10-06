@@ -1,13 +1,13 @@
-// Negative: a class named `NFAsync` collides with the reserved marker name
+// Negative: a class named `NPAsync` collides with the reserved marker name
 // the parser unwraps in return-type position.
-// Expected error: 'NFAsync' is reserved for the async return-type marker —
+// Expected error: 'NPAsync' is reserved for the async return-type marker —
 // pick a different class name
 #import <Foundation/Foundation.np>
 
-@interface NFAsync : NFObject
+@interface NPAsync : NPObject
 @end
 
-@implementation NFAsync
+@implementation NPAsync
 @end
 
 int main() { return 0; }

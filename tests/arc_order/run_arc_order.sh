@@ -76,7 +76,7 @@ for np in "$SCRIPT_DIR"/[0-9][0-9]_*.np; do
     for m in "${MODES[@]}"; do
         # shellcheck disable=SC2206
         ff=($(mode_flags "$m"))
-        # NFLog writes to stderr (runtime.c), so merge the streams: for these
+        # NPLog writes to stderr (runtime.c), so merge the streams: for these
         # cases the program's observable output *is* the stderr transcript.
         log="$WORK/$name.$m.log"
         "$NOPAC" run -o "$WORK/$name.$m.bin" ${ff[@]+"${ff[@]}"} "$np" >"$log" 2>&1

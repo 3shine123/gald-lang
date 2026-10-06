@@ -39,16 +39,16 @@ typedef struct {
     unsigned hash;
 } SEL;
 
-typedef struct NFClass NFClass;
+typedef struct NPClass NPClass;
 typedef struct nopa_root nopa_root;
-typedef struct NFObject NFObject;
-typedef struct NFString NFString;
-typedef NFObject *id;
-typedef NFObject *nopa_id_t;
+typedef struct NPObject NPObject;
+typedef struct NPString NPString;
+typedef NPObject *id;
+typedef NPObject *nopa_id_t;
 
 /* Always declared: the transpiler's nopa_metaInit() references it.
  * Definition comes from the user (freestanding) or Foundation (host). */
-extern NFClass NOPA_CLASS_$_nopa_root;
+extern NPClass NOPA_CLASS_$_nopa_root;
 
 /* memcpy is used by the @try/@catch @finally jmp_buf save/restore
  * (the generated code always calls memcpy for nesting save/restore).
@@ -62,74 +62,74 @@ void *memcpy(void *dst, const void *src, size_t n);
 #ifndef NOPA_ROOT_DEFINED
 #define NOPA_ROOT_DEFINED
 struct nopa_root {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
 };
 #endif
 
 #endif /* end of __NOPA_FREESTANDING guarded structs */
 
-#ifndef NFOBJECT_DEFINED
-#define NFOBJECT_DEFINED
-struct NFObject {
-    struct NFClass *isa;
+#ifndef NPOBJECT_DEFINED
+#define NPOBJECT_DEFINED
+struct NPObject {
+    struct NPClass *isa;
     uint32_t retain_count;
 };
 #endif
 
-struct NFClass {
+struct NPClass {
     const char *name;
-    NFClass *superclass;
+    NPClass *superclass;
     size_t instance_size;
     void *vtable;
     void *class_vtable;
-    struct NFProtocol **protocols;
+    struct NPProtocol **protocols;
     int protocol_count;
     /* Populated by nopa_metaInit() (codegen). nopa_release() calls it when the
      * retain count reaches 0, so per-class dealloc cleanup (free-ing ivars)
      * actually runs. NULL if the class defines no instance dealloc. */
-    void (*dealloc)(NFObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
 };
 
 // ─── Protocol types ──────────────────────────────────────────────────────────
 
-typedef struct NFProtocolMethod {
+typedef struct NPProtocolMethod {
     const char *name;
     const char *encoding;
-} NFProtocolMethod;
+} NPProtocolMethod;
 
-struct NFProtocol {
+struct NPProtocol {
     const char *name;
-    struct NFProtocol **parents;
+    struct NPProtocol **parents;
     int parent_count;
-    NFProtocolMethod *required_methods;
+    NPProtocolMethod *required_methods;
     int required_count;
-    NFProtocolMethod *optional_methods;
+    NPProtocolMethod *optional_methods;
     int optional_count;
 };
 
 // ─── Internal types (for runtime implementation) ────────────────────────────────
 
-typedef struct nf_vtable nf_vtable_t;
-typedef struct nf_class  nf_class_t;
-typedef struct nf_object nf_object_t;
+typedef struct np_vtable np_vtable_t;
+typedef struct np_class  np_class_t;
+typedef struct np_object np_object_t;
 
-struct nf_vtable {
-    nf_class_t *isa;
+struct np_vtable {
+    np_class_t *isa;
     void      (**methods)(void);
     int        method_count;
 };
 
-struct nf_class {
-    nf_class_t  *superclass;
+struct np_class {
+    np_class_t  *superclass;
     const char  *name;
     size_t       instance_size;
-    nf_vtable_t *vtable;
-    void       (*constructor)(nf_object_t *self, ...);
+    np_vtable_t *vtable;
+    void       (*constructor)(np_object_t *self, ...);
 };
 
-struct nf_object {
-    nf_class_t *isa;
+struct np_object {
+    np_class_t *isa;
 };
 
 // ─── Runtime API ────────────────────────────────────────────────────────────────
@@ -150,8 +150,8 @@ void nopa_meta_init(void);
 void *nopa_malloc(size_t size);
 void  nopa_free(void *ptr);
 
-NFObject *nopa_alloc(NFClass *cls);
-NFObject *nopa_init(NFObject *self);
+NPObject *nopa_alloc(NPClass *cls);
+NPObject *nopa_init(NPObject *self);
 
 // Exception globals (TLS for thread safety; plain globals in freestanding)
 #ifdef __NOPA_FREESTANDING
@@ -176,17 +176,17 @@ extern __thread id   __nopa_eh_val;
 /* Isa check for typed catches: 1 when obj's isa chain matches cls.
  * NULL obj never matches. The desugar passes &NOPA_CLASS_$_<Flat> for the
  * catch type (codegen emits the extern declaration in the same TU). */
-int __nopa_eh_isa(NFObject *obj, NFClass *cls);
+int __nopa_eh_isa(NPObject *obj, NPClass *cls);
 /* Uncaught checked exception escaped main: print ObjC wording + abort().
  * Called by main's function-tail guard (desugar) instead of `return zero`. */
 void nopa_eh_uncaught(void);
 
-NFObject *nopa_retain(NFObject *obj);
-void nopa_release(NFObject *obj);
-NFObject *nopa_autorelease(NFObject *obj);
-BOOL nopa_isKindOf(NFObject *obj, NFClass *cls);
+NPObject *nopa_retain(NPObject *obj);
+void nopa_release(NPObject *obj);
+NPObject *nopa_autorelease(NPObject *obj);
+BOOL nopa_isKindOf(NPObject *obj, NPClass *cls);
 /* Official ObjC spelling of nopa_isKindOf (same isa-chain walk). */
-BOOL nopa_isKindOfClass(NFObject *obj, NFClass *cls);
+BOOL nopa_isKindOfClass(NPObject *obj, NPClass *cls);
 
 // ─── Autorelease pool API ────────────────────────────────────────────────────────
 
@@ -201,51 +201,51 @@ void nopa_autoreleasepoolPop(nopa_autoreleasepool_t *pool);
  * The generated method body creates a task, pumps nopa_task_resume until the
  * state machine finishes (single-threaded cooperative scheduling: pumping
  * always makes progress), and reads the result from the frame. */
-typedef struct NFTask NFTask;
+typedef struct NPTask NPTask;
 
 /* State-machine entry written by the desugar pass.
  * Returns 0 = suspended at an await, 1 = finished. */
-typedef int (*nopa_task_entry_fn)(NFTask *task);
+typedef int (*nopa_task_entry_fn)(NPTask *task);
 
-struct NFTask {
+struct NPTask {
     int state;                          /* current state-machine state */
     int finished;                       /* 0 = running/suspended, 1 = done */
     nopa_task_entry_fn entry;           /* state machine body */
-    NFObject *self_obj;                 /* receiver the method runs on */
+    NPObject *self_obj;                 /* receiver the method runs on */
     void *frame;                        /* lifted locals (per-method struct) */
     void *result;                       /* return value slot (caller casts) */
-    NFTask *parent;                   /* awaiting task that created us, if any */
+    NPTask *parent;                   /* awaiting task that created us, if any */
 };
 
 /* Create a task. `frame_size` is the size of the method's lifted-locals
  * struct; the frame is zero-initialized and owned by the task. */
-NFTask *nopa_task_create(nopa_task_entry_fn entry, NFObject *self_obj, size_t frame_size);
+NPTask *nopa_task_create(nopa_task_entry_fn entry, NPObject *self_obj, size_t frame_size);
 
 /* Run the state machine until it suspends (return 0) or finishes (return 1). */
-int nopa_task_resume(NFTask *task);
+int nopa_task_resume(NPTask *task);
 
 /* Pump the task to completion (cooperative single-thread scheduling) and
  * free it. Returns the task's result slot value. */
-void *nopa_task_join(NFTask *task);
+void *nopa_task_join(NPTask *task);
 
 /* Mark the task finished (called by the state machine's final state). */
-void nopa_task_finish(NFTask *task);
+void nopa_task_finish(NPTask *task);
 
 // ─── Internal API (for runtime implementation) ───────────────────────────────────
 
-void nf_class_register(nf_class_t *cls);
-nf_class_t *nf_class_create(const char *name, nf_class_t *superclass, size_t instance_size);
-void nf_class_set_vtable(nf_class_t *cls, nf_vtable_t *vtable);
-nf_vtable_t *nf_vtable_alloc(int method_count);
-void nf_vtable_set_method(nf_vtable_t *vt, int index, void (*method)(void));
-nf_object_t *nf_object_alloc(nf_class_t *cls);
-void nf_object_dealloc(nf_object_t *obj);
+void np_class_register(np_class_t *cls);
+np_class_t *np_class_create(const char *name, np_class_t *superclass, size_t instance_size);
+void np_class_set_vtable(np_class_t *cls, np_vtable_t *vtable);
+np_vtable_t *np_vtable_alloc(int method_count);
+void np_vtable_set_method(np_vtable_t *vt, int index, void (*method)(void));
+np_object_t *np_object_alloc(np_class_t *cls);
+void np_object_dealloc(np_object_t *obj);
 
 // ─── Logging (like NSLog / NSObjCRuntime.h) ───────────────────────────────────
 
-void NFLog(NFString *format, ...);
+void NPLog(NPString *format, ...);
 #ifndef __NOPA_FREESTANDING
-void __NFLogv(NFString *format, va_list args);
+void __NPLogv(NPString *format, va_list args);
 #endif
 
 // ─── Block runtime (Clang Blocks ABI) ─────────────────────────────────────────
@@ -261,13 +261,13 @@ void _Block_release(const void *aBlock);
 
 // ─── Weak reference API ─────────────────────────────────────────────────────────
 
-void nopa_weakRegister(NFObject **weak_loc, NFObject *target);
-void nopa_weakUnregister(NFObject **weak_loc);
-void nopa_weakClearAll(NFObject *target);
+void nopa_weakRegister(NPObject **weak_loc, NPObject *target);
+void nopa_weakUnregister(NPObject **weak_loc);
+void nopa_weakClearAll(NPObject *target);
 
 // ─── String literals ──────────────────────────────────────────────────────────
 
-NFObject *nopa_stringFromCstr(const char *cstr);
+NPObject *nopa_stringFromCstr(const char *cstr);
 void nopa_weakAutoCleanup(void *ptr);
 
 // ─── @synchronized monitors ──────────────────────────────────────────────────
@@ -290,9 +290,9 @@ void nopa_syncAutoCleanup(void *ptr);   // cleanup attr: long* → unlock
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
 
-#define NF_OBJECT_ISA(obj)        (((nf_object_t *)(obj))->isa)
-#define NF_CLASS_NAME(cls)        ((cls)->name)
-#define NF_CLASS_SUPER(cls)       ((cls)->superclass)
-#define NF_VTABLE_LOOKUP(obj, idx)  ((obj)->isa->vtable->methods[(idx)])
+#define NP_OBJECT_ISA(obj)        (((np_object_t *)(obj))->isa)
+#define NP_CLASS_NAME(cls)        ((cls)->name)
+#define NP_CLASS_SUPER(cls)       ((cls)->superclass)
+#define NP_VTABLE_LOOKUP(obj, idx)  ((obj)->isa->vtable->methods[(idx)])
 
 #endif /* NOPA_OBJECT_H */

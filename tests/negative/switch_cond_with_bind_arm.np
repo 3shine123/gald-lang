@@ -2,7 +2,7 @@
 
 // Negative: a dangling-comparison arm (`case > 10:`) coexisting with a
 // type-binding or object-literal arm. The object arm forces the switch subject
-// to be materialized as `NFObject *`, so the comparison lowers to
+// to be materialized as `NPObject *`, so the comparison lowers to
 // `__nopa_sw > 10` — a POINTER vs integer compare, always true, with no
 // diagnostic anywhere in the generated C. Expected: exit=1 with
 //   "switch mixes a dangling comparison 'case' arm"
@@ -14,7 +14,7 @@ int main(void) {
     id o = @"x";
     int r = 0;
     switch (o) {
-        case NFString *s:
+        case NPString *s:
             r = 1;
             break;
         case > 10:
@@ -23,6 +23,6 @@ int main(void) {
         default:
             r = 9;
     }
-    NFLog(@"r=%d", r);
+    NPLog(@"r=%d", r);
     return 0;
 }

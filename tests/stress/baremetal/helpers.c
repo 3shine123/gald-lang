@@ -7,7 +7,7 @@ void kputs(const char *s) { fputs(s, stdout); }
 void kputdec(int v)       { fprintf(stdout, "%d", v); }
 void kputhex(unsigned v)  { fprintf(stdout, "%x", v); }
 
-// Strong override of the runtime's weak console hook (NFLog + uncaught
+// Strong override of the runtime's weak console hook (NPLog + uncaught
 // exceptions route through it).
 void nopa_console_write(const char *s, unsigned len) {
     if (len) fwrite(s, 1, len, stdout);

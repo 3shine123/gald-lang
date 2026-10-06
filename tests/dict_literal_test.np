@@ -5,7 +5,7 @@
 // separator, so any further entry collided with "expected '}'". Values are now
 // parsed with `parse_assignment()`, one level below the comma.
 //
-// Keys compare with `isEqual:` (value semantics for NFString/NFNumber), so a
+// Keys compare with `isEqual:` (value semantics for NPString/NPNumber), so a
 // lookup by an equal-but-distinct literal finds the entry — the point of a
 // dictionary, and what makes a fresh `@"key"` usable at all.
 #import <Foundation/Foundation.np>
@@ -14,7 +14,7 @@ int main(void) {
     int i = 41;
 
     // 1. multi-entry literal + count
-    NFDictionary *d = @{ @"a": @1, @"b": @2, @"c": @3 };
+    NPDictionary *d = @{ @"a": @1, @"b": @2, @"c": @3 };
     printf("1 count: %lu\n", (unsigned long)[d count]);
 
     // 2. lookup with a fresh key literal (string literals are interned —
@@ -26,14 +26,14 @@ int main(void) {
            [d objectForKey:@"missing"] ? "found" : "nil");
 
     // 3. empty dictionary — `@{}` is a dictionary, not an empty array
-    NFDictionary *e = @{};
+    NPDictionary *e = @{};
     printf("3 empty: %lu %s\n",
            (unsigned long)[e count],
            [e objectForKey:@"a"] ? "found" : "nil");
 
     // 4. allKeys / allValues (insertion order)
-    NFArray *ks = [d allKeys];
-    NFArray *vs = [d allValues];
+    NPArray *ks = [d allKeys];
+    NPArray *vs = [d allValues];
     printf("4 keys: %s %s %s\n",
            [[ks objectAtIndex:0] UTF8String],
            [[ks objectAtIndex:1] UTF8String],
@@ -43,22 +43,22 @@ int main(void) {
            [[vs objectAtIndex:1] intValue],
            [[vs objectAtIndex:2] intValue]);
 
-    // 5. boxed-expression values and number keys (value semantics on NFNumber)
-    NFDictionary *n = @{ @1: @"one", @(i + 1): @"two" };
+    // 5. boxed-expression values and number keys (value semantics on NPNumber)
+    NPDictionary *n = @{ @1: @"one", @(i + 1): @"two" };
     printf("5 numbers: %lu %s %s\n",
            (unsigned long)[n count],
            [[n objectForKey:@1] UTF8String],
            [[n objectForKey:@42] UTF8String]);
 
     // 6. nested literal inside an array literal
-    NFArray *mixed = @[ @{ @"k": @"v" }, @[ @1, @2 ] ];
-    NFDictionary *inner = [mixed objectAtIndex:0];
+    NPArray *mixed = @[ @{ @"k": @"v" }, @[ @1, @2 ] ];
+    NPDictionary *inner = [mixed objectAtIndex:0];
     printf("6 nested: %s %d\n",
            [[inner objectForKey:@"k"] UTF8String],
            (int)[[mixed objectAtIndex:1] count]);
 
     // 7. mutable dictionary: insert / replace / remove, value-based
-    NFMutableDictionary *m = [NFMutableDictionary dictionary];
+    NPMutableDictionary *m = [NPMutableDictionary dictionary];
     [m setObject:@10 forKey:@"x"];
     [m setObject:@20 forKey:@"y"];
     [m setObject:@11 forKey:@"x"];   // equal key → replaced, not appended
@@ -69,7 +69,7 @@ int main(void) {
            [m objectForKey:@"x"] ? "found" : "nil");
 
     // 8. copy is immutable and value-equal
-    NFDictionary *c = [d copy];
+    NPDictionary *c = [d copy];
     printf("8 copy: %d %lu\n", [c isEqual:d], (unsigned long)[c count]);
 
     // 9. description

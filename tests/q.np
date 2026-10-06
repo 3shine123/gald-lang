@@ -2,7 +2,7 @@
 #import <Foundation/Foundation.np>
 
 @namespace Student
-    @interface Person : NFObject 
+    @interface Person : NPObject 
 
     - (void)speak;
 
@@ -35,8 +35,8 @@ int main(int argc, const char * argv[]) {
     @autoreleasepool {
         Student::Student *s = [[Student::Student alloc] init];
         [s talk];
-        NFArray *arr = [NFArray arrayWithObjects:@1, @2, @3, nil];
-        NFLog(@"Array: %@", arr);
+        NPArray *arr = [NPArray arrayWithObjects:@1, @2, @3, nil];
+        NPLog(@"Array: %@", arr);
     }
     return 0;
 }

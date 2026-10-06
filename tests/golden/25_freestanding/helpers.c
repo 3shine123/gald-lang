@@ -15,23 +15,23 @@ void kputhex(unsigned v)   { fprintf(stdout, "%x", v); }
 
 // ── Instance factories (Nopa calls these via extern) ──
 
-extern NFClass NOPA_CLASS_$_BareMetal__Calculator;
-extern NFClass NOPA_CLASS_$_BareMetal__NFIoError;
+extern NPClass NOPA_CLASS_$_BareMetal__Calculator;
+extern NPClass NOPA_CLASS_$_BareMetal__NPIoError;
 
 struct BareMetal__Calculator {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     int total;
 };
 
-struct BareMetal__NFIoError {
-    struct NFClass *isa;
+struct BareMetal__NPIoError {
+    struct NPClass *isa;
     uint32_t retain_count;
     int code;
 };
 
 static struct BareMetal__Calculator g_calc;
-static struct BareMetal__NFIoError g_err;
+static struct BareMetal__NPIoError g_err;
 
 struct BareMetal__Calculator *create_calculator(void) {
     g_calc.isa = &NOPA_CLASS_$_BareMetal__Calculator;
@@ -40,8 +40,8 @@ struct BareMetal__Calculator *create_calculator(void) {
     return &g_calc;
 }
 
-struct BareMetal__NFIoError *create_error(int code) {
-    g_err.isa = &NOPA_CLASS_$_BareMetal__NFIoError;
+struct BareMetal__NPIoError *create_error(int code) {
+    g_err.isa = &NOPA_CLASS_$_BareMetal__NPIoError;
     g_err.retain_count = 1;
     g_err.code = code;
     return &g_err;

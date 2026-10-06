@@ -5,7 +5,7 @@
    from code the client never compiled. */
 typedef void (^Ticker)(int);
 
-@interface Pump : NFObject {
+@interface Pump : NPObject {
     @protected
     Ticker _handler;
 }

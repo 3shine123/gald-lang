@@ -1,40 +1,40 @@
-// Nullability (M1) — `nullable` / `nonnull` / `NF_ASSUME_NONNULL` region.
+// Nullability (M1) — `nullable` / `nonnull` / `NP_ASSUME_NONNULL` region.
 //
 // Every case here must COMPILE AND RUN. The error paths live in
 // tests/negative/ (nullable_to_nonnull.np etc.) — this file is the positive
 // half: annotations that are correct must stay silent, and narrow must work.
 #import <Foundation/Foundation.np>
 
-@interface Port : NFObject
+@interface Port : NPObject
 // Unannotated → unspecified, accepts anything (progressive adoption).
-- (void)loose:(NFString *)s;
+- (void)loose:(NPString *)s;
 // Annotated both spellings.
-- (void)wantNonnull:(nonnull NFString *)s;
-- (void)wantNullable:(nullable NFString *)s;
+- (void)wantNonnull:(nonnull NPString *)s;
+- (void)wantNullable:(nullable NPString *)s;
 // C-pointer spelling, same meaning.
-- (void)wantNonnullC:(NFString * _Nonnull)s;
-- (void)wantNullableC:(_Nullable NFString *)s;
+- (void)wantNonnullC:(NPString * _Nonnull)s;
+- (void)wantNullableC:(_Nullable NPString *)s;
 // Return position, both spellings.
-- (nullable NFString *)maybe;
-- (nonnull NFString *)sure;
-- (NFString * _Nullable)maybeC;
+- (nullable NPString *)maybe;
+- (nonnull NPString *)sure;
+- (NPString * _Nullable)maybeC;
 @end
 
 @implementation Port
-- (void)loose:(NFString *)s { NFLog(@"loose %s", s ? [s UTF8String] : "(nil)"); }
-- (void)wantNonnull:(nonnull NFString *)s { NFLog(@"nonnull %s", [s UTF8String]); }
-- (void)wantNullable:(nullable NFString *)s { NFLog(@"nullable %s", s ? [s UTF8String] : "(nil)"); }
-- (void)wantNonnullC:(NFString * _Nonnull)s { NFLog(@"nonnullC %s", [s UTF8String]); }
-- (void)wantNullableC:(_Nullable NFString *)s { NFLog(@"nullableC %s", s ? [s UTF8String] : "(nil)"); }
-- (nullable NFString *)maybe { return nil; }
-- (nonnull NFString *)sure { return @"sure"; }
-- (NFString * _Nullable)maybeC { return @"maybeC"; }
+- (void)loose:(NPString *)s { NPLog(@"loose %s", s ? [s UTF8String] : "(nil)"); }
+- (void)wantNonnull:(nonnull NPString *)s { NPLog(@"nonnull %s", [s UTF8String]); }
+- (void)wantNullable:(nullable NPString *)s { NPLog(@"nullable %s", s ? [s UTF8String] : "(nil)"); }
+- (void)wantNonnullC:(NPString * _Nonnull)s { NPLog(@"nonnullC %s", [s UTF8String]); }
+- (void)wantNullableC:(_Nullable NPString *)s { NPLog(@"nullableC %s", s ? [s UTF8String] : "(nil)"); }
+- (nullable NPString *)maybe { return nil; }
+- (nonnull NPString *)sure { return @"sure"; }
+- (NPString * _Nullable)maybeC { return @"maybeC"; }
 @end
 
 // Property attributes: `(nullable)` / `(nonnull)` land on the property's type.
-@interface Holder : NFObject
-@property (nonatomic, copy, nullable) NFString *title;
-@property (nonatomic, nonnull) NFString *tag;
+@interface Holder : NPObject
+@property (nonatomic, copy, nullable) NPString *title;
+@property (nonatomic, nonnull) NPString *tag;
 @end
 
 @implementation Holder
@@ -44,29 +44,29 @@
 
 // Region default: an unannotated pointer inside the region is nonnull, an
 // explicit `nullable` opts out, and a non-pointer is left alone.
-NF_ASSUME_NONNULL_BEGIN
-@interface Region : NFObject
-- (void)need:(NFString *)s;
-- (void)opt:(nullable NFString *)s;
+NP_ASSUME_NONNULL_BEGIN
+@interface Region : NPObject
+- (void)need:(NPString *)s;
+- (void)opt:(nullable NPString *)s;
 - (void)scalar:(int)n;
-- (void)optOut:(_Null_unspecified NFString *)s;
+- (void)optOut:(_Null_unspecified NPString *)s;
 @end
-NF_ASSUME_NONNULL_END
+NP_ASSUME_NONNULL_END
 
 @implementation Region
-- (void)need:(NFString *)s { NFLog(@"region need %s", [s UTF8String]); }
-- (void)opt:(nullable NFString *)s { NFLog(@"region opt %s", s ? [s UTF8String] : "(nil)"); }
-- (void)scalar:(int)n { NFLog(@"region scalar %d", n); }
-- (void)optOut:(_Null_unspecified NFString *)s { NFLog(@"region optOut %s", s ? [s UTF8String] : "(nil)"); }
+- (void)need:(NPString *)s { NPLog(@"region need %s", [s UTF8String]); }
+- (void)opt:(nullable NPString *)s { NPLog(@"region opt %s", s ? [s UTF8String] : "(nil)"); }
+- (void)scalar:(int)n { NPLog(@"region scalar %d", n); }
+- (void)optOut:(_Null_unspecified NPString *)s { NPLog(@"region optOut %s", s ? [s UTF8String] : "(nil)"); }
 @end
 
 // Top-level function: return + parameter positions.
-static nullable NFString *fn_maybe(void) { return nil; }
-static void fn_take(nonnull NFString *s) { NFLog(@"fn %s", [s UTF8String]); }
+static nullable NPString *fn_maybe(void) { return nil; }
+static void fn_take(nonnull NPString *s) { NPLog(@"fn %s", [s UTF8String]); }
 
 // Flow-sensitive narrowing: every `wantNonnull:` call below is guarded, so the
 // nullable→nonnull diagnostic must stay silent for all of them.
-static void guarded(Port *p, nullable NFString *s) {
+static void guarded(Port *p, nullable NPString *s) {
     if (s) {
         [p wantNonnull:s];              // narrowed in then-arm
     }
@@ -93,20 +93,20 @@ static void guarded(Port *p, nullable NFString *s) {
 // A nullable RETURN flows into a nonnull local — allowed (the diagnostic only
 // guards the nonnull-parameter direction), and this must still run.
 static void nullableReturn(void) {
-    NFString *m = fn_maybe();
+    NPString *m = fn_maybe();
     Port *p = (Port *)0;
     (void)p;
-    NFLog(@"ret %s", m ? [m UTF8String] : "(nil)");
+    NPLog(@"ret %s", m ? [m UTF8String] : "(nil)");
 }
 
-// --- NFError + out-param: the middle level of a double pointer is annotated
-// (`NFError * _Nullable *`) — the error object may be nil, the out-pointer
+// --- NPError + out-param: the middle level of a double pointer is annotated
+// (`NPError * _Nullable *`) — the error object may be nil, the out-pointer
 // itself is always valid because the callee writes through it. A prefix
 // annotation on a double pointer is REJECTED (clang does the same — it refuses
 // to guess the level), so the postfix spelling is the only way to say it.
-static BOOL parseNum(NFString *text, int *outVal, NFError * _Nullable * outErr) {
+static BOOL parseNum(NPString *text, int *outVal, NPError * _Nullable * outErr) {
     if (text == nil) {
-        *outErr = [NFError parseErrorWithMessage:@"empty input"];
+        *outErr = [NPError parseErrorWithMessage:@"empty input"];
         return NO;
     }
     *outVal = [text length];
@@ -116,14 +116,14 @@ static BOOL parseNum(NFString *text, int *outVal, NFError * _Nullable * outErr) 
 // --- Blocks: parameters and return type accept both spellings, and the
 // checker enforces them at the invocation site — including through a typedef
 // (the form essentially all real block code uses).
-typedef void (^SinkBlock)(nonnull NFString *s);
-typedef nullable NFString * (^GetterBlock)(void);
+typedef void (^SinkBlock)(nonnull NPString *s);
+typedef nullable NPString * (^GetterBlock)(void);
 
 static void call_blocks(void) {
-    SinkBlock sink = ^(nonnull NFString *v) { NFLog(@"block sink %s", [v UTF8String]); };
-    GetterBlock get = ^nullable NFString * { return nil; };
+    SinkBlock sink = ^(nonnull NPString *v) { NPLog(@"block sink %s", [v UTF8String]); };
+    GetterBlock get = ^nullable NPString * { return nil; };
     sink(@"from-block");
-    NFLog(@"block get=%s", get() ? "non-nil" : "nil");
+    NPLog(@"block get=%s", get() ? "non-nil" : "nil");
 }
 
 // --- ARC + nullability: releasing a nullable local is legal (nopa_release is
@@ -132,10 +132,10 @@ static void call_blocks(void) {
 // unenforceable rather than a compile error for every ARC program.
 static void arc_nullable_release(void) {
     @noarc {
-        nullable NFObject *o = [[NFObject alloc] init];
+        nullable NPObject *o = [[NPObject alloc] init];
         nopa_release(o);
         nopa_release(nil);
-        NFLog(@"arc released");
+        NPLog(@"arc released");
     }
 }
 
@@ -146,7 +146,7 @@ int main(void) {
     [p wantNullable:nil];
     [p wantNonnullC:@"b"];
     [p wantNullableC:nil];
-    NFLog(@"ret maybe=%s sure=%s maybeC=%s",
+    NPLog(@"ret maybe=%s sure=%s maybeC=%s",
           [p maybe] ? "non-nil" : "nil",
           [[p sure] UTF8String],
           [[p maybeC] UTF8String]);
@@ -154,7 +154,7 @@ int main(void) {
     Holder *h = [Holder new];
     h.title = nil;
     h.tag = @"t";
-    NFLog(@"prop title=%s tag=%s",
+    NPLog(@"prop title=%s tag=%s",
           h.title ? [h.title UTF8String] : "(nil)",
           [h.tag UTF8String]);
 
@@ -170,11 +170,11 @@ int main(void) {
     nullableReturn();
 
     int v = 0;
-    NFError *err = nil;
-    NFLog(@"parse ok=%d v=%d err=%s", parseNum(@"abc", &v, &err), v, err ? "set" : "nil");
-    NFError *err2 = nil;
+    NPError *err = nil;
+    NPLog(@"parse ok=%d v=%d err=%s", parseNum(@"abc", &v, &err), v, err ? "set" : "nil");
+    NPError *err2 = nil;
     BOOL ok2 = parseNum(nil, &v, &err2);
-    NFLog(@"parse ok=%d err=%s", ok2,
+    NPLog(@"parse ok=%d err=%s", ok2,
           err2 ? [[err2 localizedDescription] UTF8String] : "nil");
 
     call_blocks();

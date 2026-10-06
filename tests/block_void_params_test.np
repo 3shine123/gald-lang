@@ -9,7 +9,7 @@
 
 typedef int (^IntBlock)(void);
 
-@interface BVDemo : NFObject
+@interface BVDemo : NPObject
 - (int)callIntBlock:(IntBlock)b;
 @end
 
@@ -36,6 +36,6 @@ int main() {
         return 1;
     }];
 
-    NFLog(@"a=%d b=%d c=%d d=%d", paren(), voidKw(), takesVoidPtr(0), viaMsg);
+    NPLog(@"a=%d b=%d c=%d d=%d", paren(), voidKw(), takesVoidPtr(0), viaMsg);
     return (paren() == 7 && voidKw() == 35 && takesVoidPtr(0) == 100 && viaMsg == 1) ? 0 : 1;
 }

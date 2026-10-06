@@ -56,7 +56,7 @@ return __nopa_arc_ret_N;                                 /* 或 @throw __nopa_ar
 
 - ARC：stdout 必须等于 `.out` 且 exit 0
 - MRC：只断言 exit 0（MRC 不注入 release，不打印 dealloc）
-- `.np` 的 `NFLog` 输出走 **stderr**（`runtime.c`），runner 合并两个流后比对
+- `.np` 的 `NPLog` 输出走 **stderr**（`runtime.c`），runner 合并两个流后比对
 
 ```bash
 NOPAC=target/release/nopac ./tests/arc_order/run_arc_order.sh
@@ -107,14 +107,14 @@ compound 里，`goto __nopa_swN_end` 跳出去）。
 | 类的情况 | 行为 |
 |---|---|
 | **没有**自定义 `dealloc` | ARC 合成 dealloc（wrapper）：先链到父类 dealloc 入口，再**逆序**释放本类的 owned ivar |
-| **有**自定义 `dealloc` | ARC 不介入——body 可能已经手动释放了 ivar（`NFObject_release(_x)` / `[_x release]`），叠加就是 double free |
+| **有**自定义 `dealloc` | ARC 不介入——body 可能已经手动释放了 ivar（`NPObject_release(_x)` / `[_x release]`），叠加就是 double free |
 
-判定 owned ivar：仅**单级**对象指针（`NFObject **` 这类 C 数组排除——它曾导致
-`NFArray._items` 被当作对象释放而崩溃），排除 weak / 函数指针 / block / C 标量指针；
+判定 owned ivar：仅**单级**对象指针（`NPObject **` 这类 C 数组排除——它曾导致
+`NPArray._items` 被当作对象释放而崩溃），排除 weak / 函数指针 / block / C 标量指针；
 `id` 计入。释放用 `nopa_release`（nil 安全，部分初始化对象安全）。
 
 判定「自定义 dealloc」必须看 `method_owners == 本类`——`method_names` 也含**继承**条目，
-否则任何 `NFObject` 子类都会被当作"写了 dealloc"而失去合成。
+否则任何 `NPObject` 子类都会被当作"写了 dealloc"而失去合成。
 
 **MRC（`-fno-nopa-arc`）下完全不生成**（`CgUnit.no_arc` 门控）：手写保留计数的程序里
 ivar 归程序员所有。

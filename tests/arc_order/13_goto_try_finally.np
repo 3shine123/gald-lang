@@ -4,12 +4,12 @@
 // (so its local is released), stays inside the @try (so the @finally still
 // runs on normal completion).
 
-@interface AO13Item : NFObject
+@interface AO13Item : NPObject
 @end
 
 @implementation AO13Item
 - (void)dealloc {
-    NFLog(@"ao13 dealloc");
+    NPLog(@"ao13 dealloc");
     [super dealloc];
 }
 @end
@@ -21,11 +21,11 @@ int main() {
             goto inside;
         }
     inside:
-        NFLog(@"ao13 after goto");
+        NPLog(@"ao13 after goto");
     }
     @finally {
-        NFLog(@"ao13 finally");
+        NPLog(@"ao13 finally");
     }
-    NFLog(@"ao13 done");
+    NPLog(@"ao13 done");
     return 0;
 }

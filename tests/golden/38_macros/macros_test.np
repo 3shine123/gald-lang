@@ -12,7 +12,7 @@
 #define TAG(o)          [o tag]
 #define BUMP(o, n)      [o addTo:n times:1]
 #define SAFE_TAG(o)     ((o) ? TAG(o) : -1)     // macro inside macro argument
-#define LOG(x)          NFLog(@"tag=%d", x)     // body contains @literal
+#define LOG(x)          NPLog(@"tag=%d", x)     // body contains @literal
 
 // ── C-track macros (expanded by clang, unchanged behavior) ──
 #define TWICE(x)        ((x) + (x))

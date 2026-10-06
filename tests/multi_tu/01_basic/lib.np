@@ -3,7 +3,7 @@
 #include <stdio.h>
 
 /* lib TU: defines the class and a helper the client can call. */
-@implementation Greeter : NFObject
+@implementation Greeter : NPObject
 - (const char *)greeting:(const char *)who {
     static char buf[128];
     snprintf(buf, sizeof(buf), "hello, %s", who);

@@ -10,7 +10,7 @@
 // ============================================================================
 // 1. 泛型类声明与实现：智能数据包裹固定队列 (Capacity = 2)
 // ============================================================================
-@interface DataPack <T> : NFObject {
+@interface DataPack <T> : NPObject {
     @public
     int _count;
     T _storage[2]; // 静态泛型数组存储空间
@@ -70,7 +70,7 @@
 // ============================================================================
 // 2. 辅助测试元素类：量子字符串与加密数字
 // ============================================================================
-@interface QuantumToken : NFObject {
+@interface QuantumToken : NPObject {
     @public
     const char* _tokenString;
 }
@@ -92,7 +92,7 @@
 @end
 
 
-@interface EncryptedMetric : NFObject {
+@interface EncryptedMetric : NPObject {
     @public
     int _rawCode;
 }

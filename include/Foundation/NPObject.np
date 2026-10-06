@@ -1,0 +1,54 @@
+#import "NPObject.nh"
+
+@implementation nopa_root
+- (id)init {
+    return nopa_init(self);
+}
+- (void)dealloc {
+    return;
+}
+- (void)release {
+    nopa_release(self);
+}
+- (id)retain {
+    return nopa_retain(self);
+}
+- (BOOL)isKindOf:(Class)cls {
+    return nopa_isKindOf(self, cls);
+}
+- (BOOL)isKindOfClass:(Class)cls {
+    return nopa_isKindOfClass(self, cls);
+}
+- (BOOL)isEqual:(id)object {
+    /* Default: identity (pointer equality), matching NSObject. */
+    return self == object;
+}
+- (id)description {
+    return nil;
+}
+@end
+
+@implementation NPObject
++ (id)alloc {
+    return nopa_alloc(self);
+}
++ (id)new {
+    id obj = nopa_alloc(self);
+    return nopa_init(obj);
+}
+- (id)init {
+    return nopa_init(self);
+}
+- (void)dealloc {
+    return;
+}
+- (void)release {
+    nopa_release(self);
+}
+- (id)retain {
+    return nopa_retain(self);
+}
+- (id)description {
+    return nil;
+}
+@end

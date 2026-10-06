@@ -9,11 +9,11 @@
 
 #include <string.h>
 
-struct nopa_NFObject_vtable;
+struct nopa_NPObject_vtable;
 struct nopa_SmartTerminal_vtable;
 
-#define nopa_NFObject_vtable_index_init 2
-#define nopa_NFObject_vtable_index_dealloc 3
+#define nopa_NPObject_vtable_index_init 2
+#define nopa_NPObject_vtable_index_dealloc 3
 #define nopa_SmartTerminal_vtable_index_initWithId_model_ 4
 #define nopa_SmartTerminal_vtable_index_printBaseSpec 5
 #define nopa_SmartTerminal_vtable_index_establishSecureConnectionBlock_ 6
@@ -35,103 +35,103 @@ static const SEL __nopa_sel_setConnectionPort_ = {.name = "setConnectionPort_", 
 static const SEL __nopa_sel_establishSecureConnectionBlock_ = {.name = "establishSecureConnectionBlock_", .hash = 0x06BE2A0B};
 static const SEL __nopa_sel_performQuantumEncryptData_ = {.name = "performQuantumEncryptData_", .hash = 0xBDE537C1};
 
-typedef struct NFObject NFObject;
+typedef struct NPObject NPObject;
 typedef struct SmartTerminal SmartTerminal;
 
 
 
-NFObject * NFObject_alloc(NFClass * self, SEL _cmd);
-NFObject * NFObject_new(NFClass * self, SEL _cmd);
-NFObject * NFObject_init(NFObject * self, SEL _cmd);
-void NFObject_dealloc(NFObject * self, SEL _cmd);
-NFClass * NFObject_getClass(NFClass * self, SEL _cmd);
-NFObject * SmartTerminal_initWithId_model_(NFObject * self, SEL _cmd, int tid, const char * model);
-void SmartTerminal_printBaseSpec(NFObject * self, SEL _cmd);
-void SmartTerminal_establishSecureConnectionBlock_(NFObject * self, SEL _cmd, void (^statusBlock)(const char *));
-const char * SmartTerminal_ipAddress(NFObject * self, SEL _cmd);
-void SmartTerminal_setIpAddress_(NFObject * self, SEL _cmd, const char * newIp);
-int SmartTerminal_connectionPort(NFObject * self, SEL _cmd);
-void SmartTerminal_setConnectionPort_(NFObject * self, SEL _cmd, int newPort);
-int SmartTerminal_performQuantumEncryptData_(NFObject * self, SEL _cmd, const char * rawData);
-int SmartTerminal_terminalId(NFObject * self, SEL _cmd);
-void SmartTerminal_setTerminalId_(NFObject * self, SEL _cmd, int value);
-const char * SmartTerminal_hardwareModel(NFObject * self, SEL _cmd);
-NFClass * SmartTerminal_getClass(NFClass * self, SEL _cmd);
+NPObject * NPObject_alloc(NPClass * self, SEL _cmd);
+NPObject * NPObject_new(NPClass * self, SEL _cmd);
+NPObject * NPObject_init(NPObject * self, SEL _cmd);
+void NPObject_dealloc(NPObject * self, SEL _cmd);
+NPClass * NPObject_getClass(NPClass * self, SEL _cmd);
+NPObject * SmartTerminal_initWithId_model_(NPObject * self, SEL _cmd, int tid, const char * model);
+void SmartTerminal_printBaseSpec(NPObject * self, SEL _cmd);
+void SmartTerminal_establishSecureConnectionBlock_(NPObject * self, SEL _cmd, void (^statusBlock)(const char *));
+const char * SmartTerminal_ipAddress(NPObject * self, SEL _cmd);
+void SmartTerminal_setIpAddress_(NPObject * self, SEL _cmd, const char * newIp);
+int SmartTerminal_connectionPort(NPObject * self, SEL _cmd);
+void SmartTerminal_setConnectionPort_(NPObject * self, SEL _cmd, int newPort);
+int SmartTerminal_performQuantumEncryptData_(NPObject * self, SEL _cmd, const char * rawData);
+int SmartTerminal_terminalId(NPObject * self, SEL _cmd);
+void SmartTerminal_setTerminalId_(NPObject * self, SEL _cmd, int value);
+const char * SmartTerminal_hardwareModel(NPObject * self, SEL _cmd);
+NPClass * SmartTerminal_getClass(NPClass * self, SEL _cmd);
 int main(int argc, const char * * argv);
 
-extern NFClass nopa_NFObject_class;
-extern NFClass nopa_SmartTerminal_class;
+extern NPClass nopa_NPObject_class;
+extern NPClass nopa_SmartTerminal_class;
 void nopa_meta_init(void);
 
-// struct NFClass defined in runtime.h
-// struct NFObject defined in runtime.h
-struct nopa_NFObject_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
+// struct NPClass defined in runtime.h
+// struct NPObject defined in runtime.h
+struct nopa_NPObject_vtable {
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
 };
-struct nopa_NFObject_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+struct nopa_NPObject_meta_vtable {
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct SmartTerminal {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     int _terminalId;
     const char * _hardwareModel;
 };
 typedef struct SmartTerminal SmartTerminal;
 struct nopa_SmartTerminal_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    NFObject * (*initWithId_model_)(NFObject *, SEL, int, const char *);
-    void (*printBaseSpec)(NFObject *, SEL);
-    void (*establishSecureConnectionBlock_)(NFObject *, SEL, void (^)(const char *));
-    const char * (*ipAddress)(NFObject *, SEL);
-    void (*setIpAddress_)(NFObject *, SEL, const char *);
-    int (*connectionPort)(NFObject *, SEL);
-    void (*setConnectionPort_)(NFObject *, SEL, int);
-    int (*performQuantumEncryptData_)(NFObject *, SEL, const char *);
-    int (*terminalId)(NFObject *, SEL);
-    void (*setTerminalId_)(NFObject *, SEL, int);
-    const char * (*hardwareModel)(NFObject *, SEL);
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    NPObject * (*initWithId_model_)(NPObject *, SEL, int, const char *);
+    void (*printBaseSpec)(NPObject *, SEL);
+    void (*establishSecureConnectionBlock_)(NPObject *, SEL, void (^)(const char *));
+    const char * (*ipAddress)(NPObject *, SEL);
+    void (*setIpAddress_)(NPObject *, SEL, const char *);
+    int (*connectionPort)(NPObject *, SEL);
+    void (*setConnectionPort_)(NPObject *, SEL, int);
+    int (*performQuantumEncryptData_)(NPObject *, SEL, const char *);
+    int (*terminalId)(NPObject *, SEL);
+    void (*setTerminalId_)(NPObject *, SEL, int);
+    const char * (*hardwareModel)(NPObject *, SEL);
 };
 struct nopa_SmartTerminal_meta_vtable {
-    NFClass * (*class)(NFClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
-NFObject * NFObject_alloc(NFClass * self, SEL _cmd) {
+NPObject * NPObject_alloc(NPClass * self, SEL _cmd) {
     return nopa_alloc(self);
 }
 
-NFObject * NFObject_new(NFClass * self, SEL _cmd) {
-    NFObject * obj = nopa_alloc(self);
+NPObject * NPObject_new(NPClass * self, SEL _cmd) {
+    NPObject * obj = nopa_alloc(self);
     return nopa_init(obj);
 }
 
-NFObject * NFObject_init(NFObject * self, SEL _cmd) {
-    struct NFObject * _self = ((struct NFObject *)(self));
+NPObject * NPObject_init(NPObject * self, SEL _cmd) {
+    struct NPObject * _self = ((struct NPObject *)(self));
     {
         return nopa_init(self);
     }
 }
 
-void NFObject_dealloc(NFObject * self, SEL _cmd) {
-    struct NFObject * _self = ((struct NFObject *)(self));
+void NPObject_dealloc(NPObject * self, SEL _cmd) {
+    struct NPObject * _self = ((struct NPObject *)(self));
     {
         return;
     }
 }
 
-NFClass * NFObject_getClass(NFClass * self, SEL _cmd) {
-    return &nopa_NFObject_class;
+NPClass * NPObject_getClass(NPClass * self, SEL _cmd) {
+    return &nopa_NPObject_class;
 }
 
-NFObject * nopa_alloc(struct NFClass * cls);
-NFObject * nopa_init(NFObject * );
-NFObject * SmartTerminal_initWithId_model_(NFObject * self, SEL _cmd, int tid, const char * model) {
+NPObject * nopa_alloc(struct NPClass * cls);
+NPObject * nopa_init(NPObject * );
+NPObject * SmartTerminal_initWithId_model_(NPObject * self, SEL _cmd, int tid, const char * model) {
     struct SmartTerminal * _self = ((struct SmartTerminal *)(self));
     {
-        self = NFObject_init(self, __nopa_sel_init);
+        self = NPObject_init(self, __nopa_sel_init);
         if (self) {
             {
                 ((struct SmartTerminal *)(self))->_terminalId = tid;
@@ -142,14 +142,14 @@ NFObject * SmartTerminal_initWithId_model_(NFObject * self, SEL _cmd, int tid, c
     }
 }
 
-void SmartTerminal_printBaseSpec(NFObject * self, SEL _cmd) {
+void SmartTerminal_printBaseSpec(NPObject * self, SEL _cmd) {
     struct SmartTerminal * _self = ((struct SmartTerminal *)(self));
     {
         printf("[基础硬件] 终端ID: %d | 芯片型号: %s\n", ((struct SmartTerminal *)(self))->_terminalId, ((struct SmartTerminal *)(self))->_hardwareModel);
     }
 }
 
-void SmartTerminal_establishSecureConnectionBlock_(NFObject * self, SEL _cmd, void (^statusBlock)(const char *)) {
+void SmartTerminal_establishSecureConnectionBlock_(NPObject * self, SEL _cmd, void (^statusBlock)(const char *)) {
     struct SmartTerminal * _self = ((struct SmartTerminal *)(self));
     {
         printf("[网络扩展] 正在为模型 [%s] 静态激活网络堆栈...\n", ((struct SmartTerminal *)(self))->_hardwareModel);
@@ -165,35 +165,35 @@ void SmartTerminal_establishSecureConnectionBlock_(NFObject * self, SEL _cmd, vo
     }
 }
 
-const char * SmartTerminal_ipAddress(NFObject * self, SEL _cmd) {
+const char * SmartTerminal_ipAddress(NPObject * self, SEL _cmd) {
     struct SmartTerminal * _self = ((struct SmartTerminal *)(self));
     {
         return g_Associated_IpAddress;
     }
 }
 
-void SmartTerminal_setIpAddress_(NFObject * self, SEL _cmd, const char * newIp) {
+void SmartTerminal_setIpAddress_(NPObject * self, SEL _cmd, const char * newIp) {
     struct SmartTerminal * _self = ((struct SmartTerminal *)(self));
     {
         g_Associated_IpAddress = newIp;
     }
 }
 
-int SmartTerminal_connectionPort(NFObject * self, SEL _cmd) {
+int SmartTerminal_connectionPort(NPObject * self, SEL _cmd) {
     struct SmartTerminal * _self = ((struct SmartTerminal *)(self));
     {
         return g_Associated_ConnectionPort;
     }
 }
 
-void SmartTerminal_setConnectionPort_(NFObject * self, SEL _cmd, int newPort) {
+void SmartTerminal_setConnectionPort_(NPObject * self, SEL _cmd, int newPort) {
     struct SmartTerminal * _self = ((struct SmartTerminal *)(self));
     {
         g_Associated_ConnectionPort = newPort;
     }
 }
 
-int SmartTerminal_performQuantumEncryptData_(NFObject * self, SEL _cmd, const char * rawData) {
+int SmartTerminal_performQuantumEncryptData_(NPObject * self, SEL _cmd, const char * rawData) {
     struct SmartTerminal * _self = ((struct SmartTerminal *)(self));
     {
         int dataLen = ((int)(strlen(rawData)));
@@ -203,19 +203,19 @@ int SmartTerminal_performQuantumEncryptData_(NFObject * self, SEL _cmd, const ch
     }
 }
 
-int SmartTerminal_terminalId(NFObject * self, SEL _cmd) {
+int SmartTerminal_terminalId(NPObject * self, SEL _cmd) {
     return ((struct SmartTerminal *)(self))->_terminalId;
 }
 
-void SmartTerminal_setTerminalId_(NFObject * self, SEL _cmd, int value) {
+void SmartTerminal_setTerminalId_(NPObject * self, SEL _cmd, int value) {
     ((struct SmartTerminal *)(self))->_terminalId = value;
 }
 
-const char * SmartTerminal_hardwareModel(NFObject * self, SEL _cmd) {
+const char * SmartTerminal_hardwareModel(NPObject * self, SEL _cmd) {
     return ((struct SmartTerminal *)(self))->_hardwareModel;
 }
 
-NFClass * SmartTerminal_getClass(NFClass * self, SEL _cmd) {
+NPClass * SmartTerminal_getClass(NPClass * self, SEL _cmd) {
     return &nopa_SmartTerminal_class;
 }
 
@@ -231,7 +231,7 @@ int main(int argc, const char * * argv) {
             printf(">>>      nopac 编译器「静态 Category & 模拟关联属性」全新压测      <<<\n");
             printf("====================================================================\n\n");
             printf("--- 1. 验证基础类原生 Ivar 与方法的编译期决议 ---\n");
-            NFObject *__nopa_tmp_0 = (NFObject_alloc(&nopa_SmartTerminal_class, __nopa_sel_alloc));
+            NPObject *__nopa_tmp_0 = (NPObject_alloc(&nopa_SmartTerminal_class, __nopa_sel_alloc));
             SmartTerminal * myDevice = ((struct nopa_SmartTerminal_vtable *)__nopa_tmp_0->isa->vtable)->initWithId_model_(__nopa_tmp_0, __nopa_sel_initWithId_model_, 9527, "CyberCore-X100");
             ((struct nopa_SmartTerminal_vtable *)myDevice->isa->vtable)->printBaseSpec(myDevice, __nopa_sel_printBaseSpec);
             printf("\n--- 2. 验证第一个 Category (NetworkExtension) 的静态属性与方法注入 ---\n");
@@ -258,7 +258,7 @@ int main(int argc, const char * * argv) {
             printf("\n--- 5. 回归守门员：三元表达式内包含带副作用的 Category 方法调用 ---\n");
             int isTerminalOnline = 1;
             int categoryStepCounter = 3333;
-            int verifiedPort = isTerminalOnline > 0 ? ({ NFObject *__nopa_tmp_1 = (categoryStepCounter++, myDevice); ((struct nopa_SmartTerminal_vtable *)__nopa_tmp_1->isa->vtable)->connectionPort(__nopa_tmp_1, __nopa_sel_connectionPort); }) : 0;
+            int verifiedPort = isTerminalOnline > 0 ? ({ NPObject *__nopa_tmp_1 = (categoryStepCounter++, myDevice); ((struct nopa_SmartTerminal_vtable *)__nopa_tmp_1->isa->vtable)->connectionPort(__nopa_tmp_1, __nopa_sel_connectionPort); }) : 0;
             printf("[收官边界断言] Category 方法与刚才修好的 Bug 机制融合完美！\n");
             printf("          -> 副作用自增计数器: %d (预期: 3334)\n", categoryStepCounter);
             printf("          -> 动态抓取的扩展端口值: %d (预期: 443)\n", verifiedPort);
@@ -277,14 +277,14 @@ int main(int argc, const char * * argv) {
 
 // ─── Class metadata ─────────────────────────────────────
 
-struct nopa_NFObject_vtable nopa_NFObject_vtable_inst = {
-    .init = NFObject_init,
-    .dealloc = NFObject_dealloc,
+struct nopa_NPObject_vtable nopa_NPObject_vtable_inst = {
+    .init = NPObject_init,
+    .dealloc = NPObject_dealloc,
 };
 
 struct nopa_SmartTerminal_vtable nopa_SmartTerminal_vtable_inst = {
-    .init = NFObject_init,
-    .dealloc = NFObject_dealloc,
+    .init = NPObject_init,
+    .dealloc = NPObject_dealloc,
     .initWithId_model_ = SmartTerminal_initWithId_model_,
     .printBaseSpec = SmartTerminal_printBaseSpec,
     .establishSecureConnectionBlock_ = SmartTerminal_establishSecureConnectionBlock_,
@@ -298,31 +298,31 @@ struct nopa_SmartTerminal_vtable nopa_SmartTerminal_vtable_inst = {
     .hardwareModel = SmartTerminal_hardwareModel,
 };
 
-struct nopa_NFObject_meta_vtable nopa_NFObject_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
-    .class = NFObject_getClass,
+struct nopa_NPObject_meta_vtable nopa_NPObject_meta_vtable_inst = {
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
+    .class = NPObject_getClass,
 };
 
 struct nopa_SmartTerminal_meta_vtable nopa_SmartTerminal_meta_vtable_inst = {
     .class = SmartTerminal_getClass,
 };
 
-NFClass nopa_NFObject_class;
-NFClass nopa_SmartTerminal_class;
+NPClass nopa_NPObject_class;
+NPClass nopa_SmartTerminal_class;
 
 void nopa_meta_init(void) {
-    nopa_NFObject_class = (NFClass){
-        .name = "NFObject",
+    nopa_NPObject_class = (NPClass){
+        .name = "NPObject",
         .superclass = NULL,
-        .instance_size = sizeof(struct NFObject),
-        .vtable = &nopa_NFObject_vtable_inst,
-        .class_vtable = &nopa_NFObject_meta_vtable_inst,
+        .instance_size = sizeof(struct NPObject),
+        .vtable = &nopa_NPObject_vtable_inst,
+        .class_vtable = &nopa_NPObject_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_SmartTerminal_class = (NFClass){
+    nopa_SmartTerminal_class = (NPClass){
         .name = "SmartTerminal",
-        .superclass = &nopa_NFObject_class,
+        .superclass = &nopa_NPObject_class,
         .instance_size = sizeof(struct SmartTerminal),
         .vtable = &nopa_SmartTerminal_vtable_inst,
         .class_vtable = &nopa_SmartTerminal_meta_vtable_inst,

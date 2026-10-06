@@ -9,13 +9,13 @@
 
 #include <string.h>
 
-struct nopa_NFObject_vtable;
+struct nopa_NPObject_vtable;
 struct nopa_Ledger__Core__TransactionBlock_vtable;
 struct nopa_Network__Engine__ValidatorEngine_vtable;
 struct nopa_Network__Extensions__RouterPlugin_vtable;
 
-#define nopa_NFObject_vtable_index_init 2
-#define nopa_NFObject_vtable_index_dealloc 3
+#define nopa_NPObject_vtable_index_init 2
+#define nopa_NPObject_vtable_index_dealloc 3
 #define nopa_Ledger__Core__TransactionBlock_vtable_index_initWithHash_count_ 6
 #define nopa_Network__Engine__ValidatorEngine_vtable_index_initWithIdentity_stake_ 4
 #define nopa_Network__Engine__ValidatorEngine_vtable_index_validateBlock_withVerifier_ 5
@@ -38,7 +38,7 @@ static const SEL __nopa_sel_attachToValidator_ = {.name = "attachToValidator_", 
 static const SEL __nopa_sel_validateBlock_withVerifier_ = {.name = "validateBlock_withVerifier_", .hash = 0xB304DE64};
 static const SEL __nopa_sel_createStandardBlock = {.name = "createStandardBlock", .hash = 0xC0FE1041};
 
-typedef struct NFObject NFObject;
+typedef struct NPObject NPObject;
 typedef struct Ledger__Core__TransactionBlock Ledger__Core__TransactionBlock;
 typedef struct Network__Engine__ValidatorEngine Network__Engine__ValidatorEngine;
 typedef struct Network__Extensions__RouterPlugin Network__Extensions__RouterPlugin;
@@ -46,149 +46,149 @@ typedef struct Network__Extensions__RouterPlugin Network__Extensions__RouterPlug
 
 typedef int (^SignatureVerifyBlock)(int);
 
-NFObject * NFObject_alloc(NFClass * self, SEL _cmd);
-NFObject * NFObject_new(NFClass * self, SEL _cmd);
-NFObject * NFObject_init(NFObject * self, SEL _cmd);
-void NFObject_dealloc(NFObject * self, SEL _cmd);
-NFClass * NFObject_getClass(NFClass * self, SEL _cmd);
-Ledger__Core__TransactionBlock * Ledger__Core__TransactionBlock_createGenesisBlock(NFClass * self, SEL _cmd);
-Ledger__Core__TransactionBlock * Ledger__Core__TransactionBlock_createStandardBlock(NFClass * self, SEL _cmd);
-NFObject * Ledger__Core__TransactionBlock_initWithHash_count_(NFObject * self, SEL _cmd, const char * hash, int c);
-int Ledger__Core__TransactionBlock_txCount(NFObject * self, SEL _cmd);
-void Ledger__Core__TransactionBlock_setTxCount_(NFObject * self, SEL _cmd, int value);
-const char * Ledger__Core__TransactionBlock_blockHash(NFObject * self, SEL _cmd);
-NFClass * Ledger__Core__TransactionBlock_getClass(NFClass * self, SEL _cmd);
-NFObject * Network__Engine__ValidatorEngine_initWithIdentity_stake_(NFObject * self, SEL _cmd, const char * idInfo, int s);
-int Network__Engine__ValidatorEngine_validateBlock_withVerifier_(NFObject * self, SEL _cmd, Ledger__Core__TransactionBlock * block, SignatureVerifyBlock verifier);
-int Network__Engine__ValidatorEngine_stakeAmount(NFObject * self, SEL _cmd);
-void Network__Engine__ValidatorEngine_setStakeAmount_(NFObject * self, SEL _cmd, int value);
-const char * Network__Engine__ValidatorEngine_nodeIdentity(NFObject * self, SEL _cmd);
-NFClass * Network__Engine__ValidatorEngine_getClass(NFClass * self, SEL _cmd);
-NFObject * Network__Extensions__RouterPlugin_initWithName_multiplier_(NFObject * self, SEL _cmd, const char * name, int m);
-void Network__Extensions__RouterPlugin_attachToValidator_(NFObject * self, SEL _cmd, Network__Engine__ValidatorEngine * validator);
-int Network__Extensions__RouterPlugin_bandwidthMultiplier(NFObject * self, SEL _cmd);
-void Network__Extensions__RouterPlugin_setBandwidthMultiplier_(NFObject * self, SEL _cmd, int value);
-const char * Network__Extensions__RouterPlugin_pluginName(NFObject * self, SEL _cmd);
-NFClass * Network__Extensions__RouterPlugin_getClass(NFClass * self, SEL _cmd);
+NPObject * NPObject_alloc(NPClass * self, SEL _cmd);
+NPObject * NPObject_new(NPClass * self, SEL _cmd);
+NPObject * NPObject_init(NPObject * self, SEL _cmd);
+void NPObject_dealloc(NPObject * self, SEL _cmd);
+NPClass * NPObject_getClass(NPClass * self, SEL _cmd);
+Ledger__Core__TransactionBlock * Ledger__Core__TransactionBlock_createGenesisBlock(NPClass * self, SEL _cmd);
+Ledger__Core__TransactionBlock * Ledger__Core__TransactionBlock_createStandardBlock(NPClass * self, SEL _cmd);
+NPObject * Ledger__Core__TransactionBlock_initWithHash_count_(NPObject * self, SEL _cmd, const char * hash, int c);
+int Ledger__Core__TransactionBlock_txCount(NPObject * self, SEL _cmd);
+void Ledger__Core__TransactionBlock_setTxCount_(NPObject * self, SEL _cmd, int value);
+const char * Ledger__Core__TransactionBlock_blockHash(NPObject * self, SEL _cmd);
+NPClass * Ledger__Core__TransactionBlock_getClass(NPClass * self, SEL _cmd);
+NPObject * Network__Engine__ValidatorEngine_initWithIdentity_stake_(NPObject * self, SEL _cmd, const char * idInfo, int s);
+int Network__Engine__ValidatorEngine_validateBlock_withVerifier_(NPObject * self, SEL _cmd, Ledger__Core__TransactionBlock * block, SignatureVerifyBlock verifier);
+int Network__Engine__ValidatorEngine_stakeAmount(NPObject * self, SEL _cmd);
+void Network__Engine__ValidatorEngine_setStakeAmount_(NPObject * self, SEL _cmd, int value);
+const char * Network__Engine__ValidatorEngine_nodeIdentity(NPObject * self, SEL _cmd);
+NPClass * Network__Engine__ValidatorEngine_getClass(NPClass * self, SEL _cmd);
+NPObject * Network__Extensions__RouterPlugin_initWithName_multiplier_(NPObject * self, SEL _cmd, const char * name, int m);
+void Network__Extensions__RouterPlugin_attachToValidator_(NPObject * self, SEL _cmd, Network__Engine__ValidatorEngine * validator);
+int Network__Extensions__RouterPlugin_bandwidthMultiplier(NPObject * self, SEL _cmd);
+void Network__Extensions__RouterPlugin_setBandwidthMultiplier_(NPObject * self, SEL _cmd, int value);
+const char * Network__Extensions__RouterPlugin_pluginName(NPObject * self, SEL _cmd);
+NPClass * Network__Extensions__RouterPlugin_getClass(NPClass * self, SEL _cmd);
 int main(int argc, const char * * argv);
 
-extern NFClass nopa_NFObject_class;
-extern NFClass nopa_Ledger__Core__TransactionBlock_class;
-extern NFClass nopa_Network__Engine__ValidatorEngine_class;
-extern NFClass nopa_Network__Extensions__RouterPlugin_class;
+extern NPClass nopa_NPObject_class;
+extern NPClass nopa_Ledger__Core__TransactionBlock_class;
+extern NPClass nopa_Network__Engine__ValidatorEngine_class;
+extern NPClass nopa_Network__Extensions__RouterPlugin_class;
 void nopa_meta_init(void);
 
-// struct NFClass defined in runtime.h
-// struct NFObject defined in runtime.h
-struct nopa_NFObject_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
+// struct NPClass defined in runtime.h
+// struct NPObject defined in runtime.h
+struct nopa_NPObject_vtable {
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
 };
-struct nopa_NFObject_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+struct nopa_NPObject_meta_vtable {
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct Ledger__Core__TransactionBlock {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     int _txCount;
     const char * _blockHash;
 };
 typedef struct Ledger__Core__TransactionBlock Ledger__Core__TransactionBlock;
 struct nopa_Ledger__Core__TransactionBlock_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    NFObject * (*initWithHash_count_)(NFObject *, SEL, const char *, int);
-    int (*txCount)(NFObject *, SEL);
-    void (*setTxCount_)(NFObject *, SEL, int);
-    const char * (*blockHash)(NFObject *, SEL);
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    NPObject * (*initWithHash_count_)(NPObject *, SEL, const char *, int);
+    int (*txCount)(NPObject *, SEL);
+    void (*setTxCount_)(NPObject *, SEL, int);
+    const char * (*blockHash)(NPObject *, SEL);
 };
 struct nopa_Ledger__Core__TransactionBlock_meta_vtable {
-    Ledger__Core__TransactionBlock * (*createGenesisBlock)(NFClass *, SEL);
-    Ledger__Core__TransactionBlock * (*createStandardBlock)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+    Ledger__Core__TransactionBlock * (*createGenesisBlock)(NPClass *, SEL);
+    Ledger__Core__TransactionBlock * (*createStandardBlock)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 typedef int (^SignatureVerifyBlock)(int);
 struct Network__Engine__ValidatorEngine {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     const char * _nodeIdentity;
     int _stakeAmount;
 };
 typedef struct Network__Engine__ValidatorEngine Network__Engine__ValidatorEngine;
 struct nopa_Network__Engine__ValidatorEngine_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    NFObject * (*initWithIdentity_stake_)(NFObject *, SEL, const char *, int);
-    int (*validateBlock_withVerifier_)(NFObject *, SEL, Ledger__Core__TransactionBlock *, SignatureVerifyBlock);
-    int (*stakeAmount)(NFObject *, SEL);
-    void (*setStakeAmount_)(NFObject *, SEL, int);
-    const char * (*nodeIdentity)(NFObject *, SEL);
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    NPObject * (*initWithIdentity_stake_)(NPObject *, SEL, const char *, int);
+    int (*validateBlock_withVerifier_)(NPObject *, SEL, Ledger__Core__TransactionBlock *, SignatureVerifyBlock);
+    int (*stakeAmount)(NPObject *, SEL);
+    void (*setStakeAmount_)(NPObject *, SEL, int);
+    const char * (*nodeIdentity)(NPObject *, SEL);
 };
 struct nopa_Network__Engine__ValidatorEngine_meta_vtable {
-    NFClass * (*class)(NFClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct Network__Extensions__RouterPlugin {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     const char * _pluginName;
     int _bandwidthMultiplier;
 };
 typedef struct Network__Extensions__RouterPlugin Network__Extensions__RouterPlugin;
 struct nopa_Network__Extensions__RouterPlugin_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    NFObject * (*initWithName_multiplier_)(NFObject *, SEL, const char *, int);
-    void (*attachToValidator_)(NFObject *, SEL, Network__Engine__ValidatorEngine *);
-    int (*bandwidthMultiplier)(NFObject *, SEL);
-    void (*setBandwidthMultiplier_)(NFObject *, SEL, int);
-    const char * (*pluginName)(NFObject *, SEL);
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    NPObject * (*initWithName_multiplier_)(NPObject *, SEL, const char *, int);
+    void (*attachToValidator_)(NPObject *, SEL, Network__Engine__ValidatorEngine *);
+    int (*bandwidthMultiplier)(NPObject *, SEL);
+    void (*setBandwidthMultiplier_)(NPObject *, SEL, int);
+    const char * (*pluginName)(NPObject *, SEL);
 };
 struct nopa_Network__Extensions__RouterPlugin_meta_vtable {
-    NFClass * (*class)(NFClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
-NFObject * NFObject_alloc(NFClass * self, SEL _cmd) {
+NPObject * NPObject_alloc(NPClass * self, SEL _cmd) {
     return nopa_alloc(self);
 }
 
-NFObject * NFObject_new(NFClass * self, SEL _cmd) {
-    NFObject * obj = nopa_alloc(self);
+NPObject * NPObject_new(NPClass * self, SEL _cmd) {
+    NPObject * obj = nopa_alloc(self);
     return nopa_init(obj);
 }
 
-NFObject * NFObject_init(NFObject * self, SEL _cmd) {
-    struct NFObject * _self = ((struct NFObject *)(self));
+NPObject * NPObject_init(NPObject * self, SEL _cmd) {
+    struct NPObject * _self = ((struct NPObject *)(self));
     {
         return nopa_init(self);
     }
 }
 
-void NFObject_dealloc(NFObject * self, SEL _cmd) {
-    struct NFObject * _self = ((struct NFObject *)(self));
+void NPObject_dealloc(NPObject * self, SEL _cmd) {
+    struct NPObject * _self = ((struct NPObject *)(self));
     {
         return;
     }
 }
 
-NFClass * NFObject_getClass(NFClass * self, SEL _cmd) {
-    return &nopa_NFObject_class;
+NPClass * NPObject_getClass(NPClass * self, SEL _cmd) {
+    return &nopa_NPObject_class;
 }
 
-NFObject * nopa_alloc(struct NFClass * cls);
-NFObject * nopa_init(NFObject * );
-Ledger__Core__TransactionBlock * Ledger__Core__TransactionBlock_createGenesisBlock(NFClass * self, SEL _cmd) {
-    return ({ NFObject *__nopa_tmp_0 = (NFObject_alloc(&nopa_Ledger__Core__TransactionBlock_class, __nopa_sel_alloc)); ((struct nopa_Ledger__Core__TransactionBlock_vtable *)__nopa_tmp_0->isa->vtable)->initWithHash_count_(__nopa_tmp_0, __nopa_sel_initWithHash_count_, "0000000000abc123", 1); });
+NPObject * nopa_alloc(struct NPClass * cls);
+NPObject * nopa_init(NPObject * );
+Ledger__Core__TransactionBlock * Ledger__Core__TransactionBlock_createGenesisBlock(NPClass * self, SEL _cmd) {
+    return ({ NPObject *__nopa_tmp_0 = (NPObject_alloc(&nopa_Ledger__Core__TransactionBlock_class, __nopa_sel_alloc)); ((struct nopa_Ledger__Core__TransactionBlock_vtable *)__nopa_tmp_0->isa->vtable)->initWithHash_count_(__nopa_tmp_0, __nopa_sel_initWithHash_count_, "0000000000abc123", 1); });
 }
 
-Ledger__Core__TransactionBlock * Ledger__Core__TransactionBlock_createStandardBlock(NFClass * self, SEL _cmd) {
-    return ({ NFObject *__nopa_tmp_1 = (NFObject_alloc(&nopa_Ledger__Core__TransactionBlock_class, __nopa_sel_alloc)); ((struct nopa_Ledger__Core__TransactionBlock_vtable *)__nopa_tmp_1->isa->vtable)->initWithHash_count_(__nopa_tmp_1, __nopa_sel_initWithHash_count_, "00000000ff987d6a", 500); });
+Ledger__Core__TransactionBlock * Ledger__Core__TransactionBlock_createStandardBlock(NPClass * self, SEL _cmd) {
+    return ({ NPObject *__nopa_tmp_1 = (NPObject_alloc(&nopa_Ledger__Core__TransactionBlock_class, __nopa_sel_alloc)); ((struct nopa_Ledger__Core__TransactionBlock_vtable *)__nopa_tmp_1->isa->vtable)->initWithHash_count_(__nopa_tmp_1, __nopa_sel_initWithHash_count_, "00000000ff987d6a", 500); });
 }
 
-NFObject * Ledger__Core__TransactionBlock_initWithHash_count_(NFObject * self, SEL _cmd, const char * hash, int c) {
+NPObject * Ledger__Core__TransactionBlock_initWithHash_count_(NPObject * self, SEL _cmd, const char * hash, int c) {
     struct Ledger__Core__TransactionBlock * _self = ((struct Ledger__Core__TransactionBlock *)(self));
     {
-        self = NFObject_init(self, __nopa_sel_init);
+        self = NPObject_init(self, __nopa_sel_init);
         if (self) {
             {
                 ((struct Ledger__Core__TransactionBlock *)(self))->_blockHash = hash;
@@ -199,26 +199,26 @@ NFObject * Ledger__Core__TransactionBlock_initWithHash_count_(NFObject * self, S
     }
 }
 
-int Ledger__Core__TransactionBlock_txCount(NFObject * self, SEL _cmd) {
+int Ledger__Core__TransactionBlock_txCount(NPObject * self, SEL _cmd) {
     return ((struct Ledger::Core::TransactionBlock *)(self))->_txCount;
 }
 
-void Ledger__Core__TransactionBlock_setTxCount_(NFObject * self, SEL _cmd, int value) {
+void Ledger__Core__TransactionBlock_setTxCount_(NPObject * self, SEL _cmd, int value) {
     ((struct Ledger__Core__TransactionBlock *)(self))->_txCount = value;
 }
 
-const char * Ledger__Core__TransactionBlock_blockHash(NFObject * self, SEL _cmd) {
+const char * Ledger__Core__TransactionBlock_blockHash(NPObject * self, SEL _cmd) {
     return ((struct Ledger::Core::TransactionBlock *)(self))->_blockHash;
 }
 
-NFClass * Ledger__Core__TransactionBlock_getClass(NFClass * self, SEL _cmd) {
+NPClass * Ledger__Core__TransactionBlock_getClass(NPClass * self, SEL _cmd) {
     return &nopa_Ledger__Core__TransactionBlock_class;
 }
 
-NFObject * Network__Engine__ValidatorEngine_initWithIdentity_stake_(NFObject * self, SEL _cmd, const char * idInfo, int s) {
+NPObject * Network__Engine__ValidatorEngine_initWithIdentity_stake_(NPObject * self, SEL _cmd, const char * idInfo, int s) {
     struct Network__Engine__ValidatorEngine * _self = ((struct Network__Engine__ValidatorEngine *)(self));
     {
-        self = NFObject_init(self, __nopa_sel_init);
+        self = NPObject_init(self, __nopa_sel_init);
         if (self) {
             {
                 ((struct Network__Engine__ValidatorEngine *)(self))->_nodeIdentity = idInfo;
@@ -229,7 +229,7 @@ NFObject * Network__Engine__ValidatorEngine_initWithIdentity_stake_(NFObject * s
     }
 }
 
-int Network__Engine__ValidatorEngine_validateBlock_withVerifier_(NFObject * self, SEL _cmd, Ledger__Core__TransactionBlock * block, SignatureVerifyBlock verifier) {
+int Network__Engine__ValidatorEngine_validateBlock_withVerifier_(NPObject * self, SEL _cmd, Ledger__Core__TransactionBlock * block, SignatureVerifyBlock verifier) {
     struct Network__Engine__ValidatorEngine * _self = ((struct Network__Engine__ValidatorEngine *)(self));
     {
         if (!block) {
@@ -250,26 +250,26 @@ int Network__Engine__ValidatorEngine_validateBlock_withVerifier_(NFObject * self
     }
 }
 
-int Network__Engine__ValidatorEngine_stakeAmount(NFObject * self, SEL _cmd) {
+int Network__Engine__ValidatorEngine_stakeAmount(NPObject * self, SEL _cmd) {
     return ((struct Network::Engine::ValidatorEngine *)(self))->_stakeAmount;
 }
 
-void Network__Engine__ValidatorEngine_setStakeAmount_(NFObject * self, SEL _cmd, int value) {
+void Network__Engine__ValidatorEngine_setStakeAmount_(NPObject * self, SEL _cmd, int value) {
     ((struct Network__Engine__ValidatorEngine *)(self))->_stakeAmount = value;
 }
 
-const char * Network__Engine__ValidatorEngine_nodeIdentity(NFObject * self, SEL _cmd) {
+const char * Network__Engine__ValidatorEngine_nodeIdentity(NPObject * self, SEL _cmd) {
     return ((struct Network::Engine::ValidatorEngine *)(self))->_nodeIdentity;
 }
 
-NFClass * Network__Engine__ValidatorEngine_getClass(NFClass * self, SEL _cmd) {
+NPClass * Network__Engine__ValidatorEngine_getClass(NPClass * self, SEL _cmd) {
     return &nopa_Network__Engine__ValidatorEngine_class;
 }
 
-NFObject * Network__Extensions__RouterPlugin_initWithName_multiplier_(NFObject * self, SEL _cmd, const char * name, int m) {
+NPObject * Network__Extensions__RouterPlugin_initWithName_multiplier_(NPObject * self, SEL _cmd, const char * name, int m) {
     struct Network__Extensions__RouterPlugin * _self = ((struct Network__Extensions__RouterPlugin *)(self));
     {
-        self = NFObject_init(self, __nopa_sel_init);
+        self = NPObject_init(self, __nopa_sel_init);
         if (self) {
             {
                 ((struct Network__Extensions__RouterPlugin *)(self))->_pluginName = name;
@@ -280,7 +280,7 @@ NFObject * Network__Extensions__RouterPlugin_initWithName_multiplier_(NFObject *
     }
 }
 
-void Network__Extensions__RouterPlugin_attachToValidator_(NFObject * self, SEL _cmd, Network__Engine__ValidatorEngine * validator) {
+void Network__Extensions__RouterPlugin_attachToValidator_(NPObject * self, SEL _cmd, Network__Engine__ValidatorEngine * validator) {
     struct Network__Extensions__RouterPlugin * _self = ((struct Network__Extensions__RouterPlugin *)(self));
     {
         if (validator) {
@@ -293,19 +293,19 @@ void Network__Extensions__RouterPlugin_attachToValidator_(NFObject * self, SEL _
     }
 }
 
-int Network__Extensions__RouterPlugin_bandwidthMultiplier(NFObject * self, SEL _cmd) {
+int Network__Extensions__RouterPlugin_bandwidthMultiplier(NPObject * self, SEL _cmd) {
     return ((struct Network::Extensions::RouterPlugin *)(self))->_bandwidthMultiplier;
 }
 
-void Network__Extensions__RouterPlugin_setBandwidthMultiplier_(NFObject * self, SEL _cmd, int value) {
+void Network__Extensions__RouterPlugin_setBandwidthMultiplier_(NPObject * self, SEL _cmd, int value) {
     ((struct Network__Extensions__RouterPlugin *)(self))->_bandwidthMultiplier = value;
 }
 
-const char * Network__Extensions__RouterPlugin_pluginName(NFObject * self, SEL _cmd) {
+const char * Network__Extensions__RouterPlugin_pluginName(NPObject * self, SEL _cmd) {
     return ((struct Network::Extensions::RouterPlugin *)(self))->_pluginName;
 }
 
-NFClass * Network__Extensions__RouterPlugin_getClass(NFClass * self, SEL _cmd) {
+NPClass * Network__Extensions__RouterPlugin_getClass(NPClass * self, SEL _cmd) {
     return &nopa_Network__Extensions__RouterPlugin_class;
 }
 
@@ -322,11 +322,11 @@ int main(int argc, const char * * argv) {
             Ledger__Core__TransactionBlock * genesis = Ledger__Core__TransactionBlock_createGenesisBlock(&nopa_Ledger__Core__TransactionBlock_class, __nopa_sel_createGenesisBlock);
             printf("[区块生成] 成功利用短名称调用 + 方法: 哈希=%s | 交易=%d\n", ((struct nopa_Ledger__Core__TransactionBlock_vtable *)genesis->isa->vtable)->blockHash(genesis, __nopa_sel_blockHash), ((struct nopa_Ledger__Core__TransactionBlock_vtable *)genesis->isa->vtable)->txCount(genesis, __nopa_sel_txCount));
             printf("\n--- 2. 测试 Form 2 别名类的实例化与 Property 读写 ---\n");
-            NFObject *__nopa_tmp_2 = (NFObject_alloc(&nopa_Network__Engine__ValidatorEngine_class, __nopa_sel_alloc));
+            NPObject *__nopa_tmp_2 = (NPObject_alloc(&nopa_Network__Engine__ValidatorEngine_class, __nopa_sel_alloc));
             Network__Engine__ValidatorEngine * mainNode = ((struct nopa_Network__Engine__ValidatorEngine_vtable *)__nopa_tmp_2->isa->vtable)->initWithIdentity_stake_(__nopa_tmp_2, __nopa_sel_initWithIdentity_stake_, "东京-主网验证节点-01", 2000);
             printf("[节点报告] 别名实例化完成: %s | 初始权重: %d\n", ((struct nopa_Network__Engine__ValidatorEngine_vtable *)mainNode->isa->vtable)->nodeIdentity(mainNode, __nopa_sel_nodeIdentity), ((struct nopa_Network__Engine__ValidatorEngine_vtable *)mainNode->isa->vtable)->stakeAmount(mainNode, __nopa_sel_stakeAmount));
             printf("\n--- 3. 测试 Form 3 命名空间批量导入及插件挂载 ---\n");
-            NFObject *__nopa_tmp_3 = (NFObject_alloc(&nopa_Network__Extensions__RouterPlugin_class, __nopa_sel_alloc));
+            NPObject *__nopa_tmp_3 = (NPObject_alloc(&nopa_Network__Extensions__RouterPlugin_class, __nopa_sel_alloc));
             Network__Extensions__RouterPlugin * lightningModule = ((struct nopa_Network__Extensions__RouterPlugin_vtable *)__nopa_tmp_3->isa->vtable)->initWithName_multiplier_(__nopa_tmp_3, __nopa_sel_initWithName_multiplier_, "闪电网络共识加速器", 2);
             printf("[网络报告] 抓取到 Form 3 空间内的插件: %s\n", ((struct nopa_Network__Extensions__RouterPlugin_vtable *)lightningModule->isa->vtable)->pluginName(lightningModule, __nopa_sel_pluginName));
             ((struct nopa_Network__Extensions__RouterPlugin_vtable *)lightningModule->isa->vtable)->attachToValidator_(lightningModule, __nopa_sel_attachToValidator_, mainNode);
@@ -351,7 +351,7 @@ int main(int argc, const char * * argv) {
             printf("\n--- 5. 回归核心：别名接收者、三元判断与逗号表达式副作用自增 ---\n");
             int isNetworkCongested = 1;
             int blockchainStepCounter = 7777;
-            int finalVerifiedStake = isNetworkCongested > 0 ? ({ NFObject *__nopa_tmp_4 = (blockchainStepCounter++, mainNode); ((struct nopa_Network__Engine__ValidatorEngine_vtable *)__nopa_tmp_4->isa->vtable)->stakeAmount(__nopa_tmp_4, __nopa_sel_stakeAmount); }) : 0;
+            int finalVerifiedStake = isNetworkCongested > 0 ? ({ NPObject *__nopa_tmp_4 = (blockchainStepCounter++, mainNode); ((struct nopa_Network__Engine__ValidatorEngine_vtable *)__nopa_tmp_4->isa->vtable)->stakeAmount(__nopa_tmp_4, __nopa_sel_stakeAmount); }) : 0;
             printf("[终极复合断言] 编译树状态稳如泰山，未发生任何代码退化！\n");
             printf("          -> 副作用计数器自增值: %d (预期为 7778)\n", blockchainStepCounter);
             printf("          -> 动态通过表达式链抓取的节点质押权重: %d\n", finalVerifiedStake);
@@ -373,14 +373,14 @@ int main(int argc, const char * * argv) {
 
 // ─── Class metadata ─────────────────────────────────────
 
-struct nopa_NFObject_vtable nopa_NFObject_vtable_inst = {
-    .init = NFObject_init,
-    .dealloc = NFObject_dealloc,
+struct nopa_NPObject_vtable nopa_NPObject_vtable_inst = {
+    .init = NPObject_init,
+    .dealloc = NPObject_dealloc,
 };
 
 struct nopa_Ledger__Core__TransactionBlock_vtable nopa_Ledger__Core__TransactionBlock_vtable_inst = {
-    .init = NFObject_init,
-    .dealloc = NFObject_dealloc,
+    .init = NPObject_init,
+    .dealloc = NPObject_dealloc,
     .initWithHash_count_ = Ledger__Core__TransactionBlock_initWithHash_count_,
     .txCount = Ledger__Core__TransactionBlock_txCount,
     .setTxCount_ = Ledger__Core__TransactionBlock_setTxCount_,
@@ -388,8 +388,8 @@ struct nopa_Ledger__Core__TransactionBlock_vtable nopa_Ledger__Core__Transaction
 };
 
 struct nopa_Network__Engine__ValidatorEngine_vtable nopa_Network__Engine__ValidatorEngine_vtable_inst = {
-    .init = NFObject_init,
-    .dealloc = NFObject_dealloc,
+    .init = NPObject_init,
+    .dealloc = NPObject_dealloc,
     .initWithIdentity_stake_ = Network__Engine__ValidatorEngine_initWithIdentity_stake_,
     .validateBlock_withVerifier_ = Network__Engine__ValidatorEngine_validateBlock_withVerifier_,
     .stakeAmount = Network__Engine__ValidatorEngine_stakeAmount,
@@ -398,8 +398,8 @@ struct nopa_Network__Engine__ValidatorEngine_vtable nopa_Network__Engine__Valida
 };
 
 struct nopa_Network__Extensions__RouterPlugin_vtable nopa_Network__Extensions__RouterPlugin_vtable_inst = {
-    .init = NFObject_init,
-    .dealloc = NFObject_dealloc,
+    .init = NPObject_init,
+    .dealloc = NPObject_dealloc,
     .initWithName_multiplier_ = Network__Extensions__RouterPlugin_initWithName_multiplier_,
     .attachToValidator_ = Network__Extensions__RouterPlugin_attachToValidator_,
     .bandwidthMultiplier = Network__Extensions__RouterPlugin_bandwidthMultiplier,
@@ -407,10 +407,10 @@ struct nopa_Network__Extensions__RouterPlugin_vtable nopa_Network__Extensions__R
     .pluginName = Network__Extensions__RouterPlugin_pluginName,
 };
 
-struct nopa_NFObject_meta_vtable nopa_NFObject_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
-    .class = NFObject_getClass,
+struct nopa_NPObject_meta_vtable nopa_NPObject_meta_vtable_inst = {
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
+    .class = NPObject_getClass,
 };
 
 struct nopa_Ledger__Core__TransactionBlock_meta_vtable nopa_Ledger__Core__TransactionBlock_meta_vtable_inst = {
@@ -427,39 +427,39 @@ struct nopa_Network__Extensions__RouterPlugin_meta_vtable nopa_Network__Extensio
     .class = Network__Extensions__RouterPlugin_getClass,
 };
 
-NFClass nopa_NFObject_class;
-NFClass nopa_Ledger__Core__TransactionBlock_class;
-NFClass nopa_Network__Engine__ValidatorEngine_class;
-NFClass nopa_Network__Extensions__RouterPlugin_class;
+NPClass nopa_NPObject_class;
+NPClass nopa_Ledger__Core__TransactionBlock_class;
+NPClass nopa_Network__Engine__ValidatorEngine_class;
+NPClass nopa_Network__Extensions__RouterPlugin_class;
 
 void nopa_meta_init(void) {
-    nopa_NFObject_class = (NFClass){
-        .name = "NFObject",
+    nopa_NPObject_class = (NPClass){
+        .name = "NPObject",
         .superclass = NULL,
-        .instance_size = sizeof(struct NFObject),
-        .vtable = &nopa_NFObject_vtable_inst,
-        .class_vtable = &nopa_NFObject_meta_vtable_inst,
+        .instance_size = sizeof(struct NPObject),
+        .vtable = &nopa_NPObject_vtable_inst,
+        .class_vtable = &nopa_NPObject_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_Ledger__Core__TransactionBlock_class = (NFClass){
+    nopa_Ledger__Core__TransactionBlock_class = (NPClass){
         .name = "Ledger__Core__TransactionBlock",
-        .superclass = &nopa_NFObject_class,
+        .superclass = &nopa_NPObject_class,
         .instance_size = sizeof(struct Ledger__Core__TransactionBlock),
         .vtable = &nopa_Ledger__Core__TransactionBlock_vtable_inst,
         .class_vtable = &nopa_Ledger__Core__TransactionBlock_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_Network__Engine__ValidatorEngine_class = (NFClass){
+    nopa_Network__Engine__ValidatorEngine_class = (NPClass){
         .name = "Network__Engine__ValidatorEngine",
-        .superclass = &nopa_NFObject_class,
+        .superclass = &nopa_NPObject_class,
         .instance_size = sizeof(struct Network__Engine__ValidatorEngine),
         .vtable = &nopa_Network__Engine__ValidatorEngine_vtable_inst,
         .class_vtable = &nopa_Network__Engine__ValidatorEngine_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_Network__Extensions__RouterPlugin_class = (NFClass){
+    nopa_Network__Extensions__RouterPlugin_class = (NPClass){
         .name = "Network__Extensions__RouterPlugin",
-        .superclass = &nopa_NFObject_class,
+        .superclass = &nopa_NPObject_class,
         .instance_size = sizeof(struct Network__Extensions__RouterPlugin),
         .vtable = &nopa_Network__Extensions__RouterPlugin_vtable_inst,
         .class_vtable = &nopa_Network__Extensions__RouterPlugin_meta_vtable_inst,

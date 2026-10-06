@@ -10,15 +10,15 @@
 #include <string.h>
 
 struct nopa_Network__Security__QuantumPacket_Core__Swarm__MechEntity_ptr_vtable;
-struct nopa_NFObject_vtable;
+struct nopa_NPObject_vtable;
 struct nopa_Core__Swarm__MechEntity_vtable;
 
 #define nopa_Network__Security__QuantumPacket_Core__Swarm__MechEntity_ptr_vtable_index_init 2
 #define nopa_Network__Security__QuantumPacket_Core__Swarm__MechEntity_ptr_vtable_index_pushPayload_ 4
 #define nopa_Network__Security__QuantumPacket_Core__Swarm__MechEntity_ptr_vtable_index_popPayload 5
 #define nopa_Network__Security__QuantumPacket_Core__Swarm__MechEntity_ptr_vtable_index_dealloc 3
-#define nopa_NFObject_vtable_index_init 2
-#define nopa_NFObject_vtable_index_dealloc 3
+#define nopa_NPObject_vtable_index_init 2
+#define nopa_NPObject_vtable_index_dealloc 3
 #define nopa_Core__Swarm__MechEntity_vtable_index_initWithId_model_ 4
 #define nopa_Core__Swarm__MechEntity_vtable_index_dealloc 3
 
@@ -31,53 +31,53 @@ static const SEL __nopa_sel_mechId = {.name = "mechId", .hash = 0x11E4EDC1};
 static const SEL __nopa_sel_modelName = {.name = "modelName", .hash = 0x4A8A4B01};
 
 typedef struct Network__Security__QuantumPacket_Core__Swarm__MechEntity_ptr Network__Security__QuantumPacket_Core__Swarm__MechEntity_ptr;
-typedef struct NFObject NFObject;
+typedef struct NPObject NPObject;
 typedef struct Core__Swarm__MechEntity Core__Swarm__MechEntity;
 
 
 
 // ─── Struct definitions (early) ───────────────────────
 
-struct nopa_NFObject_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
+struct nopa_NPObject_vtable {
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
 };
-struct nopa_NFObject_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+struct nopa_NPObject_meta_vtable {
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct Core__Swarm__MechEntity {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     int _mechId;
     const char * _modelName;
 };
 typedef struct Core__Swarm__MechEntity Core__Swarm__MechEntity;
 struct nopa_Core__Swarm__MechEntity_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    NFObject * (*initWithId_model_)(NFObject *, SEL, int, const char *);
-    int (*mechId)(NFObject *, SEL);
-    void (*setMechId_)(NFObject *, SEL, int);
-    const char * (*modelName)(NFObject *, SEL);
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    NPObject * (*initWithId_model_)(NPObject *, SEL, int, const char *);
+    int (*mechId)(NPObject *, SEL);
+    void (*setMechId_)(NPObject *, SEL, int);
+    const char * (*modelName)(NPObject *, SEL);
 };
 struct nopa_Core__Swarm__MechEntity_meta_vtable {
-    NFClass * (*class)(NFClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct Network__Security__QuantumPacket_Core__Swarm__MechEntity_ptr {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     int _payloadCount;
     Core__Swarm__MechEntity * _slots[2];
 };
 typedef struct Network__Security__QuantumPacket_Core__Swarm__MechEntity_ptr Network__Security__QuantumPacket_Core__Swarm__MechEntity_ptr;
 struct nopa_Network__Security__QuantumPacket_Core__Swarm__MechEntity_ptr_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    void (*pushPayload_)(NFObject *, SEL, Core__Swarm__MechEntity *);
-    Core__Swarm__MechEntity * (*popPayload)(NFObject *, SEL);
-    int (*payloadCount)(NFObject *, SEL);
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    void (*pushPayload_)(NPObject *, SEL, Core__Swarm__MechEntity *);
+    Core__Swarm__MechEntity * (*popPayload)(NPObject *, SEL);
+    int (*payloadCount)(NPObject *, SEL);
 };
 struct nopa_Network__Security__QuantumPacket_Core__Swarm__MechEntity_ptr_meta_vtable {
     // (empty)
@@ -95,64 +95,64 @@ static void _block_fn_0(Network__Security__QuantumPacket_Core__Swarm__MechEntity
 }
 
 
-NFObject * NFObject_alloc(NFClass * self, SEL _cmd);
-NFObject * NFObject_new(NFClass * self, SEL _cmd);
-NFObject * NFObject_init(NFObject * self, SEL _cmd);
-void NFObject_dealloc(NFObject * self, SEL _cmd);
-NFClass * NFObject_getClass(NFClass * self, SEL _cmd);
-NFObject * Core__Swarm__MechEntity_initWithId_model_(NFObject * self, SEL _cmd, int mid, const char * model);
-void Core__Swarm__MechEntity_dealloc(NFObject * self, SEL _cmd);
-int Core__Swarm__MechEntity_mechId(NFObject * self, SEL _cmd);
-void Core__Swarm__MechEntity_setMechId_(NFObject * self, SEL _cmd, int value);
-const char * Core__Swarm__MechEntity_modelName(NFObject * self, SEL _cmd);
-NFClass * Core__Swarm__MechEntity_getClass(NFClass * self, SEL _cmd);
-NFObject * Network__Security__QuantumPacket_Core__Swarm__MechEntity_ptr_init(NFObject * self, SEL _cmd);
-void Network__Security__QuantumPacket_Core__Swarm__MechEntity_ptr_pushPayload_(NFObject * self, SEL _cmd, Core__Swarm__MechEntity * payload);
-Core__Swarm__MechEntity * Network__Security__QuantumPacket_Core__Swarm__MechEntity_ptr_popPayload(NFObject * self, SEL _cmd);
-void Network__Security__QuantumPacket_Core__Swarm__MechEntity_ptr_dealloc(NFObject * self, SEL _cmd);
-int Network__Security__QuantumPacket_Core__Swarm__MechEntity_ptr_payloadCount(NFObject * self, SEL _cmd);
+NPObject * NPObject_alloc(NPClass * self, SEL _cmd);
+NPObject * NPObject_new(NPClass * self, SEL _cmd);
+NPObject * NPObject_init(NPObject * self, SEL _cmd);
+void NPObject_dealloc(NPObject * self, SEL _cmd);
+NPClass * NPObject_getClass(NPClass * self, SEL _cmd);
+NPObject * Core__Swarm__MechEntity_initWithId_model_(NPObject * self, SEL _cmd, int mid, const char * model);
+void Core__Swarm__MechEntity_dealloc(NPObject * self, SEL _cmd);
+int Core__Swarm__MechEntity_mechId(NPObject * self, SEL _cmd);
+void Core__Swarm__MechEntity_setMechId_(NPObject * self, SEL _cmd, int value);
+const char * Core__Swarm__MechEntity_modelName(NPObject * self, SEL _cmd);
+NPClass * Core__Swarm__MechEntity_getClass(NPClass * self, SEL _cmd);
+NPObject * Network__Security__QuantumPacket_Core__Swarm__MechEntity_ptr_init(NPObject * self, SEL _cmd);
+void Network__Security__QuantumPacket_Core__Swarm__MechEntity_ptr_pushPayload_(NPObject * self, SEL _cmd, Core__Swarm__MechEntity * payload);
+Core__Swarm__MechEntity * Network__Security__QuantumPacket_Core__Swarm__MechEntity_ptr_popPayload(NPObject * self, SEL _cmd);
+void Network__Security__QuantumPacket_Core__Swarm__MechEntity_ptr_dealloc(NPObject * self, SEL _cmd);
+int Network__Security__QuantumPacket_Core__Swarm__MechEntity_ptr_payloadCount(NPObject * self, SEL _cmd);
 int main(int argc, const char * * argv);
 
-extern NFClass nopa_Network__Security__QuantumPacket_Core__Swarm__MechEntity_ptr_class;
-extern NFClass nopa_NFObject_class;
-extern NFClass nopa_Core__Swarm__MechEntity_class;
+extern NPClass nopa_Network__Security__QuantumPacket_Core__Swarm__MechEntity_ptr_class;
+extern NPClass nopa_NPObject_class;
+extern NPClass nopa_Core__Swarm__MechEntity_class;
 void nopa_meta_init(void);
 
-// struct NFClass defined in object.h
-// struct NFObject defined in object.h
-NFObject * NFObject_alloc(NFClass * self, SEL _cmd) {
+// struct NPClass defined in object.h
+// struct NPObject defined in object.h
+NPObject * NPObject_alloc(NPClass * self, SEL _cmd) {
     return nopa_alloc(self);
 }
 
-NFObject * NFObject_new(NFClass * self, SEL _cmd) {
-    NFObject * obj = nopa_alloc(self);
+NPObject * NPObject_new(NPClass * self, SEL _cmd) {
+    NPObject * obj = nopa_alloc(self);
     return nopa_init(obj);
 }
 
-NFObject * NFObject_init(NFObject * self, SEL _cmd) {
-    struct NFObject * _self = ((struct NFObject *)(self));
+NPObject * NPObject_init(NPObject * self, SEL _cmd) {
+    struct NPObject * _self = ((struct NPObject *)(self));
     {
         return nopa_init(self);
     }
 }
 
-void NFObject_dealloc(NFObject * self, SEL _cmd) {
-    struct NFObject * _self = ((struct NFObject *)(self));
+void NPObject_dealloc(NPObject * self, SEL _cmd) {
+    struct NPObject * _self = ((struct NPObject *)(self));
     {
         return;
     }
 }
 
-NFClass * NFObject_getClass(NFClass * self, SEL _cmd) {
-    return &nopa_NFObject_class;
+NPClass * NPObject_getClass(NPClass * self, SEL _cmd) {
+    return &nopa_NPObject_class;
 }
 
-NFObject * nopa_alloc(struct NFClass * cls);
-NFObject * nopa_init(NFObject * );
-NFObject * Core__Swarm__MechEntity_initWithId_model_(NFObject * self, SEL _cmd, int mid, const char * model) {
+NPObject * nopa_alloc(struct NPClass * cls);
+NPObject * nopa_init(NPObject * );
+NPObject * Core__Swarm__MechEntity_initWithId_model_(NPObject * self, SEL _cmd, int mid, const char * model) {
     struct Core__Swarm__MechEntity * _self = ((struct Core__Swarm__MechEntity *)(self));
     {
-        self = NFObject_init(self, __nopa_sel_init);
+        self = NPObject_init(self, __nopa_sel_init);
         if (self) {
             {
                 ((struct Core__Swarm__MechEntity *)(self))->_mechId = mid;
@@ -163,7 +163,7 @@ NFObject * Core__Swarm__MechEntity_initWithId_model_(NFObject * self, SEL _cmd, 
     }
 }
 
-void Core__Swarm__MechEntity_dealloc(NFObject * self, SEL _cmd) {
+void Core__Swarm__MechEntity_dealloc(NPObject * self, SEL _cmd) {
     struct Core__Swarm__MechEntity * _self = ((struct Core__Swarm__MechEntity *)(self));
     {
         printf("[机甲销毁] 空间 [Core::Swarm] 战术机甲-%d (%s) 已完全静态熔断。\n", ((struct Core__Swarm__MechEntity *)(self))->_mechId, ((struct Core__Swarm__MechEntity *)(self))->_modelName);
@@ -171,26 +171,26 @@ void Core__Swarm__MechEntity_dealloc(NFObject * self, SEL _cmd) {
     }
 }
 
-int Core__Swarm__MechEntity_mechId(NFObject * self, SEL _cmd) {
+int Core__Swarm__MechEntity_mechId(NPObject * self, SEL _cmd) {
     return ((struct Core__Swarm__MechEntity *)(self))->_mechId;
 }
 
-void Core__Swarm__MechEntity_setMechId_(NFObject * self, SEL _cmd, int value) {
+void Core__Swarm__MechEntity_setMechId_(NPObject * self, SEL _cmd, int value) {
     ((struct Core__Swarm__MechEntity *)(self))->_mechId = value;
 }
 
-const char * Core__Swarm__MechEntity_modelName(NFObject * self, SEL _cmd) {
+const char * Core__Swarm__MechEntity_modelName(NPObject * self, SEL _cmd) {
     return ((struct Core__Swarm__MechEntity *)(self))->_modelName;
 }
 
-NFClass * Core__Swarm__MechEntity_getClass(NFClass * self, SEL _cmd) {
+NPClass * Core__Swarm__MechEntity_getClass(NPClass * self, SEL _cmd) {
     return &nopa_Core__Swarm__MechEntity_class;
 }
 
-NFObject * Network__Security__QuantumPacket_Core__Swarm__MechEntity_ptr_init(NFObject * self, SEL _cmd) {
+NPObject * Network__Security__QuantumPacket_Core__Swarm__MechEntity_ptr_init(NPObject * self, SEL _cmd) {
     struct Network__Security__QuantumPacket_Core__Swarm__MechEntity_ptr * _self = ((struct Network__Security__QuantumPacket_Core__Swarm__MechEntity_ptr *)(self));
     {
-        self = NFObject_init(self, __nopa_sel_init);
+        self = NPObject_init(self, __nopa_sel_init);
         if (self) {
             {
                 ((struct Network__Security__QuantumPacket_Core__Swarm__MechEntity_ptr *)(self))->_payloadCount = 0;
@@ -202,7 +202,7 @@ NFObject * Network__Security__QuantumPacket_Core__Swarm__MechEntity_ptr_init(NFO
     }
 }
 
-void Network__Security__QuantumPacket_Core__Swarm__MechEntity_ptr_pushPayload_(NFObject * self, SEL _cmd, Core__Swarm__MechEntity * payload) {
+void Network__Security__QuantumPacket_Core__Swarm__MechEntity_ptr_pushPayload_(NPObject * self, SEL _cmd, Core__Swarm__MechEntity * payload) {
     struct Network__Security__QuantumPacket_Core__Swarm__MechEntity_ptr * _self = ((struct Network__Security__QuantumPacket_Core__Swarm__MechEntity_ptr *)(self));
     {
         if (((struct Network__Security__QuantumPacket_Core__Swarm__MechEntity_ptr *)(self))->_payloadCount < 2) {
@@ -219,7 +219,7 @@ void Network__Security__QuantumPacket_Core__Swarm__MechEntity_ptr_pushPayload_(N
     }
 }
 
-Core__Swarm__MechEntity * Network__Security__QuantumPacket_Core__Swarm__MechEntity_ptr_popPayload(NFObject * self, SEL _cmd) {
+Core__Swarm__MechEntity * Network__Security__QuantumPacket_Core__Swarm__MechEntity_ptr_popPayload(NPObject * self, SEL _cmd) {
     struct Network__Security__QuantumPacket_Core__Swarm__MechEntity_ptr * _self = ((struct Network__Security__QuantumPacket_Core__Swarm__MechEntity_ptr *)(self));
     {
         if (((struct Network__Security__QuantumPacket_Core__Swarm__MechEntity_ptr *)(self))->_payloadCount > 0) {
@@ -234,7 +234,7 @@ Core__Swarm__MechEntity * Network__Security__QuantumPacket_Core__Swarm__MechEnti
     }
 }
 
-void Network__Security__QuantumPacket_Core__Swarm__MechEntity_ptr_dealloc(NFObject * self, SEL _cmd) {
+void Network__Security__QuantumPacket_Core__Swarm__MechEntity_ptr_dealloc(NPObject * self, SEL _cmd) {
     struct Network__Security__QuantumPacket_Core__Swarm__MechEntity_ptr * _self = ((struct Network__Security__QuantumPacket_Core__Swarm__MechEntity_ptr *)(self));
     {
         printf("[通道物理析构] 正在清空单态化跨空间物理插槽内存...\n");
@@ -248,7 +248,7 @@ void Network__Security__QuantumPacket_Core__Swarm__MechEntity_ptr_dealloc(NFObje
     }
 }
 
-int Network__Security__QuantumPacket_Core__Swarm__MechEntity_ptr_payloadCount(NFObject * self, SEL _cmd) {
+int Network__Security__QuantumPacket_Core__Swarm__MechEntity_ptr_payloadCount(NPObject * self, SEL _cmd) {
     return ((struct Network__Security__QuantumPacket_Core__Swarm__MechEntity_ptr *)(self))->_payloadCount;
 }
 
@@ -262,18 +262,18 @@ int main(int argc, const char * * argv) {
             printf(">>>    nopac 编译器「命名空间+别名+零开销泛型」终极融合压测       <<<\n");
             printf("====================================================================\n\n");
             printf("--- 1. 实例化跨命名空间特化泛型类 ---\n");
-            NFObject *__nopa_tmp_0 = (NFObject_alloc(&nopa_Network__Security__QuantumPacket_Core__Swarm__MechEntity_ptr_class, __nopa_sel_alloc));
+            NPObject *__nopa_tmp_0 = (NPObject_alloc(&nopa_Network__Security__QuantumPacket_Core__Swarm__MechEntity_ptr_class, __nopa_sel_alloc));
             Network__Security__QuantumPacket_Core__Swarm__MechEntity_ptr * rawPacket = ((struct nopa_Network__Security__QuantumPacket_Core__Swarm__MechEntity_ptr_vtable *)__nopa_tmp_0->isa->vtable)->init(__nopa_tmp_0, __nopa_sel_init);
-            NFObject *__nopa_tmp_1 = (NFObject_alloc(&nopa_Core__Swarm__MechEntity_class, __nopa_sel_alloc));
+            NPObject *__nopa_tmp_1 = (NPObject_alloc(&nopa_Core__Swarm__MechEntity_class, __nopa_sel_alloc));
             Core__Swarm__MechEntity * m1 = ((struct nopa_Core__Swarm__MechEntity_vtable *)__nopa_tmp_1->isa->vtable)->initWithId_model_(__nopa_tmp_1, __nopa_sel_initWithId_model_, 901, "Gundam-Exia");
-            NFObject *__nopa_tmp_2 = (NFObject_alloc(&nopa_Core__Swarm__MechEntity_class, __nopa_sel_alloc));
+            NPObject *__nopa_tmp_2 = (NPObject_alloc(&nopa_Core__Swarm__MechEntity_class, __nopa_sel_alloc));
             Core__Swarm__MechEntity * m2 = ((struct nopa_Core__Swarm__MechEntity_vtable *)__nopa_tmp_2->isa->vtable)->initWithId_model_(__nopa_tmp_2, __nopa_sel_initWithId_model_, 902, "Gundam-Dynames");
             ((struct nopa_Network__Security__QuantumPacket_Core__Swarm__MechEntity_ptr_vtable *)rawPacket->isa->vtable)->pushPayload_(rawPacket, __nopa_sel_pushPayload_, m1);
             ((struct nopa_Network__Security__QuantumPacket_Core__Swarm__MechEntity_ptr_vtable *)rawPacket->isa->vtable)->pushPayload_(rawPacket, __nopa_sel_pushPayload_, m2);
             nopa_release(m1);
             nopa_release(m2);
             printf("\n--- 2. 验证使用 @using 泛型别名 SecTunnel 进行多态派发与数据还原 ---\n");
-            NFObject * tunnelController = rawPacket;
+            NPObject * tunnelController = rawPacket;
             Core__Swarm__MechEntity * poppedMech = ((struct nopa_Network__Security__QuantumPacket_Core__Swarm__MechEntity_ptr_vtable *)tunnelController->isa->vtable)->popPayload(tunnelController, __nopa_sel_popPayload);
             printf("[别名还原断言] 成功取出特化跨空间机甲: ID=%d | 型号=%s\n", ((struct nopa_Core__Swarm__MechEntity_vtable *)poppedMech->isa->vtable)->mechId(poppedMech, __nopa_sel_mechId), ((struct nopa_Core__Swarm__MechEntity_vtable *)poppedMech->isa->vtable)->modelName(poppedMech, __nopa_sel_modelName));
             printf("\n--- 3. 验证跨命名空间泛型作为 Block 参数的静态 ARC 表现 ---\n");
@@ -282,7 +282,7 @@ int main(int argc, const char * * argv) {
             printf("\n--- 4. 终极融合守门员：跨命名空间泛型别名、方法路由与复合副作用完美大同 ---\n");
             int isCommandChainSecure = 1;
             int globalFusionStep = 55555;
-            Core__Swarm__MechEntity * finalFusionMech = isCommandChainSecure > 0 ? ({ NFObject *__nopa_tmp_3 = (globalFusionStep++, tunnelController); ((struct nopa_Network__Security__QuantumPacket_Core__Swarm__MechEntity_ptr_vtable *)__nopa_tmp_3->isa->vtable)->popPayload(__nopa_tmp_3, __nopa_sel_popPayload); }) : 0;
+            Core__Swarm__MechEntity * finalFusionMech = isCommandChainSecure > 0 ? ({ NPObject *__nopa_tmp_3 = (globalFusionStep++, tunnelController); ((struct nopa_Network__Security__QuantumPacket_Core__Swarm__MechEntity_ptr_vtable *)__nopa_tmp_3->isa->vtable)->popPayload(__nopa_tmp_3, __nopa_sel_popPayload); }) : 0;
             printf("[终极多维断言] 编译期单态化、命名空间隔离、别名展开与复合语法树 100% 收敛！\n");
             printf("          -> 复合副作用自增计数器: %d (预期: 55556)\n", globalFusionStep);
             printf("          -> 动态解密弹出的最终机甲型号: %s (预期: (null) / 因为先前已Pop空，或nil安全拦截)\n", finalFusionMech ? ((struct nopa_Core__Swarm__MechEntity_vtable *)finalFusionMech->isa->vtable)->modelName(finalFusionMech, __nopa_sel_modelName) : "nil安全拦截");
@@ -310,13 +310,13 @@ struct nopa_Network__Security__QuantumPacket_Core__Swarm__MechEntity_ptr_vtable 
     .payloadCount = Network__Security__QuantumPacket_Core__Swarm__MechEntity_ptr_payloadCount,
 };
 
-struct nopa_NFObject_vtable nopa_NFObject_vtable_inst = {
-    .init = NFObject_init,
-    .dealloc = NFObject_dealloc,
+struct nopa_NPObject_vtable nopa_NPObject_vtable_inst = {
+    .init = NPObject_init,
+    .dealloc = NPObject_dealloc,
 };
 
 struct nopa_Core__Swarm__MechEntity_vtable nopa_Core__Swarm__MechEntity_vtable_inst = {
-    .init = NFObject_init,
+    .init = NPObject_init,
     .dealloc = Core__Swarm__MechEntity_dealloc,
     .initWithId_model_ = Core__Swarm__MechEntity_initWithId_model_,
     .mechId = Core__Swarm__MechEntity_mechId,
@@ -327,40 +327,40 @@ struct nopa_Core__Swarm__MechEntity_vtable nopa_Core__Swarm__MechEntity_vtable_i
 struct nopa_Network__Security__QuantumPacket_Core__Swarm__MechEntity_ptr_meta_vtable nopa_Network__Security__QuantumPacket_Core__Swarm__MechEntity_ptr_meta_vtable_inst = {
 };
 
-struct nopa_NFObject_meta_vtable nopa_NFObject_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
-    .class = NFObject_getClass,
+struct nopa_NPObject_meta_vtable nopa_NPObject_meta_vtable_inst = {
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
+    .class = NPObject_getClass,
 };
 
 struct nopa_Core__Swarm__MechEntity_meta_vtable nopa_Core__Swarm__MechEntity_meta_vtable_inst = {
     .class = Core__Swarm__MechEntity_getClass,
 };
 
-NFClass nopa_Network__Security__QuantumPacket_Core__Swarm__MechEntity_ptr_class;
-NFClass nopa_NFObject_class;
-NFClass nopa_Core__Swarm__MechEntity_class;
+NPClass nopa_Network__Security__QuantumPacket_Core__Swarm__MechEntity_ptr_class;
+NPClass nopa_NPObject_class;
+NPClass nopa_Core__Swarm__MechEntity_class;
 
 void nopa_meta_init(void) {
-    nopa_Network__Security__QuantumPacket_Core__Swarm__MechEntity_ptr_class = (NFClass){
+    nopa_Network__Security__QuantumPacket_Core__Swarm__MechEntity_ptr_class = (NPClass){
         .name = "Network__Security__QuantumPacket_Core__Swarm__MechEntity_ptr",
-        .superclass = &nopa_NFObject_class,
+        .superclass = &nopa_NPObject_class,
         .instance_size = sizeof(struct Network__Security__QuantumPacket_Core__Swarm__MechEntity_ptr),
         .vtable = &nopa_Network__Security__QuantumPacket_Core__Swarm__MechEntity_ptr_vtable_inst,
         .class_vtable = &nopa_Network__Security__QuantumPacket_Core__Swarm__MechEntity_ptr_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_NFObject_class = (NFClass){
-        .name = "NFObject",
+    nopa_NPObject_class = (NPClass){
+        .name = "NPObject",
         .superclass = NULL,
-        .instance_size = sizeof(struct NFObject),
-        .vtable = &nopa_NFObject_vtable_inst,
-        .class_vtable = &nopa_NFObject_meta_vtable_inst,
+        .instance_size = sizeof(struct NPObject),
+        .vtable = &nopa_NPObject_vtable_inst,
+        .class_vtable = &nopa_NPObject_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_Core__Swarm__MechEntity_class = (NFClass){
+    nopa_Core__Swarm__MechEntity_class = (NPClass){
         .name = "Core__Swarm__MechEntity",
-        .superclass = &nopa_NFObject_class,
+        .superclass = &nopa_NPObject_class,
         .instance_size = sizeof(struct Core__Swarm__MechEntity),
         .vtable = &nopa_Core__Swarm__MechEntity_vtable_inst,
         .class_vtable = &nopa_Core__Swarm__MechEntity_meta_vtable_inst,

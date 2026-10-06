@@ -6,7 +6,7 @@
 #include <stddef.h>
 #include "nopa/runtime.h"
 struct nopa_vtable;
-struct nopa_NFObject_meta_vtable;
+struct nopa_NPObject_meta_vtable;
 struct nopa_Kernel__Crypto__BlockHasher_meta_vtable;
 
 static const SEL __nopa_sel_init = {.name = "init", .hash = 0x16B1D373};
@@ -33,18 +33,18 @@ static const SEL __nopa_sel_schemeName = {.name = "schemeName", .hash = 0xFE510B
 #ifndef __NOPA_ROOT_DEFINED
 #define __NOPA_ROOT_DEFINED
 struct __nopa_root {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
 };
 typedef struct __nopa_root __nopa_root;
 #endif
-#ifndef NFOBJECT_DEFINED
-#define NFOBJECT_DEFINED
-struct NFObject {
-    struct NFClass *isa;
+#ifndef NPOBJECT_DEFINED
+#define NPOBJECT_DEFINED
+struct NPObject {
+    struct NPClass *isa;
     uint32_t retain_count;
 };
-typedef struct NFObject NFObject;
+typedef struct NPObject NPObject;
 #endif
 struct Kernel__Crypto__BlockHasher;
 typedef struct Kernel__Crypto__BlockHasher Kernel__Crypto__BlockHasher;
@@ -54,78 +54,78 @@ typedef struct DigestPair {
     int hi;
 } DigestPair;
 
-NFObject * __nopa_root_init(NFObject * self, SEL _cmd);
-void __nopa_root_dealloc(NFObject * self, SEL _cmd);
-void __nopa_root_release(NFObject * self, SEL _cmd);
-NFObject * __nopa_root_retain(NFObject * self, SEL _cmd);
-_Bool __nopa_root_isKindOf_(NFObject * self, SEL _cmd, NFClass * cls);
-NFObject * NFObject_alloc(NFClass * self, SEL _cmd);
-NFObject * NFObject_new(NFClass * self, SEL _cmd);
-NFObject * NFObject_init(NFObject * self, SEL _cmd);
-void NFObject_dealloc(NFObject * self, SEL _cmd);
-void NFObject_release(NFObject * self, SEL _cmd);
-NFObject * NFObject_retain(NFObject * self, SEL _cmd);
-NFObject * Kernel__Crypto__BlockHasher_initWithLabel_(NFObject * self, SEL _cmd, const char * label);
-unsigned Kernel__Crypto__BlockHasher_mixWord_(NFObject * self, SEL _cmd, unsigned word);
-void Kernel__Crypto__BlockHasher_absorbBytes_length_(NFObject * self, SEL _cmd, const unsigned char * buf, int len);
-unsigned Kernel__Crypto__BlockHasher_leadingZerosOf_(NFObject * self, SEL _cmd, unsigned value);
-int Kernel__Crypto__BlockHasher_isEvenViaAsmGoto_(NFObject * self, SEL _cmd, unsigned value);
-void Kernel__Crypto__BlockHasher_corruptAndThrow(NFObject * self, SEL _cmd);
-unsigned Kernel__Crypto__BlockHasher_state(NFObject * self, SEL _cmd);
-void Kernel__Crypto__BlockHasher_setState_(NFObject * self, SEL _cmd, unsigned value);
-int Kernel__Crypto__BlockHasher_rounds(NFObject * self, SEL _cmd);
-void Kernel__Crypto__BlockHasher_setRounds_(NFObject * self, SEL _cmd, int value);
-const char * Kernel__Crypto__BlockHasher_label(NFObject * self, SEL _cmd);
-unsigned Kernel__Crypto__BlockHasher_finalChecksum(NFObject * self, SEL _cmd);
-const char * Kernel__Crypto__BlockHasher_schemeName(NFObject * self, SEL _cmd);
-void Kernel__Crypto__BlockHasher_dealloc(NFObject * self, SEL _cmd);
-NFObject * nopa_alloc(struct NFClass * cls);
-NFObject * nopa_init(NFObject * self);
-void nopa_release(NFObject * obj);
-NFObject * nopa_retain(NFObject * obj);
+NPObject * __nopa_root_init(NPObject * self, SEL _cmd);
+void __nopa_root_dealloc(NPObject * self, SEL _cmd);
+void __nopa_root_release(NPObject * self, SEL _cmd);
+NPObject * __nopa_root_retain(NPObject * self, SEL _cmd);
+_Bool __nopa_root_isKindOf_(NPObject * self, SEL _cmd, NPClass * cls);
+NPObject * NPObject_alloc(NPClass * self, SEL _cmd);
+NPObject * NPObject_new(NPClass * self, SEL _cmd);
+NPObject * NPObject_init(NPObject * self, SEL _cmd);
+void NPObject_dealloc(NPObject * self, SEL _cmd);
+void NPObject_release(NPObject * self, SEL _cmd);
+NPObject * NPObject_retain(NPObject * self, SEL _cmd);
+NPObject * Kernel__Crypto__BlockHasher_initWithLabel_(NPObject * self, SEL _cmd, const char * label);
+unsigned Kernel__Crypto__BlockHasher_mixWord_(NPObject * self, SEL _cmd, unsigned word);
+void Kernel__Crypto__BlockHasher_absorbBytes_length_(NPObject * self, SEL _cmd, const unsigned char * buf, int len);
+unsigned Kernel__Crypto__BlockHasher_leadingZerosOf_(NPObject * self, SEL _cmd, unsigned value);
+int Kernel__Crypto__BlockHasher_isEvenViaAsmGoto_(NPObject * self, SEL _cmd, unsigned value);
+void Kernel__Crypto__BlockHasher_corruptAndThrow(NPObject * self, SEL _cmd);
+unsigned Kernel__Crypto__BlockHasher_state(NPObject * self, SEL _cmd);
+void Kernel__Crypto__BlockHasher_setState_(NPObject * self, SEL _cmd, unsigned value);
+int Kernel__Crypto__BlockHasher_rounds(NPObject * self, SEL _cmd);
+void Kernel__Crypto__BlockHasher_setRounds_(NPObject * self, SEL _cmd, int value);
+const char * Kernel__Crypto__BlockHasher_label(NPObject * self, SEL _cmd);
+unsigned Kernel__Crypto__BlockHasher_finalChecksum(NPObject * self, SEL _cmd);
+const char * Kernel__Crypto__BlockHasher_schemeName(NPObject * self, SEL _cmd);
+void Kernel__Crypto__BlockHasher_dealloc(NPObject * self, SEL _cmd);
+NPObject * nopa_alloc(struct NPClass * cls);
+NPObject * nopa_init(NPObject * self);
+void nopa_release(NPObject * obj);
+NPObject * nopa_retain(NPObject * obj);
 unsigned asm_crc32(const unsigned char * buf, int len);
 unsigned asm_rotl32(unsigned x, int n);
 unsigned asm_clz32(unsigned x);
 unsigned asm_bitrev32(unsigned x);
 int main(int argc, const char * argv[]);
 
-NFClass * NFObject_getClass(NFClass * self, SEL _cmd);
-NFClass * Kernel__Crypto__BlockHasher_getClass(NFClass * self, SEL _cmd);
+NPClass * NPObject_getClass(NPClass * self, SEL _cmd);
+NPClass * Kernel__Crypto__BlockHasher_getClass(NPClass * self, SEL _cmd);
 
 struct nopa_vtable {
-    void (*absorbBytes_length_)(NFObject *, SEL, const unsigned char *, int);
-    void (*corruptAndThrow)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    unsigned (*finalChecksum)(NFObject *, SEL);
-    NFObject * (*init)(NFObject *, SEL);
-    NFObject * (*initWithLabel_)(NFObject *, SEL, const char *);
-    int (*isEvenViaAsmGoto_)(NFObject *, SEL, unsigned);
-    _Bool (*isKindOf_)(NFObject *, SEL, NFClass *);
-    const char * (*label)(NFObject *, SEL);
-    unsigned (*leadingZerosOf_)(NFObject *, SEL, unsigned);
-    unsigned (*mixWord_)(NFObject *, SEL, unsigned);
-    void (*release)(NFObject *, SEL);
-    NFObject * (*retain)(NFObject *, SEL);
-    int (*rounds)(NFObject *, SEL);
-    const char * (*schemeName)(NFObject *, SEL);
-    void (*setRounds_)(NFObject *, SEL, int);
-    void (*setState_)(NFObject *, SEL, unsigned);
-    unsigned (*state)(NFObject *, SEL);
+    void (*absorbBytes_length_)(NPObject *, SEL, const unsigned char *, int);
+    void (*corruptAndThrow)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    unsigned (*finalChecksum)(NPObject *, SEL);
+    NPObject * (*init)(NPObject *, SEL);
+    NPObject * (*initWithLabel_)(NPObject *, SEL, const char *);
+    int (*isEvenViaAsmGoto_)(NPObject *, SEL, unsigned);
+    _Bool (*isKindOf_)(NPObject *, SEL, NPClass *);
+    const char * (*label)(NPObject *, SEL);
+    unsigned (*leadingZerosOf_)(NPObject *, SEL, unsigned);
+    unsigned (*mixWord_)(NPObject *, SEL, unsigned);
+    void (*release)(NPObject *, SEL);
+    NPObject * (*retain)(NPObject *, SEL);
+    int (*rounds)(NPObject *, SEL);
+    const char * (*schemeName)(NPObject *, SEL);
+    void (*setRounds_)(NPObject *, SEL, int);
+    void (*setState_)(NPObject *, SEL, unsigned);
+    unsigned (*state)(NPObject *, SEL);
 };
 
-struct nopa_NFObject_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+struct nopa_NPObject_meta_vtable {
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct nopa_Kernel__Crypto__BlockHasher_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 
 struct Kernel__Crypto__BlockHasher {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     unsigned _state;
     unsigned _digest;
@@ -134,25 +134,25 @@ struct Kernel__Crypto__BlockHasher {
 };
 typedef struct Kernel__Crypto__BlockHasher Kernel__Crypto__BlockHasher;
 
-extern NFClass nopa___nopa_root_class;
-extern NFClass nopa_NFObject_class;
-extern NFClass nopa_Kernel__Crypto__BlockHasher_class;
+extern NPClass nopa___nopa_root_class;
+extern NPClass nopa_NPObject_class;
+extern NPClass nopa_Kernel__Crypto__BlockHasher_class;
 void nopa_meta_init(void);
 
 __attribute__((weak)) struct nopa_vtable nopa___nopa_root_vtable_inst = {
     .absorbBytes_length_ = NULL,
     .corruptAndThrow = NULL,
-    .dealloc = (void (*)(NFObject *, SEL))__nopa_root_dealloc,
+    .dealloc = (void (*)(NPObject *, SEL))__nopa_root_dealloc,
     .finalChecksum = NULL,
-    .init = (NFObject * (*)(NFObject *, SEL))__nopa_root_init,
+    .init = (NPObject * (*)(NPObject *, SEL))__nopa_root_init,
     .initWithLabel_ = NULL,
     .isEvenViaAsmGoto_ = NULL,
-    .isKindOf_ = (_Bool (*)(NFObject *, SEL, NFClass *))__nopa_root_isKindOf_,
+    .isKindOf_ = (_Bool (*)(NPObject *, SEL, NPClass *))__nopa_root_isKindOf_,
     .label = NULL,
     .leadingZerosOf_ = NULL,
     .mixWord_ = NULL,
-    .release = (void (*)(NFObject *, SEL))__nopa_root_release,
-    .retain = (NFObject * (*)(NFObject *, SEL))__nopa_root_retain,
+    .release = (void (*)(NPObject *, SEL))__nopa_root_release,
+    .retain = (NPObject * (*)(NPObject *, SEL))__nopa_root_retain,
     .rounds = NULL,
     .schemeName = NULL,
     .setRounds_ = NULL,
@@ -160,20 +160,20 @@ __attribute__((weak)) struct nopa_vtable nopa___nopa_root_vtable_inst = {
     .state = NULL,
 };
 
-__attribute__((weak)) struct nopa_vtable nopa_NFObject_vtable_inst = {
+__attribute__((weak)) struct nopa_vtable nopa_NPObject_vtable_inst = {
     .absorbBytes_length_ = NULL,
     .corruptAndThrow = NULL,
-    .dealloc = (void (*)(NFObject *, SEL))NFObject_dealloc,
+    .dealloc = (void (*)(NPObject *, SEL))NPObject_dealloc,
     .finalChecksum = NULL,
-    .init = (NFObject * (*)(NFObject *, SEL))NFObject_init,
+    .init = (NPObject * (*)(NPObject *, SEL))NPObject_init,
     .initWithLabel_ = NULL,
     .isEvenViaAsmGoto_ = NULL,
-    .isKindOf_ = (_Bool (*)(NFObject *, SEL, NFClass *))__nopa_root_isKindOf_,
+    .isKindOf_ = (_Bool (*)(NPObject *, SEL, NPClass *))__nopa_root_isKindOf_,
     .label = NULL,
     .leadingZerosOf_ = NULL,
     .mixWord_ = NULL,
-    .release = (void (*)(NFObject *, SEL))NFObject_release,
-    .retain = (NFObject * (*)(NFObject *, SEL))NFObject_retain,
+    .release = (void (*)(NPObject *, SEL))NPObject_release,
+    .retain = (NPObject * (*)(NPObject *, SEL))NPObject_retain,
     .rounds = NULL,
     .schemeName = NULL,
     .setRounds_ = NULL,
@@ -182,54 +182,54 @@ __attribute__((weak)) struct nopa_vtable nopa_NFObject_vtable_inst = {
 };
 
 __attribute__((weak)) struct nopa_vtable nopa_Kernel__Crypto__BlockHasher_vtable_inst = {
-    .absorbBytes_length_ = (void (*)(NFObject *, SEL, const unsigned char *, int))Kernel__Crypto__BlockHasher_absorbBytes_length_,
-    .corruptAndThrow = (void (*)(NFObject *, SEL))Kernel__Crypto__BlockHasher_corruptAndThrow,
-    .dealloc = (void (*)(NFObject *, SEL))Kernel__Crypto__BlockHasher_dealloc,
-    .finalChecksum = (unsigned (*)(NFObject *, SEL))Kernel__Crypto__BlockHasher_finalChecksum,
-    .init = (NFObject * (*)(NFObject *, SEL))NFObject_init,
-    .initWithLabel_ = (NFObject * (*)(NFObject *, SEL, const char *))Kernel__Crypto__BlockHasher_initWithLabel_,
-    .isEvenViaAsmGoto_ = (int (*)(NFObject *, SEL, unsigned))Kernel__Crypto__BlockHasher_isEvenViaAsmGoto_,
-    .isKindOf_ = (_Bool (*)(NFObject *, SEL, NFClass *))__nopa_root_isKindOf_,
-    .label = (const char * (*)(NFObject *, SEL))Kernel__Crypto__BlockHasher_label,
-    .leadingZerosOf_ = (unsigned (*)(NFObject *, SEL, unsigned))Kernel__Crypto__BlockHasher_leadingZerosOf_,
-    .mixWord_ = (unsigned (*)(NFObject *, SEL, unsigned))Kernel__Crypto__BlockHasher_mixWord_,
-    .release = (void (*)(NFObject *, SEL))NFObject_release,
-    .retain = (NFObject * (*)(NFObject *, SEL))NFObject_retain,
-    .rounds = (int (*)(NFObject *, SEL))Kernel__Crypto__BlockHasher_rounds,
-    .schemeName = (const char * (*)(NFObject *, SEL))Kernel__Crypto__BlockHasher_schemeName,
-    .setRounds_ = (void (*)(NFObject *, SEL, int))Kernel__Crypto__BlockHasher_setRounds_,
-    .setState_ = (void (*)(NFObject *, SEL, unsigned))Kernel__Crypto__BlockHasher_setState_,
-    .state = (unsigned (*)(NFObject *, SEL))Kernel__Crypto__BlockHasher_state,
+    .absorbBytes_length_ = (void (*)(NPObject *, SEL, const unsigned char *, int))Kernel__Crypto__BlockHasher_absorbBytes_length_,
+    .corruptAndThrow = (void (*)(NPObject *, SEL))Kernel__Crypto__BlockHasher_corruptAndThrow,
+    .dealloc = (void (*)(NPObject *, SEL))Kernel__Crypto__BlockHasher_dealloc,
+    .finalChecksum = (unsigned (*)(NPObject *, SEL))Kernel__Crypto__BlockHasher_finalChecksum,
+    .init = (NPObject * (*)(NPObject *, SEL))NPObject_init,
+    .initWithLabel_ = (NPObject * (*)(NPObject *, SEL, const char *))Kernel__Crypto__BlockHasher_initWithLabel_,
+    .isEvenViaAsmGoto_ = (int (*)(NPObject *, SEL, unsigned))Kernel__Crypto__BlockHasher_isEvenViaAsmGoto_,
+    .isKindOf_ = (_Bool (*)(NPObject *, SEL, NPClass *))__nopa_root_isKindOf_,
+    .label = (const char * (*)(NPObject *, SEL))Kernel__Crypto__BlockHasher_label,
+    .leadingZerosOf_ = (unsigned (*)(NPObject *, SEL, unsigned))Kernel__Crypto__BlockHasher_leadingZerosOf_,
+    .mixWord_ = (unsigned (*)(NPObject *, SEL, unsigned))Kernel__Crypto__BlockHasher_mixWord_,
+    .release = (void (*)(NPObject *, SEL))NPObject_release,
+    .retain = (NPObject * (*)(NPObject *, SEL))NPObject_retain,
+    .rounds = (int (*)(NPObject *, SEL))Kernel__Crypto__BlockHasher_rounds,
+    .schemeName = (const char * (*)(NPObject *, SEL))Kernel__Crypto__BlockHasher_schemeName,
+    .setRounds_ = (void (*)(NPObject *, SEL, int))Kernel__Crypto__BlockHasher_setRounds_,
+    .setState_ = (void (*)(NPObject *, SEL, unsigned))Kernel__Crypto__BlockHasher_setState_,
+    .state = (unsigned (*)(NPObject *, SEL))Kernel__Crypto__BlockHasher_state,
 };
 
-__attribute__((weak)) struct nopa_NFObject_meta_vtable nopa_NFObject_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
-    .class = NFObject_getClass,
+__attribute__((weak)) struct nopa_NPObject_meta_vtable nopa_NPObject_meta_vtable_inst = {
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
+    .class = NPObject_getClass,
 };
 
 __attribute__((weak)) struct nopa_Kernel__Crypto__BlockHasher_meta_vtable nopa_Kernel__Crypto__BlockHasher_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
     .class = Kernel__Crypto__BlockHasher_getClass,
 };
 
-__attribute__((weak)) NFClass * NFObject_getClass(NFClass * self, SEL _cmd) {
+__attribute__((weak)) NPClass * NPObject_getClass(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
-__attribute__((weak)) NFClass * Kernel__Crypto__BlockHasher_getClass(NFClass * self, SEL _cmd) {
+__attribute__((weak)) NPClass * Kernel__Crypto__BlockHasher_getClass(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
-NFClass nopa___nopa_root_class;
-NFClass nopa_NFObject_class;
-NFClass nopa_Kernel__Crypto__BlockHasher_class;
+NPClass nopa___nopa_root_class;
+NPClass nopa_NPObject_class;
+NPClass nopa_Kernel__Crypto__BlockHasher_class;
 
 __attribute__((weak)) void nopa_meta_init(void) {
-    nopa___nopa_root_class = (NFClass){
+    nopa___nopa_root_class = (NPClass){
         .name = "__nopa_root",
         .superclass = NULL,
         .instance_size = sizeof(struct __nopa_root),
@@ -237,70 +237,70 @@ __attribute__((weak)) void nopa_meta_init(void) {
         .class_vtable = NULL,
         .protocol_count = 0,
     };
-    nopa_NFObject_class = (NFClass){
-        .name = "NFObject",
+    nopa_NPObject_class = (NPClass){
+        .name = "NPObject",
         .superclass = &nopa___nopa_root_class,
-        .instance_size = sizeof(struct NFObject),
-        .vtable = &nopa_NFObject_vtable_inst,
-        .class_vtable = &nopa_NFObject_meta_vtable_inst,
+        .instance_size = sizeof(struct NPObject),
+        .vtable = &nopa_NPObject_vtable_inst,
+        .class_vtable = &nopa_NPObject_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_Kernel__Crypto__BlockHasher_class = (NFClass){
+    nopa_Kernel__Crypto__BlockHasher_class = (NPClass){
         .name = "Kernel::Crypto::BlockHasher",
-        .superclass = &nopa_NFObject_class,
+        .superclass = &nopa_NPObject_class,
         .instance_size = sizeof(struct Kernel__Crypto__BlockHasher),
         .vtable = &nopa_Kernel__Crypto__BlockHasher_vtable_inst,
         .class_vtable = &nopa_Kernel__Crypto__BlockHasher_meta_vtable_inst,
         .protocol_count = 0,
     };
 }
-__attribute__((weak)) NFObject * __nopa_root_init(NFObject * self, SEL _cmd) {
+__attribute__((weak)) NPObject * __nopa_root_init(NPObject * self, SEL _cmd) {
     return nopa_init(self);
 }
 
-__attribute__((weak)) void __nopa_root_dealloc(NFObject * self, SEL _cmd) {
+__attribute__((weak)) void __nopa_root_dealloc(NPObject * self, SEL _cmd) {
     return;
 }
 
-__attribute__((weak)) void __nopa_root_release(NFObject * self, SEL _cmd) {
+__attribute__((weak)) void __nopa_root_release(NPObject * self, SEL _cmd) {
     nopa_release(self);
 }
 
-__attribute__((weak)) NFObject * __nopa_root_retain(NFObject * self, SEL _cmd) {
+__attribute__((weak)) NPObject * __nopa_root_retain(NPObject * self, SEL _cmd) {
     return nopa_retain(self);
 }
 
-__attribute__((weak)) _Bool __nopa_root_isKindOf_(NFObject * self, SEL _cmd, NFClass * cls) {
+__attribute__((weak)) _Bool __nopa_root_isKindOf_(NPObject * self, SEL _cmd, NPClass * cls) {
     return nopa_isKindOf(self, cls);
 }
 
-__attribute__((weak)) NFObject * NFObject_alloc(NFClass * self, SEL _cmd) {
+__attribute__((weak)) NPObject * NPObject_alloc(NPClass * self, SEL _cmd) {
     return nopa_alloc(self);
 }
 
-__attribute__((weak)) NFObject * NFObject_new(NFClass * self, SEL _cmd) {
-    NFObject * obj = nopa_alloc(self);
+__attribute__((weak)) NPObject * NPObject_new(NPClass * self, SEL _cmd) {
+    NPObject * obj = nopa_alloc(self);
     return nopa_init(obj);
 }
 
-__attribute__((weak)) NFObject * NFObject_init(NFObject * self, SEL _cmd) {
+__attribute__((weak)) NPObject * NPObject_init(NPObject * self, SEL _cmd) {
     return nopa_init(self);
 }
 
-__attribute__((weak)) void NFObject_dealloc(NFObject * self, SEL _cmd) {
+__attribute__((weak)) void NPObject_dealloc(NPObject * self, SEL _cmd) {
     return;
 }
 
-__attribute__((weak)) void NFObject_release(NFObject * self, SEL _cmd) {
+__attribute__((weak)) void NPObject_release(NPObject * self, SEL _cmd) {
     nopa_release(self);
 }
 
-__attribute__((weak)) NFObject * NFObject_retain(NFObject * self, SEL _cmd) {
+__attribute__((weak)) NPObject * NPObject_retain(NPObject * self, SEL _cmd) {
     return nopa_retain(self);
 }
 
-__attribute__((weak)) NFObject * Kernel__Crypto__BlockHasher_initWithLabel_(NFObject * self, SEL _cmd, const char * label) {
-    self = (&nopa_NFObject_vtable_inst)->init(self, __nopa_sel_init);
+__attribute__((weak)) NPObject * Kernel__Crypto__BlockHasher_initWithLabel_(NPObject * self, SEL _cmd, const char * label) {
+    self = (&nopa_NPObject_vtable_inst)->init(self, __nopa_sel_init);
     if (self) {
         ((struct Kernel__Crypto__BlockHasher *)self)->_state = 2166136261;
         ((struct Kernel__Crypto__BlockHasher *)self)->_digest = 0;
@@ -310,23 +310,23 @@ __attribute__((weak)) NFObject * Kernel__Crypto__BlockHasher_initWithLabel_(NFOb
     return self;
 }
 
-__attribute__((weak)) unsigned Kernel__Crypto__BlockHasher_mixWord_(NFObject * self, SEL _cmd, unsigned word) {
+__attribute__((weak)) unsigned Kernel__Crypto__BlockHasher_mixWord_(NPObject * self, SEL _cmd, unsigned word) {
     __asm__ __volatile__ ("eor %w[s], %w[s], %w[w]\n\tror %w[s], %w[s], #27" : [s] "+r"(((struct Kernel__Crypto__BlockHasher *)self)->_state) : [w] "r"(word) : "cc");
     (((struct Kernel__Crypto__BlockHasher *)self)->_rounds)++;
     return ((struct Kernel__Crypto__BlockHasher *)self)->_state;
 }
 
-__attribute__((weak)) void Kernel__Crypto__BlockHasher_absorbBytes_length_(NFObject * self, SEL _cmd, const unsigned char * buf, int len) {
+__attribute__((weak)) void Kernel__Crypto__BlockHasher_absorbBytes_length_(NPObject * self, SEL _cmd, const unsigned char * buf, int len) {
     unsigned crc = asm_crc32(buf, len);
     __asm__ __volatile__ ("mov %w[d], %w[c]" : [d] "=r"(((struct Kernel__Crypto__BlockHasher *)self)->_digest) : [c] "r"(crc) : "memory");
     (((struct Kernel__Crypto__BlockHasher *)self)->_rounds += len);
 }
 
-__attribute__((weak)) unsigned Kernel__Crypto__BlockHasher_leadingZerosOf_(NFObject * self, SEL _cmd, unsigned value) {
+__attribute__((weak)) unsigned Kernel__Crypto__BlockHasher_leadingZerosOf_(NPObject * self, SEL _cmd, unsigned value) {
     return asm_clz32(value);
 }
 
-__attribute__((weak)) int Kernel__Crypto__BlockHasher_isEvenViaAsmGoto_(NFObject * self, SEL _cmd, unsigned value) {
+__attribute__((weak)) int Kernel__Crypto__BlockHasher_isEvenViaAsmGoto_(NPObject * self, SEL _cmd, unsigned value) {
     __asm__ goto ("tst %w0, #1\n\tb.eq %l[even_label]" :  : "r"(value) : "cc" : even_label);
     goto odd_exit;
 even_label:
@@ -337,54 +337,54 @@ even_exit:
     return 1;
 }
 
-__attribute__((weak)) void Kernel__Crypto__BlockHasher_corruptAndThrow(NFObject * self, SEL _cmd) {
+__attribute__((weak)) void Kernel__Crypto__BlockHasher_corruptAndThrow(NPObject * self, SEL _cmd) {
     printf("    [%s] 检测到管线损坏，准备抛异常...\n", ((struct Kernel__Crypto__BlockHasher *)self)->_label);
     {
-        __nopa_exception_value = NFObject_alloc(&nopa_NFObject_class, __nopa_sel_alloc);
+        __nopa_exception_value = NPObject_alloc(&nopa_NPObject_class, __nopa_sel_alloc);
         longjmp(__nopa_exception_buf, 1);
     }
 }
 
-__attribute__((weak)) unsigned Kernel__Crypto__BlockHasher_state(NFObject * self, SEL _cmd) {
+__attribute__((weak)) unsigned Kernel__Crypto__BlockHasher_state(NPObject * self, SEL _cmd) {
     return ((struct Kernel__Crypto__BlockHasher *)self)->_state;
 }
 
-__attribute__((weak)) void Kernel__Crypto__BlockHasher_setState_(NFObject * self, SEL _cmd, unsigned value) {
+__attribute__((weak)) void Kernel__Crypto__BlockHasher_setState_(NPObject * self, SEL _cmd, unsigned value) {
     ((struct Kernel__Crypto__BlockHasher *)self)->_state = value;
 }
 
-__attribute__((weak)) int Kernel__Crypto__BlockHasher_rounds(NFObject * self, SEL _cmd) {
+__attribute__((weak)) int Kernel__Crypto__BlockHasher_rounds(NPObject * self, SEL _cmd) {
     return ((struct Kernel__Crypto__BlockHasher *)self)->_rounds;
 }
 
-__attribute__((weak)) void Kernel__Crypto__BlockHasher_setRounds_(NFObject * self, SEL _cmd, int value) {
+__attribute__((weak)) void Kernel__Crypto__BlockHasher_setRounds_(NPObject * self, SEL _cmd, int value) {
     ((struct Kernel__Crypto__BlockHasher *)self)->_rounds = value;
 }
 
-__attribute__((weak)) const char * Kernel__Crypto__BlockHasher_label(NFObject * self, SEL _cmd) {
+__attribute__((weak)) const char * Kernel__Crypto__BlockHasher_label(NPObject * self, SEL _cmd) {
     return ((struct Kernel__Crypto__BlockHasher *)self)->_label;
 }
 
-__attribute__((weak)) unsigned Kernel__Crypto__BlockHasher_finalChecksum(NFObject * self, SEL _cmd) {
+__attribute__((weak)) unsigned Kernel__Crypto__BlockHasher_finalChecksum(NPObject * self, SEL _cmd) {
     return ((struct Kernel__Crypto__BlockHasher *)self)->_digest;
 }
 
-__attribute__((weak)) const char * Kernel__Crypto__BlockHasher_schemeName(NFObject * self, SEL _cmd) {
+__attribute__((weak)) const char * Kernel__Crypto__BlockHasher_schemeName(NPObject * self, SEL _cmd) {
     return ((struct Kernel__Crypto__BlockHasher *)self)->_label;
 }
 
-__attribute__((weak)) void Kernel__Crypto__BlockHasher_dealloc(NFObject * self, SEL _cmd) {
+__attribute__((weak)) void Kernel__Crypto__BlockHasher_dealloc(NPObject * self, SEL _cmd) {
     printf("    [析构] %s 已被 ARC 回收，最终摘要: state=%08X digest=%08X rounds=%d\n", ((struct Kernel__Crypto__BlockHasher *)self)->_label, ((struct Kernel__Crypto__BlockHasher *)self)->_state, ((struct Kernel__Crypto__BlockHasher *)self)->_digest, ((struct Kernel__Crypto__BlockHasher *)self)->_rounds);
-    (&nopa_NFObject_vtable_inst)->dealloc(self, __nopa_sel_dealloc);
+    (&nopa_NPObject_vtable_inst)->dealloc(self, __nopa_sel_dealloc);
 }
 
-NFObject * nopa_alloc(struct NFClass * cls);
+NPObject * nopa_alloc(struct NPClass * cls);
 
-NFObject * nopa_init(NFObject * self);
+NPObject * nopa_init(NPObject * self);
 
-void nopa_release(NFObject * obj);
+void nopa_release(NPObject * obj);
 
-NFObject * nopa_retain(NFObject * obj);
+NPObject * nopa_retain(NPObject * obj);
 
 unsigned asm_crc32(const unsigned char * buf, int len);
 
@@ -401,17 +401,17 @@ __attribute__((weak)) int main(int argc, const char * argv[]) {
         printf("====================================================================\n");
         printf(">>>    nopac「内联 asm + 外部 .s + Nopa 高级特性」极致融合压测    <<<\n");
         printf("====================================================================\n\n");
-        NFObject *__nopa_tmp_1 = (NFObject_alloc(&nopa_Kernel__Crypto__BlockHasher_class, __nopa_sel_alloc));
+        NPObject *__nopa_tmp_1 = (NPObject_alloc(&nopa_Kernel__Crypto__BlockHasher_class, __nopa_sel_alloc));
         Kernel__Crypto__BlockHasher * hasher = (Kernel__Crypto__BlockHasher *)(((struct nopa_vtable *)__nopa_tmp_1->isa->vtable)->initWithLabel_(__nopa_tmp_1, __nopa_sel_initWithLabel_, "Kernel-CRC32"));
         printf("--- 1. 内联 asm 混洗 (state = rotl(state^word, 5)) ---\n");
-        unsigned a = ((struct nopa_vtable *)(hasher->isa->vtable))->mixWord_((NFObject *)(hasher), __nopa_sel_mixWord_, 16909060);
-        unsigned b = ((struct nopa_vtable *)(hasher->isa->vtable))->mixWord_((NFObject *)(hasher), __nopa_sel_mixWord_, 3735928559);
+        unsigned a = ((struct nopa_vtable *)(hasher->isa->vtable))->mixWord_((NPObject *)(hasher), __nopa_sel_mixWord_, 16909060);
+        unsigned b = ((struct nopa_vtable *)(hasher->isa->vtable))->mixWord_((NPObject *)(hasher), __nopa_sel_mixWord_, 3735928559);
         printf("    mixWord(01020304)=%08X\n", a);
         printf("    mixWord(DEADBEEF)=%08X\n", b);
-        printf("    rounds=%d\n", ((struct nopa_vtable *)(hasher->isa->vtable))->rounds((NFObject *)(hasher), __nopa_sel_rounds));
+        printf("    rounds=%d\n", ((struct nopa_vtable *)(hasher->isa->vtable))->rounds((NPObject *)(hasher), __nopa_sel_rounds));
         printf("\n--- 2. 外部 asm crc32 (已知标准向量) ---\n");
-        ((struct nopa_vtable *)(hasher->isa->vtable))->absorbBytes_length_((NFObject *)(hasher), __nopa_sel_absorbBytes_length_, (const unsigned char *)((const unsigned char *)"123456789"), 9);
-        unsigned crc = ((struct nopa_vtable *)(hasher->isa->vtable))->finalChecksum((NFObject *)(hasher), __nopa_sel_finalChecksum);
+        ((struct nopa_vtable *)(hasher->isa->vtable))->absorbBytes_length_((NPObject *)(hasher), __nopa_sel_absorbBytes_length_, (const unsigned char *)((const unsigned char *)"123456789"), 9);
+        unsigned crc = ((struct nopa_vtable *)(hasher->isa->vtable))->finalChecksum((NPObject *)(hasher), __nopa_sel_finalChecksum);
         printf("    crc32(\"123456789\") = %08X  (期望 CBF43926)\n", crc);
         printf("\n--- 3. 外部 asm rotl32 / clz32 / bitrev32 ---\n");
         printf("    rotl32(12345678, 8)    = %08X  (期望 34567812)\n", asm_rotl32(305419896, 8));
@@ -419,8 +419,8 @@ __attribute__((weak)) int main(int argc, const char * argv[]) {
         printf("    clz32(0)               = %d  (期望 32)\n", asm_clz32(0));
         printf("    bitrev32(0F0F0F0F)     = %08X  (期望 F0F0F0F0)\n", asm_bitrev32(252645135));
         printf("\n--- 4. 方法内 asm goto 奇偶校验 ---\n");
-        printf("    isEvenViaAsmGoto(42) = %d  (期望 1)\n", ((struct nopa_vtable *)(hasher->isa->vtable))->isEvenViaAsmGoto_((NFObject *)(hasher), __nopa_sel_isEvenViaAsmGoto_, 42));
-        printf("    isEvenViaAsmGoto(7)  = %d  (期望 0)\n", ((struct nopa_vtable *)(hasher->isa->vtable))->isEvenViaAsmGoto_((NFObject *)(hasher), __nopa_sel_isEvenViaAsmGoto_, 7));
+        printf("    isEvenViaAsmGoto(42) = %d  (期望 1)\n", ((struct nopa_vtable *)(hasher->isa->vtable))->isEvenViaAsmGoto_((NPObject *)(hasher), __nopa_sel_isEvenViaAsmGoto_, 42));
+        printf("    isEvenViaAsmGoto(7)  = %d  (期望 0)\n", ((struct nopa_vtable *)(hasher->isa->vtable))->isEvenViaAsmGoto_((NPObject *)(hasher), __nopa_sel_isEvenViaAsmGoto_, 7));
         printf("\n--- 5. struct + C cast + 内联 asm (xor 合并字段) ---\n");
         DigestPair pair;
         pair.lo = crc;
@@ -467,15 +467,15 @@ __attribute__((weak)) int main(int argc, const char * argv[]) {
         onDigest(via_fn);
         printf("    block: callbackCount=%d\n", callbackCount.__forwarding->__value);
         printf("\n--- 8. 协议多态派发 ---\n");
-        NFObject * polym = (NFObject *)hasher;
-        printf("    schemeName   = %s\n", ((struct nopa_vtable *)(polym->isa->vtable))->schemeName((NFObject *)(polym), __nopa_sel_schemeName));
-        printf("    finalChecksum= %08X\n", ((struct nopa_vtable *)(polym->isa->vtable))->finalChecksum((NFObject *)(polym), __nopa_sel_finalChecksum));
+        NPObject * polym = (NPObject *)hasher;
+        printf("    schemeName   = %s\n", ((struct nopa_vtable *)(polym->isa->vtable))->schemeName((NPObject *)(polym), __nopa_sel_schemeName));
+        printf("    finalChecksum= %08X\n", ((struct nopa_vtable *)(polym->isa->vtable))->finalChecksum((NPObject *)(polym), __nopa_sel_finalChecksum));
         printf("\n--- 9. @selector ---\n");
         SEL checksumSel = __nopa_sel_finalChecksum;
         printf("    SEL name = %s\n", checksumSel.name);
         printf("\n--- 10. __weak 弱引用（对象存活期间非空） ---\n");
         __block Kernel__Crypto__BlockHasher * __attribute__((cleanup(nopa_weak_auto_cleanup))) weakWatch = hasher;
-        nopa_weak_register((NFObject **)&weakWatch, (NFObject *)hasher);
+        nopa_weak_register((NPObject **)&weakWatch, (NPObject *)hasher);
         printf("    weakWatch 存活: %s\n", weakWatch ? "yes(non-nil)" : "NO(nil-bug)");
         printf("\n--- 11. @try/@catch/@finally + @throw ---\n");
         {
@@ -484,14 +484,14 @@ __attribute__((weak)) int main(int argc, const char * argv[]) {
             volatile int __nopa_state = 0;
             if (setjmp(__nopa_exception_buf) != 0)             __nopa_state = 1;
             if (__nopa_state == 0) {
-                ((struct nopa_vtable *)(hasher->isa->vtable))->corruptAndThrow((NFObject *)(hasher), __nopa_sel_corruptAndThrow);
+                ((struct nopa_vtable *)(hasher->isa->vtable))->corruptAndThrow((NPObject *)(hasher), __nopa_sel_corruptAndThrow);
                 printf("    这行永远不该打印\n");
             }
             if (__nopa_state == 1) {
                 __nopa_state = 2;
-                NFObject * exc = __nopa_exception_value;
+                NPObject * exc = __nopa_exception_value;
                 {
-                    printf("    已捕获异常，hasher 状态仍可查询: state=%08X\n", ((struct nopa_vtable *)(hasher->isa->vtable))->state((NFObject *)(hasher), __nopa_sel_state));
+                    printf("    已捕获异常，hasher 状态仍可查询: state=%08X\n", ((struct nopa_vtable *)(hasher->isa->vtable))->state((NPObject *)(hasher), __nopa_sel_state));
                 }
             }
             memcpy(__nopa_exception_buf, __nopa_saved, sizeof(jmp_buf));
@@ -502,8 +502,8 @@ __attribute__((weak)) int main(int argc, const char * argv[]) {
         }
         printf("\n--- 12. 收尾：协议方法一致性 + ARC 释放 ---\n");
         unsigned recomputed = asm_crc32((const unsigned char *)"123456789", 9);
-        printf("    与直接调用比对: %s\n", ((struct nopa_vtable *)(hasher->isa->vtable))->finalChecksum((NFObject *)(hasher), __nopa_sel_finalChecksum) == recomputed ? "MATCH(ok)" : "MISMATCH(bug)");
-        ((struct nopa_vtable *)(hasher->isa->vtable))->release((NFObject *)(hasher), __nopa_sel_release);
+        printf("    与直接调用比对: %s\n", ((struct nopa_vtable *)(hasher->isa->vtable))->finalChecksum((NPObject *)(hasher), __nopa_sel_finalChecksum) == recomputed ? "MATCH(ok)" : "MISMATCH(bug)");
+        ((struct nopa_vtable *)(hasher->isa->vtable))->release((NPObject *)(hasher), __nopa_sel_release);
         printf("\n====================================================================\n");
         printf(">>>   完美！内联 asm 与真实汇编在 Nopa 高级特性中无缝融合！   <<<\n");
         printf("====================================================================\n");

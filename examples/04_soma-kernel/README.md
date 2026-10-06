@@ -15,11 +15,11 @@ Key point: **the transpiled C has no libc dependency** (no `printf`/`malloc`; th
 `nopa/soma_core.np` uses the compiler's class system, running on bare metal:
 
 - **`@namespace SomaCore`** — class names get a `SomaCore__` prefix (`SomaCore::Calculator`)
-- **`@interface Calculator` (implicit root class)** — no `: NFObject`; the transpiled struct is just `isa` + `retain_count` + ivars, no Foundation
+- **`@interface Calculator` (implicit root class)** — no `: NPObject`; the transpiled struct is just `isa` + `retain_count` + ivars, no Foundation
 - **Class method dispatch** — `[SomaCore::Calculator compute:21]` becomes a direct call `SomaCore__Calculator_compute_(&nopa_..._class, sel, 21)`
 - **Instance method dispatch** — `[acc add:7]` becomes `recv->isa->vtable->methods[INDEX]`, verified on bare metal
 
-To support the class system the kernel ships a minimal freestanding runtime header (`include/nopa/runtime.h`) with only the types the transpiled code needs (`SEL`/`NFClass`/`NFObject`/`id`) and the `nopa___nopa_root_class` symbol; the Makefile injects it into every TU with `-include nopa/runtime.h`. `nopa_meta_init()` (a weak symbol emitted by the transpiler) is called from `kmain` first, then C hand-builds an instance (`isa = &nopa_..._class`) for Nopa's instance methods.
+To support the class system the kernel ships a minimal freestanding runtime header (`include/nopa/runtime.h`) with only the types the transpiled code needs (`SEL`/`NPClass`/`NPObject`/`id`) and the `nopa___nopa_root_class` symbol; the Makefile injects it into every TU with `-include nopa/runtime.h`. `nopa_meta_init()` (a weak symbol emitted by the transpiler) is called from `kmain` first, then C hand-builds an instance (`isa = &nopa_..._class`) for Nopa's instance methods.
 
 ## Build & run
 
@@ -82,5 +82,5 @@ examples/04_soma-kernel/
 
 - No closures in the Nopa module; integer literals must not use the `u` suffix (parser limitation).
 - Inline asm templates: with an operand section, a literal `%` must be `%%`; `outb %b0, $0x80` uses operand references.
-- Bare-metal class support: the `nopa/runtime.h` include guards must match codegen's `__NOPA_ROOT_DEFINED`/`NFOBJECT_DEFINED`; `nopa___nopa_root_class` is provided by kernel.c and `nopa_meta_init()` runs before any class use.
+- Bare-metal class support: the `nopa/runtime.h` include guards must match codegen's `__NOPA_ROOT_DEFINED`/`NPOBJECT_DEFINED`; `nopa___nopa_root_class` is provided by kernel.c and `nopa_meta_init()` runs before any class use.
 - `test_all.py` scans `tests/**/*.np`; `soma-kernel` is excluded from the default suite — verify with `./run.sh` instead.

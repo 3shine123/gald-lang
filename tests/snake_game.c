@@ -13,13 +13,13 @@
 
 #include <string.h>
 
-struct nopa_NFObject_vtable;
+struct nopa_NPObject_vtable;
 struct nopa_Food_vtable;
 struct nopa_Snake_vtable;
 struct nopa_GameEngine_vtable;
 
-#define nopa_NFObject_vtable_index_init 2
-#define nopa_NFObject_vtable_index_dealloc 3
+#define nopa_NPObject_vtable_index_init 2
+#define nopa_NPObject_vtable_index_dealloc 3
 #define nopa_Food_vtable_index_initWithX_y_ 4
 #define nopa_Snake_vtable_index_initWithX_y_ 4
 #define nopa_Snake_vtable_index_move 5
@@ -51,86 +51,86 @@ static const SEL __nopa_sel_processInfut_ = {.name = "processInfut_", .hash = 0x
 static const SEL __nopa_sel_update = {.name = "update", .hash = 0x280F9474};
 static const SEL __nopa_sel_score = {.name = "score", .hash = 0xD22F9095};
 
-typedef struct NFObject NFObject;
+typedef struct NPObject NPObject;
 typedef struct Food Food;
 typedef struct Snake Snake;
 typedef struct GameEngine GameEngine;
 
 
 
-NFObject * NFObject_alloc(NFClass * self, SEL _cmd);
-NFObject * NFObject_new(NFClass * self, SEL _cmd);
-NFObject * NFObject_init(NFObject * self, SEL _cmd);
-void NFObject_dealloc(NFObject * self, SEL _cmd);
-NFClass * NFObject_getClass(NFClass * self, SEL _cmd);
+NPObject * NPObject_alloc(NPClass * self, SEL _cmd);
+NPObject * NPObject_new(NPClass * self, SEL _cmd);
+NPObject * NPObject_init(NPObject * self, SEL _cmd);
+void NPObject_dealloc(NPObject * self, SEL _cmd);
+NPClass * NPObject_getClass(NPClass * self, SEL _cmd);
 void disableRawMode();
 void enableRawMode();
 int kbhit();
-NFObject * Food_initWithX_y_(NFObject * self, SEL _cmd, int x, int y);
-int Food_x(NFObject * self, SEL _cmd);
-void Food_setX_(NFObject * self, SEL _cmd, int value);
-int Food_y(NFObject * self, SEL _cmd);
-void Food_setY_(NFObject * self, SEL _cmd, int value);
-NFClass * Food_getClass(NFClass * self, SEL _cmd);
-NFObject * Snake_initWithX_y_(NFObject * self, SEL _cmd, int x, int y);
-void Snake_move(NFObject * self, SEL _cmd);
-void Snake_grow(NFObject * self, SEL _cmd);
-int Snake_checkSelfCollision(NFObject * self, SEL _cmd);
-int Snake_length(NFObject * self, SEL _cmd);
-void Snake_setLength_(NFObject * self, SEL _cmd, int value);
-char Snake_direction(NFObject * self, SEL _cmd);
-void Snake_setDirection_(NFObject * self, SEL _cmd, char value);
-NFClass * Snake_getClass(NFClass * self, SEL _cmd);
-NFObject * GameEngine_initWithWidth_height_(NFObject * self, SEL _cmd, int w, int h);
-void GameEngine_processInfut_(NFObject * self, SEL _cmd, char key);
-void GameEngine_update(NFObject * self, SEL _cmd);
-void GameEngine_renderWithComboBlock_(NFObject * self, SEL _cmd, int (^comboBlock)(int));
-void GameEngine_dealloc(NFObject * self, SEL _cmd);
-int GameEngine_score(NFObject * self, SEL _cmd);
-void GameEngine_setScore_(NFObject * self, SEL _cmd, int value);
-int GameEngine_gameOver(NFObject * self, SEL _cmd);
-void GameEngine_setGameOver_(NFObject * self, SEL _cmd, int value);
-NFClass * GameEngine_getClass(NFClass * self, SEL _cmd);
+NPObject * Food_initWithX_y_(NPObject * self, SEL _cmd, int x, int y);
+int Food_x(NPObject * self, SEL _cmd);
+void Food_setX_(NPObject * self, SEL _cmd, int value);
+int Food_y(NPObject * self, SEL _cmd);
+void Food_setY_(NPObject * self, SEL _cmd, int value);
+NPClass * Food_getClass(NPClass * self, SEL _cmd);
+NPObject * Snake_initWithX_y_(NPObject * self, SEL _cmd, int x, int y);
+void Snake_move(NPObject * self, SEL _cmd);
+void Snake_grow(NPObject * self, SEL _cmd);
+int Snake_checkSelfCollision(NPObject * self, SEL _cmd);
+int Snake_length(NPObject * self, SEL _cmd);
+void Snake_setLength_(NPObject * self, SEL _cmd, int value);
+char Snake_direction(NPObject * self, SEL _cmd);
+void Snake_setDirection_(NPObject * self, SEL _cmd, char value);
+NPClass * Snake_getClass(NPClass * self, SEL _cmd);
+NPObject * GameEngine_initWithWidth_height_(NPObject * self, SEL _cmd, int w, int h);
+void GameEngine_processInfut_(NPObject * self, SEL _cmd, char key);
+void GameEngine_update(NPObject * self, SEL _cmd);
+void GameEngine_renderWithComboBlock_(NPObject * self, SEL _cmd, int (^comboBlock)(int));
+void GameEngine_dealloc(NPObject * self, SEL _cmd);
+int GameEngine_score(NPObject * self, SEL _cmd);
+void GameEngine_setScore_(NPObject * self, SEL _cmd, int value);
+int GameEngine_gameOver(NPObject * self, SEL _cmd);
+void GameEngine_setGameOver_(NPObject * self, SEL _cmd, int value);
+NPClass * GameEngine_getClass(NPClass * self, SEL _cmd);
 int main(int argc, const char * * argv);
 
-extern NFClass nopa_NFObject_class;
-extern NFClass nopa_Food_class;
-extern NFClass nopa_Snake_class;
-extern NFClass nopa_GameEngine_class;
+extern NPClass nopa_NPObject_class;
+extern NPClass nopa_Food_class;
+extern NPClass nopa_Snake_class;
+extern NPClass nopa_GameEngine_class;
 void nopa_meta_init(void);
 
-// struct NFClass defined in runtime.h
-// struct NFObject defined in runtime.h
-struct nopa_NFObject_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
+// struct NPClass defined in runtime.h
+// struct NPObject defined in runtime.h
+struct nopa_NPObject_vtable {
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
 };
-struct nopa_NFObject_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+struct nopa_NPObject_meta_vtable {
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct Food {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     int _x;
     int _y;
 };
 typedef struct Food Food;
 struct nopa_Food_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    NFObject * (*initWithX_y_)(NFObject *, SEL, int, int);
-    int (*x)(NFObject *, SEL);
-    void (*setX_)(NFObject *, SEL, int);
-    int (*y)(NFObject *, SEL);
-    void (*setY_)(NFObject *, SEL, int);
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    NPObject * (*initWithX_y_)(NPObject *, SEL, int, int);
+    int (*x)(NPObject *, SEL);
+    void (*setX_)(NPObject *, SEL, int);
+    int (*y)(NPObject *, SEL);
+    void (*setY_)(NPObject *, SEL, int);
 };
 struct nopa_Food_meta_vtable {
-    NFClass * (*class)(NFClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct Snake {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     int _bodyX[100];
     int _bodyY[100];
@@ -139,22 +139,22 @@ struct Snake {
 };
 typedef struct Snake Snake;
 struct nopa_Snake_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    NFObject * (*initWithX_y_)(NFObject *, SEL, int, int);
-    void (*move)(NFObject *, SEL);
-    void (*grow)(NFObject *, SEL);
-    int (*checkSelfCollision)(NFObject *, SEL);
-    int (*length)(NFObject *, SEL);
-    void (*setLength_)(NFObject *, SEL, int);
-    char (*direction)(NFObject *, SEL);
-    void (*setDirection_)(NFObject *, SEL, char);
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    NPObject * (*initWithX_y_)(NPObject *, SEL, int, int);
+    void (*move)(NPObject *, SEL);
+    void (*grow)(NPObject *, SEL);
+    int (*checkSelfCollision)(NPObject *, SEL);
+    int (*length)(NPObject *, SEL);
+    void (*setLength_)(NPObject *, SEL, int);
+    char (*direction)(NPObject *, SEL);
+    void (*setDirection_)(NPObject *, SEL, char);
 };
 struct nopa_Snake_meta_vtable {
-    NFClass * (*class)(NFClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct GameEngine {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     Snake * _snake;
     Food * _apple;
@@ -165,49 +165,49 @@ struct GameEngine {
 };
 typedef struct GameEngine GameEngine;
 struct nopa_GameEngine_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    NFObject * (*initWithWidth_height_)(NFObject *, SEL, int, int);
-    void (*processInfut_)(NFObject *, SEL, char);
-    void (*update)(NFObject *, SEL);
-    void (*renderWithComboBlock_)(NFObject *, SEL, int (^)(int));
-    int (*score)(NFObject *, SEL);
-    void (*setScore_)(NFObject *, SEL, int);
-    int (*gameOver)(NFObject *, SEL);
-    void (*setGameOver_)(NFObject *, SEL, int);
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    NPObject * (*initWithWidth_height_)(NPObject *, SEL, int, int);
+    void (*processInfut_)(NPObject *, SEL, char);
+    void (*update)(NPObject *, SEL);
+    void (*renderWithComboBlock_)(NPObject *, SEL, int (^)(int));
+    int (*score)(NPObject *, SEL);
+    void (*setScore_)(NPObject *, SEL, int);
+    int (*gameOver)(NPObject *, SEL);
+    void (*setGameOver_)(NPObject *, SEL, int);
 };
 struct nopa_GameEngine_meta_vtable {
-    NFClass * (*class)(NFClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
-NFObject * NFObject_alloc(NFClass * self, SEL _cmd) {
+NPObject * NPObject_alloc(NPClass * self, SEL _cmd) {
     return nopa_alloc(self);
 }
 
-NFObject * NFObject_new(NFClass * self, SEL _cmd) {
-    NFObject * obj = nopa_alloc(self);
+NPObject * NPObject_new(NPClass * self, SEL _cmd) {
+    NPObject * obj = nopa_alloc(self);
     return nopa_init(obj);
 }
 
-NFObject * NFObject_init(NFObject * self, SEL _cmd) {
-    struct NFObject * _self = ((struct NFObject *)(self));
+NPObject * NPObject_init(NPObject * self, SEL _cmd) {
+    struct NPObject * _self = ((struct NPObject *)(self));
     {
         return nopa_init(self);
     }
 }
 
-void NFObject_dealloc(NFObject * self, SEL _cmd) {
-    struct NFObject * _self = ((struct NFObject *)(self));
+void NPObject_dealloc(NPObject * self, SEL _cmd) {
+    struct NPObject * _self = ((struct NPObject *)(self));
     {
         return;
     }
 }
 
-NFClass * NFObject_getClass(NFClass * self, SEL _cmd) {
-    return &nopa_NFObject_class;
+NPClass * NPObject_getClass(NPClass * self, SEL _cmd) {
+    return &nopa_NPObject_class;
 }
 
-NFObject * nopa_alloc(struct NFClass * cls);
-NFObject * nopa_init(NFObject * );
+NPObject * nopa_alloc(struct NPClass * cls);
+NPObject * nopa_init(NPObject * );
 struct termios orig_termios;
 void disableRawMode() {
     tcsetattr(STDIN_FILENO, TCSAFLUSH, &orig_termios);
@@ -233,10 +233,10 @@ int kbhit() {
     return select(STDIN_FILENO + 1, &fds, NULL, NULL, &tv);
 }
 
-NFObject * Food_initWithX_y_(NFObject * self, SEL _cmd, int x, int y) {
+NPObject * Food_initWithX_y_(NPObject * self, SEL _cmd, int x, int y) {
     struct Food * _self = ((struct Food *)(self));
     {
-        self = NFObject_init(self, __nopa_sel_init);
+        self = NPObject_init(self, __nopa_sel_init);
         if (self) {
             {
                 ((struct Food *)(self))->_x = x;
@@ -247,30 +247,30 @@ NFObject * Food_initWithX_y_(NFObject * self, SEL _cmd, int x, int y) {
     }
 }
 
-int Food_x(NFObject * self, SEL _cmd) {
+int Food_x(NPObject * self, SEL _cmd) {
     return ((struct Food *)(self))->_x;
 }
 
-void Food_setX_(NFObject * self, SEL _cmd, int value) {
+void Food_setX_(NPObject * self, SEL _cmd, int value) {
     ((struct Food *)(self))->_x = value;
 }
 
-int Food_y(NFObject * self, SEL _cmd) {
+int Food_y(NPObject * self, SEL _cmd) {
     return ((struct Food *)(self))->_y;
 }
 
-void Food_setY_(NFObject * self, SEL _cmd, int value) {
+void Food_setY_(NPObject * self, SEL _cmd, int value) {
     ((struct Food *)(self))->_y = value;
 }
 
-NFClass * Food_getClass(NFClass * self, SEL _cmd) {
+NPClass * Food_getClass(NPClass * self, SEL _cmd) {
     return &nopa_Food_class;
 }
 
-NFObject * Snake_initWithX_y_(NFObject * self, SEL _cmd, int x, int y) {
+NPObject * Snake_initWithX_y_(NPObject * self, SEL _cmd, int x, int y) {
     struct Snake * _self = ((struct Snake *)(self));
     {
-        self = NFObject_init(self, __nopa_sel_init);
+        self = NPObject_init(self, __nopa_sel_init);
         if (self) {
             {
                 ((struct Snake *)(self))->_length = 3;
@@ -287,7 +287,7 @@ NFObject * Snake_initWithX_y_(NFObject * self, SEL _cmd, int x, int y) {
     }
 }
 
-void Snake_move(NFObject * self, SEL _cmd) {
+void Snake_move(NPObject * self, SEL _cmd) {
     struct Snake * _self = ((struct Snake *)(self));
     {
         for (int i = ((struct Snake *)(self))->_length - 1; i > 0; i--) {
@@ -326,7 +326,7 @@ void Snake_move(NFObject * self, SEL _cmd) {
     }
 }
 
-void Snake_grow(NFObject * self, SEL _cmd) {
+void Snake_grow(NPObject * self, SEL _cmd) {
     struct Snake * _self = ((struct Snake *)(self));
     {
         if (((struct Snake *)(self))->_length < 100) {
@@ -339,7 +339,7 @@ void Snake_grow(NFObject * self, SEL _cmd) {
     }
 }
 
-int Snake_checkSelfCollision(NFObject * self, SEL _cmd) {
+int Snake_checkSelfCollision(NPObject * self, SEL _cmd) {
     struct Snake * _self = ((struct Snake *)(self));
     {
         for (int i = 1; i < ((struct Snake *)(self))->_length; i++) {
@@ -355,45 +355,45 @@ int Snake_checkSelfCollision(NFObject * self, SEL _cmd) {
     }
 }
 
-int Snake_length(NFObject * self, SEL _cmd) {
+int Snake_length(NPObject * self, SEL _cmd) {
     return ((struct Snake *)(self))->_length;
 }
 
-void Snake_setLength_(NFObject * self, SEL _cmd, int value) {
+void Snake_setLength_(NPObject * self, SEL _cmd, int value) {
     ((struct Snake *)(self))->_length = value;
 }
 
-char Snake_direction(NFObject * self, SEL _cmd) {
+char Snake_direction(NPObject * self, SEL _cmd) {
     return ((struct Snake *)(self))->_direction;
 }
 
-void Snake_setDirection_(NFObject * self, SEL _cmd, char value) {
+void Snake_setDirection_(NPObject * self, SEL _cmd, char value) {
     ((struct Snake *)(self))->_direction = value;
 }
 
-NFClass * Snake_getClass(NFClass * self, SEL _cmd) {
+NPClass * Snake_getClass(NPClass * self, SEL _cmd) {
     return &nopa_Snake_class;
 }
 
-NFObject * GameEngine_initWithWidth_height_(NFObject * self, SEL _cmd, int w, int h) {
+NPObject * GameEngine_initWithWidth_height_(NPObject * self, SEL _cmd, int w, int h) {
     struct GameEngine * _self = ((struct GameEngine *)(self));
     {
-        self = NFObject_init(self, __nopa_sel_init);
+        self = NPObject_init(self, __nopa_sel_init);
         if (self) {
             {
                 ((struct GameEngine *)(self))->_width = w;
                 ((struct GameEngine *)(self))->_height = h;
                 ((struct GameEngine *)(self))->_score = 0;
                 ((struct GameEngine *)(self))->_gameOver = 0;
-                ((struct GameEngine *)(self))->_snake = ({ NFObject *__nopa_tmp_0 = (NFObject_alloc(&nopa_Snake_class, __nopa_sel_alloc)); ((struct nopa_Snake_vtable *)__nopa_tmp_0->isa->vtable)->initWithX_y_(__nopa_tmp_0, __nopa_sel_initWithX_y_, 5, 5); });
-                ((struct GameEngine *)(self))->_apple = ({ NFObject *__nopa_tmp_1 = (NFObject_alloc(&nopa_Food_class, __nopa_sel_alloc)); ((struct nopa_Food_vtable *)__nopa_tmp_1->isa->vtable)->initWithX_y_(__nopa_tmp_1, __nopa_sel_initWithX_y_, 10, 5); });
+                ((struct GameEngine *)(self))->_snake = ({ NPObject *__nopa_tmp_0 = (NPObject_alloc(&nopa_Snake_class, __nopa_sel_alloc)); ((struct nopa_Snake_vtable *)__nopa_tmp_0->isa->vtable)->initWithX_y_(__nopa_tmp_0, __nopa_sel_initWithX_y_, 5, 5); });
+                ((struct GameEngine *)(self))->_apple = ({ NPObject *__nopa_tmp_1 = (NPObject_alloc(&nopa_Food_class, __nopa_sel_alloc)); ((struct nopa_Food_vtable *)__nopa_tmp_1->isa->vtable)->initWithX_y_(__nopa_tmp_1, __nopa_sel_initWithX_y_, 10, 5); });
             }
         }
         return self;
     }
 }
 
-void GameEngine_processInfut_(NFObject * self, SEL _cmd, char key) {
+void GameEngine_processInfut_(NPObject * self, SEL _cmd, char key) {
     struct GameEngine * _self = ((struct GameEngine *)(self));
     {
         char currentDir = ((struct nopa_Snake_vtable *)((struct GameEngine *)(self))->_snake->isa->vtable)->direction(((struct GameEngine *)(self))->_snake, __nopa_sel_direction);
@@ -421,7 +421,7 @@ void GameEngine_processInfut_(NFObject * self, SEL _cmd, char key) {
     }
 }
 
-void GameEngine_update(NFObject * self, SEL _cmd) {
+void GameEngine_update(NPObject * self, SEL _cmd) {
     struct GameEngine * _self = ((struct GameEngine *)(self));
     {
         ((struct nopa_Snake_vtable *)((struct GameEngine *)(self))->_snake->isa->vtable)->move(((struct GameEngine *)(self))->_snake, __nopa_sel_move);
@@ -464,7 +464,7 @@ void GameEngine_update(NFObject * self, SEL _cmd) {
     }
 }
 
-void GameEngine_renderWithComboBlock_(NFObject * self, SEL _cmd, int (^comboBlock)(int)) {
+void GameEngine_renderWithComboBlock_(NPObject * self, SEL _cmd, int (^comboBlock)(int)) {
     struct GameEngine * _self = ((struct GameEngine *)(self));
     {
         printf("\033[H");
@@ -531,35 +531,35 @@ void GameEngine_renderWithComboBlock_(NFObject * self, SEL _cmd, int (^comboBloc
     }
 }
 
-void GameEngine_dealloc(NFObject * self, SEL _cmd) {
+void GameEngine_dealloc(NPObject * self, SEL _cmd) {
     struct GameEngine * _self = ((struct GameEngine *)(self));
     {
         if (((struct GameEngine *)(self))->_snake) {
-            NFObject_release(((struct GameEngine *)(self))->_snake);
+            NPObject_release(((struct GameEngine *)(self))->_snake);
         }
         if (((struct GameEngine *)(self))->_apple) {
-            NFObject_release(((struct GameEngine *)(self))->_apple);
+            NPObject_release(((struct GameEngine *)(self))->_apple);
         }
     }
 }
 
-int GameEngine_score(NFObject * self, SEL _cmd) {
+int GameEngine_score(NPObject * self, SEL _cmd) {
     return ((struct GameEngine *)(self))->_score;
 }
 
-void GameEngine_setScore_(NFObject * self, SEL _cmd, int value) {
+void GameEngine_setScore_(NPObject * self, SEL _cmd, int value) {
     ((struct GameEngine *)(self))->_score = value;
 }
 
-int GameEngine_gameOver(NFObject * self, SEL _cmd) {
+int GameEngine_gameOver(NPObject * self, SEL _cmd) {
     return ((struct GameEngine *)(self))->_gameOver;
 }
 
-void GameEngine_setGameOver_(NFObject * self, SEL _cmd, int value) {
+void GameEngine_setGameOver_(NPObject * self, SEL _cmd, int value) {
     ((struct GameEngine *)(self))->_gameOver = value;
 }
 
-NFClass * GameEngine_getClass(NFClass * self, SEL _cmd) {
+NPClass * GameEngine_getClass(NPClass * self, SEL _cmd) {
     return &nopa_GameEngine_class;
 }
 
@@ -572,7 +572,7 @@ int main(int argc, const char * * argv) {
             srand(((int)(time(NULL))));
             enableRawMode();
             printf("\033[2J\033[H");
-            NFObject *__nopa_tmp_2 = (NFObject_alloc(&nopa_GameEngine_class, __nopa_sel_alloc));
+            NPObject *__nopa_tmp_2 = (NPObject_alloc(&nopa_GameEngine_class, __nopa_sel_alloc));
             GameEngine * engine = ((struct nopa_GameEngine_vtable *)__nopa_tmp_2->isa->vtable)->initWithWidth_height_(__nopa_tmp_2, __nopa_sel_initWithWidth_height_, 20, 15);
             int multiplier = 2;
             int (^comboCalculator)(int baseScore) = ^int(int baseScore) {
@@ -603,7 +603,7 @@ int main(int argc, const char * * argv) {
             printf(" 🏆 最终狂暴得分 (Combo x%d): %d 点！\n", multiplier, comboCalculator(((struct nopa_GameEngine_vtable *)engine->isa->vtable)->score(engine, __nopa_sel_score)));
             printf("======================================================\n\n");
             if (engine) {
-                NFObject_release(engine);
+                NPObject_release(engine);
             }
         }
         nopa_autoreleasepool_pop(__pool);
@@ -615,14 +615,14 @@ int main(int argc, const char * * argv) {
 
 // ─── Class metadata ─────────────────────────────────────
 
-struct nopa_NFObject_vtable nopa_NFObject_vtable_inst = {
-    .init = NFObject_init,
-    .dealloc = NFObject_dealloc,
+struct nopa_NPObject_vtable nopa_NPObject_vtable_inst = {
+    .init = NPObject_init,
+    .dealloc = NPObject_dealloc,
 };
 
 struct nopa_Food_vtable nopa_Food_vtable_inst = {
-    .init = NFObject_init,
-    .dealloc = NFObject_dealloc,
+    .init = NPObject_init,
+    .dealloc = NPObject_dealloc,
     .initWithX_y_ = Food_initWithX_y_,
     .x = Food_x,
     .setX_ = Food_setX_,
@@ -631,8 +631,8 @@ struct nopa_Food_vtable nopa_Food_vtable_inst = {
 };
 
 struct nopa_Snake_vtable nopa_Snake_vtable_inst = {
-    .init = NFObject_init,
-    .dealloc = NFObject_dealloc,
+    .init = NPObject_init,
+    .dealloc = NPObject_dealloc,
     .initWithX_y_ = Snake_initWithX_y_,
     .move = Snake_move,
     .grow = Snake_grow,
@@ -644,7 +644,7 @@ struct nopa_Snake_vtable nopa_Snake_vtable_inst = {
 };
 
 struct nopa_GameEngine_vtable nopa_GameEngine_vtable_inst = {
-    .init = NFObject_init,
+    .init = NPObject_init,
     .dealloc = GameEngine_dealloc,
     .initWithWidth_height_ = GameEngine_initWithWidth_height_,
     .processInfut_ = GameEngine_processInfut_,
@@ -656,10 +656,10 @@ struct nopa_GameEngine_vtable nopa_GameEngine_vtable_inst = {
     .setGameOver_ = GameEngine_setGameOver_,
 };
 
-struct nopa_NFObject_meta_vtable nopa_NFObject_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
-    .class = NFObject_getClass,
+struct nopa_NPObject_meta_vtable nopa_NPObject_meta_vtable_inst = {
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
+    .class = NPObject_getClass,
 };
 
 struct nopa_Food_meta_vtable nopa_Food_meta_vtable_inst = {
@@ -674,39 +674,39 @@ struct nopa_GameEngine_meta_vtable nopa_GameEngine_meta_vtable_inst = {
     .class = GameEngine_getClass,
 };
 
-NFClass nopa_NFObject_class;
-NFClass nopa_Food_class;
-NFClass nopa_Snake_class;
-NFClass nopa_GameEngine_class;
+NPClass nopa_NPObject_class;
+NPClass nopa_Food_class;
+NPClass nopa_Snake_class;
+NPClass nopa_GameEngine_class;
 
 void nopa_meta_init(void) {
-    nopa_NFObject_class = (NFClass){
-        .name = "NFObject",
+    nopa_NPObject_class = (NPClass){
+        .name = "NPObject",
         .superclass = NULL,
-        .instance_size = sizeof(struct NFObject),
-        .vtable = &nopa_NFObject_vtable_inst,
-        .class_vtable = &nopa_NFObject_meta_vtable_inst,
+        .instance_size = sizeof(struct NPObject),
+        .vtable = &nopa_NPObject_vtable_inst,
+        .class_vtable = &nopa_NPObject_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_Food_class = (NFClass){
+    nopa_Food_class = (NPClass){
         .name = "Food",
-        .superclass = &nopa_NFObject_class,
+        .superclass = &nopa_NPObject_class,
         .instance_size = sizeof(struct Food),
         .vtable = &nopa_Food_vtable_inst,
         .class_vtable = &nopa_Food_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_Snake_class = (NFClass){
+    nopa_Snake_class = (NPClass){
         .name = "Snake",
-        .superclass = &nopa_NFObject_class,
+        .superclass = &nopa_NPObject_class,
         .instance_size = sizeof(struct Snake),
         .vtable = &nopa_Snake_vtable_inst,
         .class_vtable = &nopa_Snake_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_GameEngine_class = (NFClass){
+    nopa_GameEngine_class = (NPClass){
         .name = "GameEngine",
-        .superclass = &nopa_NFObject_class,
+        .superclass = &nopa_NPObject_class,
         .instance_size = sizeof(struct GameEngine),
         .vtable = &nopa_GameEngine_vtable_inst,
         .class_vtable = &nopa_GameEngine_meta_vtable_inst,

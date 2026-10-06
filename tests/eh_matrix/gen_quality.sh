@@ -34,7 +34,7 @@ GOLD="tests/golden"
 CASES=(
   "no_try|$GOLD/04_arc/retain_release.np|"
   "single_try|$GOLD/15_exceptions/try_catch.np|-fno-nopa-arc"
-  "foundation|$GOLD/13_foundation/04_nfstring/nfstring_test.np|"
+  "foundation|$GOLD/13_foundation/04_npstring/npstring_test.np|"
   "big_file|examples/01_JSONEditor/json_editor.np|-fno-nopa-arc"
   "c_superset|$GOLD/22_c_superset/c_superset.np|"
   "freestanding|$GOLD/25_freestanding/freestanding.np|-ffreestanding"

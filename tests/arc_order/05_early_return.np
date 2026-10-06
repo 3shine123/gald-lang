@@ -5,25 +5,25 @@
 // path releases exactly once (the branch that returns must not rob the
 // fall-through path of its release).
 
-@interface AO05Holder : NFObject {
+@interface AO05Holder : NPObject {
 @public
-    NFString *_s;
+    NPString *_s;
 }
-- (NFString *)text;
+- (NPString *)text;
 @end
 
 @implementation AO05Holder
 - (instancetype)init {
     self = [super init];
-    if (self) { _s = [[NFString alloc] initWithUTF8String:"hello"]; }
+    if (self) { _s = [[NPString alloc] initWithUTF8String:"hello"]; }
     return self;
 }
 - (void)dealloc {
     _s = nil;
-    NFLog(@"ao05 dealloc");
+    NPLog(@"ao05 dealloc");
     [super dealloc];
 }
-- (NFString *)text { return _s; }
+- (NPString *)text { return _s; }
 @end
 
 int ao05_probe(int cond) {
@@ -31,13 +31,13 @@ int ao05_probe(int cond) {
     if (cond) {
         return [[h text] length] - 5;
     }
-    NFLog(@"ao05 fallthrough");
+    NPLog(@"ao05 fallthrough");
     return [[h text] length];
 }
 
 int main() {
     int a = ao05_probe(1);
     int b = ao05_probe(0);
-    NFLog(@"ao05 a=%d b=%d", a, b);
+    NPLog(@"ao05 a=%d b=%d", a, b);
     return (a == 0 && b == 5) ? 0 : 1;
 }

@@ -1,8 +1,8 @@
 #include "nopa/runtime.h"
-#import "Foundation/NFObject.nh"
-#import "Foundation/NFObject.np"
+#import "Foundation/NPObject.nh"
+#import "Foundation/NPObject.np"
 
-@interface Item : NFObject {
+@interface Item : NPObject {
     int _tag;
 }
 - (int)tag;

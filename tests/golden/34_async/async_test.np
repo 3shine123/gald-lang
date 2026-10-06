@@ -7,7 +7,7 @@
 // - async methods with a return value may only be called from async contexts
 //   (compile-time rejected otherwise); async void methods are the entries.
 
-@interface Fetcher : NFObject
+@interface Fetcher : NPObject
 - (int)compute:(int)n;
 - (int)twice:(int)n;
 - (void)runAll;
@@ -26,7 +26,7 @@
 // async void: the entry method (blocking wrapper semantics — pumps to completion)
 - (void)runAll {
     int x = @await [self twice:3];
-    NFLog(@"result=%d", x);      // 3 -> 6 -> 12 => a+b = 18
+    NPLog(@"result=%d", x);      // 3 -> 6 -> 12 => a+b = 18
 }
 @end
 

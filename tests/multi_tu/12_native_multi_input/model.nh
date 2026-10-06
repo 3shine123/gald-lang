@@ -2,7 +2,7 @@
 
 /* Declarations shared by both TUs — the ONLY channel between them.
    main.np never sees lib.np; it only sees these method signatures. */
-@interface Greeter : NFObject
+@interface Greeter : NPObject
 - (const char *)greeting:(const char *)who;
 - (int)count;
 @end

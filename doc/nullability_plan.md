@@ -16,7 +16,7 @@ ObjC 故意用**三态**而非布尔，这决定了一切：
 
 第三态是整套设计的支点：
 
-- **审计可行**：ObjC 的 `NS_ASSUME_NONNULL_BEGIN/END`（Nopa 拼写 `NF_ASSUME_NONNULL_BEGIN` / `NF_ASSUME_NONNULL_END`）把整段指针**自动**变 nonnull，区域内想例外才写 `_Nullable`。
+- **审计可行**：ObjC 的 `NS_ASSUME_NONNULL_BEGIN/END`（Nopa 拼写 `NP_ASSUME_NONNULL_BEGIN` / `NP_ASSUME_NONNULL_END`）把整段指针**自动**变 nonnull，区域内想例外才写 `_Nullable`。
   审计成本从 **O(声明数)** 降到 **O(1)** —— 新加声明自动获正确默认值。
 - **兼容性**：老代码（无标注）默认 unspecified，零改动不报新错。这是 ObjC 能在存量代码库上增量落地的关键。
 - **不撒谎**：`nullable` 的代价是调用方要处理 nil，所以它必须**显式写出来**；`unspecified` 不承担这个义务。
@@ -29,17 +29,17 @@ Nopa 处境**比 ObjC 更好**：ObjC 至少能用 `NS_ASSUME_NONNULL` 表达"�
 
 ```objc
 // ObjC 风格（方法/返回值/参数位，主推）
-- (nullable NFString *)find:(nonnull NFString *)key;
-- (NFString * _Nonnull)name;              // C 指针位同款拼写也接受
+- (nullable NPString *)find:(nonnull NPString *)key;
+- (NPString * _Nonnull)name;              // C 指针位同款拼写也接受
 
 // 属性
-@property (nonatomic, copy, nullable) NFString *title;
-@property (nonatomic, strong, nonnull) NFString *name;   // 标注期许 Promise 名字都不该是 nil
+@property (nonatomic, copy, nullable) NPString *title;
+@property (nonatomic, strong, nonnull) NPString *name;   // 标注期许 Promise 名字都不该是 nil
 
 // 区域默认（M1 就要，见 §5）
-NF_ASSUME_NONNULL_BEGIN
+NP_ASSUME_NONNULL_BEGIN
 ...声明...
-NF_ASSUME_NONNULL_END
+NP_ASSUME_NONNULL_END
 ```
 
 ### 1.2 关键约束：**必须是上下文关键词**
@@ -54,11 +54,11 @@ ObjC 里 `nullable` / `nonnull` 是宏（展开成 `_Nullable`），所以 `int 
 
 | 位 | 例子 | M1 | 承载字段 |
 |---|---|---|---|
-| 方法返回类型 | `- (nullable NFString *)f;` | ✅ | `CstType.nulls` |
+| 方法返回类型 | `- (nullable NPString *)f;` | ✅ | `CstType.nulls` |
 | 方法参数 | `- (void)f:(nonnull id)x;` | ✅ | `CstType.nulls`（复用 `CstParam.par_type`） |
 | 顶层函数返回/参数 | `nullable id *f(nonnull id *x);` | ✅ | 同上 |
-| 属性 | `@property (nullable) NFString *t;` | ✅ | `AstDeclData::Property` 加 `nulls` |
-| ivar | `@public nullable NFString *t;` | ✅ | `CstType.nulls` |
+| 属性 | `@property (nullable) NPString *t;` | ✅ | `AstDeclData::Property` 加 `nulls` |
+| ivar | `@public nullable NPString *t;` | ✅ | `CstType.nulls` |
 | `id` / `instancetype` 的 nullability | `nullable id` | ✅ | `CstType.nulls` |
 | block 参数/返回 | `void (^)(nullable id)` | ⏭ M2 | `CstType.block_params` 递归 |
 | out-param（**ObjC 的 `NSError **`，Nopa 对应类尚不存在**） | `- (BOOL)f:(NSError **)e;` | ⏭ M2 | 已知难点，见 §6 |
@@ -88,7 +88,7 @@ pub enum Nullability {
 | 诊断 | 触发 | 档位 | 对应 clang |
 |---|---|---|---|
 | `nullable_to_nonnull_conversion` | 把 `nullable` 实参传给 `nonnull` 形参 | **error** | `-Wnullable-to-nonnull-conversion` |
-| `nonnull_missing_nonnull` | `NF_ASSUME_NONNULL` 区内声明了 nullable 却**没标注**（即该标 nonnull 却是 unspecified） | warning | `-Wnullability-completeness` |
+| `nonnull_missing_nonnull` | `NP_ASSUME_NONNULL` 区内声明了 nullable 却**没标注**（即该标 nonnull 却是 unspecified） | warning | `-Wnullability-completeness` |
 | `nullable_to_nonnull_scalar` | `nullable` 值参与指针上下文但目标为 nonnull 标量 | error | 同族 |
 | `nonnull_on_non_pointer` | `nonnull` 用在非指针类型 | warning | `-Wnullability-completeness` |
 | `unspecified_to_nonnull` | unspecified 实参传给 nonnull 形参 | **不报**（渐进采用的核心，见 §4） | clang 默认也不报 |
@@ -103,7 +103,7 @@ pub enum Nullability {
 M1 只做**分支内 narrow**，这是 90% 的实际用法：
 
 ```objc
-- (void)f:(nullable NFString *)s {
+- (void)f:(nullable NPString *)s {
     if (s) {
         [s length];          // ✅ narrow 后当 nonnull
     }
@@ -117,19 +117,19 @@ M1 只做**分支内 narrow**，这是 90% 的实际用法：
 
 M1 **不做**：循环内 narrow、`__autoreleasing` 标注、复杂控制流合并（保守取交集，冲突则放弃 narrow —— 与 ARC `RefVal` 的 `Unknown` 合并哲学一致）。
 
-## 5. `NF_ASSUME_NONNULL_BEGIN` / `_END` 区域
+## 5. `NP_ASSUME_NONNULL_BEGIN` / `_END` 区域
 
 M1 就要，因为它是 ObjC 方案的核心价值（审计成本 O(1)）。
 
 ### 5.1 拼写定案（2026-09-30 用户拍板）
 
 ```objc
-NF_ASSUME_NONNULL_BEGIN
+NP_ASSUME_NONNULL_BEGIN
 ...声明...
-NF_ASSUME_NONNULL_END
+NP_ASSUME_NONNULL_END
 ```
 
-**这是真语法，不是宏** —— 这是本节最重要的事实，理由见 §5.2。它沿用 ObjC 的 `NS_ASSUME_NONNULL_*` 拼写（仅把 `NS_` 换成 Nopa 的 `NF_`），让 ObjC 开发者零学习成本认出，迁移时也便于对照苹果文档。
+**这是真语法，不是宏** —— 这是本节最重要的事实，理由见 §5.2。它沿用 ObjC 的 `NS_ASSUME_NONNULL_*` 拼写（仅把 `NS_` 换成 Nopa 的 `NP_`），让 ObjC 开发者零学习成本认出，迁移时也便于对照苹果文档。
 
 ### 5.2 为什么不能是宏（ObjC 的实现方式在 Nopa 不可用）
 
@@ -150,8 +150,8 @@ ObjC 那两个标记是**宏**，内部是 `_Pragma("clang assume_nonnull begin"
 
 | 会尝试的动作 | 应当的行为 |
 |---|---|
-| 找 `#define NF_ASSUME_NONNULL_BEGIN` 的定义 | 找不到 —— 它不是宏 |
-| `#undef NF_ASSUME_NONNULL_BEGIN` | 应报错/无效，不是"取消区域" |
+| 找 `#define NP_ASSUME_NONNULL_BEGIN` 的定义 | 找不到 —— 它不是宏 |
+| `#undef NP_ASSUME_NONNULL_BEGIN` | 应报错/无效，不是"取消区域" |
 | 把它放进 `#if` 条件 | 不参与预处理器求值 |
 | 在宏体里使用 | 报错（宏体内无位置安放，见 §5.2） |
 
@@ -166,7 +166,7 @@ ObjC 那两个标记是**宏**，内部是 `_Pragma("clang assume_nonnull begin"
 for (kstr, kw) in KW_TABLE { if *kstr == s { return *kw; } }
 ```
 
-本标记是标识符（`NF_ASSUME_NONNULL_BEGIN`），无 `@` 前缀，**根本不存在字符串层面的歧义**。
+本标记是标识符（`NP_ASSUME_NONNULL_BEGIN`），无 `@` 前缀，**根本不存在字符串层面的歧义**。
 
 ### 5.5 实施要点
 
@@ -177,7 +177,7 @@ for (kstr, kw) in KW_TABLE { if *kstr == s { return *kw; } }
 
 ## 6. 已知难点（如实记录，不假装简单）
 
-1. **out-param（ObjC 的 `NSError **`）** —— 这是 ObjC nullability 至今只部分检查的经典难点，也是"该特性不该一次做对"的真实刻度。Nopa Foundation 目前**没有错误类**（无 `NFError`），M1 明确不碰。
+1. **out-param（ObjC 的 `NSError **`）** —— 这是 ObjC nullability 至今只部分检查的经典难点，也是"该特性不该一次做对"的真实刻度。Nopa Foundation 目前**没有错误类**（无 `NPError`），M1 明确不碰。
 2. **block 参数/返回的 nullability** —— `CstType.block_params` 是递归结构，M1 跳过。
 3. **`nullable` 与 ARC 的交互** —— ARC 的 `RefVal` 状态机把对象局部标 `Owned`；`nullable` 意味着可能为 nil，注入的 `nopa_release` 需要 nil 守卫。**必须核实 ARC 注入路径已有该守卫**，否则 `nullable` 会引入新的 over-release。
 4. **跨 TU** —— 纯编译期，不影响 vtable 布局，`__sig` 不变。✅ 无风险。
@@ -197,7 +197,7 @@ for (kstr, kw) in KW_TABLE { if *kstr == s { return *kw; } }
 
 | 阶段 | 内容 | 工作量 | 依赖 |
 |---|---|---|---|
-| **M1** | 三态语法（上下文关键词）+ 三处类型位 + 6 条诊断 + 分支内 narrow + `NF_ASSUME_NONNULL` 区域 | 中 | 需先核实 §6.3 的 ARC 守卫 |
+| **M1** | 三态语法（上下文关键词）+ 三处类型位 + 6 条诊断 + 分支内 narrow + `NP_ASSUME_NONNULL` 区域 | 中 | 需先核实 §6.3 的 ARC 守卫 |
 | **M2** | block 参数/返回 nullability + out-param 基础检查（届时需先给 Foundation 加错误类）+ 循环内 narrow + `_Null_unspecified` 显式拼写 | 中 | M1 |
 | **不做** | 完整流敏感（跨循环/复杂合并）、值域解引用检查 | — | ObjC 也没做，见 §6.1 |
 
@@ -207,7 +207,7 @@ for (kstr, kw) in KW_TABLE { if *kstr == s { return *kw; } }
 
 ```c
 // include/nopa/runtime.c:222
-void nopa_release(NFObject *obj) {
+void nopa_release(NPObject *obj) {
     if (!obj) return;              // ← nil 安全，ARC 注入的 release 天然安全
     if (obj->retain_count > 0) obj->retain_count--;
     ...
@@ -218,7 +218,7 @@ void nopa_release(NFObject *obj) {
 
 ⚠️ **但有一处仍需在 M1 实施时确认**（本次未核）：`crates/arc/src/arc.rs:35` 构造的 release 调用是
 `FuncCall { name: "nopa_release", args: [target] }` —— 需确认这条路径**不会**被 checker 的
-`nullable` 检查拦下（`nopa_release` 的参数类型是 `NFObject *`，若标为 `nonnull` 则注入调用会误报）。
+`nullable` 检查拦下（`nopa_release` 的参数类型是 `NPObject *`，若标为 `nonnull` 则注入调用会误报）。
 **实施 M1 时第一件事**：把 runtime 内部注入的 release 调用列入诊断豁免名单（仿既有
 `&NOPA_CLASS_$_X` 内部引用的 `__` 前缀放行规则，见 AGENTS.md 记载的 eh desugar 豁免）。
 

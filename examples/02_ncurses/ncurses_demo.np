@@ -48,7 +48,7 @@ int main() {
                     if (sel == 0) { running = 0; }
                     else if (sel == 1) {
                         const char *input = [tb edit];
-                        [lbl setText:[NFString stringWithUTF8String:input]];
+                        [lbl setText:[NPString stringWithUTF8String:input]];
                     }
                     break;
                 case KEY_MOUSE:
@@ -58,7 +58,7 @@ int main() {
                         if (my == 6 && mx >= 6 && mx < 26) { running = 0; }
                         if (my == 8 && mx >= 6 && mx < 26) {
                             const char *input = [tb edit];
-                            [lbl setText:[NFString stringWithUTF8String:input]];
+                            [lbl setText:[NPString stringWithUTF8String:input]];
                         }
                     }
                     break;

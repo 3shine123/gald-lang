@@ -1,7 +1,7 @@
 #import "model.nh"
 #include <stdio.h>
 
-@implementation Pump : NFObject
+@implementation Pump : NPObject
 - (void)onTick:(Ticker)handler {
     self->_handler = _Block_copy((const void *)handler);
 }

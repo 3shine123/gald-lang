@@ -3,7 +3,7 @@
 //   1. full designated:        struct Point p1 = { .x = 1, .y = 2 };
 //   2. partial (zero fill):    struct Point p2 = { .y = 5 };
 //   3. mixed designated+pos:   struct Point p3 = { .x = 1, 7 };
-//   4. compound literal:       NFRange r = (NFRange){ .location = 3, .length = 9 };
+//   4. compound literal:       NPRange r = (NPRange){ .location = 3, .length = 9 };
 //   5. array element designated: CGPoint pts[3] = { [0].x = 1, [2].y = 6 };
 //   6. nested member chains:   struct Outer o = { .in.a = 3, .tag = 9 };
 
@@ -19,7 +19,7 @@ typedef struct {
 typedef struct {
     size_t location;
     size_t length;
-} NFRange;
+} NPRange;
 
 struct Inner { int a; int b; };
 struct Outer { struct Inner in; int tag; };
@@ -43,7 +43,7 @@ int main() {
     dump("p3", p3);
 
     // 4. compound literal with designators
-    NFRange r = (NFRange){ .location = 3, .length = 9 };
+    NPRange r = (NPRange){ .location = 3, .length = 9 };
     printf("r: loc=%zu len=%zu\n", r.location, r.length);
 
     // 5. array element designated initializers

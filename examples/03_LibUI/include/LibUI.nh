@@ -15,7 +15,7 @@
 
     /* ── Base class of every widget. The raw libui handle is an
      * implementation detail hidden inside the wrapper. ── */
-    @interface Control : NFObject {
+    @interface Control : NPObject {
         @protected
         void *_handle;
     }
@@ -113,7 +113,7 @@
         - (void)setMargined:(int)index margined:(int)margined;
     @end
 
-    @interface App : NFObject
+    @interface App : NPObject
         + (void)start;   /* initializes the toolkit — call before any widget */
         + (void)run;     /* enters the libui main loop */
         + (void)quit;    /* asks the main loop to exit */

@@ -10,7 +10,7 @@
 // ============================================================================
 // 1. 核心基础类：基础智能终端 (不包含任何网络与安全属性)
 // ============================================================================
-@interface SmartTerminal : NFObject {
+@interface SmartTerminal : NPObject {
     @public
     int _terminalId;
     const char* _hardwareModel;

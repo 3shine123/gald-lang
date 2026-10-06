@@ -6,17 +6,17 @@
 // Three ivars cover the interesting cases: two live objects (released in
 // reverse declaration order) and one left nil (release must be nil-safe).
 
-@interface AO14Child : NFObject
+@interface AO14Child : NPObject
 @end
 
 @implementation AO14Child
 - (void)dealloc {
-    NFLog(@"ao14 child dealloc");
+    NPLog(@"ao14 child dealloc");
     [super dealloc];
 }
 @end
 
-@interface AO14Owner : NFObject {
+@interface AO14Owner : NPObject {
 @public
     AO14Child *_first;
     AO14Child *_second;
@@ -40,6 +40,6 @@
 
 int main() {
     AO14Owner *o = [[AO14Owner alloc] init];
-    NFLog(@"ao14 done using");
+    NPLog(@"ao14 done using");
     return 0;
 }

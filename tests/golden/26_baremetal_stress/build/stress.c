@@ -45,28 +45,28 @@ typedef struct Bio__Human Bio__Human;
 
 /* -------------- Section 5 · Struct definitions --------------- */
 /* -------------- Section 6 · Function prototypes -------------- */
-NFObject * Bio__Organism_create(NFClass * self, SEL _cmd);
-NFObject * Bio__Organism_init(NFObject * self, SEL _cmd);
-int Bio__Organism_age(NFObject * self, SEL _cmd);
-void Bio__Organism_grow(NFObject * self, SEL _cmd);
-int Bio__Organism_legs(NFObject * self, SEL _cmd);
-int Bio__Organism_energy(NFObject * self, SEL _cmd);
-void Bio__Organism_setEnergy_(NFObject * self, SEL _cmd, int value);
-int Bio__Animal_legs(NFObject * self, SEL _cmd);
-int Bio__Animal_work_(NFObject * self, SEL _cmd, int hours);
-int Bio__Animal_strength(NFObject * self, SEL _cmd);
-void Bio__Animal_setStrength_(NFObject * self, SEL _cmd, int value);
-NFObject * Bio__Animal_init(NFObject * self, SEL _cmd);
-int Bio__Human_legs(NFObject * self, SEL _cmd);
-int Bio__Human_work_(NFObject * self, SEL _cmd, int hours);
-int Bio__Human_think_(NFObject * self, SEL _cmd, int problem);
-int Bio__Human_wisdom(NFObject * self, SEL _cmd);
-void Bio__Human_setWisdom_(NFObject * self, SEL _cmd, int value);
-NFObject * Bio__Human_init(NFObject * self, SEL _cmd);
-NFObject * DebugToken_alloc(NFClass * self, SEL _cmd);
-NFObject * DebugToken_token_(NFClass * self, SEL _cmd, int c);
-int DebugToken_code(NFObject * self, SEL _cmd);
-void DebugToken_dump(NFObject * self, SEL _cmd);
+NPObject * Bio__Organism_create(NPClass * self, SEL _cmd);
+NPObject * Bio__Organism_init(NPObject * self, SEL _cmd);
+int Bio__Organism_age(NPObject * self, SEL _cmd);
+void Bio__Organism_grow(NPObject * self, SEL _cmd);
+int Bio__Organism_legs(NPObject * self, SEL _cmd);
+int Bio__Organism_energy(NPObject * self, SEL _cmd);
+void Bio__Organism_setEnergy_(NPObject * self, SEL _cmd, int value);
+int Bio__Animal_legs(NPObject * self, SEL _cmd);
+int Bio__Animal_work_(NPObject * self, SEL _cmd, int hours);
+int Bio__Animal_strength(NPObject * self, SEL _cmd);
+void Bio__Animal_setStrength_(NPObject * self, SEL _cmd, int value);
+NPObject * Bio__Animal_init(NPObject * self, SEL _cmd);
+int Bio__Human_legs(NPObject * self, SEL _cmd);
+int Bio__Human_work_(NPObject * self, SEL _cmd, int hours);
+int Bio__Human_think_(NPObject * self, SEL _cmd, int problem);
+int Bio__Human_wisdom(NPObject * self, SEL _cmd);
+void Bio__Human_setWisdom_(NPObject * self, SEL _cmd, int value);
+NPObject * Bio__Human_init(NPObject * self, SEL _cmd);
+NPObject * DebugToken_alloc(NPClass * self, SEL _cmd);
+NPObject * DebugToken_token_(NPClass * self, SEL _cmd, int c);
+int DebugToken_code(NPObject * self, SEL _cmd);
+void DebugToken_dump(NPObject * self, SEL _cmd);
 void kputs(const char * s);
 void kputdec(int v);
 void kputhex(unsigned v);
@@ -80,10 +80,10 @@ int main(void);
 
 /* ------------- Section 7 · File-level variables -------------- */
 /* ------------ Section 8 · VTable & class layouts ------------- */
-NFClass * NOPA_GETCLASS_$_Bio__Organism(NFClass * self, SEL _cmd);
-NFClass * NOPA_GETCLASS_$_DebugToken(NFClass * self, SEL _cmd);
-NFClass * NOPA_GETCLASS_$_Bio__Animal(NFClass * self, SEL _cmd);
-NFClass * NOPA_GETCLASS_$_Bio__Human(NFClass * self, SEL _cmd);
+NPClass * NOPA_GETCLASS_$_Bio__Organism(NPClass * self, SEL _cmd);
+NPClass * NOPA_GETCLASS_$_DebugToken(NPClass * self, SEL _cmd);
+NPClass * NOPA_GETCLASS_$_Bio__Animal(NPClass * self, SEL _cmd);
+NPClass * NOPA_GETCLASS_$_Bio__Human(NPClass * self, SEL _cmd);
 
 /* vtable layout signature: 5902b1d3eb188383 (methods: 14) */
 __attribute__((weak)) void nopa_verify_vtable_sig(unsigned long long winner, unsigned long long mine, const char *method_list) {
@@ -95,43 +95,43 @@ __attribute__((weak)) void nopa_verify_vtable_sig(unsigned long long winner, uns
 
 struct nopa_vtable {
     unsigned long long __sig;
-    int (*age)(NFObject *, SEL);
-    int (*code)(NFObject *, SEL);
-    void (*dump)(NFObject *, SEL);
-    int (*energy)(NFObject *, SEL);
-    void (*grow)(NFObject *, SEL);
-    NFObject * (*init)(NFObject *, SEL);
-    int (*legs)(NFObject *, SEL);
-    void (*setEnergy_)(NFObject *, SEL, int);
-    void (*setStrength_)(NFObject *, SEL, int);
-    void (*setWisdom_)(NFObject *, SEL, int);
-    int (*strength)(NFObject *, SEL);
-    int (*think_)(NFObject *, SEL, int);
-    int (*wisdom)(NFObject *, SEL);
-    int (*work_)(NFObject *, SEL, int);
+    int (*age)(NPObject *, SEL);
+    int (*code)(NPObject *, SEL);
+    void (*dump)(NPObject *, SEL);
+    int (*energy)(NPObject *, SEL);
+    void (*grow)(NPObject *, SEL);
+    NPObject * (*init)(NPObject *, SEL);
+    int (*legs)(NPObject *, SEL);
+    void (*setEnergy_)(NPObject *, SEL, int);
+    void (*setStrength_)(NPObject *, SEL, int);
+    void (*setWisdom_)(NPObject *, SEL, int);
+    int (*strength)(NPObject *, SEL);
+    int (*think_)(NPObject *, SEL, int);
+    int (*wisdom)(NPObject *, SEL);
+    int (*work_)(NPObject *, SEL, int);
 };
 
 struct NOPA_META_VTABLE_$_Bio__Organism {
-    NFObject * (*create)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+    NPObject * (*create)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct NOPA_META_VTABLE_$_DebugToken {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*token_)(NFClass *, SEL, int);
-    NFClass * (*class)(NFClass *, SEL);
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*token_)(NPClass *, SEL, int);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct NOPA_META_VTABLE_$_Bio__Animal {
-    NFObject * (*create)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+    NPObject * (*create)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct NOPA_META_VTABLE_$_Bio__Human {
-    NFObject * (*create)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+    NPObject * (*create)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 
 /* Class layout: Bio::Organism (super: nopa_root) */
 struct Bio__Organism {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     int age;
     int vitality;
@@ -141,7 +141,7 @@ typedef struct Bio__Organism Bio__Organism;
 
 /* Class layout: DebugToken (super: nopa_root) */
 struct DebugToken {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     int code;
 };
@@ -149,7 +149,7 @@ typedef struct DebugToken DebugToken;
 
 /* Class layout: Bio::Animal (super: Bio::Organism) */
 struct Bio__Animal {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     int age;
     int vitality;
@@ -161,7 +161,7 @@ typedef struct Bio__Animal Bio__Animal;
 
 /* Class layout: Bio::Human (super: Bio::Animal) */
 struct Bio__Human {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     int age;
     int vitality;
@@ -174,24 +174,24 @@ struct Bio__Human {
 typedef struct Bio__Human Bio__Human;
 
 /* --------- Section 9 · Class metadata infrastructure --------- */
-extern NFClass NOPA_CLASS_$_Bio__Organism;
-extern NFClass NOPA_CLASS_$_DebugToken;
-extern NFClass NOPA_CLASS_$_Bio__Animal;
-extern NFClass NOPA_CLASS_$_Bio__Human;
+extern NPClass NOPA_CLASS_$_Bio__Organism;
+extern NPClass NOPA_CLASS_$_DebugToken;
+extern NPClass NOPA_CLASS_$_Bio__Animal;
+extern NPClass NOPA_CLASS_$_Bio__Human;
 void nopa_metaInit(void);
 
 /* --------- Section 10 · Vtable & metadata instances ---------- */
 /* VTable instance: Bio::Organism */
 __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_Bio__Organism = {
     .__sig = 0x5902b1d3eb188383ULL,
-    .age = (int (*)(NFObject *, SEL))Bio__Organism_age,
+    .age = (int (*)(NPObject *, SEL))Bio__Organism_age,
     .code = NULL,
     .dump = NULL,
-    .energy = (int (*)(NFObject *, SEL))Bio__Organism_energy,
-    .grow = (void (*)(NFObject *, SEL))Bio__Organism_grow,
-    .init = (NFObject * (*)(NFObject *, SEL))Bio__Organism_init,
-    .legs = (int (*)(NFObject *, SEL))Bio__Organism_legs,
-    .setEnergy_ = (void (*)(NFObject *, SEL, int))Bio__Organism_setEnergy_,
+    .energy = (int (*)(NPObject *, SEL))Bio__Organism_energy,
+    .grow = (void (*)(NPObject *, SEL))Bio__Organism_grow,
+    .init = (NPObject * (*)(NPObject *, SEL))Bio__Organism_init,
+    .legs = (int (*)(NPObject *, SEL))Bio__Organism_legs,
+    .setEnergy_ = (void (*)(NPObject *, SEL, int))Bio__Organism_setEnergy_,
     .setStrength_ = NULL,
     .setWisdom_ = NULL,
     .strength = NULL,
@@ -204,8 +204,8 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_Bio__Organism = {
 __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_DebugToken = {
     .__sig = 0x5902b1d3eb188383ULL,
     .age = NULL,
-    .code = (int (*)(NFObject *, SEL))DebugToken_code,
-    .dump = (void (*)(NFObject *, SEL))DebugToken_dump,
+    .code = (int (*)(NPObject *, SEL))DebugToken_code,
+    .dump = (void (*)(NPObject *, SEL))DebugToken_dump,
     .energy = NULL,
     .grow = NULL,
     .init = NULL,
@@ -222,39 +222,39 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_DebugToken = {
 /* VTable instance: Bio::Animal */
 __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_Bio__Animal = {
     .__sig = 0x5902b1d3eb188383ULL,
-    .age = (int (*)(NFObject *, SEL))Bio__Organism_age,
+    .age = (int (*)(NPObject *, SEL))Bio__Organism_age,
     .code = NULL,
     .dump = NULL,
-    .energy = (int (*)(NFObject *, SEL))Bio__Organism_energy,
-    .grow = (void (*)(NFObject *, SEL))Bio__Organism_grow,
-    .init = (NFObject * (*)(NFObject *, SEL))Bio__Animal_init,
-    .legs = (int (*)(NFObject *, SEL))Bio__Animal_legs,
-    .setEnergy_ = (void (*)(NFObject *, SEL, int))Bio__Organism_setEnergy_,
-    .setStrength_ = (void (*)(NFObject *, SEL, int))Bio__Animal_setStrength_,
+    .energy = (int (*)(NPObject *, SEL))Bio__Organism_energy,
+    .grow = (void (*)(NPObject *, SEL))Bio__Organism_grow,
+    .init = (NPObject * (*)(NPObject *, SEL))Bio__Animal_init,
+    .legs = (int (*)(NPObject *, SEL))Bio__Animal_legs,
+    .setEnergy_ = (void (*)(NPObject *, SEL, int))Bio__Organism_setEnergy_,
+    .setStrength_ = (void (*)(NPObject *, SEL, int))Bio__Animal_setStrength_,
     .setWisdom_ = NULL,
-    .strength = (int (*)(NFObject *, SEL))Bio__Animal_strength,
+    .strength = (int (*)(NPObject *, SEL))Bio__Animal_strength,
     .think_ = NULL,
     .wisdom = NULL,
-    .work_ = (int (*)(NFObject *, SEL, int))Bio__Animal_work_,
+    .work_ = (int (*)(NPObject *, SEL, int))Bio__Animal_work_,
 };
 
 /* VTable instance: Bio::Human */
 __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_Bio__Human = {
     .__sig = 0x5902b1d3eb188383ULL,
-    .age = (int (*)(NFObject *, SEL))Bio__Organism_age,
+    .age = (int (*)(NPObject *, SEL))Bio__Organism_age,
     .code = NULL,
     .dump = NULL,
-    .energy = (int (*)(NFObject *, SEL))Bio__Organism_energy,
-    .grow = (void (*)(NFObject *, SEL))Bio__Organism_grow,
-    .init = (NFObject * (*)(NFObject *, SEL))Bio__Human_init,
-    .legs = (int (*)(NFObject *, SEL))Bio__Human_legs,
-    .setEnergy_ = (void (*)(NFObject *, SEL, int))Bio__Organism_setEnergy_,
-    .setStrength_ = (void (*)(NFObject *, SEL, int))Bio__Animal_setStrength_,
-    .setWisdom_ = (void (*)(NFObject *, SEL, int))Bio__Human_setWisdom_,
-    .strength = (int (*)(NFObject *, SEL))Bio__Animal_strength,
-    .think_ = (int (*)(NFObject *, SEL, int))Bio__Human_think_,
-    .wisdom = (int (*)(NFObject *, SEL))Bio__Human_wisdom,
-    .work_ = (int (*)(NFObject *, SEL, int))Bio__Human_work_,
+    .energy = (int (*)(NPObject *, SEL))Bio__Organism_energy,
+    .grow = (void (*)(NPObject *, SEL))Bio__Organism_grow,
+    .init = (NPObject * (*)(NPObject *, SEL))Bio__Human_init,
+    .legs = (int (*)(NPObject *, SEL))Bio__Human_legs,
+    .setEnergy_ = (void (*)(NPObject *, SEL, int))Bio__Organism_setEnergy_,
+    .setStrength_ = (void (*)(NPObject *, SEL, int))Bio__Animal_setStrength_,
+    .setWisdom_ = (void (*)(NPObject *, SEL, int))Bio__Human_setWisdom_,
+    .strength = (int (*)(NPObject *, SEL))Bio__Animal_strength,
+    .think_ = (int (*)(NPObject *, SEL, int))Bio__Human_think_,
+    .wisdom = (int (*)(NPObject *, SEL))Bio__Human_wisdom,
+    .work_ = (int (*)(NPObject *, SEL, int))Bio__Human_work_,
 };
 
 /* Meta vtable instance: Bio::Organism */
@@ -283,34 +283,34 @@ __attribute__((weak)) struct NOPA_META_VTABLE_$_Bio__Human NOPA_META_VTABLE_$_Bi
 };
 
 /* +getClass for Bio::Organism */
-__attribute__((weak)) NFClass * NOPA_GETCLASS_$_Bio__Organism(NFClass * self, SEL _cmd) {
+__attribute__((weak)) NPClass * NOPA_GETCLASS_$_Bio__Organism(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
 /* +getClass for DebugToken */
-__attribute__((weak)) NFClass * NOPA_GETCLASS_$_DebugToken(NFClass * self, SEL _cmd) {
+__attribute__((weak)) NPClass * NOPA_GETCLASS_$_DebugToken(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
 /* +getClass for Bio::Animal */
-__attribute__((weak)) NFClass * NOPA_GETCLASS_$_Bio__Animal(NFClass * self, SEL _cmd) {
+__attribute__((weak)) NPClass * NOPA_GETCLASS_$_Bio__Animal(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
 /* +getClass for Bio::Human */
-__attribute__((weak)) NFClass * NOPA_GETCLASS_$_Bio__Human(NFClass * self, SEL _cmd) {
+__attribute__((weak)) NPClass * NOPA_GETCLASS_$_Bio__Human(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
 /* -------- Section 11 · Class metadata initialization --------- */
-NFClass NOPA_CLASS_$_Bio__Organism;
-NFClass NOPA_CLASS_$_DebugToken;
-NFClass NOPA_CLASS_$_Bio__Animal;
-NFClass NOPA_CLASS_$_Bio__Human;
+NPClass NOPA_CLASS_$_Bio__Organism;
+NPClass NOPA_CLASS_$_DebugToken;
+NPClass NOPA_CLASS_$_Bio__Animal;
+NPClass NOPA_CLASS_$_Bio__Human;
 
 __attribute__((constructor)) static void __nopa_vtable_layout_check(void) {
     nopa_verify_vtable_sig((&NOPA_VTABLE_$_Bio__Organism)->__sig, 0x5902b1d3eb188383ULL, "age code dump energy grow init legs setEnergy_ setStrength_ setWisdom_ strength think_ wisdom work_ | class Bio::Organism | tu stress.np");
@@ -320,7 +320,7 @@ __attribute__((constructor)) static void __nopa_vtable_layout_check(void) {
 }
 
 __attribute__((weak)) void nopa_metaInit(void) {
-    NOPA_CLASS_$_Bio__Organism = (NFClass){
+    NOPA_CLASS_$_Bio__Organism = (NPClass){
         .name = "Bio::Organism",
         .superclass = &NOPA_CLASS_$_nopa_root,
         .instance_size = sizeof(struct Bio__Organism),
@@ -329,7 +329,7 @@ __attribute__((weak)) void nopa_metaInit(void) {
         .protocol_count = 0,
         .dealloc = NULL,
     };
-    NOPA_CLASS_$_DebugToken = (NFClass){
+    NOPA_CLASS_$_DebugToken = (NPClass){
         .name = "DebugToken",
         .superclass = &NOPA_CLASS_$_nopa_root,
         .instance_size = sizeof(struct DebugToken),
@@ -338,7 +338,7 @@ __attribute__((weak)) void nopa_metaInit(void) {
         .protocol_count = 0,
         .dealloc = NULL,
     };
-    NOPA_CLASS_$_Bio__Animal = (NFClass){
+    NOPA_CLASS_$_Bio__Animal = (NPClass){
         .name = "Bio::Animal",
         .superclass = &NOPA_CLASS_$_Bio__Organism,
         .instance_size = sizeof(struct Bio__Animal),
@@ -347,7 +347,7 @@ __attribute__((weak)) void nopa_metaInit(void) {
         .protocol_count = 0,
         .dealloc = NULL,
     };
-    NOPA_CLASS_$_Bio__Human = (NFClass){
+    NOPA_CLASS_$_Bio__Human = (NPClass){
         .name = "Bio::Human",
         .superclass = &NOPA_CLASS_$_Bio__Animal,
         .instance_size = sizeof(struct Bio__Human),
@@ -363,50 +363,50 @@ __attribute__((weak)) void nopa_meta_init(void) { nopa_metaInit(); }
 /* --------------- Section 12 · Runtime support ---------------- */
 /* --------------- Section 13 · Function bodies ---------------- */
 /* +[Organism create] */
-__attribute__((weak)) NFObject * Bio__Organism_create(NFClass * self, SEL _cmd) {
+__attribute__((weak)) NPObject * Bio__Organism_create(NPClass * self, SEL _cmd) {
     return nopa_alloc(self);
 }
 
 /* -[Organism init] */
-__attribute__((weak)) NFObject * Bio__Organism_init(NFObject * self, SEL _cmd) {
+__attribute__((weak)) NPObject * Bio__Organism_init(NPObject * self, SEL _cmd) {
     ((struct Bio__Organism *)self)->age = 0;
     ((struct Bio__Organism *)self)->vitality = 100;
     return self;
 }
 
 /* -[Organism age] */
-__attribute__((weak)) int Bio__Organism_age(NFObject * self, SEL _cmd) {
+__attribute__((weak)) int Bio__Organism_age(NPObject * self, SEL _cmd) {
     return ((struct Bio__Organism *)self)->age;
 }
 
 /* -[Organism grow] */
-__attribute__((weak)) void Bio__Organism_grow(NFObject * self, SEL _cmd) {
+__attribute__((weak)) void Bio__Organism_grow(NPObject * self, SEL _cmd) {
     (((struct Bio__Organism *)self)->age)++;
     (((struct Bio__Organism *)self)->vitality += 10);
 }
 
 /* -[Organism legs] */
-__attribute__((weak)) int Bio__Organism_legs(NFObject * self, SEL _cmd) {
+__attribute__((weak)) int Bio__Organism_legs(NPObject * self, SEL _cmd) {
     return 0;
 }
 
 /* -[Organism energy] */
-__attribute__((weak)) int Bio__Organism_energy(NFObject * self, SEL _cmd) {
+__attribute__((weak)) int Bio__Organism_energy(NPObject * self, SEL _cmd) {
     return ((struct Bio__Organism *)self)->_energy;
 }
 
 /* -[Organism setEnergy:] */
-__attribute__((weak)) void Bio__Organism_setEnergy_(NFObject * self, SEL _cmd, int value) {
+__attribute__((weak)) void Bio__Organism_setEnergy_(NPObject * self, SEL _cmd, int value) {
     ((struct Bio__Organism *)self)->_energy = value;
 }
 
 /* -[Animal setStrength:] */
-__attribute__((weak)) int Bio__Animal_legs(NFObject * self, SEL _cmd) {
+__attribute__((weak)) int Bio__Animal_legs(NPObject * self, SEL _cmd) {
     return 4;
 }
 
 /* -[Animal work_] */
-__attribute__((weak)) int Bio__Animal_work_(NFObject * self, SEL _cmd, int hours) {
+__attribute__((weak)) int Bio__Animal_work_(NPObject * self, SEL _cmd, int hours) {
     (((struct Bio__Animal *)self)->vitality -= (hours * 5));
     kputs("       worked ");
     kputdec(hours);
@@ -417,29 +417,29 @@ __attribute__((weak)) int Bio__Animal_work_(NFObject * self, SEL _cmd, int hours
 }
 
 /* -[Animal strength] */
-__attribute__((weak)) int Bio__Animal_strength(NFObject * self, SEL _cmd) {
+__attribute__((weak)) int Bio__Animal_strength(NPObject * self, SEL _cmd) {
     return ((struct Bio__Animal *)self)->_strength;
 }
 
 /* -[Animal setStrength_] */
-__attribute__((weak)) void Bio__Animal_setStrength_(NFObject * self, SEL _cmd, int value) {
+__attribute__((weak)) void Bio__Animal_setStrength_(NPObject * self, SEL _cmd, int value) {
     ((struct Bio__Animal *)self)->_strength = value;
 }
 
 /* -[Animal work:] */
-__attribute__((weak)) NFObject * Bio__Animal_init(NFObject * self, SEL _cmd) {
+__attribute__((weak)) NPObject * Bio__Animal_init(NPObject * self, SEL _cmd) {
     self = (&NOPA_VTABLE_$_Bio__Organism)->init(self, __nopa_sel_init);
     ((struct Bio__Animal *)self)->speed = 10;
     return self;
 }
 
 /* -[Human wisdom] */
-__attribute__((weak)) int Bio__Human_legs(NFObject * self, SEL _cmd) {
+__attribute__((weak)) int Bio__Human_legs(NPObject * self, SEL _cmd) {
     return 2;
 }
 
 /* -[Human work_] */
-__attribute__((weak)) int Bio__Human_work_(NFObject * self, SEL _cmd, int hours) {
+__attribute__((weak)) int Bio__Human_work_(NPObject * self, SEL _cmd, int hours) {
     int result = (&NOPA_VTABLE_$_Bio__Animal)->work_(self, __nopa_sel_work_, hours);
     kputs("       human worked smarter: ");
     kputdec((result + 5));
@@ -448,9 +448,9 @@ __attribute__((weak)) int Bio__Human_work_(NFObject * self, SEL _cmd, int hours)
 }
 
 /* -[Human think_] */
-__attribute__((weak)) int Bio__Human_think_(NFObject * self, SEL _cmd, int problem) {
+__attribute__((weak)) int Bio__Human_think_(NPObject * self, SEL _cmd, int problem) {
     int solution = ((problem * ((struct Bio__Human *)self)->iq) / 50);
-    ({ NFObject *__nopa_tmp_0 = ((NFObject *)(self)); __nopa_tmp_0 ? ((void (*)(NFObject *, SEL, int))((struct nopa_vtable *)__nopa_tmp_0->isa->vtable)->setWisdom_)(__nopa_tmp_0, __nopa_sel_setWisdom_, (({ NFObject *__nopa_tmp_1 = ((NFObject *)(self)); __nopa_tmp_1 ? ((int (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_1->isa->vtable)->wisdom)(__nopa_tmp_1, __nopa_sel_wisdom) : (int){0}; }) + 1)) : 0; });
+    ({ NPObject *__nopa_tmp_0 = ((NPObject *)(self)); __nopa_tmp_0 ? ((void (*)(NPObject *, SEL, int))((struct nopa_vtable *)__nopa_tmp_0->isa->vtable)->setWisdom_)(__nopa_tmp_0, __nopa_sel_setWisdom_, (({ NPObject *__nopa_tmp_1 = ((NPObject *)(self)); __nopa_tmp_1 ? ((int (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_1->isa->vtable)->wisdom)(__nopa_tmp_1, __nopa_sel_wisdom) : (int){0}; }) + 1)) : 0; });
     kputs("       thought about ");
     kputdec(problem);
     kputs(" -> ");
@@ -460,17 +460,17 @@ __attribute__((weak)) int Bio__Human_think_(NFObject * self, SEL _cmd, int probl
 }
 
 /* -[Human wisdom] */
-__attribute__((weak)) int Bio__Human_wisdom(NFObject * self, SEL _cmd) {
+__attribute__((weak)) int Bio__Human_wisdom(NPObject * self, SEL _cmd) {
     return ((struct Bio__Human *)self)->_wisdom;
 }
 
 /* -[Human setWisdom_] */
-__attribute__((weak)) void Bio__Human_setWisdom_(NFObject * self, SEL _cmd, int value) {
+__attribute__((weak)) void Bio__Human_setWisdom_(NPObject * self, SEL _cmd, int value) {
     ((struct Bio__Human *)self)->_wisdom = value;
 }
 
 /* -[Human work:] */
-__attribute__((weak)) NFObject * Bio__Human_init(NFObject * self, SEL _cmd) {
+__attribute__((weak)) NPObject * Bio__Human_init(NPObject * self, SEL _cmd) {
     self = (&NOPA_VTABLE_$_Bio__Animal)->init(self, __nopa_sel_init);
     ((struct Bio__Human *)self)->iq = 100;
     ((struct Bio__Human *)self)->speed = 12;
@@ -478,24 +478,24 @@ __attribute__((weak)) NFObject * Bio__Human_init(NFObject * self, SEL _cmd) {
 }
 
 /* +[DebugToken alloc] */
-__attribute__((weak)) NFObject * DebugToken_alloc(NFClass * self, SEL _cmd) {
+__attribute__((weak)) NPObject * DebugToken_alloc(NPClass * self, SEL _cmd) {
     return nopa_alloc(self);
 }
 
 /* +[DebugToken token:] */
-__attribute__((weak)) NFObject * DebugToken_token_(NFClass * self, SEL _cmd, int c) {
+__attribute__((weak)) NPObject * DebugToken_token_(NPClass * self, SEL _cmd, int c) {
     DebugToken * t = (DebugToken *)(DebugToken_alloc(&NOPA_CLASS_$_DebugToken, __nopa_sel_alloc));
     t->code = c;
     return t;
 }
 
 /* -[DebugToken code] */
-__attribute__((weak)) int DebugToken_code(NFObject * self, SEL _cmd) {
+__attribute__((weak)) int DebugToken_code(NPObject * self, SEL _cmd) {
     return ((struct DebugToken *)self)->code;
 }
 
 /* -[DebugToken dump] */
-__attribute__((weak)) void DebugToken_dump(NFObject * self, SEL _cmd) {
+__attribute__((weak)) void DebugToken_dump(NPObject * self, SEL _cmd) {
     kputs("       DebugToken(code=");
     kputdec(((struct DebugToken *)self)->code);
     kputs(")\n");
@@ -550,7 +550,7 @@ __attribute__((weak)) int local_catch_token(int n, DebugToken * t) {
             return (n * 3);
         }
         memcpy(__nopa_exception_buf, __nopa_saved, sizeof(jmp_buf));
-        if ((__nopa_state == 1))         if (__nopa_eh_isa((NFObject *)__nopa_exception_value, &NOPA_CLASS_$_DebugToken)) {
+        if ((__nopa_state == 1))         if (__nopa_eh_isa((NPObject *)__nopa_exception_value, &NOPA_CLASS_$_DebugToken)) {
             __nopa_state = 2;
             DebugToken * caught;
             (void)caught;
@@ -570,9 +570,9 @@ __attribute__((weak)) int main(void) {
     int passed = 0;
     int total = 0;
     (total)++;
-    NFObject *__nopa_tmp_2 = (DebugToken_alloc(&NOPA_CLASS_$_Bio__Human, __nopa_sel_alloc));
+    NPObject *__nopa_tmp_2 = (DebugToken_alloc(&NOPA_CLASS_$_Bio__Human, __nopa_sel_alloc));
     Bio__Human * h = (Bio__Human *)(__nopa_tmp_2 ? ((struct nopa_vtable *)__nopa_tmp_2->isa->vtable)->init(__nopa_tmp_2, __nopa_sel_init) : 0);
-    int legs = ({ NFObject *__nopa_tmp_3 = ((NFObject *)(h)); __nopa_tmp_3 ? ((int (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_3->isa->vtable)->legs)(__nopa_tmp_3, __nopa_sel_legs) : (int){0}; });
+    int legs = ({ NPObject *__nopa_tmp_3 = ((NPObject *)(h)); __nopa_tmp_3 ? ((int (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_3->isa->vtable)->legs)(__nopa_tmp_3, __nopa_sel_legs) : (int){0}; });
     kputs("[1] Human legs=");
     kputdec(legs);
     kputs(" (expect 2)\n");
@@ -580,7 +580,7 @@ __attribute__((weak)) int main(void) {
         (passed)++;
     }
     (total)++;
-    int age = ({ NFObject *__nopa_tmp_4 = ((NFObject *)(h)); __nopa_tmp_4 ? ((int (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_4->isa->vtable)->age)(__nopa_tmp_4, __nopa_sel_age) : (int){0}; });
+    int age = ({ NPObject *__nopa_tmp_4 = ((NPObject *)(h)); __nopa_tmp_4 ? ((int (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_4->isa->vtable)->age)(__nopa_tmp_4, __nopa_sel_age) : (int){0}; });
     kputs("[2] Human age=");
     kputdec(age);
     kputs(" (expect 0)\n");
@@ -588,8 +588,8 @@ __attribute__((weak)) int main(void) {
         (passed)++;
     }
     (total)++;
-    ({ NFObject *__nopa_tmp_5 = ((NFObject *)(h)); __nopa_tmp_5 ? ((void (*)(NFObject *, SEL, int))((struct nopa_vtable *)__nopa_tmp_5->isa->vtable)->setStrength_)(__nopa_tmp_5, __nopa_sel_setStrength_, 50) : 0; });
-    int s = ({ NFObject *__nopa_tmp_6 = ((NFObject *)(h)); __nopa_tmp_6 ? ((int (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_6->isa->vtable)->strength)(__nopa_tmp_6, __nopa_sel_strength) : (int){0}; });
+    ({ NPObject *__nopa_tmp_5 = ((NPObject *)(h)); __nopa_tmp_5 ? ((void (*)(NPObject *, SEL, int))((struct nopa_vtable *)__nopa_tmp_5->isa->vtable)->setStrength_)(__nopa_tmp_5, __nopa_sel_setStrength_, 50) : 0; });
+    int s = ({ NPObject *__nopa_tmp_6 = ((NPObject *)(h)); __nopa_tmp_6 ? ((int (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_6->isa->vtable)->strength)(__nopa_tmp_6, __nopa_sel_strength) : (int){0}; });
     kputs("[3] Human strength=");
     kputdec(s);
     kputs(" (expect 50)\n");
@@ -605,7 +605,7 @@ __attribute__((weak)) int main(void) {
         (passed)++;
     }
     (total)++;
-    ({ NFObject *__nopa_tmp_7 = ((NFObject *)(h)); __nopa_tmp_7 ? ((void (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_7->isa->vtable)->grow)(__nopa_tmp_7, __nopa_sel_grow) : 0; });
+    ({ NPObject *__nopa_tmp_7 = ((NPObject *)(h)); __nopa_tmp_7 ? ((void (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_7->isa->vtable)->grow)(__nopa_tmp_7, __nopa_sel_grow) : 0; });
     int v = h->vitality;
     kputs("[5] vitality after grow=");
     kputdec(v);
@@ -614,14 +614,14 @@ __attribute__((weak)) int main(void) {
         (passed)++;
     }
     (total)++;
-    ({ NFObject *__nopa_tmp_8 = ((NFObject *)(h)); __nopa_tmp_8 ? ((int (*)(NFObject *, SEL, int))((struct nopa_vtable *)__nopa_tmp_8->isa->vtable)->work_)(__nopa_tmp_8, __nopa_sel_work_, 5) : (int){0}; });
+    ({ NPObject *__nopa_tmp_8 = ((NPObject *)(h)); __nopa_tmp_8 ? ((int (*)(NPObject *, SEL, int))((struct nopa_vtable *)__nopa_tmp_8->isa->vtable)->work_)(__nopa_tmp_8, __nopa_sel_work_, 5) : (int){0}; });
     kputs("[6] work done (check vitality deduction)\n");
     if ((v > 0)) {
         (passed)++;
     }
     (total)++;
     Bio__Organism * o = (Bio__Organism *)(Bio__Organism_create(&NOPA_CLASS_$_Bio__Organism, __nopa_sel_create));
-    ({ NFObject *__nopa_tmp_9 = ((NFObject *)(o)); __nopa_tmp_9 ? ((NFObject * (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_9->isa->vtable)->init)(__nopa_tmp_9, __nopa_sel_init) : 0; });
+    ({ NPObject *__nopa_tmp_9 = ((NPObject *)(o)); __nopa_tmp_9 ? ((NPObject * (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_9->isa->vtable)->init)(__nopa_tmp_9, __nopa_sel_init) : 0; });
     kputs("[7] Organism created via class method\n");
     if ((o != 0)) {
         (passed)++;
@@ -644,7 +644,7 @@ __attribute__((weak)) int main(void) {
             kputs("    unreachable\n");
         }
         memcpy(__nopa_exception_buf, __nopa_saved, sizeof(jmp_buf));
-        if ((__nopa_state == 1))         if (__nopa_eh_isa((NFObject *)__nopa_exception_value, &NOPA_CLASS_$_Bio__Organism)) {
+        if ((__nopa_state == 1))         if (__nopa_eh_isa((NPObject *)__nopa_exception_value, &NOPA_CLASS_$_Bio__Organism)) {
             __nopa_state = 2;
             Bio__Organism * e1;
             (void)e1;
@@ -655,7 +655,7 @@ __attribute__((weak)) int main(void) {
         }
         if ((__nopa_state == 1)) {
             __nopa_state = 2;
-            NFObject * e2;
+            NPObject * e2;
             (void)e2;
             {
                 catch_idx = 2;
@@ -699,9 +699,9 @@ __attribute__((weak)) int main(void) {
         (passed)++;
     }
     (total)++;
-    ({ NFObject *__nopa_tmp_10 = ((NFObject *)(h)); __nopa_tmp_10 ? ((void (*)(NFObject *, SEL, int))((struct nopa_vtable *)__nopa_tmp_10->isa->vtable)->setEnergy_)(__nopa_tmp_10, __nopa_sel_setEnergy_, 30) : 0; });
-    ({ NFObject *__nopa_tmp_11 = ((NFObject *)(h)); __nopa_tmp_11 ? ((void (*)(NFObject *, SEL, int))((struct nopa_vtable *)__nopa_tmp_11->isa->vtable)->setWisdom_)(__nopa_tmp_11, __nopa_sel_setWisdom_, 70) : 0; });
-    int t12 = ({ NFObject *__nopa_tmp_12 = ((NFObject *)(h)); __nopa_tmp_12 ? ((int (*)(NFObject *, SEL, int))((struct nopa_vtable *)__nopa_tmp_12->isa->vtable)->think_)(__nopa_tmp_12, __nopa_sel_think_, 20) : (int){0}; });
+    ({ NPObject *__nopa_tmp_10 = ((NPObject *)(h)); __nopa_tmp_10 ? ((void (*)(NPObject *, SEL, int))((struct nopa_vtable *)__nopa_tmp_10->isa->vtable)->setEnergy_)(__nopa_tmp_10, __nopa_sel_setEnergy_, 30) : 0; });
+    ({ NPObject *__nopa_tmp_11 = ((NPObject *)(h)); __nopa_tmp_11 ? ((void (*)(NPObject *, SEL, int))((struct nopa_vtable *)__nopa_tmp_11->isa->vtable)->setWisdom_)(__nopa_tmp_11, __nopa_sel_setWisdom_, 70) : 0; });
+    int t12 = ({ NPObject *__nopa_tmp_12 = ((NPObject *)(h)); __nopa_tmp_12 ? ((int (*)(NPObject *, SEL, int))((struct nopa_vtable *)__nopa_tmp_12->isa->vtable)->think_)(__nopa_tmp_12, __nopa_sel_think_, 20) : (int){0}; });
     kputs("[12] think(20)=");
     kputdec(t12);
     kputs(" (expect 40)\n");
@@ -710,7 +710,7 @@ __attribute__((weak)) int main(void) {
     }
     (total)++;
     Bio__Animal * a = (Bio__Animal *)h;
-    int al = ({ NFObject *__nopa_tmp_13 = ((NFObject *)(a)); __nopa_tmp_13 ? ((int (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_13->isa->vtable)->legs)(__nopa_tmp_13, __nopa_sel_legs) : (int){0}; });
+    int al = ({ NPObject *__nopa_tmp_13 = ((NPObject *)(a)); __nopa_tmp_13 ? ((int (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_13->isa->vtable)->legs)(__nopa_tmp_13, __nopa_sel_legs) : (int){0}; });
     kputs("[13] Animal-polymorphic legs=");
     kputdec(al);
     kputs(" (expect 2 via vtable)\n");
@@ -732,11 +732,11 @@ __attribute__((weak)) int main(void) {
             rethrow_token(tok);
         }
         memcpy(__nopa_exception_buf, __nopa_saved, sizeof(jmp_buf));
-        if ((__nopa_state == 1))         if (__nopa_eh_isa((NFObject *)__nopa_exception_value, &NOPA_CLASS_$_DebugToken)) {
+        if ((__nopa_state == 1))         if (__nopa_eh_isa((NPObject *)__nopa_exception_value, &NOPA_CLASS_$_DebugToken)) {
             __nopa_state = 2;
             DebugToken * c15 = (DebugToken *)__nopa_exception_value;
             {
-                hit15 = (hit15 + ({ NFObject *__nopa_tmp_14 = ((NFObject *)(c15)); __nopa_tmp_14 ? ((int (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_14->isa->vtable)->code)(__nopa_tmp_14, __nopa_sel_code) : (int){0}; }));
+                hit15 = (hit15 + ({ NPObject *__nopa_tmp_14 = ((NPObject *)(c15)); __nopa_tmp_14 ? ((int (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_14->isa->vtable)->code)(__nopa_tmp_14, __nopa_sel_code) : (int){0}; }));
             }
         }
         memcpy(__nopa_exception_buf, __nopa_saved, sizeof(jmp_buf));
@@ -751,11 +751,11 @@ __attribute__((weak)) int main(void) {
             bare_rethrow_token(tok);
         }
         memcpy(__nopa_exception_buf, __nopa_saved, sizeof(jmp_buf));
-        if ((__nopa_state == 1))         if (__nopa_eh_isa((NFObject *)__nopa_exception_value, &NOPA_CLASS_$_DebugToken)) {
+        if ((__nopa_state == 1))         if (__nopa_eh_isa((NPObject *)__nopa_exception_value, &NOPA_CLASS_$_DebugToken)) {
             __nopa_state = 2;
             DebugToken * c15b = (DebugToken *)__nopa_exception_value;
             {
-                hit15 = (hit15 + ({ NFObject *__nopa_tmp_15 = ((NFObject *)(c15b)); __nopa_tmp_15 ? ((int (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_15->isa->vtable)->code)(__nopa_tmp_15, __nopa_sel_code) : (int){0}; }));
+                hit15 = (hit15 + ({ NPObject *__nopa_tmp_15 = ((NPObject *)(c15b)); __nopa_tmp_15 ? ((int (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_15->isa->vtable)->code)(__nopa_tmp_15, __nopa_sel_code) : (int){0}; }));
             }
         }
         memcpy(__nopa_exception_buf, __nopa_saved, sizeof(jmp_buf));

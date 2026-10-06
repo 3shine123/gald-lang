@@ -3,9 +3,9 @@
 // ObjC type-introspection dispatch trio on the root class:
 //   isKindOfClass:      — isa-chain walk (official ObjC spelling)
 //   respondsToSelector: — uniform vtable NULL-slot check (compiler pseudo-method)
-//   isEqual:            — identity on nopa_root; NFString/NFNumber override with VALUE equality
+//   isEqual:            — identity on nopa_root; NPString/NPNumber override with VALUE equality
 
-@interface Dog : NFObject
+@interface Dog : NPObject
 - (void)speak;
 @end
 
@@ -13,7 +13,7 @@
 - (void)speak { printf("woof\n"); }
 @end
 
-@interface Cat : NFObject
+@interface Cat : NPObject
 @end
 
 @implementation Cat
@@ -22,12 +22,12 @@
 int main() {
     @autoreleasepool {
         Dog *d = [[Dog alloc] init];
-        NFObject *o = d;
+        NPObject *o = d;
 
         // isKindOfClass: walks the isa chain; nil receiver is safe (and warns)
-        printf("kind Dog=%d kind NFObject=%d kind Cat=%d kind nil=%d\n",
+        printf("kind Dog=%d kind NPObject=%d kind Cat=%d kind nil=%d\n",
                [o isKindOfClass:[Dog class]],
-               [o isKindOfClass:[NFObject class]],
+               [o isKindOfClass:[NPObject class]],
                [o isKindOfClass:[Cat class]],
                [nil isKindOfClass:[Dog class]]);
 
@@ -37,10 +37,10 @@ int main() {
                [o respondsToSelector:@selector(noSuchMethod)],
                [nil respondsToSelector:@selector(speak)]);
 
-        // isEqual: on NFString is VALUE equality (as in ObjC's NSString), so two
+        // isEqual: on NPString is VALUE equality (as in ObjC's NSString), so two
         // distinct @"abc" objects compare equal; isEqualToString: agrees.
-        NFString *a = @"abc";
-        NFString *b = @"abc";
+        NPString *a = @"abc";
+        NPString *b = @"abc";
         printf("eq same=%d eq other=%d eq str-content=%d\n",
                [a isEqual:a], [a isEqual:b], [a isEqualToString:b]);
 

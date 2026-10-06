@@ -115,7 +115,7 @@ pub enum AstExprKind {
     /// desugar pass splits the enclosing body at these nodes.
     Await,
     /// `@(expr)` — boxed-expression literal. The checker rewrites it into the
-    /// `NFNumber` factory matching the expression's static type; a codegen
+    /// `NPNumber` factory matching the expression's static type; a codegen
     /// fallback arm keeps `-fno-checker` from emitting bad C.
     Boxed,
 }
@@ -188,7 +188,7 @@ pub enum AstExprData {
     /// `await <expr>` — the awaited expression (message send / call).
     Await(Box<AstExpr>),
     /// `@(expr)` — the boxed expression, before the checker rewrites it into
-    /// the `NFNumber` factory matching its static type.
+    /// the `NPNumber` factory matching its static type.
     Boxed(Box<AstExpr>),
 }
 
@@ -341,7 +341,7 @@ pub struct AstDecl {
          /// `@throws` ("declared to throw, type unstated"). Compile-time only
          /// (checker reconciles it against `@throw` stmts) — never emitted to C.
          throws: Option<Box<AstType>>,
-         /// `NFAsync<T>` return-type marker (see Function).
+         /// `NPAsync<T>` return-type marker (see Function).
          async_marker: bool,
      },
  Ivar {
@@ -373,7 +373,7 @@ pub struct AstDecl {
         /// `@throws` ("declared to throw, type unstated"). Compile-time only —
         /// never emitted to C.
         throws: Option<Box<AstType>>,
-        /// `NFAsync<T>` return-type marker: parser unwrapped it to `T` and set
+        /// `NPAsync<T>` return-type marker: parser unwrapped it to `T` and set
         /// this flag. Compile-time metadata only — the emitted C signature is
         /// just `T` (the async M2 driver already returns `T`).
         async_marker: bool,

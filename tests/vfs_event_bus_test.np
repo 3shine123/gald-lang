@@ -13,7 +13,7 @@
 @namespace System::IO
 
     // 🌟 泛型组件：通用 I/O 数据块缓冲区 Buffer<T>
-    @interface Buffer<T> : NFObject {
+    @interface Buffer<T> : NPObject {
         @public
         T _ring[3];
         int _head;
@@ -93,7 +93,7 @@
     @class DirectoryNode;
 
     // 具体类 1：文件节点
-    @interface FileNode : NFObject <FSNodeProtocol> {
+    @interface FileNode : NPObject <FSNodeProtocol> {
         @public
         const char* _fileName;
         int _bytesSize;
@@ -137,16 +137,16 @@
 
 
     // 具体类 2：目录节点 (可包含多个节点)
-    @interface DirectoryNode : NFObject <FSNodeProtocol> {
+    @interface DirectoryNode : NPObject <FSNodeProtocol> {
         @public
         const char* _dirName;
-        NFObject<FSNodeProtocol>* _children[2];
+        NPObject<FSNodeProtocol>* _children[2];
         int _childCount;
     }
     @property const char* dirName;
 
     - (id)initWithName:(const char*)name;
-    - (void)addChildNode:(NFObject<FSNodeProtocol>*)node;
+    - (void)addChildNode:(NPObject<FSNodeProtocol>*)node;
     @end
 
     @implementation DirectoryNode
@@ -163,7 +163,7 @@
         return self;
     }
 
-    - (void)addChildNode:(NFObject<FSNodeProtocol>*)node {
+    - (void)addChildNode:(NPObject<FSNodeProtocol>*)node {
         if (_childCount < 2 && node) {
             _children[_childCount] = [node retain];
             
@@ -227,7 +227,7 @@
 
     typedef void (^IOMonitorBlock)(const char* eventType, System::VFS::FileNode* targetFile);
 
-    @interface EventBus : NFObject {
+    @interface EventBus : NPObject {
         @public
         IOMonitorBlock _listener;
     }

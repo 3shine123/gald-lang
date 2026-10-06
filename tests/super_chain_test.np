@@ -3,7 +3,7 @@
 
 // 3-level inheritance chain testing [super method] dispatch
 
-@interface Grandparent : NFObject
+@interface Grandparent : NPObject
 - (void)describe;
 @end
 

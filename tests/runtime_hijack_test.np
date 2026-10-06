@@ -1,6 +1,6 @@
 // lang-test/runtime_hijack_test.np
 // 专为 nopac 设计的「匿名多态、不透明指针劫持与复合边界」极限测试
-// 基准框架：NFFoundation
+// 基准框架：NPFoundation
 
 #import <Foundation/Foundation.np>
 #include <stdio.h>
@@ -9,7 +9,7 @@
 
 // ============ 1. 两个完全没有血缘关系的类（测试动态符号查找） ============
 
-@interface NFShipKernel : NFObject
+@interface NPShipKernel : NPObject
 {
     @private
     int _safetyRating;
@@ -19,7 +19,7 @@
 - (int)getRating;
 @end
 
-@implementation NFShipKernel
+@implementation NPShipKernel
 - (id)init { self = [super init]; if(self){ _safetyRating = 100; } return self; }
 - (void)executeCommandChain:(int)code {
     _safetyRating -= code;
@@ -29,7 +29,7 @@
 @end
 
 
-@interface NFAlienTech : NFObject
+@interface NPAlienTech : NPObject
 {
     @public
     int _alienEnergyCells; // 故意暴露给外部进行劫持测试
@@ -38,7 +38,7 @@
 - (void)executeCommandChain:(int)code;
 @end
 
-@implementation NFAlienTech
+@implementation NPAlienTech
 - (id)init { self = [super init]; if(self){ _alienEnergyCells = 999; } return self; }
 - (void)executeCommandChain:(int)code {
     _alienEnergyCells += code * 10;
@@ -48,7 +48,7 @@
 
 
 // ============ 2. 劫持控制器（通过 id 万能指针和强转进行破坏） ============
-@interface NFRuntimetHijacker : NFObject
+@interface NPRuntimetHijacker : NPObject
 {
     @private
     id _anonymousTarget; // 不透明万能指针
@@ -58,7 +58,7 @@
 - (void)hijackAlienMemory:(id)alienObj;
 @end
 
-@implementation NFRuntimetHijacker
+@implementation NPRuntimetHijacker
 - (id)initWithTarget:(id)target
 {
     self = [super init];
@@ -80,7 +80,7 @@
 {
     // 【压测点 2】跨对象强转与成员变量越权修改
     // 将万能 id 指针强转为具体类型，并利用 -> 运算符直接跨类篡改内部值
-    NFAlienTech* rawTech = (NFAlienTech*)alienObj;
+    NPAlienTech* rawTech = (NPAlienTech*)alienObj;
     rawTech->_alienEnergyCells = 404; // 暴力清空外星核心的能量
     printf("[劫持黑客] 成功利用指针越权强行修改外星内存！当前能量已被篡改为: %d\n", rawTech->_alienEnergyCells);
 }
@@ -96,16 +96,16 @@ int main(int argc, const char* argv[])
         printf("==================================================\n\n");
 
         // 1. 创建两个毫无关联的实例
-        NFShipKernel* earthShip = [[NFShipKernel alloc] init];
-        NFAlienTech* alienTech = [[NFAlienTech alloc] init];
+        NPShipKernel* earthShip = [[NPShipKernel alloc] init];
+        NPAlienTech* alienTech = [[NPAlienTech alloc] init];
 
         // 2. 将它们伪装成 id 扔进劫持器中
-        NFRuntimetHijacker* hijacker1 = [[NFRuntimetHijacker alloc] initWithTarget:earthShip];
-        NFRuntimetHijacker* hijacker2 = [[NFRuntimetHijacker alloc] initWithTarget:alienTech];
+        NPRuntimetHijacker* hijacker1 = [[NPRuntimetHijacker alloc] initWithTarget:earthShip];
+        NPRuntimetHijacker* hijacker2 = [[NPRuntimetHijacker alloc] initWithTarget:alienTech];
 
         printf("--- 测试点 1: 验证不透明指针的动态多态派发 ---\n");
-        [hijacker1 forceExecute:15]; // 应该跑进 NFShipKernel
-        [hijacker2 forceExecute:15]; // 应该跑进 NFAlienTech
+        [hijacker1 forceExecute:15]; // 应该跑进 NPShipKernel
+        [hijacker2 forceExecute:15]; // 应该跑进 NPAlienTech
 
         printf("\n--- 测试点 2: 验证跨对象实例变量强转劫持 ---\n");
         [hijacker1 hijackAlienMemory:alienTech];

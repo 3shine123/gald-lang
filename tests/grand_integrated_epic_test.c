@@ -6,7 +6,7 @@
 #include <stddef.h>
 #include "nopa/runtime.h"
 struct nopa_vtable;
-struct nopa_NFObject_meta_vtable;
+struct nopa_NPObject_meta_vtable;
 struct nopa_Gameplay__GameManager_meta_vtable;
 struct nopa_Engine__Graphics__RenderNode_meta_vtable;
 struct nopa_Engine__Math__Vector2D_meta_vtable;
@@ -36,18 +36,18 @@ static const SEL __nopa_sel_executeMainLoopIteration = {.name = "executeMainLoop
 #ifndef __NOPA_ROOT_DEFINED
 #define __NOPA_ROOT_DEFINED
 struct __nopa_root {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
 };
 typedef struct __nopa_root __nopa_root;
 #endif
-#ifndef NFOBJECT_DEFINED
-#define NFOBJECT_DEFINED
-struct NFObject {
-    struct NFClass *isa;
+#ifndef NPOBJECT_DEFINED
+#define NPOBJECT_DEFINED
+struct NPObject {
+    struct NPClass *isa;
     uint32_t retain_count;
 };
-typedef struct NFObject NFObject;
+typedef struct NPObject NPObject;
 #endif
 struct Gameplay__GameManager;
 typedef struct Gameplay__GameManager Gameplay__GameManager;
@@ -60,94 +60,94 @@ typedef struct Extension__SpriteNode Extension__SpriteNode;
 
 typedef void (^Extension__ActionCompleteBlock)(int, Engine__Math__Vector2D *) ;
 
-NFObject * __nopa_root_init(NFObject * self, SEL _cmd);
-void __nopa_root_dealloc(NFObject * self, SEL _cmd);
-void __nopa_root_release(NFObject * self, SEL _cmd);
-NFObject * __nopa_root_retain(NFObject * self, SEL _cmd);
-NFObject * NFObject_alloc(NFClass * self, SEL _cmd);
-NFObject * NFObject_new(NFClass * self, SEL _cmd);
-NFObject * NFObject_init(NFObject * self, SEL _cmd);
-void NFObject_dealloc(NFObject * self, SEL _cmd);
-void NFObject_release(NFObject * self, SEL _cmd);
-NFObject * NFObject_retain(NFObject * self, SEL _cmd);
-NFObject * Engine__Math__Vector2D_initWithX_y_(NFObject * self, SEL _cmd, int posX, int posY);
-void Engine__Math__Vector2D_addVector_(NFObject * self, SEL _cmd, Engine__Math__Vector2D * other);
-NFObject * Engine__Graphics__RenderNode_initWithName_(NFObject * self, SEL _cmd, const char * name);
-void Engine__Graphics__RenderNode_renderFrame(NFObject * self, SEL _cmd);
-const char * Engine__Graphics__RenderNode_nodeName(NFObject * self, SEL _cmd);
-Engine__Math__Vector2D * Engine__Graphics__RenderNode_position(NFObject * self, SEL _cmd);
-void Engine__Graphics__RenderNode_setPosition_(NFObject * self, SEL _cmd, Engine__Math__Vector2D * value);
-void Engine__Graphics__RenderNode_dealloc(NFObject * self, SEL _cmd);
-NFObject * Extension__SpriteNode_initWithName_textureId_(NFObject * self, SEL _cmd, const char * name, int tId);
-void Extension__SpriteNode_setAnimationCallback_(NFObject * self, SEL _cmd, Extension__ActionCompleteBlock cb);
-void Extension__SpriteNode_playAnimationFrames_(NFObject * self, SEL _cmd, int total);
-void Extension__SpriteNode_renderFrame(NFObject * self, SEL _cmd);
-int Extension__SpriteNode_textureId(NFObject * self, SEL _cmd);
-void Extension__SpriteNode_setTextureId_(NFObject * self, SEL _cmd, int value);
-void Gameplay__GameManager_registerNode_(NFObject * self, SEL _cmd, Engine__Graphics__RenderNode * node);
-void Gameplay__GameManager_executeMainLoopIteration(NFObject * self, SEL _cmd);
-NFObject * Gameplay__GameManager_init(NFObject * self, SEL _cmd);
-NFObject * nopa_alloc(struct NFClass * cls);
-NFObject * nopa_init(NFObject * self);
-void nopa_release(NFObject * obj);
-NFObject * nopa_retain(NFObject * obj);
+NPObject * __nopa_root_init(NPObject * self, SEL _cmd);
+void __nopa_root_dealloc(NPObject * self, SEL _cmd);
+void __nopa_root_release(NPObject * self, SEL _cmd);
+NPObject * __nopa_root_retain(NPObject * self, SEL _cmd);
+NPObject * NPObject_alloc(NPClass * self, SEL _cmd);
+NPObject * NPObject_new(NPClass * self, SEL _cmd);
+NPObject * NPObject_init(NPObject * self, SEL _cmd);
+void NPObject_dealloc(NPObject * self, SEL _cmd);
+void NPObject_release(NPObject * self, SEL _cmd);
+NPObject * NPObject_retain(NPObject * self, SEL _cmd);
+NPObject * Engine__Math__Vector2D_initWithX_y_(NPObject * self, SEL _cmd, int posX, int posY);
+void Engine__Math__Vector2D_addVector_(NPObject * self, SEL _cmd, Engine__Math__Vector2D * other);
+NPObject * Engine__Graphics__RenderNode_initWithName_(NPObject * self, SEL _cmd, const char * name);
+void Engine__Graphics__RenderNode_renderFrame(NPObject * self, SEL _cmd);
+const char * Engine__Graphics__RenderNode_nodeName(NPObject * self, SEL _cmd);
+Engine__Math__Vector2D * Engine__Graphics__RenderNode_position(NPObject * self, SEL _cmd);
+void Engine__Graphics__RenderNode_setPosition_(NPObject * self, SEL _cmd, Engine__Math__Vector2D * value);
+void Engine__Graphics__RenderNode_dealloc(NPObject * self, SEL _cmd);
+NPObject * Extension__SpriteNode_initWithName_textureId_(NPObject * self, SEL _cmd, const char * name, int tId);
+void Extension__SpriteNode_setAnimationCallback_(NPObject * self, SEL _cmd, Extension__ActionCompleteBlock cb);
+void Extension__SpriteNode_playAnimationFrames_(NPObject * self, SEL _cmd, int total);
+void Extension__SpriteNode_renderFrame(NPObject * self, SEL _cmd);
+int Extension__SpriteNode_textureId(NPObject * self, SEL _cmd);
+void Extension__SpriteNode_setTextureId_(NPObject * self, SEL _cmd, int value);
+void Gameplay__GameManager_registerNode_(NPObject * self, SEL _cmd, Engine__Graphics__RenderNode * node);
+void Gameplay__GameManager_executeMainLoopIteration(NPObject * self, SEL _cmd);
+NPObject * Gameplay__GameManager_init(NPObject * self, SEL _cmd);
+NPObject * nopa_alloc(struct NPClass * cls);
+NPObject * nopa_init(NPObject * self);
+void nopa_release(NPObject * obj);
+NPObject * nopa_retain(NPObject * obj);
 int main(int argc, const char * argv[]);
 
-NFClass * NFObject_getClass(NFClass * self, SEL _cmd);
-NFClass * Gameplay__GameManager_getClass(NFClass * self, SEL _cmd);
-NFClass * Engine__Graphics__RenderNode_getClass(NFClass * self, SEL _cmd);
-NFClass * Engine__Math__Vector2D_getClass(NFClass * self, SEL _cmd);
-NFClass * Extension__SpriteNode_getClass(NFClass * self, SEL _cmd);
+NPClass * NPObject_getClass(NPClass * self, SEL _cmd);
+NPClass * Gameplay__GameManager_getClass(NPClass * self, SEL _cmd);
+NPClass * Engine__Graphics__RenderNode_getClass(NPClass * self, SEL _cmd);
+NPClass * Engine__Math__Vector2D_getClass(NPClass * self, SEL _cmd);
+NPClass * Extension__SpriteNode_getClass(NPClass * self, SEL _cmd);
 
 struct nopa_vtable {
-    void (*addVector_)(NFObject *, SEL, Engine__Math__Vector2D *);
-    void (*dealloc)(NFObject *, SEL);
-    void (*executeMainLoopIteration)(NFObject *, SEL);
-    NFObject * (*init)(NFObject *, SEL);
-    NFObject * (*initWithName_)(NFObject *, SEL, const char *);
-    NFObject * (*initWithName_textureId_)(NFObject *, SEL, const char *, int);
-    NFObject * (*initWithX_y_)(NFObject *, SEL, int, int);
-    const char * (*nodeName)(NFObject *, SEL);
-    void (*playAnimationFrames_)(NFObject *, SEL, int);
-    Engine__Math__Vector2D * (*position)(NFObject *, SEL);
-    void (*registerNode_)(NFObject *, SEL, Engine__Graphics__RenderNode *);
-    void (*release)(NFObject *, SEL);
-    void (*renderFrame)(NFObject *, SEL);
-    NFObject * (*retain)(NFObject *, SEL);
-    void (*setAnimationCallback_)(NFObject *, SEL, Extension__ActionCompleteBlock);
-    void (*setPosition_)(NFObject *, SEL, Engine__Math__Vector2D *);
-    void (*setTextureId_)(NFObject *, SEL, int);
-    int (*textureId)(NFObject *, SEL);
+    void (*addVector_)(NPObject *, SEL, Engine__Math__Vector2D *);
+    void (*dealloc)(NPObject *, SEL);
+    void (*executeMainLoopIteration)(NPObject *, SEL);
+    NPObject * (*init)(NPObject *, SEL);
+    NPObject * (*initWithName_)(NPObject *, SEL, const char *);
+    NPObject * (*initWithName_textureId_)(NPObject *, SEL, const char *, int);
+    NPObject * (*initWithX_y_)(NPObject *, SEL, int, int);
+    const char * (*nodeName)(NPObject *, SEL);
+    void (*playAnimationFrames_)(NPObject *, SEL, int);
+    Engine__Math__Vector2D * (*position)(NPObject *, SEL);
+    void (*registerNode_)(NPObject *, SEL, Engine__Graphics__RenderNode *);
+    void (*release)(NPObject *, SEL);
+    void (*renderFrame)(NPObject *, SEL);
+    NPObject * (*retain)(NPObject *, SEL);
+    void (*setAnimationCallback_)(NPObject *, SEL, Extension__ActionCompleteBlock);
+    void (*setPosition_)(NPObject *, SEL, Engine__Math__Vector2D *);
+    void (*setTextureId_)(NPObject *, SEL, int);
+    int (*textureId)(NPObject *, SEL);
 };
 
-struct nopa_NFObject_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+struct nopa_NPObject_meta_vtable {
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct nopa_Gameplay__GameManager_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct nopa_Engine__Graphics__RenderNode_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct nopa_Engine__Math__Vector2D_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct nopa_Extension__SpriteNode_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 
 struct Gameplay__GameManager {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     Engine__Graphics__RenderNode * _activeNodes[3];
     int _nodeCount;
@@ -155,7 +155,7 @@ struct Gameplay__GameManager {
 typedef struct Gameplay__GameManager Gameplay__GameManager;
 
 struct Engine__Graphics__RenderNode {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     const char * _nodeName;
     Engine__Math__Vector2D * _position;
@@ -163,7 +163,7 @@ struct Engine__Graphics__RenderNode {
 typedef struct Engine__Graphics__RenderNode Engine__Graphics__RenderNode;
 
 struct Engine__Math__Vector2D {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     int x;
     int y;
@@ -171,7 +171,7 @@ struct Engine__Math__Vector2D {
 typedef struct Engine__Math__Vector2D Engine__Math__Vector2D;
 
 struct Extension__SpriteNode {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     const char * _nodeName;
     Engine__Math__Vector2D * _position;
@@ -180,19 +180,19 @@ struct Extension__SpriteNode {
 };
 typedef struct Extension__SpriteNode Extension__SpriteNode;
 
-extern NFClass nopa___nopa_root_class;
-extern NFClass nopa_NFObject_class;
-extern NFClass nopa_Gameplay__GameManager_class;
-extern NFClass nopa_Engine__Graphics__RenderNode_class;
-extern NFClass nopa_Engine__Math__Vector2D_class;
-extern NFClass nopa_Extension__SpriteNode_class;
+extern NPClass nopa___nopa_root_class;
+extern NPClass nopa_NPObject_class;
+extern NPClass nopa_Gameplay__GameManager_class;
+extern NPClass nopa_Engine__Graphics__RenderNode_class;
+extern NPClass nopa_Engine__Math__Vector2D_class;
+extern NPClass nopa_Extension__SpriteNode_class;
 void nopa_meta_init(void);
 
 struct nopa_vtable nopa___nopa_root_vtable_inst = {
     .addVector_ = NULL,
-    .dealloc = (void (*)(NFObject *, SEL))__nopa_root_dealloc,
+    .dealloc = (void (*)(NPObject *, SEL))__nopa_root_dealloc,
     .executeMainLoopIteration = NULL,
-    .init = (NFObject * (*)(NFObject *, SEL))__nopa_root_init,
+    .init = (NPObject * (*)(NPObject *, SEL))__nopa_root_init,
     .initWithName_ = NULL,
     .initWithName_textureId_ = NULL,
     .initWithX_y_ = NULL,
@@ -200,20 +200,20 @@ struct nopa_vtable nopa___nopa_root_vtable_inst = {
     .playAnimationFrames_ = NULL,
     .position = NULL,
     .registerNode_ = NULL,
-    .release = (void (*)(NFObject *, SEL))__nopa_root_release,
+    .release = (void (*)(NPObject *, SEL))__nopa_root_release,
     .renderFrame = NULL,
-    .retain = (NFObject * (*)(NFObject *, SEL))__nopa_root_retain,
+    .retain = (NPObject * (*)(NPObject *, SEL))__nopa_root_retain,
     .setAnimationCallback_ = NULL,
     .setPosition_ = NULL,
     .setTextureId_ = NULL,
     .textureId = NULL,
 };
 
-struct nopa_vtable nopa_NFObject_vtable_inst = {
+struct nopa_vtable nopa_NPObject_vtable_inst = {
     .addVector_ = NULL,
-    .dealloc = (void (*)(NFObject *, SEL))NFObject_dealloc,
+    .dealloc = (void (*)(NPObject *, SEL))NPObject_dealloc,
     .executeMainLoopIteration = NULL,
-    .init = (NFObject * (*)(NFObject *, SEL))NFObject_init,
+    .init = (NPObject * (*)(NPObject *, SEL))NPObject_init,
     .initWithName_ = NULL,
     .initWithName_textureId_ = NULL,
     .initWithX_y_ = NULL,
@@ -221,9 +221,9 @@ struct nopa_vtable nopa_NFObject_vtable_inst = {
     .playAnimationFrames_ = NULL,
     .position = NULL,
     .registerNode_ = NULL,
-    .release = (void (*)(NFObject *, SEL))NFObject_release,
+    .release = (void (*)(NPObject *, SEL))NPObject_release,
     .renderFrame = NULL,
-    .retain = (NFObject * (*)(NFObject *, SEL))NFObject_retain,
+    .retain = (NPObject * (*)(NPObject *, SEL))NPObject_retain,
     .setAnimationCallback_ = NULL,
     .setPosition_ = NULL,
     .setTextureId_ = NULL,
@@ -232,19 +232,19 @@ struct nopa_vtable nopa_NFObject_vtable_inst = {
 
 struct nopa_vtable nopa_Gameplay__GameManager_vtable_inst = {
     .addVector_ = NULL,
-    .dealloc = (void (*)(NFObject *, SEL))NFObject_dealloc,
-    .executeMainLoopIteration = (void (*)(NFObject *, SEL))Gameplay__GameManager_executeMainLoopIteration,
-    .init = (NFObject * (*)(NFObject *, SEL))Gameplay__GameManager_init,
+    .dealloc = (void (*)(NPObject *, SEL))NPObject_dealloc,
+    .executeMainLoopIteration = (void (*)(NPObject *, SEL))Gameplay__GameManager_executeMainLoopIteration,
+    .init = (NPObject * (*)(NPObject *, SEL))Gameplay__GameManager_init,
     .initWithName_ = NULL,
     .initWithName_textureId_ = NULL,
     .initWithX_y_ = NULL,
     .nodeName = NULL,
     .playAnimationFrames_ = NULL,
     .position = NULL,
-    .registerNode_ = (void (*)(NFObject *, SEL, Engine__Graphics__RenderNode *))Gameplay__GameManager_registerNode_,
-    .release = (void (*)(NFObject *, SEL))NFObject_release,
+    .registerNode_ = (void (*)(NPObject *, SEL, Engine__Graphics__RenderNode *))Gameplay__GameManager_registerNode_,
+    .release = (void (*)(NPObject *, SEL))NPObject_release,
     .renderFrame = NULL,
-    .retain = (NFObject * (*)(NFObject *, SEL))NFObject_retain,
+    .retain = (NPObject * (*)(NPObject *, SEL))NPObject_retain,
     .setAnimationCallback_ = NULL,
     .setPosition_ = NULL,
     .setTextureId_ = NULL,
@@ -253,40 +253,40 @@ struct nopa_vtable nopa_Gameplay__GameManager_vtable_inst = {
 
 struct nopa_vtable nopa_Engine__Graphics__RenderNode_vtable_inst = {
     .addVector_ = NULL,
-    .dealloc = (void (*)(NFObject *, SEL))Engine__Graphics__RenderNode_dealloc,
+    .dealloc = (void (*)(NPObject *, SEL))Engine__Graphics__RenderNode_dealloc,
     .executeMainLoopIteration = NULL,
-    .init = (NFObject * (*)(NFObject *, SEL))NFObject_init,
-    .initWithName_ = (NFObject * (*)(NFObject *, SEL, const char *))Engine__Graphics__RenderNode_initWithName_,
+    .init = (NPObject * (*)(NPObject *, SEL))NPObject_init,
+    .initWithName_ = (NPObject * (*)(NPObject *, SEL, const char *))Engine__Graphics__RenderNode_initWithName_,
     .initWithName_textureId_ = NULL,
     .initWithX_y_ = NULL,
-    .nodeName = (const char * (*)(NFObject *, SEL))Engine__Graphics__RenderNode_nodeName,
+    .nodeName = (const char * (*)(NPObject *, SEL))Engine__Graphics__RenderNode_nodeName,
     .playAnimationFrames_ = NULL,
-    .position = (Engine__Math__Vector2D * (*)(NFObject *, SEL))Engine__Graphics__RenderNode_position,
+    .position = (Engine__Math__Vector2D * (*)(NPObject *, SEL))Engine__Graphics__RenderNode_position,
     .registerNode_ = NULL,
-    .release = (void (*)(NFObject *, SEL))NFObject_release,
-    .renderFrame = (void (*)(NFObject *, SEL))Engine__Graphics__RenderNode_renderFrame,
-    .retain = (NFObject * (*)(NFObject *, SEL))NFObject_retain,
+    .release = (void (*)(NPObject *, SEL))NPObject_release,
+    .renderFrame = (void (*)(NPObject *, SEL))Engine__Graphics__RenderNode_renderFrame,
+    .retain = (NPObject * (*)(NPObject *, SEL))NPObject_retain,
     .setAnimationCallback_ = NULL,
-    .setPosition_ = (void (*)(NFObject *, SEL, Engine__Math__Vector2D *))Engine__Graphics__RenderNode_setPosition_,
+    .setPosition_ = (void (*)(NPObject *, SEL, Engine__Math__Vector2D *))Engine__Graphics__RenderNode_setPosition_,
     .setTextureId_ = NULL,
     .textureId = NULL,
 };
 
 struct nopa_vtable nopa_Engine__Math__Vector2D_vtable_inst = {
-    .addVector_ = (void (*)(NFObject *, SEL, Engine__Math__Vector2D *))Engine__Math__Vector2D_addVector_,
-    .dealloc = (void (*)(NFObject *, SEL))NFObject_dealloc,
+    .addVector_ = (void (*)(NPObject *, SEL, Engine__Math__Vector2D *))Engine__Math__Vector2D_addVector_,
+    .dealloc = (void (*)(NPObject *, SEL))NPObject_dealloc,
     .executeMainLoopIteration = NULL,
-    .init = (NFObject * (*)(NFObject *, SEL))NFObject_init,
+    .init = (NPObject * (*)(NPObject *, SEL))NPObject_init,
     .initWithName_ = NULL,
     .initWithName_textureId_ = NULL,
-    .initWithX_y_ = (NFObject * (*)(NFObject *, SEL, int, int))Engine__Math__Vector2D_initWithX_y_,
+    .initWithX_y_ = (NPObject * (*)(NPObject *, SEL, int, int))Engine__Math__Vector2D_initWithX_y_,
     .nodeName = NULL,
     .playAnimationFrames_ = NULL,
     .position = NULL,
     .registerNode_ = NULL,
-    .release = (void (*)(NFObject *, SEL))NFObject_release,
+    .release = (void (*)(NPObject *, SEL))NPObject_release,
     .renderFrame = NULL,
-    .retain = (NFObject * (*)(NFObject *, SEL))NFObject_retain,
+    .retain = (NPObject * (*)(NPObject *, SEL))NPObject_retain,
     .setAnimationCallback_ = NULL,
     .setPosition_ = NULL,
     .setTextureId_ = NULL,
@@ -295,89 +295,89 @@ struct nopa_vtable nopa_Engine__Math__Vector2D_vtable_inst = {
 
 struct nopa_vtable nopa_Extension__SpriteNode_vtable_inst = {
     .addVector_ = NULL,
-    .dealloc = (void (*)(NFObject *, SEL))Engine__Graphics__RenderNode_dealloc,
+    .dealloc = (void (*)(NPObject *, SEL))Engine__Graphics__RenderNode_dealloc,
     .executeMainLoopIteration = NULL,
-    .init = (NFObject * (*)(NFObject *, SEL))NFObject_init,
-    .initWithName_ = (NFObject * (*)(NFObject *, SEL, const char *))Engine__Graphics__RenderNode_initWithName_,
-    .initWithName_textureId_ = (NFObject * (*)(NFObject *, SEL, const char *, int))Extension__SpriteNode_initWithName_textureId_,
+    .init = (NPObject * (*)(NPObject *, SEL))NPObject_init,
+    .initWithName_ = (NPObject * (*)(NPObject *, SEL, const char *))Engine__Graphics__RenderNode_initWithName_,
+    .initWithName_textureId_ = (NPObject * (*)(NPObject *, SEL, const char *, int))Extension__SpriteNode_initWithName_textureId_,
     .initWithX_y_ = NULL,
-    .nodeName = (const char * (*)(NFObject *, SEL))Engine__Graphics__RenderNode_nodeName,
-    .playAnimationFrames_ = (void (*)(NFObject *, SEL, int))Extension__SpriteNode_playAnimationFrames_,
-    .position = (Engine__Math__Vector2D * (*)(NFObject *, SEL))Engine__Graphics__RenderNode_position,
+    .nodeName = (const char * (*)(NPObject *, SEL))Engine__Graphics__RenderNode_nodeName,
+    .playAnimationFrames_ = (void (*)(NPObject *, SEL, int))Extension__SpriteNode_playAnimationFrames_,
+    .position = (Engine__Math__Vector2D * (*)(NPObject *, SEL))Engine__Graphics__RenderNode_position,
     .registerNode_ = NULL,
-    .release = (void (*)(NFObject *, SEL))NFObject_release,
-    .renderFrame = (void (*)(NFObject *, SEL))Extension__SpriteNode_renderFrame,
-    .retain = (NFObject * (*)(NFObject *, SEL))NFObject_retain,
-    .setAnimationCallback_ = (void (*)(NFObject *, SEL, Extension__ActionCompleteBlock))Extension__SpriteNode_setAnimationCallback_,
-    .setPosition_ = (void (*)(NFObject *, SEL, Engine__Math__Vector2D *))Engine__Graphics__RenderNode_setPosition_,
-    .setTextureId_ = (void (*)(NFObject *, SEL, int))Extension__SpriteNode_setTextureId_,
-    .textureId = (int (*)(NFObject *, SEL))Extension__SpriteNode_textureId,
+    .release = (void (*)(NPObject *, SEL))NPObject_release,
+    .renderFrame = (void (*)(NPObject *, SEL))Extension__SpriteNode_renderFrame,
+    .retain = (NPObject * (*)(NPObject *, SEL))NPObject_retain,
+    .setAnimationCallback_ = (void (*)(NPObject *, SEL, Extension__ActionCompleteBlock))Extension__SpriteNode_setAnimationCallback_,
+    .setPosition_ = (void (*)(NPObject *, SEL, Engine__Math__Vector2D *))Engine__Graphics__RenderNode_setPosition_,
+    .setTextureId_ = (void (*)(NPObject *, SEL, int))Extension__SpriteNode_setTextureId_,
+    .textureId = (int (*)(NPObject *, SEL))Extension__SpriteNode_textureId,
 };
 
-struct nopa_NFObject_meta_vtable nopa_NFObject_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
-    .class = NFObject_getClass,
+struct nopa_NPObject_meta_vtable nopa_NPObject_meta_vtable_inst = {
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
+    .class = NPObject_getClass,
 };
 
 struct nopa_Gameplay__GameManager_meta_vtable nopa_Gameplay__GameManager_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
     .class = Gameplay__GameManager_getClass,
 };
 
 struct nopa_Engine__Graphics__RenderNode_meta_vtable nopa_Engine__Graphics__RenderNode_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
     .class = Engine__Graphics__RenderNode_getClass,
 };
 
 struct nopa_Engine__Math__Vector2D_meta_vtable nopa_Engine__Math__Vector2D_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
     .class = Engine__Math__Vector2D_getClass,
 };
 
 struct nopa_Extension__SpriteNode_meta_vtable nopa_Extension__SpriteNode_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
     .class = Extension__SpriteNode_getClass,
 };
 
-NFClass * NFObject_getClass(NFClass * self, SEL _cmd) {
+NPClass * NPObject_getClass(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
-NFClass * Gameplay__GameManager_getClass(NFClass * self, SEL _cmd) {
+NPClass * Gameplay__GameManager_getClass(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
-NFClass * Engine__Graphics__RenderNode_getClass(NFClass * self, SEL _cmd) {
+NPClass * Engine__Graphics__RenderNode_getClass(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
-NFClass * Engine__Math__Vector2D_getClass(NFClass * self, SEL _cmd) {
+NPClass * Engine__Math__Vector2D_getClass(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
-NFClass * Extension__SpriteNode_getClass(NFClass * self, SEL _cmd) {
+NPClass * Extension__SpriteNode_getClass(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
-NFClass nopa___nopa_root_class;
-NFClass nopa_NFObject_class;
-NFClass nopa_Gameplay__GameManager_class;
-NFClass nopa_Engine__Graphics__RenderNode_class;
-NFClass nopa_Engine__Math__Vector2D_class;
-NFClass nopa_Extension__SpriteNode_class;
+NPClass nopa___nopa_root_class;
+NPClass nopa_NPObject_class;
+NPClass nopa_Gameplay__GameManager_class;
+NPClass nopa_Engine__Graphics__RenderNode_class;
+NPClass nopa_Engine__Math__Vector2D_class;
+NPClass nopa_Extension__SpriteNode_class;
 
 void nopa_meta_init(void) {
-    nopa___nopa_root_class = (NFClass){
+    nopa___nopa_root_class = (NPClass){
         .name = "__nopa_root",
         .superclass = NULL,
         .instance_size = sizeof(struct __nopa_root),
@@ -385,39 +385,39 @@ void nopa_meta_init(void) {
         .class_vtable = NULL,
         .protocol_count = 0,
     };
-    nopa_NFObject_class = (NFClass){
-        .name = "NFObject",
+    nopa_NPObject_class = (NPClass){
+        .name = "NPObject",
         .superclass = &nopa___nopa_root_class,
-        .instance_size = sizeof(struct NFObject),
-        .vtable = &nopa_NFObject_vtable_inst,
-        .class_vtable = &nopa_NFObject_meta_vtable_inst,
+        .instance_size = sizeof(struct NPObject),
+        .vtable = &nopa_NPObject_vtable_inst,
+        .class_vtable = &nopa_NPObject_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_Gameplay__GameManager_class = (NFClass){
+    nopa_Gameplay__GameManager_class = (NPClass){
         .name = "Gameplay::GameManager",
-        .superclass = &nopa_NFObject_class,
+        .superclass = &nopa_NPObject_class,
         .instance_size = sizeof(struct Gameplay__GameManager),
         .vtable = &nopa_Gameplay__GameManager_vtable_inst,
         .class_vtable = &nopa_Gameplay__GameManager_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_Engine__Graphics__RenderNode_class = (NFClass){
+    nopa_Engine__Graphics__RenderNode_class = (NPClass){
         .name = "Engine::Graphics::RenderNode",
-        .superclass = &nopa_NFObject_class,
+        .superclass = &nopa_NPObject_class,
         .instance_size = sizeof(struct Engine__Graphics__RenderNode),
         .vtable = &nopa_Engine__Graphics__RenderNode_vtable_inst,
         .class_vtable = &nopa_Engine__Graphics__RenderNode_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_Engine__Math__Vector2D_class = (NFClass){
+    nopa_Engine__Math__Vector2D_class = (NPClass){
         .name = "Engine::Math::Vector2D",
-        .superclass = &nopa_NFObject_class,
+        .superclass = &nopa_NPObject_class,
         .instance_size = sizeof(struct Engine__Math__Vector2D),
         .vtable = &nopa_Engine__Math__Vector2D_vtable_inst,
         .class_vtable = &nopa_Engine__Math__Vector2D_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_Extension__SpriteNode_class = (NFClass){
+    nopa_Extension__SpriteNode_class = (NPClass){
         .name = "Extension::SpriteNode",
         .superclass = &nopa_Engine__Graphics__RenderNode_class,
         .instance_size = sizeof(struct Extension__SpriteNode),
@@ -426,49 +426,49 @@ void nopa_meta_init(void) {
         .protocol_count = 0,
     };
 }
-NFObject * __nopa_root_init(NFObject * self, SEL _cmd) {
+NPObject * __nopa_root_init(NPObject * self, SEL _cmd) {
   return nopa_init(self);
 }
 
-void __nopa_root_dealloc(NFObject * self, SEL _cmd) {
+void __nopa_root_dealloc(NPObject * self, SEL _cmd) {
   return;
 }
 
-void __nopa_root_release(NFObject * self, SEL _cmd) {
+void __nopa_root_release(NPObject * self, SEL _cmd) {
   nopa_release(self);
 }
 
-NFObject * __nopa_root_retain(NFObject * self, SEL _cmd) {
+NPObject * __nopa_root_retain(NPObject * self, SEL _cmd) {
   return nopa_retain(self);
 }
 
-NFObject * NFObject_alloc(NFClass * self, SEL _cmd) {
+NPObject * NPObject_alloc(NPClass * self, SEL _cmd) {
   return nopa_alloc(self);
 }
 
-NFObject * NFObject_new(NFClass * self, SEL _cmd) {
-  NFObject * obj = nopa_alloc(self);
+NPObject * NPObject_new(NPClass * self, SEL _cmd) {
+  NPObject * obj = nopa_alloc(self);
   return nopa_init(obj);
 }
 
-NFObject * NFObject_init(NFObject * self, SEL _cmd) {
+NPObject * NPObject_init(NPObject * self, SEL _cmd) {
   return nopa_init(self);
 }
 
-void NFObject_dealloc(NFObject * self, SEL _cmd) {
+void NPObject_dealloc(NPObject * self, SEL _cmd) {
   return;
 }
 
-void NFObject_release(NFObject * self, SEL _cmd) {
+void NPObject_release(NPObject * self, SEL _cmd) {
   nopa_release(self);
 }
 
-NFObject * NFObject_retain(NFObject * self, SEL _cmd) {
+NPObject * NPObject_retain(NPObject * self, SEL _cmd) {
   return nopa_retain(self);
 }
 
-NFObject * Engine__Math__Vector2D_initWithX_y_(NFObject * self, SEL _cmd, int posX, int posY) {
-  self = (&nopa_NFObject_vtable_inst)->init(self, __nopa_sel_init);
+NPObject * Engine__Math__Vector2D_initWithX_y_(NPObject * self, SEL _cmd, int posX, int posY) {
+  self = (&nopa_NPObject_vtable_inst)->init(self, __nopa_sel_init);
   if (self)   {
     ((struct Engine__Math__Vector2D *)self)->x = posX;
     ((struct Engine__Math__Vector2D *)self)->y = posY;
@@ -476,44 +476,44 @@ NFObject * Engine__Math__Vector2D_initWithX_y_(NFObject * self, SEL _cmd, int po
   return self;
 }
 
-void Engine__Math__Vector2D_addVector_(NFObject * self, SEL _cmd, Engine__Math__Vector2D * other) {
+void Engine__Math__Vector2D_addVector_(NPObject * self, SEL _cmd, Engine__Math__Vector2D * other) {
   if (other)   {
     (((struct Engine__Math__Vector2D *)self)->x += other->x);
     (((struct Engine__Math__Vector2D *)self)->y += other->y);
   }
 }
 
-NFObject * Engine__Graphics__RenderNode_initWithName_(NFObject * self, SEL _cmd, const char * name) {
-  self = (&nopa_NFObject_vtable_inst)->init(self, __nopa_sel_init);
+NPObject * Engine__Graphics__RenderNode_initWithName_(NPObject * self, SEL _cmd, const char * name) {
+  self = (&nopa_NPObject_vtable_inst)->init(self, __nopa_sel_init);
   if (self)   {
     ((struct Engine__Graphics__RenderNode *)self)->_nodeName = name;
-    ((struct Engine__Graphics__RenderNode *)self)->_position = (Engine__Math__Vector2D *)(({ NFObject *__nopa_tmp_1 = ((NFObject *)(NFObject_alloc(&nopa_Engine__Math__Vector2D_class, __nopa_sel_alloc))); __nopa_tmp_1 ? ((struct nopa_vtable *)__nopa_tmp_1->isa->vtable)->initWithX_y_(__nopa_tmp_1, __nopa_sel_initWithX_y_, 0, 0) : 0; }));
+    ((struct Engine__Graphics__RenderNode *)self)->_position = (Engine__Math__Vector2D *)(({ NPObject *__nopa_tmp_1 = ((NPObject *)(NPObject_alloc(&nopa_Engine__Math__Vector2D_class, __nopa_sel_alloc))); __nopa_tmp_1 ? ((struct nopa_vtable *)__nopa_tmp_1->isa->vtable)->initWithX_y_(__nopa_tmp_1, __nopa_sel_initWithX_y_, 0, 0) : 0; }));
   }
   return self;
 }
 
-void Engine__Graphics__RenderNode_renderFrame(NFObject * self, SEL _cmd) {
+void Engine__Graphics__RenderNode_renderFrame(NPObject * self, SEL _cmd) {
   printf("[基类节点] 正在执行通用绘制 -> 节点名: %s | 坐标: (%d, %d)\n", ((struct Engine__Graphics__RenderNode *)self)->_nodeName, ((struct Engine__Graphics__RenderNode *)self)->_position->x, ((struct Engine__Graphics__RenderNode *)self)->_position->y);
 }
 
-const char * Engine__Graphics__RenderNode_nodeName(NFObject * self, SEL _cmd) {
+const char * Engine__Graphics__RenderNode_nodeName(NPObject * self, SEL _cmd) {
   return ((struct Engine__Graphics__RenderNode *)self)->_nodeName;
 }
 
-Engine__Math__Vector2D * Engine__Graphics__RenderNode_position(NFObject * self, SEL _cmd) {
+Engine__Math__Vector2D * Engine__Graphics__RenderNode_position(NPObject * self, SEL _cmd) {
   return ((struct Engine__Graphics__RenderNode *)self)->_position;
 }
 
-void Engine__Graphics__RenderNode_setPosition_(NFObject * self, SEL _cmd, Engine__Math__Vector2D * value) {
+void Engine__Graphics__RenderNode_setPosition_(NPObject * self, SEL _cmd, Engine__Math__Vector2D * value) {
   ((struct Engine__Graphics__RenderNode *)self)->_position = value;
 }
 
-void Engine__Graphics__RenderNode_dealloc(NFObject * self, SEL _cmd) {
-  ({ NFObject *__nopa_tmp_2 = ((NFObject *)(((struct Engine__Graphics__RenderNode *)self)->_position)); __nopa_tmp_2 ? ((struct nopa_vtable *)__nopa_tmp_2->isa->vtable)->release(__nopa_tmp_2, __nopa_sel_release) : 0; });
-  (&nopa_NFObject_vtable_inst)->dealloc(self, __nopa_sel_dealloc);
+void Engine__Graphics__RenderNode_dealloc(NPObject * self, SEL _cmd) {
+  ({ NPObject *__nopa_tmp_2 = ((NPObject *)(((struct Engine__Graphics__RenderNode *)self)->_position)); __nopa_tmp_2 ? ((struct nopa_vtable *)__nopa_tmp_2->isa->vtable)->release(__nopa_tmp_2, __nopa_sel_release) : 0; });
+  (&nopa_NPObject_vtable_inst)->dealloc(self, __nopa_sel_dealloc);
 }
 
-NFObject * Extension__SpriteNode_initWithName_textureId_(NFObject * self, SEL _cmd, const char * name, int tId) {
+NPObject * Extension__SpriteNode_initWithName_textureId_(NPObject * self, SEL _cmd, const char * name, int tId) {
   self = (&nopa_Engine__Graphics__RenderNode_vtable_inst)->initWithName_(self, __nopa_sel_initWithName_, name);
   if (self)   {
     ((struct Extension__SpriteNode *)self)->_textureId = tId;
@@ -522,11 +522,11 @@ NFObject * Extension__SpriteNode_initWithName_textureId_(NFObject * self, SEL _c
   return self;
 }
 
-void Extension__SpriteNode_setAnimationCallback_(NFObject * self, SEL _cmd, Extension__ActionCompleteBlock cb) {
+void Extension__SpriteNode_setAnimationCallback_(NPObject * self, SEL _cmd, Extension__ActionCompleteBlock cb) {
   ((struct Extension__SpriteNode *)self)->_animationCallback = cb;
 }
 
-void Extension__SpriteNode_playAnimationFrames_(NFObject * self, SEL _cmd, int total) {
+void Extension__SpriteNode_playAnimationFrames_(NPObject * self, SEL _cmd, int total) {
   printf("[精灵动画] 开始播放帧序列，预计播放 %d 帧...\n", total);
   if (((struct Extension__SpriteNode *)self)->_animationCallback)   {
     (((struct Extension__SpriteNode *)self)->_position->x += (total * 2));
@@ -535,48 +535,48 @@ void Extension__SpriteNode_playAnimationFrames_(NFObject * self, SEL _cmd, int t
   }
 }
 
-void Extension__SpriteNode_renderFrame(NFObject * self, SEL _cmd) {
+void Extension__SpriteNode_renderFrame(NPObject * self, SEL _cmd) {
   printf("[子类精灵] [VTable 多态] 渲染贴图 -> 资源ID: %d | 节点名: %s | 坐标: (%d, %d)\n", ((struct Extension__SpriteNode *)self)->_textureId, ((struct Extension__SpriteNode *)self)->_nodeName, ((struct Extension__SpriteNode *)self)->_position->x, ((struct Extension__SpriteNode *)self)->_position->y);
 }
 
-int Extension__SpriteNode_textureId(NFObject * self, SEL _cmd) {
+int Extension__SpriteNode_textureId(NPObject * self, SEL _cmd) {
   return ((struct Extension__SpriteNode *)self)->_textureId;
 }
 
-void Extension__SpriteNode_setTextureId_(NFObject * self, SEL _cmd, int value) {
+void Extension__SpriteNode_setTextureId_(NPObject * self, SEL _cmd, int value) {
   ((struct Extension__SpriteNode *)self)->_textureId = value;
 }
 
-void Gameplay__GameManager_registerNode_(NFObject * self, SEL _cmd, Engine__Graphics__RenderNode * node) {
+void Gameplay__GameManager_registerNode_(NPObject * self, SEL _cmd, Engine__Graphics__RenderNode * node) {
   if ((((struct Gameplay__GameManager *)self)->_nodeCount < 3))   {
     ((struct Gameplay__GameManager *)self)->_activeNodes[((struct Gameplay__GameManager *)self)->_nodeCount] = node;
     ((struct Gameplay__GameManager *)self)->_nodeCount++;
   }
 }
 
-void Gameplay__GameManager_executeMainLoopIteration(NFObject * self, SEL _cmd) {
+void Gameplay__GameManager_executeMainLoopIteration(NPObject * self, SEL _cmd) {
   printf("[GameManager] ---- 启动这一帧的逻辑与渲染管线 ----\n");
   for (int i = 0;
 (i < ((struct Gameplay__GameManager *)self)->_nodeCount); i++)   {
-    ({ NFObject *__nopa_tmp_3 = ((NFObject *)(((struct Gameplay__GameManager *)self)->_activeNodes[i])); __nopa_tmp_3 ? ((struct nopa_vtable *)__nopa_tmp_3->isa->vtable)->renderFrame(__nopa_tmp_3, __nopa_sel_renderFrame) : 0; });
+    ({ NPObject *__nopa_tmp_3 = ((NPObject *)(((struct Gameplay__GameManager *)self)->_activeNodes[i])); __nopa_tmp_3 ? ((struct nopa_vtable *)__nopa_tmp_3->isa->vtable)->renderFrame(__nopa_tmp_3, __nopa_sel_renderFrame) : 0; });
   }
 }
 
-NFObject * Gameplay__GameManager_init(NFObject * self, SEL _cmd) {
-  self = (&nopa_NFObject_vtable_inst)->init(self, __nopa_sel_init);
+NPObject * Gameplay__GameManager_init(NPObject * self, SEL _cmd) {
+  self = (&nopa_NPObject_vtable_inst)->init(self, __nopa_sel_init);
   if (self)   {
     ((struct Gameplay__GameManager *)self)->_nodeCount = 0;
   }
   return self;
 }
 
-NFObject * nopa_alloc(struct NFClass * cls);
+NPObject * nopa_alloc(struct NPClass * cls);
 
-NFObject * nopa_init(NFObject * self);
+NPObject * nopa_init(NPObject * self);
 
-void nopa_release(NFObject * obj);
+void nopa_release(NPObject * obj);
 
-NFObject * nopa_retain(NFObject * obj);
+NPObject * nopa_retain(NPObject * obj);
 
 int main(int argc, const char * argv[]) {
   nopa_meta_init();
@@ -585,47 +585,47 @@ int main(int argc, const char * argv[]) {
     printf("=========================================================\n");
     printf(">>>    nopac 编译器「方括号内 :: 全称消息传递」集成压测   <<<\n");
     printf("=========================================================\n\n");
-    NFObject *__nopa_tmp_4 = (NFObject_alloc(&nopa_Gameplay__GameManager_class, __nopa_sel_alloc));
+    NPObject *__nopa_tmp_4 = (NPObject_alloc(&nopa_Gameplay__GameManager_class, __nopa_sel_alloc));
     Gameplay__GameManager * manager = (Gameplay__GameManager *)(((struct nopa_vtable *)__nopa_tmp_4->isa->vtable)->init(__nopa_tmp_4, __nopa_sel_init));
-    NFObject *__nopa_tmp_5 = (NFObject_alloc(&nopa_Engine__Graphics__RenderNode_class, __nopa_sel_alloc));
+    NPObject *__nopa_tmp_5 = (NPObject_alloc(&nopa_Engine__Graphics__RenderNode_class, __nopa_sel_alloc));
     Engine__Graphics__RenderNode * bgNode = (Engine__Graphics__RenderNode *)(((struct nopa_vtable *)__nopa_tmp_5->isa->vtable)->initWithName_(__nopa_tmp_5, __nopa_sel_initWithName_, "Background_Layer"));
-    NFObject *__nopa_tmp_6 = (NFObject_alloc(&nopa_Extension__SpriteNode_class, __nopa_sel_alloc));
+    NPObject *__nopa_tmp_6 = (NPObject_alloc(&nopa_Extension__SpriteNode_class, __nopa_sel_alloc));
     Extension__SpriteNode * heroSprite = (Extension__SpriteNode *)(((struct nopa_vtable *)__nopa_tmp_6->isa->vtable)->initWithName_textureId_(__nopa_tmp_6, __nopa_sel_initWithName_textureId_, "Hero_Character", 9001));
-    NFObject *__nopa_tmp_7 = (NFObject_alloc(&nopa_Extension__SpriteNode_class, __nopa_sel_alloc));
+    NPObject *__nopa_tmp_7 = (NPObject_alloc(&nopa_Extension__SpriteNode_class, __nopa_sel_alloc));
     Extension__SpriteNode * enemySprite = (Extension__SpriteNode *)(((struct nopa_vtable *)__nopa_tmp_7->isa->vtable)->initWithName_textureId_(__nopa_tmp_7, __nopa_sel_initWithName_textureId_, "Boss_Dragon", 9999));
-    NFObject *__nopa_tmp_8 = (NFObject_alloc(&nopa_Engine__Math__Vector2D_class, __nopa_sel_alloc));
+    NPObject *__nopa_tmp_8 = (NPObject_alloc(&nopa_Engine__Math__Vector2D_class, __nopa_sel_alloc));
     Engine__Math__Vector2D * offset1 = (Engine__Math__Vector2D *)(((struct nopa_vtable *)__nopa_tmp_8->isa->vtable)->initWithX_y_(__nopa_tmp_8, __nopa_sel_initWithX_y_, 100, 150));
-    NFObject *__nopa_tmp_9 = (NFObject_alloc(&nopa_Engine__Math__Vector2D_class, __nopa_sel_alloc));
+    NPObject *__nopa_tmp_9 = (NPObject_alloc(&nopa_Engine__Math__Vector2D_class, __nopa_sel_alloc));
     Engine__Math__Vector2D * offset2 = (Engine__Math__Vector2D *)(((struct nopa_vtable *)__nopa_tmp_9->isa->vtable)->initWithX_y_(__nopa_tmp_9, __nopa_sel_initWithX_y_, 500, 800));
-    ({ NFObject *__nopa_tmp_10 = ((NFObject *)(((struct nopa_vtable *)(bgNode->isa->vtable))->position((NFObject *)(bgNode), __nopa_sel_position))); __nopa_tmp_10 ? ((struct nopa_vtable *)__nopa_tmp_10->isa->vtable)->addVector_(__nopa_tmp_10, __nopa_sel_addVector_, (Engine__Math__Vector2D *)(offset1)) : 0; });
-    ({ NFObject *__nopa_tmp_11 = ((NFObject *)(((struct nopa_vtable *)(heroSprite->isa->vtable))->position((NFObject *)(heroSprite), __nopa_sel_position))); __nopa_tmp_11 ? ((struct nopa_vtable *)__nopa_tmp_11->isa->vtable)->addVector_(__nopa_tmp_11, __nopa_sel_addVector_, (Engine__Math__Vector2D *)(offset2)) : 0; });
-    ((struct nopa_vtable *)(manager->isa->vtable))->registerNode_((NFObject *)(manager), __nopa_sel_registerNode_, (Engine__Graphics__RenderNode *)(bgNode));
-    ((struct nopa_vtable *)(manager->isa->vtable))->registerNode_((NFObject *)(manager), __nopa_sel_registerNode_, (Engine__Graphics__RenderNode *)(heroSprite));
-    ((struct nopa_vtable *)(manager->isa->vtable))->registerNode_((NFObject *)(manager), __nopa_sel_registerNode_, (Engine__Graphics__RenderNode *)(enemySprite));
+    ({ NPObject *__nopa_tmp_10 = ((NPObject *)(((struct nopa_vtable *)(bgNode->isa->vtable))->position((NPObject *)(bgNode), __nopa_sel_position))); __nopa_tmp_10 ? ((struct nopa_vtable *)__nopa_tmp_10->isa->vtable)->addVector_(__nopa_tmp_10, __nopa_sel_addVector_, (Engine__Math__Vector2D *)(offset1)) : 0; });
+    ({ NPObject *__nopa_tmp_11 = ((NPObject *)(((struct nopa_vtable *)(heroSprite->isa->vtable))->position((NPObject *)(heroSprite), __nopa_sel_position))); __nopa_tmp_11 ? ((struct nopa_vtable *)__nopa_tmp_11->isa->vtable)->addVector_(__nopa_tmp_11, __nopa_sel_addVector_, (Engine__Math__Vector2D *)(offset2)) : 0; });
+    ((struct nopa_vtable *)(manager->isa->vtable))->registerNode_((NPObject *)(manager), __nopa_sel_registerNode_, (Engine__Graphics__RenderNode *)(bgNode));
+    ((struct nopa_vtable *)(manager->isa->vtable))->registerNode_((NPObject *)(manager), __nopa_sel_registerNode_, (Engine__Graphics__RenderNode *)(heroSprite));
+    ((struct nopa_vtable *)(manager->isa->vtable))->registerNode_((NPObject *)(manager), __nopa_sel_registerNode_, (Engine__Graphics__RenderNode *)(enemySprite));
     void (^onHeroActionFinished)(int, Engine__Math__Vector2D *) = ^void(int frames, Engine__Math__Vector2D * finalPos) {
   printf("[全局事件中心] 捕获到精灵动作结束信号！\n");
   printf("       -> 播放帧数: %d\n", frames);
   printf("       -> 精灵最终落点物理坐标: (%d, %d)\n", finalPos->x, finalPos->y);
 }
 ;
-    ((struct nopa_vtable *)(heroSprite->isa->vtable))->setAnimationCallback_((NFObject *)(heroSprite), __nopa_sel_setAnimationCallback_, onHeroActionFinished);
-    ((struct nopa_vtable *)(manager->isa->vtable))->executeMainLoopIteration((NFObject *)(manager), __nopa_sel_executeMainLoopIteration);
+    ((struct nopa_vtable *)(heroSprite->isa->vtable))->setAnimationCallback_((NPObject *)(heroSprite), __nopa_sel_setAnimationCallback_, onHeroActionFinished);
+    ((struct nopa_vtable *)(manager->isa->vtable))->executeMainLoopIteration((NPObject *)(manager), __nopa_sel_executeMainLoopIteration);
     printf("\n>>> 模拟游戏内幕：主角释放大招，触发关键帧动画...\n");
-    ((struct nopa_vtable *)(heroSprite->isa->vtable))->playAnimationFrames_((NFObject *)(heroSprite), __nopa_sel_playAnimationFrames_, 24);
+    ((struct nopa_vtable *)(heroSprite->isa->vtable))->playAnimationFrames_((NPObject *)(heroSprite), __nopa_sel_playAnimationFrames_, 24);
     printf("\n");
-    ((struct nopa_vtable *)(manager->isa->vtable))->executeMainLoopIteration((NFObject *)(manager), __nopa_sel_executeMainLoopIteration);
+    ((struct nopa_vtable *)(manager->isa->vtable))->executeMainLoopIteration((NPObject *)(manager), __nopa_sel_executeMainLoopIteration);
     printf("\n--- 压测恶心复合语法边界（方括号内全称表达式） ---\n");
     int syntaxControl = 1;
     int secondarySideEffect = 100;
-    int evaluatedTexture = (syntaxControl > 0) ? ({ NFObject *__nopa_tmp_12 = ((NFObject *)((secondarySideEffect++, enemySprite))); __nopa_tmp_12 ? ((struct nopa_vtable *)__nopa_tmp_12->isa->vtable)->textureId(__nopa_tmp_12, __nopa_sel_textureId) : 0; }) : 0;
+    int evaluatedTexture = (syntaxControl > 0) ? ({ NPObject *__nopa_tmp_12 = ((NPObject *)((secondarySideEffect++, enemySprite))); __nopa_tmp_12 ? ((struct nopa_vtable *)__nopa_tmp_12->isa->vtable)->textureId(__nopa_tmp_12, __nopa_sel_textureId) : 0; }) : 0;
     printf("[复合断言] 边界切分完美！副作用计数: %d | 抓取Boss纹理ID: %d\n", secondarySideEffect, evaluatedTexture);
     printf("\n--- 正在启动对象拓扑树资源安全销毁... ---\n");
-    ((struct nopa_vtable *)(offset1->isa->vtable))->release((NFObject *)(offset1), __nopa_sel_release);
-    ((struct nopa_vtable *)(offset2->isa->vtable))->release((NFObject *)(offset2), __nopa_sel_release);
-    ((struct nopa_vtable *)(bgNode->isa->vtable))->release((NFObject *)(bgNode), __nopa_sel_release);
-    ((struct nopa_vtable *)(heroSprite->isa->vtable))->release((NFObject *)(heroSprite), __nopa_sel_release);
-    ((struct nopa_vtable *)(enemySprite->isa->vtable))->release((NFObject *)(enemySprite), __nopa_sel_release);
-    ((struct nopa_vtable *)(manager->isa->vtable))->release((NFObject *)(manager), __nopa_sel_release);
+    ((struct nopa_vtable *)(offset1->isa->vtable))->release((NPObject *)(offset1), __nopa_sel_release);
+    ((struct nopa_vtable *)(offset2->isa->vtable))->release((NPObject *)(offset2), __nopa_sel_release);
+    ((struct nopa_vtable *)(bgNode->isa->vtable))->release((NPObject *)(bgNode), __nopa_sel_release);
+    ((struct nopa_vtable *)(heroSprite->isa->vtable))->release((NPObject *)(heroSprite), __nopa_sel_release);
+    ((struct nopa_vtable *)(enemySprite->isa->vtable))->release((NPObject *)(enemySprite), __nopa_sel_release);
+    ((struct nopa_vtable *)(manager->isa->vtable))->release((NPObject *)(manager), __nopa_sel_release);
     printf("\n=========================================================\n");
     printf(">>>    太强了！方括号内直接解析「::」全称消息传递成功！   <<<\n");
     printf("=========================================================\n");

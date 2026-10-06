@@ -10,7 +10,7 @@
 // ============================================================================
 // 1. 泛型类声明与实现：向量图元固定缓冲区 (Capacity = 2)
 // ============================================================================
-@interface VectorBuffer <T> : NFObject {
+@interface VectorBuffer <T> : NPObject {
     @public
     int _bufferSize;
     T _slots[2]; // 编译期根据 T 的真实类型进行单态化替换
@@ -69,7 +69,7 @@
 // ============================================================================
 // 2. 辅助测试类：二维坐标点 与 渲染颜色
 // ============================================================================
-@interface RenderPoint2D : NFObject {
+@interface RenderPoint2D : NPObject {
     @public
     float _x;
     float _y;
@@ -94,7 +94,7 @@
 @end
 
 
-@interface RenderColorRGB : NFObject {
+@interface RenderColorRGB : NPObject {
     @public
     int _r; int _g; int _b;
 }

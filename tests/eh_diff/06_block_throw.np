@@ -7,14 +7,14 @@ typedef void (^ThrowerBlock)(void);
 int main() {
     @try {
         ThrowerBlock b = ^{
-            NFLog(@"in block");
+            NPLog(@"in block");
             @throw @"from-block";
         };
         b();
     }
-    @catch (NFString *e) {
-        NFLog(@"caught from block");
+    @catch (NPString *e) {
+        NPLog(@"caught from block");
     }
-    NFLog(@"end");
+    NPLog(@"end");
     return 0;
 }

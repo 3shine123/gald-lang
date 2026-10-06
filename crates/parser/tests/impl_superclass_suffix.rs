@@ -1,5 +1,5 @@
-// Bug #2 regression: `@implementation Base : NFObject` with an empty body used
-// to leave the `: NFObject` superclass suffix unconsumed; the parser's fallback
+// Bug #2 regression: `@implementation Base : NPObject` with an empty body used
+// to leave the `: NPObject` superclass suffix unconsumed; the parser's fallback
 // token-skip then swallowed the following `@interface Sub ... @end`, so `Sub`
 // never reached the binder ("cannot find class 'Sub' for @implementation").
 //
@@ -33,10 +33,10 @@ fn decl_classes(src: &str) -> Vec<(String, String)> {
 #[test]
 fn impl_with_superclass_suffix_and_empty_body_keeps_next_interface() {
     let src = r#"
-@interface Base : NFObject
+@interface Base : NPObject
 @end
 
-@implementation Base : NFObject
+@implementation Base : NPObject
 @end
 
 @interface Sub : Base
@@ -56,14 +56,14 @@ fn impl_with_superclass_suffix_and_empty_body_keeps_next_interface() {
             ("interface".into(), "Sub".into()),
             ("implementation".into(), "Sub".into()),
         ],
-        "the @interface Sub following an empty @implementation Base : NFObject was swallowed"
+        "the @interface Sub following an empty @implementation Base : NPObject was swallowed"
     );
 }
 
 #[test]
 fn impl_superclass_suffix_parsed_before_methods() {
     let src = r#"
-@implementation Base : NFObject
+@implementation Base : NPObject
 - (void)ping { }
 @end
 

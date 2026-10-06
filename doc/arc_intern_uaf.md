@@ -25,7 +25,7 @@ fix it **aliased** the object's initial `+1` instead of taking a reference of
 its own, despite the comment claiming *"The table owns its +1 forever"*:
 
 ```c
-NFObject *obj = nopa_alloc(&NOPA_CLASS_$_NFString);   /* refcount 1 */
+NPObject *obj = nopa_alloc(&NOPA_CLASS_$_NPString);   /* refcount 1 */
 ...
 if (nopa_intern_count < 256) {
     nopa_intern_table[nopa_intern_count].cstr = str->_cstr;
@@ -44,14 +44,14 @@ ARC does **not** retain here (the RHS is treated as borrowed/`+0`), but the
 synthesised ARC dealloc **does** release every owned object ivar:
 
 ```c
-static void FsSprite__nopa_arc_dealloc(NFObject *self, SEL _cmd) {
-    NFObject_dealloc(self, _cmd);
+static void FsSprite__nopa_arc_dealloc(NPObject *self, SEL _cmd) {
+    NPObject_dealloc(self, _cmd);
     nopa_release(((struct FsSprite *)self)->_tag);     /* 1 -> 0 */
     nopa_release(((struct FsSprite *)self)->_label);
 }
 ```
 
-So the release consumed the *intern table's* reference, `NFString_dealloc` freed
+So the release consumed the *intern table's* reference, `NPString_dealloc` freed
 `_cstr`, and the table was left holding a dangling `const char *`. The next
 interning lookup walked that table and `strcmp()`d freed memory:
 
@@ -73,7 +73,7 @@ the ivar is the sole reference, which is why they were where it detonated.
     #1 nopa_stringFromCstr
     #2 main
 freed by:
-    #1 NFString_dealloc
+    #1 NPString_dealloc
     #2 nopa_release
     #3 Holder__nopa_arc_dealloc
     #4 nopa_release

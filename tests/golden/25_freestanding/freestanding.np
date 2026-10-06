@@ -8,7 +8,7 @@ extern void kputdec(int v);
 extern void kputhex(unsigned v);
 
 extern BareMetal::Calculator   *create_calculator(void);
-extern BareMetal::NFIoError  *create_error(int code);
+extern BareMetal::NPIoError  *create_error(int code);
 
 @namespace BareMetal
 
@@ -26,13 +26,13 @@ extern BareMetal::NFIoError  *create_error(int code);
     - (int) value          { return total; }
     @end
 
-    @interface NFIoError {
+    @interface NPIoError {
         int code;
     }
     - (int) errorCode;
     @end
 
-    @implementation NFIoError
+    @implementation NPIoError
     - (int) errorCode { return code; }
     @end
 
@@ -89,7 +89,7 @@ int main() {
     kputs("\n");
 
     // ── 3. @try/@catch/@finally ──
-    BareMetal::NFIoError *err = create_error(42);
+    BareMetal::NPIoError *err = create_error(42);
     kputs("[3] @try/@catch/@finally:\n");
     kputs("    try body, throwing...\n");
     @try {

@@ -9,8 +9,8 @@ struct nopa_Universe__Space__Cruiser_vtable;
 struct nopa_Universe__Space__Cruiser_meta_vtable;
 struct nopa_Engine__Core__WeaponSystem_vtable;
 struct nopa_Engine__Core__WeaponSystem_meta_vtable;
-struct nopa_NFObject_vtable;
-struct nopa_NFObject_meta_vtable;
+struct nopa_NPObject_vtable;
+struct nopa_NPObject_meta_vtable;
 
 static const SEL __nopa_sel_alloc = {.name = "alloc", .hash = 0xBAB1BB16};
 static const SEL __nopa_sel_new = {.name = "new", .hash = 0x28999611};
@@ -35,89 +35,89 @@ static const SEL __nopa_sel_setSecondaryWeapon_ = {.name = "setSecondaryWeapon_"
 
 typedef struct Universe__Space__Cruiser Universe__Space__Cruiser;
 typedef struct Engine__Core__WeaponSystem Engine__Core__WeaponSystem;
-typedef struct NFObject NFObject;
+typedef struct NPObject NPObject;
 
-NFObject * NFObject_alloc(NFClass * self, SEL _cmd);
-NFObject * NFObject_new(NFClass * self, SEL _cmd);
-NFObject * NFObject_init(NFObject * self, SEL _cmd);
-void NFObject_dealloc(NFObject * self, SEL _cmd);
-void NFObject_release(NFObject * self, SEL _cmd);
-NFObject * NFObject_retain(NFObject * self, SEL _cmd);
-Engine__Core__WeaponSystem * Engine__Core__WeaponSystem_createPlasmaCannon(NFClass * self, SEL _cmd);
-Engine__Core__WeaponSystem * Engine__Core__WeaponSystem_createLaserBeam(NFClass * self, SEL _cmd);
-NFObject * Engine__Core__WeaponSystem_initWithName_damage_(NFObject * self, SEL _cmd, const char * name, int dmg);
-int Engine__Core__WeaponSystem_calculateFirepowerWithModifier_(NFObject * self, SEL _cmd, Engine__Core__WeaponModifierBlock mod);
-int Engine__Core__WeaponSystem_baseDamage(NFObject * self, SEL _cmd);
-void Engine__Core__WeaponSystem_setBaseDamage_(NFObject * self, SEL _cmd, int value);
-const char * Engine__Core__WeaponSystem_weaponName(NFObject * self, SEL _cmd);
-NFObject * Universe__Space__Cruiser_initCruiserWithName_(NFObject * self, SEL _cmd, const char * name);
-void Universe__Space__Cruiser_fireAllWeaponsWithGlobalMod_(NFObject * self, SEL _cmd, Engine__Core__WeaponModifierBlock globalMod);
-const char * Universe__Space__Cruiser_shipName(NFObject * self, SEL _cmd);
-Engine__Core__WeaponSystem * Universe__Space__Cruiser_primaryWeapon(NFObject * self, SEL _cmd);
-void Universe__Space__Cruiser_setPrimaryWeapon_(NFObject * self, SEL _cmd, Engine__Core__WeaponSystem * value);
-Engine__Core__WeaponSystem * Universe__Space__Cruiser_secondaryWeapon(NFObject * self, SEL _cmd);
-void Universe__Space__Cruiser_setSecondaryWeapon_(NFObject * self, SEL _cmd, Engine__Core__WeaponSystem * value);
-void Universe__Space__Cruiser_dealloc(NFObject * self, SEL _cmd);
-NFObject * nopa_alloc(struct NFClass * cls);
-NFObject * nopa_init(NFObject * self);
-void nopa_release(NFObject * obj);
-NFObject * nopa_retain(NFObject * obj);
+NPObject * NPObject_alloc(NPClass * self, SEL _cmd);
+NPObject * NPObject_new(NPClass * self, SEL _cmd);
+NPObject * NPObject_init(NPObject * self, SEL _cmd);
+void NPObject_dealloc(NPObject * self, SEL _cmd);
+void NPObject_release(NPObject * self, SEL _cmd);
+NPObject * NPObject_retain(NPObject * self, SEL _cmd);
+Engine__Core__WeaponSystem * Engine__Core__WeaponSystem_createPlasmaCannon(NPClass * self, SEL _cmd);
+Engine__Core__WeaponSystem * Engine__Core__WeaponSystem_createLaserBeam(NPClass * self, SEL _cmd);
+NPObject * Engine__Core__WeaponSystem_initWithName_damage_(NPObject * self, SEL _cmd, const char * name, int dmg);
+int Engine__Core__WeaponSystem_calculateFirepowerWithModifier_(NPObject * self, SEL _cmd, Engine__Core__WeaponModifierBlock mod);
+int Engine__Core__WeaponSystem_baseDamage(NPObject * self, SEL _cmd);
+void Engine__Core__WeaponSystem_setBaseDamage_(NPObject * self, SEL _cmd, int value);
+const char * Engine__Core__WeaponSystem_weaponName(NPObject * self, SEL _cmd);
+NPObject * Universe__Space__Cruiser_initCruiserWithName_(NPObject * self, SEL _cmd, const char * name);
+void Universe__Space__Cruiser_fireAllWeaponsWithGlobalMod_(NPObject * self, SEL _cmd, Engine__Core__WeaponModifierBlock globalMod);
+const char * Universe__Space__Cruiser_shipName(NPObject * self, SEL _cmd);
+Engine__Core__WeaponSystem * Universe__Space__Cruiser_primaryWeapon(NPObject * self, SEL _cmd);
+void Universe__Space__Cruiser_setPrimaryWeapon_(NPObject * self, SEL _cmd, Engine__Core__WeaponSystem * value);
+Engine__Core__WeaponSystem * Universe__Space__Cruiser_secondaryWeapon(NPObject * self, SEL _cmd);
+void Universe__Space__Cruiser_setSecondaryWeapon_(NPObject * self, SEL _cmd, Engine__Core__WeaponSystem * value);
+void Universe__Space__Cruiser_dealloc(NPObject * self, SEL _cmd);
+NPObject * nopa_alloc(struct NPClass * cls);
+NPObject * nopa_init(NPObject * self);
+void nopa_release(NPObject * obj);
+NPObject * nopa_retain(NPObject * obj);
 int main(int argc, const char * argv[]);
 
-NFClass * Universe__Space__Cruiser_getClass(NFClass * self, SEL _cmd);
-NFClass * Engine__Core__WeaponSystem_getClass(NFClass * self, SEL _cmd);
-NFClass * NFObject_getClass(NFClass * self, SEL _cmd);
+NPClass * Universe__Space__Cruiser_getClass(NPClass * self, SEL _cmd);
+NPClass * Engine__Core__WeaponSystem_getClass(NPClass * self, SEL _cmd);
+NPClass * NPObject_getClass(NPClass * self, SEL _cmd);
 
 struct nopa_Universe__Space__Cruiser_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*release)(NFObject *, SEL);
-    NFObject * (*retain)(NFObject *, SEL);
-    NFObject * (*initCruiserWithName_)(NFObject *, SEL, const char *);
-    void (*fireAllWeaponsWithGlobalMod_)(NFObject *, SEL, Engine__Core__WeaponModifierBlock);
-    const char * (*shipName)(NFObject *, SEL);
-    Engine__Core__WeaponSystem * (*primaryWeapon)(NFObject *, SEL);
-    void (*setPrimaryWeapon_)(NFObject *, SEL, Engine__Core__WeaponSystem *);
-    Engine__Core__WeaponSystem * (*secondaryWeapon)(NFObject *, SEL);
-    void (*setSecondaryWeapon_)(NFObject *, SEL, Engine__Core__WeaponSystem *);
-    void (*dealloc)(NFObject *, SEL);
+    NPObject * (*init)(NPObject *, SEL);
+    void (*release)(NPObject *, SEL);
+    NPObject * (*retain)(NPObject *, SEL);
+    NPObject * (*initCruiserWithName_)(NPObject *, SEL, const char *);
+    void (*fireAllWeaponsWithGlobalMod_)(NPObject *, SEL, Engine__Core__WeaponModifierBlock);
+    const char * (*shipName)(NPObject *, SEL);
+    Engine__Core__WeaponSystem * (*primaryWeapon)(NPObject *, SEL);
+    void (*setPrimaryWeapon_)(NPObject *, SEL, Engine__Core__WeaponSystem *);
+    Engine__Core__WeaponSystem * (*secondaryWeapon)(NPObject *, SEL);
+    void (*setSecondaryWeapon_)(NPObject *, SEL, Engine__Core__WeaponSystem *);
+    void (*dealloc)(NPObject *, SEL);
 };
 struct nopa_Universe__Space__Cruiser_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct nopa_Engine__Core__WeaponSystem_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    void (*release)(NFObject *, SEL);
-    NFObject * (*retain)(NFObject *, SEL);
-    NFObject * (*initWithName_damage_)(NFObject *, SEL, const char *, int);
-    int (*calculateFirepowerWithModifier_)(NFObject *, SEL, Engine__Core__WeaponModifierBlock);
-    int (*baseDamage)(NFObject *, SEL);
-    void (*setBaseDamage_)(NFObject *, SEL, int);
-    const char * (*weaponName)(NFObject *, SEL);
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    void (*release)(NPObject *, SEL);
+    NPObject * (*retain)(NPObject *, SEL);
+    NPObject * (*initWithName_damage_)(NPObject *, SEL, const char *, int);
+    int (*calculateFirepowerWithModifier_)(NPObject *, SEL, Engine__Core__WeaponModifierBlock);
+    int (*baseDamage)(NPObject *, SEL);
+    void (*setBaseDamage_)(NPObject *, SEL, int);
+    const char * (*weaponName)(NPObject *, SEL);
 };
 struct nopa_Engine__Core__WeaponSystem_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    Engine__Core__WeaponSystem * (*createPlasmaCannon)(NFClass *, SEL);
-    Engine__Core__WeaponSystem * (*createLaserBeam)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    Engine__Core__WeaponSystem * (*createPlasmaCannon)(NPClass *, SEL);
+    Engine__Core__WeaponSystem * (*createLaserBeam)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
-struct nopa_NFObject_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    void (*release)(NFObject *, SEL);
-    NFObject * (*retain)(NFObject *, SEL);
+struct nopa_NPObject_vtable {
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    void (*release)(NPObject *, SEL);
+    NPObject * (*retain)(NPObject *, SEL);
 };
-struct nopa_NFObject_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+struct nopa_NPObject_meta_vtable {
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 
 struct Universe__Space__Cruiser {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     const char * _shipName;
     Engine__Core__WeaponSystem * _primaryWeapon;
@@ -126,22 +126,22 @@ struct Universe__Space__Cruiser {
 typedef struct Universe__Space__Cruiser Universe__Space__Cruiser;
 
 struct Engine__Core__WeaponSystem {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     int _baseDamage;
     const char * _weaponName;
 };
 typedef struct Engine__Core__WeaponSystem Engine__Core__WeaponSystem;
 
-extern NFClass nopa_Universe__Space__Cruiser_class;
-extern NFClass nopa_Engine__Core__WeaponSystem_class;
-extern NFClass nopa_NFObject_class;
+extern NPClass nopa_Universe__Space__Cruiser_class;
+extern NPClass nopa_Engine__Core__WeaponSystem_class;
+extern NPClass nopa_NPObject_class;
 void nopa_meta_init(void);
 
 struct nopa_Universe__Space__Cruiser_vtable nopa_Universe__Space__Cruiser_vtable_inst = {
-    .init = NFObject_init,
-    .release = NFObject_release,
-    .retain = NFObject_retain,
+    .init = NPObject_init,
+    .release = NPObject_release,
+    .retain = NPObject_retain,
     .initCruiserWithName_ = Universe__Space__Cruiser_initCruiserWithName_,
     .fireAllWeaponsWithGlobalMod_ = Universe__Space__Cruiser_fireAllWeaponsWithGlobalMod_,
     .shipName = Universe__Space__Cruiser_shipName,
@@ -153,10 +153,10 @@ struct nopa_Universe__Space__Cruiser_vtable nopa_Universe__Space__Cruiser_vtable
 };
 
 struct nopa_Engine__Core__WeaponSystem_vtable nopa_Engine__Core__WeaponSystem_vtable_inst = {
-    .init = NFObject_init,
-    .dealloc = NFObject_dealloc,
-    .release = NFObject_release,
-    .retain = NFObject_retain,
+    .init = NPObject_init,
+    .dealloc = NPObject_dealloc,
+    .release = NPObject_release,
+    .retain = NPObject_retain,
     .initWithName_damage_ = Engine__Core__WeaponSystem_initWithName_damage_,
     .calculateFirepowerWithModifier_ = Engine__Core__WeaponSystem_calculateFirepowerWithModifier_,
     .baseDamage = Engine__Core__WeaponSystem_baseDamage,
@@ -164,127 +164,127 @@ struct nopa_Engine__Core__WeaponSystem_vtable nopa_Engine__Core__WeaponSystem_vt
     .weaponName = Engine__Core__WeaponSystem_weaponName,
 };
 
-struct nopa_NFObject_vtable nopa_NFObject_vtable_inst = {
-    .init = NFObject_init,
-    .dealloc = NFObject_dealloc,
-    .release = NFObject_release,
-    .retain = NFObject_retain,
+struct nopa_NPObject_vtable nopa_NPObject_vtable_inst = {
+    .init = NPObject_init,
+    .dealloc = NPObject_dealloc,
+    .release = NPObject_release,
+    .retain = NPObject_retain,
 };
 
 struct nopa_Universe__Space__Cruiser_meta_vtable nopa_Universe__Space__Cruiser_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
     .class = Universe__Space__Cruiser_getClass,
 };
 
 struct nopa_Engine__Core__WeaponSystem_meta_vtable nopa_Engine__Core__WeaponSystem_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
     .createPlasmaCannon = Engine__Core__WeaponSystem_createPlasmaCannon,
     .createLaserBeam = Engine__Core__WeaponSystem_createLaserBeam,
     .class = Engine__Core__WeaponSystem_getClass,
 };
 
-struct nopa_NFObject_meta_vtable nopa_NFObject_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
-    .class = NFObject_getClass,
+struct nopa_NPObject_meta_vtable nopa_NPObject_meta_vtable_inst = {
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
+    .class = NPObject_getClass,
 };
 
-NFClass * Universe__Space__Cruiser_getClass(NFClass * self, SEL _cmd) {
+NPClass * Universe__Space__Cruiser_getClass(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
-NFClass * Engine__Core__WeaponSystem_getClass(NFClass * self, SEL _cmd) {
+NPClass * Engine__Core__WeaponSystem_getClass(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
-NFClass * NFObject_getClass(NFClass * self, SEL _cmd) {
+NPClass * NPObject_getClass(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
-NFClass nopa_Universe__Space__Cruiser_class;
-NFClass nopa_Engine__Core__WeaponSystem_class;
-NFClass nopa_NFObject_class;
+NPClass nopa_Universe__Space__Cruiser_class;
+NPClass nopa_Engine__Core__WeaponSystem_class;
+NPClass nopa_NPObject_class;
 
 void nopa_meta_init(void) {
-    nopa_Universe__Space__Cruiser_class = (NFClass){
+    nopa_Universe__Space__Cruiser_class = (NPClass){
         .name = "Universe::Space::Cruiser",
-        .superclass = &nopa_NFObject_class,
+        .superclass = &nopa_NPObject_class,
         .instance_size = sizeof(struct Universe__Space__Cruiser),
         .vtable = &nopa_Universe__Space__Cruiser_vtable_inst,
         .class_vtable = &nopa_Universe__Space__Cruiser_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_Engine__Core__WeaponSystem_class = (NFClass){
+    nopa_Engine__Core__WeaponSystem_class = (NPClass){
         .name = "Engine::Core::WeaponSystem",
-        .superclass = &nopa_NFObject_class,
+        .superclass = &nopa_NPObject_class,
         .instance_size = sizeof(struct Engine__Core__WeaponSystem),
         .vtable = &nopa_Engine__Core__WeaponSystem_vtable_inst,
         .class_vtable = &nopa_Engine__Core__WeaponSystem_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_NFObject_class = (NFClass){
-        .name = "NFObject",
+    nopa_NPObject_class = (NPClass){
+        .name = "NPObject",
         .superclass = NULL,
-        .instance_size = sizeof(struct NFObject),
-        .vtable = &nopa_NFObject_vtable_inst,
-        .class_vtable = &nopa_NFObject_meta_vtable_inst,
+        .instance_size = sizeof(struct NPObject),
+        .vtable = &nopa_NPObject_vtable_inst,
+        .class_vtable = &nopa_NPObject_meta_vtable_inst,
         .protocol_count = 0,
     };
 }
-NFObject * NFObject_alloc(NFClass * self, SEL _cmd) {
+NPObject * NPObject_alloc(NPClass * self, SEL _cmd) {
   return nopa_alloc(self);
 }
 
-NFObject * NFObject_new(NFClass * self, SEL _cmd) {
-  NFObject * obj = nopa_alloc(self);
+NPObject * NPObject_new(NPClass * self, SEL _cmd) {
+  NPObject * obj = nopa_alloc(self);
   return nopa_init(obj);
 }
 
-NFObject * NFObject_init(NFObject * self, SEL _cmd) {
-  struct NFObject * _self = (struct NFObject *)self;
+NPObject * NPObject_init(NPObject * self, SEL _cmd) {
+  struct NPObject * _self = (struct NPObject *)self;
   {
     return nopa_init(self);
   }
 }
 
-void NFObject_dealloc(NFObject * self, SEL _cmd) {
-  struct NFObject * _self = (struct NFObject *)self;
+void NPObject_dealloc(NPObject * self, SEL _cmd) {
+  struct NPObject * _self = (struct NPObject *)self;
   {
     return;
   }
 }
 
-void NFObject_release(NFObject * self, SEL _cmd) {
-  struct NFObject * _self = (struct NFObject *)self;
+void NPObject_release(NPObject * self, SEL _cmd) {
+  struct NPObject * _self = (struct NPObject *)self;
   {
     nopa_release(self);
   }
 }
 
-NFObject * NFObject_retain(NFObject * self, SEL _cmd) {
-  struct NFObject * _self = (struct NFObject *)self;
+NPObject * NPObject_retain(NPObject * self, SEL _cmd) {
+  struct NPObject * _self = (struct NPObject *)self;
   {
     return nopa_retain(self);
   }
 }
 
-Engine__Core__WeaponSystem * Engine__Core__WeaponSystem_createPlasmaCannon(NFClass * self, SEL _cmd) {
-  return ((struct nopa_Engine__Core__WeaponSystem_vtable *)NFObject_alloc(&nopa_Engine__Core__WeaponSystem_class, sel_registerName("alloc"))->isa->vtable)->initWithName_damage_(NFObject_alloc(&nopa_Engine__Core__WeaponSystem_class, sel_registerName("alloc")), sel_registerName("initWithName:damage:"), "等离子重炮", 500);
+Engine__Core__WeaponSystem * Engine__Core__WeaponSystem_createPlasmaCannon(NPClass * self, SEL _cmd) {
+  return ((struct nopa_Engine__Core__WeaponSystem_vtable *)NPObject_alloc(&nopa_Engine__Core__WeaponSystem_class, sel_registerName("alloc"))->isa->vtable)->initWithName_damage_(NPObject_alloc(&nopa_Engine__Core__WeaponSystem_class, sel_registerName("alloc")), sel_registerName("initWithName:damage:"), "等离子重炮", 500);
 }
 
-Engine__Core__WeaponSystem * Engine__Core__WeaponSystem_createLaserBeam(NFClass * self, SEL _cmd) {
-  return ((struct nopa_Engine__Core__WeaponSystem_vtable *)NFObject_alloc(&nopa_Engine__Core__WeaponSystem_class, sel_registerName("alloc"))->isa->vtable)->initWithName_damage_(NFObject_alloc(&nopa_Engine__Core__WeaponSystem_class, sel_registerName("alloc")), sel_registerName("initWithName:damage:"), "聚集激光束", 250);
+Engine__Core__WeaponSystem * Engine__Core__WeaponSystem_createLaserBeam(NPClass * self, SEL _cmd) {
+  return ((struct nopa_Engine__Core__WeaponSystem_vtable *)NPObject_alloc(&nopa_Engine__Core__WeaponSystem_class, sel_registerName("alloc"))->isa->vtable)->initWithName_damage_(NPObject_alloc(&nopa_Engine__Core__WeaponSystem_class, sel_registerName("alloc")), sel_registerName("initWithName:damage:"), "聚集激光束", 250);
 }
 
-NFObject * Engine__Core__WeaponSystem_initWithName_damage_(NFObject * self, SEL _cmd, const char * name, int dmg) {
+NPObject * Engine__Core__WeaponSystem_initWithName_damage_(NPObject * self, SEL _cmd, const char * name, int dmg) {
   struct Engine__Core__WeaponSystem * _self = (struct Engine__Core__WeaponSystem *)self;
   {
-    self = NFObject_init(self, sel_registerName("init"));
+    self = NPObject_init(self, sel_registerName("init"));
     if (self)     {
       _weaponName = name;
       _baseDamage = dmg;
@@ -293,7 +293,7 @@ NFObject * Engine__Core__WeaponSystem_initWithName_damage_(NFObject * self, SEL 
   }
 }
 
-int Engine__Core__WeaponSystem_calculateFirepowerWithModifier_(NFObject * self, SEL _cmd, Engine__Core__WeaponModifierBlock mod) {
+int Engine__Core__WeaponSystem_calculateFirepowerWithModifier_(NPObject * self, SEL _cmd, Engine__Core__WeaponModifierBlock mod) {
   struct Engine__Core__WeaponSystem * _self = (struct Engine__Core__WeaponSystem *)self;
   {
     if (mod)     {
@@ -303,22 +303,22 @@ int Engine__Core__WeaponSystem_calculateFirepowerWithModifier_(NFObject * self, 
   }
 }
 
-int Engine__Core__WeaponSystem_baseDamage(NFObject * self, SEL _cmd) {
+int Engine__Core__WeaponSystem_baseDamage(NPObject * self, SEL _cmd) {
   return ((struct Engine__Core__WeaponSystem *)self)->_baseDamage;
 }
 
-void Engine__Core__WeaponSystem_setBaseDamage_(NFObject * self, SEL _cmd, int value) {
+void Engine__Core__WeaponSystem_setBaseDamage_(NPObject * self, SEL _cmd, int value) {
   ((struct Engine__Core__WeaponSystem *)self)->_baseDamage = value;
 }
 
-const char * Engine__Core__WeaponSystem_weaponName(NFObject * self, SEL _cmd) {
+const char * Engine__Core__WeaponSystem_weaponName(NPObject * self, SEL _cmd) {
   return ((struct Engine__Core__WeaponSystem *)self)->_weaponName;
 }
 
-NFObject * Universe__Space__Cruiser_initCruiserWithName_(NFObject * self, SEL _cmd, const char * name) {
+NPObject * Universe__Space__Cruiser_initCruiserWithName_(NPObject * self, SEL _cmd, const char * name) {
   struct Universe__Space__Cruiser * _self = (struct Universe__Space__Cruiser *)self;
   {
-    self = NFObject_init(self, sel_registerName("init"));
+    self = NPObject_init(self, sel_registerName("init"));
     if (self)     {
       _shipName = name;
       _primaryWeapon = Engine__Core__WeaponSystem_createPlasmaCannon(&nopa_Engine__Core__WeaponSystem_class, sel_registerName("createPlasmaCannon"));
@@ -328,7 +328,7 @@ NFObject * Universe__Space__Cruiser_initCruiserWithName_(NFObject * self, SEL _c
   }
 }
 
-void Universe__Space__Cruiser_fireAllWeaponsWithGlobalMod_(NFObject * self, SEL _cmd, Engine__Core__WeaponModifierBlock globalMod) {
+void Universe__Space__Cruiser_fireAllWeaponsWithGlobalMod_(NPObject * self, SEL _cmd, Engine__Core__WeaponModifierBlock globalMod) {
   struct Universe__Space__Cruiser * _self = (struct Universe__Space__Cruiser *)self;
   {
     printf("[战舰开火] 巡洋舰「%s」全武器主控序列启动：\n", _shipName);
@@ -340,42 +340,42 @@ void Universe__Space__Cruiser_fireAllWeaponsWithGlobalMod_(NFObject * self, SEL 
   }
 }
 
-const char * Universe__Space__Cruiser_shipName(NFObject * self, SEL _cmd) {
+const char * Universe__Space__Cruiser_shipName(NPObject * self, SEL _cmd) {
   return ((struct Universe__Space__Cruiser *)self)->_shipName;
 }
 
-Engine__Core__WeaponSystem * Universe__Space__Cruiser_primaryWeapon(NFObject * self, SEL _cmd) {
+Engine__Core__WeaponSystem * Universe__Space__Cruiser_primaryWeapon(NPObject * self, SEL _cmd) {
   return ((struct Universe__Space__Cruiser *)self)->_primaryWeapon;
 }
 
-void Universe__Space__Cruiser_setPrimaryWeapon_(NFObject * self, SEL _cmd, Engine__Core__WeaponSystem * value) {
+void Universe__Space__Cruiser_setPrimaryWeapon_(NPObject * self, SEL _cmd, Engine__Core__WeaponSystem * value) {
   ((struct Universe__Space__Cruiser *)self)->_primaryWeapon = value;
 }
 
-Engine__Core__WeaponSystem * Universe__Space__Cruiser_secondaryWeapon(NFObject * self, SEL _cmd) {
+Engine__Core__WeaponSystem * Universe__Space__Cruiser_secondaryWeapon(NPObject * self, SEL _cmd) {
   return ((struct Universe__Space__Cruiser *)self)->_secondaryWeapon;
 }
 
-void Universe__Space__Cruiser_setSecondaryWeapon_(NFObject * self, SEL _cmd, Engine__Core__WeaponSystem * value) {
+void Universe__Space__Cruiser_setSecondaryWeapon_(NPObject * self, SEL _cmd, Engine__Core__WeaponSystem * value) {
   ((struct Universe__Space__Cruiser *)self)->_secondaryWeapon = value;
 }
 
-void Universe__Space__Cruiser_dealloc(NFObject * self, SEL _cmd) {
+void Universe__Space__Cruiser_dealloc(NPObject * self, SEL _cmd) {
   struct Universe__Space__Cruiser * _self = (struct Universe__Space__Cruiser *)self;
   {
-    ((struct nopa_NFObject_vtable *)_primaryWeapon->isa->vtable)->release(_primaryWeapon, sel_registerName("release"));
-    ((struct nopa_NFObject_vtable *)_secondaryWeapon->isa->vtable)->release(_secondaryWeapon, sel_registerName("release"));
-    NFObject_dealloc(self, sel_registerName("dealloc"));
+    ((struct nopa_NPObject_vtable *)_primaryWeapon->isa->vtable)->release(_primaryWeapon, sel_registerName("release"));
+    ((struct nopa_NPObject_vtable *)_secondaryWeapon->isa->vtable)->release(_secondaryWeapon, sel_registerName("release"));
+    NPObject_dealloc(self, sel_registerName("dealloc"));
   }
 }
 
-NFObject * nopa_alloc(struct NFClass * cls);
+NPObject * nopa_alloc(struct NPClass * cls);
 
-NFObject * nopa_init(NFObject * self);
+NPObject * nopa_init(NPObject * self);
 
-void nopa_release(NFObject * obj);
+void nopa_release(NPObject * obj);
 
-NFObject * nopa_retain(NFObject * obj);
+NPObject * nopa_retain(NPObject * obj);
 
 typedef int (^)(int) Engine::Core::WeaponModifierBlock;
 
@@ -389,7 +389,7 @@ int main(int argc, const char * argv[]) {
     Engine__Core__WeaponSystem * customCannon = Engine__Core__WeaponSystem_createPlasmaCannon(&nopa_Engine__Core__WeaponSystem_class, sel_registerName("createPlasmaCannon"));
     printf("[工厂断言] 成功独立制造武器: %s, 基础威力: %d\n", ((struct nopa_Engine__Core__WeaponSystem_vtable *)customCannon->isa->vtable)->weaponName(customCannon, sel_registerName("weaponName")), ((struct nopa_Engine__Core__WeaponSystem_vtable *)customCannon->isa->vtable)->baseDamage(customCannon, sel_registerName("baseDamage")));
     printf("\n--- 2. 测试内部级联类方法的对象初始化（Cruiser 内部调用 WeaponSystem） ---\n");
-    Universe__Space__Cruiser * myFleetFlagship = ((struct nopa_Universe__Space__Cruiser_vtable *)NFObject_alloc(&nopa_Universe__Space__Cruiser_class, sel_registerName("alloc"))->isa->vtable)->initCruiserWithName_(NFObject_alloc(&nopa_Universe__Space__Cruiser_class, sel_registerName("alloc")), sel_registerName("initCruiserWithName:"), "无畏征服者号");
+    Universe__Space__Cruiser * myFleetFlagship = ((struct nopa_Universe__Space__Cruiser_vtable *)NPObject_alloc(&nopa_Universe__Space__Cruiser_class, sel_registerName("alloc"))->isa->vtable)->initCruiserWithName_(NPObject_alloc(&nopa_Universe__Space__Cruiser_class, sel_registerName("alloc")), sel_registerName("initCruiserWithName:"), "无畏征服者号");
     printf("[战舰报告] 战舰名称: %s\n", ((struct nopa_Universe__Space__Cruiser_vtable *)myFleetFlagship->isa->vtable)->shipName(myFleetFlagship, sel_registerName("shipName")));
     printf("[战舰报告] 已自动装配主炮: %s\n", ((struct nopa_Engine__Core__WeaponSystem_vtable *)((struct nopa_Universe__Space__Cruiser_vtable *)myFleetFlagship->isa->vtable)->primaryWeapon(myFleetFlagship, sel_registerName("primaryWeapon"))->isa->vtable)->weaponName(((struct nopa_Universe__Space__Cruiser_vtable *)myFleetFlagship->isa->vtable)->primaryWeapon(myFleetFlagship, sel_registerName("primaryWeapon")), sel_registerName("weaponName")));
     printf("[战舰报告] 已自动装配副炮: %s\n", ((struct nopa_Engine__Core__WeaponSystem_vtable *)((struct nopa_Universe__Space__Cruiser_vtable *)myFleetFlagship->isa->vtable)->secondaryWeapon(myFleetFlagship, sel_registerName("secondaryWeapon"))->isa->vtable)->weaponName(((struct nopa_Universe__Space__Cruiser_vtable *)myFleetFlagship->isa->vtable)->secondaryWeapon(myFleetFlagship, sel_registerName("secondaryWeapon")), sel_registerName("weaponName")));
@@ -404,9 +404,9 @@ int main(int argc, const char * argv[]) {
     printf("[复合断言] 恶心边界表达式完美解析！\n");
     printf("          -> 动态生产的边界武器名称: %s\n", ((struct nopa_Engine__Core__WeaponSystem_vtable *)evilGeneratedWeapon->isa->vtable)->weaponName(evilGeneratedWeapon, sel_registerName("weaponName")));
     printf("\n--- 5. 正在释放星际军事资产内存... ---\n");
-    ((struct nopa_NFObject_vtable *)customCannon->isa->vtable)->release(customCannon, sel_registerName("release"));
-    ((struct nopa_NFObject_vtable *)myFleetFlagship->isa->vtable)->release(myFleetFlagship, sel_registerName("release"));
-    ((struct nopa_NFObject_vtable *)evilGeneratedWeapon->isa->vtable)->release(evilGeneratedWeapon, sel_registerName("release"));
+    ((struct nopa_NPObject_vtable *)customCannon->isa->vtable)->release(customCannon, sel_registerName("release"));
+    ((struct nopa_NPObject_vtable *)myFleetFlagship->isa->vtable)->release(myFleetFlagship, sel_registerName("release"));
+    ((struct nopa_NPObject_vtable *)evilGeneratedWeapon->isa->vtable)->release(evilGeneratedWeapon, sel_registerName("release"));
     printf("\n====================================================================\n");
     printf(">>> 卧槽！静态类方法寻址与多层 Block 投递完美闭合，无解！ <<<\n");
     printf("====================================================================\n");

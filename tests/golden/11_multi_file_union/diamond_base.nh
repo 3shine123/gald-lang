@@ -4,25 +4,25 @@
 #import <Foundation/Foundation.np>
 
 // 1. 菱形继承协议网
-@protocol NFBaseProtocol <NFObject>
+@protocol NPBaseProtocol <NPObject>
 - (void)executeCoreTask;
 @end
 
-@protocol NFLeftProtocol <NFBaseProtocol>
+@protocol NPLeftProtocol <NPBaseProtocol>
 - (void)leftBranchAction;
 @end
 
-@protocol NFRightProtocol <NFBaseProtocol>
+@protocol NPRightProtocol <NPBaseProtocol>
 - (void)rightBranchAction;
 @end
 
 // 2. 两个互相引用的类的前置声明（打破文件包含死锁）
-@class NFCraftPilot;
-@interface NFShipSystem : NFObject
+@class NPCraftPilot;
+@interface NPShipSystem : NPObject
 {
     @public
-    // 互引用指针，测试编译器在未完全解析 NFCraftPilot 时对指针大小和符号的计算
-    NFCraftPilot* currentPilot; 
+    // 互引用指针，测试编译器在未完全解析 NPCraftPilot 时对指针大小和符号的计算
+    NPCraftPilot* currentPilot; 
     int systemStatusId;
 }
 - (id)initWithId:(int)sid;

@@ -5,14 +5,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-struct nopa_NFObject_vtable;
-struct nopa_NFObject_meta_vtable;
-struct nopa_NFDataContainer_vtable;
-struct nopa_NFDataContainer_meta_vtable;
-struct nopa_NFDataNode_vtable;
-struct nopa_NFDataNode_meta_vtable;
-struct nopa_NFCollectionInspector_vtable;
-struct nopa_NFCollectionInspector_meta_vtable;
+struct nopa_NPObject_vtable;
+struct nopa_NPObject_meta_vtable;
+struct nopa_NPDataContainer_vtable;
+struct nopa_NPDataContainer_meta_vtable;
+struct nopa_NPDataNode_vtable;
+struct nopa_NPDataNode_meta_vtable;
+struct nopa_NPCollectionInspector_vtable;
+struct nopa_NPCollectionInspector_meta_vtable;
 
 static const SEL __nopa_sel_alloc = {.name = "alloc", .hash = 0xBAB1BB16};
 static const SEL __nopa_sel_new = {.name = "new", .hash = 0x28999611};
@@ -40,316 +40,316 @@ static const SEL __nopa_sel_initWithName_ = {.name = "initWithName:", .hash = 0x
 static const SEL __nopa_sel_collectionDidReachCapacity_ = {.name = "collectionDidReachCapacity:", .hash = 0x1862E9BD};
 static const SEL __nopa_sel_collection_didAddItem_ = {.name = "collection:didAddItem:", .hash = 0xA643FA98};
 
-typedef struct NFObject NFObject;
-typedef struct NFDataContainer NFDataContainer;
-typedef struct NFDataNode NFDataNode;
-typedef struct NFCollectionInspector NFCollectionInspector;
+typedef struct NPObject NPObject;
+typedef struct NPDataContainer NPDataContainer;
+typedef struct NPDataNode NPDataNode;
+typedef struct NPCollectionInspector NPCollectionInspector;
 
-NFObject * NFObject_alloc(NFClass * self, SEL _cmd);
-NFObject * NFObject_new(NFClass * self, SEL _cmd);
-NFObject * NFObject_init(NFObject * self, SEL _cmd);
-void NFObject_dealloc(NFObject * self, SEL _cmd);
-void NFObject_release(NFObject * self, SEL _cmd);
-NFObject * NFObject_retain(NFObject * self, SEL _cmd);
-NFObject * NFDataNode_initWithKey_value_(NFObject * self, SEL _cmd, const char * k, NFObject * v);
-const char * NFDataNode_key(NFObject * self, SEL _cmd);
-void NFDataNode_setKey_(NFObject * self, SEL _cmd, const char * value);
-NFObject * NFDataNode_value(NFObject * self, SEL _cmd);
-void NFDataNode_setValue_(NFObject * self, SEL _cmd, NFObject * value);
-NFDataNode * NFDataNode_nextNode(NFObject * self, SEL _cmd);
-void NFDataNode_setNextNode_(NFObject * self, SEL _cmd, NFDataNode * value);
-void NFDataNode_dealloc(NFObject * self, SEL _cmd);
-NFObject * NFDataContainer_initWithCapacity_(NFObject * self, SEL _cmd, int capacity);
-_Bool NFDataContainer_setObject_forKey_(NFObject * self, SEL _cmd, NFObject * obj, const char * key);
-NFObject * NFDataContainer_objectForKey_(NFObject * self, SEL _cmd, const char * key);
-void NFDataContainer_performSelectorTest_(NFObject * self, SEL _cmd, const char * selectorName);
-int NFDataContainer_maxCapacity(NFObject * self, SEL _cmd);
-void NFDataContainer_setMaxCapacity_(NFObject * self, SEL _cmd, int value);
-int NFDataContainer_count(NFObject * self, SEL _cmd);
-NFObject * NFDataContainer_delegate(NFObject * self, SEL _cmd);
-void NFDataContainer_setDelegate_(NFObject * self, SEL _cmd, NFObject * value);
-void NFDataContainer_dealloc(NFObject * self, SEL _cmd);
-NFObject * NFCollectionInspector_initWithName_(NFObject * self, SEL _cmd, const char * name);
-void NFCollectionInspector_collectionDidReachCapacity_(NFObject * self, SEL _cmd, NFObject * collection);
-void NFCollectionInspector_collection_didAddItem_(NFObject * self, SEL _cmd, NFObject * collection, NFObject * item);
-NFObject * nopa_alloc(struct NFClass * cls);
-NFObject * nopa_init(NFObject * self);
-void nopa_release(NFObject * obj);
-NFObject * nopa_retain(NFObject * obj);
+NPObject * NPObject_alloc(NPClass * self, SEL _cmd);
+NPObject * NPObject_new(NPClass * self, SEL _cmd);
+NPObject * NPObject_init(NPObject * self, SEL _cmd);
+void NPObject_dealloc(NPObject * self, SEL _cmd);
+void NPObject_release(NPObject * self, SEL _cmd);
+NPObject * NPObject_retain(NPObject * self, SEL _cmd);
+NPObject * NPDataNode_initWithKey_value_(NPObject * self, SEL _cmd, const char * k, NPObject * v);
+const char * NPDataNode_key(NPObject * self, SEL _cmd);
+void NPDataNode_setKey_(NPObject * self, SEL _cmd, const char * value);
+NPObject * NPDataNode_value(NPObject * self, SEL _cmd);
+void NPDataNode_setValue_(NPObject * self, SEL _cmd, NPObject * value);
+NPDataNode * NPDataNode_nextNode(NPObject * self, SEL _cmd);
+void NPDataNode_setNextNode_(NPObject * self, SEL _cmd, NPDataNode * value);
+void NPDataNode_dealloc(NPObject * self, SEL _cmd);
+NPObject * NPDataContainer_initWithCapacity_(NPObject * self, SEL _cmd, int capacity);
+_Bool NPDataContainer_setObject_forKey_(NPObject * self, SEL _cmd, NPObject * obj, const char * key);
+NPObject * NPDataContainer_objectForKey_(NPObject * self, SEL _cmd, const char * key);
+void NPDataContainer_performSelectorTest_(NPObject * self, SEL _cmd, const char * selectorName);
+int NPDataContainer_maxCapacity(NPObject * self, SEL _cmd);
+void NPDataContainer_setMaxCapacity_(NPObject * self, SEL _cmd, int value);
+int NPDataContainer_count(NPObject * self, SEL _cmd);
+NPObject * NPDataContainer_delegate(NPObject * self, SEL _cmd);
+void NPDataContainer_setDelegate_(NPObject * self, SEL _cmd, NPObject * value);
+void NPDataContainer_dealloc(NPObject * self, SEL _cmd);
+NPObject * NPCollectionInspector_initWithName_(NPObject * self, SEL _cmd, const char * name);
+void NPCollectionInspector_collectionDidReachCapacity_(NPObject * self, SEL _cmd, NPObject * collection);
+void NPCollectionInspector_collection_didAddItem_(NPObject * self, SEL _cmd, NPObject * collection, NPObject * item);
+NPObject * nopa_alloc(struct NPClass * cls);
+NPObject * nopa_init(NPObject * self);
+void nopa_release(NPObject * obj);
+NPObject * nopa_retain(NPObject * obj);
 int main(int argc, const char * argv[]);
 
-NFClass * NFObject_getClass(NFClass * self, SEL _cmd);
-NFClass * NFDataContainer_getClass(NFClass * self, SEL _cmd);
-NFClass * NFDataNode_getClass(NFClass * self, SEL _cmd);
-NFClass * NFCollectionInspector_getClass(NFClass * self, SEL _cmd);
+NPClass * NPObject_getClass(NPClass * self, SEL _cmd);
+NPClass * NPDataContainer_getClass(NPClass * self, SEL _cmd);
+NPClass * NPDataNode_getClass(NPClass * self, SEL _cmd);
+NPClass * NPCollectionInspector_getClass(NPClass * self, SEL _cmd);
 
-struct nopa_NFObject_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    void (*release)(NFObject *, SEL);
-    NFObject * (*retain)(NFObject *, SEL);
+struct nopa_NPObject_vtable {
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    void (*release)(NPObject *, SEL);
+    NPObject * (*retain)(NPObject *, SEL);
 };
-struct nopa_NFObject_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+struct nopa_NPObject_meta_vtable {
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
-struct nopa_NFDataContainer_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    void (*release)(NFObject *, SEL);
-    NFObject * (*retain)(NFObject *, SEL);
-    NFObject * (*initWithCapacity_)(NFObject *, SEL, int);
-    _Bool (*setObject_forKey_)(NFObject *, SEL, NFObject *, const char *);
-    NFObject * (*objectForKey_)(NFObject *, SEL, const char *);
-    void (*performSelectorTest_)(NFObject *, SEL, const char *);
-    int (*maxCapacity)(NFObject *, SEL);
-    void (*setMaxCapacity_)(NFObject *, SEL, int);
-    int (*count)(NFObject *, SEL);
-    NFObject * (*delegate)(NFObject *, SEL);
-    void (*setDelegate_)(NFObject *, SEL, NFObject *);
+struct nopa_NPDataContainer_vtable {
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    void (*release)(NPObject *, SEL);
+    NPObject * (*retain)(NPObject *, SEL);
+    NPObject * (*initWithCapacity_)(NPObject *, SEL, int);
+    _Bool (*setObject_forKey_)(NPObject *, SEL, NPObject *, const char *);
+    NPObject * (*objectForKey_)(NPObject *, SEL, const char *);
+    void (*performSelectorTest_)(NPObject *, SEL, const char *);
+    int (*maxCapacity)(NPObject *, SEL);
+    void (*setMaxCapacity_)(NPObject *, SEL, int);
+    int (*count)(NPObject *, SEL);
+    NPObject * (*delegate)(NPObject *, SEL);
+    void (*setDelegate_)(NPObject *, SEL, NPObject *);
 };
-struct nopa_NFDataContainer_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+struct nopa_NPDataContainer_meta_vtable {
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
-struct nopa_NFDataNode_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    void (*release)(NFObject *, SEL);
-    NFObject * (*retain)(NFObject *, SEL);
-    NFObject * (*initWithKey_value_)(NFObject *, SEL, const char *, NFObject *);
-    const char * (*key)(NFObject *, SEL);
-    void (*setKey_)(NFObject *, SEL, const char *);
-    NFObject * (*value)(NFObject *, SEL);
-    void (*setValue_)(NFObject *, SEL, NFObject *);
-    NFDataNode * (*nextNode)(NFObject *, SEL);
-    void (*setNextNode_)(NFObject *, SEL, NFDataNode *);
+struct nopa_NPDataNode_vtable {
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    void (*release)(NPObject *, SEL);
+    NPObject * (*retain)(NPObject *, SEL);
+    NPObject * (*initWithKey_value_)(NPObject *, SEL, const char *, NPObject *);
+    const char * (*key)(NPObject *, SEL);
+    void (*setKey_)(NPObject *, SEL, const char *);
+    NPObject * (*value)(NPObject *, SEL);
+    void (*setValue_)(NPObject *, SEL, NPObject *);
+    NPDataNode * (*nextNode)(NPObject *, SEL);
+    void (*setNextNode_)(NPObject *, SEL, NPDataNode *);
 };
-struct nopa_NFDataNode_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+struct nopa_NPDataNode_meta_vtable {
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
-struct nopa_NFCollectionInspector_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    void (*release)(NFObject *, SEL);
-    NFObject * (*retain)(NFObject *, SEL);
-    NFObject * (*initWithName_)(NFObject *, SEL, const char *);
-    void (*collectionDidReachCapacity_)(NFObject *, SEL, NFObject *);
-    void (*collection_didAddItem_)(NFObject *, SEL, NFObject *, NFObject *);
+struct nopa_NPCollectionInspector_vtable {
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    void (*release)(NPObject *, SEL);
+    NPObject * (*retain)(NPObject *, SEL);
+    NPObject * (*initWithName_)(NPObject *, SEL, const char *);
+    void (*collectionDidReachCapacity_)(NPObject *, SEL, NPObject *);
+    void (*collection_didAddItem_)(NPObject *, SEL, NPObject *, NPObject *);
 };
-struct nopa_NFCollectionInspector_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+struct nopa_NPCollectionInspector_meta_vtable {
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 
-struct NFDataContainer {
-    struct NFClass *isa;
+struct NPDataContainer {
+    struct NPClass *isa;
     uint32_t retain_count;
-    NFDataNode * _headNode;
+    NPDataNode * _headNode;
     int _count;
     int _maxCapacity;
-    NFObject * _delegate;
+    NPObject * _delegate;
 };
-typedef struct NFDataContainer NFDataContainer;
+typedef struct NPDataContainer NPDataContainer;
 
-struct NFDataNode {
-    struct NFClass *isa;
+struct NPDataNode {
+    struct NPClass *isa;
     uint32_t retain_count;
     const char * _key;
-    NFObject * _value;
-    NFDataNode * _nextNode;
+    NPObject * _value;
+    NPDataNode * _nextNode;
 };
-typedef struct NFDataNode NFDataNode;
+typedef struct NPDataNode NPDataNode;
 
-struct NFCollectionInspector {
-    struct NFClass *isa;
+struct NPCollectionInspector {
+    struct NPClass *isa;
     uint32_t retain_count;
     const char * _inspectorName;
 };
-typedef struct NFCollectionInspector NFCollectionInspector;
+typedef struct NPCollectionInspector NPCollectionInspector;
 
-extern NFClass nopa_NFObject_class;
-extern NFClass nopa_NFDataContainer_class;
-extern NFClass nopa_NFDataNode_class;
-extern NFClass nopa_NFCollectionInspector_class;
+extern NPClass nopa_NPObject_class;
+extern NPClass nopa_NPDataContainer_class;
+extern NPClass nopa_NPDataNode_class;
+extern NPClass nopa_NPCollectionInspector_class;
 void nopa_meta_init(void);
 
-struct nopa_NFObject_vtable nopa_NFObject_vtable_inst = {
-    .init = NFObject_init,
-    .dealloc = NFObject_dealloc,
-    .release = NFObject_release,
-    .retain = NFObject_retain,
+struct nopa_NPObject_vtable nopa_NPObject_vtable_inst = {
+    .init = NPObject_init,
+    .dealloc = NPObject_dealloc,
+    .release = NPObject_release,
+    .retain = NPObject_retain,
 };
 
-struct nopa_NFDataContainer_vtable nopa_NFDataContainer_vtable_inst = {
-    .init = NFObject_init,
-    .dealloc = NFDataContainer_dealloc,
-    .release = NFObject_release,
-    .retain = NFObject_retain,
-    .initWithCapacity_ = NFDataContainer_initWithCapacity_,
-    .setObject_forKey_ = NFDataContainer_setObject_forKey_,
-    .objectForKey_ = NFDataContainer_objectForKey_,
-    .performSelectorTest_ = NFDataContainer_performSelectorTest_,
-    .maxCapacity = NFDataContainer_maxCapacity,
-    .setMaxCapacity_ = NFDataContainer_setMaxCapacity_,
-    .count = NFDataContainer_count,
-    .delegate = NFDataContainer_delegate,
-    .setDelegate_ = NFDataContainer_setDelegate_,
+struct nopa_NPDataContainer_vtable nopa_NPDataContainer_vtable_inst = {
+    .init = NPObject_init,
+    .dealloc = NPDataContainer_dealloc,
+    .release = NPObject_release,
+    .retain = NPObject_retain,
+    .initWithCapacity_ = NPDataContainer_initWithCapacity_,
+    .setObject_forKey_ = NPDataContainer_setObject_forKey_,
+    .objectForKey_ = NPDataContainer_objectForKey_,
+    .performSelectorTest_ = NPDataContainer_performSelectorTest_,
+    .maxCapacity = NPDataContainer_maxCapacity,
+    .setMaxCapacity_ = NPDataContainer_setMaxCapacity_,
+    .count = NPDataContainer_count,
+    .delegate = NPDataContainer_delegate,
+    .setDelegate_ = NPDataContainer_setDelegate_,
 };
 
-struct nopa_NFDataNode_vtable nopa_NFDataNode_vtable_inst = {
-    .init = NFObject_init,
-    .dealloc = NFDataNode_dealloc,
-    .release = NFObject_release,
-    .retain = NFObject_retain,
-    .initWithKey_value_ = NFDataNode_initWithKey_value_,
-    .key = NFDataNode_key,
-    .setKey_ = NFDataNode_setKey_,
-    .value = NFDataNode_value,
-    .setValue_ = NFDataNode_setValue_,
-    .nextNode = NFDataNode_nextNode,
-    .setNextNode_ = NFDataNode_setNextNode_,
+struct nopa_NPDataNode_vtable nopa_NPDataNode_vtable_inst = {
+    .init = NPObject_init,
+    .dealloc = NPDataNode_dealloc,
+    .release = NPObject_release,
+    .retain = NPObject_retain,
+    .initWithKey_value_ = NPDataNode_initWithKey_value_,
+    .key = NPDataNode_key,
+    .setKey_ = NPDataNode_setKey_,
+    .value = NPDataNode_value,
+    .setValue_ = NPDataNode_setValue_,
+    .nextNode = NPDataNode_nextNode,
+    .setNextNode_ = NPDataNode_setNextNode_,
 };
 
-struct nopa_NFCollectionInspector_vtable nopa_NFCollectionInspector_vtable_inst = {
-    .init = NFObject_init,
-    .dealloc = NFObject_dealloc,
-    .release = NFObject_release,
-    .retain = NFObject_retain,
-    .initWithName_ = NFCollectionInspector_initWithName_,
-    .collectionDidReachCapacity_ = NFCollectionInspector_collectionDidReachCapacity_,
-    .collection_didAddItem_ = NFCollectionInspector_collection_didAddItem_,
+struct nopa_NPCollectionInspector_vtable nopa_NPCollectionInspector_vtable_inst = {
+    .init = NPObject_init,
+    .dealloc = NPObject_dealloc,
+    .release = NPObject_release,
+    .retain = NPObject_retain,
+    .initWithName_ = NPCollectionInspector_initWithName_,
+    .collectionDidReachCapacity_ = NPCollectionInspector_collectionDidReachCapacity_,
+    .collection_didAddItem_ = NPCollectionInspector_collection_didAddItem_,
 };
 
-struct nopa_NFObject_meta_vtable nopa_NFObject_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
-    .class = NFObject_getClass,
+struct nopa_NPObject_meta_vtable nopa_NPObject_meta_vtable_inst = {
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
+    .class = NPObject_getClass,
 };
 
-struct nopa_NFDataContainer_meta_vtable nopa_NFDataContainer_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
-    .class = NFDataContainer_getClass,
+struct nopa_NPDataContainer_meta_vtable nopa_NPDataContainer_meta_vtable_inst = {
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
+    .class = NPDataContainer_getClass,
 };
 
-struct nopa_NFDataNode_meta_vtable nopa_NFDataNode_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
-    .class = NFDataNode_getClass,
+struct nopa_NPDataNode_meta_vtable nopa_NPDataNode_meta_vtable_inst = {
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
+    .class = NPDataNode_getClass,
 };
 
-struct nopa_NFCollectionInspector_meta_vtable nopa_NFCollectionInspector_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
-    .class = NFCollectionInspector_getClass,
+struct nopa_NPCollectionInspector_meta_vtable nopa_NPCollectionInspector_meta_vtable_inst = {
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
+    .class = NPCollectionInspector_getClass,
 };
 
-NFClass * NFObject_getClass(NFClass * self, SEL _cmd) {
+NPClass * NPObject_getClass(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
-NFClass * NFDataContainer_getClass(NFClass * self, SEL _cmd) {
+NPClass * NPDataContainer_getClass(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
-NFClass * NFDataNode_getClass(NFClass * self, SEL _cmd) {
+NPClass * NPDataNode_getClass(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
-NFClass * NFCollectionInspector_getClass(NFClass * self, SEL _cmd) {
+NPClass * NPCollectionInspector_getClass(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
-NFClass nopa_NFObject_class;
-NFClass nopa_NFDataContainer_class;
-NFClass nopa_NFDataNode_class;
-NFClass nopa_NFCollectionInspector_class;
+NPClass nopa_NPObject_class;
+NPClass nopa_NPDataContainer_class;
+NPClass nopa_NPDataNode_class;
+NPClass nopa_NPCollectionInspector_class;
 
 void nopa_meta_init(void) {
-    nopa_NFObject_class = (NFClass){
-        .name = "NFObject",
+    nopa_NPObject_class = (NPClass){
+        .name = "NPObject",
         .superclass = NULL,
-        .instance_size = sizeof(struct NFObject),
-        .vtable = &nopa_NFObject_vtable_inst,
-        .class_vtable = &nopa_NFObject_meta_vtable_inst,
+        .instance_size = sizeof(struct NPObject),
+        .vtable = &nopa_NPObject_vtable_inst,
+        .class_vtable = &nopa_NPObject_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_NFDataContainer_class = (NFClass){
-        .name = "NFDataContainer",
-        .superclass = &nopa_NFObject_class,
-        .instance_size = sizeof(struct NFDataContainer),
-        .vtable = &nopa_NFDataContainer_vtable_inst,
-        .class_vtable = &nopa_NFDataContainer_meta_vtable_inst,
+    nopa_NPDataContainer_class = (NPClass){
+        .name = "NPDataContainer",
+        .superclass = &nopa_NPObject_class,
+        .instance_size = sizeof(struct NPDataContainer),
+        .vtable = &nopa_NPDataContainer_vtable_inst,
+        .class_vtable = &nopa_NPDataContainer_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_NFDataNode_class = (NFClass){
-        .name = "NFDataNode",
-        .superclass = &nopa_NFObject_class,
-        .instance_size = sizeof(struct NFDataNode),
-        .vtable = &nopa_NFDataNode_vtable_inst,
-        .class_vtable = &nopa_NFDataNode_meta_vtable_inst,
+    nopa_NPDataNode_class = (NPClass){
+        .name = "NPDataNode",
+        .superclass = &nopa_NPObject_class,
+        .instance_size = sizeof(struct NPDataNode),
+        .vtable = &nopa_NPDataNode_vtable_inst,
+        .class_vtable = &nopa_NPDataNode_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_NFCollectionInspector_class = (NFClass){
-        .name = "NFCollectionInspector",
-        .superclass = &nopa_NFObject_class,
-        .instance_size = sizeof(struct NFCollectionInspector),
-        .vtable = &nopa_NFCollectionInspector_vtable_inst,
-        .class_vtable = &nopa_NFCollectionInspector_meta_vtable_inst,
+    nopa_NPCollectionInspector_class = (NPClass){
+        .name = "NPCollectionInspector",
+        .superclass = &nopa_NPObject_class,
+        .instance_size = sizeof(struct NPCollectionInspector),
+        .vtable = &nopa_NPCollectionInspector_vtable_inst,
+        .class_vtable = &nopa_NPCollectionInspector_meta_vtable_inst,
         .protocol_count = 0,
     };
 }
-NFObject * NFObject_alloc(NFClass * self, SEL _cmd) {
+NPObject * NPObject_alloc(NPClass * self, SEL _cmd) {
   return nopa_alloc(self);
 }
 
-NFObject * NFObject_new(NFClass * self, SEL _cmd) {
-  NFObject * obj = nopa_alloc(self);
+NPObject * NPObject_new(NPClass * self, SEL _cmd) {
+  NPObject * obj = nopa_alloc(self);
   return nopa_init(obj);
 }
 
-NFObject * NFObject_init(NFObject * self, SEL _cmd) {
-  struct NFObject * _self = (struct NFObject *)self;
+NPObject * NPObject_init(NPObject * self, SEL _cmd) {
+  struct NPObject * _self = (struct NPObject *)self;
   {
     return nopa_init(self);
   }
 }
 
-void NFObject_dealloc(NFObject * self, SEL _cmd) {
-  struct NFObject * _self = (struct NFObject *)self;
+void NPObject_dealloc(NPObject * self, SEL _cmd) {
+  struct NPObject * _self = (struct NPObject *)self;
   {
     return;
   }
 }
 
-void NFObject_release(NFObject * self, SEL _cmd) {
-  struct NFObject * _self = (struct NFObject *)self;
+void NPObject_release(NPObject * self, SEL _cmd) {
+  struct NPObject * _self = (struct NPObject *)self;
   {
     nopa_release(self);
   }
 }
 
-NFObject * NFObject_retain(NFObject * self, SEL _cmd) {
-  struct NFObject * _self = (struct NFObject *)self;
+NPObject * NPObject_retain(NPObject * self, SEL _cmd) {
+  struct NPObject * _self = (struct NPObject *)self;
   {
     return nopa_retain(self);
   }
 }
 
-NFObject * NFDataNode_initWithKey_value_(NFObject * self, SEL _cmd, const char * k, NFObject * v) {
-  struct NFDataNode * _self = (struct NFDataNode *)self;
+NPObject * NPDataNode_initWithKey_value_(NPObject * self, SEL _cmd, const char * k, NPObject * v) {
+  struct NPDataNode * _self = (struct NPDataNode *)self;
   {
-    self = NFObject_init(self, sel_registerName("init"));
+    self = NPObject_init(self, sel_registerName("init"));
     if (self)     {
       _self->_key = k;
       _self->_value = v;
@@ -359,44 +359,44 @@ NFObject * NFDataNode_initWithKey_value_(NFObject * self, SEL _cmd, const char *
   }
 }
 
-const char * NFDataNode_key(NFObject * self, SEL _cmd) {
-  return ((struct NFDataNode *)self)->_key;
+const char * NPDataNode_key(NPObject * self, SEL _cmd) {
+  return ((struct NPDataNode *)self)->_key;
 }
 
-void NFDataNode_setKey_(NFObject * self, SEL _cmd, const char * value) {
-  ((struct NFDataNode *)self)->_key = value;
+void NPDataNode_setKey_(NPObject * self, SEL _cmd, const char * value) {
+  ((struct NPDataNode *)self)->_key = value;
 }
 
-NFObject * NFDataNode_value(NFObject * self, SEL _cmd) {
-  return ((struct NFDataNode *)self)->_value;
+NPObject * NPDataNode_value(NPObject * self, SEL _cmd) {
+  return ((struct NPDataNode *)self)->_value;
 }
 
-void NFDataNode_setValue_(NFObject * self, SEL _cmd, NFObject * value) {
-  ((struct NFDataNode *)self)->_value = value;
+void NPDataNode_setValue_(NPObject * self, SEL _cmd, NPObject * value) {
+  ((struct NPDataNode *)self)->_value = value;
 }
 
-NFDataNode * NFDataNode_nextNode(NFObject * self, SEL _cmd) {
-  return ((struct NFDataNode *)self)->_nextNode;
+NPDataNode * NPDataNode_nextNode(NPObject * self, SEL _cmd) {
+  return ((struct NPDataNode *)self)->_nextNode;
 }
 
-void NFDataNode_setNextNode_(NFObject * self, SEL _cmd, NFDataNode * value) {
-  ((struct NFDataNode *)self)->_nextNode = value;
+void NPDataNode_setNextNode_(NPObject * self, SEL _cmd, NPDataNode * value) {
+  ((struct NPDataNode *)self)->_nextNode = value;
 }
 
-void NFDataNode_dealloc(NFObject * self, SEL _cmd) {
-  struct NFDataNode * _self = (struct NFDataNode *)self;
+void NPDataNode_dealloc(NPObject * self, SEL _cmd) {
+  struct NPDataNode * _self = (struct NPDataNode *)self;
   {
     if (_self->_nextNode)     {
-      ((struct nopa_NFObject_vtable *)(_self->_nextNode)->isa->vtable)->release(_self->_nextNode, sel_registerName("release"));
+      ((struct nopa_NPObject_vtable *)(_self->_nextNode)->isa->vtable)->release(_self->_nextNode, sel_registerName("release"));
     }
-    NFObject_dealloc(self, sel_registerName("dealloc"));
+    NPObject_dealloc(self, sel_registerName("dealloc"));
   }
 }
 
-NFObject * NFDataContainer_initWithCapacity_(NFObject * self, SEL _cmd, int capacity) {
-  struct NFDataContainer * _self = (struct NFDataContainer *)self;
+NPObject * NPDataContainer_initWithCapacity_(NPObject * self, SEL _cmd, int capacity) {
+  struct NPDataContainer * _self = (struct NPDataContainer *)self;
   {
-    self = NFObject_init(self, sel_registerName("init"));
+    self = NPObject_init(self, sel_registerName("init"));
     if (self)     {
       _self->_maxCapacity = capacity;
       _self->_count = 0;
@@ -407,8 +407,8 @@ NFObject * NFDataContainer_initWithCapacity_(NFObject * self, SEL _cmd, int capa
   }
 }
 
-_Bool NFDataContainer_setObject_forKey_(NFObject * self, SEL _cmd, NFObject * obj, const char * key) {
-  struct NFDataContainer * _self = (struct NFDataContainer *)self;
+_Bool NPDataContainer_setObject_forKey_(NPObject * self, SEL _cmd, NPObject * obj, const char * key) {
+  struct NPDataContainer * _self = (struct NPDataContainer *)self;
   {
     if ((_self->_count >= _self->_maxCapacity))     {
       if ((_self->_delegate != NULL))       {
@@ -416,10 +416,10 @@ _Bool NFDataContainer_setObject_forKey_(NFObject * self, SEL _cmd, NFObject * ob
       }
       return 0;
     }
-    NFObject *__nopa_tmp_0 = (NFObject_alloc(&nopa_NFDataNode_class, sel_registerName("alloc")));
-    NFDataNode * newNode = ((struct nopa_NFDataNode_vtable *)__nopa_tmp_0->isa->vtable)->initWithKey_value_(__nopa_tmp_0, sel_registerName("initWithKey:value:"), key, obj);
+    NPObject *__nopa_tmp_0 = (NPObject_alloc(&nopa_NPDataNode_class, sel_registerName("alloc")));
+    NPDataNode * newNode = ((struct nopa_NPDataNode_vtable *)__nopa_tmp_0->isa->vtable)->initWithKey_value_(__nopa_tmp_0, sel_registerName("initWithKey:value:"), key, obj);
     if ((_self->_headNode != NULL))     {
-      ((struct nopa_NFDataNode_vtable *)(newNode)->isa->vtable)->setNextNode_(newNode, sel_registerName("setNextNode:"), _self->_headNode);
+      ((struct nopa_NPDataNode_vtable *)(newNode)->isa->vtable)->setNextNode_(newNode, sel_registerName("setNextNode:"), _self->_headNode);
     }
     _self->_headNode = newNode;
     _self->_count++;
@@ -430,61 +430,61 @@ _Bool NFDataContainer_setObject_forKey_(NFObject * self, SEL _cmd, NFObject * ob
   }
 }
 
-NFObject * NFDataContainer_objectForKey_(NFObject * self, SEL _cmd, const char * key) {
-  struct NFDataContainer * _self = (struct NFDataContainer *)self;
+NPObject * NPDataContainer_objectForKey_(NPObject * self, SEL _cmd, const char * key) {
+  struct NPDataContainer * _self = (struct NPDataContainer *)self;
   {
-    NFDataNode * current = _self->_headNode;
+    NPDataNode * current = _self->_headNode;
     while ((current != NULL))     {
-      if ((strcmp(((struct nopa_NFDataNode_vtable *)(current)->isa->vtable)->key(current, sel_registerName("key")), key) == 0))       {
-        return ((struct nopa_NFDataNode_vtable *)(current)->isa->vtable)->value(current, sel_registerName("value"));
+      if ((strcmp(((struct nopa_NPDataNode_vtable *)(current)->isa->vtable)->key(current, sel_registerName("key")), key) == 0))       {
+        return ((struct nopa_NPDataNode_vtable *)(current)->isa->vtable)->value(current, sel_registerName("value"));
       }
-      current = ((struct nopa_NFDataNode_vtable *)(current)->isa->vtable)->nextNode(current, sel_registerName("nextNode"));
+      current = ((struct nopa_NPDataNode_vtable *)(current)->isa->vtable)->nextNode(current, sel_registerName("nextNode"));
     }
     return NULL;
   }
 }
 
-void NFDataContainer_performSelectorTest_(NFObject * self, SEL _cmd, const char * selectorName) {
-  struct NFDataContainer * _self = (struct NFDataContainer *)self;
+void NPDataContainer_performSelectorTest_(NPObject * self, SEL _cmd, const char * selectorName) {
+  struct NPDataContainer * _self = (struct NPDataContainer *)self;
   {
     printf("[容器日志] 正在尝试解析动态指令: @selector(%s)\n", selectorName);
   }
 }
 
-int NFDataContainer_maxCapacity(NFObject * self, SEL _cmd) {
-  return ((struct NFDataContainer *)self)->_maxCapacity;
+int NPDataContainer_maxCapacity(NPObject * self, SEL _cmd) {
+  return ((struct NPDataContainer *)self)->_maxCapacity;
 }
 
-void NFDataContainer_setMaxCapacity_(NFObject * self, SEL _cmd, int value) {
-  ((struct NFDataContainer *)self)->_maxCapacity = value;
+void NPDataContainer_setMaxCapacity_(NPObject * self, SEL _cmd, int value) {
+  ((struct NPDataContainer *)self)->_maxCapacity = value;
 }
 
-int NFDataContainer_count(NFObject * self, SEL _cmd) {
-  return ((struct NFDataContainer *)self)->_count;
+int NPDataContainer_count(NPObject * self, SEL _cmd) {
+  return ((struct NPDataContainer *)self)->_count;
 }
 
-NFObject * NFDataContainer_delegate(NFObject * self, SEL _cmd) {
-  return ((struct NFDataContainer *)self)->_delegate;
+NPObject * NPDataContainer_delegate(NPObject * self, SEL _cmd) {
+  return ((struct NPDataContainer *)self)->_delegate;
 }
 
-void NFDataContainer_setDelegate_(NFObject * self, SEL _cmd, NFObject * value) {
-  ((struct NFDataContainer *)self)->_delegate = value;
+void NPDataContainer_setDelegate_(NPObject * self, SEL _cmd, NPObject * value) {
+  ((struct NPDataContainer *)self)->_delegate = value;
 }
 
-void NFDataContainer_dealloc(NFObject * self, SEL _cmd) {
-  struct NFDataContainer * _self = (struct NFDataContainer *)self;
+void NPDataContainer_dealloc(NPObject * self, SEL _cmd) {
+  struct NPDataContainer * _self = (struct NPDataContainer *)self;
   {
     if (_self->_headNode)     {
-      ((struct nopa_NFObject_vtable *)(_self->_headNode)->isa->vtable)->release(_self->_headNode, sel_registerName("release"));
+      ((struct nopa_NPObject_vtable *)(_self->_headNode)->isa->vtable)->release(_self->_headNode, sel_registerName("release"));
     }
-    NFObject_dealloc(self, sel_registerName("dealloc"));
+    NPObject_dealloc(self, sel_registerName("dealloc"));
   }
 }
 
-NFObject * NFCollectionInspector_initWithName_(NFObject * self, SEL _cmd, const char * name) {
-  struct NFCollectionInspector * _self = (struct NFCollectionInspector *)self;
+NPObject * NPCollectionInspector_initWithName_(NPObject * self, SEL _cmd, const char * name) {
+  struct NPCollectionInspector * _self = (struct NPCollectionInspector *)self;
   {
-    self = NFObject_init(self, sel_registerName("init"));
+    self = NPObject_init(self, sel_registerName("init"));
     if (self)     {
       _self->_inspectorName = name;
     }
@@ -492,61 +492,61 @@ NFObject * NFCollectionInspector_initWithName_(NFObject * self, SEL _cmd, const 
   }
 }
 
-void NFCollectionInspector_collectionDidReachCapacity_(NFObject * self, SEL _cmd, NFObject * collection) {
-  struct NFCollectionInspector * _self = (struct NFCollectionInspector *)self;
+void NPCollectionInspector_collectionDidReachCapacity_(NPObject * self, SEL _cmd, NPObject * collection) {
+  struct NPCollectionInspector * _self = (struct NPCollectionInspector *)self;
   {
-    NFDataContainer * container = (NFDataContainer *)collection;
-    printf("[%s 报告] 警告：容器已满！当前数量: %d, 最大容量: %d\n", _self->_inspectorName, ((struct nopa_NFDataContainer_vtable *)(container)->isa->vtable)->count(container, sel_registerName("count")), ((struct nopa_NFDataContainer_vtable *)(container)->isa->vtable)->maxCapacity(container, sel_registerName("maxCapacity")));
+    NPDataContainer * container = (NPDataContainer *)collection;
+    printf("[%s 报告] 警告：容器已满！当前数量: %d, 最大容量: %d\n", _self->_inspectorName, ((struct nopa_NPDataContainer_vtable *)(container)->isa->vtable)->count(container, sel_registerName("count")), ((struct nopa_NPDataContainer_vtable *)(container)->isa->vtable)->maxCapacity(container, sel_registerName("maxCapacity")));
   }
 }
 
-void NFCollectionInspector_collection_didAddItem_(NFObject * self, SEL _cmd, NFObject * collection, NFObject * item) {
-  struct NFCollectionInspector * _self = (struct NFCollectionInspector *)self;
+void NPCollectionInspector_collection_didAddItem_(NPObject * self, SEL _cmd, NPObject * collection, NPObject * item) {
+  struct NPCollectionInspector * _self = (struct NPCollectionInspector *)self;
   {
     printf("[%s 报告] 成功捕获入库事件，新元素地址: %p\n", _self->_inspectorName, item);
   }
 }
 
-NFObject * nopa_alloc(struct NFClass * cls);
+NPObject * nopa_alloc(struct NPClass * cls);
 
-NFObject * nopa_init(NFObject * self);
+NPObject * nopa_init(NPObject * self);
 
-void nopa_release(NFObject * obj);
+void nopa_release(NPObject * obj);
 
-NFObject * nopa_retain(NFObject * obj);
+NPObject * nopa_retain(NPObject * obj);
 
 int main(int argc, const char * argv[]) {
   nopa_meta_init();
   {
-    printf(">>> 开始 NFFoundation 关键字密集型压力测试 <<<\n\n");
-    NFObject *__nopa_tmp_1 = (NFObject_alloc(&nopa_NFCollectionInspector_class, sel_registerName("alloc")));
-    NFCollectionInspector * inspector = ((struct nopa_NFCollectionInspector_vtable *)__nopa_tmp_1->isa->vtable)->initWithName_(__nopa_tmp_1, sel_registerName("initWithName:"), "核心审计器");
-    NFObject *__nopa_tmp_2 = (NFObject_alloc(&nopa_NFDataContainer_class, sel_registerName("alloc")));
-    NFDataContainer * container = ((struct nopa_NFDataContainer_vtable *)__nopa_tmp_2->isa->vtable)->initWithCapacity_(__nopa_tmp_2, sel_registerName("initWithCapacity:"), 2);
-    ((struct nopa_NFDataContainer_vtable *)(container)->isa->vtable)->setDelegate_(container, sel_registerName("setDelegate:"), inspector);
-    NFObject *__nopa_tmp_3 = (NFObject_alloc(&nopa_NFObject_class, sel_registerName("alloc")));
-    NFObject * dummyData1 = ((struct nopa_NFObject_vtable *)__nopa_tmp_3->isa->vtable)->init(__nopa_tmp_3, sel_registerName("init"));
-    NFObject *__nopa_tmp_4 = (NFObject_alloc(&nopa_NFObject_class, sel_registerName("alloc")));
-    NFObject * dummyData2 = ((struct nopa_NFObject_vtable *)__nopa_tmp_4->isa->vtable)->init(__nopa_tmp_4, sel_registerName("init"));
-    NFObject *__nopa_tmp_5 = (NFObject_alloc(&nopa_NFObject_class, sel_registerName("alloc")));
-    NFObject * dummyData3 = ((struct nopa_NFObject_vtable *)__nopa_tmp_5->isa->vtable)->init(__nopa_tmp_5, sel_registerName("init"));
+    printf(">>> 开始 NPFoundation 关键字密集型压力测试 <<<\n\n");
+    NPObject *__nopa_tmp_1 = (NPObject_alloc(&nopa_NPCollectionInspector_class, sel_registerName("alloc")));
+    NPCollectionInspector * inspector = ((struct nopa_NPCollectionInspector_vtable *)__nopa_tmp_1->isa->vtable)->initWithName_(__nopa_tmp_1, sel_registerName("initWithName:"), "核心审计器");
+    NPObject *__nopa_tmp_2 = (NPObject_alloc(&nopa_NPDataContainer_class, sel_registerName("alloc")));
+    NPDataContainer * container = ((struct nopa_NPDataContainer_vtable *)__nopa_tmp_2->isa->vtable)->initWithCapacity_(__nopa_tmp_2, sel_registerName("initWithCapacity:"), 2);
+    ((struct nopa_NPDataContainer_vtable *)(container)->isa->vtable)->setDelegate_(container, sel_registerName("setDelegate:"), inspector);
+    NPObject *__nopa_tmp_3 = (NPObject_alloc(&nopa_NPObject_class, sel_registerName("alloc")));
+    NPObject * dummyData1 = ((struct nopa_NPObject_vtable *)__nopa_tmp_3->isa->vtable)->init(__nopa_tmp_3, sel_registerName("init"));
+    NPObject *__nopa_tmp_4 = (NPObject_alloc(&nopa_NPObject_class, sel_registerName("alloc")));
+    NPObject * dummyData2 = ((struct nopa_NPObject_vtable *)__nopa_tmp_4->isa->vtable)->init(__nopa_tmp_4, sel_registerName("init"));
+    NPObject *__nopa_tmp_5 = (NPObject_alloc(&nopa_NPObject_class, sel_registerName("alloc")));
+    NPObject * dummyData3 = ((struct nopa_NPObject_vtable *)__nopa_tmp_5->isa->vtable)->init(__nopa_tmp_5, sel_registerName("init"));
     printf("--- 尝试插入元素 1 ---\n");
-    ((struct nopa_NFDataContainer_vtable *)(container)->isa->vtable)->setObject_forKey_(container, sel_registerName("setObject:forKey:"), dummyData1, "EngineToken");
+    ((struct nopa_NPDataContainer_vtable *)(container)->isa->vtable)->setObject_forKey_(container, sel_registerName("setObject:forKey:"), dummyData1, "EngineToken");
     printf("\n--- 尝试插入元素 2 ---\n");
-    ((struct nopa_NFDataContainer_vtable *)(container)->isa->vtable)->setObject_forKey_(container, sel_registerName("setObject:forKey:"), dummyData2, "WeaponToken");
+    ((struct nopa_NPDataContainer_vtable *)(container)->isa->vtable)->setObject_forKey_(container, sel_registerName("setObject:forKey:"), dummyData2, "WeaponToken");
     printf("\n--- 尝试插入元素 3 (预期触发容量报警) ---\n");
-    _Bool success = ((struct nopa_NFDataContainer_vtable *)(container)->isa->vtable)->setObject_forKey_(container, sel_registerName("setObject:forKey:"), dummyData3, "ShieldToken");
+    _Bool success = ((struct nopa_NPDataContainer_vtable *)(container)->isa->vtable)->setObject_forKey_(container, sel_registerName("setObject:forKey:"), dummyData3, "ShieldToken");
     if (!success)     {
       printf("[主程序] 元素 3 插入失败，阻断机制正常工作。\n");
     }
     printf("\n--- 运行时选择器解析测试 ---\n");
-    ((struct nopa_NFDataContainer_vtable *)(container)->isa->vtable)->performSelectorTest_(container, sel_registerName("performSelectorTest:"), "collectionDidReachCapacity:");
+    ((struct nopa_NPDataContainer_vtable *)(container)->isa->vtable)->performSelectorTest_(container, sel_registerName("performSelectorTest:"), "collectionDidReachCapacity:");
     printf("\n>>> 正在按引用计数释放对象... <<<\n");
-    ((struct nopa_NFObject_vtable *)(dummyData1)->isa->vtable)->release(dummyData1, sel_registerName("release"));
-    ((struct nopa_NFObject_vtable *)(dummyData2)->isa->vtable)->release(dummyData2, sel_registerName("release"));
-    ((struct nopa_NFObject_vtable *)(dummyData3)->isa->vtable)->release(dummyData3, sel_registerName("release"));
-    ((struct nopa_NFObject_vtable *)(container)->isa->vtable)->release(container, sel_registerName("release"));
-    ((struct nopa_NFObject_vtable *)(inspector)->isa->vtable)->release(inspector, sel_registerName("release"));
+    ((struct nopa_NPObject_vtable *)(dummyData1)->isa->vtable)->release(dummyData1, sel_registerName("release"));
+    ((struct nopa_NPObject_vtable *)(dummyData2)->isa->vtable)->release(dummyData2, sel_registerName("release"));
+    ((struct nopa_NPObject_vtable *)(dummyData3)->isa->vtable)->release(dummyData3, sel_registerName("release"));
+    ((struct nopa_NPObject_vtable *)(container)->isa->vtable)->release(container, sel_registerName("release"));
+    ((struct nopa_NPObject_vtable *)(inspector)->isa->vtable)->release(inspector, sel_registerName("release"));
     printf(">>> 所有 @ 关键字语法测试顺利结束！ <<<\n");
   }
   return 0;

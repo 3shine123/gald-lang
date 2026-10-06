@@ -9,157 +9,157 @@
 
 #include <string.h>
 
-struct nopa_NFObject_vtable;
-struct nopa_NFShadowGhost_vtable;
-struct nopa_NFScopeMixer_vtable;
+struct nopa_NPObject_vtable;
+struct nopa_NPShadowGhost_vtable;
+struct nopa_NPScopeMixer_vtable;
 
-#define nopa_NFObject_vtable_index_init 2
-#define nopa_NFObject_vtable_index_dealloc 3
-#define nopa_NFShadowGhost_vtable_index_initWithId_ 4
-#define nopa_NFShadowGhost_vtable_index_dealloc 3
-#define nopa_NFScopeMixer_vtable_index_triggerScopeChaos 4
+#define nopa_NPObject_vtable_index_init 2
+#define nopa_NPObject_vtable_index_dealloc 3
+#define nopa_NPShadowGhost_vtable_index_initWithId_ 4
+#define nopa_NPShadowGhost_vtable_index_dealloc 3
+#define nopa_NPScopeMixer_vtable_index_triggerScopeChaos 4
 
 static const SEL __nopa_sel_init = {.name = "init", .hash = 0x16B1D373};
 static const SEL __nopa_sel_initWithId_ = {.name = "initWithId_", .hash = 0x8CE5C4CB};
 static const SEL __nopa_sel_alloc = {.name = "alloc", .hash = 0xBAB1BB16};
 static const SEL __nopa_sel_triggerScopeChaos = {.name = "triggerScopeChaos", .hash = 0xBC5E90F3};
 
-typedef struct NFObject NFObject;
-typedef struct NFShadowGhost NFShadowGhost;
-typedef struct NFScopeMixer NFScopeMixer;
+typedef struct NPObject NPObject;
+typedef struct NPShadowGhost NPShadowGhost;
+typedef struct NPScopeMixer NPScopeMixer;
 
 
 
-NFObject * NFObject_alloc(NFClass * self, SEL _cmd);
-NFObject * NFObject_new(NFClass * self, SEL _cmd);
-NFObject * NFObject_init(NFObject * self, SEL _cmd);
-void NFObject_dealloc(NFObject * self, SEL _cmd);
-NFClass * NFObject_getClass(NFClass * self, SEL _cmd);
-NFObject * NFShadowGhost_initWithId_(NFObject * self, SEL _cmd, int gid);
-void NFShadowGhost_dealloc(NFObject * self, SEL _cmd);
-NFClass * NFShadowGhost_getClass(NFClass * self, SEL _cmd);
-NFObject * NFScopeMixer_triggerScopeChaos(NFObject * self, SEL _cmd);
-NFClass * NFScopeMixer_getClass(NFClass * self, SEL _cmd);
+NPObject * NPObject_alloc(NPClass * self, SEL _cmd);
+NPObject * NPObject_new(NPClass * self, SEL _cmd);
+NPObject * NPObject_init(NPObject * self, SEL _cmd);
+void NPObject_dealloc(NPObject * self, SEL _cmd);
+NPClass * NPObject_getClass(NPClass * self, SEL _cmd);
+NPObject * NPShadowGhost_initWithId_(NPObject * self, SEL _cmd, int gid);
+void NPShadowGhost_dealloc(NPObject * self, SEL _cmd);
+NPClass * NPShadowGhost_getClass(NPClass * self, SEL _cmd);
+NPObject * NPScopeMixer_triggerScopeChaos(NPObject * self, SEL _cmd);
+NPClass * NPScopeMixer_getClass(NPClass * self, SEL _cmd);
 int main(int argc, const char * * argv);
 
-extern NFClass nopa_NFObject_class;
-extern NFClass nopa_NFShadowGhost_class;
-extern NFClass nopa_NFScopeMixer_class;
+extern NPClass nopa_NPObject_class;
+extern NPClass nopa_NPShadowGhost_class;
+extern NPClass nopa_NPScopeMixer_class;
 void nopa_meta_init(void);
 
-// struct NFClass defined in runtime.h
-// struct NFObject defined in runtime.h
-struct nopa_NFObject_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
+// struct NPClass defined in runtime.h
+// struct NPObject defined in runtime.h
+struct nopa_NPObject_vtable {
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
 };
-struct nopa_NFObject_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+struct nopa_NPObject_meta_vtable {
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
-struct NFShadowGhost {
-    struct NFClass *isa;
+struct NPShadowGhost {
+    struct NPClass *isa;
     uint32_t retain_count;
     int ghostId;
 };
-typedef struct NFShadowGhost NFShadowGhost;
-struct nopa_NFShadowGhost_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    NFObject * (*initWithId_)(NFObject *, SEL, int);
+typedef struct NPShadowGhost NPShadowGhost;
+struct nopa_NPShadowGhost_vtable {
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    NPObject * (*initWithId_)(NPObject *, SEL, int);
 };
-struct nopa_NFShadowGhost_meta_vtable {
-    NFClass * (*class)(NFClass *, SEL);
+struct nopa_NPShadowGhost_meta_vtable {
+    NPClass * (*class)(NPClass *, SEL);
 };
-struct NFScopeMixer {
-    struct NFClass *isa;
+struct NPScopeMixer {
+    struct NPClass *isa;
     uint32_t retain_count;
 };
-typedef struct NFScopeMixer NFScopeMixer;
-struct nopa_NFScopeMixer_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    NFObject * (*triggerScopeChaos)(NFObject *, SEL);
+typedef struct NPScopeMixer NPScopeMixer;
+struct nopa_NPScopeMixer_vtable {
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    NPObject * (*triggerScopeChaos)(NPObject *, SEL);
 };
-struct nopa_NFScopeMixer_meta_vtable {
-    NFClass * (*class)(NFClass *, SEL);
+struct nopa_NPScopeMixer_meta_vtable {
+    NPClass * (*class)(NPClass *, SEL);
 };
-NFObject * NFObject_alloc(NFClass * self, SEL _cmd) {
+NPObject * NPObject_alloc(NPClass * self, SEL _cmd) {
     return nopa_alloc(self);
 }
 
-NFObject * NFObject_new(NFClass * self, SEL _cmd) {
-    NFObject * obj = nopa_alloc(self);
+NPObject * NPObject_new(NPClass * self, SEL _cmd) {
+    NPObject * obj = nopa_alloc(self);
     return nopa_init(obj);
 }
 
-NFObject * NFObject_init(NFObject * self, SEL _cmd) {
-    struct NFObject * _self = ((struct NFObject *)(self));
+NPObject * NPObject_init(NPObject * self, SEL _cmd) {
+    struct NPObject * _self = ((struct NPObject *)(self));
     {
         return nopa_init(self);
     }
 }
 
-void NFObject_dealloc(NFObject * self, SEL _cmd) {
-    struct NFObject * _self = ((struct NFObject *)(self));
+void NPObject_dealloc(NPObject * self, SEL _cmd) {
+    struct NPObject * _self = ((struct NPObject *)(self));
     {
         return;
     }
 }
 
-NFClass * NFObject_getClass(NFClass * self, SEL _cmd) {
-    return &nopa_NFObject_class;
+NPClass * NPObject_getClass(NPClass * self, SEL _cmd) {
+    return &nopa_NPObject_class;
 }
 
-NFObject * nopa_alloc(struct NFClass * cls);
-NFObject * nopa_init(NFObject * );
-NFObject * NFShadowGhost_initWithId_(NFObject * self, SEL _cmd, int gid) {
-    struct NFShadowGhost * _self = ((struct NFShadowGhost *)(self));
+NPObject * nopa_alloc(struct NPClass * cls);
+NPObject * nopa_init(NPObject * );
+NPObject * NPShadowGhost_initWithId_(NPObject * self, SEL _cmd, int gid) {
+    struct NPShadowGhost * _self = ((struct NPShadowGhost *)(self));
     {
-        self = NFObject_init(self, __nopa_sel_init);
+        self = NPObject_init(self, __nopa_sel_init);
         if (self) {
             {
-                ((struct NFShadowGhost *)(self))->ghostId = gid;
+                ((struct NPShadowGhost *)(self))->ghostId = gid;
             }
         }
         return self;
     }
 }
 
-void NFShadowGhost_dealloc(NFObject * self, SEL _cmd) {
-    struct NFShadowGhost * _self = ((struct NFShadowGhost *)(self));
+void NPShadowGhost_dealloc(NPObject * self, SEL _cmd) {
+    struct NPShadowGhost * _self = ((struct NPShadowGhost *)(self));
     {
-        printf("[生命周期日志] Ghost-%d 顺利触发 dealloc 彻底销毁。\n", ((struct NFShadowGhost *)(self))->ghostId);
+        printf("[生命周期日志] Ghost-%d 顺利触发 dealloc 彻底销毁。\n", ((struct NPShadowGhost *)(self))->ghostId);
         nopa_object_dealloc(self);
     }
 }
 
-NFClass * NFShadowGhost_getClass(NFClass * self, SEL _cmd) {
-    return &nopa_NFShadowGhost_class;
+NPClass * NPShadowGhost_getClass(NPClass * self, SEL _cmd) {
+    return &nopa_NPShadowGhost_class;
 }
 
-NFObject * NFScopeMixer_triggerScopeChaos(NFObject * self, SEL _cmd) {
-    struct NFScopeMixer * _self = ((struct NFScopeMixer *)(self));
+NPObject * NPScopeMixer_triggerScopeChaos(NPObject * self, SEL _cmd) {
+    struct NPScopeMixer * _self = ((struct NPScopeMixer *)(self));
     {
         printf("[作用域测试] 启动顶级作用域环境...\n");
         int x = 100;
-        NFObject * escapedObject = NULL;
+        NPObject * escapedObject = NULL;
         {
             nopa_autoreleasepool_t * __pool = nopa_autoreleasepool_push();
             {
-                NFObject *__nopa_tmp_0 = (NFObject_alloc(&nopa_NFShadowGhost_class, __nopa_sel_alloc));
-                NFShadowGhost * x = ((struct nopa_NFShadowGhost_vtable *)__nopa_tmp_0->isa->vtable)->initWithId_(__nopa_tmp_0, __nopa_sel_initWithId_, 1);
-                printf("[一层遮蔽内] 局部对象 x 的 ghostId = %d (顶级整型 x 此时被隐藏)\n", ((struct NFShadowGhost *)(x))->ghostId);
-                if (((struct NFShadowGhost *)(x))->ghostId > 0) {
+                NPObject *__nopa_tmp_0 = (NPObject_alloc(&nopa_NPShadowGhost_class, __nopa_sel_alloc));
+                NPShadowGhost * x = ((struct nopa_NPShadowGhost_vtable *)__nopa_tmp_0->isa->vtable)->initWithId_(__nopa_tmp_0, __nopa_sel_initWithId_, 1);
+                printf("[一层遮蔽内] 局部对象 x 的 ghostId = %d (顶级整型 x 此时被隐藏)\n", ((struct NPShadowGhost *)(x))->ghostId);
+                if (((struct NPShadowGhost *)(x))->ghostId > 0) {
                     {
                         {
                             nopa_autoreleasepool_t * __pool = nopa_autoreleasepool_push();
                             {
                                 const char * x = "GHOST_STRING_MARKER";
                                 printf("[二层遮蔽内] 嵌套字符串 x = %s\n", x);
-                                NFObject *__nopa_tmp_1 = (NFObject_alloc(&nopa_NFShadowGhost_class, __nopa_sel_alloc));
-                                NFShadowGhost * ghost2 = ((struct nopa_NFShadowGhost_vtable *)__nopa_tmp_1->isa->vtable)->initWithId_(__nopa_tmp_1, __nopa_sel_initWithId_, 999);
+                                NPObject *__nopa_tmp_1 = (NPObject_alloc(&nopa_NPShadowGhost_class, __nopa_sel_alloc));
+                                NPShadowGhost * ghost2 = ((struct nopa_NPShadowGhost_vtable *)__nopa_tmp_1->isa->vtable)->initWithId_(__nopa_tmp_1, __nopa_sel_initWithId_, 999);
                                 escapedObject = ghost2;
                             }
                             nopa_autoreleasepool_pop(__pool);
@@ -176,8 +176,8 @@ NFObject * NFScopeMixer_triggerScopeChaos(NFObject * self, SEL _cmd) {
     }
 }
 
-NFClass * NFScopeMixer_getClass(NFClass * self, SEL _cmd) {
-    return &nopa_NFScopeMixer_class;
+NPClass * NPScopeMixer_getClass(NPClass * self, SEL _cmd) {
+    return &nopa_NPScopeMixer_class;
 }
 
 int main(int argc, const char * * argv) {
@@ -189,15 +189,15 @@ int main(int argc, const char * * argv) {
             printf("==================================================\n");
             printf(">>>    nopac 编译器「阴阳作用域遮蔽与逃逸」压测    <<<\n");
             printf("==================================================\n\n");
-            NFObject *__nopa_tmp_2 = (NFObject_alloc(&nopa_NFScopeMixer_class, __nopa_sel_alloc));
-            NFScopeMixer * mixer = ((struct nopa_NFObject_vtable *)__nopa_tmp_2->isa->vtable)->init(__nopa_tmp_2, __nopa_sel_init);
+            NPObject *__nopa_tmp_2 = (NPObject_alloc(&nopa_NPScopeMixer_class, __nopa_sel_alloc));
+            NPScopeMixer * mixer = ((struct nopa_NPObject_vtable *)__nopa_tmp_2->isa->vtable)->init(__nopa_tmp_2, __nopa_sel_init);
             printf("--- 开始执行多层遮蔽与逃逸混淆逻辑 ---\n");
-            NFObject * resultGhost = ((struct nopa_NFScopeMixer_vtable *)mixer->isa->vtable)->triggerScopeChaos(mixer, __nopa_sel_triggerScopeChaos);
+            NPObject * resultGhost = ((struct nopa_NPScopeMixer_vtable *)mixer->isa->vtable)->triggerScopeChaos(mixer, __nopa_sel_triggerScopeChaos);
             printf("\n--- 检查逃逸对象的存活状态 ---\n");
             if (resultGhost != NULL) {
                 {
-                    NFShadowGhost * finalGhost = ((NFShadowGhost *)(resultGhost));
-                    printf("[主程序验证] 逃逸对象成功被顶层捕获！GhostID: %d\n", ((struct NFShadowGhost *)(finalGhost))->ghostId);
+                    NPShadowGhost * finalGhost = ((NPShadowGhost *)(resultGhost));
+                    printf("[主程序验证] 逃逸对象成功被顶层捕获！GhostID: %d\n", ((struct NPShadowGhost *)(finalGhost))->ghostId);
                     printf("[主程序销毁] 手动释放逃逸对象...\n");
                     nopa_release(finalGhost);
                 }
@@ -216,64 +216,64 @@ int main(int argc, const char * * argv) {
 
 // ─── Class metadata ─────────────────────────────────────
 
-struct nopa_NFObject_vtable nopa_NFObject_vtable_inst = {
-    .init = NFObject_init,
-    .dealloc = NFObject_dealloc,
+struct nopa_NPObject_vtable nopa_NPObject_vtable_inst = {
+    .init = NPObject_init,
+    .dealloc = NPObject_dealloc,
 };
 
-struct nopa_NFShadowGhost_vtable nopa_NFShadowGhost_vtable_inst = {
-    .init = NFObject_init,
-    .dealloc = NFShadowGhost_dealloc,
-    .initWithId_ = NFShadowGhost_initWithId_,
+struct nopa_NPShadowGhost_vtable nopa_NPShadowGhost_vtable_inst = {
+    .init = NPObject_init,
+    .dealloc = NPShadowGhost_dealloc,
+    .initWithId_ = NPShadowGhost_initWithId_,
 };
 
-struct nopa_NFScopeMixer_vtable nopa_NFScopeMixer_vtable_inst = {
-    .init = NFObject_init,
-    .dealloc = NFObject_dealloc,
-    .triggerScopeChaos = NFScopeMixer_triggerScopeChaos,
+struct nopa_NPScopeMixer_vtable nopa_NPScopeMixer_vtable_inst = {
+    .init = NPObject_init,
+    .dealloc = NPObject_dealloc,
+    .triggerScopeChaos = NPScopeMixer_triggerScopeChaos,
 };
 
-struct nopa_NFObject_meta_vtable nopa_NFObject_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
-    .class = NFObject_getClass,
+struct nopa_NPObject_meta_vtable nopa_NPObject_meta_vtable_inst = {
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
+    .class = NPObject_getClass,
 };
 
-struct nopa_NFShadowGhost_meta_vtable nopa_NFShadowGhost_meta_vtable_inst = {
-    .class = NFShadowGhost_getClass,
+struct nopa_NPShadowGhost_meta_vtable nopa_NPShadowGhost_meta_vtable_inst = {
+    .class = NPShadowGhost_getClass,
 };
 
-struct nopa_NFScopeMixer_meta_vtable nopa_NFScopeMixer_meta_vtable_inst = {
-    .class = NFScopeMixer_getClass,
+struct nopa_NPScopeMixer_meta_vtable nopa_NPScopeMixer_meta_vtable_inst = {
+    .class = NPScopeMixer_getClass,
 };
 
-NFClass nopa_NFObject_class;
-NFClass nopa_NFShadowGhost_class;
-NFClass nopa_NFScopeMixer_class;
+NPClass nopa_NPObject_class;
+NPClass nopa_NPShadowGhost_class;
+NPClass nopa_NPScopeMixer_class;
 
 void nopa_meta_init(void) {
-    nopa_NFObject_class = (NFClass){
-        .name = "NFObject",
+    nopa_NPObject_class = (NPClass){
+        .name = "NPObject",
         .superclass = NULL,
-        .instance_size = sizeof(struct NFObject),
-        .vtable = &nopa_NFObject_vtable_inst,
-        .class_vtable = &nopa_NFObject_meta_vtable_inst,
+        .instance_size = sizeof(struct NPObject),
+        .vtable = &nopa_NPObject_vtable_inst,
+        .class_vtable = &nopa_NPObject_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_NFShadowGhost_class = (NFClass){
-        .name = "NFShadowGhost",
-        .superclass = &nopa_NFObject_class,
-        .instance_size = sizeof(struct NFShadowGhost),
-        .vtable = &nopa_NFShadowGhost_vtable_inst,
-        .class_vtable = &nopa_NFShadowGhost_meta_vtable_inst,
+    nopa_NPShadowGhost_class = (NPClass){
+        .name = "NPShadowGhost",
+        .superclass = &nopa_NPObject_class,
+        .instance_size = sizeof(struct NPShadowGhost),
+        .vtable = &nopa_NPShadowGhost_vtable_inst,
+        .class_vtable = &nopa_NPShadowGhost_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_NFScopeMixer_class = (NFClass){
-        .name = "NFScopeMixer",
-        .superclass = &nopa_NFObject_class,
-        .instance_size = sizeof(struct NFScopeMixer),
-        .vtable = &nopa_NFScopeMixer_vtable_inst,
-        .class_vtable = &nopa_NFScopeMixer_meta_vtable_inst,
+    nopa_NPScopeMixer_class = (NPClass){
+        .name = "NPScopeMixer",
+        .superclass = &nopa_NPObject_class,
+        .instance_size = sizeof(struct NPScopeMixer),
+        .vtable = &nopa_NPScopeMixer_vtable_inst,
+        .class_vtable = &nopa_NPScopeMixer_meta_vtable_inst,
         .protocol_count = 0,
     };
 }

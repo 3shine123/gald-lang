@@ -18,7 +18,7 @@
 // ==========================================================
 // 2. Base Class 基类声明：游戏角色基类
 // ==========================================================
-@interface GameEntity : NFObject <Fighter>
+@interface GameEntity : NPObject <Fighter>
 
 @property char *name;
 @property int hp;

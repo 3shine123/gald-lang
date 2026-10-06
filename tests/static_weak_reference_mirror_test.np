@@ -13,7 +13,7 @@
 // ============================================================================
 // 1. 核心类：指挥母舰核心 (拥有指向战术机甲的强引用)
 // ============================================================================
-@interface CarrierCommandCenter : NFObject {
+@interface CarrierCommandCenter : NPObject {
     @public
     int _carrierId;
     const char* _fleetCode;
@@ -31,7 +31,7 @@
 // ============================================================================
 // 2. 核心类：战术机甲实体 (弱引用指向母舰，防止强引用闭环)
 // ============================================================================
-@interface TacticalMechEntity : NFObject {
+@interface TacticalMechEntity : NPObject {
     @public
     int _mechId;
     // 关键压测点 1：__weak 关键字修饰成员变量

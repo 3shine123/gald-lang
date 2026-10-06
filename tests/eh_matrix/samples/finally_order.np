@@ -10,19 +10,19 @@
 int main() {
     @try {
         @try {
-            NFLog(@"inner-try");
+            NPLog(@"inner-try");
             @throw @"err";
         }
         @finally {
-            NFLog(@"inner-finally");
+            NPLog(@"inner-finally");
         }
     }
-    @catch (NFString *e) {
-        NFLog(@"outer-catch: %@", e);
+    @catch (NPString *e) {
+        NPLog(@"outer-catch: %@", e);
     }
     @finally {
-        NFLog(@"outer-finally");
+        NPLog(@"outer-finally");
     }
-    NFLog(@"after");
+    NPLog(@"after");
     return 0;
 }

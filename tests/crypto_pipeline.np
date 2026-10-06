@@ -25,7 +25,7 @@
 // ==========================================================
 // 3. Base Class 基类声明 (带有 Ivar 访问修饰符)
 // ==========================================================
-@interface UtilityBase : NFObject {
+@interface UtilityBase : NPObject {
     @public
         char *_utilityName;
     @protected
@@ -77,7 +77,7 @@
 // ==========================================================
 // 7. Class 声明：SecurityAuditor (安全审计观察者)
 // ==========================================================
-@interface SecurityAuditor : NFObject {
+@interface SecurityAuditor : NPObject {
 @public
     char *_auditorId;
 }
@@ -278,7 +278,7 @@ int main(int argc, const char * argv[]) {
             
             printf("  --> 临时加密流已完成转换任务，即将离开局部作用域并销毁...\n");
             // 💥 编译器在此作用域出口，必须【自动逆序】插桩释放：
-            // if (tempCipher) NFObject_release(tempCipher);
+            // if (tempCipher) NPObject_release(tempCipher);
         }
         // 💥 超出局部作用域！tempCipher 已经被安全回收！
         // 自动触发 weak 自动抹零，globalAuditor 持有的 monitoredCipher 被底层运行时自动变成 NULL (nil)！
@@ -308,7 +308,7 @@ int main(int argc, const char * argv[]) {
 
         // 4. 自动作用域出口清理
         // 💥 转译器必须严格按照 栈式 FILO 逆序 自动插桩释放主函数范围内的变量：
-        // 1. [自动] if (globalAuditor) NFObject_release(globalAuditor);
+        // 1. [自动] if (globalAuditor) NPObject_release(globalAuditor);
     }
     return 0;
 }

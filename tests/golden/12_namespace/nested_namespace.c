@@ -7,13 +7,13 @@
 
 #include <string.h>
 
-struct nopa_NFObject_vtable;
+struct nopa_NPObject_vtable;
 struct nopa_Game__Entities__Player_vtable;
 struct nopa_Game__Entities__Enemy_vtable;
 struct nopa_Game__Items__Potion_vtable;
 
-#define nopa_NFObject_vtable_index_init 2
-#define nopa_NFObject_vtable_index_dealloc 3
+#define nopa_NPObject_vtable_index_init 2
+#define nopa_NPObject_vtable_index_dealloc 3
 #define nopa_Game__Entities__Player_vtable_index_initWithId_ 4
 #define nopa_Game__Entities__Enemy_vtable_index_initWithLevel_ 4
 #define nopa_Game__Items__Potion_vtable_index_initWithHeal_ 4
@@ -24,132 +24,132 @@ static const SEL __nopa_sel_alloc = {.name = "alloc", .hash = 0xBAB1BB16};
 static const SEL __nopa_sel_initWithLevel_ = {.name = "initWithLevel_", .hash = 0x335A278C};
 static const SEL __nopa_sel_initWithHeal_ = {.name = "initWithHeal_", .hash = 0xC76A1722};
 
-typedef struct NFObject NFObject;
+typedef struct NPObject NPObject;
 typedef struct Game__Entities__Player Game__Entities__Player;
 typedef struct Game__Entities__Enemy Game__Entities__Enemy;
 typedef struct Game__Items__Potion Game__Items__Potion;
 
 
 
-NFObject * NFObject_alloc(NFClass * self, SEL _cmd);
-NFObject * NFObject_new(NFClass * self, SEL _cmd);
-NFObject * NFObject_init(NFObject * self, SEL _cmd);
-void NFObject_dealloc(NFObject * self, SEL _cmd);
-NFClass * NFObject_getClass(NFClass * self, SEL _cmd);
-NFObject * Game__Entities__Player_initWithId_(NFObject * self, SEL _cmd, int i);
-NFClass * Game__Entities__Player_getClass(NFClass * self, SEL _cmd);
-NFObject * Game__Entities__Enemy_initWithLevel_(NFObject * self, SEL _cmd, int l);
-NFClass * Game__Entities__Enemy_getClass(NFClass * self, SEL _cmd);
-NFObject * Game__Items__Potion_initWithHeal_(NFObject * self, SEL _cmd, int h);
-NFClass * Game__Items__Potion_getClass(NFClass * self, SEL _cmd);
+NPObject * NPObject_alloc(NPClass * self, SEL _cmd);
+NPObject * NPObject_new(NPClass * self, SEL _cmd);
+NPObject * NPObject_init(NPObject * self, SEL _cmd);
+void NPObject_dealloc(NPObject * self, SEL _cmd);
+NPClass * NPObject_getClass(NPClass * self, SEL _cmd);
+NPObject * Game__Entities__Player_initWithId_(NPObject * self, SEL _cmd, int i);
+NPClass * Game__Entities__Player_getClass(NPClass * self, SEL _cmd);
+NPObject * Game__Entities__Enemy_initWithLevel_(NPObject * self, SEL _cmd, int l);
+NPClass * Game__Entities__Enemy_getClass(NPClass * self, SEL _cmd);
+NPObject * Game__Items__Potion_initWithHeal_(NPObject * self, SEL _cmd, int h);
+NPClass * Game__Items__Potion_getClass(NPClass * self, SEL _cmd);
 int main();
 
-extern NFClass nopa_NFObject_class;
-extern NFClass nopa_Game__Entities__Player_class;
-extern NFClass nopa_Game__Entities__Enemy_class;
-extern NFClass nopa_Game__Items__Potion_class;
+extern NPClass nopa_NPObject_class;
+extern NPClass nopa_Game__Entities__Player_class;
+extern NPClass nopa_Game__Entities__Enemy_class;
+extern NPClass nopa_Game__Items__Potion_class;
 void nopa_meta_init(void);
 
-// struct NFClass defined in runtime.h
-// struct NFObject defined in runtime.h
-struct nopa_NFObject_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
+// struct NPClass defined in runtime.h
+// struct NPObject defined in runtime.h
+struct nopa_NPObject_vtable {
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
 };
-struct nopa_NFObject_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+struct nopa_NPObject_meta_vtable {
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct Game__Entities__Player {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     int id;
 };
 typedef struct Game__Entities__Player Game__Entities__Player;
 struct nopa_Game__Entities__Player_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    NFObject * (*initWithId_)(NFObject *, SEL, int);
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    NPObject * (*initWithId_)(NPObject *, SEL, int);
 };
 struct nopa_Game__Entities__Player_meta_vtable {
-    NFClass * (*class)(NFClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct Game__Entities__Enemy {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     int level;
 };
 typedef struct Game__Entities__Enemy Game__Entities__Enemy;
 struct nopa_Game__Entities__Enemy_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    NFObject * (*initWithLevel_)(NFObject *, SEL, int);
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    NPObject * (*initWithLevel_)(NPObject *, SEL, int);
 };
 struct nopa_Game__Entities__Enemy_meta_vtable {
-    NFClass * (*class)(NFClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct Game__Items__Potion {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     int healAmount;
 };
 typedef struct Game__Items__Potion Game__Items__Potion;
 struct nopa_Game__Items__Potion_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    NFObject * (*initWithHeal_)(NFObject *, SEL, int);
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    NPObject * (*initWithHeal_)(NPObject *, SEL, int);
 };
 struct nopa_Game__Items__Potion_meta_vtable {
-    NFClass * (*class)(NFClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
-NFObject * NFObject_alloc(NFClass * self, SEL _cmd) {
+NPObject * NPObject_alloc(NPClass * self, SEL _cmd) {
     return nopa_alloc(self);
 }
 
-NFObject * NFObject_new(NFClass * self, SEL _cmd) {
-    NFObject * obj = nopa_alloc(self);
+NPObject * NPObject_new(NPClass * self, SEL _cmd) {
+    NPObject * obj = nopa_alloc(self);
     return nopa_init(obj);
 }
 
-NFObject * NFObject_init(NFObject * self, SEL _cmd) {
-    struct NFObject * _self = ((struct NFObject *)(self));
+NPObject * NPObject_init(NPObject * self, SEL _cmd) {
+    struct NPObject * _self = ((struct NPObject *)(self));
     {
         return nopa_init(self);
     }
 }
 
-void NFObject_dealloc(NFObject * self, SEL _cmd) {
-    struct NFObject * _self = ((struct NFObject *)(self));
+void NPObject_dealloc(NPObject * self, SEL _cmd) {
+    struct NPObject * _self = ((struct NPObject *)(self));
     {
         return;
     }
 }
 
-NFClass * NFObject_getClass(NFClass * self, SEL _cmd) {
-    return &nopa_NFObject_class;
+NPClass * NPObject_getClass(NPClass * self, SEL _cmd) {
+    return &nopa_NPObject_class;
 }
 
-NFObject * nopa_alloc(struct NFClass * cls);
-NFObject * nopa_init(NFObject * );
-NFObject * Game__Entities__Player_initWithId_(NFObject * self, SEL _cmd, int i) {
+NPObject * nopa_alloc(struct NPClass * cls);
+NPObject * nopa_init(NPObject * );
+NPObject * Game__Entities__Player_initWithId_(NPObject * self, SEL _cmd, int i) {
     struct Game__Entities__Player * _self = ((struct Game__Entities__Player *)(self));
     {
-        self = NFObject_init(self, __nopa_sel_init);
+        self = NPObject_init(self, __nopa_sel_init);
         if (self) {
             return self;
         }
     }
 }
 
-NFClass * Game__Entities__Player_getClass(NFClass * self, SEL _cmd) {
+NPClass * Game__Entities__Player_getClass(NPClass * self, SEL _cmd) {
     return &nopa_Game__Entities__Player_class;
 }
 
-NFObject * Game__Entities__Enemy_initWithLevel_(NFObject * self, SEL _cmd, int l) {
+NPObject * Game__Entities__Enemy_initWithLevel_(NPObject * self, SEL _cmd, int l) {
     struct Game__Entities__Enemy * _self = ((struct Game__Entities__Enemy *)(self));
     {
-        self = NFObject_init(self, __nopa_sel_init);
+        self = NPObject_init(self, __nopa_sel_init);
         if (self) {
             ((struct Game__Entities__Enemy *)(self))->level = l;
         }
@@ -157,14 +157,14 @@ NFObject * Game__Entities__Enemy_initWithLevel_(NFObject * self, SEL _cmd, int l
     }
 }
 
-NFClass * Game__Entities__Enemy_getClass(NFClass * self, SEL _cmd) {
+NPClass * Game__Entities__Enemy_getClass(NPClass * self, SEL _cmd) {
     return &nopa_Game__Entities__Enemy_class;
 }
 
-NFObject * Game__Items__Potion_initWithHeal_(NFObject * self, SEL _cmd, int h) {
+NPObject * Game__Items__Potion_initWithHeal_(NPObject * self, SEL _cmd, int h) {
     struct Game__Items__Potion * _self = ((struct Game__Items__Potion *)(self));
     {
-        self = NFObject_init(self, __nopa_sel_init);
+        self = NPObject_init(self, __nopa_sel_init);
         if (self) {
             ((struct Game__Items__Potion *)(self))->healAmount = h;
         }
@@ -172,7 +172,7 @@ NFObject * Game__Items__Potion_initWithHeal_(NFObject * self, SEL _cmd, int h) {
     }
 }
 
-NFClass * Game__Items__Potion_getClass(NFClass * self, SEL _cmd) {
+NPClass * Game__Items__Potion_getClass(NPClass * self, SEL _cmd) {
     return &nopa_Game__Items__Potion_class;
 }
 
@@ -182,11 +182,11 @@ int main() {
     {
         nopa_autoreleasepool_t * __pool = nopa_autoreleasepool_push();
         {
-            NFObject *__nopa_tmp_0 = (NFObject_alloc(&nopa_Game__Entities__Player_class, __nopa_sel_alloc));
+            NPObject *__nopa_tmp_0 = (NPObject_alloc(&nopa_Game__Entities__Player_class, __nopa_sel_alloc));
             Game__Entities__Player * p = ((struct nopa_Game__Entities__Player_vtable *)__nopa_tmp_0->isa->vtable)->initWithId_(__nopa_tmp_0, __nopa_sel_initWithId_, 1);
-            NFObject *__nopa_tmp_1 = (NFObject_alloc(&nopa_Game__Entities__Enemy_class, __nopa_sel_alloc));
+            NPObject *__nopa_tmp_1 = (NPObject_alloc(&nopa_Game__Entities__Enemy_class, __nopa_sel_alloc));
             Game__Entities__Enemy * e = ((struct nopa_Game__Entities__Enemy_vtable *)__nopa_tmp_1->isa->vtable)->initWithLevel_(__nopa_tmp_1, __nopa_sel_initWithLevel_, 5);
-            NFObject *__nopa_tmp_2 = (NFObject_alloc(&nopa_Game__Items__Potion_class, __nopa_sel_alloc));
+            NPObject *__nopa_tmp_2 = (NPObject_alloc(&nopa_Game__Items__Potion_class, __nopa_sel_alloc));
             Game__Items__Potion * pot = ((struct nopa_Game__Items__Potion_vtable *)__nopa_tmp_2->isa->vtable)->initWithHeal_(__nopa_tmp_2, __nopa_sel_initWithHeal_, 30);
             printf("[nested] Player id=%d, Enemy level=%d, Potion heal=%d\n", ((struct Game__Entities__Player *)(p))->id, ((struct Game__Entities__Enemy *)(e))->level, ((struct Game__Items__Potion *)(pot))->healAmount);
             nopa_release(p);
@@ -202,33 +202,33 @@ int main() {
 
 // ─── Class metadata ─────────────────────────────────────
 
-struct nopa_NFObject_vtable nopa_NFObject_vtable_inst = {
-    .init = NFObject_init,
-    .dealloc = NFObject_dealloc,
+struct nopa_NPObject_vtable nopa_NPObject_vtable_inst = {
+    .init = NPObject_init,
+    .dealloc = NPObject_dealloc,
 };
 
 struct nopa_Game__Entities__Player_vtable nopa_Game__Entities__Player_vtable_inst = {
-    .init = NFObject_init,
-    .dealloc = NFObject_dealloc,
+    .init = NPObject_init,
+    .dealloc = NPObject_dealloc,
     .initWithId_ = Game__Entities__Player_initWithId_,
 };
 
 struct nopa_Game__Entities__Enemy_vtable nopa_Game__Entities__Enemy_vtable_inst = {
-    .init = NFObject_init,
-    .dealloc = NFObject_dealloc,
+    .init = NPObject_init,
+    .dealloc = NPObject_dealloc,
     .initWithLevel_ = Game__Entities__Enemy_initWithLevel_,
 };
 
 struct nopa_Game__Items__Potion_vtable nopa_Game__Items__Potion_vtable_inst = {
-    .init = NFObject_init,
-    .dealloc = NFObject_dealloc,
+    .init = NPObject_init,
+    .dealloc = NPObject_dealloc,
     .initWithHeal_ = Game__Items__Potion_initWithHeal_,
 };
 
-struct nopa_NFObject_meta_vtable nopa_NFObject_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
-    .class = NFObject_getClass,
+struct nopa_NPObject_meta_vtable nopa_NPObject_meta_vtable_inst = {
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
+    .class = NPObject_getClass,
 };
 
 struct nopa_Game__Entities__Player_meta_vtable nopa_Game__Entities__Player_meta_vtable_inst = {
@@ -243,39 +243,39 @@ struct nopa_Game__Items__Potion_meta_vtable nopa_Game__Items__Potion_meta_vtable
     .class = Game__Items__Potion_getClass,
 };
 
-NFClass nopa_NFObject_class;
-NFClass nopa_Game__Entities__Player_class;
-NFClass nopa_Game__Entities__Enemy_class;
-NFClass nopa_Game__Items__Potion_class;
+NPClass nopa_NPObject_class;
+NPClass nopa_Game__Entities__Player_class;
+NPClass nopa_Game__Entities__Enemy_class;
+NPClass nopa_Game__Items__Potion_class;
 
 void nopa_meta_init(void) {
-    nopa_NFObject_class = (NFClass){
-        .name = "NFObject",
+    nopa_NPObject_class = (NPClass){
+        .name = "NPObject",
         .superclass = NULL,
-        .instance_size = sizeof(struct NFObject),
-        .vtable = &nopa_NFObject_vtable_inst,
-        .class_vtable = &nopa_NFObject_meta_vtable_inst,
+        .instance_size = sizeof(struct NPObject),
+        .vtable = &nopa_NPObject_vtable_inst,
+        .class_vtable = &nopa_NPObject_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_Game__Entities__Player_class = (NFClass){
+    nopa_Game__Entities__Player_class = (NPClass){
         .name = "Game__Entities__Player",
-        .superclass = &nopa_NFObject_class,
+        .superclass = &nopa_NPObject_class,
         .instance_size = sizeof(struct Game__Entities__Player),
         .vtable = &nopa_Game__Entities__Player_vtable_inst,
         .class_vtable = &nopa_Game__Entities__Player_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_Game__Entities__Enemy_class = (NFClass){
+    nopa_Game__Entities__Enemy_class = (NPClass){
         .name = "Game__Entities__Enemy",
-        .superclass = &nopa_NFObject_class,
+        .superclass = &nopa_NPObject_class,
         .instance_size = sizeof(struct Game__Entities__Enemy),
         .vtable = &nopa_Game__Entities__Enemy_vtable_inst,
         .class_vtable = &nopa_Game__Entities__Enemy_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_Game__Items__Potion_class = (NFClass){
+    nopa_Game__Items__Potion_class = (NPClass){
         .name = "Game__Items__Potion",
-        .superclass = &nopa_NFObject_class,
+        .superclass = &nopa_NPObject_class,
         .instance_size = sizeof(struct Game__Items__Potion),
         .vtable = &nopa_Game__Items__Potion_vtable_inst,
         .class_vtable = &nopa_Game__Items__Potion_meta_vtable_inst,

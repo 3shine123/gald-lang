@@ -4,10 +4,10 @@ use nopa_parser::Parser;
 #[test]
 fn subclass_impl_after_empty_base_impl_is_found() {
     let src = r#"
-@interface Base : NFObject
+@interface Base : NPObject
 @end
 
-@implementation Base : NFObject
+@implementation Base : NPObject
 @end
 
 @interface Sub : Base

@@ -45,7 +45,7 @@ static int kbhit() {
 // ==========================================================
 // 2. Class 声明：食物 (Food)
 // ==========================================================
-@interface Food : NFObject {
+@interface Food : NPObject {
 @public
     int _x;
     int _y;
@@ -61,7 +61,7 @@ static int kbhit() {
 // ==========================================================
 // 3. Class 声明：贪吃蛇 (Snake)
 // ==========================================================
-@interface Snake : NFObject {
+@interface Snake : NPObject {
 @public
     // 💥 原生数组存储蛇身坐标
     int _bodyX[100];
@@ -83,7 +83,7 @@ static int kbhit() {
 // ==========================================================
 // 4. Class 声明：游戏引擎 (GameEngine)
 // ==========================================================
-@interface GameEngine : NFObject {
+@interface GameEngine : NPObject {
 @public
     Snake *_snake;
     Food *_apple;
@@ -306,8 +306,8 @@ static int kbhit() {
 }
 
 - (void)dealloc {
-    if (_snake) NFObject_release(_snake);
-    if (_apple) NFObject_release(_apple);
+    if (_snake) NPObject_release(_snake);
+    if (_apple) NPObject_release(_apple);
 }
 
 @end
@@ -362,7 +362,7 @@ int main(int argc, const char * argv[]) {
         printf(" 🏆 最终狂暴得分 (Combo x%d): %d 点！\n", multiplier, comboCalculator([engine score]));
         printf("======================================================\n\n");
         
-        if (engine) NFObject_release(engine);
+        if (engine) NPObject_release(engine);
     }
     return 0;
 }

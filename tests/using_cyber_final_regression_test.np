@@ -12,7 +12,7 @@
 // ============================================================================
 @namespace Cyber
     @namespace Security
-        @interface IntrusionPayload : NFObject {
+        @interface IntrusionPayload : NPObject {
             @public
             int _threatLevel; // 威胁等级 1 - 100
             const char* _exploitName;
@@ -58,7 +58,7 @@
         // 声明入侵防护策略计算的高阶回调 Block
         typedef int (^MitigationFormulaBlock)(int rawThreat);
 
-        @interface MainframeFirewall : NFObject {
+        @interface MainframeFirewall : NPObject {
             @public
             const char* _hostDomain;
             int _defenseRating; // 防御系数 Base Rating
@@ -108,7 +108,7 @@
 // ============================================================================
 @namespace Cyber
     @namespace Exploits
-        @interface ProxyBypass : NFObject {
+        @interface ProxyBypass : NPObject {
             @public
             const char* _proxyName;
             int _amplificationFactor;

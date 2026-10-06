@@ -296,7 +296,7 @@ static void test_emit_protocol_meta(void) {
     char *mnames[] = { strdup("doIt"), strdup("getValue") };
     int vindices[] = { 0, 1 };
     cg_protocol_meta_t *protocols[] = { pm };
-    cg_unit_meta_add(u, "Foo", "NFObject", 2, mnames, vindices, 0, NULL, NULL, 1, protocols);
+    cg_unit_meta_add(u, "Foo", "NPObject", 2, mnames, vindices, 0, NULL, NULL, 1, protocols);
 
     char *s = emit_to_str(u);
     ASSERT(s != NULL, "got output");
@@ -305,7 +305,7 @@ static void test_emit_protocol_meta(void) {
     ASSERT(strstr(s, "doIt") != NULL, "has doIt");
     ASSERT(strstr(s, "getValue") != NULL, "has getValue");
     ASSERT(strstr(s, ".required_count = 2") != NULL, "has required_count");
-    ASSERT(strstr(s, ".protocols = (NFProtocol *[])") != NULL, "has class protocols");
+    ASSERT(strstr(s, ".protocols = (NPProtocol *[])") != NULL, "has class protocols");
     ASSERT(strstr(s, "&nopa_protocol_P") != NULL, "links to protocol");
     free(s);
     cg_unit_free(u);

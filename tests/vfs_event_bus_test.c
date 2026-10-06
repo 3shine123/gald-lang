@@ -6,8 +6,8 @@
 #include <stddef.h>
 #include "nopa/runtime.h"
 struct nopa___nopa_root_vtable;
-struct nopa_NFObject_vtable;
-struct nopa_NFObject_meta_vtable;
+struct nopa_NPObject_vtable;
+struct nopa_NPObject_meta_vtable;
 struct nopa_System__IO__Buffer_System__VFS__FileNode_ptr_vtable;
 struct nopa_System__IO__Buffer_System__VFS__FileNode_ptr_meta_vtable;
 struct nopa_System__Notifier__EventBus_vtable;
@@ -47,7 +47,7 @@ static const SEL __nopa_sel_registerListener_ = {.name = "registerListener:", .h
 static const SEL __nopa_sel_emitEvent_forFile_ = {.name = "emitEvent:forFile:", .hash = 0x447A0F0D};
 
 typedef struct __nopa_root __nopa_root;
-typedef struct NFObject NFObject;
+typedef struct NPObject NPObject;
 typedef struct System__IO__Buffer_System__VFS__FileNode_ptr System__IO__Buffer_System__VFS__FileNode_ptr;
 typedef struct System__Notifier__EventBus System__Notifier__EventBus;
 typedef struct System__VFS__DirectoryNode System__VFS__DirectoryNode;
@@ -57,49 +57,49 @@ typedef struct System__IO__Buffer System__IO__Buffer;
 typedef void (^IOMonitorBlock)(const char *, System__VFS__FileNode *) ;
 typedef void (^System__Notifier__IOMonitorBlock)(const char *, System__VFS__FileNode *) ;
 
-NFObject * __nopa_root_init(NFObject * self, SEL _cmd);
-void __nopa_root_dealloc(NFObject * self, SEL _cmd);
-void __nopa_root_release(NFObject * self, SEL _cmd);
-NFObject * __nopa_root_retain(NFObject * self, SEL _cmd);
-NFObject * NFObject_alloc(NFClass * self, SEL _cmd);
-NFObject * NFObject_new(NFClass * self, SEL _cmd);
-NFObject * NFObject_init(NFObject * self, SEL _cmd);
-void NFObject_dealloc(NFObject * self, SEL _cmd);
-void NFObject_release(NFObject * self, SEL _cmd);
-NFObject * NFObject_retain(NFObject * self, SEL _cmd);
-NFObject * System__IO__Buffer_init(NFObject * self, SEL _cmd);
-_Bool System__IO__Buffer_enqueue_(NFObject * self, SEL _cmd, NFObject * item);
-NFObject * System__IO__Buffer_dequeue(NFObject * self, SEL _cmd);
-int System__IO__Buffer_count(NFObject * self, SEL _cmd);
-void System__IO__Buffer_dealloc(NFObject * self, SEL _cmd);
-NFObject * System__VFS__FileNode_initWithName_size_(NFObject * self, SEL _cmd, const char * name, int sz);
-const char * System__VFS__FileNode_fileName(NFObject * self, SEL _cmd);
-void System__VFS__FileNode_setFileName_(NFObject * self, SEL _cmd, const char * value);
-int System__VFS__FileNode_bytesSize(NFObject * self, SEL _cmd);
-void System__VFS__FileNode_setBytesSize_(NFObject * self, SEL _cmd, int value);
-System__VFS__DirectoryNode * System__VFS__FileNode_parentDir(NFObject * self, SEL _cmd);
-void System__VFS__FileNode_setParentDir_(NFObject * self, SEL _cmd, System__VFS__DirectoryNode * value);
-const char * System__VFS__FileNode_nodeName(NFObject * self, SEL _cmd);
-int System__VFS__FileNode_calculateSize(NFObject * self, SEL _cmd);
-void System__VFS__FileNode_syncToDisk(NFObject * self, SEL _cmd);
-void System__VFS__FileNode_dealloc(NFObject * self, SEL _cmd);
-NFObject * System__VFS__DirectoryNode_initWithName_(NFObject * self, SEL _cmd, const char * name);
-void System__VFS__DirectoryNode_addChildNode_(NFObject * self, SEL _cmd, NFObject_FSNodeProtocol * node);
-const char * System__VFS__DirectoryNode_dirName(NFObject * self, SEL _cmd);
-void System__VFS__DirectoryNode_setDirName_(NFObject * self, SEL _cmd, const char * value);
-const char * System__VFS__DirectoryNode_nodeName(NFObject * self, SEL _cmd);
-int System__VFS__DirectoryNode_calculateSize(NFObject * self, SEL _cmd);
-void System__VFS__DirectoryNode_syncToDisk(NFObject * self, SEL _cmd);
-void System__VFS__DirectoryNode_dealloc(NFObject * self, SEL _cmd);
-void System__VFS__FileNode_compressWithAlgorithm_(NFObject * self, SEL _cmd, const char * algo);
-void System__Notifier__EventBus_registerListener_(NFObject * self, SEL _cmd, System__Notifier__IOMonitorBlock block);
-void System__Notifier__EventBus_emitEvent_forFile_(NFObject * self, SEL _cmd, const char * evt, System__VFS__FileNode * file);
-NFObject * System__Notifier__EventBus_init(NFObject * self, SEL _cmd);
-void System__Notifier__EventBus_dealloc(NFObject * self, SEL _cmd);
-NFObject * nopa_alloc(struct NFClass * cls);
-NFObject * nopa_init(NFObject * self);
-void nopa_release(NFObject * obj);
-NFObject * nopa_retain(NFObject * obj);
+NPObject * __nopa_root_init(NPObject * self, SEL _cmd);
+void __nopa_root_dealloc(NPObject * self, SEL _cmd);
+void __nopa_root_release(NPObject * self, SEL _cmd);
+NPObject * __nopa_root_retain(NPObject * self, SEL _cmd);
+NPObject * NPObject_alloc(NPClass * self, SEL _cmd);
+NPObject * NPObject_new(NPClass * self, SEL _cmd);
+NPObject * NPObject_init(NPObject * self, SEL _cmd);
+void NPObject_dealloc(NPObject * self, SEL _cmd);
+void NPObject_release(NPObject * self, SEL _cmd);
+NPObject * NPObject_retain(NPObject * self, SEL _cmd);
+NPObject * System__IO__Buffer_init(NPObject * self, SEL _cmd);
+_Bool System__IO__Buffer_enqueue_(NPObject * self, SEL _cmd, NPObject * item);
+NPObject * System__IO__Buffer_dequeue(NPObject * self, SEL _cmd);
+int System__IO__Buffer_count(NPObject * self, SEL _cmd);
+void System__IO__Buffer_dealloc(NPObject * self, SEL _cmd);
+NPObject * System__VFS__FileNode_initWithName_size_(NPObject * self, SEL _cmd, const char * name, int sz);
+const char * System__VFS__FileNode_fileName(NPObject * self, SEL _cmd);
+void System__VFS__FileNode_setFileName_(NPObject * self, SEL _cmd, const char * value);
+int System__VFS__FileNode_bytesSize(NPObject * self, SEL _cmd);
+void System__VFS__FileNode_setBytesSize_(NPObject * self, SEL _cmd, int value);
+System__VFS__DirectoryNode * System__VFS__FileNode_parentDir(NPObject * self, SEL _cmd);
+void System__VFS__FileNode_setParentDir_(NPObject * self, SEL _cmd, System__VFS__DirectoryNode * value);
+const char * System__VFS__FileNode_nodeName(NPObject * self, SEL _cmd);
+int System__VFS__FileNode_calculateSize(NPObject * self, SEL _cmd);
+void System__VFS__FileNode_syncToDisk(NPObject * self, SEL _cmd);
+void System__VFS__FileNode_dealloc(NPObject * self, SEL _cmd);
+NPObject * System__VFS__DirectoryNode_initWithName_(NPObject * self, SEL _cmd, const char * name);
+void System__VFS__DirectoryNode_addChildNode_(NPObject * self, SEL _cmd, NPObject_FSNodeProtocol * node);
+const char * System__VFS__DirectoryNode_dirName(NPObject * self, SEL _cmd);
+void System__VFS__DirectoryNode_setDirName_(NPObject * self, SEL _cmd, const char * value);
+const char * System__VFS__DirectoryNode_nodeName(NPObject * self, SEL _cmd);
+int System__VFS__DirectoryNode_calculateSize(NPObject * self, SEL _cmd);
+void System__VFS__DirectoryNode_syncToDisk(NPObject * self, SEL _cmd);
+void System__VFS__DirectoryNode_dealloc(NPObject * self, SEL _cmd);
+void System__VFS__FileNode_compressWithAlgorithm_(NPObject * self, SEL _cmd, const char * algo);
+void System__Notifier__EventBus_registerListener_(NPObject * self, SEL _cmd, System__Notifier__IOMonitorBlock block);
+void System__Notifier__EventBus_emitEvent_forFile_(NPObject * self, SEL _cmd, const char * evt, System__VFS__FileNode * file);
+NPObject * System__Notifier__EventBus_init(NPObject * self, SEL _cmd);
+void System__Notifier__EventBus_dealloc(NPObject * self, SEL _cmd);
+NPObject * nopa_alloc(struct NPClass * cls);
+NPObject * nopa_init(NPObject * self);
+void nopa_release(NPObject * obj);
+NPObject * nopa_retain(NPObject * obj);
 int main(int argc, const char * argv[]);
 System__VFS__FileNode * System__IO__Buffer_System__VFS__FileNode_ptr_init(System__VFS__FileNode * self, SEL _cmd);
 _Bool System__IO__Buffer_System__VFS__FileNode_ptr_enqueue_(System__VFS__FileNode * self, SEL _cmd, System__VFS__FileNode * item);
@@ -107,120 +107,120 @@ System__VFS__FileNode * System__IO__Buffer_System__VFS__FileNode_ptr_dequeue(Sys
 void System__IO__Buffer_System__VFS__FileNode_ptr_dealloc(System__VFS__FileNode * self, SEL _cmd);
 int System__IO__Buffer_System__VFS__FileNode_ptr_count(System__VFS__FileNode * self, SEL _cmd);
 
-NFClass * NFObject_getClass(NFClass * self, SEL _cmd);
-NFClass * System__IO__Buffer_System__VFS__FileNode_ptr_getClass(NFClass * self, SEL _cmd);
-NFClass * System__Notifier__EventBus_getClass(NFClass * self, SEL _cmd);
-NFClass * System__VFS__DirectoryNode_getClass(NFClass * self, SEL _cmd);
-NFClass * System__VFS__FileNode_getClass(NFClass * self, SEL _cmd);
-NFClass * System__IO__Buffer_getClass(NFClass * self, SEL _cmd);
+NPClass * NPObject_getClass(NPClass * self, SEL _cmd);
+NPClass * System__IO__Buffer_System__VFS__FileNode_ptr_getClass(NPClass * self, SEL _cmd);
+NPClass * System__Notifier__EventBus_getClass(NPClass * self, SEL _cmd);
+NPClass * System__VFS__DirectoryNode_getClass(NPClass * self, SEL _cmd);
+NPClass * System__VFS__FileNode_getClass(NPClass * self, SEL _cmd);
+NPClass * System__IO__Buffer_getClass(NPClass * self, SEL _cmd);
 
 struct nopa___nopa_root_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    void (*release)(NFObject *, SEL);
-    NFObject * (*retain)(NFObject *, SEL);
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    void (*release)(NPObject *, SEL);
+    NPObject * (*retain)(NPObject *, SEL);
 };
-struct nopa_NFObject_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    void (*release)(NFObject *, SEL);
-    NFObject * (*retain)(NFObject *, SEL);
+struct nopa_NPObject_vtable {
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    void (*release)(NPObject *, SEL);
+    NPObject * (*retain)(NPObject *, SEL);
 };
-struct nopa_NFObject_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+struct nopa_NPObject_meta_vtable {
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct nopa_System__IO__Buffer_System__VFS__FileNode_ptr_vtable {
     System__VFS__FileNode * (*init)(System__VFS__FileNode *, SEL);
     void (*dealloc)(System__VFS__FileNode *, SEL);
-    void (*release)(NFObject *, SEL);
-    NFObject * (*retain)(NFObject *, SEL);
+    void (*release)(NPObject *, SEL);
+    NPObject * (*retain)(NPObject *, SEL);
     _Bool (*enqueue_)(System__VFS__FileNode *, SEL, System__VFS__FileNode *);
     System__VFS__FileNode * (*dequeue)(System__VFS__FileNode *, SEL);
     int (*count)(System__VFS__FileNode *, SEL);
 };
 struct nopa_System__IO__Buffer_System__VFS__FileNode_ptr_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct nopa_System__Notifier__EventBus_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    void (*release)(NFObject *, SEL);
-    NFObject * (*retain)(NFObject *, SEL);
-    void (*registerListener_)(NFObject *, SEL, System__Notifier__IOMonitorBlock);
-    void (*emitEvent_forFile_)(NFObject *, SEL, const char *, System__VFS__FileNode *);
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    void (*release)(NPObject *, SEL);
+    NPObject * (*retain)(NPObject *, SEL);
+    void (*registerListener_)(NPObject *, SEL, System__Notifier__IOMonitorBlock);
+    void (*emitEvent_forFile_)(NPObject *, SEL, const char *, System__VFS__FileNode *);
 };
 struct nopa_System__Notifier__EventBus_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct nopa_System__VFS__DirectoryNode_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    void (*release)(NFObject *, SEL);
-    NFObject * (*retain)(NFObject *, SEL);
-    NFObject * (*initWithName_)(NFObject *, SEL, const char *);
-    void (*addChildNode_)(NFObject *, SEL, NFObject_FSNodeProtocol *);
-    const char * (*nodeName)(NFObject *, SEL);
-    int (*calculateSize)(NFObject *, SEL);
-    void (*syncToDisk)(NFObject *, SEL);
-    const char * (*dirName)(NFObject *, SEL);
-    void (*setDirName_)(NFObject *, SEL, const char *);
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    void (*release)(NPObject *, SEL);
+    NPObject * (*retain)(NPObject *, SEL);
+    NPObject * (*initWithName_)(NPObject *, SEL, const char *);
+    void (*addChildNode_)(NPObject *, SEL, NPObject_FSNodeProtocol *);
+    const char * (*nodeName)(NPObject *, SEL);
+    int (*calculateSize)(NPObject *, SEL);
+    void (*syncToDisk)(NPObject *, SEL);
+    const char * (*dirName)(NPObject *, SEL);
+    void (*setDirName_)(NPObject *, SEL, const char *);
 };
 struct nopa_System__VFS__DirectoryNode_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct nopa_System__VFS__FileNode_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    void (*release)(NFObject *, SEL);
-    NFObject * (*retain)(NFObject *, SEL);
-    NFObject * (*initWithName_size_)(NFObject *, SEL, const char *, int);
-    const char * (*nodeName)(NFObject *, SEL);
-    int (*calculateSize)(NFObject *, SEL);
-    void (*syncToDisk)(NFObject *, SEL);
-    void (*compressWithAlgorithm_)(NFObject *, SEL, const char *);
-    const char * (*fileName)(NFObject *, SEL);
-    void (*setFileName_)(NFObject *, SEL, const char *);
-    int (*bytesSize)(NFObject *, SEL);
-    void (*setBytesSize_)(NFObject *, SEL, int);
-    System__VFS__DirectoryNode * (*parentDir)(NFObject *, SEL);
-    void (*setParentDir_)(NFObject *, SEL, System__VFS__DirectoryNode *);
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    void (*release)(NPObject *, SEL);
+    NPObject * (*retain)(NPObject *, SEL);
+    NPObject * (*initWithName_size_)(NPObject *, SEL, const char *, int);
+    const char * (*nodeName)(NPObject *, SEL);
+    int (*calculateSize)(NPObject *, SEL);
+    void (*syncToDisk)(NPObject *, SEL);
+    void (*compressWithAlgorithm_)(NPObject *, SEL, const char *);
+    const char * (*fileName)(NPObject *, SEL);
+    void (*setFileName_)(NPObject *, SEL, const char *);
+    int (*bytesSize)(NPObject *, SEL);
+    void (*setBytesSize_)(NPObject *, SEL, int);
+    System__VFS__DirectoryNode * (*parentDir)(NPObject *, SEL);
+    void (*setParentDir_)(NPObject *, SEL, System__VFS__DirectoryNode *);
 };
 struct nopa_System__VFS__FileNode_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct nopa_System__IO__Buffer_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    void (*release)(NFObject *, SEL);
-    NFObject * (*retain)(NFObject *, SEL);
-    _Bool (*enqueue_)(NFObject *, SEL, NFObject *);
-    NFObject * (*dequeue)(NFObject *, SEL);
-    int (*count)(NFObject *, SEL);
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    void (*release)(NPObject *, SEL);
+    NPObject * (*retain)(NPObject *, SEL);
+    _Bool (*enqueue_)(NPObject *, SEL, NPObject *);
+    NPObject * (*dequeue)(NPObject *, SEL);
+    int (*count)(NPObject *, SEL);
 };
 struct nopa_System__IO__Buffer_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 
 struct __nopa_root {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
 };
 typedef struct __nopa_root __nopa_root;
 
 struct System__IO__Buffer_System__VFS__FileNode_ptr {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     System__VFS__FileNode * _ring[3];
     int _head;
@@ -230,23 +230,23 @@ struct System__IO__Buffer_System__VFS__FileNode_ptr {
 typedef struct System__IO__Buffer_System__VFS__FileNode_ptr System__IO__Buffer_System__VFS__FileNode_ptr;
 
 struct System__Notifier__EventBus {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     IOMonitorBlock _listener;
 };
 typedef struct System__Notifier__EventBus System__Notifier__EventBus;
 
 struct System__VFS__DirectoryNode {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     const char * _dirName;
-    NFObject_FSNodeProtocol * _children[2];
+    NPObject_FSNodeProtocol * _children[2];
     int _childCount;
 };
 typedef struct System__VFS__DirectoryNode System__VFS__DirectoryNode;
 
 struct System__VFS__FileNode {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     const char * _fileName;
     int _bytesSize;
@@ -255,22 +255,22 @@ struct System__VFS__FileNode {
 typedef struct System__VFS__FileNode System__VFS__FileNode;
 
 struct System__IO__Buffer {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
-    NFObject * _ring[3];
+    NPObject * _ring[3];
     int _head;
     int _tail;
     int _count;
 };
 typedef struct System__IO__Buffer System__IO__Buffer;
 
-extern NFClass nopa___nopa_root_class;
-extern NFClass nopa_NFObject_class;
-extern NFClass nopa_System__IO__Buffer_System__VFS__FileNode_ptr_class;
-extern NFClass nopa_System__Notifier__EventBus_class;
-extern NFClass nopa_System__VFS__DirectoryNode_class;
-extern NFClass nopa_System__VFS__FileNode_class;
-extern NFClass nopa_System__IO__Buffer_class;
+extern NPClass nopa___nopa_root_class;
+extern NPClass nopa_NPObject_class;
+extern NPClass nopa_System__IO__Buffer_System__VFS__FileNode_ptr_class;
+extern NPClass nopa_System__Notifier__EventBus_class;
+extern NPClass nopa_System__VFS__DirectoryNode_class;
+extern NPClass nopa_System__VFS__FileNode_class;
+extern NPClass nopa_System__IO__Buffer_class;
 void nopa_meta_init(void);
 
 struct nopa___nopa_root_vtable nopa___nopa_root_vtable_inst = {
@@ -280,18 +280,18 @@ struct nopa___nopa_root_vtable nopa___nopa_root_vtable_inst = {
     .retain = __nopa_root_retain,
 };
 
-struct nopa_NFObject_vtable nopa_NFObject_vtable_inst = {
-    .init = NFObject_init,
-    .dealloc = NFObject_dealloc,
-    .release = NFObject_release,
-    .retain = NFObject_retain,
+struct nopa_NPObject_vtable nopa_NPObject_vtable_inst = {
+    .init = NPObject_init,
+    .dealloc = NPObject_dealloc,
+    .release = NPObject_release,
+    .retain = NPObject_retain,
 };
 
 struct nopa_System__IO__Buffer_System__VFS__FileNode_ptr_vtable nopa_System__IO__Buffer_System__VFS__FileNode_ptr_vtable_inst = {
     .init = System__IO__Buffer_System__VFS__FileNode_ptr_init,
     .dealloc = System__IO__Buffer_System__VFS__FileNode_ptr_dealloc,
-    .release = NFObject_release,
-    .retain = NFObject_retain,
+    .release = NPObject_release,
+    .retain = NPObject_retain,
     .enqueue_ = System__IO__Buffer_System__VFS__FileNode_ptr_enqueue_,
     .dequeue = System__IO__Buffer_System__VFS__FileNode_ptr_dequeue,
     .count = System__IO__Buffer_System__VFS__FileNode_ptr_count,
@@ -300,17 +300,17 @@ struct nopa_System__IO__Buffer_System__VFS__FileNode_ptr_vtable nopa_System__IO_
 struct nopa_System__Notifier__EventBus_vtable nopa_System__Notifier__EventBus_vtable_inst = {
     .init = System__Notifier__EventBus_init,
     .dealloc = System__Notifier__EventBus_dealloc,
-    .release = NFObject_release,
-    .retain = NFObject_retain,
+    .release = NPObject_release,
+    .retain = NPObject_retain,
     .registerListener_ = System__Notifier__EventBus_registerListener_,
     .emitEvent_forFile_ = System__Notifier__EventBus_emitEvent_forFile_,
 };
 
 struct nopa_System__VFS__DirectoryNode_vtable nopa_System__VFS__DirectoryNode_vtable_inst = {
-    .init = NFObject_init,
+    .init = NPObject_init,
     .dealloc = System__VFS__DirectoryNode_dealloc,
-    .release = NFObject_release,
-    .retain = NFObject_retain,
+    .release = NPObject_release,
+    .retain = NPObject_retain,
     .initWithName_ = System__VFS__DirectoryNode_initWithName_,
     .addChildNode_ = System__VFS__DirectoryNode_addChildNode_,
     .nodeName = System__VFS__DirectoryNode_nodeName,
@@ -321,10 +321,10 @@ struct nopa_System__VFS__DirectoryNode_vtable nopa_System__VFS__DirectoryNode_vt
 };
 
 struct nopa_System__VFS__FileNode_vtable nopa_System__VFS__FileNode_vtable_inst = {
-    .init = NFObject_init,
+    .init = NPObject_init,
     .dealloc = System__VFS__FileNode_dealloc,
-    .release = NFObject_release,
-    .retain = NFObject_retain,
+    .release = NPObject_release,
+    .retain = NPObject_retain,
     .initWithName_size_ = System__VFS__FileNode_initWithName_size_,
     .nodeName = System__VFS__FileNode_nodeName,
     .calculateSize = System__VFS__FileNode_calculateSize,
@@ -341,89 +341,89 @@ struct nopa_System__VFS__FileNode_vtable nopa_System__VFS__FileNode_vtable_inst 
 struct nopa_System__IO__Buffer_vtable nopa_System__IO__Buffer_vtable_inst = {
     .init = System__IO__Buffer_init,
     .dealloc = System__IO__Buffer_dealloc,
-    .release = NFObject_release,
-    .retain = NFObject_retain,
+    .release = NPObject_release,
+    .retain = NPObject_retain,
     .enqueue_ = System__IO__Buffer_enqueue_,
     .dequeue = System__IO__Buffer_dequeue,
     .count = System__IO__Buffer_count,
 };
 
-struct nopa_NFObject_meta_vtable nopa_NFObject_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
-    .class = NFObject_getClass,
+struct nopa_NPObject_meta_vtable nopa_NPObject_meta_vtable_inst = {
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
+    .class = NPObject_getClass,
 };
 
 struct nopa_System__IO__Buffer_System__VFS__FileNode_ptr_meta_vtable nopa_System__IO__Buffer_System__VFS__FileNode_ptr_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
     .class = System__IO__Buffer_System__VFS__FileNode_ptr_getClass,
 };
 
 struct nopa_System__Notifier__EventBus_meta_vtable nopa_System__Notifier__EventBus_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
     .class = System__Notifier__EventBus_getClass,
 };
 
 struct nopa_System__VFS__DirectoryNode_meta_vtable nopa_System__VFS__DirectoryNode_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
     .class = System__VFS__DirectoryNode_getClass,
 };
 
 struct nopa_System__VFS__FileNode_meta_vtable nopa_System__VFS__FileNode_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
     .class = System__VFS__FileNode_getClass,
 };
 
 struct nopa_System__IO__Buffer_meta_vtable nopa_System__IO__Buffer_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
     .class = System__IO__Buffer_getClass,
 };
 
-NFClass * NFObject_getClass(NFClass * self, SEL _cmd) {
+NPClass * NPObject_getClass(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
-NFClass * System__IO__Buffer_System__VFS__FileNode_ptr_getClass(NFClass * self, SEL _cmd) {
+NPClass * System__IO__Buffer_System__VFS__FileNode_ptr_getClass(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
-NFClass * System__Notifier__EventBus_getClass(NFClass * self, SEL _cmd) {
+NPClass * System__Notifier__EventBus_getClass(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
-NFClass * System__VFS__DirectoryNode_getClass(NFClass * self, SEL _cmd) {
+NPClass * System__VFS__DirectoryNode_getClass(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
-NFClass * System__VFS__FileNode_getClass(NFClass * self, SEL _cmd) {
+NPClass * System__VFS__FileNode_getClass(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
-NFClass * System__IO__Buffer_getClass(NFClass * self, SEL _cmd) {
+NPClass * System__IO__Buffer_getClass(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
-NFClass nopa___nopa_root_class;
-NFClass nopa_NFObject_class;
-NFClass nopa_System__IO__Buffer_System__VFS__FileNode_ptr_class;
-NFClass nopa_System__Notifier__EventBus_class;
-NFClass nopa_System__VFS__DirectoryNode_class;
-NFClass nopa_System__VFS__FileNode_class;
-NFClass nopa_System__IO__Buffer_class;
+NPClass nopa___nopa_root_class;
+NPClass nopa_NPObject_class;
+NPClass nopa_System__IO__Buffer_System__VFS__FileNode_ptr_class;
+NPClass nopa_System__Notifier__EventBus_class;
+NPClass nopa_System__VFS__DirectoryNode_class;
+NPClass nopa_System__VFS__FileNode_class;
+NPClass nopa_System__IO__Buffer_class;
 
 void nopa_meta_init(void) {
-    nopa___nopa_root_class = (NFClass){
+    nopa___nopa_root_class = (NPClass){
         .name = "__nopa_root",
         .superclass = NULL,
         .instance_size = sizeof(struct __nopa_root),
@@ -431,124 +431,124 @@ void nopa_meta_init(void) {
         .class_vtable = NULL,
         .protocol_count = 0,
     };
-    nopa_NFObject_class = (NFClass){
-        .name = "NFObject",
+    nopa_NPObject_class = (NPClass){
+        .name = "NPObject",
         .superclass = &nopa___nopa_root_class,
-        .instance_size = sizeof(struct NFObject),
-        .vtable = &nopa_NFObject_vtable_inst,
-        .class_vtable = &nopa_NFObject_meta_vtable_inst,
+        .instance_size = sizeof(struct NPObject),
+        .vtable = &nopa_NPObject_vtable_inst,
+        .class_vtable = &nopa_NPObject_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_System__IO__Buffer_System__VFS__FileNode_ptr_class = (NFClass){
+    nopa_System__IO__Buffer_System__VFS__FileNode_ptr_class = (NPClass){
         .name = "System::IO::Buffer<System__VFS__FileNode *>",
-        .superclass = &nopa_NFObject_class,
+        .superclass = &nopa_NPObject_class,
         .instance_size = sizeof(struct System__IO__Buffer_System__VFS__FileNode_ptr),
         .vtable = &nopa_System__IO__Buffer_System__VFS__FileNode_ptr_vtable_inst,
         .class_vtable = &nopa_System__IO__Buffer_System__VFS__FileNode_ptr_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_System__Notifier__EventBus_class = (NFClass){
+    nopa_System__Notifier__EventBus_class = (NPClass){
         .name = "System::Notifier::EventBus",
-        .superclass = &nopa_NFObject_class,
+        .superclass = &nopa_NPObject_class,
         .instance_size = sizeof(struct System__Notifier__EventBus),
         .vtable = &nopa_System__Notifier__EventBus_vtable_inst,
         .class_vtable = &nopa_System__Notifier__EventBus_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_System__VFS__DirectoryNode_class = (NFClass){
+    nopa_System__VFS__DirectoryNode_class = (NPClass){
         .name = "System::VFS::DirectoryNode",
-        .superclass = &nopa_NFObject_class,
+        .superclass = &nopa_NPObject_class,
         .instance_size = sizeof(struct System__VFS__DirectoryNode),
         .vtable = &nopa_System__VFS__DirectoryNode_vtable_inst,
         .class_vtable = &nopa_System__VFS__DirectoryNode_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_System__VFS__FileNode_class = (NFClass){
+    nopa_System__VFS__FileNode_class = (NPClass){
         .name = "System::VFS::FileNode",
-        .superclass = &nopa_NFObject_class,
+        .superclass = &nopa_NPObject_class,
         .instance_size = sizeof(struct System__VFS__FileNode),
         .vtable = &nopa_System__VFS__FileNode_vtable_inst,
         .class_vtable = &nopa_System__VFS__FileNode_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_System__IO__Buffer_class = (NFClass){
+    nopa_System__IO__Buffer_class = (NPClass){
         .name = "System::IO::Buffer",
-        .superclass = &nopa_NFObject_class,
+        .superclass = &nopa_NPObject_class,
         .instance_size = sizeof(struct System__IO__Buffer),
         .vtable = &nopa_System__IO__Buffer_vtable_inst,
         .class_vtable = &nopa_System__IO__Buffer_meta_vtable_inst,
         .protocol_count = 0,
     };
 }
-NFObject * __nopa_root_init(NFObject * self, SEL _cmd) {
+NPObject * __nopa_root_init(NPObject * self, SEL _cmd) {
   struct __nopa_root * _self = (struct __nopa_root *)self;
   {
     return nopa_init(self);
   }
 }
 
-void __nopa_root_dealloc(NFObject * self, SEL _cmd) {
+void __nopa_root_dealloc(NPObject * self, SEL _cmd) {
   struct __nopa_root * _self = (struct __nopa_root *)self;
   {
     return;
   }
 }
 
-void __nopa_root_release(NFObject * self, SEL _cmd) {
+void __nopa_root_release(NPObject * self, SEL _cmd) {
   struct __nopa_root * _self = (struct __nopa_root *)self;
   {
     nopa_release(self);
   }
 }
 
-NFObject * __nopa_root_retain(NFObject * self, SEL _cmd) {
+NPObject * __nopa_root_retain(NPObject * self, SEL _cmd) {
   struct __nopa_root * _self = (struct __nopa_root *)self;
   {
     return nopa_retain(self);
   }
 }
 
-NFObject * NFObject_alloc(NFClass * self, SEL _cmd) {
+NPObject * NPObject_alloc(NPClass * self, SEL _cmd) {
   return nopa_alloc(self);
 }
 
-NFObject * NFObject_new(NFClass * self, SEL _cmd) {
-  NFObject * obj = nopa_alloc(self);
+NPObject * NPObject_new(NPClass * self, SEL _cmd) {
+  NPObject * obj = nopa_alloc(self);
   return nopa_init(obj);
 }
 
-NFObject * NFObject_init(NFObject * self, SEL _cmd) {
-  struct NFObject * _self = (struct NFObject *)self;
+NPObject * NPObject_init(NPObject * self, SEL _cmd) {
+  struct NPObject * _self = (struct NPObject *)self;
   {
     return nopa_init(self);
   }
 }
 
-void NFObject_dealloc(NFObject * self, SEL _cmd) {
-  struct NFObject * _self = (struct NFObject *)self;
+void NPObject_dealloc(NPObject * self, SEL _cmd) {
+  struct NPObject * _self = (struct NPObject *)self;
   {
     return;
   }
 }
 
-void NFObject_release(NFObject * self, SEL _cmd) {
-  struct NFObject * _self = (struct NFObject *)self;
+void NPObject_release(NPObject * self, SEL _cmd) {
+  struct NPObject * _self = (struct NPObject *)self;
   {
     nopa_release(self);
   }
 }
 
-NFObject * NFObject_retain(NFObject * self, SEL _cmd) {
-  struct NFObject * _self = (struct NFObject *)self;
+NPObject * NPObject_retain(NPObject * self, SEL _cmd) {
+  struct NPObject * _self = (struct NPObject *)self;
   {
     return nopa_retain(self);
   }
 }
 
-NFObject * System__IO__Buffer_init(NFObject * self, SEL _cmd) {
+NPObject * System__IO__Buffer_init(NPObject * self, SEL _cmd) {
   struct System__IO__Buffer * _self = (struct System__IO__Buffer *)self;
   {
-    self = NFObject_init(self, sel_registerName("init"));
+    self = NPObject_init(self, sel_registerName("init"));
     if (self)     {
       _self->_head = 0;
       _self->_tail = 0;
@@ -561,11 +561,11 @@ NFObject * System__IO__Buffer_init(NFObject * self, SEL _cmd) {
   }
 }
 
-_Bool System__IO__Buffer_enqueue_(NFObject * self, SEL _cmd, NFObject * item) {
+_Bool System__IO__Buffer_enqueue_(NPObject * self, SEL _cmd, NPObject * item) {
   struct System__IO__Buffer * _self = (struct System__IO__Buffer *)self;
   {
     if ((_self->_count < 3))     {
-      _self->_ring[_self->_tail] = ((NFObject *)item)->isa->vtable == &nopa_NFObject_vtable_inst ? ((struct nopa_NFObject_vtable *)((NFObject *)(item))->isa->vtable)->retain(item, sel_registerName("retain")) : ((struct nopa___nopa_root_vtable *)((NFObject *)(item))->isa->vtable)->retain(item, sel_registerName("retain"));
+      _self->_ring[_self->_tail] = ((NPObject *)item)->isa->vtable == &nopa_NPObject_vtable_inst ? ((struct nopa_NPObject_vtable *)((NPObject *)(item))->isa->vtable)->retain(item, sel_registerName("retain")) : ((struct nopa___nopa_root_vtable *)((NPObject *)(item))->isa->vtable)->retain(item, sel_registerName("retain"));
       _self->_tail = ((_self->_tail + 1) % 3);
       _self->_count++;
       printf("[System::IO::Buffer<T>] 成功写入数据块！当前队列积压: %d\n", _self->_count);
@@ -576,11 +576,11 @@ _Bool System__IO__Buffer_enqueue_(NFObject * self, SEL _cmd, NFObject * item) {
   }
 }
 
-NFObject * System__IO__Buffer_dequeue(NFObject * self, SEL _cmd) {
+NPObject * System__IO__Buffer_dequeue(NPObject * self, SEL _cmd) {
   struct System__IO__Buffer * _self = (struct System__IO__Buffer *)self;
   {
     if ((_self->_count > 0))     {
-      NFObject * item = _self->_ring[_self->_head];
+      NPObject * item = _self->_ring[_self->_head];
       _self->_ring[_self->_head] = NULL;
       _self->_head = ((_self->_head + 1) % 3);
       _self->_count--;
@@ -590,26 +590,26 @@ NFObject * System__IO__Buffer_dequeue(NFObject * self, SEL _cmd) {
   }
 }
 
-int System__IO__Buffer_count(NFObject * self, SEL _cmd) {
+int System__IO__Buffer_count(NPObject * self, SEL _cmd) {
   return ((struct System__IO__Buffer *)self)->_count;
 }
 
-void System__IO__Buffer_dealloc(NFObject * self, SEL _cmd) {
+void System__IO__Buffer_dealloc(NPObject * self, SEL _cmd) {
   struct System__IO__Buffer * _self = (struct System__IO__Buffer *)self;
   {
     printf("[System::IO::Buffer<T>] 物理 I/O 环形缓冲区被销毁。\n");
     for (int i = 0;
 (i < 3); i++)     {
-      if (_self->_ring[i])       ({ NFObject *__nopa_tmp_1 = (_self->_ring[i]); !__nopa_tmp_1 ? 0 : __nopa_tmp_1->isa->vtable == &nopa_NFObject_vtable_inst ? ((struct nopa_NFObject_vtable *)__nopa_tmp_1->isa->vtable)->release(__nopa_tmp_1, sel_registerName("release")) : ((struct nopa___nopa_root_vtable *)__nopa_tmp_1->isa->vtable)->release(__nopa_tmp_1, sel_registerName("release")); });
+      if (_self->_ring[i])       ({ NPObject *__nopa_tmp_1 = (_self->_ring[i]); !__nopa_tmp_1 ? 0 : __nopa_tmp_1->isa->vtable == &nopa_NPObject_vtable_inst ? ((struct nopa_NPObject_vtable *)__nopa_tmp_1->isa->vtable)->release(__nopa_tmp_1, sel_registerName("release")) : ((struct nopa___nopa_root_vtable *)__nopa_tmp_1->isa->vtable)->release(__nopa_tmp_1, sel_registerName("release")); });
     }
-    NFObject_dealloc(self, sel_registerName("dealloc"));
+    NPObject_dealloc(self, sel_registerName("dealloc"));
   }
 }
 
-NFObject * System__VFS__FileNode_initWithName_size_(NFObject * self, SEL _cmd, const char * name, int sz) {
+NPObject * System__VFS__FileNode_initWithName_size_(NPObject * self, SEL _cmd, const char * name, int sz) {
   struct System__VFS__FileNode * _self = (struct System__VFS__FileNode *)self;
   {
-    self = NFObject_init(self, sel_registerName("init"));
+    self = NPObject_init(self, sel_registerName("init"));
     if (self)     {
       _self->_fileName = name;
       _self->_bytesSize = sz;
@@ -619,65 +619,65 @@ NFObject * System__VFS__FileNode_initWithName_size_(NFObject * self, SEL _cmd, c
   }
 }
 
-const char * System__VFS__FileNode_fileName(NFObject * self, SEL _cmd) {
+const char * System__VFS__FileNode_fileName(NPObject * self, SEL _cmd) {
   return ((struct System__VFS__FileNode *)self)->_fileName;
 }
 
-void System__VFS__FileNode_setFileName_(NFObject * self, SEL _cmd, const char * value) {
+void System__VFS__FileNode_setFileName_(NPObject * self, SEL _cmd, const char * value) {
   ((struct System__VFS__FileNode *)self)->_fileName = value;
 }
 
-int System__VFS__FileNode_bytesSize(NFObject * self, SEL _cmd) {
+int System__VFS__FileNode_bytesSize(NPObject * self, SEL _cmd) {
   return ((struct System__VFS__FileNode *)self)->_bytesSize;
 }
 
-void System__VFS__FileNode_setBytesSize_(NFObject * self, SEL _cmd, int value) {
+void System__VFS__FileNode_setBytesSize_(NPObject * self, SEL _cmd, int value) {
   ((struct System__VFS__FileNode *)self)->_bytesSize = value;
 }
 
-System__VFS__DirectoryNode * System__VFS__FileNode_parentDir(NFObject * self, SEL _cmd) {
+System__VFS__DirectoryNode * System__VFS__FileNode_parentDir(NPObject * self, SEL _cmd) {
   return ((struct System__VFS__FileNode *)self)->_parentDir;
 }
 
-void System__VFS__FileNode_setParentDir_(NFObject * self, SEL _cmd, System__VFS__DirectoryNode * value) {
-  nopa_weak_unregister((NFObject **)&((struct System__VFS__FileNode *)self)->_parentDir);
+void System__VFS__FileNode_setParentDir_(NPObject * self, SEL _cmd, System__VFS__DirectoryNode * value) {
+  nopa_weak_unregister((NPObject **)&((struct System__VFS__FileNode *)self)->_parentDir);
   ((struct System__VFS__FileNode *)self)->_parentDir = value;
-  nopa_weak_register((NFObject **)&((struct System__VFS__FileNode *)self)->_parentDir, (NFObject *)value);
+  nopa_weak_register((NPObject **)&((struct System__VFS__FileNode *)self)->_parentDir, (NPObject *)value);
 }
 
-const char * System__VFS__FileNode_nodeName(NFObject * self, SEL _cmd) {
+const char * System__VFS__FileNode_nodeName(NPObject * self, SEL _cmd) {
   struct System__VFS__FileNode * _self = (struct System__VFS__FileNode *)self;
   {
     return _self->_fileName;
   }
 }
 
-int System__VFS__FileNode_calculateSize(NFObject * self, SEL _cmd) {
+int System__VFS__FileNode_calculateSize(NPObject * self, SEL _cmd) {
   struct System__VFS__FileNode * _self = (struct System__VFS__FileNode *)self;
   {
     return _self->_bytesSize;
   }
 }
 
-void System__VFS__FileNode_syncToDisk(NFObject * self, SEL _cmd) {
+void System__VFS__FileNode_syncToDisk(NPObject * self, SEL _cmd) {
   struct System__VFS__FileNode * _self = (struct System__VFS__FileNode *)self;
   {
     printf("[FileNode] 刷盘刷入扇区 -> 文件: %s (%d KB)\n", _self->_fileName, _self->_bytesSize);
   }
 }
 
-void System__VFS__FileNode_dealloc(NFObject * self, SEL _cmd) {
+void System__VFS__FileNode_dealloc(NPObject * self, SEL _cmd) {
   struct System__VFS__FileNode * _self = (struct System__VFS__FileNode *)self;
   {
     printf("[FileNode] 文件 [%s] 节点物理解构已从内存移出。\n", _self->_fileName);
-    NFObject_dealloc(self, sel_registerName("dealloc"));
+    NPObject_dealloc(self, sel_registerName("dealloc"));
   }
 }
 
-NFObject * System__VFS__DirectoryNode_initWithName_(NFObject * self, SEL _cmd, const char * name) {
+NPObject * System__VFS__DirectoryNode_initWithName_(NPObject * self, SEL _cmd, const char * name) {
   struct System__VFS__DirectoryNode * _self = (struct System__VFS__DirectoryNode *)self;
   {
-    self = NFObject_init(self, sel_registerName("init"));
+    self = NPObject_init(self, sel_registerName("init"));
     if (self)     {
       _self->_dirName = name;
       _self->_childCount = 0;
@@ -688,84 +688,84 @@ NFObject * System__VFS__DirectoryNode_initWithName_(NFObject * self, SEL _cmd, c
   }
 }
 
-void System__VFS__DirectoryNode_addChildNode_(NFObject * self, SEL _cmd, NFObject_FSNodeProtocol * node) {
+void System__VFS__DirectoryNode_addChildNode_(NPObject * self, SEL _cmd, NPObject_FSNodeProtocol * node) {
   struct System__VFS__DirectoryNode * _self = (struct System__VFS__DirectoryNode *)self;
   {
     if (((_self->_childCount < 2) && node))     {
-      _self->_children[_self->_childCount] = ((NFObject *)node)->isa->vtable == &nopa_NFObject_vtable_inst ? ((struct nopa_NFObject_vtable *)((NFObject *)(node))->isa->vtable)->retain(node, sel_registerName("retain")) : ((struct nopa___nopa_root_vtable *)((NFObject *)(node))->isa->vtable)->retain(node, sel_registerName("retain"));
+      _self->_children[_self->_childCount] = ((NPObject *)node)->isa->vtable == &nopa_NPObject_vtable_inst ? ((struct nopa_NPObject_vtable *)((NPObject *)(node))->isa->vtable)->retain(node, sel_registerName("retain")) : ((struct nopa___nopa_root_vtable *)((NPObject *)(node))->isa->vtable)->retain(node, sel_registerName("retain"));
       System__VFS__FileNode * file = (System__VFS__FileNode *)node;
-      ((struct nopa_System__VFS__FileNode_vtable *)((NFObject *)(file))->isa->vtable)->setParentDir_(file, sel_registerName("setParentDir:"), self);
+      ((struct nopa_System__VFS__FileNode_vtable *)((NPObject *)(file))->isa->vtable)->setParentDir_(file, sel_registerName("setParentDir:"), self);
       _self->_childCount++;
-      printf("[DirectoryNode] 目录 [%s] 成功装载节点 [%s]\n", _self->_dirName, ((NFObject *)node)->isa->vtable == &nopa_System__VFS__DirectoryNode_vtable_inst ? ((struct nopa_System__VFS__DirectoryNode_vtable *)((NFObject *)(node))->isa->vtable)->nodeName(node, sel_registerName("nodeName")) : ((struct nopa_System__VFS__FileNode_vtable *)((NFObject *)(node))->isa->vtable)->nodeName(node, sel_registerName("nodeName")));
+      printf("[DirectoryNode] 目录 [%s] 成功装载节点 [%s]\n", _self->_dirName, ((NPObject *)node)->isa->vtable == &nopa_System__VFS__DirectoryNode_vtable_inst ? ((struct nopa_System__VFS__DirectoryNode_vtable *)((NPObject *)(node))->isa->vtable)->nodeName(node, sel_registerName("nodeName")) : ((struct nopa_System__VFS__FileNode_vtable *)((NPObject *)(node))->isa->vtable)->nodeName(node, sel_registerName("nodeName")));
     }
   }
 }
 
-const char * System__VFS__DirectoryNode_dirName(NFObject * self, SEL _cmd) {
+const char * System__VFS__DirectoryNode_dirName(NPObject * self, SEL _cmd) {
   return ((struct System__VFS__DirectoryNode *)self)->_dirName;
 }
 
-void System__VFS__DirectoryNode_setDirName_(NFObject * self, SEL _cmd, const char * value) {
+void System__VFS__DirectoryNode_setDirName_(NPObject * self, SEL _cmd, const char * value) {
   ((struct System__VFS__DirectoryNode *)self)->_dirName = value;
 }
 
-const char * System__VFS__DirectoryNode_nodeName(NFObject * self, SEL _cmd) {
+const char * System__VFS__DirectoryNode_nodeName(NPObject * self, SEL _cmd) {
   struct System__VFS__DirectoryNode * _self = (struct System__VFS__DirectoryNode *)self;
   {
     return _self->_dirName;
   }
 }
 
-int System__VFS__DirectoryNode_calculateSize(NFObject * self, SEL _cmd) {
+int System__VFS__DirectoryNode_calculateSize(NPObject * self, SEL _cmd) {
   struct System__VFS__DirectoryNode * _self = (struct System__VFS__DirectoryNode *)self;
   {
     int total = 0;
     for (int i = 0;
 (i < _self->_childCount); i++)     {
-      (total += ({ NFObject *__nopa_tmp_2 = (_self->_children[i]); !__nopa_tmp_2 ? 0 : __nopa_tmp_2->isa->vtable == &nopa_System__VFS__DirectoryNode_vtable_inst ? ((struct nopa_System__VFS__DirectoryNode_vtable *)__nopa_tmp_2->isa->vtable)->calculateSize(__nopa_tmp_2, sel_registerName("calculateSize")) : ((struct nopa_System__VFS__FileNode_vtable *)__nopa_tmp_2->isa->vtable)->calculateSize(__nopa_tmp_2, sel_registerName("calculateSize")); }));
+      (total += ({ NPObject *__nopa_tmp_2 = (_self->_children[i]); !__nopa_tmp_2 ? 0 : __nopa_tmp_2->isa->vtable == &nopa_System__VFS__DirectoryNode_vtable_inst ? ((struct nopa_System__VFS__DirectoryNode_vtable *)__nopa_tmp_2->isa->vtable)->calculateSize(__nopa_tmp_2, sel_registerName("calculateSize")) : ((struct nopa_System__VFS__FileNode_vtable *)__nopa_tmp_2->isa->vtable)->calculateSize(__nopa_tmp_2, sel_registerName("calculateSize")); }));
     }
     return total;
   }
 }
 
-void System__VFS__DirectoryNode_syncToDisk(NFObject * self, SEL _cmd) {
+void System__VFS__DirectoryNode_syncToDisk(NPObject * self, SEL _cmd) {
   struct System__VFS__DirectoryNode * _self = (struct System__VFS__DirectoryNode *)self;
   {
     printf("[DirectoryNode] 正在递归同步目录 [%s] 下的所有子节点...\n", _self->_dirName);
     for (int i = 0;
 (i < _self->_childCount); i++)     {
-      ({ NFObject *__nopa_tmp_3 = (_self->_children[i]); !__nopa_tmp_3 ? 0 : __nopa_tmp_3->isa->vtable == &nopa_System__VFS__DirectoryNode_vtable_inst ? ((struct nopa_System__VFS__DirectoryNode_vtable *)__nopa_tmp_3->isa->vtable)->syncToDisk(__nopa_tmp_3, sel_registerName("syncToDisk")) : ((struct nopa_System__VFS__FileNode_vtable *)__nopa_tmp_3->isa->vtable)->syncToDisk(__nopa_tmp_3, sel_registerName("syncToDisk")); });
+      ({ NPObject *__nopa_tmp_3 = (_self->_children[i]); !__nopa_tmp_3 ? 0 : __nopa_tmp_3->isa->vtable == &nopa_System__VFS__DirectoryNode_vtable_inst ? ((struct nopa_System__VFS__DirectoryNode_vtable *)__nopa_tmp_3->isa->vtable)->syncToDisk(__nopa_tmp_3, sel_registerName("syncToDisk")) : ((struct nopa_System__VFS__FileNode_vtable *)__nopa_tmp_3->isa->vtable)->syncToDisk(__nopa_tmp_3, sel_registerName("syncToDisk")); });
     }
   }
 }
 
-void System__VFS__DirectoryNode_dealloc(NFObject * self, SEL _cmd) {
+void System__VFS__DirectoryNode_dealloc(NPObject * self, SEL _cmd) {
   struct System__VFS__DirectoryNode * _self = (struct System__VFS__DirectoryNode *)self;
   {
     printf("[DirectoryNode] 目录 [%s] 正在销毁其内部子节点树...\n", _self->_dirName);
     for (int i = 0;
 (i < _self->_childCount); i++)     {
-      if (_self->_children[i])       ({ NFObject *__nopa_tmp_4 = (_self->_children[i]); !__nopa_tmp_4 ? 0 : __nopa_tmp_4->isa->vtable == &nopa_NFObject_vtable_inst ? ((struct nopa_NFObject_vtable *)__nopa_tmp_4->isa->vtable)->release(__nopa_tmp_4, sel_registerName("release")) : ((struct nopa___nopa_root_vtable *)__nopa_tmp_4->isa->vtable)->release(__nopa_tmp_4, sel_registerName("release")); });
+      if (_self->_children[i])       ({ NPObject *__nopa_tmp_4 = (_self->_children[i]); !__nopa_tmp_4 ? 0 : __nopa_tmp_4->isa->vtable == &nopa_NPObject_vtable_inst ? ((struct nopa_NPObject_vtable *)__nopa_tmp_4->isa->vtable)->release(__nopa_tmp_4, sel_registerName("release")) : ((struct nopa___nopa_root_vtable *)__nopa_tmp_4->isa->vtable)->release(__nopa_tmp_4, sel_registerName("release")); });
     }
-    NFObject_dealloc(self, sel_registerName("dealloc"));
+    NPObject_dealloc(self, sel_registerName("dealloc"));
   }
 }
 
-void System__VFS__FileNode_compressWithAlgorithm_(NFObject * self, SEL _cmd, const char * algo) {
+void System__VFS__FileNode_compressWithAlgorithm_(NPObject * self, SEL _cmd, const char * algo) {
   struct System__VFS__FileNode * _self = (struct System__VFS__FileNode *)self;
   {
     printf("[Category 扩展] 文件 [%s] 正在执行 [%s] 压缩优化，体积缩减 30%%\n", _self->_fileName, algo);
   }
 }
 
-void System__Notifier__EventBus_registerListener_(NFObject * self, SEL _cmd, System__Notifier__IOMonitorBlock block) {
+void System__Notifier__EventBus_registerListener_(NPObject * self, SEL _cmd, System__Notifier__IOMonitorBlock block) {
   struct System__Notifier__EventBus * _self = (struct System__Notifier__EventBus *)self;
   {
     _self->_listener = block;
   }
 }
 
-void System__Notifier__EventBus_emitEvent_forFile_(NFObject * self, SEL _cmd, const char * evt, System__VFS__FileNode * file) {
+void System__Notifier__EventBus_emitEvent_forFile_(NPObject * self, SEL _cmd, const char * evt, System__VFS__FileNode * file) {
   struct System__Notifier__EventBus * _self = (struct System__Notifier__EventBus *)self;
   {
     printf("[EventBus] 捕获到底层系统事件 [%s]\n", evt);
@@ -775,10 +775,10 @@ void System__Notifier__EventBus_emitEvent_forFile_(NFObject * self, SEL _cmd, co
   }
 }
 
-NFObject * System__Notifier__EventBus_init(NFObject * self, SEL _cmd) {
+NPObject * System__Notifier__EventBus_init(NPObject * self, SEL _cmd) {
   struct System__Notifier__EventBus * _self = (struct System__Notifier__EventBus *)self;
   {
-    self = NFObject_init(self, sel_registerName("init"));
+    self = NPObject_init(self, sel_registerName("init"));
     if (self)     {
       _self->_listener = NULL;
     }
@@ -786,21 +786,21 @@ NFObject * System__Notifier__EventBus_init(NFObject * self, SEL _cmd) {
   }
 }
 
-void System__Notifier__EventBus_dealloc(NFObject * self, SEL _cmd) {
+void System__Notifier__EventBus_dealloc(NPObject * self, SEL _cmd) {
   struct System__Notifier__EventBus * _self = (struct System__Notifier__EventBus *)self;
   {
     printf("[EventBus] 监听总线销毁。\n");
-    NFObject_dealloc(self, sel_registerName("dealloc"));
+    NPObject_dealloc(self, sel_registerName("dealloc"));
   }
 }
 
-NFObject * nopa_alloc(struct NFClass * cls);
+NPObject * nopa_alloc(struct NPClass * cls);
 
-NFObject * nopa_init(NFObject * self);
+NPObject * nopa_init(NPObject * self);
 
-void nopa_release(NFObject * obj);
+void nopa_release(NPObject * obj);
 
-NFObject * nopa_retain(NFObject * obj);
+NPObject * nopa_retain(NPObject * obj);
 
 typedef void (^IOMonitorBlock)(const char *, System__VFS__FileNode *) ;
 
@@ -813,50 +813,50 @@ int main(int argc, const char * argv[]) {
     printf(">>>  nopac 压测套件：「VFS 虚拟文件系统与异步总线」 <<<\n");
     printf("=========================================================\n\n");
     printf("--- 1. 测试 @protocol 接口多态性与递归树算法 ---\n");
-    NFObject *__nopa_tmp_5 = (NFObject_alloc(&nopa_System__VFS__DirectoryNode_class, sel_registerName("alloc")));
+    NPObject *__nopa_tmp_5 = (NPObject_alloc(&nopa_System__VFS__DirectoryNode_class, sel_registerName("alloc")));
     System__VFS__DirectoryNode * rootDir = ((struct nopa_System__VFS__DirectoryNode_vtable *)__nopa_tmp_5->isa->vtable)->initWithName_(__nopa_tmp_5, sel_registerName("initWithName:"), "/usr/bin");
-    NFObject *__nopa_tmp_6 = (NFObject_alloc(&nopa_System__VFS__FileNode_class, sel_registerName("alloc")));
+    NPObject *__nopa_tmp_6 = (NPObject_alloc(&nopa_System__VFS__FileNode_class, sel_registerName("alloc")));
     System__VFS__FileNode * sysLog = ((struct nopa_System__VFS__FileNode_vtable *)__nopa_tmp_6->isa->vtable)->initWithName_size_(__nopa_tmp_6, sel_registerName("initWithName:size:"), "kernel.log", 256);
-    NFObject *__nopa_tmp_7 = (NFObject_alloc(&nopa_System__VFS__FileNode_class, sel_registerName("alloc")));
+    NPObject *__nopa_tmp_7 = (NPObject_alloc(&nopa_System__VFS__FileNode_class, sel_registerName("alloc")));
     System__VFS__FileNode * userConfig = ((struct nopa_System__VFS__FileNode_vtable *)__nopa_tmp_7->isa->vtable)->initWithName_size_(__nopa_tmp_7, sel_registerName("initWithName:size:"), "settings.json", 64);
-    ((struct nopa_System__VFS__DirectoryNode_vtable *)((NFObject *)(rootDir))->isa->vtable)->addChildNode_(rootDir, sel_registerName("addChildNode:"), sysLog);
-    ((struct nopa_System__VFS__DirectoryNode_vtable *)((NFObject *)(rootDir))->isa->vtable)->addChildNode_(rootDir, sel_registerName("addChildNode:"), userConfig);
-    printf("[VFS 校验] 根目录 [%s] 递归汇总计算总容量: %d KB (预期: 320)\n", ((NFObject *)rootDir)->isa->vtable == &nopa_System__VFS__DirectoryNode_vtable_inst ? ((struct nopa_System__VFS__DirectoryNode_vtable *)((NFObject *)(rootDir))->isa->vtable)->nodeName(rootDir, sel_registerName("nodeName")) : ((struct nopa_System__VFS__FileNode_vtable *)((NFObject *)(rootDir))->isa->vtable)->nodeName(rootDir, sel_registerName("nodeName")), ((NFObject *)rootDir)->isa->vtable == &nopa_System__VFS__DirectoryNode_vtable_inst ? ((struct nopa_System__VFS__DirectoryNode_vtable *)((NFObject *)(rootDir))->isa->vtable)->calculateSize(rootDir, sel_registerName("calculateSize")) : ((struct nopa_System__VFS__FileNode_vtable *)((NFObject *)(rootDir))->isa->vtable)->calculateSize(rootDir, sel_registerName("calculateSize")));
-    ((struct nopa_System__VFS__FileNode_vtable *)((NFObject *)(sysLog))->isa->vtable)->compressWithAlgorithm_(sysLog, sel_registerName("compressWithAlgorithm:"), "ZSTD");
+    ((struct nopa_System__VFS__DirectoryNode_vtable *)((NPObject *)(rootDir))->isa->vtable)->addChildNode_(rootDir, sel_registerName("addChildNode:"), sysLog);
+    ((struct nopa_System__VFS__DirectoryNode_vtable *)((NPObject *)(rootDir))->isa->vtable)->addChildNode_(rootDir, sel_registerName("addChildNode:"), userConfig);
+    printf("[VFS 校验] 根目录 [%s] 递归汇总计算总容量: %d KB (预期: 320)\n", ((NPObject *)rootDir)->isa->vtable == &nopa_System__VFS__DirectoryNode_vtable_inst ? ((struct nopa_System__VFS__DirectoryNode_vtable *)((NPObject *)(rootDir))->isa->vtable)->nodeName(rootDir, sel_registerName("nodeName")) : ((struct nopa_System__VFS__FileNode_vtable *)((NPObject *)(rootDir))->isa->vtable)->nodeName(rootDir, sel_registerName("nodeName")), ((NPObject *)rootDir)->isa->vtable == &nopa_System__VFS__DirectoryNode_vtable_inst ? ((struct nopa_System__VFS__DirectoryNode_vtable *)((NPObject *)(rootDir))->isa->vtable)->calculateSize(rootDir, sel_registerName("calculateSize")) : ((struct nopa_System__VFS__FileNode_vtable *)((NPObject *)(rootDir))->isa->vtable)->calculateSize(rootDir, sel_registerName("calculateSize")));
+    ((struct nopa_System__VFS__FileNode_vtable *)((NPObject *)(sysLog))->isa->vtable)->compressWithAlgorithm_(sysLog, sel_registerName("compressWithAlgorithm:"), "ZSTD");
     printf("\n--- 2. 测试泛型别名 Buffer<FileNode*> 的异步刷盘队列 ---\n");
-    NFObject *__nopa_tmp_8 = (NFObject_alloc(&nopa_System__IO__Buffer_System__VFS__FileNode_ptr_class, sel_registerName("alloc")));
-    System__IO__Buffer_System__VFS__FileNode_ptr * ioQueue = ((struct nopa_NFObject_vtable *)__nopa_tmp_8->isa->vtable)->init(__nopa_tmp_8, sel_registerName("init"));
-    ((struct nopa_System__IO__Buffer_vtable *)((NFObject *)(ioQueue))->isa->vtable)->enqueue_(ioQueue, sel_registerName("enqueue:"), sysLog);
-    ((struct nopa_System__IO__Buffer_vtable *)((NFObject *)(ioQueue))->isa->vtable)->enqueue_(ioQueue, sel_registerName("enqueue:"), userConfig);
-    ((NFObject *)sysLog)->isa->vtable == &nopa_NFObject_vtable_inst ? ((struct nopa_NFObject_vtable *)((NFObject *)(sysLog))->isa->vtable)->release(sysLog, sel_registerName("release")) : ((struct nopa___nopa_root_vtable *)((NFObject *)(sysLog))->isa->vtable)->release(sysLog, sel_registerName("release"));
-    ((NFObject *)userConfig)->isa->vtable == &nopa_NFObject_vtable_inst ? ((struct nopa_NFObject_vtable *)((NFObject *)(userConfig))->isa->vtable)->release(userConfig, sel_registerName("release")) : ((struct nopa___nopa_root_vtable *)((NFObject *)(userConfig))->isa->vtable)->release(userConfig, sel_registerName("release"));
+    NPObject *__nopa_tmp_8 = (NPObject_alloc(&nopa_System__IO__Buffer_System__VFS__FileNode_ptr_class, sel_registerName("alloc")));
+    System__IO__Buffer_System__VFS__FileNode_ptr * ioQueue = ((struct nopa_NPObject_vtable *)__nopa_tmp_8->isa->vtable)->init(__nopa_tmp_8, sel_registerName("init"));
+    ((struct nopa_System__IO__Buffer_vtable *)((NPObject *)(ioQueue))->isa->vtable)->enqueue_(ioQueue, sel_registerName("enqueue:"), sysLog);
+    ((struct nopa_System__IO__Buffer_vtable *)((NPObject *)(ioQueue))->isa->vtable)->enqueue_(ioQueue, sel_registerName("enqueue:"), userConfig);
+    ((NPObject *)sysLog)->isa->vtable == &nopa_NPObject_vtable_inst ? ((struct nopa_NPObject_vtable *)((NPObject *)(sysLog))->isa->vtable)->release(sysLog, sel_registerName("release")) : ((struct nopa___nopa_root_vtable *)((NPObject *)(sysLog))->isa->vtable)->release(sysLog, sel_registerName("release"));
+    ((NPObject *)userConfig)->isa->vtable == &nopa_NPObject_vtable_inst ? ((struct nopa_NPObject_vtable *)((NPObject *)(userConfig))->isa->vtable)->release(userConfig, sel_registerName("release")) : ((struct nopa___nopa_root_vtable *)((NPObject *)(userConfig))->isa->vtable)->release(userConfig, sel_registerName("release"));
     printf("\n--- 3. 校验父子节点 __weak 弱引用 (防止循环引用) ---\n");
-    __block System__VFS__DirectoryNode * __attribute__((cleanup(nopa_weak_auto_cleanup))) weakDirRef = ((struct nopa_System__VFS__FileNode_vtable *)((NFObject *)(sysLog))->isa->vtable)->parentDir(sysLog, sel_registerName("parentDir"));
-    nopa_weak_register((NFObject **)&weakDirRef, (NFObject *)((struct nopa_System__VFS__FileNode_vtable *)((NFObject *)(sysLog))->isa->vtable)->parentDir(sysLog, sel_registerName("parentDir")));
+    __block System__VFS__DirectoryNode * __attribute__((cleanup(nopa_weak_auto_cleanup))) weakDirRef = ((struct nopa_System__VFS__FileNode_vtable *)((NPObject *)(sysLog))->isa->vtable)->parentDir(sysLog, sel_registerName("parentDir"));
+    nopa_weak_register((NPObject **)&weakDirRef, (NPObject *)((struct nopa_System__VFS__FileNode_vtable *)((NPObject *)(sysLog))->isa->vtable)->parentDir(sysLog, sel_registerName("parentDir")));
     if (weakDirRef)     {
-      printf("[弱引用验证] 文件 sysLog 的父目录指针正常指向: %s\n", ((NFObject *)weakDirRef)->isa->vtable == &nopa_System__VFS__DirectoryNode_vtable_inst ? ((struct nopa_System__VFS__DirectoryNode_vtable *)((NFObject *)(weakDirRef))->isa->vtable)->nodeName(weakDirRef, sel_registerName("nodeName")) : ((struct nopa_System__VFS__FileNode_vtable *)((NFObject *)(weakDirRef))->isa->vtable)->nodeName(weakDirRef, sel_registerName("nodeName")));
+      printf("[弱引用验证] 文件 sysLog 的父目录指针正常指向: %s\n", ((NPObject *)weakDirRef)->isa->vtable == &nopa_System__VFS__DirectoryNode_vtable_inst ? ((struct nopa_System__VFS__DirectoryNode_vtable *)((NPObject *)(weakDirRef))->isa->vtable)->nodeName(weakDirRef, sel_registerName("nodeName")) : ((struct nopa_System__VFS__FileNode_vtable *)((NPObject *)(weakDirRef))->isa->vtable)->nodeName(weakDirRef, sel_registerName("nodeName")));
     }
     printf("\n--- 4. 测试 EventBus 闭包监听与环境变量捕获 ---\n");
-    NFObject *__nopa_tmp_9 = (NFObject_alloc(&nopa_System__Notifier__EventBus_class, sel_registerName("alloc")));
-    System__Notifier__EventBus * bus = ((struct nopa_NFObject_vtable *)__nopa_tmp_9->isa->vtable)->init(__nopa_tmp_9, sel_registerName("init"));
+    NPObject *__nopa_tmp_9 = (NPObject_alloc(&nopa_System__Notifier__EventBus_class, sel_registerName("alloc")));
+    System__Notifier__EventBus * bus = ((struct nopa_NPObject_vtable *)__nopa_tmp_9->isa->vtable)->init(__nopa_tmp_9, sel_registerName("init"));
     int capturedMagicCode = 0;
-    ((struct nopa_System__Notifier__EventBus_vtable *)((NFObject *)(bus))->isa->vtable)->registerListener_(bus, sel_registerName("registerListener:"), ^void(const char * evt, System__VFS__FileNode * file) {
+    ((struct nopa_System__Notifier__EventBus_vtable *)((NPObject *)(bus))->isa->vtable)->registerListener_(bus, sel_registerName("registerListener:"), ^void(const char * evt, System__VFS__FileNode * file) {
   printf("  [监听器回调] 收到通知！魔数标记: 0x%X\n", capturedMagicCode);
-  printf("              事件类型: %s | 触发目标文件: %s\n", evt, ((struct nopa_System__VFS__FileNode_vtable *)((NFObject *)(file))->isa->vtable)->fileName(file, sel_registerName("fileName")));
+  printf("              事件类型: %s | 触发目标文件: %s\n", evt, ((struct nopa_System__VFS__FileNode_vtable *)((NPObject *)(file))->isa->vtable)->fileName(file, sel_registerName("fileName")));
 }
 );
-    System__VFS__FileNode * dequeuedFile = ((struct nopa_System__IO__Buffer_vtable *)((NFObject *)(ioQueue))->isa->vtable)->dequeue(ioQueue, sel_registerName("dequeue"));
-    ((struct nopa_System__Notifier__EventBus_vtable *)((NFObject *)(bus))->isa->vtable)->emitEvent_forFile_(bus, sel_registerName("emitEvent:forFile:"), "FILE_MODIFIED", dequeuedFile);
-    ((NFObject *)dequeuedFile)->isa->vtable == &nopa_System__VFS__DirectoryNode_vtable_inst ? ((struct nopa_System__VFS__DirectoryNode_vtable *)((NFObject *)(dequeuedFile))->isa->vtable)->syncToDisk(dequeuedFile, sel_registerName("syncToDisk")) : ((struct nopa_System__VFS__FileNode_vtable *)((NFObject *)(dequeuedFile))->isa->vtable)->syncToDisk(dequeuedFile, sel_registerName("syncToDisk"));
+    System__VFS__FileNode * dequeuedFile = ((struct nopa_System__IO__Buffer_vtable *)((NPObject *)(ioQueue))->isa->vtable)->dequeue(ioQueue, sel_registerName("dequeue"));
+    ((struct nopa_System__Notifier__EventBus_vtable *)((NPObject *)(bus))->isa->vtable)->emitEvent_forFile_(bus, sel_registerName("emitEvent:forFile:"), "FILE_MODIFIED", dequeuedFile);
+    ((NPObject *)dequeuedFile)->isa->vtable == &nopa_System__VFS__DirectoryNode_vtable_inst ? ((struct nopa_System__VFS__DirectoryNode_vtable *)((NPObject *)(dequeuedFile))->isa->vtable)->syncToDisk(dequeuedFile, sel_registerName("syncToDisk")) : ((struct nopa_System__VFS__FileNode_vtable *)((NPObject *)(dequeuedFile))->isa->vtable)->syncToDisk(dequeuedFile, sel_registerName("syncToDisk"));
     printf("\n--- 5. 边界求值测试：方括号内三元运算符 + 自减副作用 ---\n");
     int flag = 1;
     int sideEffectCounter = 99;
-    char * resultName = ({ NFObject *__nopa_tmp_10 = (flag ? (sideEffectCounter--, dequeuedFile) : NULL); !__nopa_tmp_10 ? 0 : __nopa_tmp_10->isa->vtable == &nopa_System__VFS__DirectoryNode_vtable_inst ? ((struct nopa_System__VFS__DirectoryNode_vtable *)__nopa_tmp_10->isa->vtable)->nodeName(__nopa_tmp_10, sel_registerName("nodeName")) : ((struct nopa_System__VFS__FileNode_vtable *)__nopa_tmp_10->isa->vtable)->nodeName(__nopa_tmp_10, sel_registerName("nodeName")); });
+    char * resultName = ({ NPObject *__nopa_tmp_10 = (flag ? (sideEffectCounter--, dequeuedFile) : NULL); !__nopa_tmp_10 ? 0 : __nopa_tmp_10->isa->vtable == &nopa_System__VFS__DirectoryNode_vtable_inst ? ((struct nopa_System__VFS__DirectoryNode_vtable *)__nopa_tmp_10->isa->vtable)->nodeName(__nopa_tmp_10, sel_registerName("nodeName")) : ((struct nopa_System__VFS__FileNode_vtable *)__nopa_tmp_10->isa->vtable)->nodeName(__nopa_tmp_10, sel_registerName("nodeName")); });
     printf("[副作用断言] 计算成功！自减后计数器: %d (预期: 98) | 提取文件名: %s\n", sideEffectCounter, resultName);
     printf("\n--- 6. 开始安全物理销毁 VFS 结构树 ---\n");
-    ((NFObject *)bus)->isa->vtable == &nopa_NFObject_vtable_inst ? ((struct nopa_NFObject_vtable *)((NFObject *)(bus))->isa->vtable)->release(bus, sel_registerName("release")) : ((struct nopa___nopa_root_vtable *)((NFObject *)(bus))->isa->vtable)->release(bus, sel_registerName("release"));
-    ((NFObject *)ioQueue)->isa->vtable == &nopa_NFObject_vtable_inst ? ((struct nopa_NFObject_vtable *)((NFObject *)(ioQueue))->isa->vtable)->release(ioQueue, sel_registerName("release")) : ((struct nopa___nopa_root_vtable *)((NFObject *)(ioQueue))->isa->vtable)->release(ioQueue, sel_registerName("release"));
-    ((NFObject *)rootDir)->isa->vtable == &nopa_NFObject_vtable_inst ? ((struct nopa_NFObject_vtable *)((NFObject *)(rootDir))->isa->vtable)->release(rootDir, sel_registerName("release")) : ((struct nopa___nopa_root_vtable *)((NFObject *)(rootDir))->isa->vtable)->release(rootDir, sel_registerName("release"));
+    ((NPObject *)bus)->isa->vtable == &nopa_NPObject_vtable_inst ? ((struct nopa_NPObject_vtable *)((NPObject *)(bus))->isa->vtable)->release(bus, sel_registerName("release")) : ((struct nopa___nopa_root_vtable *)((NPObject *)(bus))->isa->vtable)->release(bus, sel_registerName("release"));
+    ((NPObject *)ioQueue)->isa->vtable == &nopa_NPObject_vtable_inst ? ((struct nopa_NPObject_vtable *)((NPObject *)(ioQueue))->isa->vtable)->release(ioQueue, sel_registerName("release")) : ((struct nopa___nopa_root_vtable *)((NPObject *)(ioQueue))->isa->vtable)->release(ioQueue, sel_registerName("release"));
+    ((NPObject *)rootDir)->isa->vtable == &nopa_NPObject_vtable_inst ? ((struct nopa_NPObject_vtable *)((NPObject *)(rootDir))->isa->vtable)->release(rootDir, sel_registerName("release")) : ((struct nopa___nopa_root_vtable *)((NPObject *)(rootDir))->isa->vtable)->release(rootDir, sel_registerName("release"));
     printf("\n=========================================================\n");
     printf(">>>   恭喜！VFS 虚拟文件系统与异步总线测试顺利通过！  <<<\n");
     printf("=========================================================\n");
@@ -867,7 +867,7 @@ int main(int argc, const char * argv[]) {
 System__VFS__FileNode * System__IO__Buffer_System__VFS__FileNode_ptr_init(System__VFS__FileNode * self, SEL _cmd) {
   struct System__IO__Buffer_System__VFS__FileNode_ptr * _self = (struct System__IO__Buffer_System__VFS__FileNode_ptr *)self;
   {
-    self = NFObject_init(self, sel_registerName("init"));
+    self = NPObject_init(self, sel_registerName("init"));
     if (self)     {
       _self->_head = 0;
       _self->_tail = 0;
@@ -884,7 +884,7 @@ _Bool System__IO__Buffer_System__VFS__FileNode_ptr_enqueue_(System__VFS__FileNod
   struct System__IO__Buffer_System__VFS__FileNode_ptr * _self = (struct System__IO__Buffer_System__VFS__FileNode_ptr *)self;
   {
     if ((_self->_count < 3))     {
-      _self->_ring[_self->_tail] = ((NFObject *)item)->isa->vtable == &nopa_NFObject_vtable_inst ? ((struct nopa_NFObject_vtable *)((NFObject *)(item))->isa->vtable)->retain(item, sel_registerName("retain")) : ((struct nopa___nopa_root_vtable *)((NFObject *)(item))->isa->vtable)->retain(item, sel_registerName("retain"));
+      _self->_ring[_self->_tail] = ((NPObject *)item)->isa->vtable == &nopa_NPObject_vtable_inst ? ((struct nopa_NPObject_vtable *)((NPObject *)(item))->isa->vtable)->retain(item, sel_registerName("retain")) : ((struct nopa___nopa_root_vtable *)((NPObject *)(item))->isa->vtable)->retain(item, sel_registerName("retain"));
       _self->_tail = ((_self->_tail + 1) % 3);
       _self->_count++;
       printf("[System::IO::Buffer<T>] 成功写入数据块！当前队列积压: %d\n", _self->_count);
@@ -915,9 +915,9 @@ void System__IO__Buffer_System__VFS__FileNode_ptr_dealloc(System__VFS__FileNode 
     printf("[System::IO::Buffer<T>] 物理 I/O 环形缓冲区被销毁。\n");
     for (int i = 0;
 (i < 3); i++)     {
-      if (_self->_ring[i])       ({ NFObject *__nopa_tmp_11 = (_self->_ring[i]); !__nopa_tmp_11 ? 0 : __nopa_tmp_11->isa->vtable == &nopa_NFObject_vtable_inst ? ((struct nopa_NFObject_vtable *)__nopa_tmp_11->isa->vtable)->release(__nopa_tmp_11, sel_registerName("release")) : ((struct nopa___nopa_root_vtable *)__nopa_tmp_11->isa->vtable)->release(__nopa_tmp_11, sel_registerName("release")); });
+      if (_self->_ring[i])       ({ NPObject *__nopa_tmp_11 = (_self->_ring[i]); !__nopa_tmp_11 ? 0 : __nopa_tmp_11->isa->vtable == &nopa_NPObject_vtable_inst ? ((struct nopa_NPObject_vtable *)__nopa_tmp_11->isa->vtable)->release(__nopa_tmp_11, sel_registerName("release")) : ((struct nopa___nopa_root_vtable *)__nopa_tmp_11->isa->vtable)->release(__nopa_tmp_11, sel_registerName("release")); });
     }
-    NFObject_dealloc(self, sel_registerName("dealloc"));
+    NPObject_dealloc(self, sel_registerName("dealloc"));
   }
 }
 

@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #import <Foundation/Foundation.np>
 
-@interface Widget : NFObject
+@interface Widget : NPObject
 - (int)value;
 @end
 
@@ -10,7 +10,7 @@
 - (int)value { return 42; }
 @end
 
-@interface Holder : NFObject {
+@interface Holder : NPObject {
     @public (weak) Widget *_widget;
 }
 - (instancetype)initWithWidget:(Widget *)w;

@@ -1,12 +1,12 @@
-// Negative: @interface marks `NFAsync<int>` but @implementation does not.
+// Negative: @interface marks `NPAsync<int>` but @implementation does not.
 // The marker is part of the method signature — the two declarations must
 // agree.
-// Expected error: 'NFAsync' marker mismatch on 'compute:': the @interface
+// Expected error: 'NPAsync' marker mismatch on 'compute:': the @interface
 // and @implementation disagree — the marker is part of the method signature
 #import <Foundation/Foundation.np>
 
-@interface F : NFObject
-- (NFAsync<int>)compute:(int)n;
+@interface F : NPObject
+- (NPAsync<int>)compute:(int)n;
 @end
 
 @implementation F

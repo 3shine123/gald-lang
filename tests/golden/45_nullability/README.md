@@ -1,17 +1,17 @@
-# golden/45 — Nullability（`nullable` / `nonnull` / `NF_ASSUME_NONNULL`）
+# golden/45 — Nullability（`nullable` / `nonnull` / `NP_ASSUME_NONNULL`）
 
 **特性**：ObjC 2015 年最大的语言演进在 Nopa 落地。三态标注 + 区域默认 + 分支内流敏感窄化，**纯编译期、零运行时成本**（codegen 从不读 `nulls` 字段 —— 与 ObjC 的 `NS_ASSUME_NONNULL` 同构）。
 
 ## 语法：两种拼写都支持
 
 ```objc
-- (void)f:(nonnull NFString *)s;        // 前置（ObjC 宏展开后的形态）
-- (void)g:(NFString * _Nonnull)s;       // 后置（clang 头文件里的形态）
-- (nullable NFString *)maybe;
-@property (nonatomic, copy, nullable) NFString *title;   // 属性位
-NF_ASSUME_NONNULL_BEGIN               // 区域默认：未标注指针 → nonnull
-- (void)h:(NFString *)s;
-NF_ASSUME_NONNULL_END
+- (void)f:(nonnull NPString *)s;        // 前置（ObjC 宏展开后的形态）
+- (void)g:(NPString * _Nonnull)s;       // 后置（clang 头文件里的形态）
+- (nullable NPString *)maybe;
+@property (nonatomic, copy, nullable) NPString *title;   // 属性位
+NP_ASSUME_NONNULL_BEGIN               // 区域默认：未标注指针 → nonnull
+- (void)h:(NPString *)s;
+NP_ASSUME_NONNULL_END
 ```
 
 | 态 | 拼写 | 含义 |
@@ -39,9 +39,9 @@ NF_ASSUME_NONNULL_END
 
 ### 2. 指针包装层必须**携带注解上浮**
 
-`nullable NFString *s` 把注解解析到内层 named type，但 checker 读的是**最外层**类型。首版没上浮 → 85 次诊断钩子调用中 `param.nulls` 全是 `Unspecified`，诊断静默失效。指针与 block 两个包装层都要 `ptr.nulls = t.nulls`。
+`nullable NPString *s` 把注解解析到内层 named type，但 checker 读的是**最外层**类型。首版没上浮 → 85 次诊断钩子调用中 `param.nulls` 全是 `Unspecified`，诊断静默失效。指针与 block 两个包装层都要 `ptr.nulls = t.nulls`。
 
-### 3. `NF_ASSUME_NONNULL_*` 是**真语法，不是宏**
+### 3. `NP_ASSUME_NONNULL_*` 是**真语法，不是宏**
 
 ObjC 那两个标记是宏（内部 `_Pragma("clang assume_nonnull begin")`），**nopac 明确拒绝宏体内的 `_Pragma`**（`crates/cpp` —— 源级展开器没有调用点位置可放）。所以标记只能在 nopac 侧实现。
 
@@ -49,7 +49,7 @@ ObjC 那两个标记是宏（内部 `_Pragma("clang assume_nonnull begin")`）�
 
 ### 4. 区域**按文件作用域**（实测修掉的真 bug）
 
-parser 读的是**一个内联缓冲区**（`grep -c source_map crates/parser/src/parser.rs` = 0），没有 `#include` 边界。首版区域跨 `#import` 泄漏：导入头里未标注的 `NFString *s` 静默变 nonnull。
+parser 读的是**一个内联缓冲区**（`grep -c source_map crates/parser/src/parser.rs` = 0），没有 `#include` 边界。首版区域跨 `#import` 泄漏：导入头里未标注的 `NPString *s` 静默变 nonnull。
 
 修法：注入 `SourceMap`，记录区域开启所在文件，`region_applies_at(line)` 只在同文件内生效。
 
@@ -77,12 +77,12 @@ if (s != nil) { ... }                  // 显式 != nil（nil/NULL/0/NO 都算�
 | 诊断 | 触发 | 档位 |
 |---|---|---|
 | `nullable value passed to nonnull parameter` | `nullable` 实参传给 `nonnull` 形参 | **error** |
-| `NF_ASSUME_NONNULL_BEGIN without a matching …_END` | 区域未闭合（否则后续所有指针静默变 nonnull） | error |
-| `NF_ASSUME_NONNULL_BEGIN inside an existing nonnull region` | 重复开启 | error |
+| `NP_ASSUME_NONNULL_BEGIN without a matching …_END` | 区域未闭合（否则后续所有指针静默变 nonnull） | error |
+| `NP_ASSUME_NONNULL_BEGIN inside an existing nonnull region` | 重复开启 | error |
 
 **只报"可证"的情况**（`arg_nullability` 只读变量/强转/消息发送三种形态的注解），其余一律不报 —— 避免洪水，与 ObjC `-Wnullable-to-nonnull-conversion` 同档。
 
-⚠️ 诊断文案里出现的是**类型名**（`'NFString'`）而非形参名（`'v'`）—— checker 读的 AST 类型节点上没带参数名。
+⚠️ 诊断文案里出现的是**类型名**（`'NPString'`）而非形参名（`'v'`）—— checker 读的 AST 类型节点上没带参数名。
 
 ## ARC 交互（豁免名单已落地）
 
@@ -92,7 +92,7 @@ if (s != nil) { ... }                  // 显式 != nil（nil/NULL/0/NO 都算�
 
 ## M2 补齐（原 M1 限制，已解决）
 
-- ✅ **out-param**：`NFError * _Nullable *`——后置注解跟随它前面的星号，标**中间层**（错误对象 nullable；out 指针本身由被调方写入，必然有效）。**前缀注解 + 多级指针被拒绝**：clang 同款拒绝（实测 `_Nonnull Widget * *` → "nullability specifier cannot be applied to non-pointer type 'Widget'"——它拒绝猜层级），报错指引改用后置拼写。配套 Foundation 新增 **`NFError` 类**（`include/Foundation/NFError.{nh,np}`：code/domain/userInfo/localizedDescription + `parseErrorWithMessage:` / `fileIOErrorWithMessage:` 工厂）。
+- ✅ **out-param**：`NPError * _Nullable *`——后置注解跟随它前面的星号，标**中间层**（错误对象 nullable；out 指针本身由被调方写入，必然有效）。**前缀注解 + 多级指针被拒绝**：clang 同款拒绝（实测 `_Nonnull Widget * *` → "nullability specifier cannot be applied to non-pointer type 'Widget'"——它拒绝猜层级），报错指引改用后置拼写。配套 Foundation 新增 **`NPError` 类**（`include/Foundation/NPError.{nh,np}`：code/domain/userInfo/localizedDescription + `parseErrorWithMessage:` / `fileIOErrorWithMessage:` 工厂）。
 - ✅ **block 参数/返回**：三条解析路径（block 类型参数、block 字面量返回、typedef）+ checker 调用点检查。⚠️ 实测坑：**typedef 形式的变量类型只是别名**（`is_block` 为假），必须经 `typedef_blocks` 表解析才能查——不补这条，Foundation 风格（typedef 块）代码几乎全漏。⚠️ 另一实测坑：`T * _Nullable s` 里的**下划线保留字豁免**是关键——无豁免时歧义守卫把 `_Nullable` 误读成"类型名"、`s` 误读成声明符，注解被静默丢弃（该豁免在修 `int nullable = 5;` 回归时曾被误删，CST 断言抓回）。
 - ✅ **nil 字面量传 nonnull**：静态已知 null，比 maybe-nil 更严重，直接报 error（clang `-Wnonnull` 同款行为，已对 SDK 实证）。只判指针位（`is_pointer` / id / instancetype / Class）。
 - 仍不做：值域解引用检查（nullable 返回值直接当指针用）—— ObjC 至今也不做
@@ -100,7 +100,7 @@ if (s != nil) { ... }                  // 显式 != nil（nil/NULL/0/NO 都算�
 
 ## 测试
 
-- `nullability.np`（17 段）—— 正例：两种拼写 × 各落点、属性位、区域默认/例外/`_Null_unspecified` opt-out、6 种窄化形态、nullable 返回值流入局部、**NFError out-param（双指针中间层）、带注解 block（typedef + 字面量 × 两种拼写）、ARC 释放 nullable 局部（nil-safe 白名单）**。`.out` 验证：重跑 STABLE、ARC/MRC 输出 SAME。
+- `nullability.np`（17 段）—— 正例：两种拼写 × 各落点、属性位、区域默认/例外/`_Null_unspecified` opt-out、6 种窄化形态、nullable 返回值流入局部、**NPError out-param（双指针中间层）、带注解 block（typedef + 字面量 × 两种拼写）、ARC 释放 nullable 局部（nil-safe 白名单）**。`.out` 验证：重跑 STABLE、ARC/MRC 输出 SAME。
 - `tests/nullable_c_superset_test.np` —— **C 超集守护**：`int nullable = 5;` / `struct nullable_s { int nonnull; }` / 形参名 / typedef 名 / 嵌套作用域遮蔽
 - `crates/parser/tests/nullability_probe.rs`（**16 项**）—— CST 层精确断言（含双指针层级、双指针前缀拒绝、block 参数/返回两种拼写）。**端到端跑通证明不了任何事**：codegen 从不读 `nulls`，注解丢了照样编译运行
 - 负例（均 exit=1，头注释记录期望报错文案）：

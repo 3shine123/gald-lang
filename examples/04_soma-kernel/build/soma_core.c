@@ -11,7 +11,7 @@
 struct nopa_vtable;
 struct NOPA_META_VTABLE_$_SomaCore__Calculator;
 struct NOPA_META_VTABLE_$_SomaCore__HeapCounter;
-struct NOPA_META_VTABLE_$_SomaCore__NFIoError;
+struct NOPA_META_VTABLE_$_SomaCore__NPIoError;
 struct NOPA_META_VTABLE_$_SomaCore__SchedulerTask;
 
 /* ----------------- Section 3 · SEL constants ----------------- */
@@ -33,28 +33,28 @@ struct SomaCore__Calculator;
 typedef struct SomaCore__Calculator SomaCore__Calculator;
 struct SomaCore__HeapCounter;
 typedef struct SomaCore__HeapCounter SomaCore__HeapCounter;
-struct SomaCore__NFIoError;
-typedef struct SomaCore__NFIoError SomaCore__NFIoError;
+struct SomaCore__NPIoError;
+typedef struct SomaCore__NPIoError SomaCore__NPIoError;
 struct SomaCore__SchedulerTask;
 typedef struct SomaCore__SchedulerTask SomaCore__SchedulerTask;
 
 /* -------------- Section 5 · Struct definitions --------------- */
 /* -------------- Section 6 · Function prototypes -------------- */
-int SomaCore__Calculator_compute_(NFClass * self, SEL _cmd, int x);
-int SomaCore__Calculator_add_(NFObject * self, SEL _cmd, int x);
-int SomaCore__Calculator_value(NFObject * self, SEL _cmd);
-int SomaCore__NFIoError_errorCode(NFObject * self, SEL _cmd);
-NFObject * SomaCore__HeapCounter_alloc(NFClass * self, SEL _cmd);
-NFObject * SomaCore__HeapCounter_init(NFObject * self, SEL _cmd);
-int SomaCore__HeapCounter_add_(NFObject * self, SEL _cmd, int x);
-int SomaCore__HeapCounter_value(NFObject * self, SEL _cmd);
-NFObject * SomaCore__SchedulerTask_new(NFClass * self, SEL _cmd);
-NFObject * SomaCore__SchedulerTask_init(NFObject * self, SEL _cmd);
-int SomaCore__SchedulerTask_getId(NFObject * self, SEL _cmd);
-void SomaCore__SchedulerTask_setId_(NFObject * self, SEL _cmd, int value);
-int SomaCore__SchedulerTask_run(NFObject * self, SEL _cmd);
-int SomaCore__SchedulerTask_priority(NFObject * self, SEL _cmd);
-void SomaCore__SchedulerTask_setPriority_(NFObject * self, SEL _cmd, int value);
+int SomaCore__Calculator_compute_(NPClass * self, SEL _cmd, int x);
+int SomaCore__Calculator_add_(NPObject * self, SEL _cmd, int x);
+int SomaCore__Calculator_value(NPObject * self, SEL _cmd);
+int SomaCore__NPIoError_errorCode(NPObject * self, SEL _cmd);
+NPObject * SomaCore__HeapCounter_alloc(NPClass * self, SEL _cmd);
+NPObject * SomaCore__HeapCounter_init(NPObject * self, SEL _cmd);
+int SomaCore__HeapCounter_add_(NPObject * self, SEL _cmd, int x);
+int SomaCore__HeapCounter_value(NPObject * self, SEL _cmd);
+NPObject * SomaCore__SchedulerTask_new(NPClass * self, SEL _cmd);
+NPObject * SomaCore__SchedulerTask_init(NPObject * self, SEL _cmd);
+int SomaCore__SchedulerTask_getId(NPObject * self, SEL _cmd);
+void SomaCore__SchedulerTask_setId_(NPObject * self, SEL _cmd, int value);
+int SomaCore__SchedulerTask_run(NPObject * self, SEL _cmd);
+int SomaCore__SchedulerTask_priority(NPObject * self, SEL _cmd);
+void SomaCore__SchedulerTask_setPriority_(NPObject * self, SEL _cmd, int value);
 void kputs(const char * s);
 void kputdec(int v);
 void kputhex(unsigned v);
@@ -70,7 +70,7 @@ unsigned soma_fnv1a(const char * s);
 unsigned soma_rotl(unsigned x, unsigned n);
 void soma_class_demo(void );
 void soma_instance_demo(SomaCore__Calculator * acc);
-void soma_exc_demo(NFObject * err);
+void soma_exc_demo(NPObject * err);
 void soma_heap_demo(void );
 void soma_advanced_demo(void );
 void soma_kbd_demo(void );
@@ -78,10 +78,10 @@ void soma_core_boot(void );
 
 /* ------------- Section 7 · File-level variables -------------- */
 /* ------------ Section 8 · VTable & class layouts ------------- */
-NFClass * NOPA_GETCLASS_$_SomaCore__Calculator(NFClass * self, SEL _cmd);
-NFClass * NOPA_GETCLASS_$_SomaCore__HeapCounter(NFClass * self, SEL _cmd);
-NFClass * NOPA_GETCLASS_$_SomaCore__NFIoError(NFClass * self, SEL _cmd);
-NFClass * NOPA_GETCLASS_$_SomaCore__SchedulerTask(NFClass * self, SEL _cmd);
+NPClass * NOPA_GETCLASS_$_SomaCore__Calculator(NPClass * self, SEL _cmd);
+NPClass * NOPA_GETCLASS_$_SomaCore__HeapCounter(NPClass * self, SEL _cmd);
+NPClass * NOPA_GETCLASS_$_SomaCore__NPIoError(NPClass * self, SEL _cmd);
+NPClass * NOPA_GETCLASS_$_SomaCore__SchedulerTask(NPClass * self, SEL _cmd);
 
 /* vtable layout signature: 9a59318b0062d040 (methods: 9) */
 __attribute__((weak)) void nopa_verify_vtable_sig(unsigned long long winner, unsigned long long mine, const char *method_list) {
@@ -93,36 +93,36 @@ __attribute__((weak)) void nopa_verify_vtable_sig(unsigned long long winner, uns
 
 struct nopa_vtable {
     unsigned long long __sig;
-    int (*add_)(NFObject *, SEL, int);
-    int (*errorCode)(NFObject *, SEL);
-    int (*getId)(NFObject *, SEL);
-    NFObject * (*init)(NFObject *, SEL);
-    int (*priority)(NFObject *, SEL);
-    int (*run)(NFObject *, SEL);
-    void (*setId_)(NFObject *, SEL, int);
-    void (*setPriority_)(NFObject *, SEL, int);
-    int (*value)(NFObject *, SEL);
+    int (*add_)(NPObject *, SEL, int);
+    int (*errorCode)(NPObject *, SEL);
+    int (*getId)(NPObject *, SEL);
+    NPObject * (*init)(NPObject *, SEL);
+    int (*priority)(NPObject *, SEL);
+    int (*run)(NPObject *, SEL);
+    void (*setId_)(NPObject *, SEL, int);
+    void (*setPriority_)(NPObject *, SEL, int);
+    int (*value)(NPObject *, SEL);
 };
 
 struct NOPA_META_VTABLE_$_SomaCore__Calculator {
-    int (*compute_)(NFClass *, SEL, int);
-    NFClass * (*class)(NFClass *, SEL);
+    int (*compute_)(NPClass *, SEL, int);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct NOPA_META_VTABLE_$_SomaCore__HeapCounter {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
-struct NOPA_META_VTABLE_$_SomaCore__NFIoError {
-    NFClass * (*class)(NFClass *, SEL);
+struct NOPA_META_VTABLE_$_SomaCore__NPIoError {
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct NOPA_META_VTABLE_$_SomaCore__SchedulerTask {
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 
 /* Class layout: SomaCore::Calculator (super: nopa_root) */
 struct SomaCore__Calculator {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     int total;
 };
@@ -130,23 +130,23 @@ typedef struct SomaCore__Calculator SomaCore__Calculator;
 
 /* Class layout: SomaCore::HeapCounter (super: nopa_root) */
 struct SomaCore__HeapCounter {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     int total;
 };
 typedef struct SomaCore__HeapCounter SomaCore__HeapCounter;
 
-/* Class layout: SomaCore::NFIoError (super: nopa_root) */
-struct SomaCore__NFIoError {
-    struct NFClass *isa;
+/* Class layout: SomaCore::NPIoError (super: nopa_root) */
+struct SomaCore__NPIoError {
+    struct NPClass *isa;
     uint32_t retain_count;
     int code;
 };
-typedef struct SomaCore__NFIoError SomaCore__NFIoError;
+typedef struct SomaCore__NPIoError SomaCore__NPIoError;
 
 /* Class layout: SomaCore::SchedulerTask (super: nopa_root) */
 struct SomaCore__SchedulerTask {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     int id;
     int _priority;
@@ -154,17 +154,17 @@ struct SomaCore__SchedulerTask {
 typedef struct SomaCore__SchedulerTask SomaCore__SchedulerTask;
 
 /* --------- Section 9 · Class metadata infrastructure --------- */
-extern NFClass NOPA_CLASS_$_SomaCore__Calculator;
-extern NFClass NOPA_CLASS_$_SomaCore__HeapCounter;
-extern NFClass NOPA_CLASS_$_SomaCore__NFIoError;
-extern NFClass NOPA_CLASS_$_SomaCore__SchedulerTask;
+extern NPClass NOPA_CLASS_$_SomaCore__Calculator;
+extern NPClass NOPA_CLASS_$_SomaCore__HeapCounter;
+extern NPClass NOPA_CLASS_$_SomaCore__NPIoError;
+extern NPClass NOPA_CLASS_$_SomaCore__SchedulerTask;
 void nopa_metaInit(void);
 
 /* --------- Section 10 · Vtable & metadata instances ---------- */
 /* VTable instance: SomaCore::Calculator */
 __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_SomaCore__Calculator = {
     .__sig = 0x9a59318b0062d040ULL,
-    .add_ = (int (*)(NFObject *, SEL, int))SomaCore__Calculator_add_,
+    .add_ = (int (*)(NPObject *, SEL, int))SomaCore__Calculator_add_,
     .errorCode = NULL,
     .getId = NULL,
     .init = NULL,
@@ -172,28 +172,28 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_SomaCore__Calculator = {
     .run = NULL,
     .setId_ = NULL,
     .setPriority_ = NULL,
-    .value = (int (*)(NFObject *, SEL))SomaCore__Calculator_value,
+    .value = (int (*)(NPObject *, SEL))SomaCore__Calculator_value,
 };
 
 /* VTable instance: SomaCore::HeapCounter */
 __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_SomaCore__HeapCounter = {
     .__sig = 0x9a59318b0062d040ULL,
-    .add_ = (int (*)(NFObject *, SEL, int))SomaCore__HeapCounter_add_,
+    .add_ = (int (*)(NPObject *, SEL, int))SomaCore__HeapCounter_add_,
     .errorCode = NULL,
     .getId = NULL,
-    .init = (NFObject * (*)(NFObject *, SEL))SomaCore__HeapCounter_init,
+    .init = (NPObject * (*)(NPObject *, SEL))SomaCore__HeapCounter_init,
     .priority = NULL,
     .run = NULL,
     .setId_ = NULL,
     .setPriority_ = NULL,
-    .value = (int (*)(NFObject *, SEL))SomaCore__HeapCounter_value,
+    .value = (int (*)(NPObject *, SEL))SomaCore__HeapCounter_value,
 };
 
-/* VTable instance: SomaCore::NFIoError */
-__attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_SomaCore__NFIoError = {
+/* VTable instance: SomaCore::NPIoError */
+__attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_SomaCore__NPIoError = {
     .__sig = 0x9a59318b0062d040ULL,
     .add_ = NULL,
-    .errorCode = (int (*)(NFObject *, SEL))SomaCore__NFIoError_errorCode,
+    .errorCode = (int (*)(NPObject *, SEL))SomaCore__NPIoError_errorCode,
     .getId = NULL,
     .init = NULL,
     .priority = NULL,
@@ -208,12 +208,12 @@ __attribute__((weak)) struct nopa_vtable NOPA_VTABLE_$_SomaCore__SchedulerTask =
     .__sig = 0x9a59318b0062d040ULL,
     .add_ = NULL,
     .errorCode = NULL,
-    .getId = (int (*)(NFObject *, SEL))SomaCore__SchedulerTask_getId,
-    .init = (NFObject * (*)(NFObject *, SEL))SomaCore__SchedulerTask_init,
-    .priority = (int (*)(NFObject *, SEL))SomaCore__SchedulerTask_priority,
-    .run = (int (*)(NFObject *, SEL))SomaCore__SchedulerTask_run,
-    .setId_ = (void (*)(NFObject *, SEL, int))SomaCore__SchedulerTask_setId_,
-    .setPriority_ = (void (*)(NFObject *, SEL, int))SomaCore__SchedulerTask_setPriority_,
+    .getId = (int (*)(NPObject *, SEL))SomaCore__SchedulerTask_getId,
+    .init = (NPObject * (*)(NPObject *, SEL))SomaCore__SchedulerTask_init,
+    .priority = (int (*)(NPObject *, SEL))SomaCore__SchedulerTask_priority,
+    .run = (int (*)(NPObject *, SEL))SomaCore__SchedulerTask_run,
+    .setId_ = (void (*)(NPObject *, SEL, int))SomaCore__SchedulerTask_setId_,
+    .setPriority_ = (void (*)(NPObject *, SEL, int))SomaCore__SchedulerTask_setPriority_,
     .value = NULL,
 };
 
@@ -229,9 +229,9 @@ __attribute__((weak)) struct NOPA_META_VTABLE_$_SomaCore__HeapCounter NOPA_META_
     .class = NOPA_GETCLASS_$_SomaCore__HeapCounter,
 };
 
-/* Meta vtable instance: SomaCore::NFIoError */
-__attribute__((weak)) struct NOPA_META_VTABLE_$_SomaCore__NFIoError NOPA_META_VTABLE_$_SomaCore__NFIoError_inst = {
-    .class = NOPA_GETCLASS_$_SomaCore__NFIoError,
+/* Meta vtable instance: SomaCore::NPIoError */
+__attribute__((weak)) struct NOPA_META_VTABLE_$_SomaCore__NPIoError NOPA_META_VTABLE_$_SomaCore__NPIoError_inst = {
+    .class = NOPA_GETCLASS_$_SomaCore__NPIoError,
 };
 
 /* Meta vtable instance: SomaCore::SchedulerTask */
@@ -241,44 +241,44 @@ __attribute__((weak)) struct NOPA_META_VTABLE_$_SomaCore__SchedulerTask NOPA_MET
 };
 
 /* +getClass for SomaCore::Calculator */
-__attribute__((weak)) NFClass * NOPA_GETCLASS_$_SomaCore__Calculator(NFClass * self, SEL _cmd) {
+__attribute__((weak)) NPClass * NOPA_GETCLASS_$_SomaCore__Calculator(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
 /* +getClass for SomaCore::HeapCounter */
-__attribute__((weak)) NFClass * NOPA_GETCLASS_$_SomaCore__HeapCounter(NFClass * self, SEL _cmd) {
+__attribute__((weak)) NPClass * NOPA_GETCLASS_$_SomaCore__HeapCounter(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
-/* +getClass for SomaCore::NFIoError */
-__attribute__((weak)) NFClass * NOPA_GETCLASS_$_SomaCore__NFIoError(NFClass * self, SEL _cmd) {
+/* +getClass for SomaCore::NPIoError */
+__attribute__((weak)) NPClass * NOPA_GETCLASS_$_SomaCore__NPIoError(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
 /* +getClass for SomaCore::SchedulerTask */
-__attribute__((weak)) NFClass * NOPA_GETCLASS_$_SomaCore__SchedulerTask(NFClass * self, SEL _cmd) {
+__attribute__((weak)) NPClass * NOPA_GETCLASS_$_SomaCore__SchedulerTask(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
 /* -------- Section 11 · Class metadata initialization --------- */
-NFClass NOPA_CLASS_$_SomaCore__Calculator;
-NFClass NOPA_CLASS_$_SomaCore__HeapCounter;
-NFClass NOPA_CLASS_$_SomaCore__NFIoError;
-NFClass NOPA_CLASS_$_SomaCore__SchedulerTask;
+NPClass NOPA_CLASS_$_SomaCore__Calculator;
+NPClass NOPA_CLASS_$_SomaCore__HeapCounter;
+NPClass NOPA_CLASS_$_SomaCore__NPIoError;
+NPClass NOPA_CLASS_$_SomaCore__SchedulerTask;
 
 __attribute__((constructor)) static void __nopa_vtable_layout_check(void) {
     nopa_verify_vtable_sig((&NOPA_VTABLE_$_SomaCore__Calculator)->__sig, 0x9a59318b0062d040ULL, "add_ errorCode getId init priority run setId_ setPriority_ value | class SomaCore::Calculator | tu nopa/soma_core.np");
     nopa_verify_vtable_sig((&NOPA_VTABLE_$_SomaCore__HeapCounter)->__sig, 0x9a59318b0062d040ULL, "add_ errorCode getId init priority run setId_ setPriority_ value | class SomaCore::HeapCounter | tu nopa/soma_core.np");
-    nopa_verify_vtable_sig((&NOPA_VTABLE_$_SomaCore__NFIoError)->__sig, 0x9a59318b0062d040ULL, "add_ errorCode getId init priority run setId_ setPriority_ value | class SomaCore::NFIoError | tu nopa/soma_core.np");
+    nopa_verify_vtable_sig((&NOPA_VTABLE_$_SomaCore__NPIoError)->__sig, 0x9a59318b0062d040ULL, "add_ errorCode getId init priority run setId_ setPriority_ value | class SomaCore::NPIoError | tu nopa/soma_core.np");
     nopa_verify_vtable_sig((&NOPA_VTABLE_$_SomaCore__SchedulerTask)->__sig, 0x9a59318b0062d040ULL, "add_ errorCode getId init priority run setId_ setPriority_ value | class SomaCore::SchedulerTask | tu nopa/soma_core.np");
 }
 
 __attribute__((weak)) void nopa_metaInit(void) {
-    NOPA_CLASS_$_SomaCore__Calculator = (NFClass){
+    NOPA_CLASS_$_SomaCore__Calculator = (NPClass){
         .name = "SomaCore::Calculator",
         .superclass = &NOPA_CLASS_$_nopa_root,
         .instance_size = sizeof(struct SomaCore__Calculator),
@@ -287,7 +287,7 @@ __attribute__((weak)) void nopa_metaInit(void) {
         .protocol_count = 0,
         .dealloc = NULL,
     };
-    NOPA_CLASS_$_SomaCore__HeapCounter = (NFClass){
+    NOPA_CLASS_$_SomaCore__HeapCounter = (NPClass){
         .name = "SomaCore::HeapCounter",
         .superclass = &NOPA_CLASS_$_nopa_root,
         .instance_size = sizeof(struct SomaCore__HeapCounter),
@@ -296,16 +296,16 @@ __attribute__((weak)) void nopa_metaInit(void) {
         .protocol_count = 0,
         .dealloc = NULL,
     };
-    NOPA_CLASS_$_SomaCore__NFIoError = (NFClass){
-        .name = "SomaCore::NFIoError",
+    NOPA_CLASS_$_SomaCore__NPIoError = (NPClass){
+        .name = "SomaCore::NPIoError",
         .superclass = &NOPA_CLASS_$_nopa_root,
-        .instance_size = sizeof(struct SomaCore__NFIoError),
-        .vtable = &NOPA_VTABLE_$_SomaCore__NFIoError,
-        .class_vtable = &NOPA_META_VTABLE_$_SomaCore__NFIoError_inst,
+        .instance_size = sizeof(struct SomaCore__NPIoError),
+        .vtable = &NOPA_VTABLE_$_SomaCore__NPIoError,
+        .class_vtable = &NOPA_META_VTABLE_$_SomaCore__NPIoError_inst,
         .protocol_count = 0,
         .dealloc = NULL,
     };
-    NOPA_CLASS_$_SomaCore__SchedulerTask = (NFClass){
+    NOPA_CLASS_$_SomaCore__SchedulerTask = (NPClass){
         .name = "SomaCore::SchedulerTask",
         .superclass = &NOPA_CLASS_$_nopa_root,
         .instance_size = sizeof(struct SomaCore__SchedulerTask),
@@ -321,69 +321,69 @@ __attribute__((weak)) void nopa_meta_init(void) { nopa_metaInit(); }
 /* --------------- Section 12 · Runtime support ---------------- */
 /* --------------- Section 13 · Function bodies ---------------- */
 /* +[Calculator compute:] */
-__attribute__((weak)) int SomaCore__Calculator_compute_(NFClass * self, SEL _cmd, int x) {
+__attribute__((weak)) int SomaCore__Calculator_compute_(NPClass * self, SEL _cmd, int x) {
     return ((x * 2) + 1);
 }
 
 /* -[Calculator add:] */
-__attribute__((weak)) int SomaCore__Calculator_add_(NFObject * self, SEL _cmd, int x) {
+__attribute__((weak)) int SomaCore__Calculator_add_(NPObject * self, SEL _cmd, int x) {
     (((struct SomaCore__Calculator *)self)->total += x);
     return ((struct SomaCore__Calculator *)self)->total;
 }
 
 /* -[Calculator value] */
-__attribute__((weak)) int SomaCore__Calculator_value(NFObject * self, SEL _cmd) {
+__attribute__((weak)) int SomaCore__Calculator_value(NPObject * self, SEL _cmd) {
     return ((struct SomaCore__Calculator *)self)->total;
 }
 
-/* -[NFIoError errorCode] */
-__attribute__((weak)) int SomaCore__NFIoError_errorCode(NFObject * self, SEL _cmd) {
-    return ((struct SomaCore__NFIoError *)self)->code;
+/* -[NPIoError errorCode] */
+__attribute__((weak)) int SomaCore__NPIoError_errorCode(NPObject * self, SEL _cmd) {
+    return ((struct SomaCore__NPIoError *)self)->code;
 }
 
 /* +[HeapCounter alloc] */
-__attribute__((weak)) NFObject * SomaCore__HeapCounter_alloc(NFClass * self, SEL _cmd) {
+__attribute__((weak)) NPObject * SomaCore__HeapCounter_alloc(NPClass * self, SEL _cmd) {
     return nopa_alloc(self);
 }
 
 /* -[HeapCounter init] */
-__attribute__((weak)) NFObject * SomaCore__HeapCounter_init(NFObject * self, SEL _cmd) {
+__attribute__((weak)) NPObject * SomaCore__HeapCounter_init(NPObject * self, SEL _cmd) {
     return self;
 }
 
 /* -[HeapCounter add:] */
-__attribute__((weak)) int SomaCore__HeapCounter_add_(NFObject * self, SEL _cmd, int x) {
+__attribute__((weak)) int SomaCore__HeapCounter_add_(NPObject * self, SEL _cmd, int x) {
     (((struct SomaCore__HeapCounter *)self)->total += x);
     return ((struct SomaCore__HeapCounter *)self)->total;
 }
 
 /* -[HeapCounter value] */
-__attribute__((weak)) int SomaCore__HeapCounter_value(NFObject * self, SEL _cmd) {
+__attribute__((weak)) int SomaCore__HeapCounter_value(NPObject * self, SEL _cmd) {
     return ((struct SomaCore__HeapCounter *)self)->total;
 }
 
 /* +[SchedulerTask new] */
-__attribute__((weak)) NFObject * SomaCore__SchedulerTask_new(NFClass * self, SEL _cmd) {
+__attribute__((weak)) NPObject * SomaCore__SchedulerTask_new(NPClass * self, SEL _cmd) {
     return nopa_alloc(self);
 }
 
 /* -[SchedulerTask init] */
-__attribute__((weak)) NFObject * SomaCore__SchedulerTask_init(NFObject * self, SEL _cmd) {
+__attribute__((weak)) NPObject * SomaCore__SchedulerTask_init(NPObject * self, SEL _cmd) {
     return self;
 }
 
 /* -[SchedulerTask getId] */
-__attribute__((weak)) int SomaCore__SchedulerTask_getId(NFObject * self, SEL _cmd) {
+__attribute__((weak)) int SomaCore__SchedulerTask_getId(NPObject * self, SEL _cmd) {
     return ((struct SomaCore__SchedulerTask *)self)->id;
 }
 
 /* -[SchedulerTask setId:] */
-__attribute__((weak)) void SomaCore__SchedulerTask_setId_(NFObject * self, SEL _cmd, int value) {
+__attribute__((weak)) void SomaCore__SchedulerTask_setId_(NPObject * self, SEL _cmd, int value) {
     ((struct SomaCore__SchedulerTask *)self)->id = value;
 }
 
 /* -[SchedulerTask run] */
-__attribute__((weak)) int SomaCore__SchedulerTask_run(NFObject * self, SEL _cmd) {
+__attribute__((weak)) int SomaCore__SchedulerTask_run(NPObject * self, SEL _cmd) {
     kputs("       task id=");
     kputdec(((struct SomaCore__SchedulerTask *)self)->id);
     kputs(" priority=");
@@ -393,12 +393,12 @@ __attribute__((weak)) int SomaCore__SchedulerTask_run(NFObject * self, SEL _cmd)
 }
 
 /* -[SchedulerTask priority] */
-__attribute__((weak)) int SomaCore__SchedulerTask_priority(NFObject * self, SEL _cmd) {
+__attribute__((weak)) int SomaCore__SchedulerTask_priority(NPObject * self, SEL _cmd) {
     return ((struct SomaCore__SchedulerTask *)self)->_priority;
 }
 
 /* -[SchedulerTask setPriority:] */
-__attribute__((weak)) void SomaCore__SchedulerTask_setPriority_(NFObject * self, SEL _cmd, int value) {
+__attribute__((weak)) void SomaCore__SchedulerTask_setPriority_(NPObject * self, SEL _cmd, int value) {
     ((struct SomaCore__SchedulerTask *)self)->_priority = value;
 }
 
@@ -468,15 +468,15 @@ __attribute__((weak)) void soma_class_demo(void ) {
 
 __attribute__((weak)) void soma_instance_demo(SomaCore__Calculator * acc) {
     kputs("[nopa] instance methods on C-created obj: add:7 -> ");
-    kputdec(({ NFObject *__nopa_tmp_0 = ((NFObject *)(acc)); __nopa_tmp_0 ? ((int (*)(NFObject *, SEL, int))((struct nopa_vtable *)__nopa_tmp_0->isa->vtable)->add_)(__nopa_tmp_0, __nopa_sel_add_, 7) : (int){0}; }));
+    kputdec(({ NPObject *__nopa_tmp_0 = ((NPObject *)(acc)); __nopa_tmp_0 ? ((int (*)(NPObject *, SEL, int))((struct nopa_vtable *)__nopa_tmp_0->isa->vtable)->add_)(__nopa_tmp_0, __nopa_sel_add_, 7) : (int){0}; }));
     kputs(", add:35 -> ");
-    kputdec(({ NFObject *__nopa_tmp_1 = ((NFObject *)(acc)); __nopa_tmp_1 ? ((int (*)(NFObject *, SEL, int))((struct nopa_vtable *)__nopa_tmp_1->isa->vtable)->add_)(__nopa_tmp_1, __nopa_sel_add_, 35) : (int){0}; }));
+    kputdec(({ NPObject *__nopa_tmp_1 = ((NPObject *)(acc)); __nopa_tmp_1 ? ((int (*)(NPObject *, SEL, int))((struct nopa_vtable *)__nopa_tmp_1->isa->vtable)->add_)(__nopa_tmp_1, __nopa_sel_add_, 35) : (int){0}; }));
     kputs(", value = ");
-    kputdec(({ NFObject *__nopa_tmp_2 = ((NFObject *)(acc)); __nopa_tmp_2 ? ((int (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_2->isa->vtable)->value)(__nopa_tmp_2, __nopa_sel_value) : (int){0}; }));
+    kputdec(({ NPObject *__nopa_tmp_2 = ((NPObject *)(acc)); __nopa_tmp_2 ? ((int (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_2->isa->vtable)->value)(__nopa_tmp_2, __nopa_sel_value) : (int){0}; }));
     kputs("\n");
 }
 
-__attribute__((weak)) void soma_exc_demo(NFObject * err) {
+__attribute__((weak)) void soma_exc_demo(NPObject * err) {
     kputs("[nopa] @try/@catch demo:\n");
     {
         jmp_buf __nopa_saved;
@@ -494,10 +494,10 @@ __attribute__((weak)) void soma_exc_demo(NFObject * err) {
         memcpy(__nopa_exception_buf, __nopa_saved, sizeof(jmp_buf));
         if ((__nopa_state == 1)) {
             __nopa_state = 2;
-            NFObject * e = (NFObject *)__nopa_exception_value;
+            NPObject * e = (NPObject *)__nopa_exception_value;
             {
                 kputs("       caught [e errorCode] = ");
-                kputdec(({ NFObject *__nopa_tmp_3 = ((NFObject *)(e)); __nopa_tmp_3 ? ((int (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_3->isa->vtable)->errorCode)(__nopa_tmp_3, __nopa_sel_errorCode) : (int){0}; }));
+                kputdec(({ NPObject *__nopa_tmp_3 = ((NPObject *)(e)); __nopa_tmp_3 ? ((int (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_3->isa->vtable)->errorCode)(__nopa_tmp_3, __nopa_sel_errorCode) : (int){0}; }));
                 kputs("\n");
             }
         }
@@ -511,15 +511,15 @@ __attribute__((weak)) void soma_exc_demo(NFObject * err) {
 }
 
 __attribute__((weak)) void soma_heap_demo(void ) {
-    NFObject *__nopa_tmp_4 = (SomaCore__HeapCounter_alloc(&NOPA_CLASS_$_SomaCore__HeapCounter, __nopa_sel_alloc));
+    NPObject *__nopa_tmp_4 = (SomaCore__HeapCounter_alloc(&NOPA_CLASS_$_SomaCore__HeapCounter, __nopa_sel_alloc));
     SomaCore__HeapCounter * c = (SomaCore__HeapCounter *)(__nopa_tmp_4 ? ((struct nopa_vtable *)__nopa_tmp_4->isa->vtable)->init(__nopa_tmp_4, __nopa_sel_init) : 0);
     kputs("[nopa] alloc+init (bump allocator):\n");
     kputs("       [c add:10]=");
-    kputdec(({ NFObject *__nopa_tmp_5 = ((NFObject *)(c)); __nopa_tmp_5 ? ((int (*)(NFObject *, SEL, int))((struct nopa_vtable *)__nopa_tmp_5->isa->vtable)->add_)(__nopa_tmp_5, __nopa_sel_add_, 10) : (int){0}; }));
+    kputdec(({ NPObject *__nopa_tmp_5 = ((NPObject *)(c)); __nopa_tmp_5 ? ((int (*)(NPObject *, SEL, int))((struct nopa_vtable *)__nopa_tmp_5->isa->vtable)->add_)(__nopa_tmp_5, __nopa_sel_add_, 10) : (int){0}; }));
     kputs(" [c add:20]=");
-    kputdec(({ NFObject *__nopa_tmp_6 = ((NFObject *)(c)); __nopa_tmp_6 ? ((int (*)(NFObject *, SEL, int))((struct nopa_vtable *)__nopa_tmp_6->isa->vtable)->add_)(__nopa_tmp_6, __nopa_sel_add_, 20) : (int){0}; }));
+    kputdec(({ NPObject *__nopa_tmp_6 = ((NPObject *)(c)); __nopa_tmp_6 ? ((int (*)(NPObject *, SEL, int))((struct nopa_vtable *)__nopa_tmp_6->isa->vtable)->add_)(__nopa_tmp_6, __nopa_sel_add_, 20) : (int){0}; }));
     kputs(" [c value]=");
-    kputdec(({ NFObject *__nopa_tmp_7 = ((NFObject *)(c)); __nopa_tmp_7 ? ((int (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_7->isa->vtable)->value)(__nopa_tmp_7, __nopa_sel_value) : (int){0}; }));
+    kputdec(({ NPObject *__nopa_tmp_7 = ((NPObject *)(c)); __nopa_tmp_7 ? ((int (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_7->isa->vtable)->value)(__nopa_tmp_7, __nopa_sel_value) : (int){0}; }));
     kputs("\n");
     nopa_release(c);
 }
@@ -528,14 +528,14 @@ __attribute__((weak)) void soma_advanced_demo(void ) {
     kputs("[nopa] @protocol + @property + @synthesize + @public:\n");
     SomaCore__SchedulerTask * t;
     t = SomaCore__SchedulerTask_new(&NOPA_CLASS_$_SomaCore__SchedulerTask, __nopa_sel_new);
-    ({ NFObject *__nopa_tmp_8 = ((NFObject *)(t)); __nopa_tmp_8 ? ((void (*)(NFObject *, SEL, int))((struct nopa_vtable *)__nopa_tmp_8->isa->vtable)->setId_)(__nopa_tmp_8, __nopa_sel_setId_, 7) : 0; });
-    ({ NFObject *__nopa_tmp_9 = ((NFObject *)(t)); __nopa_tmp_9 ? ((void (*)(NFObject *, SEL, int))((struct nopa_vtable *)__nopa_tmp_9->isa->vtable)->setPriority_)(__nopa_tmp_9, __nopa_sel_setPriority_, 3) : 0; });
+    ({ NPObject *__nopa_tmp_8 = ((NPObject *)(t)); __nopa_tmp_8 ? ((void (*)(NPObject *, SEL, int))((struct nopa_vtable *)__nopa_tmp_8->isa->vtable)->setId_)(__nopa_tmp_8, __nopa_sel_setId_, 7) : 0; });
+    ({ NPObject *__nopa_tmp_9 = ((NPObject *)(t)); __nopa_tmp_9 ? ((void (*)(NPObject *, SEL, int))((struct nopa_vtable *)__nopa_tmp_9->isa->vtable)->setPriority_)(__nopa_tmp_9, __nopa_sel_setPriority_, 3) : 0; });
     kputs("       priority = ");
-    kputdec(({ NFObject *__nopa_tmp_10 = ((NFObject *)(t)); __nopa_tmp_10 ? ((int (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_10->isa->vtable)->priority)(__nopa_tmp_10, __nopa_sel_priority) : (int){0}; }));
+    kputdec(({ NPObject *__nopa_tmp_10 = ((NPObject *)(t)); __nopa_tmp_10 ? ((int (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_10->isa->vtable)->priority)(__nopa_tmp_10, __nopa_sel_priority) : (int){0}; }));
     kputs(", id = ");
-    kputdec(({ NFObject *__nopa_tmp_11 = ((NFObject *)(t)); __nopa_tmp_11 ? ((int (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_11->isa->vtable)->getId)(__nopa_tmp_11, __nopa_sel_getId) : (int){0}; }));
+    kputdec(({ NPObject *__nopa_tmp_11 = ((NPObject *)(t)); __nopa_tmp_11 ? ((int (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_11->isa->vtable)->getId)(__nopa_tmp_11, __nopa_sel_getId) : (int){0}; }));
     kputs("\n");
-    ({ NFObject *__nopa_tmp_12 = ((NFObject *)(t)); __nopa_tmp_12 ? ((int (*)(NFObject *, SEL))((struct nopa_vtable *)__nopa_tmp_12->isa->vtable)->run)(__nopa_tmp_12, __nopa_sel_run) : (int){0}; });
+    ({ NPObject *__nopa_tmp_12 = ((NPObject *)(t)); __nopa_tmp_12 ? ((int (*)(NPObject *, SEL))((struct nopa_vtable *)__nopa_tmp_12->isa->vtable)->run)(__nopa_tmp_12, __nopa_sel_run) : (int){0}; });
     nopa_release(t);
 }
 

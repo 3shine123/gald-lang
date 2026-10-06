@@ -4,7 +4,7 @@
 
 typedef int (^AddBlock)(int);
 
-@interface Calc : NFObject
+@interface Calc : NPObject
 + (int)scale:(int)base by:(int)factor;
 @end
 
@@ -21,14 +21,14 @@ int main() {
     __block int total = 0;
     AddBlock acc = ^(int v){ total += v; return total; };
     acc(3); acc(4);
-    NFLog(@"total=%d", total);
+    NPLog(@"total=%d", total);
 
     // 高危复现：main 里 __block int base；Calc::scale: 的参数 base 不得被污染
     __block int base = 10;
     AddBlock addBase = ^(int v){ base += v; return base; };
     addBase(5);
-    NFLog(@"base=%d", base);
-    NFLog(@"scaled=%d", [Calc scale:6 by:7]);
+    NPLog(@"base=%d", base);
+    NPLog(@"scaled=%d", [Calc scale:6 by:7]);
 
     return 0;
 }

@@ -35,7 +35,7 @@
 // ============================================================================
 // 2. 类声明与实现：重型自动化机器人 (实现 Serializable 和 Syncable 协议)
 // ============================================================================
-@interface HeavyRobot : NFObject <DataSerializable, CloudSyncable> {
+@interface HeavyRobot : NPObject <DataSerializable, CloudSyncable> {
     @public
     int _robotId;
     int _payloadWeight;
@@ -82,7 +82,7 @@
 // ============================================================================
 // 3. 类声明与实现：AI 安全网关 (实现 Serializable 和 Inspector 协议)
 // ============================================================================
-@interface AISecurityGateway : NFObject <DataSerializable, SecurityInspector> {
+@interface AISecurityGateway : NPObject <DataSerializable, SecurityInspector> {
     @public
     const char* _gatewayName;
     int _firewallRulesActive;

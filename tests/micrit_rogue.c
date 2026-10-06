@@ -13,13 +13,13 @@
 
 #include <string.h>
 
-struct nopa_NFObject_vtable;
+struct nopa_NPObject_vtable;
 struct nopa_Monster_vtable;
 struct nopa_Player_vtable;
 struct nopa_DungeonEngine_vtable;
 
-#define nopa_NFObject_vtable_index_init 2
-#define nopa_NFObject_vtable_index_dealloc 3
+#define nopa_NPObject_vtable_index_init 2
+#define nopa_NPObject_vtable_index_dealloc 3
 #define nopa_Monster_vtable_index_initWithX_y_hp_atk_ 4
 #define nopa_Monster_vtable_index_x 5
 #define nopa_Monster_vtable_index_y 6
@@ -67,70 +67,70 @@ static const SEL __nopa_sel_render = {.name = "render", .hash = 0xEEF97A0D};
 static const SEL __nopa_sel_processInfut_ = {.name = "processInfut_", .hash = 0xB4C50C83};
 static const SEL __nopa_sel_updateWithCritBlock_ = {.name = "updateWithCritBlock_", .hash = 0xC0DD1222};
 
-typedef struct NFObject NFObject;
+typedef struct NPObject NPObject;
 typedef struct Monster Monster;
 typedef struct Player Player;
 typedef struct DungeonEngine DungeonEngine;
 
 
 
-NFObject * NFObject_alloc(NFClass * self, SEL _cmd);
-NFObject * NFObject_new(NFClass * self, SEL _cmd);
-NFObject * NFObject_init(NFObject * self, SEL _cmd);
-void NFObject_dealloc(NFObject * self, SEL _cmd);
-NFClass * NFObject_getClass(NFClass * self, SEL _cmd);
+NPObject * NPObject_alloc(NPClass * self, SEL _cmd);
+NPObject * NPObject_new(NPClass * self, SEL _cmd);
+NPObject * NPObject_init(NPObject * self, SEL _cmd);
+void NPObject_dealloc(NPObject * self, SEL _cmd);
+NPClass * NPObject_getClass(NPClass * self, SEL _cmd);
 void disableRawMode();
 void enableRawMode();
 int kbhit();
-NFObject * Monster_initWithX_y_hp_atk_(NFObject * self, SEL _cmd, int x, int y, int h, int a);
-int Monster_x(NFObject * self, SEL _cmd);
-int Monster_y(NFObject * self, SEL _cmd);
-int Monster_hp(NFObject * self, SEL _cmd);
-int Monster_atk(NFObject * self, SEL _cmd);
-_Bool Monster_alive(NFObject * self, SEL _cmd);
-void Monster_takeDamage_(NFObject * self, SEL _cmd, int dmg);
-void Monster_wanderWithWidth_height_(NFObject * self, SEL _cmd, int w, int h);
-NFClass * Monster_getClass(NFClass * self, SEL _cmd);
-NFObject * Player_init(NFObject * self, SEL _cmd);
-int Player_x(NFObject * self, SEL _cmd);
-int Player_y(NFObject * self, SEL _cmd);
-int Player_hp(NFObject * self, SEL _cmd);
-int Player_atk(NFObject * self, SEL _cmd);
-int Player_exp(NFObject * self, SEL _cmd);
-void Player_moveX_y_width_height_(NFObject * self, SEL _cmd, int dx, int dy, int w, int h);
-void Player_takeDamage_(NFObject * self, SEL _cmd, int dmg);
-void Player_heal_(NFObject * self, SEL _cmd, int amount);
-void Player_addExp_(NFObject * self, SEL _cmd, int amount);
-NFClass * Player_getClass(NFClass * self, SEL _cmd);
-NFObject * DungeonEngine_initWithWidth_height_(NFObject * self, SEL _cmd, int w, int h);
-_Bool DungeonEngine_gameOver(NFObject * self, SEL _cmd);
-void DungeonEngine_processInfut_(NFObject * self, SEL _cmd, char ch);
-void DungeonEngine_updateWithCritBlock_(NFObject * self, SEL _cmd, int (^critBlock)(int));
-void DungeonEngine_render(NFObject * self, SEL _cmd);
-void DungeonEngine_refreshFloor(NFObject * self, SEL _cmd);
-void DungeonEngine_dealloc(NFObject * self, SEL _cmd);
-NFClass * DungeonEngine_getClass(NFClass * self, SEL _cmd);
+NPObject * Monster_initWithX_y_hp_atk_(NPObject * self, SEL _cmd, int x, int y, int h, int a);
+int Monster_x(NPObject * self, SEL _cmd);
+int Monster_y(NPObject * self, SEL _cmd);
+int Monster_hp(NPObject * self, SEL _cmd);
+int Monster_atk(NPObject * self, SEL _cmd);
+_Bool Monster_alive(NPObject * self, SEL _cmd);
+void Monster_takeDamage_(NPObject * self, SEL _cmd, int dmg);
+void Monster_wanderWithWidth_height_(NPObject * self, SEL _cmd, int w, int h);
+NPClass * Monster_getClass(NPClass * self, SEL _cmd);
+NPObject * Player_init(NPObject * self, SEL _cmd);
+int Player_x(NPObject * self, SEL _cmd);
+int Player_y(NPObject * self, SEL _cmd);
+int Player_hp(NPObject * self, SEL _cmd);
+int Player_atk(NPObject * self, SEL _cmd);
+int Player_exp(NPObject * self, SEL _cmd);
+void Player_moveX_y_width_height_(NPObject * self, SEL _cmd, int dx, int dy, int w, int h);
+void Player_takeDamage_(NPObject * self, SEL _cmd, int dmg);
+void Player_heal_(NPObject * self, SEL _cmd, int amount);
+void Player_addExp_(NPObject * self, SEL _cmd, int amount);
+NPClass * Player_getClass(NPClass * self, SEL _cmd);
+NPObject * DungeonEngine_initWithWidth_height_(NPObject * self, SEL _cmd, int w, int h);
+_Bool DungeonEngine_gameOver(NPObject * self, SEL _cmd);
+void DungeonEngine_processInfut_(NPObject * self, SEL _cmd, char ch);
+void DungeonEngine_updateWithCritBlock_(NPObject * self, SEL _cmd, int (^critBlock)(int));
+void DungeonEngine_render(NPObject * self, SEL _cmd);
+void DungeonEngine_refreshFloor(NPObject * self, SEL _cmd);
+void DungeonEngine_dealloc(NPObject * self, SEL _cmd);
+NPClass * DungeonEngine_getClass(NPClass * self, SEL _cmd);
 int main();
 
-extern NFClass nopa_NFObject_class;
-extern NFClass nopa_Monster_class;
-extern NFClass nopa_Player_class;
-extern NFClass nopa_DungeonEngine_class;
+extern NPClass nopa_NPObject_class;
+extern NPClass nopa_Monster_class;
+extern NPClass nopa_Player_class;
+extern NPClass nopa_DungeonEngine_class;
 void nopa_meta_init(void);
 
-// struct NFClass defined in runtime.h
-// struct NFObject defined in runtime.h
-struct nopa_NFObject_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
+// struct NPClass defined in runtime.h
+// struct NPObject defined in runtime.h
+struct nopa_NPObject_vtable {
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
 };
-struct nopa_NFObject_meta_vtable {
-    NFObject * (*alloc)(NFClass *, SEL);
-    NFObject * (*new)(NFClass *, SEL);
-    NFClass * (*class)(NFClass *, SEL);
+struct nopa_NPObject_meta_vtable {
+    NPObject * (*alloc)(NPClass *, SEL);
+    NPObject * (*new)(NPClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct Monster {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     int _x;
     int _y;
@@ -140,22 +140,22 @@ struct Monster {
 };
 typedef struct Monster Monster;
 struct nopa_Monster_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    NFObject * (*initWithX_y_hp_atk_)(NFObject *, SEL, int, int, int, int);
-    int (*x)(NFObject *, SEL);
-    int (*y)(NFObject *, SEL);
-    int (*hp)(NFObject *, SEL);
-    int (*atk)(NFObject *, SEL);
-    _Bool (*alive)(NFObject *, SEL);
-    void (*takeDamage_)(NFObject *, SEL, int);
-    void (*wanderWithWidth_height_)(NFObject *, SEL, int, int);
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    NPObject * (*initWithX_y_hp_atk_)(NPObject *, SEL, int, int, int, int);
+    int (*x)(NPObject *, SEL);
+    int (*y)(NPObject *, SEL);
+    int (*hp)(NPObject *, SEL);
+    int (*atk)(NPObject *, SEL);
+    _Bool (*alive)(NPObject *, SEL);
+    void (*takeDamage_)(NPObject *, SEL, int);
+    void (*wanderWithWidth_height_)(NPObject *, SEL, int, int);
 };
 struct nopa_Monster_meta_vtable {
-    NFClass * (*class)(NFClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct Player {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     int _x;
     int _y;
@@ -166,23 +166,23 @@ struct Player {
 };
 typedef struct Player Player;
 struct nopa_Player_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    int (*x)(NFObject *, SEL);
-    int (*y)(NFObject *, SEL);
-    int (*hp)(NFObject *, SEL);
-    int (*atk)(NFObject *, SEL);
-    int (*exp)(NFObject *, SEL);
-    void (*moveX_y_width_height_)(NFObject *, SEL, int, int, int, int);
-    void (*takeDamage_)(NFObject *, SEL, int);
-    void (*heal_)(NFObject *, SEL, int);
-    void (*addExp_)(NFObject *, SEL, int);
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    int (*x)(NPObject *, SEL);
+    int (*y)(NPObject *, SEL);
+    int (*hp)(NPObject *, SEL);
+    int (*atk)(NPObject *, SEL);
+    int (*exp)(NPObject *, SEL);
+    void (*moveX_y_width_height_)(NPObject *, SEL, int, int, int, int);
+    void (*takeDamage_)(NPObject *, SEL, int);
+    void (*heal_)(NPObject *, SEL, int);
+    void (*addExp_)(NPObject *, SEL, int);
 };
 struct nopa_Player_meta_vtable {
-    NFClass * (*class)(NFClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
 struct DungeonEngine {
-    struct NFClass *isa;
+    struct NPClass *isa;
     uint32_t retain_count;
     int _width;
     int _height;
@@ -199,47 +199,47 @@ struct DungeonEngine {
 };
 typedef struct DungeonEngine DungeonEngine;
 struct nopa_DungeonEngine_vtable {
-    NFObject * (*init)(NFObject *, SEL);
-    void (*dealloc)(NFObject *, SEL);
-    NFObject * (*initWithWidth_height_)(NFObject *, SEL, int, int);
-    _Bool (*gameOver)(NFObject *, SEL);
-    void (*processInfut_)(NFObject *, SEL, char);
-    void (*updateWithCritBlock_)(NFObject *, SEL, int (^)(int));
-    void (*render)(NFObject *, SEL);
-    void (*refreshFloor)(NFObject *, SEL);
+    NPObject * (*init)(NPObject *, SEL);
+    void (*dealloc)(NPObject *, SEL);
+    NPObject * (*initWithWidth_height_)(NPObject *, SEL, int, int);
+    _Bool (*gameOver)(NPObject *, SEL);
+    void (*processInfut_)(NPObject *, SEL, char);
+    void (*updateWithCritBlock_)(NPObject *, SEL, int (^)(int));
+    void (*render)(NPObject *, SEL);
+    void (*refreshFloor)(NPObject *, SEL);
 };
 struct nopa_DungeonEngine_meta_vtable {
-    NFClass * (*class)(NFClass *, SEL);
+    NPClass * (*class)(NPClass *, SEL);
 };
-NFObject * NFObject_alloc(NFClass * self, SEL _cmd) {
+NPObject * NPObject_alloc(NPClass * self, SEL _cmd) {
     return nopa_alloc(self);
 }
 
-NFObject * NFObject_new(NFClass * self, SEL _cmd) {
-    NFObject * obj = nopa_alloc(self);
+NPObject * NPObject_new(NPClass * self, SEL _cmd) {
+    NPObject * obj = nopa_alloc(self);
     return nopa_init(obj);
 }
 
-NFObject * NFObject_init(NFObject * self, SEL _cmd) {
-    struct NFObject * _self = ((struct NFObject *)(self));
+NPObject * NPObject_init(NPObject * self, SEL _cmd) {
+    struct NPObject * _self = ((struct NPObject *)(self));
     {
         return nopa_init(self);
     }
 }
 
-void NFObject_dealloc(NFObject * self, SEL _cmd) {
-    struct NFObject * _self = ((struct NFObject *)(self));
+void NPObject_dealloc(NPObject * self, SEL _cmd) {
+    struct NPObject * _self = ((struct NPObject *)(self));
     {
         return;
     }
 }
 
-NFClass * NFObject_getClass(NFClass * self, SEL _cmd) {
-    return &nopa_NFObject_class;
+NPClass * NPObject_getClass(NPClass * self, SEL _cmd) {
+    return &nopa_NPObject_class;
 }
 
-NFObject * nopa_alloc(struct NFClass * cls);
-NFObject * nopa_init(NFObject * );
+NPObject * nopa_alloc(struct NPClass * cls);
+NPObject * nopa_init(NPObject * );
 struct termios orig_termios;
 void disableRawMode() {
     tcsetattr(STDIN_FILENO, TCSAFLUSH, &orig_termios);
@@ -265,10 +265,10 @@ int kbhit() {
     return select(STDIN_FILENO + 1, &fds, NULL, NULL, &tv);
 }
 
-NFObject * Monster_initWithX_y_hp_atk_(NFObject * self, SEL _cmd, int x, int y, int h, int a) {
+NPObject * Monster_initWithX_y_hp_atk_(NPObject * self, SEL _cmd, int x, int y, int h, int a) {
     struct Monster * _self = ((struct Monster *)(self));
     {
-        self = NFObject_init(self, __nopa_sel_init);
+        self = NPObject_init(self, __nopa_sel_init);
         if (self) {
             {
                 ((struct Monster *)(self))->_x = x;
@@ -282,42 +282,42 @@ NFObject * Monster_initWithX_y_hp_atk_(NFObject * self, SEL _cmd, int x, int y, 
     }
 }
 
-int Monster_x(NFObject * self, SEL _cmd) {
+int Monster_x(NPObject * self, SEL _cmd) {
     struct Monster * _self = ((struct Monster *)(self));
     {
         return ((struct Monster *)(self))->_x;
     }
 }
 
-int Monster_y(NFObject * self, SEL _cmd) {
+int Monster_y(NPObject * self, SEL _cmd) {
     struct Monster * _self = ((struct Monster *)(self));
     {
         return ((struct Monster *)(self))->_y;
     }
 }
 
-int Monster_hp(NFObject * self, SEL _cmd) {
+int Monster_hp(NPObject * self, SEL _cmd) {
     struct Monster * _self = ((struct Monster *)(self));
     {
         return ((struct Monster *)(self))->_hp;
     }
 }
 
-int Monster_atk(NFObject * self, SEL _cmd) {
+int Monster_atk(NPObject * self, SEL _cmd) {
     struct Monster * _self = ((struct Monster *)(self));
     {
         return ((struct Monster *)(self))->_atk;
     }
 }
 
-_Bool Monster_alive(NFObject * self, SEL _cmd) {
+_Bool Monster_alive(NPObject * self, SEL _cmd) {
     struct Monster * _self = ((struct Monster *)(self));
     {
         return ((struct Monster *)(self))->_alive;
     }
 }
 
-void Monster_takeDamage_(NFObject * self, SEL _cmd, int dmg) {
+void Monster_takeDamage_(NPObject * self, SEL _cmd, int dmg) {
     struct Monster * _self = ((struct Monster *)(self));
     {
         ((struct Monster *)(self))->_hp = ((struct Monster *)(self))->_hp - dmg;
@@ -330,7 +330,7 @@ void Monster_takeDamage_(NFObject * self, SEL _cmd, int dmg) {
     }
 }
 
-void Monster_wanderWithWidth_height_(NFObject * self, SEL _cmd, int w, int h) {
+void Monster_wanderWithWidth_height_(NPObject * self, SEL _cmd, int w, int h) {
     struct Monster * _self = ((struct Monster *)(self));
     {
         if (!((struct Monster *)(self))->_alive) {
@@ -352,14 +352,14 @@ void Monster_wanderWithWidth_height_(NFObject * self, SEL _cmd, int w, int h) {
     }
 }
 
-NFClass * Monster_getClass(NFClass * self, SEL _cmd) {
+NPClass * Monster_getClass(NPClass * self, SEL _cmd) {
     return &nopa_Monster_class;
 }
 
-NFObject * Player_init(NFObject * self, SEL _cmd) {
+NPObject * Player_init(NPObject * self, SEL _cmd) {
     struct Player * _self = ((struct Player *)(self));
     {
-        self = NFObject_init(self, __nopa_sel_init);
+        self = NPObject_init(self, __nopa_sel_init);
         if (self) {
             {
                 ((struct Player *)(self))->_x = 2;
@@ -374,42 +374,42 @@ NFObject * Player_init(NFObject * self, SEL _cmd) {
     }
 }
 
-int Player_x(NFObject * self, SEL _cmd) {
+int Player_x(NPObject * self, SEL _cmd) {
     struct Player * _self = ((struct Player *)(self));
     {
         return ((struct Player *)(self))->_x;
     }
 }
 
-int Player_y(NFObject * self, SEL _cmd) {
+int Player_y(NPObject * self, SEL _cmd) {
     struct Player * _self = ((struct Player *)(self));
     {
         return ((struct Player *)(self))->_y;
     }
 }
 
-int Player_hp(NFObject * self, SEL _cmd) {
+int Player_hp(NPObject * self, SEL _cmd) {
     struct Player * _self = ((struct Player *)(self));
     {
         return ((struct Player *)(self))->_hp;
     }
 }
 
-int Player_atk(NFObject * self, SEL _cmd) {
+int Player_atk(NPObject * self, SEL _cmd) {
     struct Player * _self = ((struct Player *)(self));
     {
         return ((struct Player *)(self))->_atk;
     }
 }
 
-int Player_exp(NFObject * self, SEL _cmd) {
+int Player_exp(NPObject * self, SEL _cmd) {
     struct Player * _self = ((struct Player *)(self));
     {
         return ((struct Player *)(self))->_exp;
     }
 }
 
-void Player_moveX_y_width_height_(NFObject * self, SEL _cmd, int dx, int dy, int w, int h) {
+void Player_moveX_y_width_height_(NPObject * self, SEL _cmd, int dx, int dy, int w, int h) {
     struct Player * _self = ((struct Player *)(self));
     {
         ((struct Player *)(self))->_x = ((struct Player *)(self))->_x + dx;
@@ -429,7 +429,7 @@ void Player_moveX_y_width_height_(NFObject * self, SEL _cmd, int dx, int dy, int
     }
 }
 
-void Player_takeDamage_(NFObject * self, SEL _cmd, int dmg) {
+void Player_takeDamage_(NPObject * self, SEL _cmd, int dmg) {
     struct Player * _self = ((struct Player *)(self));
     {
         ((struct Player *)(self))->_hp = ((struct Player *)(self))->_hp - dmg;
@@ -439,7 +439,7 @@ void Player_takeDamage_(NFObject * self, SEL _cmd, int dmg) {
     }
 }
 
-void Player_heal_(NFObject * self, SEL _cmd, int amount) {
+void Player_heal_(NPObject * self, SEL _cmd, int amount) {
     struct Player * _self = ((struct Player *)(self));
     {
         ((struct Player *)(self))->_hp = ((struct Player *)(self))->_hp + amount;
@@ -449,7 +449,7 @@ void Player_heal_(NFObject * self, SEL _cmd, int amount) {
     }
 }
 
-void Player_addExp_(NFObject * self, SEL _cmd, int amount) {
+void Player_addExp_(NPObject * self, SEL _cmd, int amount) {
     struct Player * _self = ((struct Player *)(self));
     {
         ((struct Player *)(self))->_exp = ((struct Player *)(self))->_exp + amount;
@@ -464,14 +464,14 @@ void Player_addExp_(NFObject * self, SEL _cmd, int amount) {
     }
 }
 
-NFClass * Player_getClass(NFClass * self, SEL _cmd) {
+NPClass * Player_getClass(NPClass * self, SEL _cmd) {
     return &nopa_Player_class;
 }
 
-NFObject * DungeonEngine_initWithWidth_height_(NFObject * self, SEL _cmd, int w, int h) {
+NPObject * DungeonEngine_initWithWidth_height_(NPObject * self, SEL _cmd, int w, int h) {
     struct DungeonEngine * _self = ((struct DungeonEngine *)(self));
     {
-        self = NFObject_init(self, __nopa_sel_init);
+        self = NPObject_init(self, __nopa_sel_init);
         if (self) {
             {
                 ((struct DungeonEngine *)(self))->_width = w;
@@ -479,7 +479,7 @@ NFObject * DungeonEngine_initWithWidth_height_(NFObject * self, SEL _cmd, int w,
                 ((struct DungeonEngine *)(self))->_dungeonFloor = 1;
                 ((struct DungeonEngine *)(self))->_gameOver = 0;
                 strcpy(((struct DungeonEngine *)(self))->_logMessage, "欢迎来到暗黑地牢! WASD移动。找 > 下楼。");
-                ((struct DungeonEngine *)(self))->_player = ({ NFObject *__nopa_tmp_0 = (NFObject_alloc(&nopa_Player_class, __nopa_sel_alloc)); ((struct nopa_Player_vtable *)__nopa_tmp_0->isa->vtable)->init(__nopa_tmp_0, __nopa_sel_init); });
+                ((struct DungeonEngine *)(self))->_player = ({ NPObject *__nopa_tmp_0 = (NPObject_alloc(&nopa_Player_class, __nopa_sel_alloc)); ((struct nopa_Player_vtable *)__nopa_tmp_0->isa->vtable)->init(__nopa_tmp_0, __nopa_sel_init); });
                 ((struct DungeonEngine *)(self))->_m1 = NULL;
                 ((struct DungeonEngine *)(self))->_m2 = NULL;
                 ((struct nopa_DungeonEngine_vtable *)self->isa->vtable)->refreshFloor(self, __nopa_sel_refreshFloor);
@@ -489,14 +489,14 @@ NFObject * DungeonEngine_initWithWidth_height_(NFObject * self, SEL _cmd, int w,
     }
 }
 
-_Bool DungeonEngine_gameOver(NFObject * self, SEL _cmd) {
+_Bool DungeonEngine_gameOver(NPObject * self, SEL _cmd) {
     struct DungeonEngine * _self = ((struct DungeonEngine *)(self));
     {
         return ((struct DungeonEngine *)(self))->_gameOver;
     }
 }
 
-void DungeonEngine_processInfut_(NFObject * self, SEL _cmd, char ch) {
+void DungeonEngine_processInfut_(NPObject * self, SEL _cmd, char ch) {
     struct DungeonEngine * _self = ((struct DungeonEngine *)(self));
     {
         if (ch == 119 || ch == 87) {
@@ -521,7 +521,7 @@ void DungeonEngine_processInfut_(NFObject * self, SEL _cmd, char ch) {
     }
 }
 
-void DungeonEngine_updateWithCritBlock_(NFObject * self, SEL _cmd, int (^critBlock)(int)) {
+void DungeonEngine_updateWithCritBlock_(NPObject * self, SEL _cmd, int (^critBlock)(int)) {
     struct DungeonEngine * _self = ((struct DungeonEngine *)(self));
     {
         if (((struct DungeonEngine *)(self))->_gameOver) {
@@ -593,7 +593,7 @@ void DungeonEngine_updateWithCritBlock_(NFObject * self, SEL _cmd, int (^critBlo
     }
 }
 
-void DungeonEngine_render(NFObject * self, SEL _cmd) {
+void DungeonEngine_render(NPObject * self, SEL _cmd) {
     struct DungeonEngine * _self = ((struct DungeonEngine *)(self));
     {
         printf("\033[H");
@@ -656,25 +656,25 @@ void DungeonEngine_render(NFObject * self, SEL _cmd) {
     }
 }
 
-void DungeonEngine_refreshFloor(NFObject * self, SEL _cmd) {
+void DungeonEngine_refreshFloor(NPObject * self, SEL _cmd) {
     struct DungeonEngine * _self = ((struct DungeonEngine *)(self));
     {
         if (((struct DungeonEngine *)(self))->_m1) {
             {
-                NFObject_release(((struct DungeonEngine *)(self))->_m1);
+                NPObject_release(((struct DungeonEngine *)(self))->_m1);
                 ((struct DungeonEngine *)(self))->_m1 = NULL;
             }
         }
         if (((struct DungeonEngine *)(self))->_m2) {
             {
-                NFObject_release(((struct DungeonEngine *)(self))->_m2);
+                NPObject_release(((struct DungeonEngine *)(self))->_m2);
                 ((struct DungeonEngine *)(self))->_m2 = NULL;
             }
         }
         int monsterHp = 20 + ((struct DungeonEngine *)(self))->_dungeonFloor * 5;
         int monsterAtk = 5 + ((struct DungeonEngine *)(self))->_dungeonFloor * 2;
-        ((struct DungeonEngine *)(self))->_m1 = ({ NFObject *__nopa_tmp_1 = (NFObject_alloc(&nopa_Monster_class, __nopa_sel_alloc)); ((struct nopa_Monster_vtable *)__nopa_tmp_1->isa->vtable)->initWithX_y_hp_atk_(__nopa_tmp_1, __nopa_sel_initWithX_y_hp_atk_, rand() % ((struct DungeonEngine *)(self))->_width - 4 + 2, rand() % ((struct DungeonEngine *)(self))->_height - 4 + 2, monsterHp, monsterAtk); });
-        ((struct DungeonEngine *)(self))->_m2 = ({ NFObject *__nopa_tmp_2 = (NFObject_alloc(&nopa_Monster_class, __nopa_sel_alloc)); ((struct nopa_Monster_vtable *)__nopa_tmp_2->isa->vtable)->initWithX_y_hp_atk_(__nopa_tmp_2, __nopa_sel_initWithX_y_hp_atk_, rand() % ((struct DungeonEngine *)(self))->_width - 4 + 2, rand() % ((struct DungeonEngine *)(self))->_height - 4 + 2, monsterHp, monsterAtk); });
+        ((struct DungeonEngine *)(self))->_m1 = ({ NPObject *__nopa_tmp_1 = (NPObject_alloc(&nopa_Monster_class, __nopa_sel_alloc)); ((struct nopa_Monster_vtable *)__nopa_tmp_1->isa->vtable)->initWithX_y_hp_atk_(__nopa_tmp_1, __nopa_sel_initWithX_y_hp_atk_, rand() % ((struct DungeonEngine *)(self))->_width - 4 + 2, rand() % ((struct DungeonEngine *)(self))->_height - 4 + 2, monsterHp, monsterAtk); });
+        ((struct DungeonEngine *)(self))->_m2 = ({ NPObject *__nopa_tmp_2 = (NPObject_alloc(&nopa_Monster_class, __nopa_sel_alloc)); ((struct nopa_Monster_vtable *)__nopa_tmp_2->isa->vtable)->initWithX_y_hp_atk_(__nopa_tmp_2, __nopa_sel_initWithX_y_hp_atk_, rand() % ((struct DungeonEngine *)(self))->_width - 4 + 2, rand() % ((struct DungeonEngine *)(self))->_height - 4 + 2, monsterHp, monsterAtk); });
         ((struct DungeonEngine *)(self))->_potionX = rand() % ((struct DungeonEngine *)(self))->_width - 4 + 2;
         ((struct DungeonEngine *)(self))->_potionY = rand() % ((struct DungeonEngine *)(self))->_height - 4 + 2;
         ((struct DungeonEngine *)(self))->_stairsX = ((struct DungeonEngine *)(self))->_width - 3;
@@ -682,23 +682,23 @@ void DungeonEngine_refreshFloor(NFObject * self, SEL _cmd) {
     }
 }
 
-void DungeonEngine_dealloc(NFObject * self, SEL _cmd) {
+void DungeonEngine_dealloc(NPObject * self, SEL _cmd) {
     struct DungeonEngine * _self = ((struct DungeonEngine *)(self));
     {
         if (((struct DungeonEngine *)(self))->_player) {
-            NFObject_release(((struct DungeonEngine *)(self))->_player);
+            NPObject_release(((struct DungeonEngine *)(self))->_player);
         }
         if (((struct DungeonEngine *)(self))->_m1) {
-            NFObject_release(((struct DungeonEngine *)(self))->_m1);
+            NPObject_release(((struct DungeonEngine *)(self))->_m1);
         }
         if (((struct DungeonEngine *)(self))->_m2) {
-            NFObject_release(((struct DungeonEngine *)(self))->_m2);
+            NPObject_release(((struct DungeonEngine *)(self))->_m2);
         }
         nopa_object_dealloc(self);
     }
 }
 
-NFClass * DungeonEngine_getClass(NFClass * self, SEL _cmd) {
+NPClass * DungeonEngine_getClass(NPClass * self, SEL _cmd) {
     return &nopa_DungeonEngine_class;
 }
 
@@ -711,7 +711,7 @@ int main() {
             srand(time(NULL));
             enableRawMode();
             printf("\033[2J\033[H");
-            NFObject *__nopa_tmp_3 = (NFObject_alloc(&nopa_DungeonEngine_class, __nopa_sel_alloc));
+            NPObject *__nopa_tmp_3 = (NPObject_alloc(&nopa_DungeonEngine_class, __nopa_sel_alloc));
             DungeonEngine * engine = ((struct nopa_DungeonEngine_vtable *)__nopa_tmp_3->isa->vtable)->initWithWidth_height_(__nopa_tmp_3, __nopa_sel_initWithWidth_height_, 32, 12);
             int (^critBlock)(int baseAtk) = ^int(int baseAtk) {
     if (rand() % 100 < 35) {
@@ -745,7 +745,7 @@ int main() {
             printf(" 💀 你在地牢深处耗尽了最后一点力气，不幸力竭阵亡！\n");
             printf("===================================================\n");
             if (engine) {
-                NFObject_release(engine);
+                NPObject_release(engine);
             }
         }
         nopa_autoreleasepool_pop(__pool);
@@ -757,14 +757,14 @@ int main() {
 
 // ─── Class metadata ─────────────────────────────────────
 
-struct nopa_NFObject_vtable nopa_NFObject_vtable_inst = {
-    .init = NFObject_init,
-    .dealloc = NFObject_dealloc,
+struct nopa_NPObject_vtable nopa_NPObject_vtable_inst = {
+    .init = NPObject_init,
+    .dealloc = NPObject_dealloc,
 };
 
 struct nopa_Monster_vtable nopa_Monster_vtable_inst = {
-    .init = NFObject_init,
-    .dealloc = NFObject_dealloc,
+    .init = NPObject_init,
+    .dealloc = NPObject_dealloc,
     .initWithX_y_hp_atk_ = Monster_initWithX_y_hp_atk_,
     .x = Monster_x,
     .y = Monster_y,
@@ -777,7 +777,7 @@ struct nopa_Monster_vtable nopa_Monster_vtable_inst = {
 
 struct nopa_Player_vtable nopa_Player_vtable_inst = {
     .init = Player_init,
-    .dealloc = NFObject_dealloc,
+    .dealloc = NPObject_dealloc,
     .x = Player_x,
     .y = Player_y,
     .hp = Player_hp,
@@ -790,7 +790,7 @@ struct nopa_Player_vtable nopa_Player_vtable_inst = {
 };
 
 struct nopa_DungeonEngine_vtable nopa_DungeonEngine_vtable_inst = {
-    .init = NFObject_init,
+    .init = NPObject_init,
     .dealloc = DungeonEngine_dealloc,
     .initWithWidth_height_ = DungeonEngine_initWithWidth_height_,
     .gameOver = DungeonEngine_gameOver,
@@ -800,10 +800,10 @@ struct nopa_DungeonEngine_vtable nopa_DungeonEngine_vtable_inst = {
     .refreshFloor = DungeonEngine_refreshFloor,
 };
 
-struct nopa_NFObject_meta_vtable nopa_NFObject_meta_vtable_inst = {
-    .alloc = NFObject_alloc,
-    .new = NFObject_new,
-    .class = NFObject_getClass,
+struct nopa_NPObject_meta_vtable nopa_NPObject_meta_vtable_inst = {
+    .alloc = NPObject_alloc,
+    .new = NPObject_new,
+    .class = NPObject_getClass,
 };
 
 struct nopa_Monster_meta_vtable nopa_Monster_meta_vtable_inst = {
@@ -818,39 +818,39 @@ struct nopa_DungeonEngine_meta_vtable nopa_DungeonEngine_meta_vtable_inst = {
     .class = DungeonEngine_getClass,
 };
 
-NFClass nopa_NFObject_class;
-NFClass nopa_Monster_class;
-NFClass nopa_Player_class;
-NFClass nopa_DungeonEngine_class;
+NPClass nopa_NPObject_class;
+NPClass nopa_Monster_class;
+NPClass nopa_Player_class;
+NPClass nopa_DungeonEngine_class;
 
 void nopa_meta_init(void) {
-    nopa_NFObject_class = (NFClass){
-        .name = "NFObject",
+    nopa_NPObject_class = (NPClass){
+        .name = "NPObject",
         .superclass = NULL,
-        .instance_size = sizeof(struct NFObject),
-        .vtable = &nopa_NFObject_vtable_inst,
-        .class_vtable = &nopa_NFObject_meta_vtable_inst,
+        .instance_size = sizeof(struct NPObject),
+        .vtable = &nopa_NPObject_vtable_inst,
+        .class_vtable = &nopa_NPObject_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_Monster_class = (NFClass){
+    nopa_Monster_class = (NPClass){
         .name = "Monster",
-        .superclass = &nopa_NFObject_class,
+        .superclass = &nopa_NPObject_class,
         .instance_size = sizeof(struct Monster),
         .vtable = &nopa_Monster_vtable_inst,
         .class_vtable = &nopa_Monster_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_Player_class = (NFClass){
+    nopa_Player_class = (NPClass){
         .name = "Player",
-        .superclass = &nopa_NFObject_class,
+        .superclass = &nopa_NPObject_class,
         .instance_size = sizeof(struct Player),
         .vtable = &nopa_Player_vtable_inst,
         .class_vtable = &nopa_Player_meta_vtable_inst,
         .protocol_count = 0,
     };
-    nopa_DungeonEngine_class = (NFClass){
+    nopa_DungeonEngine_class = (NPClass){
         .name = "DungeonEngine",
-        .superclass = &nopa_NFObject_class,
+        .superclass = &nopa_NPObject_class,
         .instance_size = sizeof(struct DungeonEngine),
         .vtable = &nopa_DungeonEngine_vtable_inst,
         .class_vtable = &nopa_DungeonEngine_meta_vtable_inst,

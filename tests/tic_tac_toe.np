@@ -40,7 +40,7 @@ static int kbhit() {
 // ==========================================================
 // 2. 井字棋核心引擎类
 // ==========================================================
-@interface TicTacToeEngine : NFObject {
+@interface TicTacToeEngine : NPObject {
     char _board[9];      // 💥 压力点：一维数组模拟 3x3 矩阵
     int _cursorX;        // 动态 UI 光标 X (0~2)
     int _cursorY;        // 动态 UI 光标 Y (0~2)
@@ -239,7 +239,7 @@ int main() {
         printf(" 🏁 终端棋局结束。Micrit 语言高级闭包与一维映射测试完毕！\n");
         printf("===================================================\n");
         
-        if (engine) NFObject_release(engine);
+        if (engine) NPObject_release(engine);
     }
     return 0;
 }

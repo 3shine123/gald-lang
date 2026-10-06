@@ -1,4 +1,4 @@
-// Boxing literals — every form must produce a real NFNumber.
+// Boxing literals — every form must produce a real NPNumber.
 //
 //   @123 / @1.5   — literal value, typed by the literal itself
 //   @(expr)       — factory chosen by the expression's STATIC type (parser has
@@ -14,41 +14,41 @@ int main(void) {
     char c = 'A';
 
     // 1. literal forms (pre-existing)
-    NFNumber *n1 = @123;
-    NFNumber *n2 = @1.5;
-    NFLog(@"1 literal: %d %.1f", [n1 intValue], [n2 doubleValue]);
+    NPNumber *n1 = @123;
+    NPNumber *n2 = @1.5;
+    NPLog(@"1 literal: %d %.1f", [n1 intValue], [n2 doubleValue]);
 
     // 2. boxed expression — one factory per static type
-    NFNumber *n3 = @(i + 1);      // int    → numberWithInt:
-    NFNumber *n4 = @(d * 2.0);    // double → numberWithDouble:
-    NFNumber *n5 = @(c + 0);      // char+int promotes to int
-    NFLog(@"2 expr: %d %.1f %d", [n3 intValue], [n4 doubleValue], [n5 intValue]);
+    NPNumber *n3 = @(i + 1);      // int    → numberWithInt:
+    NPNumber *n4 = @(d * 2.0);    // double → numberWithDouble:
+    NPNumber *n5 = @(c + 0);      // char+int promotes to int
+    NPLog(@"2 expr: %d %.1f %d", [n3 intValue], [n4 doubleValue], [n5 intValue]);
 
     // 3. boxed BOOL
-    NFNumber *n6 = @YES;
-    NFNumber *n7 = @NO;
-    NFLog(@"3 bool: %d %d", [n6 boolValue], [n7 boolValue]);
+    NPNumber *n6 = @YES;
+    NPNumber *n7 = @NO;
+    NPLog(@"3 bool: %d %d", [n6 boolValue], [n7 boolValue]);
 
     // 4. boxed character, round-tripped through charValue
-    NFNumber *n8 = @'A';
-    NFNumber *n9 = @(c);
-    NFLog(@"4 char: %c %d %c", [n8 charValue], [n8 intValue], [n9 charValue]);
+    NPNumber *n8 = @'A';
+    NPNumber *n9 = @(c);
+    NPLog(@"4 char: %c %d %c", [n8 charValue], [n8 intValue], [n9 charValue]);
 
     // 5. boxed result used directly as a receiver (chained dispatch)
-    NFLog(@"5 chain: %d", [@(i * 2) intValue]);
+    NPLog(@"5 chain: %d", [@(i * 2) intValue]);
 
     // 6. boxed results inside a literal array
-    NFArray *arr = @[ @1, @(i + 1), @YES ];
+    NPArray *arr = @[ @1, @(i + 1), @YES ];
     // A C-style cast directly on a message send is fine (it used to be avoided
     // here on a stale "parser gap" note — verified working since).
-    NFNumber *head = (NFNumber *)[arr objectAtIndex:0];
-    NFNumber *mid = (NFNumber *)[arr objectAtIndex:1];
-    NFNumber *tail = (NFNumber *)[arr objectAtIndex:2];
-    NFLog(@"6 array: %d %d %d %d",
+    NPNumber *head = (NPNumber *)[arr objectAtIndex:0];
+    NPNumber *mid = (NPNumber *)[arr objectAtIndex:1];
+    NPNumber *tail = (NPNumber *)[arr objectAtIndex:2];
+    NPLog(@"6 array: %d %d %d %d",
           [arr count], [head intValue], [mid intValue], [tail boolValue]);
 
     // 7. same value, both spellings — equality is value-based
-    NFLog(@"7 eq: %d %d",
+    NPLog(@"7 eq: %d %d",
           [@(i + 1) isEqualToNumber:@42],
           [@YES isEqualToNumber:@(1 == 1)]);
 

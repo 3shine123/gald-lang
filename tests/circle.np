@@ -2,7 +2,7 @@
 
 #define PI 3.14159265358979323846
 
-@interface Circle : NFObject {
+@interface Circle : NPObject {
     @public
     float _radius;
 }
@@ -23,7 +23,7 @@
 - (float)area { return PI * _radius * _radius; }
 + (void)run {
     Circle *c = [[Circle alloc] initWithRadius:5.0];
-    NFLog(@"Circle radius: %f, area: %f", c.radius, [c area]);
+    NPLog(@"Circle radius: %f, area: %f", c.radius, [c area]);
 }
 @end
 

@@ -7,7 +7,7 @@
 //!
 //! - `await e` splits the body into segments; each segment runs inside one
 //!   `switch (task->state)` arm.
-//! - Locals live in a per-method `NFTaskFrame` struct so they survive
+//! - Locals live in a per-method `NPTaskFrame` struct so they survive
 //!   suspension (codegen's @try lifting precedent).
 //! - break/continue across awaits become state jumps (no C break/continue
 //!   across switch arms).
@@ -126,7 +126,7 @@ pub fn method_is_async(m: &AstDecl) -> bool {
 /// before desugar runs; any error aborts compilation).
 pub struct AsyncDiagnostics {
     pub errors: Vec<String>,
-    /// Recoverable mismatches — mostly the `NFAsync<T>` marker reconciliation
+    /// Recoverable mismatches — mostly the `NPAsync<T>` marker reconciliation
     /// (await-without-marker). Purple pipeline warnings; `-Werror` escalates.
     pub warnings: Vec<String>,
 }
@@ -140,7 +140,7 @@ pub struct AsyncDiagnostics {
 pub fn check_unit(unit: &nopa_ast::AstUnit) -> AsyncDiagnostics {
     let mut diags = AsyncDiagnostics { errors: Vec::new(), warnings: Vec::new() };
 
-    // ── NFAsync<T> marker reconciliation (AGENTS.md `NFAsync<T>` section) ──
+    // ── NPAsync<T> marker reconciliation (AGENTS.md `NPAsync<T>` section) ──
     // The marker is a return-type-position flag; the body's awaits decide the
     // truth. Only implementations (methods WITH a body) reconcile against the
     // body — header-only `@interface` methods have no body to contradict
@@ -171,7 +171,7 @@ pub fn check_unit(unit: &nopa_ast::AstUnit) -> AsyncDiagnostics {
                     if let Some(&iface_marked) = iface_markers.get(&key) {
                         if iface_marked != marker {
                             diags.errors.push(format!(
-                                "{}:{}: 'NFAsync' marker mismatch on '{}': the @interface and @implementation disagree — the marker is part of the method signature",
+                                "{}:{}: 'NPAsync' marker mismatch on '{}': the @interface and @implementation disagree — the marker is part of the method signature",
                                 m.line, m.col, sym));
                         }
                     }
@@ -236,7 +236,7 @@ pub fn check_unit(unit: &nopa_ast::AstUnit) -> AsyncDiagnostics {
     diags
 }
 
-/// NFAsync<T> reconciliation table (AGENTS.md `NFAsync<T>` section):
+/// NPAsync<T> reconciliation table (AGENTS.md `NPAsync<T>` section):
 ///   marked + await     → ok
 ///   marked, no await   → error — the marker must not lie (same philosophy as
 ///                        bare `@throws` requiring a real throw)
@@ -253,11 +253,11 @@ fn reconcile_marker(
 ) {
     if marked && !has_await {
         diags.errors.push(format!(
-            "{}:{}: '{}' is marked 'NFAsync<T>' but its body never suspends — remove the marker or add an '@await'",
+            "{}:{}: '{}' is marked 'NPAsync<T>' but its body never suspends — remove the marker or add an '@await'",
             line, col, sym));
     } else if !marked && has_await {
         diags.warnings.push(format!(
-            "{}:{}: '{}' contains '@await' but its return type is not marked 'NFAsync<T>' — mark it so callers can see it suspends",
+            "{}:{}: '{}' contains '@await' but its return type is not marked 'NPAsync<T>' — mark it so callers can see it suspends",
             line, col, sym));
     }
 }
@@ -381,7 +381,7 @@ fn check_expr_sync_calls(
 /// Rewrite an async method body into the M1 task-driven form:
 ///
 /// ```text
-///     { NFTask *__nopa_task = nopa_task_create(entry_stub, (NFObject *)self, 0);
+///     { NPTask *__nopa_task = nopa_task_create(entry_stub, (NPObject *)self, 0);
 ///       ...original body with `await e` lowered...
 ///       nopa_task_join(__nopa_task); }
 /// ```
@@ -531,7 +531,7 @@ pub fn desugar_method_body(body: &mut AstStmt) {
         data: AstDeclData::Variable {
             var_type: Some(Box::new({
                 let mut inner = AstType::new(TypePrim::Named);
-                inner.name = Some("NFTask".to_string());
+                inner.name = Some("NPTask".to_string());
                 let mut t = AstType::new(TypePrim::Named);
                 t.is_pointer = true;
                 t.subtype = Some(Box::new(inner));
@@ -605,7 +605,7 @@ fn sanitize_symbol(sym: &str) -> String {
 
 /// Build the M2 state-machine form for one async method:
 ///   - a `struct <M>_frame { params + locals }` typedef (top-level decl)
-///   - a `static int <M>_state(NFTask *t)` entry (top-level decl)
+///   - a `static int <M>_state(NPTask *t)` entry (top-level decl)
 ///   - rewrite the method body to: create + fill params + join + return result
 ///
 /// In M2's synchronous-drive model the entry runs all states in one resume
@@ -685,7 +685,7 @@ pub fn desugar_method_m2(
     let final_state = state_counter;
 
     // 4. Entry function:
-    //   static int nopa_async_state_<M>(NFTask *t) {
+    //   static int nopa_async_state_<M>(NPTask *t) {
     //     struct <M>_frame *f = (struct <M>_frame *)t->frame;  // M3 uses f
     //     switch (t->state) {
     //       case 1: ...body with lowered awaits...
@@ -824,8 +824,8 @@ pub fn desugar_method_m2(
         },
     };
 
-    // Entry params: (NFTask *t)
-    let entry_param = cst_param("NFTask", "t");
+    // Entry params: (NPTask *t)
+    let entry_param = cst_param("NPTask", "t");
     let entry_decl = AstDecl {
         kind: AstDeclKind::Function,
         name: Some(entry_name.clone()),
@@ -868,7 +868,7 @@ pub fn desugar_method_m2(
     top_decls.push(entry_decl);
 
     // 5. Rewrite the method body: create + join + return cast result.
-    //    NFTask *t = nopa_task_create(nopa_async_state_<M>, self, sizeof(struct <M>_frame));
+    //    NPTask *t = nopa_task_create(nopa_async_state_<M>, self, sizeof(struct <M>_frame));
     //    join → nopa_task_join(t) discards; result read needs join to return it:
     //    use (return_type)(long)nopa_task_join(t) for non-void, else plain join.
     let create_call = AstExpr {
@@ -1340,14 +1340,14 @@ fn call_stmt(name: &str, args: Vec<AstExpr>, line: usize, col: usize) -> AstStmt
 
 fn nopa_task_ptr_type() -> AstType {
     let mut inner = AstType::new(TypePrim::Named);
-    inner.name = Some("NFTask".to_string());
+    inner.name = Some("NPTask".to_string());
     let mut t = AstType::new(TypePrim::Named);
     t.is_pointer = true;
     t.subtype = Some(Box::new(inner));
     t
 }
 
-/// Build a CstParam for the entry function's `(NFTask *t)`.
+/// Build a CstParam for the entry function's `(NPTask *t)`.
 fn cst_param(type_name: &str, name: &str) -> nopa_cst::CstParam {
     let mut t = nopa_cst::CstType::new(TypePrim::Named);
     t.name = Some(type_name.to_string());

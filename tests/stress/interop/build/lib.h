@@ -6,53 +6,53 @@
 
 struct Calc;
 typedef struct Calc Calc;
-typedef struct { size_t location; size_t length; } NFRange;
+typedef struct { size_t location; size_t length; } NPRange;
 
 extern void nopa_metaInit(void);
 
-extern NFObject * Calc_init(NFObject *self, SEL _cmd);
-static inline NFObject * nopa_Calc_init(void *self) {
+extern NPObject * Calc_init(NPObject *self, SEL _cmd);
+static inline NPObject * nopa_Calc_init(void *self) {
     SEL _sel = sel_registerName("init");
-    NFObject * __nopa_ret = Calc_init((NFObject *)self, _sel);
+    NPObject * __nopa_ret = Calc_init((NPObject *)self, _sel);
     if (__nopa_eh_flag) { nopa_eh_uncaught(); }
     return __nopa_ret;
 }
 
-extern void Calc_add_(NFObject *self, SEL _cmd, int v);
+extern void Calc_add_(NPObject *self, SEL _cmd, int v);
 static inline void nopa_Calc_add_(void *self, int v) {
     SEL _sel = sel_registerName("add:");
-    Calc_add_((NFObject *)self, _sel, v);
+    Calc_add_((NPObject *)self, _sel, v);
     if (__nopa_eh_flag) { nopa_eh_uncaught(); }
 }
 
-extern int Calc_total(NFObject *self, SEL _cmd);
+extern int Calc_total(NPObject *self, SEL _cmd);
 static inline int nopa_Calc_total(void *self) {
     SEL _sel = sel_registerName("total");
-    int __nopa_ret = Calc_total((NFObject *)self, _sel);
+    int __nopa_ret = Calc_total((NPObject *)self, _sel);
     if (__nopa_eh_flag) { nopa_eh_uncaught(); }
     return __nopa_ret;
 }
 
-extern int Calc_squareOf_(NFObject *self, SEL _cmd, int v);
+extern int Calc_squareOf_(NPObject *self, SEL _cmd, int v);
 static inline int nopa_Calc_squareOf_(void *self, int v) {
     SEL _sel = sel_registerName("squareOf:");
-    int __nopa_ret = Calc_squareOf_((NFObject *)self, _sel, v);
+    int __nopa_ret = Calc_squareOf_((NPObject *)self, _sel, v);
     if (__nopa_eh_flag) { nopa_eh_uncaught(); }
     return __nopa_ret;
 }
 
-extern int Calc_scale_by_(NFObject *self, SEL _cmd, int v, int k);
+extern int Calc_scale_by_(NPObject *self, SEL _cmd, int v, int k);
 static inline int nopa_Calc_scale_by_(void *self, int v, int k) {
     SEL _sel = sel_registerName("scale:by:");
-    int __nopa_ret = Calc_scale_by_((NFObject *)self, _sel, v, k);
+    int __nopa_ret = Calc_scale_by_((NPObject *)self, _sel, v, k);
     if (__nopa_eh_flag) { nopa_eh_uncaught(); }
     return __nopa_ret;
 }
 
-extern int Calc_mix_with_(NFObject *self, SEL _cmd, int v, int k);
+extern int Calc_mix_with_(NPObject *self, SEL _cmd, int v, int k);
 static inline int nopa_Calc_mix_with_(void *self, int v, int k) {
     SEL _sel = sel_registerName("mix:with:");
-    int __nopa_ret = Calc_mix_with_((NFObject *)self, _sel, v, k);
+    int __nopa_ret = Calc_mix_with_((NPObject *)self, _sel, v, k);
     if (__nopa_eh_flag) { nopa_eh_uncaught(); }
     return __nopa_ret;
 }

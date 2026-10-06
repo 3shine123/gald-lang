@@ -1,14 +1,14 @@
 #include <stdio.h>
 #import <Foundation/Foundation.np>
 
-@interface MathUtils : NFObject
+@interface MathUtils : NPObject
 + (int)divide:(int)a by:(int)b @throws;
 @end
 
 @implementation MathUtils
 + (int)divide:(int)a by:(int)b @throws {
     if (b == 0) {
-        @throw [NFObject alloc];
+        @throw [NPObject alloc];
     }
     return a / b;
 }
@@ -35,7 +35,7 @@ int main() {
         @try {
             @try {
                 printf("  inner try: about to throw\n");
-                @throw [NFObject alloc];
+                @throw [NPObject alloc];
                 printf("  inner try: after throw (never printed)\n");
             } @finally {
                 printf("  inner finally: cleanup\n");

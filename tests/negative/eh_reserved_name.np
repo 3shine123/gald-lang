@@ -2,8 +2,8 @@
 // (The desugar's own _N-suffixed temporaries ARE declared and stay legal —
 // only the never-declared runtime globals are reserved.)
 #include "nopa/runtime.h"
-#import "Foundation/NFObject.nh"
-#import "Foundation/NFObject.np"
+#import "Foundation/NPObject.nh"
+#import "Foundation/NPObject.np"
 
 int main() {
     int __nopa_eh_flag = 0;         // reserved — expect error

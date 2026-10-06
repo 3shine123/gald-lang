@@ -1,0 +1,28 @@
+// test: alloc/init pattern (chained message send)
+#include <stdio.h>
+#import <Foundation/Foundation.np>
+
+@interface Widget : NPObject {
+    @public
+    int value;
+}
+- (id)initWithValue:(int)v;
+@end
+
+@implementation Widget
+- (id)initWithValue:(int)v {
+    self = [super init];
+    if (self) value = v;
+    return self;
+}
+@end
+
+int main() {
+    @autoreleasepool {
+        Widget *w = [[Widget alloc] initWithValue:42];
+        printf("widget value: %d\n", w->value);
+        [w release];
+    }
+    printf("alloc-init chain OK\n");
+    return 0;
+}

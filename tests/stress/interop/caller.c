@@ -8,7 +8,7 @@
 // Free functions and class metadata are not bridged (the bridge header
 // emits instance-method wrappers only) — declare manually; defined in lib.c.
 extern int nopa_add(int a, int b);
-extern NFClass NOPA_CLASS_$_Calc;
+extern NPClass NOPA_CLASS_$_Calc;
 
 int main(void) {
     nopa_metaInit();   // required before any class use
@@ -17,7 +17,7 @@ int main(void) {
     printf("[X1] nopa_add(20,22) = %d (expect 42)\n", nopa_add(20, 22));
 
     // ── 2. C → Nopa object lifecycle ──
-    // +alloc is a class method (inherited from NFObject): the bridge header
+    // +alloc is a class method (inherited from NPObject): the bridge header
     // emits instance wrappers only, so dispatch it via the class metadata
     // exactly like generated code does.
     Calc *calc = (Calc *)nopa_Calc_init(nopa_alloc(&NOPA_CLASS_$_Calc));

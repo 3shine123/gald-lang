@@ -4,13 +4,13 @@
 // CALLED inside the exit expression. The capture must be established (block
 // constructed) and the call must complete before the local is released.
 
-@interface AO08Holder : NFObject
+@interface AO08Holder : NPObject
 - (int)value;
 @end
 
 @implementation AO08Holder
 - (void)dealloc {
-    NFLog(@"ao08 dealloc");
+    NPLog(@"ao08 dealloc");
     [super dealloc];
 }
 - (int)value { return 7; }
@@ -28,6 +28,6 @@ int ao08_run(void) {
 }
 
 int main() {
-    NFLog(@"ao08 r=%d", ao08_run());
+    NPLog(@"ao08 r=%d", ao08_run());
     return 0;
 }

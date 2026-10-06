@@ -7,7 +7,7 @@
 // order (defer runs before the scope-end release). See AGENTS.md `@defer`.
 #import "Foundation/Foundation.np"
 
-@interface Tracker : NFObject
+@interface Tracker : NPObject
 - (void)dealloc;
 @end
 
@@ -72,7 +72,7 @@ static int thrower(void) {
         @defer { printf("  defer-before-throw\n"); }
         printf("  before throw\n");
         @throw @"boom";
-    } @catch (NFString *e) {
+    } @catch (NPString *e) {
         printf("  caught\n");
     }
     return 0;

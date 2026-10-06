@@ -3,7 +3,7 @@
 #import <Foundation/Foundation.np>
 
 @namespace Game
-    @interface Player : NFObject {
+    @interface Player : NPObject {
         @public
         int level;
     }
@@ -20,7 +20,7 @@
 @endnamespace
 
 @namespace UI
-    @interface HUD : NFObject {
+    @interface HUD : NPObject {
         @public
         int value;
     }

@@ -1,7 +1,7 @@
 #include <stdio.h>
 #import <Foundation/Foundation.np>
 
-@interface Fibonacci : NFObject
+@interface Fibonacci : NPObject
 - (long)fib:(int)n;
 @end
 

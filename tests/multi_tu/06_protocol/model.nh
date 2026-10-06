@@ -7,7 +7,7 @@
 - (const char *)greet:(const char *)who;
 @end
 
-@interface Rude : NFObject <Greeter>
+@interface Rude : NPObject <Greeter>
 - (const char *)mood;
 @end
 

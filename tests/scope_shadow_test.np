@@ -1,6 +1,6 @@
 // lang-test/scope_shadow_test.np
 // 专为 nopac 设计的「多层阴阳作用域遮蔽与生命周期逃逸」极限测试
-// 基准框架：NFFoundation
+// 基准框架：NPFoundation
 
 #import <Foundation/Foundation.np>
 #include <stdio.h>
@@ -8,7 +8,7 @@
 #include <string.h>
 
 // ============ 1. 测试用高频存活类 ============
-@interface NFShadowGhost : NFObject
+@interface NPShadowGhost : NPObject
 {
     @public
     int ghostId;
@@ -16,7 +16,7 @@
 - (id)initWithId:(int)gid;
 @end
 
-@implementation NFShadowGhost
+@implementation NPShadowGhost
 - (id)initWithId:(int)gid { self = [super init]; if(self){ ghostId = gid; } return self; }
 - (void)dealloc {
     printf("[生命周期日志] Ghost-%d 顺利触发 dealloc 彻底销毁。\n", ghostId);
@@ -26,11 +26,11 @@
 
 
 // ============ 2. 核心混淆测试器 ============
-@interface NFScopeMixer : NFObject
+@interface NPScopeMixer : NPObject
 - (id)triggerScopeChaos;
 @end
 
-@implementation NFScopeMixer
+@implementation NPScopeMixer
 
 - (id)triggerScopeChaos
 {
@@ -44,7 +44,7 @@
         // 【压测点 1】：第一层遮蔽
         // 在局部作用域中，重新声明一个同名的 x，但此时它是一个 ObjC 对象指针！
         // 转译器在输出 C 代码时，必须能够区分这两个 x，绝对不能产生编译命名冲突！
-        NFShadowGhost* x = [[NFShadowGhost alloc] initWithId:1];
+        NPShadowGhost* x = [[NPShadowGhost alloc] initWithId:1];
         printf("[一层遮蔽内] 局部对象 x 的 ghostId = %d (顶级整型 x 此时被隐藏)\n", x->ghostId);
 
         if (x->ghostId > 0) {
@@ -56,7 +56,7 @@
                 
                 // 【压测点 3】：生命周期逃逸
                 // 在最深层实例化一个对象，但赋值给最外层的隐式变量，使其跨过两个 pool 逃逸出去
-                NFShadowGhost* ghost2 = [[NFShadowGhost alloc] initWithId:999];
+                NPShadowGhost* ghost2 = [[NPShadowGhost alloc] initWithId:999];
                 escapedObject = ghost2; // 强行将局部对象的所有权向外提权逃逸
             }
             // 出了内层 pool，ghost2 应该因为无强引用且退出池而被延迟释放？
@@ -83,7 +83,7 @@ int main(int argc, const char* argv[])
         printf(">>>    nopac 编译器「阴阳作用域遮蔽与逃逸」压测    <<<\n");
         printf("==================================================\n\n");
 
-        NFScopeMixer* mixer = [[NFScopeMixer alloc] init];
+        NPScopeMixer* mixer = [[NPScopeMixer alloc] init];
         
         printf("--- 开始执行多层遮蔽与逃逸混淆逻辑 ---\n");
         id resultGhost = [mixer triggerScopeChaos];
@@ -91,7 +91,7 @@ int main(int argc, const char* argv[])
         printf("\n--- 检查逃逸对象的存活状态 ---\n");
         if (resultGhost != nil) {
             // 动态强转并读取
-            NFShadowGhost* finalGhost = (NFShadowGhost*)resultGhost;
+            NPShadowGhost* finalGhost = (NPShadowGhost*)resultGhost;
             printf("[主程序验证] 逃逸对象成功被顶层捕获！GhostID: %d\n", finalGhost->ghostId);
             
             printf("[主程序销毁] 手动释放逃逸对象...\n");

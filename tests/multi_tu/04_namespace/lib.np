@@ -2,7 +2,7 @@
 #include <stdio.h>
 
 @namespace Geo
-    @implementation Point : NFObject
+    @implementation Point : NPObject
     - (int)x { return _x; }
     - (int)y { return _y; }
     - (int)magnitude { return _x + _y; }

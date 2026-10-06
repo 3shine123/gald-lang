@@ -86,7 +86,7 @@ Notes that cost time when the cases were first written:
 - ARC rejects a bare `[x autorelease]`. Use `@noarc { }`, or have the factory
   method return `+1` and let the caller release.
 - Most cases need `#import <Foundation/Foundation.nh>`: the generated C gets
-  `NFObject` / `SEL` / `NOPA_CLASS_$_*` from the C headers Foundation inlines.
+  `NPObject` / `SEL` / `NOPA_CLASS_$_*` from the C headers Foundation inlines.
 
 ## Not covered
 
