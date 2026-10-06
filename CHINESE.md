@@ -69,8 +69,7 @@ Gald 是一门**纯静态**的 Objective-C 方言（C 超集语言）。Gald 源
 ### 依赖
 
 - Clang（>= 14）
-- Meson（>= 0.60）
-- Ninja
+- Rust（stable，含 cargo）
 - Git
 
 ### 构建
@@ -153,6 +152,45 @@ galdc hello.gm -o hello.c   → Error: use -rewrite-gald to output C code
 galdc hello.gm              → Error: specify -o or -rewrite-gald
 ```
 
+### Foundation：两种使用模式
+
+Foundation 支持两种模式，都完整可用；**真实工程推荐预编译库模式**。
+
+**self-contained / unity 模式**——实现经 `#import` 内联，无需任何库。适合单文件、快速试验和兼容旧构建方式：
+
+```gald
+// hello.gm
+#import <Foundation/Foundation.gm>   // 声明 + 实现全部内联
+
+int main() {
+    NFLog(@"hello %@", [NFString stringWithUTF8String:"world"]);
+    return 0;
+}
+```
+
+```bash
+galdc run hello.gm
+```
+
+**预编译 Foundation / multi-TU 模式（推荐）**——实现存进一次构建的静态库；你的 TU 只编译自己的代码：
+
+```gald
+// app.gm
+#import <Foundation/Foundation.gh>   // 纯声明——不内联任何东西
+
+int main() {
+    NFLog(@"hello %@", [NFString stringWithUTF8String:"world"]);
+    return 0;
+}
+```
+
+```bash
+./tools/build-foundation-lib.sh   # 一次 → target/foundation/libgaldfoundation.a
+galdc app.gm -o app               # 库被自动找到并链接
+```
+
+底层区别：self-contained 模式下内联实现不是其 TU 的主文件，类元数据是弱符号（每个 TU 重复一份再合并）；库模式下每个 Foundation `.gm` 作为独立 TU 编译，其 `@implementation` 持有元数据并发射为强符号——归档里只存一份。owner/strong/weak 完整规则见 `doc/architecture.md`。
+
 ### Shell 补全（Tab 自动补全）
 
 `galdc` 自带用 [clap_complete](https://crates.io/crates/clap_complete) 生成的 **zsh / bash / fish** 补全脚本。随时可用以下命令重新生成：
@@ -192,10 +230,8 @@ source /opt/gald/share/galdc/completions/galdc.fish
 # 运行所有测试
 ./test_all.sh -j4
 
-# 运行单个单元测试
-./builddir/test_parser
-./builddir/test_codegen
-等等..
+# 运行 Rust 单元测试
+cargo test --workspace
 ```
 
 ---

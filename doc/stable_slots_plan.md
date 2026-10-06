@@ -1,6 +1,14 @@
 # 稳定 vtable 槽位（3b）实施计划
 
-> 状态：**待实施**。验收用例已入库：`tests/multi_tu/11_vtable_private_slots/`
+> **本文是 stable slots / multi-TU 迁移历史和决策记录。**
+> 当前架构请阅读 `doc/architecture.md`。
+>
+> 状态：**已完成**——R1/R2/R3 已于 2026-10-02/03 落地并全量验证（见 §9–§11）；
+> 原验收用例 `tests/multi_tu/11_vtable_private_slots/` 已从 `EXPECT_FAIL` 摘牌转为
+> `expected.txt` 正向比对。下文按时间顺序保留计划、探索、回退与验证记录；
+> 与现状不符的表述（`Foundation.decl.gh`、`-fstrong-metadata`、`gald_metaInit` 旧限制等）
+> 为历史记录：**当前状态见 §11 / `doc/architecture.md`**。
+> 原始验收目标：“待实施。验收用例已入库：`tests/multi_tu/11_vtable_private_slots/`”
 
 ## 1. 问题
 
@@ -144,6 +152,9 @@ A+B 完成后动手做 C，试了两条路，都只走到一半：
   ar rcs libgaldfoundation.a Foundation.o
   ```
 
+  > 历史记录：`-fstrong-metadata` 已于 2026-10-03 删除（方案 A 落地，见 §11），
+  > 此段仅为当时事实；当前建库统一走 `tools/build-foundation-lib.sh`，无旗标。
+
   ⚠️ 建库**必须**带 `-fstrong-metadata`（P3 落地时新增）：否则库里的元数据仍是
   `weak`，客户 TU 的空桩会在链接期胜出 → 段错误（详见下方「剩余一步」）。
 
@@ -234,6 +245,9 @@ sig：库 TU == 客户 TU（0xbe99f65a63e20021）
   duplicate symbol」。
 
 ### 仍未做（`-fstrong-metadata` 为何还不能删）
+
+> 历史记录：本小节的两项阻塞已在 §9 更新与 §11 方案 A 落地中全部清偿，
+> `-fstrong-metadata` 已删除；当前状态见 `doc/architecture.md` §6/§7。
 
 自动判据覆盖不到**库自身**：`tools/build-foundation-lib.sh` 编译的是
 `include/Foundation/Foundation.gh`，其 `@implementation` 全部来自 `#import "*.gm"`，

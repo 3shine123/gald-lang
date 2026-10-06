@@ -154,6 +154,45 @@ galdc hello.gm -o hello.c   → Error: use -rewrite-gald to output C code
 galdc hello.gm              → Error: specify -o or -rewrite-gald
 ```
 
+### Foundation: Two Usage Modes
+
+Foundation supports two modes. Both are fully supported; **for real projects we recommend the precompiled-library mode**.
+
+**Self-contained / unity mode** — implementations are inlined via `#import`; no library needed. Good for single files, quick experiments, and legacy builds:
+
+```gald
+// hello.gm
+#import <Foundation/Foundation.gm>   // declarations + implementations, all inlined
+
+int main() {
+    NFLog(@"hello %@", [NFString stringWithUTF8String:"world"]);
+    return 0;
+}
+```
+
+```bash
+galdc run hello.gm
+```
+
+**Precompiled Foundation / multi-TU mode (recommended)** — the implementation lives in a static library built once; your TU only compiles your own code:
+
+```gald
+// app.gm
+#import <Foundation/Foundation.gh>   // declarations only — nothing inlined
+
+int main() {
+    NFLog(@"hello %@", [NFString stringWithUTF8String:"world"]);
+    return 0;
+}
+```
+
+```bash
+./tools/build-foundation-lib.sh   # once → target/foundation/libgaldfoundation.a
+galdc app.gm -o app               # the library is found and linked automatically
+```
+
+Under the hood: in self-contained mode the inlined implementations are not their TU's main file, so their class metadata is weak (duplicated per TU and merged). In library mode each Foundation `.gm` is compiled as its own TU, so its `@implementation` owns the metadata and emits it strong — one copy in the archive. Full owner/strong/weak rules: `doc/architecture.md`.
+
 ### Shell Completion (Tab autocomplete)
 
 `galdc` ships with generated completion scripts for **zsh**, **bash** and **fish**, built with
