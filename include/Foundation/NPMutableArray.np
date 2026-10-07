@@ -174,4 +174,24 @@
     [self replaceObjectAtIndex:index withObject:obj];
 }
 
+// In-place filter: one compaction pass. The write cursor never overtakes the
+// read cursor, so an unvisited element is never clobbered; kept elements keep
+// the array's existing +1, a dropped element is released exactly once (a
+// duplicated pointer in the array holds one ref per slot, so its each copy
+// releases its own).
+- (void)filterUsingPredicate:(NPPredicate *)pred {
+    if (!pred) return;
+    size_t write = 0;
+    for (size_t i = 0; i < _count; i++) {
+        NPObject *obj = _items[i];
+        if (obj && [pred evaluateWithObject:obj]) {
+            _items[write] = obj;
+            write++;
+        } else if (obj) {
+            nopa_release(obj);
+        }
+    }
+    _count = write;
+}
+
 @end

@@ -77,6 +77,22 @@ struct NPObject {
 };
 #endif
 
+/* Key-value-coding accessor table for this class (NPPredicate support).
+ * Emitted by codegen as the static array NOPA_KVC_$_<Class> when the TU can
+ * see the NPPredicate declaration; the last entry's key is NULL (sentinel).
+ * NULL on classes compiled without KVC emission — nopa_kvc_lookup skips
+ * those levels and walks on to the superclass. Appended last: existing
+ * designated-initializer metadata (`.field = ...`) leaves it NULL. */
+/* Key-value-coding accessor table entry (NPPredicate support).
+ * Emitted by codegen as the static array NOPA_KVC_$_<Class> when the TU can
+ * see the NPPredicate declaration; the last entry's key is NULL (sentinel).
+ * The getter wraps an ordinary static vtable dispatch and returns a boxed
+ * result (scalars become NPNumber), so the engine needs no reflection. */
+typedef struct nopa_kvc_entry {
+    const char *key;            /* NULL marks the sentinel end */
+    id (*get)(id self);
+} nopa_kvc_entry;
+
 struct NPClass {
     const char *name;
     NPClass *superclass;
@@ -89,6 +105,10 @@ struct NPClass {
      * retain count reaches 0, so per-class dealloc cleanup (free-ing ivars)
      * actually runs. NULL if the class defines no instance dealloc. */
     void (*dealloc)(NPObject *, SEL);
+    /* KVC: key → getter (id (*)(id)). Compiled-time table, no reflection:
+     * a key lookup walks the isa chain comparing key strings, then calls
+     * the getter — which is an ordinary static vtable dispatch inside. */
+    const struct nopa_kvc_entry *kvc_entries;
 };
 
 // ─── Protocol types ──────────────────────────────────────────────────────────
@@ -187,6 +207,13 @@ NPObject *nopa_autorelease(NPObject *obj);
 BOOL nopa_isKindOf(NPObject *obj, NPClass *cls);
 /* Official ObjC spelling of nopa_isKindOf (same isa-chain walk). */
 BOOL nopa_isKindOfClass(NPObject *obj, NPClass *cls);
+
+/* KVC lookup: walk obj's isa chain, scan each class's kvc_entries table for
+ * `key`, call the getter. NULL when no class in the chain declares the key
+ * (the caller — valueForKey: / the predicate engine — reports the error).
+ * Lives here so the NPPredicate engine (Foundation) and a direct valueForKey:
+ * call share one implementation. */
+id nopa_kvc_value(id obj, const char *key);
 
 // ─── Autorelease pool API ────────────────────────────────────────────────────────
 

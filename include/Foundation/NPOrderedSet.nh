@@ -1,0 +1,36 @@
+#ifndef NPORDEREDSET_NH
+#define NPORDEREDSET_NH
+
+#import <Foundation/NPSet.nh>
+#import <Foundation/NPArray.nh>
+
+// Set that preserves insertion order — the ObjC NSOrderedSet model.
+//
+// Inherits NPSet's uniqueness semantics (isEqual: membership, nil skipped).
+// The order guarantee is the only addition: allObjects / objectAtIndex:
+// / firstObject / lastObject / indexOfObject: reflect the sequence elements
+// were FIRST added in (re-adding an existing element does not move it —
+// matching NSOrderedSet's semantics). Storage reuses NPSet's ivars
+// (_items / _count / _capacity); the dense-shift remove in the mutable
+// subclass keeps the array ordered by construction.
+@interface NPOrderedSet<T> : NPSet<T> {
+@public
+    // ivars inherited from NPSet
+}
+
++ (NPOrderedSet *)orderedSet;
++ (NPOrderedSet *)orderedSetWithObject:(id)object;
++ (NPOrderedSet *)orderedSetWithArray:(NPArray *)array;
++ (NPOrderedSet *)orderedSetWithOrderedSet:(NPOrderedSet *)other;
+
+- (NPOrderedSet *)initWithArray:(NPArray *)other;
+- (NPOrderedSet *)initWithSet:(NPSet *)other;
+
+- (id)objectAtIndex:(size_t)index;
+- (id)firstObject;
+- (id)lastObject;
+- (size_t)indexOfObject:(id)object;
+
+@end
+
+#endif

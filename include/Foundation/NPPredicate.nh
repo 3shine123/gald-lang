@@ -1,0 +1,51 @@
+#ifndef NPPREDICATE_NH
+#define NPPREDICATE_NH
+
+#import <Foundation/NPObject.nh>
+
+// Predicate object — the ObjC NSPredicate model, backed by compile-time KVC
+// accessor tables (NOPA_KVC_$_<Class>, emitted by codegen when this header is
+// visible) instead of runtime reflection. See doc/nppredicate_plan.md.
+//
+// The format string is a small DSL parsed at RUNTIME by this class (nopac
+// never sees it):
+//
+//   age > 18 AND name BEGINSWITH 'A'
+//   height BETWEEN {160.0, 190.0}        (BETWEEN takes a 2-element literal)
+//   name IN {'ann', 'bob'}               (IN takes a list literal)
+//   ANY tags LIKE '*dev*'                (aggregates over an NPArray key;
+//   ANY tags = 'ann'                     the element is the implicit subject)
+//   NOT (age = 0 OR retired = 1)         (parentheses, %%%@ placeholders)
+//
+// Operators: = == != <> < > <= >= AND && OR || NOT !
+// String ops: BEGINSWITH ENDSWITH CONTAINS LIKE MATCHES, with [c] (case
+//  -insensitive) and [d] (diacritic-insensitive, accepted and ignored)
+//   modifiers. LIKE wildcards: * (any run) ? (one char).
+// MATCHES uses a POSIX ERE subset: . * + ? [] ^ $ ( ) | — no backrefs.
+//
+// Keys are resolved through nopa_kvc_value: a key is any zero-argument
+// instance method of the receiver's class chain (ObjC getter convention,
+// minus the runtime/infra methods). An unknown key aborts loudly — there is
+// no runtime to inject an exception into.
+@interface NPPredicate : NPObject {
+@public
+    // Parsed node array. The engine owns one flat pool: each node is a
+    // tagged record (see NPPredicate.np for the tag codes).
+    void *_nodes;        // struct nopa_pred_node *
+    size_t _node_count;
+    size_t _node_cap;
+    size_t _root;        // root node index in the pool
+    // Normalized format string (parser round-trip), retained.
+    NPString *_format;
+}
+
++ (NPPredicate *)predicateWithFormat:(NPString *)format;
++ (NPPredicate *)predicateWithFormat:(NPString *)format object:(id)arg;
+- (NPPredicate *)initWithFormat:(NPString *)format args:(id *)args count:(size_t)n;
+
+- (BOOL)evaluateWithObject:(id)object;
+- (NPString *)predicateFormat;
+
+@end
+
+#endif

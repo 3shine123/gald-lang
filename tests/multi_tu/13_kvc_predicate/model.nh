@@ -1,0 +1,22 @@
+#import <Foundation/Foundation.np>
+
+/* Declarations shared by both TUs — the ONLY channel between them.
+   main.np never sees lib.np; it only sees these signatures.
+
+   The predicate engine resolves keys through the compile-time KVC tables, so
+   every key a client may name has to be declared here. lib.np holds the
+   @implementation (owner TU: strong metadata + KVC table); main.np is a
+   declaration-only client whose weak metadata must merge with the owner's or
+   the key lookups silently resolve to nothing. */
+@interface Widget : NPObject {
+@public
+    int _size;
+    NPString *_label;
+}
+- (Widget *)initWithSize:(int)size label:(const char *)label;
+- (int)size;
+- (NPString *)label;
+@end
+
+/* Owner-TU entry point: keeps the @implementation out of the client TU. */
+Widget *MakeWidget(int size, const char *label);

@@ -1,0 +1,35 @@
+#ifndef NPMUTABLESET_NH
+#define NPMUTABLESET_NH
+
+#import <Foundation/NPSet.nh>
+
+// Mutable counterpart of NPSet. Inherits the storage ivars (_items / _count /
+// _capacity) and the querying API (count / containsObject: / anyObject /
+// allObjects / copy / description).
+//
+// Mutators keep value semantics: an equal element (isEqual:) is a no-op on
+// add, so adding the same object twice leaves one entry. A nil object is
+// ignored rather than stored (use removeObject: to take one out).
+@interface NPMutableSet<T> : NPSet<T> {
+@public
+    // ivars inherited from NPSet
+}
+
++ (NPMutableSet *)set;
++ (NPMutableSet *)setWithCapacity:(size_t)capacity;
++ (NPMutableSet *)setWithObject:(id)object;
+
+- (NPMutableSet *)init;
+- (NPMutableSet *)initWithCapacity:(size_t)capacity;
+- (NPMutableSet *)initWithSet:(NPSet *)other;
+- (NPMutableSet *)initWithArray:(NPArray *)other;
+
+// addObject:/addObjectsFromArray: are declared (and implemented) on NPSet —
+// see the note there. The mutable subclass only adds removal and batch init.
+
+- (void)removeObject:(T)obj;
+- (void)removeAllObjects;
+
+@end
+
+#endif

@@ -380,3 +380,26 @@ void __NPLogv(NPString *format, va_list args) {
     vfprintf(stderr, cstr ? cstr : "", args);
     fprintf(stderr, "\n");
 }
+
+// ─── KVC lookup (NPPredicate support) ───────────────────────────────────────
+
+// Walk obj's isa chain and scan each class's NOPA_KVC_$_<Class> table for
+// `key`. Codegen emits the tables (see doc/nppredicate_plan.md §2); classes
+// compiled without KVC emission leave the field NULL and the walk continues
+// to the superclass. The getter itself is an ordinary static vtable dispatch,
+// so this is table-driven lookup, never reflection.
+id nopa_kvc_value(id obj, const char *key) {
+    if (!obj || !key) return NULL;
+    // Every object (NPObject or nopa_root) starts with the isa pointer.
+    NPClass *cls = *(NPClass **)obj;
+    for (int depth = 0; cls && depth < 64; cls = cls->superclass, depth++) {
+        const nopa_kvc_entry *e = cls->kvc_entries;
+        if (!e) continue;
+        for (; e->key; e++) {
+            if (strcmp(e->key, key) == 0) {
+                return e->get(obj);
+            }
+        }
+    }
+    return NULL;
+}

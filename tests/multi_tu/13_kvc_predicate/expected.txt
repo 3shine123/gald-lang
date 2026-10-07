@@ -1,0 +1,3 @@
+big a=1 b=0
+lab a=1 b=0
+hits=1

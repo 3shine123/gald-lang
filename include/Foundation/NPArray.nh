@@ -2,6 +2,7 @@
 #define NPARRAY_NH
 
 #import <Foundation/NPObject.nh>
+#import <Foundation/NPPredicate.nh>
 
 // Generic since the modernization pass: `NPArray<T>` specializes via
 // monomorphization (objectAtIndex: returns T, addObject-style params take T).
@@ -24,6 +25,12 @@
 - (T)lastObject;
 - (BOOL)containsObject:(T)obj;
 - (size_t)indexOfObject:(T)obj;
+// Predicate filtering (doc/nppredicate_plan.md §3): NPPredicate owns the DSL
+// parsing; the container only applies the parsed predicate per element. A nil
+// predicate filters nothing — the same nil-tolerant stance the rest of this
+// container API takes.
+- (NPArray *)filteredArrayUsingPredicate:(NPPredicate *)pred;
+- (size_t)indexOfObjectMatchingPredicate:(NPPredicate *)pred;
 - (id)copy;
 - (NPString *)description;
 

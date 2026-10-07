@@ -1,0 +1,95 @@
+#import <Foundation/NPMutableSet.nh>
+#include <string.h>
+#include <stdlib.h>
+
+@implementation NPMutableSet
+
+- (NPMutableSet *)init {
+    self = [super init];
+    if (self) {
+        _items = NULL;
+        _count = 0;
+        _capacity = 0;
+    }
+    return self;
+}
+
+- (NPMutableSet *)initWithCapacity:(size_t)capacity {
+    self = [self init];
+    if (self && capacity > 0) {
+        _items = (NPObject **)calloc(capacity, sizeof(NPObject *));
+        _capacity = _items ? capacity : 0;
+    }
+    return self;
+}
+
+- (NPMutableSet *)initWithSet:(NPSet *)other {
+    self = [self init];
+    if (self && other) {
+        size_t n = [other count];
+        if (n > 0) {
+            _items = (NPObject **)calloc(n, sizeof(NPObject *));
+            if (_items) {
+                _capacity = n;
+                // addObjectsFromArray reuses the uniqueness + retain path.
+                [self addObjectsFromArray:[other allObjects]];
+            }
+        }
+    }
+    return self;
+}
+
+- (NPMutableSet *)initWithArray:(NPArray *)other {
+    self = [self init];
+    if (self && other) {
+        [self addObjectsFromArray:other];
+    }
+    return self;
+}
+
++ (NPMutableSet *)set {
+    return [[self alloc] init];
+}
+
++ (NPMutableSet *)setWithCapacity:(size_t)capacity {
+    return [[self alloc] initWithCapacity:capacity];
+}
+
++ (NPMutableSet *)setWithObject:(id)object {
+    NPMutableSet *s = [[self alloc] init];
+    [s addObject:object];
+    return s;
+}
+
+// addObject:/_grow/addObjectsFromArray: are implemented on NPSet (the vtable
+// slots live there — see the note in NPSet.nh). The mutable subclass only
+// adds removal.
+
+// Remove by identity of position after an isEqual: scan; the tail shifts down
+// one so order stays dense (allObjects/index iteration never sees a hole).
+- (void)removeObject:(T)obj {
+    if (!obj) return;
+    for (size_t i = 0; i < _count; i++) {
+        if (_items[i] && [_items[i] isEqual:obj]) {
+            nopa_release(_items[i]);
+            for (size_t j = i; j + 1 < _count; j++) {
+                _items[j] = _items[j + 1];
+            }
+            _count--;
+            _items[_count] = NULL;
+            return;
+        }
+    }
+}
+
+- (void)removeAllObjects {
+    for (size_t i = 0; i < _count; i++) {
+        if (_items[i]) {
+            nopa_release(_items[i]);
+            _items[i] = NULL;
+        }
+    }
+    _count = 0;
+}
+
+@end

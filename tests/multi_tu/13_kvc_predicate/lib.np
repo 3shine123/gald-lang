@@ -1,0 +1,21 @@
+#import "model.nh"
+#include <stdio.h>
+
+/* library TU: owns Widget's @implementation, so it emits the strong metadata
+   and the NOPA_KVC_$_Widget accessor table the client dispatches through. */
+@implementation Widget
+- (Widget *)initWithSize:(int)size label:(const char *)label {
+    self = [super init];
+    if (self) {
+        _size = size;
+        _label = [NPString stringWithUTF8String:label];
+    }
+    return self;
+}
+- (int)size { return _size; }
+- (NPString *)label { return _label; }
+@end
+
+Widget *MakeWidget(int size, const char *label) {
+    return [[Widget alloc] initWithSize:size label:label];
+}

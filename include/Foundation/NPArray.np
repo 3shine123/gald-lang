@@ -74,6 +74,44 @@
     return (size_t)-1;
 }
 
+// Predicate filtering. The predicate owns all DSL knowledge; this loop only
+// calls it per element. Hits are collected as *borrowed* element pointers and
+// handed to arrayWithObjects:, which retains them — so the failure paths below
+// need no refcount bookkeeping.
+- (NPArray *)filteredArrayUsingPredicate:(NPPredicate *)pred {
+    if (!pred) {
+        return [NPArray arrayWithObjects:_items count:_count];
+    }
+    if (_count == 0) {
+        return [NPArray arrayWithObjects:NULL count:0];
+    }
+    NPObject **hits = (NPObject **)malloc(_count * sizeof(NPObject *));
+    if (!hits) {
+        return [NPArray arrayWithObjects:NULL count:0];
+    }
+    size_t hit_count = 0;
+    for (size_t i = 0; i < _count; i++) {
+        if (_items[i] && [pred evaluateWithObject:_items[i]]) {
+            hits[hit_count] = _items[i];
+            hit_count++;
+        }
+    }
+    NPArray *result = [NPArray arrayWithObjects:hits count:hit_count];
+    free(hits);
+    return result;
+}
+
+// (size_t)-1 = no match, matching indexOfObject:'s not-found spelling.
+- (size_t)indexOfObjectMatchingPredicate:(NPPredicate *)pred {
+    if (!pred) return (size_t)-1;
+    for (size_t i = 0; i < _count; i++) {
+        if (_items[i] && [pred evaluateWithObject:_items[i]]) {
+            return i;
+        }
+    }
+    return (size_t)-1;
+}
+
 // `-copy` honors the ObjC convention: the caller owns the result (+1).
 // Returns an immutable NPArray even when invoked on a mutable subclass.
 - (id)copy {
