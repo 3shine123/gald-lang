@@ -12,3 +12,9 @@
 - nopa-lang Foundation 按 .gm 分 TU 的元数据方案已定案 A（owner 静态初始化=铺满 §10 既有机制）；B（registration fragment）存档、复活条件=动态加载/运行时算值/反射；探针 9/9 个 Foundation .gm 已可独立编译；定案+路线图在 doc/stable_slots_plan.md §11
 - Commit messages: write in ENGLISH — user reacted negatively ("我靠提交怎么都是中文？") to Chinese-language commits; history left as-is by their choice, but new commits should use English natural language (Conventional Commit types/scopes unchanged).
 - Nopa 改名定案（用户纠正）：库文件名保留全称 libnopa.a / libnopafoundation.a，绝不缩写为 libnp*；头 .nh、实现 .np；编译器 nopac；NP- 类前缀不变。
+- nopa-lang KVC 包装 getter 发射铁律：仅返回类型=内建标量（NPNumber 装箱）或 id/instancetype/指向非内建类型的指针（对象路径）才发条目；按值 struct（NPRange）与指向内建的指针（int */char */void *）必须跳过——前者 (id) 转换非法、后者把指针当 int 装箱（-Wint-conversion）。且 NPArray.nh/NPSet.nh 导入 NPPredicate.nh 会传递性打开所有 import 它们的 TU 的 KVC 门控，改动后必须复跑 tests/ 全量基线。
+- nopa 中 `self` 是保留关键字：在普通 static C 函数里用 `self` 当局部变量名会生成 C 错误 `use of undeclared identifier 'self'`，必须改名（如 subject）。
+- nopa-lang 泛型协议约束（T : Proto）已实现：checker 两挂载点（check_decl Variable 臂实例化检查 + 单元级继承重申/弱化检查）；关键坑——binder 原本不把 @interface 的 <> 协议列表写入类符号 protocols 字段（曾无消费方），checker 靠符号表判合规会全量误报，已在 binder ClassInterface 臂补写（协议名预解析防 E0502 借用冲突）。设计定稿 doc/generic_bounds_plan.md；bound 零 codegen，golden 逐字节不变。
+- nopa-lang checker selector 可见性检查是 warning 不是 error（伞头下 Foundation 源内 15 处 receiver 误解析误报所致，error 会打崩基线）；未声明 selector 的程序仍会运行期 NULL 槽 segv，已记 ROADMAP「Checker known limitations」。
+- nopa-lang categories/协议跨 TU 方案已定稿未实施：doc/categories_protocol_plan.md，核心 = 弱符号 vtable 槽（链接器当运行时，等价 ObjC attachCategories）+ 备胎强 extern（取决于探针 P1 弱未定义取址是否为 NULL）；D1-D6 决策 + P0-P4 探针先行，实施时按文档四阶段走。
+- nopa-lang golden 46 目录名是 `tests/golden/46_generic_bounds(T : Proto)`（含括号和空格），shell 引用必须加引号；漏引会 rc=1 "No such file or directory" 假失败（本会话踩过两次）。

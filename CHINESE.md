@@ -455,6 +455,8 @@ Nopa 在 Objective-C 语法基础上，加入了一些 ObjC 本身没有的语�
 
 **近期亮点：**
 
+- **谓词 / KVC（`NPPredicate`）** — 格式串解析器与求值引擎**全在 Foundation 库的 C 里**（`age > 18 AND name BEGINSWITH[c] 'A'`、`ANY tags LIKE '*dev*'`），底层是编译期发射的 KVC 访问表（`NOPA_KVC_$_X`，owner TU 出强表），并带宿主过滤 API（`filteredArrayUsingPredicate:` / `indexOfObjectMatchingPredicate:` / `filterUsingPredicate:`；`nil` 谓词 = 恒等不过滤）。编译器从不解析格式串 —— 见 `doc/architecture.md` §12。
+- **集合（`NPSet` / `NPMutableSet` / `NPOrderedSet`）** — Foundation 库里的哈希桶集合容器（元素唯一，`containsObject:` / `anyObject` / `setWithObjects:count:`），`NPOrderedSet` 额外保持插入顺序；全部容器方法走静态 vtable 派发，跨 TU 安全。
 - **原生裸机支持（`-ffreestanding`）** — 编译为自包含 C，无 libc、无 Foundation、无 TLS；`@try/@catch` 走默认的 `-eh checked` 后端（纯旗标 + 守卫，**完全不用 `setjmp/longjmp`**，这正是裸机可用的前提；`-eh legacy` 才回退到 `__builtin_setjmp/longjmp`），零样板的 `runtime_freestanding.c` 提供 bump allocator、`NOPA_CLASS_$_nopa_root`、异常状态和 `memcpy`。
 - **C 超集** — `@protocol` + 一致性检查、`@property` + `@synthesize`、`instancetype`、`@public` ivar、点语法、struct + 函数指针、内联汇编、C 风格类型转换。
 - **类型化 `@catch`** — 每个 catch 块现在检查 `isa == &NOPA_CLASS_$_Class`，只有匹配的类才进入该处理器；多个 catch 正确隔离。
@@ -527,22 +529,21 @@ p == &a               // 指针比较语义不变
 
 ### async/await（`@await`）
 
-方法体里含 `@await` 即为 async——无需任何标注，与 C++20 用 `co_await` 判定协程的风格一致（声明端与普通 ObjC 方法一字不差，vtable 布局不变）：
+方法体里含 `@await` 即为 async，与 C++20 用 `co_await` 判定协程的风格一致。会挂起的方法返回类型必须标 `NPAsync<T>`（checker 强制，见下文专节——parser 把它解包，vtable 布局不变）：
 
 ```nopa
 @interface Fetcher : NPObject
-- (int)compute:(int)n;
-- (void)runAll;
+- (NPAsync<int>)compute:(int)n;   // 会挂起，产出 int
+- (NPAsync<void>)runAll;          // async void = 入口方法
 @end
 
 @implementation Fetcher
-- (int)compute:(int)n {
+- (NPAsync<int>)compute:(int)n {
     int raw = @await n;               // 挂起点
     return raw * 2;
 }
 
-// async void = 入口方法（阻塞泵到完成）
-- (void)runAll {
+- (NPAsync<void>)runAll {
     int x = @await [self compute:21]; // await 一个调用会把本方法也传染成 async
     NPLog(@"result=%d", x);
 }
@@ -550,7 +551,7 @@ p == &a               // 指针比较语义不变
 
 int main() {
     Fetcher *f = [[Fetcher alloc] init];
-    [f runAll];                       // async void 可从同步上下文调用
+    [f runAll];                       // async void 入口：可从同步上下文调用
     return 0;
 }
 ```
@@ -1185,6 +1186,31 @@ container's element type is unchecked; add an explicit cast if the contents are 
 `-Werror` 可升级拦截。`NPArray<A>` 与 `NPArray<B>` 之间互相赋值则不告警——与 ObjC lightweight generics 同样的宽松（你要回了 `id`，就给你 `id`）。
 
 代价要说清楚：特化是编译期代码，不是免费的类型安全。同一程序改用泛型拼写而非裸拼写，生成的 C 多约 42 KB / +41%——全是重复的方法体与元数据，布局逐字节相同，故运行期收益为零。Golden：`tests/golden/40_nparray_generic/`。
+
+### 泛型协议约束（`T : Proto`）
+
+类型参数接受类级约束——ObjC 拼写（`T : id<Summable>`）、裸协议名（`T : Summable`）、类指针（`T : NSObject *`）三种都接受；存储与诊断统一用裸名：
+
+```nopa
+@protocol Greetable
+- (NPString *)greeting;
+@end
+
+@interface Box<T : Greetable> : NPObject {
+    T _value;
+}
+- (instancetype)initWithValue:(T)value;
+@end
+
+// 多参数：只有 V 被约束
+@interface Pair<K, V : Comparable> : NPObject { ... }
+
+// 子类必须重申继承的 bound（显式拼写——与共享 .nh 保留完整 ivar 布局
+// 同一哲学），且不得弱化
+@interface MutableBox<T : Greetable> : Box<T> { ... }
+```
+
+checker 在**显式特化的实例化点**（`Box<Dog *> *b = ...;`）强制约束：违约实报 error（一次报齐所有违约）。逃逸通道——`id`、`instancetype`、嵌套类型参数槽、forward 声明壳、无法解析的 bound 名——静默放行（漏报优于误报，与 checker 全局哲学一致）。裸拼写（`Box *`）永不触发：擦除兼容，今天的代码照常编译。bound 是纯编译期元数据——**零 codegen**，golden 输出逐字节不变；`-fno-checker` 关闭检查。不支持方法级约束（`where U : P`）。Golden：`tests/golden/46_generic_bounds/`。
 
 ### Nopa 语法宏（双轨 `#define`）
 

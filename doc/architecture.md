@@ -93,7 +93,7 @@ nopac app.np -I include -L target/foundation -lnopafoundation -o app
 - **R1**（字段顺序）：公共段内任意方法的槽位偏移在所有 TU 中一致；私有段只影响自己 TU 的尾部。
 - **私有方法**只能在 owner TU 内派发（跨 TU 没有槽位）——把要跨 TU 调的方法写进共享 `.nh`。
 - **R3**（`__sig` 校验）：启动期签名校验只覆盖**公共段**（本 TU 见到的声明集），允许尾部私有段差异。签名不一致（例如某 TU 的 `.nh` 过期）会大声 abort 并打印双方方法集，而不是静默读错槽位。
-- **R2**（实例归属）见 §4。三条均已落地并由 `tests/multi_tu/`（12 用例）守护。
+- **R2**（实例归属）见 §4。三条均已落地并由 `tests/multi_tu/`（13 用例）守护。
 
 ## 6. class metadata：静态初始化
 
@@ -115,6 +115,7 @@ nopac app.np -I include -L target/foundation -lnopafoundation -o app
 - **主模型是编译期单态化**：`Box<T>` / `NPArray<T>` / `NPDictionary<K,V>` 等泛型类按使用点实例化（专属结构体、方法副本、vtable/元数据，`T` 以 `TypePrim::Param` 哨兵按参数名替换）；checker 把接收者的 `type_args` 代入方法签名做元素类型检查。
 - **裸容器拼写保留擦除兼容行为**：不带实参的 `NPArray`（无 `<...>`）按 `id` 擦除处理，行为与历史版本一致、零迁移；裸 → 特化赋值会发 warning（`-Werror` 可升级），特化 → 裸静默。
 - `@[...]` 字面量全元素同型时推断为 `NPArray<X>`，混合回退裸 `NPArray`。
+- **协议约束（`T : Proto`）**：类级 bound，编译期强制。接受 ObjC 拼写 `T : id<Summable>`（剥 `id<>` 按裸协议名存储）、裸名 `T : Summable`、类指针 bound `T : NSObject *`。checker 在**显式特化的实例化点**（变量声明）验证实参：违约报 error（一次报齐）；逃逸通道——`id`/`instancetype`/嵌套类型参数槽/未解析类（forward 壳）/无法解析的 bound 名——一律放行（漏报优于误报）。继承规则：子类必须重申父类 bound（显式拼写，`.nh` 读者看到全部约束）、不得弱化（重申的 bound 须相等或更具体：协议在父 bound 继承链上 / 类是父 bound 子类）；实例化沿类链检查可证明位置的祖先 bound。裸拼写（无 type_args）永不触发（擦除兼容）；`-fno-checker` 关闭；**bound 不进 codegen，golden 输出逐字节不变**。不支持方法级约束。设计定稿见 `doc/generic_bounds_plan.md`。
 
 ## 9. 异常处理：checked 默认，legacy 回退
 
@@ -159,4 +160,32 @@ nopac -trace-refcount app.np         # 引用计数静态追踪
 nopac app.np -emit-bridge-header app.h -o app.c   # C 桥接头
 nopac -ffreestanding kernel.np       # 裸机（自备运行时）
 ```
+
+## 12. KVC 与 NPPredicate（谓词 / 过滤）
+
+谓词引擎**全部在 Foundation 库的 C 里**（`NPPredicate.np`）；nopac 从不解析格式串，它只负责发射键值访问表。
+
+### KVC 访问表（`NOPA_KVC_$_X`）
+
+- **门控**：TU 的展开导入集中出现 `NPPredicate` 时才发射（`#import <Foundation/NPPredicate.nh>`，或经 `NPArray.nh` / `NPSet.nh` 传递性带入）。
+- **归属**：表随类元数据走 —— owner TU 发**强**表（写进静态 `NPClass` 的 `.kvc_entries`），纯声明客户端发弱桩，链接期强表胜出；与 §4 的 R2 是同一套合并规则（`tests/multi_tu/13_kvc_predicate` 守护）。
+- **条目 = 零参实例 getter**（ObjC getter 约定）：排除运行时/基础设施方法（`init`/`copy`/`retain`/`release`/`class`/`description`/`isEqual:`/`hash`/`self` …），私有方法只在 owner TU 中出现。
+- **包装分类**（按声明返回类型；判据先看指针拼写）：
+  - 内建标量 → 走 `NPNumber` 装箱的包装 getter；
+  - `id`/`instancetype`/指向非内建类型的指针 → 对象路径（直接返回 `id`）；
+  - **按值 struct/union（如 `NPRange`）与指向内建类型的指针（`int *`/`char *`/`void *`）不发表条目** —— 前者 `(id)` 转换非法，后者会把指针当整数装箱（`-Wint-conversion`）；这类键保持未注册，查键按"未命中"处理。
+- **查键**：`nopa_kvc_value(receiver, "key")` 按点号分段走链，任一段未命中即返回 `NULL`。`-valueForKey:` 对未命中**大声 abort**；谓词求值路径把未命中当 `nil`（比较为假、`= nil` 为真）——不会静默误命中。
+- self-contained 伞头构建中 `nopa_metaInit` **幂等回填** `.kvc_entries`（§6）；owner / multi-TU 路径不依赖它。
+
+### NPPredicate DSL
+
+格式串**运行时**解析，支持：比较 `= == != <> < > <= >=`；连接 `AND && OR || NOT !`；字符串 `BEGINSWITH ENDSWITH CONTAINS LIKE MATCHES`（`[c]` 忽略大小写、`[d]` 接受并忽略）；`IN {...}` 与 `BETWEEN {a, b}`（聚合字面量同时接受数字与引号字符串）；量词 `ANY` / `ALL` / `NONE <数组键>`，其中**元素是隐式主语**（`ANY tags = 'dev'`、`ANY tags LIKE '*dev*'`）。`%@` 占位符在解析前替换，`predicateFormat` 回读的是替换后的串。完整语法与语义以 `include/Foundation/NPPredicate.nh` 为准。
+
+### 宿主过滤 API
+
+`NPArray -filteredArrayUsingPredicate:` / `-indexOfObjectMatchingPredicate:`、`NPMutableArray -filterUsingPredicate:`、`NPSet -filteredArrayUsingPredicate:`（Set 子类经 `NPSet.nh` 公共段继承该槽位）；`nil` 谓词 = 恒等（不过滤）。这些方法落在**公共段**，新库因此带新的 `__sig`：升级后需重建 `libnopafoundation.a` 并重编客户端；不新增 ivar、不改存储布局。
+
+### 回归
+
+`tests/predicate_filter_test.np`（自检 38 项：DSL / 占位符 / 量词 / KVC 类链与未命中 / 宿主 API）+ `tests/multi_tu/13_kvc_predicate`（跨 TU 强弱表合并）+ `tests/nil_messaging_test.np`（按值 struct 返回不得发表条目）。
 

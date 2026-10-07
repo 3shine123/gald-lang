@@ -474,6 +474,8 @@ Nopa adds features on top of Objective-C syntax that ObjC itself doesn't have.
 
 **Recent highlights:**
 
+- **Predicates / KVC (`NPPredicate`)** — a runtime format-string parser + evaluation engine living entirely in the Foundation library (`age > 18 AND name BEGINSWITH[c] 'A'`, `ANY tags LIKE '*dev*'`), backed by compile-time KVC accessor tables (`NOPA_KVC_$_X`, strong in the owner TU) and a host filtering API (`filteredArrayUsingPredicate:` / `indexOfObjectMatchingPredicate:` / `filterUsingPredicate:`; a `nil` predicate is the identity). The compiler never parses the format string — see `doc/architecture.md` §12.
+- **Sets (`NPSet` / `NPMutableSet` / `NPOrderedSet`)** — hash-bucket set containers in the Foundation library (unique elements, `containsObject:` / `anyObject` / `setWithObjects:count:`), with `NPOrderedSet` preserving insertion order; all container methods dispatch through the static vtable, so they are safe across TUs.
 - **Native bare-metal support (`-ffreestanding`)** — compiles to self-contained C with no libc, no Foundation, no TLS; `@try/@catch` uses `__builtin_setjmp/longjmp`, and a zero-boilerplate `runtime_freestanding.c` provides the bump allocator, `NOPA_CLASS_$_nopa_root`, exception state, and `memcpy`.
 - **C superset** — `@protocol` + conformance, `@property` + `@synthesize`, `instancetype`, `@public` ivars, dot syntax, structs + function pointers, inline asm, C-style casts.
 - **Typed `@catch`** — catch arms match via `__nopa_eh_isa` (isKindOf: superclass-chain semantics, like ObjC): a parent-class arm catches subclass instances, and the first matching arm consumes the exception so later arms never double-catch.
@@ -546,22 +548,21 @@ p == &a               // pointer comparison semantics unchanged
 
 ### async/await (`@await`)
 
-A method whose body contains `@await` is async — no annotation needed, mirroring C++20's `co_await`-based coroutines (the declaration looks like a perfectly ordinary ObjC method, so vtable layout is unchanged):
+A method whose body contains `@await` is async — mirroring C++20's `co_await`-based coroutines. Return types of suspending methods must be marked `NPAsync<T>` (checker-enforced, see below — the parser unwraps it, so vtable layout is unchanged):
 
 ```nopa
 @interface Fetcher : NPObject
-- (int)compute:(int)n;
-- (void)runAll;
+- (NPAsync<int>)compute:(int)n;   // suspends, yields an int
+- (NPAsync<void>)runAll;          // async void = the entry method
 @end
 
 @implementation Fetcher
-- (int)compute:(int)n {
+- (NPAsync<int>)compute:(int)n {
     int raw = @await n;               // suspension point
     return raw * 2;
 }
 
-// async void = the entry method (blocks and pumps to completion)
-- (void)runAll {
+- (NPAsync<void>)runAll {
     int x = @await [self compute:21]; // awaiting a call infects this method too
     NPLog(@"result=%d", x);
 }
@@ -569,7 +570,7 @@ A method whose body contains `@await` is async — no annotation needed, mirrori
 
 int main() {
     Fetcher *f = [[Fetcher alloc] init];
-    [f runAll];                       // async void is callable from sync context
+    [f runAll];                       // async void entry: callable from sync context
     return 0;
 }
 ```
@@ -1231,6 +1232,32 @@ container's element type is unchecked; add an explicit cast if the contents are 
 `-Werror` escalates it. `NPArray<A>` and `NPArray<B>` remain mutually assignable without complaint — the same permissiveness as ObjC lightweight generics (you asked for `id` back, you get `id` back).
 
 Note the cost: specialization is compile-time code, not free type safety. The same program using containers generically instead of bare compiles to ~42 KB / +41% more C — all duplicated method bodies and metadata, byte-identical layout, so zero runtime benefit. Golden: `tests/golden/40_nparray_generic/`.
+
+### Generic Protocol Bounds (`T : Proto`)
+
+Type parameters accept class-level constraints — ObjC spelling (`T : id<Summable>`), bare protocol name (`T : Summable`), or a class pointer (`T : NSObject *`); all are stored and diagnosed as the bare name:
+
+```nopa
+@protocol Greetable
+- (NPString *)greeting;
+@end
+
+@interface Box<T : Greetable> : NPObject {
+    T _value;
+}
+- (instancetype)initWithValue:(T)value;
+@end
+
+// multi-param: only V is constrained
+@interface Pair<K, V : Comparable> : NPObject { ... }
+
+// subclass must RE-DECLARE the inherited bound (explicit spelling, same
+// philosophy as full ivar layouts in shared .nh headers) and must not
+// weaken it
+@interface MutableBox<T : Greetable> : Box<T> { ... }
+```
+
+The checker enforces bounds at **explicit specialization points** (`Box<Dog *> *b = ...;`): a violating argument is an error (all violations reported at once). Escape channels — `id`, `instancetype`, nested type-param slots, forward-declared shells, unresolvable bound names — pass silently (a missed report beats a false one, same philosophy as the rest of the checker). Bare spellings (`Box *`) never trigger: erasure compatibility, today's code keeps compiling. Bounds are pure compile-time metadata — **zero codegen**, golden output byte-identical; `-fno-checker` turns the check off. Method-level constraints (`where U : P`) are not supported. Golden: `tests/golden/46_generic_bounds/`.
 
 ### Nopa-Syntax Macros (dual-track `#define`)
 
