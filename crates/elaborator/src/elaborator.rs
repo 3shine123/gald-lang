@@ -822,7 +822,7 @@ impl Elaborator {
                 });
                 AstDecl { kind: AstDeclKind::Function, line, col, name: cd.name.clone(), data: AstDeclData::Function { func_sym, return_type: return_type.as_ref().and_then(|t| self.convert_type(t)).map(Box::new), params: params.clone(), body: converted_body.and_then(|b| b.map(Box::new)), has_variadic: *has_variadic, throws: throws.as_ref().and_then(|t| self.convert_type(t)).map(Box::new), async_marker: *async_marker }, attributes: cd.attributes.clone() }
             }
-            CstDeclData::Class { superclass, ivars, properties, methods, impl_vars, protocols, type_params, .. } => {
+            CstDeclData::Class { superclass, ivars, properties, methods, impl_vars, protocols, type_params, type_bounds, .. } => {
                 let fqn = self.ns_fqn(cd.name.as_deref().unwrap_or(""));
                 let cls_sym = self.symtab.as_ref().and_then(|st| st.find_class(&fqn)).map(|s| s.name.clone());
                 let cls_sym_clone = cls_sym.clone();
@@ -849,7 +849,7 @@ impl Elaborator {
                         cur = np.next.as_ref().map(|n| n.as_ref());
                     }
                 }
-                let mut ad = AstDecl { kind: AstDeclKind::Class, line, col, name: Some(self.ns_fqn(cd.name.as_deref().unwrap_or(""))), data: AstDeclData::Class { cls_sym: cls_sym_clone, super_name: sup_name, protocols: protocols.clone(), type_params: type_params.clone(), methods: methods.iter().filter_map(|m| self.convert_decl(m)).collect(), ivars: ivars.iter().filter_map(|iv| self.convert_decl(iv)).collect(), properties: all_properties.iter().filter_map(|p| self.convert_decl(p)).collect(), impl_vars: impl_vars.iter().filter_map(|v| self.convert_decl(v)).collect(), is_implementation: cd.kind == CstDeclKind::ClassImplementation || cd.kind == CstDeclKind::CategoryImplementation }, attributes: cd.attributes.clone() };
+                let mut ad = AstDecl { kind: AstDeclKind::Class, line, col, name: Some(self.ns_fqn(cd.name.as_deref().unwrap_or(""))), data: AstDeclData::Class { cls_sym: cls_sym_clone, super_name: sup_name, protocols: protocols.clone(), type_params: type_params.clone(), type_bounds: type_bounds.clone(), methods: methods.iter().filter_map(|m| self.convert_decl(m)).collect(), ivars: ivars.iter().filter_map(|iv| self.convert_decl(iv)).collect(), properties: all_properties.iter().filter_map(|p| self.convert_decl(p)).collect(), impl_vars: impl_vars.iter().filter_map(|v| self.convert_decl(v)).collect(), is_implementation: cd.kind == CstDeclKind::ClassImplementation || cd.kind == CstDeclKind::CategoryImplementation }, attributes: cd.attributes.clone() };
                 if let AstDeclData::Class { ref mut methods, .. } = ad.data {
                     if let Some(ref st) = self.symtab {
                         if let Some(ref cls_name) = cls_sym {

@@ -439,6 +439,11 @@ pub struct CgUnit {
     /// pins). With a `--slots` manifest the shared portion is the manifest
     /// itself; with neither, every method is shared (the pre-R3 behavior).
     pub vtable_sig_names: Vec<String>,
+    /// True when this TU can see the NPPredicate declaration (pipeline: a
+    /// transitive nopa `#import` of NPPredicate). Gates KVC accessor-table
+    /// emission (NOPA_KVC_$_<Class>): a TU that never touches predicates
+    /// pays nothing. See doc/nppredicate_plan.md §2.
+    pub kvc: bool,
 }
 
 #[derive(Debug, Clone)]
@@ -997,8 +1002,19 @@ pub fn ast_type_to_c_str(t: &AstType) -> String {
                 // name must include the mangled type arguments so that
                 // `Box<Node*>` → `Box_Node_ptr` (matches the specialized
                 // struct/vtable symbols). When there are no type args,
-                // `name_flat` is a passthrough.
-                let flat = if t.type_args.is_empty() {
+                // `name_flat` is a passthrough. BUT: a type arg that is
+                // itself a type parameter (`+ (NPArray<T>)wrap:` inside the
+                // generic template) renders as the `NPObject * /*T*/`
+                // sentinel, and mangling that would fabricate a typedef
+                // that does not exist (`NPArray_NPObject_ptr`) in BOTH the
+                // template and the per-instantiation clone. Fall back to
+                // the erased flat base name — legal C in both; the clone's
+                // signature substitution rewrites return/param strings
+                // separately (param_pairs replace on the whole type string).
+                let contains_param_arg = t.type_args.iter()
+                    .any(|a| a.prim == TypePrim::Param
+                        || a.subtype.as_ref().map(|s| s.prim == TypePrim::Param).unwrap_or(false));
+                let flat = if t.type_args.is_empty() || contains_param_arg {
                     name_flat(type_name)
                 } else {
                     let args_str = t.type_args.iter()
@@ -1573,6 +1589,24 @@ fn convert_expr(ae: &AstExpr, class_infos: &std::collections::BTreeMap<String, C
                                     }
                                 } else {
                                     break;
+                                }
+                            }
+                        } else if name.contains('<') {
+                            // Specialized class-name receiver (`[Box<NPString *> defaultValue]`):
+                            // the specialized clone is inserted into class_infos AFTER
+                            // expression conversion, so the lookup above necessarily missed
+                            // it. The base template's presence guarantees the clone will
+                            // exist (generic_instantiations collects this same spelling via
+                            // parse_generic_type_string), so dispatch to the specialized
+                            // function directly — its emitted signature carries the
+                            // substituted return/param types, while the base function's
+                            // stay erased at the `NPObject * /*T*/` sentinel (an ABI
+                            // mismatch for non-pointer T).
+                            let base = name.split('<').next().unwrap_or(name);
+                            if let Some(info) = class_infos.get(&name_flat(base)) {
+                                if let Some(idx) = info.method_names.iter().position(|n| n == &sel) {
+                                    vtable_class = Some(name.clone());
+                                    effective_is_class = info.is_class_methods[idx];
                                 }
                             }
                         }
@@ -5317,7 +5351,7 @@ method_names: info.method_names,
     // `no_arc` stays false here: this entry point feeds the header/prototype
     // paths, which never emit the ARC dealloc wrappers (that decision belongs
     // to the pipeline, which sets the flag on its own CgUnit).
-    let mut unit = CgUnit { decls, filename: ast.filename.clone(), c_headers: Vec::new(), selectors, classes, global_instance_method_names, struct_eq_tags: Vec::new(), no_arc: false, owned_classes: std::collections::HashSet::new(), vtable_sig_names };
+    let mut unit = CgUnit { decls, filename: ast.filename.clone(), c_headers: Vec::new(), selectors, classes, global_instance_method_names, struct_eq_tags: Vec::new(), no_arc: false, owned_classes: std::collections::HashSet::new(), vtable_sig_names, kvc: false };
     // The authoritative record of which method function bodies exist: every
     // `CgDeclData::Function` with a body. This covers paths that do not go
     // through `ClassInfo::method_bodies` — notably @property-synthesised
@@ -7418,6 +7452,141 @@ pub fn emit_unit_with_headers(unit: &CgUnit, c_headers: &[String], search_dirs: 
     };
     out.push_str(&arc_dealloc_defs);
 
+    // KVC accessor tables (NPPredicate support) — doc/nppredicate_plan.md §2.
+    // Emitted only when the pipeline saw a transitive NPPredicate import
+    // (`unit.kvc`): a TU that never touches predicates pays nothing. Each
+    // table maps method-name keys to generated wrapper getters whose body is
+    // ONE ordinary static vtable dispatch (no reflection): object returns
+    // flow through, scalars are boxed via the NPNumber factories the same way
+    // `@(expr)` does. Emission is gated per-method by the SAME discipline as
+    // the vtable slots: a method with a body in this TU, or an inherited one
+    // (owner != this class, resolved at link time), gets a wrapper; a
+    // declaration-only method stays out of the table.
+    let mut kvc_syms: std::collections::HashMap<String, String> = std::collections::HashMap::new();
+    if unit.kvc {
+        let has_npnumber = unit.classes.iter().any(|c| c.class_name == "NPNumber");
+        let mut kvc_out = String::new();
+        for cm in &unit.classes {
+            let flat = name_flat(&cm.class_name);
+            // A class with no bodies here contributes nothing: its vtable slots
+            // are NULL stubs (R2 decl-only client) and the method symbols this
+            // TU could reference do not exist. Owner classes and inline-
+            // implementation TUs (self-contained mode) both qualify.
+            let mut any_body = unit.owned_classes.contains(&cm.class_name);
+            if !any_body {
+                for (j, mname) in cm.method_names.iter().enumerate() {
+                    if !cm.is_class_methods[j] && method_is_emitted(cm.method_owners.get(j).map(|s| s.as_str()).unwrap_or(&flat), mname) {
+                        any_body = true;
+                        break;
+                    }
+                }
+            }
+            if !any_body { continue; }
+            let mut entries: Vec<(String, String)> = Vec::new();
+            for (j, mname) in cm.method_names.iter().enumerate() {
+                if cm.is_class_methods[j] { continue; }
+                // KVC keys are zero-argument instance methods with a
+                // meaningful return (the ObjC getter convention).
+                // method_params_list INCLUDES the implicit self/_cmd params,
+                // so zero real args means len <= 2.
+                if !cm.method_params_list.get(j).map_or(true, |p| p.len() <= 2) { continue; }
+                let rt = cm.method_return_types.get(j).cloned().unwrap_or_default();
+                if rt.is_empty() || rt == "void" { continue; }
+                // ObjC KVC excludes the runtime/infra methods even though
+                // they are zero-argument instance methods with returns.
+                if matches!(mname.as_str(),
+                    "init" | "copy" | "mutableCopy" | "retain" | "release"
+                    | "autorelease" | "dealloc" | "class" | "description"
+                    | "isEqual:" | "hash" | "self") { continue; }
+                let owner = cm.method_owners.get(j).cloned().unwrap_or_else(|| flat.clone());
+                // Same reference rule as the vtable slots (see the meta
+                // vtable emission above): own methods need a body in this TU.
+                if owner == flat && !method_is_emitted(&owner, mname) { continue; }
+                let wrapper = format!("nopa_kvc_wrap_{}_{}", flat, mname);
+                let fn_sym = format!("{}_{}", owner, mname);
+                let sel = sel_const_name(mname);
+                // Scalar whitelist: only clearly-scalar return types box via
+                // NPNumber. Everything else (any pointer spelling, id,
+                // instancetype, unknown typedefs) flows through as an object
+                // — boxing an object pointer into a number is a silent
+                // type-confusion, while treating an unknown scalar as an
+                // object just yields an uncomparable value the engine
+                // reports. (firstObject/lastObject bit on the old blacklist:
+                // their declared `id` spelled differently and they took the
+                // numberWithInt path with an object in hand.)
+                //
+                // Pointer spellings are classified FIRST: the multi-word
+                // scalar matching below ("unsigned int", "long long") reads
+                // `int *` as a prefix hit, which boxed a pointer into an int
+                // (multi-TU 03_generic: a generic `- (T)pop` erased to
+                // `NPObject *` and a `Stack<int *>` clone returning `int *`
+                // both hit the numberWithInt path). A pointer to a built-in
+                // (`int *`, `char *`, `void *`) is a non-object with no KVC
+                // representation at all, so the key is left out: it stays
+                // UNKNOWN and the engine reports it loudly, rather than
+                // handing it a non-object to dispatch on.
+                let rt_trim = rt.trim();
+                let rt_lower = rt_trim.to_lowercase();
+                let is_pointer = rt_trim.contains('*');
+                let builtin = ["int", "long", "long long", "short", "char",
+                    "float", "double", "bool", "_bool", "unsigned", "signed",
+                    "size_t", "uint", "sint", "void"];
+                let is_builtin = builtin.iter().any(|s| rt_lower == *s
+                    || rt_lower.starts_with(&format!("{} ", s))
+                    || rt_lower.starts_with(&format!("unsigned {}", s)));
+                if is_pointer && is_builtin {
+                    continue;
+                }
+                let is_scalar = !is_pointer && is_builtin;
+                // The object path casts the call to `id`, so it needs a return
+                // type that can legally be cast to a pointer: `id` /
+                // `instancetype`, or a pointer to a non-built-in. A by-value
+                // struct (`- (NPRange)bounds`, tests/nil_messaging_test.np) has
+                // no such cast and no KVC representation — emitting the wrapper
+                // broke the C build ("operand of type 'NPRange' where
+                // arithmetic or pointer type is required"), so the key is left
+                // out and stays UNKNOWN (loud) instead.
+                let is_object = !is_scalar
+                    && (matches!(rt_lower.as_str(), "id" | "instancetype")
+                        || (is_pointer && !is_builtin));
+                if !is_scalar && !is_object {
+                    continue;
+                }
+                if !is_scalar {
+                    let _ = write!(kvc_out,
+                        "static id {w}(id self) {{\n    return (id){f}((NPObject *)self, {s});\n}}\n\n",
+                        w = wrapper, f = fn_sym, s = sel);
+                } else if !has_npnumber {
+                    // No NPNumber in this TU: a scalar key cannot be boxed.
+                    continue;
+                } else if rt.contains("double") || rt.contains("float") {
+                    // Class-method send: the receiver is the class object
+                    // (&NOPA_CLASS_$_NPNumber), same as an ordinary
+                    // [NPNumber numberWithDouble:] lowering — NOT self.
+                    let _ = write!(kvc_out,
+                        "static id {w}(id self) {{\n    return NPNumber_numberWithDouble_(&NOPA_CLASS_$_NPNumber, {s}, {f}((NPObject *)self, {s}));\n}}\n\n",
+                        w = wrapper, f = fn_sym, s = sel);
+                } else {
+                    let _ = write!(kvc_out,
+                        "static id {w}(id self) {{\n    return NPNumber_numberWithInt_(&NOPA_CLASS_$_NPNumber, {s}, {f}((NPObject *)self, {s}));\n}}\n\n",
+                        w = wrapper, f = fn_sym, s = sel);
+                }
+                entries.push((mname.clone(), wrapper));
+            }
+            if entries.is_empty() { continue; }
+            let sym = meta_symbol("KVC_", &flat);
+            let _ = write!(kvc_out, "static const nopa_kvc_entry {}[] = {{\n", sym);
+            for (key, wrapper) in &entries {
+                let _ = write!(kvc_out, "    {{ .key = \"{}\", .get = {} }},\n", key, wrapper);
+            }
+            kvc_out.push_str("    { .key = NULL, .get = NULL },\n};\n\n");
+            kvc_syms.insert(flat, sym);
+        }
+        if !kvc_out.is_empty() {
+            out.push_str(&kvc_out);
+        }
+    }
+
     // Class metadata variables. Two lifetimes:
     //  * default: a tentative definition (a common symbol), so the per-TU
     //    copies merge harmlessly; the *contents* are written by `nopa_metaInit`
@@ -7483,6 +7652,13 @@ pub fn emit_unit_with_headers(unit: &CgUnit, c_headers: &[String], search_dirs: 
             }
         } else {
             out.push_str("        .dealloc = NULL,\n");
+        }
+        // KVC table pointer — owner static metadata only. Decl-only clients
+        // leave it NULL: their tentative-definition stubs must not clobber the
+        // owner's table under weak merging (nopa_metaInit writes full struct
+        // literals and would reset the field if it carried a pointer here).
+        if let Some(sym) = kvc_syms.get(&flat) {
+            out.push_str(&format!("        .kvc_entries = {},\n", sym));
         }
         out.push_str("    };\n");
     }
@@ -7560,6 +7736,15 @@ pub fn emit_unit_with_headers(unit: &CgUnit, c_headers: &[String], search_dirs: 
                 }
             } else {
                 out.push_str("        .dealloc = NULL,\n");
+            }
+            // KVC table pointer — mirror Section 11's static initialization
+            // exactly: this backfill is a FULL struct-literal assignment, so a
+            // class whose table was statically initialized would have the
+            // pointer zeroed here if the field were omitted (the idempotent
+            // backfill contract). Only TUs that computed a table write it;
+            // decl-only clients omit it here just as they do in Section 11.
+            if let Some(sym) = kvc_syms.get(&flat_here) {
+                out.push_str(&format!("        .kvc_entries = {},\n", sym));
             }
             out.push_str("    };\n");
         }
@@ -7923,6 +8108,7 @@ mod vtable_sig_tests {
             struct_eq_tags: Vec::new(),
             no_arc: false,
             owned_classes: std::collections::HashSet::new(),
+            kvc: false,
             global_instance_method_names: vec![
                 "dealloc".into(), "init".into(), "ping".into(), "release".into(), "retain".into(),
             ],
@@ -8033,6 +8219,7 @@ mod eh_runtime_include_tests {
             struct_eq_tags: Vec::new(),
             no_arc: false,
             owned_classes: std::collections::HashSet::new(),
+            kvc: false,
             vtable_sig_names: Vec::new(),
         }
     }

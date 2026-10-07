@@ -416,6 +416,13 @@ impl Pipeline {
         let mut cg = nopa_codegen::ast_to_cg_unit_with_slots_ext(
             &ast, self.backend, slots.as_deref(), Some(&public_methods),
         );
+        // KVC gate: emit accessor tables only when this TU can see the
+        // NPPredicate declaration (a transitive nopa #import — the same
+        // resolved-source scan the auto-link decision rests on). The name
+        // appears in the inlined buffer exactly when its declaring header
+        // was imported; a plain string mention cannot occur otherwise
+        // (NPPredicate is not a user-spellable identifier until declared).
+        cg.kvc = pre.resolved_nopa.contains("NPPredicate");
         // Struct tags whose `==`/`!=` the checker rewrote to value-comparison
         // calls; codegen emits one field-wise `nopa_struct_eq_<tag>` per tag.
         cg.struct_eq_tags = struct_eq_tags;

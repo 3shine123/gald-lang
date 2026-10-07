@@ -84,6 +84,10 @@ pub enum SymbolData {
         ivars: Vec<String>,
         properties: Vec<String>,
         type_params: Vec<String>,
+        /// Generic bounds: (type-param name, bound name) pairs from the
+        /// `@interface` — the symbol table is the single source of truth
+        /// the checker's instantiation-point conformance check consults.
+        type_bounds: Vec<(String, String)>,
     },
     Method {
         is_class_method: bool,
@@ -145,6 +149,7 @@ impl Symbol {
                 superclass: None, protocols: Vec::new(),
                 methods: Vec::new(), ivars: Vec::new(),
                 properties: Vec::new(), type_params: Vec::new(),
+                type_bounds: Vec::new(),
             },
             SymbolKind::Method => SymbolData::Method {
                 is_class_method: false, return_type: None,

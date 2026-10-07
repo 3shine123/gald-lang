@@ -4654,16 +4654,51 @@ if self.current.kind == TokenKind::Identifier {
         // via add_type_name, so is_type_name disambiguates. Unknown names
         // (e.g. `Box<T>`) stay generic type params.
         let mut type_params = Vec::new();
+        let mut type_bounds: Vec<(String, String)> = Vec::new();
         let mut protocols = Vec::new();
         if self.match_token(TokenKind::Less) {
             let mut names: Vec<String> = Vec::new();
+            let mut bounds: Vec<(String, String)> = Vec::new();
             while self.current.kind == TokenKind::Identifier ||
                   (self.current.kind == TokenKind::Keyword &&
                    matches!(self.current.keyword, KeywordKind::Id | KeywordKind::Class |
                     KeywordKind::Sel | KeywordKind::Instancetype)) {
                 let tp = self.current_text().to_string();
                 self.advance();
-                names.push(tp);
+                names.push(tp.clone());
+                // Optional bound: `T : Greetable` (bare protocol), `T : id<Greetable>`
+                // (ObjC spelling — the shell is stripped, nopa protocol types are
+                // compile-time labels so both spellings are equivalent), or
+                // `T : NSObject *` (class-pointer bound, stored bare). A protocol
+                // conformance list never carries a colon, so this only fires for
+                // real type params. Unknown/unresolvable bound names are kept as
+                //-is; the checker's escape channel lets them pass.
+                if self.match_token(TokenKind::Colon) {
+                    if self.current.kind == TokenKind::Keyword
+                        && self.current.keyword == KeywordKind::Id {
+                        // ObjC spelling `T : id<P, Q>` — the shell is stripped
+                        // (nopa protocol types are compile-time labels, so
+                        // `id<P>` and bare `P` are equivalent); each protocol
+                        // in the conjunction becomes its own bound entry.
+                        self.advance();
+                        self.consume(TokenKind::Less, "expected '<' after 'id' in type-param bound");
+                        while self.current.kind == TokenKind::Identifier {
+                            let bound = self.current_text().to_string();
+                            self.advance();
+                            bounds.push((tp.clone(), bound));
+                            if !(self.match_token(TokenKind::Comma) || self.match_token(TokenKind::Ampersand)) { break; }
+                        }
+                        self.consume(TokenKind::Greater, "expected '>' after bound protocol");
+                    } else if self.current.kind == TokenKind::Identifier {
+                        // Bare protocol name, or class-pointer spelling
+                        // `NSObject *` — the `*` is stripped; storage is
+                        // always the bare name.
+                        let bound = self.current_text().to_string();
+                        self.advance();
+                        while self.match_token(TokenKind::Star) {}
+                        bounds.push((tp.clone(), bound));
+                    }
+                }
                 // `<P & Q>` protocol intersection: `&` joins protocol names
                 // into one conjunction list (same semantics as `,`).
                 if !(self.match_token(TokenKind::Comma) || self.match_token(TokenKind::Ampersand)) { break; }
@@ -4685,6 +4720,7 @@ if self.current.kind == TokenKind::Identifier {
                     self.add_type_param(tp);
                 }
                 type_params = names;
+                type_bounds = bounds;
             }
         }
 
@@ -4894,6 +4930,7 @@ if self.current.kind == TokenKind::Identifier {
                 category_name,
                 protocols,
                 type_params,
+                type_bounds,
                 ivars,
                 properties,
                 methods,
@@ -5014,6 +5051,7 @@ if self.current.kind == TokenKind::Identifier {
                 category_name,
                 protocols: Vec::new(),
                 type_params: Vec::new(),
+                type_bounds: Vec::new(),
                 ivars: Vec::new(),
                 properties: Vec::new(),
                 methods,

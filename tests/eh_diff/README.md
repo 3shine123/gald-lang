@@ -33,6 +33,7 @@ NOPAC=target/release/nopac ./run_eh_diff.sh   # 指定二进制(默认 target/de
 | 05_typed_chain | typed catch 按 isa 匹配,不匹配放行给外层 |
 | 06_block_throw | block 字面量内 `@throw` 可传播到外层 @try(ObjC 允许;KNOWN-FAIL→block desugar 落地) |
 | 07_uncaught | 未捕获异常:输出 `*** Terminating app due to uncaught exception ...` 后 abort(只比措辞行,栈回溯不可复现;KNOWN-FAIL→uncaught guard 落地) |
+| 08_lazy_branch | 迟求值:C 语义——三元未选中分支、`&&`/`\|\|` 短路右操作数不得求值(EH 提升若越过分支边界,未选中分支的调用会照跑:副作用可见,且对接收者类未实现的 selector 会派发 NULL 槽→崩) |
 
 ## 已知偏差(设计决定,非遗漏)
 

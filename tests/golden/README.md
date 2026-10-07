@@ -47,6 +47,8 @@
 42_boxed_literal/   装箱字面量 @(expr) / @YES / @NO / @'c'
 43_dict_literal/    字典字面量 @{ key: value }
 44_designated_init/ C99 指定初始化器六形态
+45_nullability/     nullability 注解（nonnull/nullable 透传 + checker）
+46_generic_bounds/  泛型协议约束 T : Proto（实例化检查 + 继承重申/弱化）
 ```
 
 > 每个目录的 `README.md` 记录该特性的**实现要点、判据表、M1 限制与踩过的坑**——排查问题时先看它，比读 `.np` 快得多。

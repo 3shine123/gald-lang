@@ -1049,18 +1049,29 @@ fn hoist_expr(e: &mut AstExpr, top: bool, pre: &mut Vec<AstStmt>, line: usize, c
                 hoist_expr(a, false, pre, line, col);
             }
         }
-        AstExprData::Binary { left, right, .. } => {
+        AstExprData::Binary { op, left, right, .. } => {
             hoist_expr(left, false, pre, line, col);
-            hoist_expr(right, false, pre, line, col);
+            // `&&` (17) / `||` (18) evaluate the right operand only when the
+            // left one does not already decide the result. Hoisting a send out
+            // of it would run the call unconditionally: side effects the source
+            // never asks for, and — for a selector the receiver's class does not
+            // implement — a NULL vtable slot dispatch. C semantics win over the
+            // extra stop-at-throw precision inside the skipped operand.
+            if *op != 17 && *op != 18 {
+                hoist_expr(right, false, pre, line, col);
+            }
         }
         AstExprData::Assign { value, .. } => hoist_expr(value, false, pre, line, col),
         AstExprData::Unary { operand, .. } | AstExprData::Cast { expr: operand, .. } => {
             hoist_expr(operand, false, pre, line, col)
         }
-        AstExprData::Ternary { cond, then, else_ } => {
+        AstExprData::Ternary { cond, .. } => {
             hoist_expr(cond, false, pre, line, col);
-            hoist_expr(then, false, pre, line, col);
-            hoist_expr(else_, false, pre, line, col);
+            // Only one branch runs, so both branches stay exactly as written.
+            // A hoisted send would evaluate the branch that is not taken —
+            // observable side effects, and for a selector the receiver's class
+            // does not implement, a NULL vtable slot dispatch. The condition is
+            // always evaluated, so it keeps the stop-at-throw hoist.
         }
         AstExprData::IvarRef { obj, .. } | AstExprData::PropRef { obj, .. } => {
             hoist_expr(obj, false, pre, line, col)

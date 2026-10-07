@@ -462,6 +462,11 @@ pub enum CstDeclData {
         category_name: Option<String>,
         protocols: Vec<String>,
         type_params: Vec<String>,
+        /// Generic bounds: (type-param name, bound name) in declaration order
+        /// (`@interface Box<T : Greetable>` → `[("T", "Greetable")]`). The
+        /// ObjC `id<...>` shell is stripped by the parser; a bound name is a
+        /// protocol or a class (resolved by the checker via the symbol table).
+        type_bounds: Vec<(String, String)>,
         ivars: Vec<CstDecl>,
         properties: Vec<CstDecl>,
         methods: Vec<CstDecl>,

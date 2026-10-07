@@ -323,6 +323,11 @@ pub struct AstDecl {
          /// type_args with the right Param sentinel (`/*K*/`, `/*V*/`) during
          /// monomorphization; the checker reads them from the symbol table.
          type_params: Vec<String>,
+         /// Generic bounds: (type-param name, bound name) pairs from
+         /// `@interface Box<T : Greetable>`. Consumed by the checker's
+         /// instantiation-point conformance check; codegen ignores them —
+         /// bounds produce no C (zero codegen, checker-only feature).
+         type_bounds: Vec<(String, String)>,
          methods: Vec<AstDecl>,
          ivars: Vec<AstDecl>,
          properties: Vec<AstDecl>,

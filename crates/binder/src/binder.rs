@@ -332,6 +332,21 @@ impl Binder {
                     CstDeclData::Class { ref type_params, .. } => type_params.clone(),
                     _ => Vec::new(),
                 };
+                // Bounds ride along the same way (which param carries which
+                // protocol/class constraint); the checker is their consumer.
+                let type_bounds_from_cst = match &d.data {
+                    CstDeclData::Class { ref type_bounds, .. } => type_bounds.clone(),
+                    _ => Vec::new(),
+                };
+                // Protocol conformances (`@interface Dog <Greetable>`) — the
+                // checker's bound enforcement resolves them via the class
+                // symbol, so they must be recorded here (names resolved like
+                // protocol parents below: known protocol kept as written,
+                // otherwise namespace-qualified).
+                let protocols_from_cst = match &d.data {
+                    CstDeclData::Class { ref protocols, .. } => protocols.clone(),
+                    _ => Vec::new(),
+                };
                 if self.symtab.find_class(&cls_name).is_none() {
                     self.symtab.declare(Symbol::new(SymbolKind::Class, &cls_name));
                 }
@@ -387,9 +402,20 @@ impl Binder {
                 }
 
                 // Update class symbol data with ivar/property/method names
+                // Protocol names are resolved BEFORE the mutable loop:
+                // find_protocol needs an immutable borrow of symtab.
+                let protocols_resolved: Vec<String> = protocols_from_cst.iter().map(|p| {
+                    if self.symtab.find_protocol(p).is_some() {
+                        p.clone()
+                    } else if !cls_name.contains("::") {
+                        p.clone()
+                    } else {
+                        format!("{}::{}", cls_name.split("::").next().unwrap_or(""), p)
+                    }
+                }).collect();
                 for sym in self.symtab.global.symbols.iter_mut() {
                     if sym.name == cls_name && sym.kind == SymbolKind::Class {
-                        if let SymbolData::Class { ref mut ivars, ref mut properties, ref mut methods, ref mut type_params, .. } = sym.data {
+                        if let SymbolData::Class { ref mut ivars, ref mut properties, ref mut methods, ref mut type_params, ref mut type_bounds, ref mut protocols, .. } = sym.data {
                             ivars.extend(ivar_names);
                             properties.extend(prop_names);
                             methods.extend(method_names);
@@ -398,7 +424,16 @@ impl Binder {
                             // forward declaration), and a re-binding without type
                             // params must not leave stale ones behind.
                             if !type_params_from_cst.is_empty() {
-                                *type_params = type_params_from_cst;
+                                *type_params = type_params_from_cst.clone();
+                            }
+                            if !type_bounds_from_cst.is_empty() {
+                                *type_bounds = type_bounds_from_cst.clone();
+                            }
+                            if !protocols_from_cst.is_empty() {
+                                protocols.clear();
+                                for r in &protocols_resolved {
+                                    protocols.push(r.clone());
+                                }
                             }
                         }
                         break;

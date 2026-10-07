@@ -4,7 +4,7 @@
 // and a comment saying who will use it.
 #![deny(dead_code)]
 use nopa_ast::ast::*;
-use nopa_cst::{Nullability, TypePrim, CstParam};
+use nopa_cst::{Nullability, TagKind, TypePrim, CstParam};
 use nopa_symbol::*;
 use std::collections::HashMap;
 
@@ -111,6 +111,18 @@ pub struct Checker {
     /// the block signature (params + their annotations) is unreachable without
     /// this map. Foundation and essentially all real block code use typedefs.
     pub typedef_blocks: HashMap<String, AstType>,
+    /// Enum tag name → member list, collected from THIS TU's `enum` decls
+    /// (including ones nested in namespaces and class bodies). Powers switch
+    /// exhaustiveness: a switch over a *known* enum with no `default:` must
+    /// cover every member. C's `-Wswitch` only reaches the same guarantee
+    /// when the subject spells the enum type directly; collecting here lets
+    /// the checker prove it from the declaration table instead of guessing.
+    pub enum_members: HashMap<String, Vec<String>>,
+    /// typedef alias → enum tag name (`typedef enum Tag {...} Alias;`), the
+    /// same shape as `struct_alias_tags`. The alias spelling is what a
+    /// variable's type node carries, so the exhaustiveness check resolves
+    /// `Alias` through this map to the member table keyed by the tag.
+    pub enum_alias_tags: HashMap<String, String>,
     /// `@throws` annotation of the declaration whose body is being checked.
     /// `None` = not annotated; `Some(None)` = bare `@throws` ("declares it
     /// throws, type unstated"); `Some(Some(T))` = `@throws(T)`. Saved and
@@ -155,6 +167,8 @@ impl Checker {
             struct_eq_tags: Vec::new(),
             struct_alias_tags: HashMap::new(),
             typedef_blocks: HashMap::new(),
+            enum_members: HashMap::new(),
+            enum_alias_tags: HashMap::new(),
             throws_ann: None,
             thrown: Vec::new(),
             uncaught_throws: Vec::new(),
@@ -221,6 +235,74 @@ impl Checker {
         t.name.as_ref().map(|n| n.split('<').next().unwrap_or(n).to_string())
     }
 
+    /// Parse a specialized class-name receiver spelling into its type:
+    /// `Box<NPString *>` → Named "Box" with type_args [NPString *], pointer
+    /// set (class-name receivers are class objects, but only the type_args
+    /// matter here — substitution reads `type_args` and strips `<...>` for
+    /// the base name). Bare names return None: no args, nothing to substitute.
+    fn parse_generic_receiver_name(name: &str) -> Option<AstType> {
+        let lt = name.find('<')?;
+        let base = name[..lt].trim().to_string();
+        if base.is_empty() { return None; }
+        let end = name.rfind('>')?;
+        if end < lt { return None; }
+        let args_str = &name[lt + 1..end];
+        let mut args = Vec::new();
+        // Split top-level commas (depth-aware for nested generics).
+        let mut depth = 0usize;
+        let mut cur = String::new();
+        for ch in args_str.chars() {
+            match ch {
+                '<' => { depth += 1; cur.push(ch); }
+                '>' => { depth = depth.saturating_sub(1); cur.push(ch); }
+                ',' if depth == 0 => { args.push(cur.trim().to_string()); cur.clear(); }
+                _ => cur.push(ch),
+            }
+        }
+        if !cur.trim().is_empty() { args.push(cur.trim().to_string()); }
+        if args.is_empty() { return None; }
+        // Render each arg string into an AstType (pointer suffix / nested
+        // generics), the same shapes codegen's parse_generic_type_string
+        // accepts.
+        let render = |s: &str| -> AstType {
+            let s = s.trim();
+            let (base, is_ptr) = match s.strip_suffix('*') {
+                Some(b) => (b.trim().to_string(), true),
+                None => (s.to_string(), false),
+            };
+            let mut t = if let Some(lt2) = base.find('<') {
+                if base.ends_with('>') {
+                    let outer = AstType::new(TypePrim::Named);
+                    let mut t2 = outer;
+                    t2.name = Some(base[..lt2].trim().to_string());
+                    // Nested args keep their rendered spelling in the name;
+                    // deep nesting is rare and the checker only needs
+                    // element identity, not full structure.
+                    t2.is_pointer = is_ptr;
+                    t2
+                } else {
+                    let mut t2 = AstType::new(TypePrim::Named);
+                    t2.name = Some(base.clone());
+                    t2.is_pointer = is_ptr;
+                    t2
+                }
+            } else {
+                let mut t2 = AstType::new(TypePrim::Named);
+                t2.name = Some(base);
+                t2.is_pointer = is_ptr;
+                t2
+            };
+            t.class_ref = t.name.clone();
+            t
+        };
+        let mut t = AstType::new(TypePrim::Named);
+        t.name = Some(base);
+        t.class_ref = t.name.clone();
+        t.is_pointer = true;
+        t.type_args = args.iter().map(|a| render(a)).collect();
+        Some(t)
+    }
+
     /// Param types for `selector` as declared by `class_name` or its
     /// superclass chain. Returns None when no class in the chain declares the
     /// selector (the caller falls back to the global selector-keyed table).
@@ -244,6 +326,36 @@ impl Checker {
             }
         }
         None
+    }
+
+    /// Does `class_name` (or any superclass) declare an instance method
+    /// `selector`? Consults the per-class param table (same source the
+    /// receiver-aware signature lookup uses) along the superclass chain.
+    /// Returns None when the class itself is unknown (forward shell / other
+    /// TU) — the caller must stay silent in that case.
+    fn class_declares_selector(&self, class_name: &str, selector: &str) -> Option<bool> {
+        let st = self.symtab.as_ref()?;
+        if st.find_class(class_name).is_none() {
+            return None; // unresolved class: cannot judge
+        }
+        let mut cur = class_name.to_string();
+        for _ in 0..32 {
+            if self.method_params_by_class.get(&cur)
+                .map(|m| m.contains_key(selector))
+                .unwrap_or(false)
+            {
+                return Some(true);
+            }
+            let sup = st.find_class(&cur).and_then(|c| match &c.data {
+                SymbolData::Class { superclass: Some(s), .. } if !s.is_empty() => Some(s.clone()),
+                _ => None,
+            });
+            match sup {
+                Some(s) => cur = s,
+                None => return Some(false),
+            }
+        }
+        Some(false)
     }
 
     /// Does EVERY declaration of `selector` agree on a plain C string
@@ -1199,6 +1311,196 @@ impl Checker {
             name));
     }
 
+    // ── Generic protocol bounds (`T : Proto`) — doc/generic_bounds_plan.md ──
+
+    /// Short name of a possibly-namespaced symbol (`ns::P` → `P`).
+    fn short_type_name(n: &str) -> &str {
+        n.rsplit("::").next().unwrap_or(n)
+    }
+
+    /// Resolve a protocol symbol by exact or short name and return its parent
+    /// protocol names. Mirrors the tolerant resolution in
+    /// `check_protocol_conformance` (short or namespace-qualified spellings).
+    fn protocol_parents(&self, name: &str) -> Option<Vec<String>> {
+        let st = self.symtab.as_ref()?;
+        let mut short_match: Option<Vec<String>> = None;
+        for sym in &st.global.symbols {
+            if let SymbolData::Protocol { parents, .. } = &sym.data {
+                if sym.name == name {
+                    return Some(parents.clone());
+                }
+                if short_match.is_none()
+                    && Self::short_type_name(&sym.name) == Self::short_type_name(name)
+                {
+                    short_match = Some(parents.clone());
+                }
+            }
+        }
+        short_match
+    }
+
+    /// Is `ancestor` equal to `proto` or on its protocol-inheritance chain?
+    fn protocol_extends(&self, proto: &str, ancestor: &str) -> bool {
+        if Self::short_type_name(proto) == Self::short_type_name(ancestor) { return true; }
+        let mut seen: Vec<String> = Vec::new();
+        let mut queue: Vec<String> = vec![proto.to_string()];
+        while let Some(p) = queue.pop() {
+            if seen.iter().any(|s| *s == p) { continue; }
+            seen.push(p.clone());
+            let Some(parents) = self.protocol_parents(&p) else { continue };
+            for par in parents {
+                if Self::short_type_name(&par) == Self::short_type_name(ancestor) { return true; }
+                queue.push(par);
+            }
+        }
+        false
+    }
+
+    /// Does `cls` (or any superclass) list `proto` (or a descendant of it)?
+    fn class_conforms_to_protocol(&self, cls: &str, proto: &str) -> bool {
+        let Some(ref st) = self.symtab else { return false };
+        let mut cur = cls.to_string();
+        for _ in 0..64 {
+            let Some(sym) = st.find_class(&cur) else { return false };
+            let SymbolData::Class { protocols, superclass, .. } = &sym.data else { return false };
+            for p in protocols {
+                if self.protocol_extends(p, proto) { return true; }
+            }
+            match superclass {
+                Some(s) if !s.is_empty() => cur = s.clone(),
+                _ => return false,
+            }
+        }
+        false
+    }
+
+    /// Is `cls` equal to `ancestor` or derived from it (superclass walk)?
+    fn class_derives_from(&self, cls: &str, ancestor: &str) -> bool {
+        if Self::short_type_name(cls) == Self::short_type_name(ancestor) { return true; }
+        let Some(ref st) = self.symtab else { return false };
+        let mut cur = cls.to_string();
+        for _ in 0..64 {
+            let Some(sym) = st.find_class(&cur) else { return false };
+            let SymbolData::Class { superclass, .. } = &sym.data else { return false };
+            match superclass {
+                Some(s) if !s.is_empty() => {
+                    if Self::short_type_name(s) == Self::short_type_name(ancestor) { return true; }
+                    cur = s.clone();
+                }
+                _ => return false,
+            }
+        }
+        false
+    }
+
+    /// Is the argument class a fully-declared symbol? A forward declaration
+    /// (`@class X`) leaves a shell with no members, and the real declaration
+    /// may live in another TU — judging a shell would be a false positive, so
+    /// shells escape (§3 escape channels; a missed report beats a false one).
+    fn arg_class_is_resolved(&self, name: &str) -> bool {
+        let Some(ref st) = self.symtab else { return false };
+        let Some(sym) = st.find_class(name) else { return false };
+        match &sym.data {
+            SymbolData::Class { protocols, methods, ivars, properties, .. } => {
+                !(protocols.is_empty() && methods.is_empty()
+                    && ivars.is_empty() && properties.is_empty())
+            }
+            _ => false,
+        }
+    }
+
+    /// §4 diagnostic when `arg` violates the bound on `param` of `cls`, or
+    /// None when it passes: conforms, is an escape spelling (`id`,
+    /// `instancetype`, a nested type-param slot), names an unresolved class,
+    /// or the bound itself resolves to nothing (unknown name).
+    fn bound_violation(&self, arg: &AstType, bound: &str, cls: &str, param: &str) -> Option<String> {
+        if arg.prim == TypePrim::Id || arg.prim == TypePrim::Instancetype { return None; }
+        if arg.prim == TypePrim::Param { return None; } // nested generic slot (Box<S<T>>)
+        let Some(arg_name) = Self::class_name_of(arg) else { return None };
+        let arg_base = arg_name.split('<').next().unwrap_or(&arg_name).to_string();
+        // The bound names a protocol or a class; if it resolves to neither,
+        // the name is unknown — escape (unverifiable → silent).
+        let is_proto = self.protocol_parents(bound).is_some();
+        let arg_ok = if is_proto {
+            self.class_conforms_to_protocol(&arg_base, bound)
+        } else if self.symtab.as_ref().and_then(|st| st.find_class(bound)).is_some() {
+            // Class-pointer bound (`T : NSObject *`): the argument must be
+            // that class or derive from it.
+            self.class_derives_from(&arg_base, bound)
+        } else {
+            return None;
+        };
+        if arg_ok { return None; }
+        if !self.arg_class_is_resolved(&arg_base) { return None; }
+        let spelling = format!("{}<{} : {}>", cls, param, bound);
+        if is_proto {
+            Some(format!(
+                "'{}' does not conform to protocol '{}' required by '{}' — add <{}> to {}'s declaration or use a conforming type argument",
+                arg_base, bound, spelling, bound, arg_base))
+        } else {
+            Some(format!(
+                "'{}' is not a subclass of '{}' required by '{}' — use a conforming type argument",
+                arg_base, bound, spelling))
+        }
+    }
+
+    /// §3: check one explicitly-specialized instantiation (`Box<Arg…> *v;`)
+    /// against the bounds declared on Box and, where the positional mapping
+    /// is provable, on its generic ancestors (§5.3). Fired from the Variable
+    /// arm of `check_decl` — the point where every explicit specialization
+    /// enters the checker. Bare spellings carry no type_args and never
+    /// trigger (erasure compatibility; today's code keeps compiling).
+    fn check_generic_bounds_instantiation(&mut self, t: &AstType, line: usize, col: usize) {
+        if t.type_args.is_empty() { return; }
+        if !t.protocol_refs.is_empty() { return; } // parser routed to a protocol list
+        let Some(name) = Self::class_name_of(t) else { return };
+        // `@using` aliases can bake `<...>` into the resolved name
+        // (init_generic_erasure_warning precedent) — strip to the base class.
+        let base = name.split('<').next().unwrap_or(&name).to_string();
+        // Snapshot the bound table so the symtab borrow ends before error
+        // reporting (&mut self) — same shape as check_protocol_conformance.
+        let (params, bounds, super_name) = {
+            let Some(ref st) = self.symtab else { return };
+            let Some(sym) = st.find_class(&base) else { return };
+            let SymbolData::Class { type_params, type_bounds, superclass, .. } = &sym.data else { return };
+            (type_params.clone(), type_bounds.clone(), superclass.clone())
+        };
+        let mut violations: Vec<String> = Vec::new();
+        // args[i] pairs with params[i] (substitute_type_args pairing); bounds
+        // are keyed by parameter name.
+        for (pname, bound) in &bounds {
+            let Some(idx) = params.iter().position(|p| p == pname) else { continue };
+            let Some(arg) = t.type_args.get(idx) else { continue };
+            if let Some(msg) = self.bound_violation(arg, bound, &base, pname) {
+                violations.push(msg);
+            }
+        }
+        // §5.3: ancestor bounds apply to the specialization too — but only
+        // where the slot mapping is provable (the `MutableBox<T> : Box<T>`
+        // idiom: the same parameter name at the same index). Anything else is
+        // unverifiable and escapes.
+        let mut cur = super_name;
+        for _ in 0..64 {
+            let Some(p) = cur else { break };
+            if p.is_empty() { break; }
+            let Some(ref st) = self.symtab else { break };
+            let Some(sym) = st.find_class(&p) else { break };
+            let SymbolData::Class { type_params, type_bounds, superclass, .. } = &sym.data else { break };
+            for (pname, bound) in type_bounds {
+                let Some(idx) = type_params.iter().position(|q| q == pname) else { continue };
+                if params.get(idx).map(String::as_str) != Some(pname.as_str()) { continue; }
+                let Some(arg) = t.type_args.get(idx) else { continue };
+                if let Some(msg) = self.bound_violation(arg, bound, &p, pname) {
+                    violations.push(msg);
+                }
+            }
+            cur = superclass.clone();
+        }
+        for msg in violations {
+            self.check_error(line, col, &msg);
+        }
+    }
+
     /// Does `cls` (or any superclass) declare an instance method `sel`?
     /// Selector spelling is normalized by dropping EVERY colon: the binder
     /// stores `setObject:atIndex:` as `setObjectatIndex` and `objectAtIndex:`
@@ -1656,6 +1958,25 @@ impl Checker {
                         }
                         _ => None,
                     });
+                // Static dispatch safety: a statically-typed receiver whose
+                // class chain does NOT declare the selector would dispatch
+                // through a NULL vtable slot — a segfault at runtime (ObjC
+                // rejects this at compile time: "no visible @interface").
+                // WARNING, not error: receiver-class resolution is not yet
+                // reliable in every lowering path (self-contained umbrella
+                // bodies resolve params differently), so a hard error
+                // produces false positives on valid Foundation code. A
+                // missed report beats a false one — same philosophy as the
+                // rest of the checker.
+                if let Some(ref cn) = recv_class {
+                    if !*is_class_method {
+                        if let Some(false) = self.class_declares_selector(cn, selector) {
+                            self.check_warning(e.line, e.col, &format!(
+                                "no visible method '{}' on receiver type '{} *' — static dispatch would hit a NULL vtable slot; declare it on '{}' (or a superclass) or type the receiver as 'id'",
+                                selector, cn, cn));
+                        }
+                    }
+                }
                 let param_types = recv_class
                     .as_deref()
                     .and_then(|cn| self.method_params_for_receiver(cn, selector))
@@ -1733,12 +2054,24 @@ impl Checker {
                 // positions, then check each argument and the result type.
                 // Bare spellings (`NPArray *`) have no type_args — full
                 // erasure, zero migration.
-                let recv_ty: Option<AstType> = receiver.expr_type.as_ref()
-                    .map(|t| (**t).clone())
-                    .or_else(|| match &receiver.data {
-                        AstExprData::VarRef { name, .. } => self.lookup_scope_var_type(name),
-                        _ => None,
-                    });
+                let recv_ty: Option<AstType> = match &receiver.data {
+                    AstExprData::VarRef { name, .. } => {
+                        // A local/param variable's declared type wins (same
+                        // type the VarRef arm resolved). A class-name receiver
+                        // is NOT in scope: parse `Base<Arg, ...>` from the name
+                        // so a CLASS-method send on a specialized class name
+                        // substitutes type_args into the signature exactly like
+                        // an instance receiver does. Without this, a declared
+                        // `+ (T)fetch` return stays raw `T` — object-kind
+                        // returns erase to `id` (the ROADMAP generic
+                        // class-method return gap; probe:
+                        // tests/probe_generic_classmethod_ret.np).
+                        self.lookup_scope_var_type(name)
+                            .or_else(|| Self::parse_generic_receiver_name(name))
+                            .or_else(|| receiver.expr_type.as_ref().map(|t| (**t).clone()))
+                    }
+                    _ => receiver.expr_type.as_ref().map(|t| (**t).clone()),
+                };
                 let recv_args: Vec<AstType> = recv_ty.as_ref()
                     .map(|t| t.type_args.clone())
                     .unwrap_or_default();
@@ -2252,6 +2585,7 @@ AstExprData::Subscript { object, key, .. } => {
             AstStmtData::Switch { expr, body } => {
                 self.check_expr(&mut *expr);
                 self.check_stmt(&mut *body);
+                self.check_switch_exhaustiveness(expr, body);
             }
             AstStmtData::Case { value, body } => {
                 self.check_expr(&mut *value);
@@ -2493,6 +2827,7 @@ AstExprData::Subscript { object, key, .. } => {
                 if let Some(ref t) = head_type {
                     self.warn_if_erased_generics(t, d.line, d.col);
                     self.reject_npasync_type(t, d.line, d.col, "variable");
+                    self.check_generic_bounds_instantiation(t, d.line, d.col);
                 }
                 if let Some(ref name) = d.name {
                     // Reserved compiler/runtime names the -eh desugar assigns
@@ -2653,11 +2988,120 @@ AstExprData::Subscript { object, key, .. } => {
         }
     }
 
+    /// Enum exhaustiveness for a plain-C `switch` (pattern arms are lowered
+    /// to goto/if by the pattern pass BEFORE the checker runs, so any
+    /// `Switch` node that reaches here is an ordinary C switch whose cases
+    /// are constant expressions).
+    ///
+    /// Fires only when the subject's static type is an enum this TU can see
+    /// the member list of (tag decl, or typedef alias → tag). Any other
+    /// subject — scalars, `id`, enums declared only in a `#include`d C
+    /// header — stays silent: same conservative direction as the rest of
+    /// this checker (a missed exhaustiveness costs nothing; a false one
+    /// rejects legal C). A `default:` arm opts out, exactly like C's
+    /// `-Wswitch`.
+    fn check_switch_exhaustiveness(&mut self, expr: &AstExpr, body: &AstStmt) {
+        let type_name = expr.expr_type.as_ref().and_then(|t| t.name.clone());
+        let Some(name) = type_name else { return };
+        // Member list: three spellings reach here. (1) `enum Color c` — the
+        // type node carries the tag. (2) `typedef enum {Up, Down} Direction;`
+        // — the PARSER rewrites this to a plain Enum decl named `Direction`
+        // (parse_typedef's Enum branch sets the alias as the decl name), so
+        // the elaborated AstDeclData::Enum is keyed by the alias itself and
+        // the variable's type node just spells `Direction`. (3) a typedef
+        // alias of a separately-named tag — resolved through enum_alias_tags.
+        // Lookup is by name, tag-agnostic: a struct/typedef can never share
+        // the key with an enum member table entry because collect_enums only
+        // inserts from Enum decls.
+        let members = self.enum_members.get(&name).cloned()
+            .or_else(|| {
+                self.enum_alias_tags.get(&name)
+                    .and_then(|tag| self.enum_members.get(tag).cloned())
+            });
+        let Some(members) = members else { return };
+        if members.is_empty() { return; }
+
+        // Collect the case labels of THIS switch: the body's top-level
+        // Case/Default statements. Case bodies are NOT descended into — a
+        // nested switch lives inside an arm's body and its labels belong to
+        // that inner switch.
+        let mut has_default = false;
+        let mut covered: Vec<String> = Vec::new();
+        let mut all_recognized = true;
+        fn walk(body: &AstStmt, members: &[String], covered: &mut Vec<String>,
+                has_default: &mut bool, all_recognized: &mut bool) {
+            match &body.data {
+                AstStmtData::Case { value, .. } => {
+                    match &value.data {
+                        AstExprData::VarRef { name, .. } if members.iter().any(|m| m == name) => {
+                            covered.push(name.clone());
+                        }
+                        _ => {
+                            // A constant expression (int literal, `A | B`, a
+                            // macro) — member identity is not provable here.
+                            *all_recognized = false;
+                        }
+                    }
+                }
+                AstStmtData::Default(_) => { *has_default = true; }
+                AstStmtData::Compound(v) => {
+                    for s in v { walk(s, members, covered, has_default, all_recognized); }
+                }
+                _ => {}
+            }
+        }
+        walk(body, &members, &mut covered, &mut has_default, &mut all_recognized);
+
+        if has_default || !all_recognized { return; }
+        let missing: Vec<&String> = members.iter()
+            .filter(|m| !covered.contains(m))
+            .collect();
+        if missing.is_empty() { return; }
+        let list = missing.iter().map(|m| format!("'{}'", m)).collect::<Vec<_>>().join(", ");
+        self.check_error(expr.line, expr.col, &format!(
+            "switch over enum '{}' does not cover member(s): {} — add the missing case(s) or a default arm",
+            name, list));
+    }
+
+    /// Collect enum member tables and typedef→enum-tag aliases from the
+    /// unit (first pass, before any body is checked). Recurses into
+    /// namespaces and class bodies so an enum declared inside either still
+    /// participates in exhaustiveness.
+    fn collect_enums(&mut self, decl: &AstDecl) {
+        match &decl.data {
+            AstDeclData::Enum { members, .. } => {
+                if let Some(tag) = &decl.name {
+                    self.enum_members.insert(tag.clone(), members.clone());
+                }
+            }
+            AstDeclData::Typedef { aliased_type: Some(at), .. } => {
+                if at.tag == TagKind::Enum {
+                    if let (Some(alias), Some(tag)) = (&decl.name, &at.name) {
+                        self.enum_alias_tags.insert(alias.clone(), tag.clone());
+                    }
+                }
+            }
+            AstDeclData::Namespace(inner) => {
+                for d in inner { self.collect_enums(d); }
+            }
+            AstDeclData::Class { methods, impl_vars, .. } => {
+                for m in methods { self.collect_enums(m); }
+                for v in impl_vars { self.collect_enums(v); }
+            }
+            _ => {}
+        }
+    }
+
     /// Check the entire AST unit
     pub fn check(&mut self, unit: &mut AstUnit) -> i32 {
         // First pass: collect method/function signatures from the AST.
         for decl in &unit.decls {
             self.collect_signatures(decl);
+        }
+        // Enum member tables for switch exhaustiveness (same pass shape as
+        // the typedef maps below).
+        for decl in &unit.decls {
+            self.collect_enums(decl);
         }
         // Map `typedef struct Tag { ... } Alias;` so a variable declared with
         // the alias name still compares as a value struct (see struct_alias_tags).
@@ -2689,6 +3133,7 @@ AstExprData::Subscript { object, key, .. } => {
         }
         if !self.has_error {
             self.check_protocol_conformance(unit);
+            self.check_generic_bounds_decls(unit);
         }
         if self.has_error { -1 } else { 0 }
     }
@@ -2788,6 +3233,65 @@ AstExprData::Subscript { object, key, .. } => {
             self.check_error(line, col, &format!(
                 "class '{}' does not implement required method '{}' from protocol '{}'",
                 cls, sel, proto));
+        }
+    }
+
+    /// §5.1/§5.2: a subclass of a bounded generic must re-declare every
+    /// inherited bound (explicit spelling — `.nh` readers see the whole
+    /// constraint, same philosophy as full ivar layouts in shared headers)
+    /// and must not weaken it (the re-declared bound must be equal or a
+    /// sub-protocol/subclass of the inherited one). Unit-level pass, same
+    /// shape as `check_protocol_conformance`: violations are collected first
+    /// and reported after the symtab borrow ends.
+    fn check_generic_bounds_decls(&mut self, unit: &AstUnit) {
+        let mut violations: Vec<(usize, usize, String)> = Vec::new();
+        for decl in &unit.decls {
+            let AstDeclData::Class { super_name, type_params, type_bounds, .. } = &decl.data
+                else { continue };
+            let Some(ref parent) = super_name else { continue };
+            let Some(cls_name) = decl.name.as_ref() else { continue };
+            // Parent's bound table lives in the symbol table, so parents
+            // declared in imported headers are covered too.
+            let (p_params, p_bounds) = {
+                let Some(ref st) = self.symtab else { continue };
+                let Some(sym) = st.find_class(parent) else { continue };
+                let SymbolData::Class { type_params, type_bounds, .. } = &sym.data else { continue };
+                (type_params.clone(), type_bounds.clone())
+            };
+            if p_bounds.is_empty() { continue; }
+            for (pname, pbound) in &p_bounds {
+                // Positional parent→subclass mapping (the `MutableBox<T> :
+                // Box<T>` idiom); unmappable positions escape.
+                let Some(idx) = p_params.iter().position(|q| q == pname) else { continue };
+                let Some(sub_param) = type_params.get(idx) else { continue };
+                let sub_bound = type_bounds.iter()
+                    .find(|(n, _)| n == sub_param)
+                    .map(|(_, b)| b.clone());
+                let Some(sbound) = sub_bound else {
+                    violations.push((decl.line, decl.col, format!(
+                        "class '{}' must re-declare the bound on type parameter '{}' (inherited bound '{}' from '{}') — bounds are not implicit",
+                        cls_name, sub_param, pbound, parent)));
+                    continue;
+                };
+                // §5.2 strength: equal or more specific only. Unresolvable
+                // names escape — weakening cannot be proven here.
+                let is_proto_bound = self.protocol_parents(pbound).is_some();
+                let ok = if is_proto_bound {
+                    self.protocol_extends(&sbound, pbound)
+                } else if self.symtab.as_ref().and_then(|st| st.find_class(pbound)).is_some() {
+                    self.class_derives_from(&sbound, pbound)
+                } else {
+                    true
+                };
+                if !ok {
+                    violations.push((decl.line, decl.col, format!(
+                        "bound '{}' on '{}' weakens the inherited bound '{}' from '{}' — the re-declared bound must be equal or more specific",
+                        sbound, sub_param, pbound, parent)));
+                }
+            }
+        }
+        for (line, col, msg) in violations {
+            self.check_error(line, col, &msg);
         }
     }
 

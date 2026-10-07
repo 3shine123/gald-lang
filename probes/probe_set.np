@@ -1,0 +1,36 @@
+// Probe: NPSet / NPMutableSet / NPOrderedSet — uniqueness (isEqual:), value
+// semantics, order preservation, and for-in over allObjects.
+
+#import <Foundation/Foundation.nh>
+#include <stdio.h>
+
+int main() {
+    // Uniqueness with value semantics: two equal-but-distinct strings -> 1.
+    NPMutableSet *s = [[NPMutableSet alloc] init];
+    [s addObject:@"hello"];
+    [s addObject:[NPString stringWithUTF8String:"hello"]];
+    [s addObject:@"world"];
+    printf("count=%zu\n", [s count]);            // 2
+    printf("has=%d\n", [s containsObject:@"hello"]); // 1
+
+    // Ordered set preserves first-insertion order.
+    NPOrderedSet *os = [[NPOrderedSet alloc] init];
+    [os addObject:@"b"];
+    [os addObject:@"a"];
+    [os addObject:@"b"];                          // no-op, no reorder
+    printf("first=%s last=%s idx=%zu\n",
+           [[os firstObject] UTF8String],
+           [[os lastObject] UTF8String],
+           [os indexOfObject:@"a"]);               // b a 1
+
+    // allObjects + for-in.
+    for (NPString *x in [os allObjects]) {
+        printf("item=%s\n", [x UTF8String]);
+    }
+
+    // Immutable factory + equality.
+    NPSet *a = [NPSet setWithArray:@[ @"x", @"y" ]];
+    NPSet *b = [NPSet setWithArray:@[ @"y", @"x" ]];
+    printf("equal=%d count=%zu\n", [a isEqual:b], [a count]); // 1 2
+    return 0;
+}
