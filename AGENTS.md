@@ -4,6 +4,10 @@
 > architecture (pipeline, `.nh`/`.np` semantics, Foundation modes, owner/strong/weak
 > metadata, vtable rules, EH backends). This file covers layout, commands, and the
 > rules code changes must follow.
+> **Source locations / debugging / LSP plan:** `doc/source_locations_debug_lsp_plan.md`
+> describes SourceSpan, generated-C `#line`, DWARF-backed debugging, versioned source
+> maps, and LSP/debugger reuse. It is a plan, not implemented behavior; check
+> `doc/architecture.md` and `ROADMAP.md` for current status.
 >
 > **History:** detailed implementation logs and decision records live in
 > `doc/stable_slots_plan.md`, `doc/arc_intern_uaf.md`, and
@@ -140,4 +144,10 @@ cargo test --workspace           # Rust unit tests
   declaration-only clients (source-level transitive `#import` scan decides); a TU
   that inlines Foundation implementations is skipped on purpose — do not "simplify"
   this to a generated-C text heuristic (two such heuristics were already falsified).
+- **Source location preservation:** when adding or changing AST/HIR nodes or lowering
+  passes, preserve their source origin. New synthesized nodes should be marked or
+  documented as synthetic and retain the originating Nepa span when one exists.
+  Do not add a parallel line-number/source-map mechanism: follow
+  `doc/source_locations_debug_lsp_plan.md` and keep diagnostics, generated-C mappings,
+  LSP, and debugger support on the shared SourceSpan/SourceMap model.
 - **Destructive git ops need user approval.**

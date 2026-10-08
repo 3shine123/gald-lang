@@ -6,20 +6,21 @@
 
 ## Language / compiler gaps
 
-- [ ] **Debug information** — nepac does not emit DWARF; debugging generated C is the only option today.
+- [ ] **Source locations, debug info, and LSP foundation** — current diagnostics map some expanded lines back through the preprocessor, but AST nodes lack a unified file/start/end span and generated C has no source-aware `#line` directives. Plan: `doc/source_locations_debug_lsp_plan.md`. First ship shared SourceSpan/source mapping and `#line` diagnostics; then Clang `-g`/`-O0` debug builds and a versioned `.np.map`; finally use the same locations for LSP and debugger adapters. LSP syntax/diagnostics can start directly from AST before native debugging is complete.
 - [x] **Generic class-method return instantiation (single TU)** — `[Box<NPString *> defaultValue]`
   substitutes T in the checker's result type and in the specialized vtable fn-ptr casts;
   ARC ownership on the returned T is correct (no extra release at the call site).
   Evidence: `probes/genret/` g1 (multi-instantiation), g3 (function pointers), g4 (ARC).
-- [ ] **Generic class-method return across TUs** — a client-TU send `[Factory<NPString *> make]`
-  does not link when the lib TU never mentions the instantiation (undefined
-  `Factory_NPString_ptr_make`); when the lib TU mentions it only via a plain variable
-  declaration, its specialized vtable shape diverges from the client's and the startup
-  `__sig` check aborts loudly (R3 doing its job — no silent misdispatch). See
-  `probes/genret/g2/`. Mixed class/instance sends on a class name are checker-rejected
-  by design, non-generic classes included (`g5c` control).
+- [x] **Generic class-method return across TUs** — a multi-input build now collects
+  concrete specializations from all `.np` inputs and forwards the demand to the TU
+  containing the generic implementation, so `[Factory<NPString *> make]` no longer
+  needs a dummy variable in the library TU. This remains true monomorphization: the
+  generated class, methods, vtable, metadata, and ABI are specialized per argument
+  list. A separately precompiled library can only provide the specializations it
+  shipped; it cannot invent a new method body for an unseen type. See `probes/genret/g2/`
+  and the cross-TU generic section in `README.md` / `CHINESE.md`.
 - [x] **Categories across TUs** — implemented (weak-definition/strong-extern vtable slots, ownership excluded for category impls); see `doc/categories_protocol_plan.md` §8 and `tests/multi_tu/14`/`15`.
-- [x] **Protocol inheritance across TUs** — implemented: static `NPProtocol` metadata + `conformsToProtocol:` runtime query (`doc/categories_protocol_plan.md` §8).
+- [x] **Protocol inheritance across TUs** — implemented: weak-coalesced `NPProtocol` identity, static metadata + `conformsToProtocol:` runtime query. Category-only conformances are merged by a constructor registration path (`tests/multi_tu/16_category_protocol`).
 - [ ] **Pattern switch M2** — mixing plain constant arms with pattern arms in one `switch` (currently rejected with a clear error); exhaustiveness analysis.
 
 ## Foundation library gaps

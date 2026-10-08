@@ -1,10 +1,8 @@
 #import "model.nh"
 
-// Variant: the lib TU mentions the instantiation ONLY via a plain variable
-// declaration inside a body function (the documented 03_generic mention
-// requirement). Expected per ROADMAP claim: link succeeds but the client's
-// send of `+make` either resolves against a divergent vtable shape (startup
-// __sig aborts loudly) or fails otherwise — observe which.
+// Variant: the lib TU also mentions the instantiation via a plain variable.
+// The result must be the same specialization as g2: demand collection is
+// idempotent and no local trigger is required.
 @implementation Factory
 + (T)make { return nil; }
 - (T)produce { return nil; }

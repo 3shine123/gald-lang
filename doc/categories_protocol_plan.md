@@ -243,8 +243,11 @@ P0/P1 探针已完成，实测结论修正了本方案的两处假设：
   cargo test 53 全过、test_all 350/360（与基线一致）、multi_tu 15/15。
 - golden：harness 只比对 `.out`，全部协议相关 golden 输出不变；07 的
   `conformance.c` 是改名前陈旧物（不被比对），已顺手重生成。
-- 未做：协议身份跨 TU 唯一性、类别给类追加协议的 metadata 合并（§7 第
-  五项验证）——现状类别携带协议极少见，留待有真实需求再补。
+- 已补：协议符号 `NEPA_PROTO_$_P` 以 weak 定义跨 TU 合并为同一链接单元身份；
+  类别 TU 对 owner 类发 constructor 注册，把类别新增协议并入 `NPClass` 的
+  协议表，注册操作幂等。回归用例见 `tests/multi_tu/16_category_protocol`。
+- 仍需保持的约束：类别方法声明必须出现在共享 `.nh`，否则公共 vtable 段不一致；
+  只有类别实现 TU 注册新增协议，声明-only 客户端不会重复注册。
 
 ### 遗留清单更新
 

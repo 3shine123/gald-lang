@@ -48,6 +48,31 @@ int nepa_class_conformsToProtocol(NPClass *cls, struct NPProtocol *proto) {
     return class_conforms(cls, proto, 0);
 }
 
+void nepa_register_category_protocols(NPClass *cls, struct NPProtocol **protocols, int count) {
+    if (!cls || !protocols || count <= 0) return;
+    int old_count = cls->protocol_count;
+    int add = 0;
+    for (int i = 0; i < count; i++) {
+        int duplicate = 0;
+        for (int j = 0; j < old_count; j++) {
+            if (cls->protocols && cls->protocols[j] == protocols[i]) { duplicate = 1; break; }
+        }
+        if (!duplicate) add++;
+    }
+    if (!add) return;
+    struct NPProtocol **merged = malloc((size_t)(old_count + add) * sizeof(*merged));
+    if (!merged) abort();
+    for (int i = 0; i < old_count; i++) merged[i] = cls->protocols[i];
+    int n = old_count;
+    for (int i = 0; i < count; i++) {
+        int duplicate = 0;
+        for (int j = 0; j < n; j++) if (merged[j] == protocols[i]) { duplicate = 1; break; }
+        if (!duplicate) merged[n++] = protocols[i];
+    }
+    cls->protocols = merged;
+    cls->protocol_count = n;
+}
+
 // ─── Exception globals ────────────────────────────────────────────────────────
 
 #ifdef __NEPA_FREESTANDING

@@ -1165,6 +1165,36 @@ m[0] = @"hello";               // → [m setObject:@"hello" atIndex:0] —— �
 
 泛型容器**真单态化并做类型检查**。`NPArray<NPString *>` 与 `NPDictionary<NPString *, NPNumber *>` 会生成真正的特化 C（struct、vtable、类元数据、类型已代入的方法副本），checker 再把元素类型代入方法签名——所以元素类型是被强制的，不是被擦除的：
 
+#### 真泛型跨 TU：写法像 Objective-C，实现不是轻量泛型
+
+这里要特别区分两种模型。Objective-C 的 lightweight generics 主要是编译期注解：运行时仍然只有一个 `Factory` 类，`Factory<NPString *>` 不会生成一套新的方法和 ABI。Nepa 采用的是真泛型：每个具体参数列表都会生成独立的 C struct、方法副本、vtable、类元数据和调用 ABI；不做类型擦除，也不把特化对象退回成 `id`。
+
+为了让写法仍然接近 Objective-C，跨 TU 编译时 nepac 会先扫描同一次构建中的全部 `.np` 输入，收集客户端实际使用的具体特化，再把需求传给各个 TU。包含泛型实现的 TU 负责生成特化；只有声明的客户端 TU 只引用同一个稳定的特化符号。因此不需要在库 TU 里写一个“假的变量”来触发实例化：
+
+```nepa
+// model.nh
+@interface Factory<T> : NPObject
++ (T)make;
+@end
+
+// lib.np：真正拥有实现的 TU
+#import "model.nh"
+@implementation Factory
++ (T)make { return nil; }
+@end
+
+// main.np：客户端 TU
+#import "model.nh"
+int main(void) {
+    NPString *s = [Factory<NPString *> make];
+    return s == nil ? 0 : 1;
+}
+```
+
+用一次命令把两个 TU 放进同一个构建：`nepac main.np lib.np -I . -o app`。泛型实现必须随输入源码或模块一起提供；只有 `.nh` 声明而没有实现体时，编译器无法凭空生成方法。预编译库可以携带一组已经生成的特化，但不能为发布后才出现、且库中没有实现模板的新参数类型发明方法体。若两个 TU 同时提供同一个特化，仍按 owner/strong-metadata 规则在链接期报重复定义，避免悄悄选出不一致的 ABI。
+
+这就是 Nepa 的取舍：调用语法接近 Objective-C，泛型语义和代码生成更接近 C++ 模板；类型参数是真实类型，特化按使用生成，未使用的特化不会进入最终程序。
+
 ```nepa
 NPMutableArray<NPString *> *m = [NPMutableArray array];
 [m addObject:@"a"];

@@ -68,6 +68,8 @@ louder diagnostic, not a weaker one, so `EXPECT_FAIL_MATCH` looks for
 | `11_vtable_private_slots` | The legal split R3 exists for: the lib implements `Widget` plus a TU-local private helper, the client sees only the shared `.nh` and defines its own `App`. Under R1+R2+R3 the shared segments agree (the `__sig` guard stays silent) and each TU dispatches its own privates — the case runs to `run=42`. |
 | `12_native_multi_input` | The compiler's own multi-input mode (`nepac main.np lib.np -o app`): one command transpiles each TU (its own nepac subprocess), compiles, and links — no manual clang. Same cross-TU dispatch as `01_basic`; marked with a `NATIVE` file so the runner drives the native path. |
 | `13_kvc_predicate` | KVC accessor tables ride the *same* metadata merge: the lib TU owns `Widget` and emits the strong `NEPA_KVC_$_Widget` table while the client sees only the `.nh`. If the client's weak metadata won, `size` / `label` would resolve to nothing and the predicates would quietly print `0` instead of the expected hits. |
+| `14_category_present` / `15_category_absent` | Category methods across TUs: the category TU contributes method bodies without claiming class ownership; present links and absent fails clearly. |
+| `16_category_protocol` | A category TU adds a protocol conformance to an owner class. The category constructor merges its protocol list into the owner's static metadata, and protocol symbols are weak-coalesced across TUs so `@protocol(P)` has one link-unit identity. |
 
 ## Writing a case
 
@@ -91,6 +93,5 @@ Notes that cost time when the cases were first written:
 
 ## Not covered
 
-- Categories split across TUs.
-- Protocol *inheritance* (`@protocol A <B>`) across TUs.
+- Category-added protocols that are not declared in a shared category interface are only visible to the category TU; put the category method declaration in the shared `.nh` to keep the public vtable segment identical.
 - Generic monomorphisation triggered only from a class-method return type.

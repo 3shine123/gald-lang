@@ -136,6 +136,9 @@ struct NPProtocol {
    subset check against the class's protocol graph. NULL-safe: any argument
    NULL → 0. */
 int nepa_class_conformsToProtocol(NPClass *cls, struct NPProtocol *proto);
+/* Category TUs can add protocol conformances to the owning class metadata
+ * after static initialization. The registration is idempotent. */
+void nepa_register_category_protocols(NPClass *cls, struct NPProtocol **protocols, int count);
 
 // ─── Internal types (for runtime implementation) ────────────────────────────────
 

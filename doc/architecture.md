@@ -92,7 +92,7 @@ nepac app.np -I include -L target/foundation -lnepafoundation -o app
 
 - **R1**（字段顺序）：公共段内任意方法的槽位偏移在所有 TU 中一致；私有段只影响自己 TU 的尾部。
 - **私有方法**只能在 owner TU 内派发（跨 TU 没有槽位）——把要跨 TU 调的方法写进共享 `.nh`。
-- **R3**（`__sig` 校验）：启动期签名校验只覆盖**公共段**（本 TU 见到的声明集），允许尾部私有段差异。签名不一致（例如某 TU 的 `.nh` 过期）会大声 abort 并打印双方方法集，而不是静默读错槽位。
+- **R3**（`__sig` 校验）：启动期签名校验只覆盖**公共段**（本 TU 见到的声明集），允许尾部私有段差异。签名不一致（例如某 TU 的 `.nh` 过期）会大声 abort 并打印双方方法集，而不是静默读错槽位。类别新增协议通过 category TU 的幂等注册合并进 owner 的 `NPClass`；类别方法声明仍必须出现在共享 `.nh`。
 - **R2**（实例归属）见 §4。三条均已落地并由 `tests/multi_tu/`（13 用例）守护。
 
 ## 6. class metadata：静态初始化
@@ -128,9 +128,11 @@ nepac app.np -I include -L target/foundation -lnepafoundation -o app
 
 - **legacy EH 跨帧泄漏**：见 §9；需要跨帧异常安全用默认 checked。
 - **裸泛型只有 warning**：裸容器拼写是擦除兼容行为（无元素类型检查），真正的元素检查需要显式 type args。
-- **categories / 协议继承的跨 TU 场景**支持有限（详见 `ROADMAP.md`）。
+- 类别追加协议要求类别方法声明位于共享 `.nh`；类别 TU 通过启动期注册补入 owner metadata（详见 `tests/multi_tu/16_category_protocol`）。
 - **泛型类方法返回类型的实例化**不完整（`ROADMAP.md`）。
 - **无 debug info**（不生成 DWARF）。
+
+源码位置当前只由预处理器逐行 `SourceMap` 支持部分诊断回映；AST 尚无统一文件级完整 span，codegen 也未发射 `#line`。因此上面的“无 debug info”仍是现状。SourceSpan、source map、Clang DWARF、LSP/debugger 的目标与阶段计划见 `doc/source_locations_debug_lsp_plan.md`。
 
 ## 11. 推荐命令示例
 
@@ -188,4 +190,3 @@ nepac -ffreestanding kernel.np       # 裸机（自备运行时）
 ### 回归
 
 `tests/predicate_filter_test.np`（自检 38 项：DSL / 占位符 / 量词 / KVC 类链与未命中 / 宿主 API）+ `tests/multi_tu/13_kvc_predicate`（跨 TU 强弱表合并）+ `tests/nil_messaging_test.np`（按值 struct 返回不得发表条目）。
-

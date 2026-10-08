@@ -1211,6 +1211,36 @@ Dictionary subscripting (`d[@"k"]`) is deliberately **not** part of this rewrite
 
 Generic containers **monomorphize and are type-checked**. `NPArray<NPString *>` and `NPDictionary<NPString *, NPNumber *>` generate real specialized C (struct, vtable, class metadata, method copies with substituted types), and the checker substitutes the element types into method signatures — so the element type is enforced, not erased:
 
+#### True generics across translation units
+
+Nepa's generics are deliberately different from Objective-C lightweight generics. Objective-C keeps one runtime class and uses generic arguments mainly as compiler annotations. Nepa keeps the source spelling familiar (`Factory<NPString *>`) but generates a real monomorphized class: a distinct C struct, methods, vtable, metadata, and ABI for each concrete argument list. There is no type-erased fallback for a specialized use.
+
+In a multi-TU build, the compiler first scans all `.np` inputs for concrete specializations and forwards that demand to every TU. A TU emits the specialization only when it contains the generic implementation body; declaration-only TUs emit references to the same mangled specialization. This makes the following work without a dummy variable in the library TU:
+
+```nepa
+// model.nh — shared declaration
+@interface Factory<T> : NPObject
++ (T)make;
+@end
+
+// lib.np — implementation TU
+#import "model.nh"
+@implementation Factory
++ (T)make { return nil; }
+@end
+
+// main.np — client TU
+#import "model.nh"
+int main(void) {
+    NPString *s = [Factory<NPString *> make];
+    return s == nil ? 0 : 1;
+}
+```
+
+Build both inputs together: `nepac main.np lib.np -I . -o app`. The implementation must be available in one of the inputs (or in the source/module form used to build the library). A precompiled library can provide a fixed set of specializations, but it cannot invent a new method body for an argument type whose implementation was not shipped. If two TUs provide the same specialization, the normal owner/strong-metadata rules reject the duplicate definition instead of silently choosing an ABI.
+
+This is the intended trade-off: Nepa matches Objective-C's call-site style, while its semantics are closer to C++ templates—concrete types are checked and compiled into separate code, and unused specializations do not exist.
+
 ```nepa
 NPMutableArray<NPString *> *m = [NPMutableArray array];
 [m addObject:@"a"];
