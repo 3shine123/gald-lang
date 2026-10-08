@@ -6055,90 +6055,70 @@ __attribute__((weak)) NPObject *nepa_dictionary_create(size_t count, ...) {
 /* --------------- Section 13 · Function bodies ---------------- */
 /* -[nepa_root init] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPObject * nepa_root_init(NPObject * self, SEL _cmd) 
-#line 6 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPObject.np"
-{
+__attribute__((weak)) NPObject * nepa_root_init(NPObject * self, SEL _cmd) {
 #line 5 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPObject.np"
     return nepa_init(self);
 }
 
 /* -[nepa_root dealloc] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) void nepa_root_dealloc(NPObject * self, SEL _cmd) 
-#line 9 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPObject.np"
-{
+__attribute__((weak)) void nepa_root_dealloc(NPObject * self, SEL _cmd) {
 #line 8 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPObject.np"
     return;
 }
 
 /* -[nepa_root release] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) void nepa_root_release(NPObject * self, SEL _cmd) 
-#line 12 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPObject.np"
-{
+__attribute__((weak)) void nepa_root_release(NPObject * self, SEL _cmd) {
 #line 11 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPObject.np"
     nepa_release(self);
 }
 
 /* -[nepa_root retain] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPObject * nepa_root_retain(NPObject * self, SEL _cmd) 
-#line 15 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPObject.np"
-{
+__attribute__((weak)) NPObject * nepa_root_retain(NPObject * self, SEL _cmd) {
 #line 14 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPObject.np"
     return nepa_retain(self);
 }
 
 /* -[nepa_root isKindOf:] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) _Bool nepa_root_isKindOf_(NPObject * self, SEL _cmd, NPClass * cls) 
-#line 18 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPObject.np"
-{
+__attribute__((weak)) _Bool nepa_root_isKindOf_(NPObject * self, SEL _cmd, NPClass * cls) {
 #line 17 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPObject.np"
     return nepa_isKindOf(self, cls);
 }
 
 /* -[nepa_root isKindOfClass:] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) _Bool nepa_root_isKindOfClass_(NPObject * self, SEL _cmd, NPClass * cls) 
-#line 21 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPObject.np"
-{
+__attribute__((weak)) _Bool nepa_root_isKindOfClass_(NPObject * self, SEL _cmd, NPClass * cls) {
 #line 20 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPObject.np"
     return nepa_isKindOfClass(self, cls);
 }
 
 /* -[nepa_root isEqual:] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) _Bool nepa_root_isEqual_(NPObject * self, SEL _cmd, NPObject * object) 
-#line 25 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPObject.np"
-{
+__attribute__((weak)) _Bool nepa_root_isEqual_(NPObject * self, SEL _cmd, NPObject * object) {
 #line 24 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPObject.np"
     return (self == object);
 }
 
 /* -[nepa_root description] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPObject * nepa_root_description(NPObject * self, SEL _cmd) 
-#line 28 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPObject.np"
-{
+__attribute__((weak)) NPObject * nepa_root_description(NPObject * self, SEL _cmd) {
 #line 27 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPObject.np"
     return NULL;
 }
 
 /* +[NPObject alloc] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPObject * NPObject_alloc(NPClass * self, SEL _cmd) 
-#line 34 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPObject.np"
-{
+__attribute__((weak)) NPObject * NPObject_alloc(NPClass * self, SEL _cmd) {
 #line 33 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPObject.np"
     return nepa_alloc(self);
 }
 
 /* +[NPObject new] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPObject * NPObject_new(NPClass * self, SEL _cmd) 
-#line 38 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPObject.np"
-{
+__attribute__((weak)) NPObject * NPObject_new(NPClass * self, SEL _cmd) {
 #line 36 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPObject.np"
     NPObject * obj = nepa_alloc(self);
 #line 37 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPObject.np"
@@ -6147,54 +6127,42 @@ __attribute__((weak)) NPObject * NPObject_new(NPClass * self, SEL _cmd)
 
 /* -[NPObject alloc] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPObject * NPObject_init(NPObject * self, SEL _cmd) 
-#line 41 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPObject.np"
-{
+__attribute__((weak)) NPObject * NPObject_init(NPObject * self, SEL _cmd) {
 #line 40 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPObject.np"
     return nepa_init(self);
 }
 
 /* -[NPObject new] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) void NPObject_dealloc(NPObject * self, SEL _cmd) 
-#line 44 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPObject.np"
-{
+__attribute__((weak)) void NPObject_dealloc(NPObject * self, SEL _cmd) {
 #line 43 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPObject.np"
     return;
 }
 
 /* -[NPObject init] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) void NPObject_release(NPObject * self, SEL _cmd) 
-#line 47 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPObject.np"
-{
+__attribute__((weak)) void NPObject_release(NPObject * self, SEL _cmd) {
 #line 46 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPObject.np"
     nepa_release(self);
 }
 
 /* -[NPObject dealloc] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPObject * NPObject_retain(NPObject * self, SEL _cmd) 
-#line 50 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPObject.np"
-{
+__attribute__((weak)) NPObject * NPObject_retain(NPObject * self, SEL _cmd) {
 #line 49 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPObject.np"
     return nepa_retain(self);
 }
 
 /* -[NPObject description] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPObject * NPObject_description(NPObject * self, SEL _cmd) 
-#line 53 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPObject.np"
-{
+__attribute__((weak)) NPObject * NPObject_description(NPObject * self, SEL _cmd) {
 #line 52 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPObject.np"
     return NULL;
 }
 
 /* +[NPString hasPrefix:] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPString * NPString_stringWithUTF8String_(NPClass * self, SEL _cmd, const char * cstr) 
-#line 53 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPString.np"
-{
+__attribute__((weak)) NPString * NPString_stringWithUTF8String_(NPClass * self, SEL _cmd, const char * cstr) {
 #line 52 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPString.np"
     {
 #line 51 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPString.np"
@@ -6204,9 +6172,7 @@ __attribute__((weak)) NPString * NPString_stringWithUTF8String_(NPClass * self, 
 
 /* +[NPString hasSuffix:] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPString * NPString_stringWithString_(NPClass * self, SEL _cmd, NPString * str) 
-#line 59 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPString.np"
-{
+__attribute__((weak)) NPString * NPString_stringWithString_(NPClass * self, SEL _cmd, NPString * str) {
 #line 58 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPString.np"
     {
 #line 57 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPString.np"
@@ -6216,9 +6182,7 @@ __attribute__((weak)) NPString * NPString_stringWithString_(NPClass * self, SEL 
 
 /* -[NPString rangeOfString:] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPString * NPString_initWithUTF8String_(NPObject * self, SEL _cmd, const char * cstr) 
-#line 21 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPString.np"
-{
+__attribute__((weak)) NPString * NPString_initWithUTF8String_(NPObject * self, SEL _cmd, const char * cstr) {
 #line 10 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPString.np"
     self = (&NEPA_VTABLE_$_NPObject)->init(self, __nepa_sel_init);
 #line 19 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPString.np"
@@ -6256,9 +6220,7 @@ __attribute__((weak)) NPString * NPString_initWithUTF8String_(NPObject * self, S
 }
 
 /* -[NPString substringFromIndex:] */
-__attribute__((weak)) NPString * NPString_initWithString_(NPObject * self, SEL _cmd, NPString * str) 
-#line 38 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPString.np"
-{
+__attribute__((weak)) NPString * NPString_initWithString_(NPObject * self, SEL _cmd, NPString * str) {
 #line 24 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPString.np"
     self = (&NEPA_VTABLE_$_NPObject)->init(self, __nepa_sel_init);
 #line 36 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPString.np"
@@ -6301,27 +6263,21 @@ __attribute__((weak)) NPString * NPString_initWithString_(NPObject * self, SEL _
 }
 
 /* -[NPString substringToIndex:] */
-__attribute__((weak)) size_t NPString_length(NPObject * self, SEL _cmd) 
-#line 63 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPString.np"
-{
+__attribute__((weak)) size_t NPString_length(NPObject * self, SEL _cmd) {
 #line 62 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPString.np"
     return ((struct NPString *)self)->_length;
 }
 
 /* -[NPString substringWithRange:] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) const char * NPString_UTF8String(NPObject * self, SEL _cmd) 
-#line 67 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPString.np"
-{
+__attribute__((weak)) const char * NPString_UTF8String(NPObject * self, SEL _cmd) {
 #line 66 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPString.np"
     return ((struct NPString *)self)->_cstr ? ((struct NPString *)self)->_cstr : "";
 }
 
 /* -[NPString stringByAppendingString:] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) char NPString_characterAtIndex_(NPObject * self, SEL _cmd, size_t index) 
-#line 74 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPString.np"
-{
+__attribute__((weak)) char NPString_characterAtIndex_(NPObject * self, SEL _cmd, size_t index) {
 #line 72 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPString.np"
     if ((((struct NPString *)self)->_cstr && (index < ((struct NPString *)self)->_length))) {
 #line 71 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPString.np"
@@ -6333,9 +6289,7 @@ __attribute__((weak)) char NPString_characterAtIndex_(NPObject * self, SEL _cmd,
 
 /* -[NPString characterAtIndex:] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) _Bool NPString_isEqual_(NPObject * self, SEL _cmd, NPObject * object) 
-#line 83 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPString.np"
-{
+__attribute__((weak)) _Bool NPString_isEqual_(NPObject * self, SEL _cmd, NPObject * object) {
 #line 77 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPString.np"
     if ((self == (NPObject *)object)) {
         return 1;
@@ -6357,9 +6311,7 @@ __attribute__((weak)) _Bool NPString_isEqual_(NPObject * self, SEL _cmd, NPObjec
 
 /* -[NPString stringByAppendingUTF8String:] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) int NPString_isEqualToString_(NPObject * self, SEL _cmd, NPString * other) 
-#line 92 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPString.np"
-{
+__attribute__((weak)) int NPString_isEqualToString_(NPObject * self, SEL _cmd, NPString * other) {
 #line 86 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPString.np"
     if ((self == (NPObject *)other)) {
         return 1;
@@ -6382,9 +6334,7 @@ __attribute__((weak)) int NPString_isEqualToString_(NPObject * self, SEL _cmd, N
 
 /* -[NPString uppercaseString] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) int NPString_compare_(NPObject * self, SEL _cmd, NPString * other) 
-#line 101 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPString.np"
-{
+__attribute__((weak)) int NPString_compare_(NPObject * self, SEL _cmd, NPString * other) {
 #line 95 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPString.np"
     if (!other) {
         return 1;
@@ -6407,9 +6357,7 @@ __attribute__((weak)) int NPString_compare_(NPObject * self, SEL _cmd, NPString 
 
 /* -[NPString lowercaseString] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) int NPString_hasPrefix_(NPObject * self, SEL _cmd, NPString * prefix) 
-#line 110 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPString.np"
-{
+__attribute__((weak)) int NPString_hasPrefix_(NPObject * self, SEL _cmd, NPString * prefix) {
 #line 104 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPString.np"
     if ((!self || !prefix)) {
         return 0;
@@ -6430,9 +6378,7 @@ __attribute__((weak)) int NPString_hasPrefix_(NPObject * self, SEL _cmd, NPStrin
 
 /* -[NPString hash] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) int NPString_hasSuffix_(NPObject * self, SEL _cmd, NPString * suffix) 
-#line 121 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPString.np"
-{
+__attribute__((weak)) int NPString_hasSuffix_(NPObject * self, SEL _cmd, NPString * suffix) {
 #line 113 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPString.np"
     if ((!self || !suffix)) {
         return 0;
@@ -6459,9 +6405,7 @@ __attribute__((weak)) int NPString_hasSuffix_(NPObject * self, SEL _cmd, NPStrin
 
 /* -[NPString description] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPRange NPString_rangeOfString_(NPObject * self, SEL _cmd, NPString * substring) 
-#line 137 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPString.np"
-{
+__attribute__((weak)) NPRange NPString_rangeOfString_(NPObject * self, SEL _cmd, NPString * substring) {
 #line 124 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPString.np"
     NPRange range = { 0, 0 };
 #line 125 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPString.np"
@@ -6503,9 +6447,7 @@ __attribute__((weak)) NPRange NPString_rangeOfString_(NPObject * self, SEL _cmd,
 }
 
 /* -[NPString copy] */
-__attribute__((weak)) NPString * NPString_substringFromIndex_(NPObject * self, SEL _cmd, size_t from) 
-#line 142 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPString.np"
-{
+__attribute__((weak)) NPString * NPString_substringFromIndex_(NPObject * self, SEL _cmd, size_t from) {
 #line 140 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPString.np"
     if ((!((struct NPString *)self)->_cstr || (from > ((struct NPString *)self)->_length))) {
         return NULL;
@@ -6516,9 +6458,7 @@ __attribute__((weak)) NPString * NPString_substringFromIndex_(NPObject * self, S
 
 /* -[NPString dealloc] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPString * NPString_substringToIndex_(NPObject * self, SEL _cmd, size_t to) 
-#line 153 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPString.np"
-{
+__attribute__((weak)) NPString * NPString_substringToIndex_(NPObject * self, SEL _cmd, size_t to) {
 #line 145 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPString.np"
     if (!((struct NPString *)self)->_cstr) {
         return NULL;
@@ -6551,9 +6491,7 @@ __attribute__((weak)) NPString * NPString_substringToIndex_(NPObject * self, SEL
 }
 
 /* -[NPString substringWithRange_] */
-__attribute__((weak)) NPString * NPString_substringWithRange_(NPObject * self, SEL _cmd, NPRange range) 
-#line 166 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPString.np"
-{
+__attribute__((weak)) NPString * NPString_substringWithRange_(NPObject * self, SEL _cmd, NPRange range) {
 #line 156 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPString.np"
     if (!((struct NPString *)self)->_cstr) {
         return NULL;
@@ -6587,9 +6525,7 @@ __attribute__((weak)) NPString * NPString_substringWithRange_(NPObject * self, S
 }
 
 /* -[NPString stringByAppendingString_] */
-__attribute__((weak)) NPString * NPString_stringByAppendingString_(NPObject * self, SEL _cmd, NPString * other) 
-#line 182 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPString.np"
-{
+__attribute__((weak)) NPString * NPString_stringByAppendingString_(NPObject * self, SEL _cmd, NPString * other) {
 #line 169 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPString.np"
     if (!self) {
         return (NPString *)NPString_stringWithString_(&NEPA_CLASS_$_NPString, __nepa_sel_stringWithString_, other);
@@ -6639,9 +6575,7 @@ __attribute__((weak)) NPString * NPString_stringByAppendingString_(NPObject * se
 }
 
 /* -[NPString stringByAppendingUTF8String_] */
-__attribute__((weak)) NPString * NPString_stringByAppendingUTF8String_(NPObject * self, SEL _cmd, const char * cstr) 
-#line 196 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPString.np"
-{
+__attribute__((weak)) NPString * NPString_stringByAppendingUTF8String_(NPObject * self, SEL _cmd, const char * cstr) {
 #line 185 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPString.np"
     if ((!self || !cstr)) {
         return (NPString *)NPString_stringWithString_(&NEPA_CLASS_$_NPString, __nepa_sel_stringWithString_, self);
@@ -6685,9 +6619,7 @@ __attribute__((weak)) NPString * NPString_stringByAppendingUTF8String_(NPObject 
 }
 
 /* -[NPString uppercaseString] */
-__attribute__((weak)) NPString * NPString_uppercaseString(NPObject * self, SEL _cmd) 
-#line 207 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPString.np"
-{
+__attribute__((weak)) NPString * NPString_uppercaseString(NPObject * self, SEL _cmd) {
 #line 199 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPString.np"
     if (!((struct NPString *)self)->_cstr) {
         return NULL;
@@ -6717,9 +6649,7 @@ __attribute__((weak)) NPString * NPString_uppercaseString(NPObject * self, SEL _
 }
 
 /* -[NPString lowercaseString] */
-__attribute__((weak)) NPString * NPString_lowercaseString(NPObject * self, SEL _cmd) 
-#line 218 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPString.np"
-{
+__attribute__((weak)) NPString * NPString_lowercaseString(NPObject * self, SEL _cmd) {
 #line 210 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPString.np"
     if (!((struct NPString *)self)->_cstr) {
         return NULL;
@@ -6749,9 +6679,7 @@ __attribute__((weak)) NPString * NPString_lowercaseString(NPObject * self, SEL _
 }
 
 /* -[NPString hash] */
-__attribute__((weak)) uint32_t NPString_hash(NPObject * self, SEL _cmd) 
-#line 232 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPString.np"
-{
+__attribute__((weak)) uint32_t NPString_hash(NPObject * self, SEL _cmd) {
 #line 221 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPString.np"
     if (((struct NPString *)self)->_hashIsValid) {
         return ((struct NPString *)self)->_hash;
@@ -6778,27 +6706,21 @@ __attribute__((weak)) uint32_t NPString_hash(NPObject * self, SEL _cmd)
 
 /* -[NPString isEqual:] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPString * NPString_description(NPObject * self, SEL _cmd) 
-#line 236 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPString.np"
-{
+__attribute__((weak)) NPString * NPString_description(NPObject * self, SEL _cmd) {
 #line 235 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPString.np"
     return (NPString *)NPString_stringWithString_(&NEPA_CLASS_$_NPString, __nepa_sel_stringWithString_, self);
 }
 
 /* -[NPString copy] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPString * NPString_copy(NPObject * self, SEL _cmd) 
-#line 241 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPString.np"
-{
+__attribute__((weak)) NPString * NPString_copy(NPObject * self, SEL _cmd) {
 #line 240 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPString.np"
     return (NPString *)({ NPObject *__nepa_tmp_22 = ((NPObject *)(NPObject_alloc(&NEPA_CLASS_$_NPString, __nepa_sel_alloc))); __nepa_tmp_22 ? ((NPMutableString * (*)(NPObject *, SEL, NPString *))((struct nepa_vtable *)__nepa_tmp_22->isa->vtable)->initWithString_)(__nepa_tmp_22, __nepa_sel_initWithString_, (NPString *)(self)) : 0; });
 }
 
 /* -[NPString stringWithString:] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) void NPString_dealloc(NPObject * self, SEL _cmd) 
-#line 47 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPString.np"
-{
+__attribute__((weak)) void NPString_dealloc(NPObject * self, SEL _cmd) {
 #line 44 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPString.np"
     if (((struct NPString *)self)->_cstr) {
 #line 42 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPString.np"
@@ -6814,9 +6736,7 @@ __attribute__((weak)) void NPString_dealloc(NPObject * self, SEL _cmd)
 
 /* +[NPMutableString stringWithUTF8String_] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPMutableString * NPMutableString_stringWithUTF8String_(NPClass * self, SEL _cmd, const char * cstr) 
-#line 21 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableString.np"
-{
+__attribute__((weak)) NPMutableString * NPMutableString_stringWithUTF8String_(NPClass * self, SEL _cmd, const char * cstr) {
 #line 20 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableString.np"
     {
 #line 19 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableString.np"
@@ -6826,9 +6746,7 @@ __attribute__((weak)) NPMutableString * NPMutableString_stringWithUTF8String_(NP
 
 /* +[NPMutableString stringWithString_] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPMutableString * NPMutableString_stringWithString_(NPClass * self, SEL _cmd, NPString * str) 
-#line 27 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableString.np"
-{
+__attribute__((weak)) NPMutableString * NPMutableString_stringWithString_(NPClass * self, SEL _cmd, NPString * str) {
 #line 26 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableString.np"
     {
 #line 25 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableString.np"
@@ -6838,9 +6756,7 @@ __attribute__((weak)) NPMutableString * NPMutableString_stringWithString_(NPClas
 
 /* -[NPMutableString initWithUTF8String_] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPMutableString * NPMutableString_initWithUTF8String_(NPObject * self, SEL _cmd, const char * cstr) 
-#line 10 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableString.np"
-{
+__attribute__((weak)) NPMutableString * NPMutableString_initWithUTF8String_(NPObject * self, SEL _cmd, const char * cstr) {
 #line 8 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableString.np"
     self = (&NEPA_VTABLE_$_NPString)->initWithUTF8String_(self, __nepa_sel_initWithUTF8String_, cstr);
 #line 9 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableString.np"
@@ -6849,9 +6765,7 @@ __attribute__((weak)) NPMutableString * NPMutableString_initWithUTF8String_(NPOb
 
 /* -[NPMutableString initWithString_] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPMutableString * NPMutableString_initWithString_(NPObject * self, SEL _cmd, NPString * str) 
-#line 15 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableString.np"
-{
+__attribute__((weak)) NPMutableString * NPMutableString_initWithString_(NPObject * self, SEL _cmd, NPString * str) {
 #line 13 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableString.np"
     self = (&NEPA_VTABLE_$_NPString)->initWithString_(self, __nepa_sel_initWithString_, (NPString *)(str));
 #line 14 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableString.np"
@@ -6860,9 +6774,7 @@ __attribute__((weak)) NPMutableString * NPMutableString_initWithString_(NPObject
 
 /* -[NPMutableString appendString_] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) void NPMutableString_appendString_(NPObject * self, SEL _cmd, NPString * str) 
-#line 34 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableString.np"
-{
+__attribute__((weak)) void NPMutableString_appendString_(NPObject * self, SEL _cmd, NPString * str) {
 #line 30 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableString.np"
     if (!str) {
         return;
@@ -6879,9 +6791,7 @@ __attribute__((weak)) void NPMutableString_appendString_(NPObject * self, SEL _c
 
 /* -[NPMutableString appendUTF8String_] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) void NPMutableString_appendUTF8String_(NPObject * self, SEL _cmd, const char * cstr) 
-#line 46 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableString.np"
-{
+__attribute__((weak)) void NPMutableString_appendUTF8String_(NPObject * self, SEL _cmd, const char * cstr) {
 #line 37 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableString.np"
     if (!cstr) {
         return;
@@ -6910,9 +6820,7 @@ __attribute__((weak)) void NPMutableString_appendUTF8String_(NPObject * self, SE
 
 /* -[NPMutableString insertString_atIndex_] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) void NPMutableString_insertString_atIndex_(NPObject * self, SEL _cmd, NPString * str, size_t idx) 
-#line 62 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableString.np"
-{
+__attribute__((weak)) void NPMutableString_insertString_atIndex_(NPObject * self, SEL _cmd, NPString * str, size_t idx) {
 #line 49 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableString.np"
     if (!str) {
         return;
@@ -6953,9 +6861,7 @@ __attribute__((weak)) void NPMutableString_insertString_atIndex_(NPObject * self
 
 /* -[NPMutableString deleteCharactersInRange_] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) void NPMutableString_deleteCharactersInRange_(NPObject * self, SEL _cmd, NPRange range) 
-#line 75 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableString.np"
-{
+__attribute__((weak)) void NPMutableString_deleteCharactersInRange_(NPObject * self, SEL _cmd, NPRange range) {
 #line 65 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableString.np"
     if (!((struct NPMutableString *)self)->_cstr) {
         return;
@@ -6983,9 +6889,7 @@ __attribute__((weak)) void NPMutableString_deleteCharactersInRange_(NPObject * s
 
 /* -[NPMutableString replaceCharactersInRange_withString_] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) void NPMutableString_replaceCharactersInRange_withString_(NPObject * self, SEL _cmd, NPRange range, NPString * str) 
-#line 95 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableString.np"
-{
+__attribute__((weak)) void NPMutableString_replaceCharactersInRange_withString_(NPObject * self, SEL _cmd, NPRange range, NPString * str) {
 #line 78 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableString.np"
     if (!str) {
         return;
@@ -7031,9 +6935,7 @@ __attribute__((weak)) void NPMutableString_replaceCharactersInRange_withString_(
 
 /* -[NPMutableString setString_] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) void NPMutableString_setString_(NPObject * self, SEL _cmd, NPString * str) 
-#line 106 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableString.np"
-{
+__attribute__((weak)) void NPMutableString_setString_(NPObject * self, SEL _cmd, NPString * str) {
 #line 98 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableString.np"
     char * src = (char *)(str ? ({ NPObject *__nepa_tmp_29 = ((NPObject *)(str)); __nepa_tmp_29 ? ((const char * (*)(NPObject *, SEL))((struct nepa_vtable *)__nepa_tmp_29->isa->vtable)->UTF8String)(__nepa_tmp_29, __nepa_sel_UTF8String) : 0; }) : "");
 #line 99 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableString.np"
@@ -7056,18 +6958,14 @@ __attribute__((weak)) void NPMutableString_setString_(NPObject * self, SEL _cmd,
 
 /* +[NPPredicate predicateWithFormat_] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPPredicate * NPPredicate_predicateWithFormat_(NPClass * self, SEL _cmd, NPString * format) 
-#line 388 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
-{
+__attribute__((weak)) NPPredicate * NPPredicate_predicateWithFormat_(NPClass * self, SEL _cmd, NPString * format) {
 #line 387 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
     return (NPPredicate *)({ NPObject *__nepa_tmp_30 = ((NPObject *)(NPObject_alloc(self, __nepa_sel_alloc))); __nepa_tmp_30 ? ((NPPredicate * (*)(NPObject *, SEL, NPString *, NPObject * *, size_t))((struct nepa_vtable *)__nepa_tmp_30->isa->vtable)->initWithFormat_args_count_)(__nepa_tmp_30, __nepa_sel_initWithFormat_args_count_, (NPString *)(format), (NPObject * *)(NULL), 0) : 0; });
 }
 
 /* +[NPPredicate predicateWithFormat_object_] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPPredicate * NPPredicate_predicateWithFormat_object_(NPClass * self, SEL _cmd, NPString * format, NPObject * arg) 
-#line 393 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
-{
+__attribute__((weak)) NPPredicate * NPPredicate_predicateWithFormat_object_(NPClass * self, SEL _cmd, NPString * format, NPObject * arg) {
 #line 391 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
     NPObject * args[2] = { arg, NULL };
 #line 392 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
@@ -7076,9 +6974,7 @@ __attribute__((weak)) NPPredicate * NPPredicate_predicateWithFormat_object_(NPCl
 
 /* -[NPPredicate initWithFormat_args_count_] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPPredicate * NPPredicate_initWithFormat_args_count_(NPObject * self, SEL _cmd, NPString * format, NPObject * * args, size_t n) 
-#line 424 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
-{
+__attribute__((weak)) NPPredicate * NPPredicate_initWithFormat_args_count_(NPObject * self, SEL _cmd, NPString * format, NPObject * * args, size_t n) {
 #line 396 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
     self = (&NEPA_VTABLE_$_NPObject)->init(self, __nepa_sel_init);
 #line 397 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
@@ -7137,9 +7033,7 @@ __attribute__((weak)) NPPredicate * NPPredicate_initWithFormat_args_count_(NPObj
 }
 
 /* -[NPPredicate evaluateWithObject_] */
-__attribute__((weak)) _Bool NPPredicate_evaluateWithObject_(NPObject * self, SEL _cmd, NPObject * object) 
-#line 482 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
-{
+__attribute__((weak)) _Bool NPPredicate_evaluateWithObject_(NPObject * self, SEL _cmd, NPObject * object) {
 #line 480 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
     if ((((struct NPPredicate *)self)->_node_count == 0)) {
         return 0;
@@ -7153,18 +7047,14 @@ __attribute__((weak)) _Bool NPPredicate_evaluateWithObject_(NPObject * self, SEL
 }
 
 /* -[NPPredicate predicateFormat] */
-__attribute__((weak)) NPString * NPPredicate_predicateFormat(NPObject * self, SEL _cmd) 
-#line 466 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
-{
+__attribute__((weak)) NPString * NPPredicate_predicateFormat(NPObject * self, SEL _cmd) {
 #line 465 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
     return ((struct NPPredicate *)self)->_format;
 }
 
 /* +[NPArray indexOfObjectMatchingPredicate:] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPObject * NPArray_arrayWithObjects_count_(NPClass * self, SEL _cmd, NPObject * * objs, size_t n) 
-#line 36 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPArray.np"
-{
+__attribute__((weak)) NPObject * NPArray_arrayWithObjects_count_(NPClass * self, SEL _cmd, NPObject * * objs, size_t n) {
 #line 23 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPArray.np"
     NPObject *__nepa_tmp_36 = (NPObject_alloc(self, __nepa_sel_alloc));
     NPArray * arr = (NPArray *)(__nepa_tmp_36 ? ((struct nepa_vtable *)__nepa_tmp_36->isa->vtable)->init(__nepa_tmp_36, __nepa_sel_init) : 0);
@@ -7198,36 +7088,28 @@ __attribute__((weak)) NPObject * NPArray_arrayWithObjects_count_(NPClass * self,
 
 /* +[NPArray copy] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPObject * NPArray_arrayWithObject_(NPClass * self, SEL _cmd, NPObject * obj) 
-#line 40 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPArray.np"
-{
+__attribute__((weak)) NPObject * NPArray_arrayWithObject_(NPClass * self, SEL _cmd, NPObject * obj) {
 #line 39 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPArray.np"
     return NPArray_arrayWithObjects_count_(self, __nepa_sel_arrayWithObjects_count_, &obj, 1);
 }
 
 /* +[NPArray description] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPObject * NPArray_array(NPClass * self, SEL _cmd) 
-#line 44 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPArray.np"
-{
+__attribute__((weak)) NPObject * NPArray_array(NPClass * self, SEL _cmd) {
 #line 43 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPArray.np"
     return NPArray_arrayWithObjects_count_(self, __nepa_sel_arrayWithObjects_count_, NULL, 0);
 }
 
 /* -[NPArray dealloc] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) size_t NPArray_count(NPObject * self, SEL _cmd) 
-#line 48 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPArray.np"
-{
+__attribute__((weak)) size_t NPArray_count(NPObject * self, SEL _cmd) {
 #line 47 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPArray.np"
     return ((struct NPArray *)self)->_count;
 }
 
 /* -[NPArray objectAtIndex_] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPObject * NPArray_objectAtIndex_(NPObject * self, SEL _cmd, size_t index) 
-#line 53 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPArray.np"
-{
+__attribute__((weak)) NPObject * NPArray_objectAtIndex_(NPObject * self, SEL _cmd, size_t index) {
 #line 51 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPArray.np"
     if ((index >= ((struct NPArray *)self)->_count)) {
         return NULL;
@@ -7238,27 +7120,21 @@ __attribute__((weak)) NPObject * NPArray_objectAtIndex_(NPObject * self, SEL _cm
 
 /* -[NPArray firstObject] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPObject * NPArray_firstObject(NPObject * self, SEL _cmd) 
-#line 57 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPArray.np"
-{
+__attribute__((weak)) NPObject * NPArray_firstObject(NPObject * self, SEL _cmd) {
 #line 56 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPArray.np"
     return (((struct NPArray *)self)->_count > 0) ? ((struct NPArray *)self)->_items[0] : NULL;
 }
 
 /* -[NPArray lastObject] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPObject * NPArray_lastObject(NPObject * self, SEL _cmd) 
-#line 61 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPArray.np"
-{
+__attribute__((weak)) NPObject * NPArray_lastObject(NPObject * self, SEL _cmd) {
 #line 60 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPArray.np"
     return (((struct NPArray *)self)->_count > 0) ? ((struct NPArray *)self)->_items[(((struct NPArray *)self)->_count - 1)] : NULL;
 }
 
 /* -[NPArray containsObject_] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) _Bool NPArray_containsObject_(NPObject * self, SEL _cmd, NPObject * obj) 
-#line 68 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPArray.np"
-{
+__attribute__((weak)) _Bool NPArray_containsObject_(NPObject * self, SEL _cmd, NPObject * obj) {
 #line 66 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPArray.np"
     for (size_t i = 0;  (i < ((struct NPArray *)self)->_count); (i)++) {
 #line 65 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPArray.np"
@@ -7272,9 +7148,7 @@ __attribute__((weak)) _Bool NPArray_containsObject_(NPObject * self, SEL _cmd, N
 
 /* -[NPArray indexOfObject_] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) size_t NPArray_indexOfObject_(NPObject * self, SEL _cmd, NPObject * obj) 
-#line 75 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPArray.np"
-{
+__attribute__((weak)) size_t NPArray_indexOfObject_(NPObject * self, SEL _cmd, NPObject * obj) {
 #line 73 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPArray.np"
     for (size_t i = 0;  (i < ((struct NPArray *)self)->_count); (i)++) {
 #line 72 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPArray.np"
@@ -7288,9 +7162,7 @@ __attribute__((weak)) size_t NPArray_indexOfObject_(NPObject * self, SEL _cmd, N
 
 /* -[NPArray filteredArrayUsingPredicate_] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPArray * NPArray_filteredArrayUsingPredicate_(NPObject * self, SEL _cmd, NPPredicate * pred) 
-#line 102 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPArray.np"
-{
+__attribute__((weak)) NPArray * NPArray_filteredArrayUsingPredicate_(NPObject * self, SEL _cmd, NPPredicate * pred) {
 #line 84 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPArray.np"
     if (!pred) {
 #line 83 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPArray.np"
@@ -7330,9 +7202,7 @@ __attribute__((weak)) NPArray * NPArray_filteredArrayUsingPredicate_(NPObject * 
 
 /* -[NPArray indexOfObjectMatchingPredicate_] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) size_t NPArray_indexOfObjectMatchingPredicate_(NPObject * self, SEL _cmd, NPPredicate * pred) 
-#line 113 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPArray.np"
-{
+__attribute__((weak)) size_t NPArray_indexOfObjectMatchingPredicate_(NPObject * self, SEL _cmd, NPPredicate * pred) {
 #line 106 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPArray.np"
     if (!pred) {
         return (size_t)-1;
@@ -7351,9 +7221,7 @@ __attribute__((weak)) size_t NPArray_indexOfObjectMatchingPredicate_(NPObject * 
 
 /* -[NPArray copy] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPObject * NPArray_copy(NPObject * self, SEL _cmd) 
-#line 119 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPArray.np"
-{
+__attribute__((weak)) NPObject * NPArray_copy(NPObject * self, SEL _cmd) {
 #line 118 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPArray.np"
     __auto_type __nepa_eh_tmp_2 = NPArray_arrayWithObjects_count_(&NEPA_CLASS_$_NPArray, __nepa_sel_arrayWithObjects_count_, ((struct NPArray *)self)->_items, ((struct NPArray *)self)->_count);
     return nepa_retain(__nepa_eh_tmp_2);
@@ -7361,9 +7229,7 @@ __attribute__((weak)) NPObject * NPArray_copy(NPObject * self, SEL _cmd)
 
 /* -[NPArray containsObject:] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPString * NPArray_description(NPObject * self, SEL _cmd) 
-#line 135 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPArray.np"
-{
+__attribute__((weak)) NPString * NPArray_description(NPObject * self, SEL _cmd) {
 #line 122 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPArray.np"
     NPString * result = (NPString *)(NPString_stringWithUTF8String_(&NEPA_CLASS_$_NPString, __nepa_sel_stringWithUTF8String_, "["));
 #line 132 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPArray.np"
@@ -7396,9 +7262,7 @@ __attribute__((weak)) NPString * NPArray_description(NPObject * self, SEL _cmd)
 
 /* -[NPArray arrayWithObject:] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) void NPArray_dealloc(NPObject * self, SEL _cmd) 
-#line 20 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPArray.np"
-{
+__attribute__((weak)) void NPArray_dealloc(NPObject * self, SEL _cmd) {
 #line 14 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPArray.np"
     for (size_t i = 0;  (i < ((struct NPArray *)self)->_count); (i)++) {
 #line 13 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPArray.np"
@@ -7421,9 +7285,7 @@ __attribute__((weak)) void NPArray_dealloc(NPObject * self, SEL _cmd)
 
 /* +[NPMutableArray arrayWithCapacity_] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPMutableArray * NPMutableArray_arrayWithCapacity_(NPClass * self, SEL _cmd, size_t capacity) 
-#line 54 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableArray.np"
-{
+__attribute__((weak)) NPMutableArray * NPMutableArray_arrayWithCapacity_(NPClass * self, SEL _cmd, size_t capacity) {
 #line 53 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableArray.np"
     {
 #line 52 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableArray.np"
@@ -7433,9 +7295,7 @@ __attribute__((weak)) NPMutableArray * NPMutableArray_arrayWithCapacity_(NPClass
 
 /* +[NPMutableArray removeLastObject] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPMutableArray * NPMutableArray_array(NPClass * self, SEL _cmd) 
-#line 60 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableArray.np"
-{
+__attribute__((weak)) NPMutableArray * NPMutableArray_array(NPClass * self, SEL _cmd) {
 #line 59 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableArray.np"
     {
 #line 58 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableArray.np"
@@ -7445,9 +7305,7 @@ __attribute__((weak)) NPMutableArray * NPMutableArray_array(NPClass * self, SEL 
 
 /* +[NPMutableArray removeObjectAtIndex:] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPMutableArray * NPMutableArray_arrayWithObject_(NPClass * self, SEL _cmd, NPObject * obj) 
-#line 70 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableArray.np"
-{
+__attribute__((weak)) NPMutableArray * NPMutableArray_arrayWithObject_(NPClass * self, SEL _cmd, NPObject * obj) {
 #line 69 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableArray.np"
     {
 #line 64 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableArray.np"
@@ -7464,9 +7322,7 @@ __attribute__((weak)) NPMutableArray * NPMutableArray_arrayWithObject_(NPClass *
 
 /* +[NPMutableArray insertObject:atIndex:] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPMutableArray * NPMutableArray_arrayWithObjects_count_(NPClass * self, SEL _cmd, NPObject * * objs, size_t n) 
-#line 84 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableArray.np"
-{
+__attribute__((weak)) NPMutableArray * NPMutableArray_arrayWithObjects_count_(NPClass * self, SEL _cmd, NPObject * * objs, size_t n) {
 #line 83 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableArray.np"
     {
 #line 74 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableArray.np"
@@ -7489,18 +7345,14 @@ __attribute__((weak)) NPMutableArray * NPMutableArray_arrayWithObjects_count_(NP
 
 /* -[NPMutableArray arrayWithCapacity:] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPMutableArray * NPMutableArray_init(NPObject * self, SEL _cmd) 
-#line 27 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableArray.np"
-{
+__attribute__((weak)) NPMutableArray * NPMutableArray_init(NPObject * self, SEL _cmd) {
 #line 26 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableArray.np"
     return (NPMutableArray *)({ NPObject *__nepa_tmp_48 = ((NPObject *)(self)); __nepa_tmp_48 ? ((NPMutableArray * (*)(NPObject *, SEL, size_t))((struct nepa_vtable *)__nepa_tmp_48->isa->vtable)->initWithCapacity_)(__nepa_tmp_48, __nepa_sel_initWithCapacity_, 0) : 0; });
 }
 
 /* -[NPMutableArray initWithCapacity_] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPMutableArray * NPMutableArray_initWithCapacity_(NPObject * self, SEL _cmd, size_t capacity) 
-#line 23 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableArray.np"
-{
+__attribute__((weak)) NPMutableArray * NPMutableArray_initWithCapacity_(NPObject * self, SEL _cmd, size_t capacity) {
 #line 9 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableArray.np"
     self = (&NEPA_VTABLE_$_NPObject)->init(self, __nepa_sel_init);
 #line 21 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableArray.np"
@@ -7530,9 +7382,7 @@ __attribute__((weak)) NPMutableArray * NPMutableArray_initWithCapacity_(NPObject
 
 /* -[NPMutableArray initWithArray_] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPMutableArray * NPMutableArray_initWithArray_(NPObject * self, SEL _cmd, NPArray * other) 
-#line 38 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableArray.np"
-{
+__attribute__((weak)) NPMutableArray * NPMutableArray_initWithArray_(NPObject * self, SEL _cmd, NPArray * other) {
 #line 30 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableArray.np"
     self = ({ NPObject *__nepa_tmp_49 = ((NPObject *)(self)); __nepa_tmp_49 ? ((NPMutableArray * (*)(NPObject *, SEL))((struct nepa_vtable *)__nepa_tmp_49->isa->vtable)->init)(__nepa_tmp_49, __nepa_sel_init) : 0; });
 #line 36 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableArray.np"
@@ -7552,9 +7402,7 @@ __attribute__((weak)) NPMutableArray * NPMutableArray_initWithArray_(NPObject * 
 
 /* -[NPMutableArray initWithObjects_count_] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPMutableArray * NPMutableArray_initWithObjects_count_(NPObject * self, SEL _cmd, NPObject * * objs, size_t n) 
-#line 48 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableArray.np"
-{
+__attribute__((weak)) NPMutableArray * NPMutableArray_initWithObjects_count_(NPObject * self, SEL _cmd, NPObject * * objs, size_t n) {
 #line 41 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableArray.np"
     self = ({ NPObject *__nepa_tmp_53 = ((NPObject *)(self)); __nepa_tmp_53 ? ((NPMutableArray * (*)(NPObject *, SEL))((struct nepa_vtable *)__nepa_tmp_53->isa->vtable)->init)(__nepa_tmp_53, __nepa_sel_init) : 0; });
 #line 46 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableArray.np"
@@ -7571,9 +7419,7 @@ __attribute__((weak)) NPMutableArray * NPMutableArray_initWithObjects_count_(NPO
 
 /* -[NPMutableArray addObject_] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) void NPMutableArray_addObject_(NPObject * self, SEL _cmd, NPObject * obj) 
-#line 97 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableArray.np"
-{
+__attribute__((weak)) void NPMutableArray_addObject_(NPObject * self, SEL _cmd, NPObject * obj) {
 #line 87 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableArray.np"
     if (!obj) {
         return;
@@ -7601,9 +7447,7 @@ __attribute__((weak)) void NPMutableArray_addObject_(NPObject * self, SEL _cmd, 
 
 /* -[NPMutableArray addObjectsFromArray_] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) void NPMutableArray_addObjectsFromArray_(NPObject * self, SEL _cmd, NPArray * other) 
-#line 105 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableArray.np"
-{
+__attribute__((weak)) void NPMutableArray_addObjectsFromArray_(NPObject * self, SEL _cmd, NPArray * other) {
 #line 100 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableArray.np"
     if (!other) {
         return;
@@ -7620,9 +7464,7 @@ __attribute__((weak)) void NPMutableArray_addObjectsFromArray_(NPObject * self, 
 
 /* -[NPMutableArray insertObject_atIndex_] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) void NPMutableArray_insertObject_atIndex_(NPObject * self, SEL _cmd, NPObject * obj, size_t index) 
-#line 120 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableArray.np"
-{
+__attribute__((weak)) void NPMutableArray_insertObject_atIndex_(NPObject * self, SEL _cmd, NPObject * obj, size_t index) {
 #line 108 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableArray.np"
     if (!obj) {
         return;
@@ -7656,9 +7498,7 @@ __attribute__((weak)) void NPMutableArray_insertObject_atIndex_(NPObject * self,
 
 /* -[NPMutableArray removeObjectAtIndex_] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) void NPMutableArray_removeObjectAtIndex_(NPObject * self, SEL _cmd, size_t index) 
-#line 130 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableArray.np"
-{
+__attribute__((weak)) void NPMutableArray_removeObjectAtIndex_(NPObject * self, SEL _cmd, size_t index) {
 #line 123 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableArray.np"
     if ((index >= ((struct NPMutableArray *)self)->_count)) {
         return;
@@ -7678,9 +7518,7 @@ __attribute__((weak)) void NPMutableArray_removeObjectAtIndex_(NPObject * self, 
 
 /* -[NPMutableArray removeLastObject] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) void NPMutableArray_removeLastObject(NPObject * self, SEL _cmd) 
-#line 135 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableArray.np"
-{
+__attribute__((weak)) void NPMutableArray_removeLastObject(NPObject * self, SEL _cmd) {
 #line 133 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableArray.np"
     if ((((struct NPMutableArray *)self)->_count == 0)) {
         return;
@@ -7691,9 +7529,7 @@ __attribute__((weak)) void NPMutableArray_removeLastObject(NPObject * self, SEL 
 
 /* -[NPMutableArray removeObject_] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) void NPMutableArray_removeObject_(NPObject * self, SEL _cmd, NPObject * obj) 
-#line 145 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableArray.np"
-{
+__attribute__((weak)) void NPMutableArray_removeObject_(NPObject * self, SEL _cmd, NPObject * obj) {
 #line 138 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableArray.np"
     if (!obj) {
         return;
@@ -7712,9 +7548,7 @@ __attribute__((weak)) void NPMutableArray_removeObject_(NPObject * self, SEL _cm
 
 /* -[NPMutableArray removeAllObjects] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) void NPMutableArray_removeAllObjects(NPObject * self, SEL _cmd) 
-#line 154 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableArray.np"
-{
+__attribute__((weak)) void NPMutableArray_removeAllObjects(NPObject * self, SEL _cmd) {
 #line 152 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableArray.np"
     for (size_t i = 0;  (i < ((struct NPMutableArray *)self)->_count); (i)++) {
 #line 151 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableArray.np"
@@ -7729,9 +7563,7 @@ __attribute__((weak)) void NPMutableArray_removeAllObjects(NPObject * self, SEL 
 
 /* -[NPMutableArray replaceObjectAtIndex_withObject_] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) void NPMutableArray_replaceObjectAtIndex_withObject_(NPObject * self, SEL _cmd, size_t index, NPObject * obj) 
-#line 163 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableArray.np"
-{
+__attribute__((weak)) void NPMutableArray_replaceObjectAtIndex_withObject_(NPObject * self, SEL _cmd, size_t index, NPObject * obj) {
 #line 157 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableArray.np"
     if ((!obj || (index >= ((struct NPMutableArray *)self)->_count))) {
         return;
@@ -7749,9 +7581,7 @@ __attribute__((weak)) void NPMutableArray_replaceObjectAtIndex_withObject_(NPObj
 
 /* -[NPMutableArray exchangeObjectAtIndex_withObjectAtIndex_] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) void NPMutableArray_exchangeObjectAtIndex_withObjectAtIndex_(NPObject * self, SEL _cmd, size_t a, size_t b) 
-#line 170 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableArray.np"
-{
+__attribute__((weak)) void NPMutableArray_exchangeObjectAtIndex_withObjectAtIndex_(NPObject * self, SEL _cmd, size_t a, size_t b) {
 #line 166 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableArray.np"
     if (((a >= ((struct NPMutableArray *)self)->_count) || (b >= ((struct NPMutableArray *)self)->_count))) {
         return;
@@ -7766,9 +7596,7 @@ __attribute__((weak)) void NPMutableArray_exchangeObjectAtIndex_withObjectAtInde
 
 /* -[NPMutableArray setObject_atIndex_] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) void NPMutableArray_setObject_atIndex_(NPObject * self, SEL _cmd, NPObject * obj, size_t index) 
-#line 175 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableArray.np"
-{
+__attribute__((weak)) void NPMutableArray_setObject_atIndex_(NPObject * self, SEL _cmd, NPObject * obj, size_t index) {
 #line 173 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableArray.np"
     if ((!obj || (index >= ((struct NPMutableArray *)self)->_count))) {
         return;
@@ -7779,9 +7607,7 @@ __attribute__((weak)) void NPMutableArray_setObject_atIndex_(NPObject * self, SE
 
 /* -[NPMutableArray filterUsingPredicate_] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) void NPMutableArray_filterUsingPredicate_(NPObject * self, SEL _cmd, NPPredicate * pred) 
-#line 195 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableArray.np"
-{
+__attribute__((weak)) void NPMutableArray_filterUsingPredicate_(NPObject * self, SEL _cmd, NPPredicate * pred) {
 #line 183 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableArray.np"
     if (!pred) {
         return;
@@ -7813,27 +7639,21 @@ __attribute__((weak)) void NPMutableArray_filterUsingPredicate_(NPObject * self,
 
 /* +[NPDictionary dealloc] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPDictionary * NPDictionary_dictionary(NPClass * self, SEL _cmd) 
-#line 28 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPDictionary.np"
-{
+__attribute__((weak)) NPDictionary * NPDictionary_dictionary(NPClass * self, SEL _cmd) {
 #line 27 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPDictionary.np"
     return (NPDictionary *)NPDictionary_dictionaryWithObjects_forKeys_count_(self, __nepa_sel_dictionaryWithObjects_forKeys_count_, NULL, NULL, 0);
 }
 
 /* +[NPDictionary dictionaryWithObject_forKey_] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPDictionary * NPDictionary_dictionaryWithObject_forKey_(NPClass * self, SEL _cmd, NPObject * value, NPObject * key) 
-#line 32 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPDictionary.np"
-{
+__attribute__((weak)) NPDictionary * NPDictionary_dictionaryWithObject_forKey_(NPClass * self, SEL _cmd, NPObject * value, NPObject * key) {
 #line 31 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPDictionary.np"
     return (NPDictionary *)NPDictionary_dictionaryWithObjects_forKeys_count_(self, __nepa_sel_dictionaryWithObjects_forKeys_count_, &value, &key, 1);
 }
 
 /* +[NPDictionary dictionaryWithObjects_forKeys_count_] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPDictionary * NPDictionary_dictionaryWithObjects_forKeys_count_(NPClass * self, SEL _cmd, NPObject * * values, NPObject * * keys, size_t n) 
-#line 65 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPDictionary.np"
-{
+__attribute__((weak)) NPDictionary * NPDictionary_dictionaryWithObjects_forKeys_count_(NPClass * self, SEL _cmd, NPObject * * values, NPObject * * keys, size_t n) {
 #line 64 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPDictionary.np"
     {
 #line 36 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPDictionary.np"
@@ -7888,18 +7708,14 @@ __attribute__((weak)) NPDictionary * NPDictionary_dictionaryWithObjects_forKeys_
 
 /* -[NPDictionary count] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) size_t NPDictionary_count(NPObject * self, SEL _cmd) 
-#line 69 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPDictionary.np"
-{
+__attribute__((weak)) size_t NPDictionary_count(NPObject * self, SEL _cmd) {
 #line 68 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPDictionary.np"
     return ((struct NPDictionary *)self)->_count;
 }
 
 /* -[NPDictionary objectForKey_] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPObject * NPDictionary_objectForKey_(NPObject * self, SEL _cmd, NPObject * key) 
-#line 82 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPDictionary.np"
-{
+__attribute__((weak)) NPObject * NPDictionary_objectForKey_(NPObject * self, SEL _cmd, NPObject * key) {
 #line 75 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPDictionary.np"
     if (!key) {
         return NULL;
@@ -7918,27 +7734,21 @@ __attribute__((weak)) NPObject * NPDictionary_objectForKey_(NPObject * self, SEL
 
 /* -[NPDictionary allKeys] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPArray * NPDictionary_allKeys(NPObject * self, SEL _cmd) 
-#line 104 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPDictionary.np"
-{
+__attribute__((weak)) NPArray * NPDictionary_allKeys(NPObject * self, SEL _cmd) {
 #line 103 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPDictionary.np"
     return (NPArray *)NPArray_arrayWithObjects_count_(&NEPA_CLASS_$_NPArray, __nepa_sel_arrayWithObjects_count_, ((struct NPDictionary *)self)->_keys, ((struct NPDictionary *)self)->_count);
 }
 
 /* -[NPDictionary allValues] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPArray * NPDictionary_allValues(NPObject * self, SEL _cmd) 
-#line 108 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPDictionary.np"
-{
+__attribute__((weak)) NPArray * NPDictionary_allValues(NPObject * self, SEL _cmd) {
 #line 107 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPDictionary.np"
     return (NPArray *)NPArray_arrayWithObjects_count_(&NEPA_CLASS_$_NPArray, __nepa_sel_arrayWithObjects_count_, ((struct NPDictionary *)self)->_values, ((struct NPDictionary *)self)->_count);
 }
 
 /* -[NPDictionary allValues] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) _Bool NPDictionary_isEqual_(NPObject * self, SEL _cmd, NPObject * object) 
-#line 100 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPDictionary.np"
-{
+__attribute__((weak)) _Bool NPDictionary_isEqual_(NPObject * self, SEL _cmd, NPObject * object) {
 #line 85 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPDictionary.np"
     if ((self == (NPObject *)object)) {
         return 1;
@@ -7987,9 +7797,7 @@ __attribute__((weak)) _Bool NPDictionary_isEqual_(NPObject * self, SEL _cmd, NPO
 
 /* -[NPDictionary copy] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPObject * NPDictionary_copy(NPObject * self, SEL _cmd) 
-#line 114 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPDictionary.np"
-{
+__attribute__((weak)) NPObject * NPDictionary_copy(NPObject * self, SEL _cmd) {
 #line 113 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPDictionary.np"
     __auto_type __nepa_eh_tmp_14 = NPDictionary_dictionaryWithObjects_forKeys_count_(&NEPA_CLASS_$_NPDictionary, __nepa_sel_dictionaryWithObjects_forKeys_count_, ((struct NPDictionary *)self)->_values, ((struct NPDictionary *)self)->_keys, ((struct NPDictionary *)self)->_count);
     return nepa_retain(__nepa_eh_tmp_14);
@@ -7997,9 +7805,7 @@ __attribute__((weak)) NPObject * NPDictionary_copy(NPObject * self, SEL _cmd)
 
 /* -[NPDictionary isEqual:] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPString * NPDictionary_description(NPObject * self, SEL _cmd) 
-#line 136 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPDictionary.np"
-{
+__attribute__((weak)) NPString * NPDictionary_description(NPObject * self, SEL _cmd) {
 #line 117 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPDictionary.np"
     NPString * result = (NPString *)(NPString_stringWithUTF8String_(&NEPA_CLASS_$_NPString, __nepa_sel_stringWithUTF8String_, "{"));
 #line 133 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPDictionary.np"
@@ -8047,9 +7853,7 @@ __attribute__((weak)) NPString * NPDictionary_description(NPObject * self, SEL _
 
 /* -[NPDictionary dictionaryWithObject:forKey:] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) void NPDictionary_dealloc(NPObject * self, SEL _cmd) 
-#line 24 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPDictionary.np"
-{
+__attribute__((weak)) void NPDictionary_dealloc(NPObject * self, SEL _cmd) {
 #line 16 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPDictionary.np"
     for (size_t i = 0;  (i < ((struct NPDictionary *)self)->_count); (i)++) {
 #line 12 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPDictionary.np"
@@ -8081,9 +7885,7 @@ __attribute__((weak)) void NPDictionary_dealloc(NPObject * self, SEL _cmd)
 
 /* +[NPMutableDictionary dictionary] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPMutableDictionary * NPMutableDictionary_dictionary(NPClass * self, SEL _cmd) 
-#line 53 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableDictionary.np"
-{
+__attribute__((weak)) NPMutableDictionary * NPMutableDictionary_dictionary(NPClass * self, SEL _cmd) {
 #line 52 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableDictionary.np"
     {
 #line 51 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableDictionary.np"
@@ -8093,9 +7895,7 @@ __attribute__((weak)) NPMutableDictionary * NPMutableDictionary_dictionary(NPCla
 
 /* +[NPMutableDictionary dictionaryWithCapacity_] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPMutableDictionary * NPMutableDictionary_dictionaryWithCapacity_(NPClass * self, SEL _cmd, size_t capacity) 
-#line 47 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableDictionary.np"
-{
+__attribute__((weak)) NPMutableDictionary * NPMutableDictionary_dictionaryWithCapacity_(NPClass * self, SEL _cmd, size_t capacity) {
 #line 46 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableDictionary.np"
     {
 #line 45 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableDictionary.np"
@@ -8105,9 +7905,7 @@ __attribute__((weak)) NPMutableDictionary * NPMutableDictionary_dictionaryWithCa
 
 /* +[NPMutableDictionary dictionaryWithObject_forKey_] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPMutableDictionary * NPMutableDictionary_dictionaryWithObject_forKey_(NPClass * self, SEL _cmd, NPObject * value, NPObject * key) 
-#line 63 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableDictionary.np"
-{
+__attribute__((weak)) NPMutableDictionary * NPMutableDictionary_dictionaryWithObject_forKey_(NPClass * self, SEL _cmd, NPObject * value, NPObject * key) {
 #line 62 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableDictionary.np"
     {
 #line 57 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableDictionary.np"
@@ -8124,18 +7922,14 @@ __attribute__((weak)) NPMutableDictionary * NPMutableDictionary_dictionaryWithOb
 
 /* -[NPMutableDictionary dictionary] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPMutableDictionary * NPMutableDictionary_init(NPObject * self, SEL _cmd) 
-#line 33 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableDictionary.np"
-{
+__attribute__((weak)) NPMutableDictionary * NPMutableDictionary_init(NPObject * self, SEL _cmd) {
 #line 32 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableDictionary.np"
     return (NPMutableDictionary *)({ NPObject *__nepa_tmp_80 = ((NPObject *)(self)); __nepa_tmp_80 ? ((NPMutableArray * (*)(NPObject *, SEL, size_t))((struct nepa_vtable *)__nepa_tmp_80->isa->vtable)->initWithCapacity_)(__nepa_tmp_80, __nepa_sel_initWithCapacity_, 0) : 0; });
 }
 
 /* -[NPMutableDictionary initWithCapacity_] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPMutableDictionary * NPMutableDictionary_initWithCapacity_(NPObject * self, SEL _cmd, size_t capacity) 
-#line 29 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableDictionary.np"
-{
+__attribute__((weak)) NPMutableDictionary * NPMutableDictionary_initWithCapacity_(NPObject * self, SEL _cmd, size_t capacity) {
 #line 9 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableDictionary.np"
     self = (&NEPA_VTABLE_$_NPObject)->init(self, __nepa_sel_init);
 #line 27 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableDictionary.np"
@@ -8177,9 +7971,7 @@ __attribute__((weak)) NPMutableDictionary * NPMutableDictionary_initWithCapacity
 
 /* -[NPMutableDictionary initWithDictionary_] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPMutableDictionary * NPMutableDictionary_initWithDictionary_(NPObject * self, SEL _cmd, NPDictionary * other) 
-#line 41 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableDictionary.np"
-{
+__attribute__((weak)) NPMutableDictionary * NPMutableDictionary_initWithDictionary_(NPObject * self, SEL _cmd, NPDictionary * other) {
 #line 36 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableDictionary.np"
     self = ({ NPObject *__nepa_tmp_81 = ((NPObject *)(self)); __nepa_tmp_81 ? ((NPMutableArray * (*)(NPObject *, SEL))((struct nepa_vtable *)__nepa_tmp_81->isa->vtable)->init)(__nepa_tmp_81, __nepa_sel_init) : 0; });
 #line 39 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableDictionary.np"
@@ -8193,9 +7985,7 @@ __attribute__((weak)) NPMutableDictionary * NPMutableDictionary_initWithDictiona
 
 /* -[NPMutableDictionary setObject_forKey_] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) void NPMutableDictionary_setObject_forKey_(NPObject * self, SEL _cmd, NPObject * value, NPObject * key) 
-#line 94 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableDictionary.np"
-{
+__attribute__((weak)) void NPMutableDictionary_setObject_forKey_(NPObject * self, SEL _cmd, NPObject * value, NPObject * key) {
 #line 68 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableDictionary.np"
     if ((!key || !value)) {
         return;
@@ -8253,9 +8043,7 @@ __attribute__((weak)) void NPMutableDictionary_setObject_forKey_(NPObject * self
 
 /* -[NPMutableDictionary addEntriesFromDictionary_] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) void NPMutableDictionary_addEntriesFromDictionary_(NPObject * self, SEL _cmd, NPDictionary * other) 
-#line 104 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableDictionary.np"
-{
+__attribute__((weak)) void NPMutableDictionary_addEntriesFromDictionary_(NPObject * self, SEL _cmd, NPDictionary * other) {
 #line 97 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableDictionary.np"
     if (!other) {
         return;
@@ -8276,9 +8064,7 @@ __attribute__((weak)) void NPMutableDictionary_addEntriesFromDictionary_(NPObjec
 
 /* -[NPMutableDictionary removeObjectForKey_] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) void NPMutableDictionary_removeObjectForKey_(NPObject * self, SEL _cmd, NPObject * key) 
-#line 124 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableDictionary.np"
-{
+__attribute__((weak)) void NPMutableDictionary_removeObjectForKey_(NPObject * self, SEL _cmd, NPObject * key) {
 #line 107 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableDictionary.np"
     if (!key) {
         return;
@@ -8315,9 +8101,7 @@ __attribute__((weak)) void NPMutableDictionary_removeObjectForKey_(NPObject * se
 
 /* -[NPMutableDictionary removeAllObjects] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) void NPMutableDictionary_removeAllObjects(NPObject * self, SEL _cmd) 
-#line 136 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableDictionary.np"
-{
+__attribute__((weak)) void NPMutableDictionary_removeAllObjects(NPObject * self, SEL _cmd) {
 #line 134 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableDictionary.np"
     for (size_t i = 0;  (i < ((struct NPMutableDictionary *)self)->_count); (i)++) {
 #line 130 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableDictionary.np"
@@ -8337,27 +8121,21 @@ __attribute__((weak)) void NPMutableDictionary_removeAllObjects(NPObject * self,
 
 /* +[NPSet addObjectsFromArray:] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPSet * NPSet_set(NPClass * self, SEL _cmd) 
-#line 23 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPSet.np"
-{
+__attribute__((weak)) NPSet * NPSet_set(NPClass * self, SEL _cmd) {
 #line 22 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPSet.np"
     return (NPSet *)NPSet_setWithObjects_count_(self, __nepa_sel_setWithObjects_count_, NULL, 0);
 }
 
 /* +[NPSet _grow] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPSet * NPSet_setWithObject_(NPClass * self, SEL _cmd, NPObject * object) 
-#line 27 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPSet.np"
-{
+__attribute__((weak)) NPSet * NPSet_setWithObject_(NPClass * self, SEL _cmd, NPObject * object) {
 #line 26 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPSet.np"
     return (NPSet *)NPSet_setWithObjects_count_(self, __nepa_sel_setWithObjects_count_, &object, 1);
 }
 
 /* +[NPSet isEqual:] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPSet * NPSet_setWithObjects_count_(NPClass * self, SEL _cmd, NPObject * * objects, size_t n) 
-#line 65 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPSet.np"
-{
+__attribute__((weak)) NPSet * NPSet_setWithObjects_count_(NPClass * self, SEL _cmd, NPObject * * objects, size_t n) {
 #line 64 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPSet.np"
     {
 #line 31 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPSet.np"
@@ -8418,9 +8196,7 @@ __attribute__((weak)) NPSet * NPSet_setWithObjects_count_(NPClass * self, SEL _c
 
 /* +[NPSet copy] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPSet * NPSet_setWithArray_(NPClass * self, SEL _cmd, NPArray * array) 
-#line 84 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPSet.np"
-{
+__attribute__((weak)) NPSet * NPSet_setWithArray_(NPClass * self, SEL _cmd, NPArray * array) {
 #line 68 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPSet.np"
     size_t n = ({ NPObject *__nepa_tmp_92 = ((NPObject *)(array)); __nepa_tmp_92 ? ((size_t (*)(NPObject *, SEL))((struct nepa_vtable *)__nepa_tmp_92->isa->vtable)->count)(__nepa_tmp_92, __nepa_sel_count) : (size_t){0}; });
 #line 71 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPSet.np"
@@ -8451,18 +8227,14 @@ __attribute__((weak)) NPSet * NPSet_setWithArray_(NPClass * self, SEL _cmd, NPAr
 
 /* -[NPSet description] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) size_t NPSet_count(NPObject * self, SEL _cmd) 
-#line 88 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPSet.np"
-{
+__attribute__((weak)) size_t NPSet_count(NPObject * self, SEL _cmd) {
 #line 87 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPSet.np"
     return ((struct NPSet *)self)->_count;
 }
 
 /* -[NPSet dealloc] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) _Bool NPSet_containsObject_(NPObject * self, SEL _cmd, NPObject * object) 
-#line 102 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPSet.np"
-{
+__attribute__((weak)) _Bool NPSet_containsObject_(NPObject * self, SEL _cmd, NPObject * object) {
 #line 95 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPSet.np"
     if (!object) {
         return 0;
@@ -8481,9 +8253,7 @@ __attribute__((weak)) _Bool NPSet_containsObject_(NPObject * self, SEL _cmd, NPO
 
 /* -[NPSet anyObject] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPObject * NPSet_anyObject(NPObject * self, SEL _cmd) 
-#line 107 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPSet.np"
-{
+__attribute__((weak)) NPObject * NPSet_anyObject(NPObject * self, SEL _cmd) {
 #line 105 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPSet.np"
     if ((((struct NPSet *)self)->_count == 0)) {
         return NULL;
@@ -8494,18 +8264,14 @@ __attribute__((weak)) NPObject * NPSet_anyObject(NPObject * self, SEL _cmd)
 
 /* -[NPSet allObjects] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPArray * NPSet_allObjects(NPObject * self, SEL _cmd) 
-#line 144 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPSet.np"
-{
+__attribute__((weak)) NPArray * NPSet_allObjects(NPObject * self, SEL _cmd) {
 #line 143 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPSet.np"
     return (NPArray *)NPArray_arrayWithObjects_count_(&NEPA_CLASS_$_NPArray, __nepa_sel_arrayWithObjects_count_, ((struct NPSet *)self)->_items, ((struct NPSet *)self)->_count);
 }
 
 /* -[NPSet filteredArrayUsingPredicate_] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPArray * NPSet_filteredArrayUsingPredicate_(NPObject * self, SEL _cmd, NPPredicate * pred) 
-#line 169 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPSet.np"
-{
+__attribute__((weak)) NPArray * NPSet_filteredArrayUsingPredicate_(NPObject * self, SEL _cmd, NPPredicate * pred) {
 #line 151 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPSet.np"
     if (!pred) {
 #line 150 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPSet.np"
@@ -8545,9 +8311,7 @@ __attribute__((weak)) NPArray * NPSet_filteredArrayUsingPredicate_(NPObject * se
 
 /* -[NPSet addObject_] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) void NPSet_addObject_(NPObject * self, SEL _cmd, NPObject * object) 
-#line 132 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPSet.np"
-{
+__attribute__((weak)) void NPSet_addObject_(NPObject * self, SEL _cmd, NPObject * object) {
 #line 126 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPSet.np"
     if (!object) {
         return;
@@ -8571,9 +8335,7 @@ __attribute__((weak)) void NPSet_addObject_(NPObject * self, SEL _cmd, NPObject 
 
 /* -[NPSet addObjectsFromArray_] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) void NPSet_addObjectsFromArray_(NPObject * self, SEL _cmd, NPArray * other) 
-#line 140 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPSet.np"
-{
+__attribute__((weak)) void NPSet_addObjectsFromArray_(NPObject * self, SEL _cmd, NPArray * other) {
 #line 135 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPSet.np"
     if (!other) {
         return;
@@ -8590,9 +8352,7 @@ __attribute__((weak)) void NPSet_addObjectsFromArray_(NPObject * self, SEL _cmd,
 
 /* -[NPSet _grow] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) void NPSet__grow(NPObject * self, SEL _cmd) 
-#line 120 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPSet.np"
-{
+__attribute__((weak)) void NPSet__grow(NPObject * self, SEL _cmd) {
 #line 113 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPSet.np"
     if ((((struct NPSet *)self)->_count < ((struct NPSet *)self)->_capacity)) {
         return;
@@ -8615,9 +8375,7 @@ __attribute__((weak)) void NPSet__grow(NPObject * self, SEL _cmd)
 
 /* -[NPSet anyObject] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) _Bool NPSet_isEqual_(NPObject * self, SEL _cmd, NPObject * object) 
-#line 186 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPSet.np"
-{
+__attribute__((weak)) _Bool NPSet_isEqual_(NPObject * self, SEL _cmd, NPObject * object) {
 #line 172 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPSet.np"
     if ((self == (NPObject *)object)) {
         return 1;
@@ -8655,9 +8413,7 @@ __attribute__((weak)) _Bool NPSet_isEqual_(NPObject * self, SEL _cmd, NPObject *
 
 /* -[NPSet copy] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPObject * NPSet_copy(NPObject * self, SEL _cmd) 
-#line 192 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPSet.np"
-{
+__attribute__((weak)) NPObject * NPSet_copy(NPObject * self, SEL _cmd) {
 #line 191 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPSet.np"
     __auto_type __nepa_eh_tmp_33 = NPSet_setWithObjects_count_(&NEPA_CLASS_$_NPSet, __nepa_sel_setWithObjects_count_, ((struct NPSet *)self)->_items, ((struct NPSet *)self)->_count);
     return nepa_retain(__nepa_eh_tmp_33);
@@ -8665,9 +8421,7 @@ __attribute__((weak)) NPObject * NPSet_copy(NPObject * self, SEL _cmd)
 
 /* -[NPSet allObjects] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPString * NPSet_description(NPObject * self, SEL _cmd) 
-#line 208 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPSet.np"
-{
+__attribute__((weak)) NPString * NPSet_description(NPObject * self, SEL _cmd) {
 #line 195 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPSet.np"
     NPString * result = (NPString *)(NPString_stringWithUTF8String_(&NEPA_CLASS_$_NPString, __nepa_sel_stringWithUTF8String_, "{("));
 #line 205 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPSet.np"
@@ -8700,9 +8454,7 @@ __attribute__((weak)) NPString * NPSet_description(NPObject * self, SEL _cmd)
 
 /* -[NPSet setWithObject:] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) void NPSet_dealloc(NPObject * self, SEL _cmd) 
-#line 19 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPSet.np"
-{
+__attribute__((weak)) void NPSet_dealloc(NPObject * self, SEL _cmd) {
 #line 13 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPSet.np"
     for (size_t i = 0;  (i < ((struct NPSet *)self)->_count); (i)++) {
 #line 12 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPSet.np"
@@ -8725,27 +8477,21 @@ __attribute__((weak)) void NPSet_dealloc(NPObject * self, SEL _cmd)
 
 /* +[NPMutableSet set] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPMutableSet * NPMutableSet_set(NPClass * self, SEL _cmd) 
-#line 52 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableSet.np"
-{
+__attribute__((weak)) NPMutableSet * NPMutableSet_set(NPClass * self, SEL _cmd) {
 #line 51 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableSet.np"
     return (NPMutableSet *)({ NPObject *__nepa_tmp_110 = ((NPObject *)(NPObject_alloc(self, __nepa_sel_alloc))); __nepa_tmp_110 ? ((NPMutableArray * (*)(NPObject *, SEL))((struct nepa_vtable *)__nepa_tmp_110->isa->vtable)->init)(__nepa_tmp_110, __nepa_sel_init) : 0; });
 }
 
 /* +[NPMutableSet setWithCapacity_] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPMutableSet * NPMutableSet_setWithCapacity_(NPClass * self, SEL _cmd, size_t capacity) 
-#line 56 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableSet.np"
-{
+__attribute__((weak)) NPMutableSet * NPMutableSet_setWithCapacity_(NPClass * self, SEL _cmd, size_t capacity) {
 #line 55 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableSet.np"
     return (NPMutableSet *)({ NPObject *__nepa_tmp_111 = ((NPObject *)(NPObject_alloc(self, __nepa_sel_alloc))); __nepa_tmp_111 ? ((NPMutableArray * (*)(NPObject *, SEL, size_t))((struct nepa_vtable *)__nepa_tmp_111->isa->vtable)->initWithCapacity_)(__nepa_tmp_111, __nepa_sel_initWithCapacity_, capacity) : 0; });
 }
 
 /* +[NPMutableSet setWithObject_] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPMutableSet * NPMutableSet_setWithObject_(NPClass * self, SEL _cmd, NPObject * object) 
-#line 62 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableSet.np"
-{
+__attribute__((weak)) NPMutableSet * NPMutableSet_setWithObject_(NPClass * self, SEL _cmd, NPObject * object) {
 #line 59 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableSet.np"
     NPObject *__nepa_tmp_112 = (NPObject_alloc(self, __nepa_sel_alloc));
     NPMutableSet * s = (NPMutableSet *)(__nepa_tmp_112 ? ((struct nepa_vtable *)__nepa_tmp_112->isa->vtable)->init(__nepa_tmp_112, __nepa_sel_init) : 0);
@@ -8757,9 +8503,7 @@ __attribute__((weak)) NPMutableSet * NPMutableSet_setWithObject_(NPClass * self,
 
 /* -[NPMutableSet set] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPMutableSet * NPMutableSet_init(NPObject * self, SEL _cmd) 
-#line 15 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableSet.np"
-{
+__attribute__((weak)) NPMutableSet * NPMutableSet_init(NPObject * self, SEL _cmd) {
 #line 8 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableSet.np"
     self = (&NEPA_VTABLE_$_NPObject)->init(self, __nepa_sel_init);
 #line 13 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableSet.np"
@@ -8777,9 +8521,7 @@ __attribute__((weak)) NPMutableSet * NPMutableSet_init(NPObject * self, SEL _cmd
 
 /* -[NPMutableSet initWithCapacity_] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPMutableSet * NPMutableSet_initWithCapacity_(NPObject * self, SEL _cmd, size_t capacity) 
-#line 24 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableSet.np"
-{
+__attribute__((weak)) NPMutableSet * NPMutableSet_initWithCapacity_(NPObject * self, SEL _cmd, size_t capacity) {
 #line 18 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableSet.np"
     self = ({ NPObject *__nepa_tmp_114 = ((NPObject *)(self)); __nepa_tmp_114 ? ((NPMutableArray * (*)(NPObject *, SEL))((struct nepa_vtable *)__nepa_tmp_114->isa->vtable)->init)(__nepa_tmp_114, __nepa_sel_init) : 0; });
 #line 22 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableSet.np"
@@ -8795,9 +8537,7 @@ __attribute__((weak)) NPMutableSet * NPMutableSet_initWithCapacity_(NPObject * s
 
 /* -[NPMutableSet initWithSet_] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPMutableSet * NPMutableSet_initWithSet_(NPObject * self, SEL _cmd, NPSet * other) 
-#line 40 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableSet.np"
-{
+__attribute__((weak)) NPMutableSet * NPMutableSet_initWithSet_(NPObject * self, SEL _cmd, NPSet * other) {
 #line 27 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableSet.np"
     self = ({ NPObject *__nepa_tmp_115 = ((NPObject *)(self)); __nepa_tmp_115 ? ((NPMutableArray * (*)(NPObject *, SEL))((struct nepa_vtable *)__nepa_tmp_115->isa->vtable)->init)(__nepa_tmp_115, __nepa_sel_init) : 0; });
 #line 38 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableSet.np"
@@ -8824,9 +8564,7 @@ __attribute__((weak)) NPMutableSet * NPMutableSet_initWithSet_(NPObject * self, 
 
 /* -[NPMutableSet initWithArray_] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPMutableSet * NPMutableSet_initWithArray_(NPObject * self, SEL _cmd, NPArray * other) 
-#line 48 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableSet.np"
-{
+__attribute__((weak)) NPMutableSet * NPMutableSet_initWithArray_(NPObject * self, SEL _cmd, NPArray * other) {
 #line 43 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableSet.np"
     self = ({ NPObject *__nepa_tmp_119 = ((NPObject *)(self)); __nepa_tmp_119 ? ((NPMutableArray * (*)(NPObject *, SEL))((struct nepa_vtable *)__nepa_tmp_119->isa->vtable)->init)(__nepa_tmp_119, __nepa_sel_init) : 0; });
 #line 46 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableSet.np"
@@ -8840,9 +8578,7 @@ __attribute__((weak)) NPMutableSet * NPMutableSet_initWithArray_(NPObject * self
 
 /* -[NPMutableSet removeObject_] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) void NPMutableSet_removeObject_(NPObject * self, SEL _cmd, NPObject * obj) 
-#line 83 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableSet.np"
-{
+__attribute__((weak)) void NPMutableSet_removeObject_(NPObject * self, SEL _cmd, NPObject * obj) {
 #line 71 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableSet.np"
     if (!obj) {
         return;
@@ -8870,9 +8606,7 @@ __attribute__((weak)) void NPMutableSet_removeObject_(NPObject * self, SEL _cmd,
 
 /* -[NPMutableSet removeAllObjects] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) void NPMutableSet_removeAllObjects(NPObject * self, SEL _cmd) 
-#line 93 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableSet.np"
-{
+__attribute__((weak)) void NPMutableSet_removeAllObjects(NPObject * self, SEL _cmd) {
 #line 91 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableSet.np"
     for (size_t i = 0;  (i < ((struct NPMutableSet *)self)->_count); (i)++) {
 #line 90 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableSet.np"
@@ -8889,18 +8623,14 @@ __attribute__((weak)) void NPMutableSet_removeAllObjects(NPObject * self, SEL _c
 
 /* +[NPOrderedSet orderedSet] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPOrderedSet * NPOrderedSet_orderedSet(NPClass * self, SEL _cmd) 
-#line 27 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPOrderedSet.np"
-{
+__attribute__((weak)) NPOrderedSet * NPOrderedSet_orderedSet(NPClass * self, SEL _cmd) {
 #line 26 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPOrderedSet.np"
     return (NPOrderedSet *)({ NPObject *__nepa_tmp_122 = ((NPObject *)(NPObject_alloc(self, __nepa_sel_alloc))); __nepa_tmp_122 ? ((NPMutableArray * (*)(NPObject *, SEL))((struct nepa_vtable *)__nepa_tmp_122->isa->vtable)->init)(__nepa_tmp_122, __nepa_sel_init) : 0; });
 }
 
 /* +[NPOrderedSet orderedSetWithObject_] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPOrderedSet * NPOrderedSet_orderedSetWithObject_(NPClass * self, SEL _cmd, NPObject * object) 
-#line 33 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPOrderedSet.np"
-{
+__attribute__((weak)) NPOrderedSet * NPOrderedSet_orderedSetWithObject_(NPClass * self, SEL _cmd, NPObject * object) {
 #line 30 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPOrderedSet.np"
     NPObject *__nepa_tmp_123 = (NPObject_alloc(self, __nepa_sel_alloc));
     NPOrderedSet * s = (NPOrderedSet *)(__nepa_tmp_123 ? ((struct nepa_vtable *)__nepa_tmp_123->isa->vtable)->init(__nepa_tmp_123, __nepa_sel_init) : 0);
@@ -8912,18 +8642,14 @@ __attribute__((weak)) NPOrderedSet * NPOrderedSet_orderedSetWithObject_(NPClass 
 
 /* +[NPOrderedSet orderedSetWithArray_] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPOrderedSet * NPOrderedSet_orderedSetWithArray_(NPClass * self, SEL _cmd, NPArray * array) 
-#line 37 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPOrderedSet.np"
-{
+__attribute__((weak)) NPOrderedSet * NPOrderedSet_orderedSetWithArray_(NPClass * self, SEL _cmd, NPArray * array) {
 #line 36 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPOrderedSet.np"
     return (NPOrderedSet *)({ NPObject *__nepa_tmp_125 = ((NPObject *)(NPObject_alloc(self, __nepa_sel_alloc))); __nepa_tmp_125 ? ((NPMutableArray * (*)(NPObject *, SEL, NPArray *))((struct nepa_vtable *)__nepa_tmp_125->isa->vtable)->initWithArray_)(__nepa_tmp_125, __nepa_sel_initWithArray_, (NPArray *)(array)) : 0; });
 }
 
 /* +[NPOrderedSet orderedSetWithOrderedSet_] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPOrderedSet * NPOrderedSet_orderedSetWithOrderedSet_(NPClass * self, SEL _cmd, NPOrderedSet * other) 
-#line 42 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPOrderedSet.np"
-{
+__attribute__((weak)) NPOrderedSet * NPOrderedSet_orderedSetWithOrderedSet_(NPClass * self, SEL _cmd, NPOrderedSet * other) {
 #line 40 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPOrderedSet.np"
     if (!other) {
         return (NPOrderedSet *)NPOrderedSet_orderedSet(self, __nepa_sel_orderedSet);
@@ -8935,9 +8661,7 @@ __attribute__((weak)) NPOrderedSet * NPOrderedSet_orderedSetWithOrderedSet_(NPCl
 
 /* -[NPOrderedSet initWithArray_] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPOrderedSet * NPOrderedSet_initWithArray_(NPObject * self, SEL _cmd, NPArray * other) 
-#line 15 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPOrderedSet.np"
-{
+__attribute__((weak)) NPOrderedSet * NPOrderedSet_initWithArray_(NPObject * self, SEL _cmd, NPArray * other) {
 #line 8 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPOrderedSet.np"
     self = (&NEPA_VTABLE_$_NPObject)->init(self, __nepa_sel_init);
 #line 13 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPOrderedSet.np"
@@ -8951,9 +8675,7 @@ __attribute__((weak)) NPOrderedSet * NPOrderedSet_initWithArray_(NPObject * self
 
 /* -[NPOrderedSet initWithSet_] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPOrderedSet * NPOrderedSet_initWithSet_(NPObject * self, SEL _cmd, NPSet * other) 
-#line 23 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPOrderedSet.np"
-{
+__attribute__((weak)) NPOrderedSet * NPOrderedSet_initWithSet_(NPObject * self, SEL _cmd, NPSet * other) {
 #line 18 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPOrderedSet.np"
     self = (&NEPA_VTABLE_$_NPObject)->init(self, __nepa_sel_init);
 #line 21 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPOrderedSet.np"
@@ -8968,9 +8690,7 @@ __attribute__((weak)) NPOrderedSet * NPOrderedSet_initWithSet_(NPObject * self, 
 
 /* -[NPOrderedSet objectAtIndex_] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPObject * NPOrderedSet_objectAtIndex_(NPObject * self, SEL _cmd, size_t index) 
-#line 47 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPOrderedSet.np"
-{
+__attribute__((weak)) NPObject * NPOrderedSet_objectAtIndex_(NPObject * self, SEL _cmd, size_t index) {
 #line 45 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPOrderedSet.np"
     if ((index >= ((struct NPOrderedSet *)self)->_count)) {
         return NULL;
@@ -8981,9 +8701,7 @@ __attribute__((weak)) NPObject * NPOrderedSet_objectAtIndex_(NPObject * self, SE
 
 /* -[NPOrderedSet firstObject] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPObject * NPOrderedSet_firstObject(NPObject * self, SEL _cmd) 
-#line 52 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPOrderedSet.np"
-{
+__attribute__((weak)) NPObject * NPOrderedSet_firstObject(NPObject * self, SEL _cmd) {
 #line 50 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPOrderedSet.np"
     if ((((struct NPOrderedSet *)self)->_count == 0)) {
         return NULL;
@@ -8994,9 +8712,7 @@ __attribute__((weak)) NPObject * NPOrderedSet_firstObject(NPObject * self, SEL _
 
 /* -[NPOrderedSet lastObject] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPObject * NPOrderedSet_lastObject(NPObject * self, SEL _cmd) 
-#line 57 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPOrderedSet.np"
-{
+__attribute__((weak)) NPObject * NPOrderedSet_lastObject(NPObject * self, SEL _cmd) {
 #line 55 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPOrderedSet.np"
     if ((((struct NPOrderedSet *)self)->_count == 0)) {
         return NULL;
@@ -9007,9 +8723,7 @@ __attribute__((weak)) NPObject * NPOrderedSet_lastObject(NPObject * self, SEL _c
 
 /* -[NPOrderedSet indexOfObject_] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) size_t NPOrderedSet_indexOfObject_(NPObject * self, SEL _cmd, NPObject * object) 
-#line 67 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPOrderedSet.np"
-{
+__attribute__((weak)) size_t NPOrderedSet_indexOfObject_(NPObject * self, SEL _cmd, NPObject * object) {
 #line 60 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPOrderedSet.np"
     if (!object) {
         return (size_t)-1;
@@ -9028,9 +8742,7 @@ __attribute__((weak)) size_t NPOrderedSet_indexOfObject_(NPObject * self, SEL _c
 
 /* +[NPNumber boolValue] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPNumber * NPNumber_numberWithInt_(NPClass * self, SEL _cmd, int value) 
-#line 31 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPNumber.np"
-{
+__attribute__((weak)) NPNumber * NPNumber_numberWithInt_(NPClass * self, SEL _cmd, int value) {
 #line 30 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPNumber.np"
     {
 #line 29 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPNumber.np"
@@ -9040,9 +8752,7 @@ __attribute__((weak)) NPNumber * NPNumber_numberWithInt_(NPClass * self, SEL _cm
 
 /* +[NPNumber charValue] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPNumber * NPNumber_numberWithLongLong_(NPClass * self, SEL _cmd, long long value) 
-#line 37 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPNumber.np"
-{
+__attribute__((weak)) NPNumber * NPNumber_numberWithLongLong_(NPClass * self, SEL _cmd, long long value) {
 #line 36 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPNumber.np"
     {
 #line 35 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPNumber.np"
@@ -9052,9 +8762,7 @@ __attribute__((weak)) NPNumber * NPNumber_numberWithLongLong_(NPClass * self, SE
 
 /* +[NPNumber description] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPNumber * NPNumber_numberWithDouble_(NPClass * self, SEL _cmd, double value) 
-#line 43 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPNumber.np"
-{
+__attribute__((weak)) NPNumber * NPNumber_numberWithDouble_(NPClass * self, SEL _cmd, double value) {
 #line 42 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPNumber.np"
     {
 #line 41 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPNumber.np"
@@ -9064,9 +8772,7 @@ __attribute__((weak)) NPNumber * NPNumber_numberWithDouble_(NPClass * self, SEL 
 
 /* +[NPNumber isEqual:] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPNumber * NPNumber_numberWithBool_(NPClass * self, SEL _cmd, int value) 
-#line 49 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPNumber.np"
-{
+__attribute__((weak)) NPNumber * NPNumber_numberWithBool_(NPClass * self, SEL _cmd, int value) {
 #line 48 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPNumber.np"
     {
 #line 47 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPNumber.np"
@@ -9076,9 +8782,7 @@ __attribute__((weak)) NPNumber * NPNumber_numberWithBool_(NPClass * self, SEL _c
 
 /* +[NPNumber isEqualToNumber:] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPNumber * NPNumber_numberWithChar_(NPClass * self, SEL _cmd, char value) 
-#line 55 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPNumber.np"
-{
+__attribute__((weak)) NPNumber * NPNumber_numberWithChar_(NPClass * self, SEL _cmd, char value) {
 #line 54 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPNumber.np"
     {
 #line 53 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPNumber.np"
@@ -9088,9 +8792,7 @@ __attribute__((weak)) NPNumber * NPNumber_numberWithChar_(NPClass * self, SEL _c
 
 /* -[NPNumber initWithLongLong_] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPNumber * NPNumber_initWithLongLong_(NPObject * self, SEL _cmd, long long value) 
-#line 15 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPNumber.np"
-{
+__attribute__((weak)) NPNumber * NPNumber_initWithLongLong_(NPObject * self, SEL _cmd, long long value) {
 #line 8 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPNumber.np"
     self = (&NEPA_VTABLE_$_NPObject)->init(self, __nepa_sel_init);
 #line 13 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPNumber.np"
@@ -9108,9 +8810,7 @@ __attribute__((weak)) NPNumber * NPNumber_initWithLongLong_(NPObject * self, SEL
 
 /* -[NPNumber initWithDouble_] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPNumber * NPNumber_initWithDouble_(NPObject * self, SEL _cmd, double value) 
-#line 25 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPNumber.np"
-{
+__attribute__((weak)) NPNumber * NPNumber_initWithDouble_(NPObject * self, SEL _cmd, double value) {
 #line 18 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPNumber.np"
     self = (&NEPA_VTABLE_$_NPObject)->init(self, __nepa_sel_init);
 #line 23 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPNumber.np"
@@ -9128,49 +8828,42 @@ __attribute__((weak)) NPNumber * NPNumber_initWithDouble_(NPObject * self, SEL _
 
 /* -[NPNumber intValue] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) int NPNumber_intValue(NPObject * self, SEL _cmd) 
+__attribute__((weak)) int NPNumber_intValue(NPObject * self, SEL _cmd) {
 #line 57 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPNumber.np"
-{
     return (int)((struct NPNumber *)self)->_intValue;
 }
 
 /* -[NPNumber longLongValue] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) long long NPNumber_longLongValue(NPObject * self, SEL _cmd) 
+__attribute__((weak)) long long NPNumber_longLongValue(NPObject * self, SEL _cmd) {
 #line 58 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPNumber.np"
-{
     return ((struct NPNumber *)self)->_intValue;
 }
 
 /* -[NPNumber doubleValue] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) double NPNumber_doubleValue(NPObject * self, SEL _cmd) 
+__attribute__((weak)) double NPNumber_doubleValue(NPObject * self, SEL _cmd) {
 #line 59 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPNumber.np"
-{
     return ((struct NPNumber *)self)->_isDouble ? ((struct NPNumber *)self)->_doubleValue : (double)((struct NPNumber *)self)->_intValue;
 }
 
 /* -[NPNumber boolValue] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) int NPNumber_boolValue(NPObject * self, SEL _cmd) 
+__attribute__((weak)) int NPNumber_boolValue(NPObject * self, SEL _cmd) {
 #line 60 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPNumber.np"
-{
     return ((struct NPNumber *)self)->_isDouble ? ((((struct NPNumber *)self)->_doubleValue != 0.0f)) : ((((struct NPNumber *)self)->_intValue != 0));
 }
 
 /* -[NPNumber charValue] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) char NPNumber_charValue(NPObject * self, SEL _cmd) 
+__attribute__((weak)) char NPNumber_charValue(NPObject * self, SEL _cmd) {
 #line 61 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPNumber.np"
-{
     return (char)((struct NPNumber *)self)->_intValue;
 }
 
 /* -[NPNumber intValue] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPString * NPNumber_description(NPObject * self, SEL _cmd) 
-#line 71 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPNumber.np"
-{
+__attribute__((weak)) NPString * NPNumber_description(NPObject * self, SEL _cmd) {
 #line 64 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPNumber.np"
     char buf[64];
 #line 69 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPNumber.np"
@@ -9188,9 +8881,7 @@ __attribute__((weak)) NPString * NPNumber_description(NPObject * self, SEL _cmd)
 
 /* -[NPNumber initWithDouble:] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) _Bool NPNumber_isEqual_(NPObject * self, SEL _cmd, NPObject * object) 
-#line 80 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPNumber.np"
-{
+__attribute__((weak)) _Bool NPNumber_isEqual_(NPObject * self, SEL _cmd, NPObject * object) {
 #line 74 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPNumber.np"
     if ((self == (NPObject *)object)) {
         return 1;
@@ -9212,9 +8903,7 @@ __attribute__((weak)) _Bool NPNumber_isEqual_(NPObject * self, SEL _cmd, NPObjec
 
 /* -[NPNumber isEqualToNumber_] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) int NPNumber_isEqualToNumber_(NPObject * self, SEL _cmd, NPNumber * other) 
-#line 85 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPNumber.np"
-{
+__attribute__((weak)) int NPNumber_isEqualToNumber_(NPObject * self, SEL _cmd, NPNumber * other) {
 #line 83 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPNumber.np"
     if (!other) {
         return 0;
@@ -9227,9 +8916,7 @@ __attribute__((weak)) int NPNumber_isEqualToNumber_(NPObject * self, SEL _cmd, N
 
 /* -[NPPredicate predicateWithFormat:object:] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) void NPPredicate_dealloc(NPObject * self, SEL _cmd) 
-#line 384 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
-{
+__attribute__((weak)) void NPPredicate_dealloc(NPObject * self, SEL _cmd) {
 #line 371 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
     nepa_pred_node * nodes = (nepa_pred_node *)((struct NPPredicate *)self)->_nodes;
 #line 381 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
@@ -9263,9 +8950,7 @@ __attribute__((weak)) void NPPredicate_dealloc(NPObject * self, SEL _cmd)
 
 /* -[NPPredicate _expandFormat_args_count_] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPString * NPPredicate__expandFormat_args_count_(NPObject * self, SEL _cmd, NPString * format, NPObject * * args, size_t n) 
-#line 462 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
-{
+__attribute__((weak)) NPString * NPPredicate__expandFormat_args_count_(NPObject * self, SEL _cmd, NPString * format, NPObject * * args, size_t n) {
 #line 428 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
     char * src = (char *)(({ NPObject *__nepa_tmp_140 = ((NPObject *)(format)); __nepa_tmp_140 ? ((const char * (*)(NPObject *, SEL))((struct nepa_vtable *)__nepa_tmp_140->isa->vtable)->UTF8String)(__nepa_tmp_140, __nepa_sel_UTF8String) : 0; }));
 #line 429 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
@@ -9347,9 +9032,7 @@ __attribute__((weak)) NPString * NPPredicate__expandFormat_args_count_(NPObject 
 
 /* -[NPPredicate valueForKey_] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPObject * NPPredicate_valueForKey_(NPObject * self, SEL _cmd, NPString * key) 
-#line 477 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
-{
+__attribute__((weak)) NPObject * NPPredicate_valueForKey_(NPObject * self, SEL _cmd, NPString * key) {
 #line 470 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
     __auto_type __nepa_eh_tmp_46 = ({ NPObject *__nepa_tmp_143 = ((NPObject *)(key)); __nepa_tmp_143 ? ((const char * (*)(NPObject *, SEL))((struct nepa_vtable *)__nepa_tmp_143->isa->vtable)->UTF8String)(__nepa_tmp_143, __nepa_sel_UTF8String) : 0; });
     NPObject * v = nepa_kvc_value(self, __nepa_eh_tmp_46);
@@ -9375,27 +9058,21 @@ __attribute__((weak)) NPObject * NPPredicate_valueForKey_(NPObject * self, SEL _
 }
 
 /* +[NPError errorWithCode_domain_] */
-__attribute__((weak)) NPError * NPError_errorWithCode_domain_(NPClass * self, SEL _cmd, int code, NPString * domain) 
-#line 25 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPError.np"
-{
+__attribute__((weak)) NPError * NPError_errorWithCode_domain_(NPClass * self, SEL _cmd, int code, NPString * domain) {
 #line 24 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPError.np"
     return (NPError *)NPError_errorWithCode_domain_userInfo_(self, __nepa_sel_errorWithCode_domain_userInfo_, code, domain, NULL);
 }
 
 /* +[NPError errorWithCode_domain_userInfo_] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPError * NPError_errorWithCode_domain_userInfo_(NPClass * self, SEL _cmd, int code, NPString * domain, NPDictionary * userInfo) 
-#line 30 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPError.np"
-{
+__attribute__((weak)) NPError * NPError_errorWithCode_domain_userInfo_(NPClass * self, SEL _cmd, int code, NPString * domain, NPDictionary * userInfo) {
 #line 29 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPError.np"
     return (NPError *)({ NPObject *__nepa_tmp_145 = ((NPObject *)(NPObject_alloc(self, __nepa_sel_alloc))); __nepa_tmp_145 ? ((NPError * (*)(NPObject *, SEL, int, NPString *, NPDictionary *))((struct nepa_vtable *)__nepa_tmp_145->isa->vtable)->initWithCode_domain_userInfo_)(__nepa_tmp_145, __nepa_sel_initWithCode_domain_userInfo_, code, (NPString *)(domain), (NPDictionary *)(userInfo)) : 0; });
 }
 
 /* -[NPError initWithCode_domain_userInfo_] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPError * NPError_initWithCode_domain_userInfo_(NPObject * self, SEL _cmd, int code, NPString * domain, NPDictionary * userInfo) 
-#line 21 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPError.np"
-{
+__attribute__((weak)) NPError * NPError_initWithCode_domain_userInfo_(NPObject * self, SEL _cmd, int code, NPString * domain, NPDictionary * userInfo) {
 #line 10 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPError.np"
     self = (&NEPA_VTABLE_$_NPObject)->init(self, __nepa_sel_init);
 #line 19 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPError.np"
@@ -9413,9 +9090,7 @@ __attribute__((weak)) NPError * NPError_initWithCode_domain_userInfo_(NPObject *
 
 /* +[NPError parseErrorWithMessage_] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPError * NPError_parseErrorWithMessage_(NPClass * self, SEL _cmd, NPString * message) 
-#line 35 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPError.np"
-{
+__attribute__((weak)) NPError * NPError_parseErrorWithMessage_(NPClass * self, SEL _cmd, NPString * message) {
 #line 33 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPError.np"
     NPDictionary * info = (NPDictionary *)(nepa_dictionary_create(1, nepa_stringFromCstr("NSLocalizedDescription"), message));
 #line 34 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPError.np"
@@ -9424,9 +9099,7 @@ __attribute__((weak)) NPError * NPError_parseErrorWithMessage_(NPClass * self, S
 
 /* +[NPError fileIOErrorWithMessage_] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPError * NPError_fileIOErrorWithMessage_(NPClass * self, SEL _cmd, NPString * message) 
-#line 40 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPError.np"
-{
+__attribute__((weak)) NPError * NPError_fileIOErrorWithMessage_(NPClass * self, SEL _cmd, NPString * message) {
 #line 38 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPError.np"
     NPDictionary * info = (NPDictionary *)(nepa_dictionary_create(1, nepa_stringFromCstr("NSLocalizedDescription"), message));
 #line 39 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPError.np"
@@ -9435,33 +9108,28 @@ __attribute__((weak)) NPError * NPError_fileIOErrorWithMessage_(NPClass * self, 
 
 /* -[NPError code] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) int NPError_code(NPObject * self, SEL _cmd) 
+__attribute__((weak)) int NPError_code(NPObject * self, SEL _cmd) {
 #line 42 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPError.np"
-{
     return ((struct NPError *)self)->_code;
 }
 
 /* -[NPError domain] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPString * NPError_domain(NPObject * self, SEL _cmd) 
+__attribute__((weak)) NPString * NPError_domain(NPObject * self, SEL _cmd) {
 #line 44 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPError.np"
-{
     return ((struct NPError *)self)->_domain ? ((struct NPError *)self)->_domain : nepa_stringFromCstr("");
 }
 
 /* -[NPError userInfo] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPDictionary * NPError_userInfo(NPObject * self, SEL _cmd) 
+__attribute__((weak)) NPDictionary * NPError_userInfo(NPObject * self, SEL _cmd) {
 #line 46 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPError.np"
-{
     return ((struct NPError *)self)->_userInfo;
 }
 
 /* -[NPError localizedDescription] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPString * NPError_localizedDescription(NPObject * self, SEL _cmd) 
-#line 56 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPError.np"
-{
+__attribute__((weak)) NPString * NPError_localizedDescription(NPObject * self, SEL _cmd) {
 #line 52 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPError.np"
     if (((struct NPError *)self)->_userInfo) {
 #line 50 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPError.np"
@@ -9483,9 +9151,7 @@ __attribute__((weak)) NPString * NPError_localizedDescription(NPObject * self, S
 
 /* -[NPError userInfo] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPString * NPError_description(NPObject * self, SEL _cmd) 
-#line 63 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPError.np"
-{
+__attribute__((weak)) NPString * NPError_description(NPObject * self, SEL _cmd) {
 #line 59 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPError.np"
     char buf[160];
 #line 60 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPError.np"
@@ -9500,17 +9166,14 @@ __attribute__((weak)) NPString * NPError_description(NPObject * self, SEL _cmd)
 
 /* -[FsForwardUser poke] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) int FsForwardUser_poke(NPObject * self, SEL _cmd) 
+__attribute__((weak)) int FsForwardUser_poke(NPObject * self, SEL _cmd) {
 #line 207 "tests/full_syntax_test.np"
-{
     return 7;
 }
 
 /* -[FsBox initWith_] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) FsBox * FsBox_initWith_(NPObject * self, SEL _cmd, NPObject * v) 
-#line 225 "tests/full_syntax_test.np"
-{
+__attribute__((weak)) FsBox * FsBox_initWith_(NPObject * self, SEL _cmd, NPObject * v) {
 #line 222 "tests/full_syntax_test.np"
     self = (&NEPA_VTABLE_$_NPObject)->init(self, __nepa_sel_init);
 #line 223 "tests/full_syntax_test.np"
@@ -9523,33 +9186,28 @@ __attribute__((weak)) FsBox * FsBox_initWith_(NPObject * self, SEL _cmd, NPObjec
 
 /* -[FsBox value] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPObject * FsBox_value(NPObject * self, SEL _cmd) 
+__attribute__((weak)) NPObject * FsBox_value(NPObject * self, SEL _cmd) {
 #line 226 "tests/full_syntax_test.np"
-{
     return ((struct FsBox *)self)->_value;
 }
 
 /* -[FsBox setValue_] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) void FsBox_setValue_(NPObject * self, SEL _cmd, NPObject * v) 
+__attribute__((weak)) void FsBox_setValue_(NPObject * self, SEL _cmd, NPObject * v) {
 #line 227 "tests/full_syntax_test.np"
-{
     ((struct FsBox *)self)->_value = v;
 }
 
 /* -[FsRenderable render] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) int FsEngine__FsRenderable_render(NPObject * self, SEL _cmd) 
+__attribute__((weak)) int FsEngine__FsRenderable_render(NPObject * self, SEL _cmd) {
 #line 238 "tests/full_syntax_test.np"
-{
     return 1;
 }
 
 /* -[FsSprite initWithId_] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) FsSprite * FsSprite_initWithId_(NPObject * self, SEL _cmd, int i) 
-#line 270 "tests/full_syntax_test.np"
-{
+__attribute__((weak)) FsSprite * FsSprite_initWithId_(NPObject * self, SEL _cmd, int i) {
 #line 267 "tests/full_syntax_test.np"
     self = (&NEPA_VTABLE_$_NPObject)->init(self, __nepa_sel_init);
 #line 268 "tests/full_syntax_test.np"
@@ -9562,9 +9220,7 @@ __attribute__((weak)) FsSprite * FsSprite_initWithId_(NPObject * self, SEL _cmd,
 
 /* -[FsSprite sum_] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) int FsSprite_sum_(NPObject * self, SEL _cmd, int first, ...) 
-#line 285 "tests/full_syntax_test.np"
-{
+__attribute__((weak)) int FsSprite_sum_(NPObject * self, SEL _cmd, int first, ...) {
 #line 278 "tests/full_syntax_test.np"
     va_list ap;
 #line 279 "tests/full_syntax_test.np"
@@ -9585,9 +9241,7 @@ __attribute__((weak)) int FsSprite_sum_(NPObject * self, SEL _cmd, int first, ..
 
 /* +[FsSprite classSum_] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) int FsSprite_classSum_(NPClass * self, SEL _cmd, int first, ...) 
-#line 293 "tests/full_syntax_test.np"
-{
+__attribute__((weak)) int FsSprite_classSum_(NPClass * self, SEL _cmd, int first, ...) {
 #line 287 "tests/full_syntax_test.np"
     va_list ap;
 #line 288 "tests/full_syntax_test.np"
@@ -9626,25 +9280,21 @@ __attribute__((weak)) void FsSprite_setTag_(NPObject * self, SEL _cmd, NPString 
 }
 
 /* -[FsSprite draw] */
-__attribute__((weak)) void FsSprite_draw(NPObject * self, SEL _cmd) 
+__attribute__((weak)) void FsSprite_draw(NPObject * self, SEL _cmd) {
 #line 271 "tests/full_syntax_test.np"
-{
     printf("2.x draw sprite\n");
 }
 
 /* -[FsSprite color] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) int FsSprite_color(NPObject * self, SEL _cmd) 
+__attribute__((weak)) int FsSprite_color(NPObject * self, SEL _cmd) {
 #line 272 "tests/full_syntax_test.np"
-{
     return 65280;
 }
 
 /* -[FsSprite render] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) int FsSprite_render(NPObject * self, SEL _cmd) 
-#line 276 "tests/full_syntax_test.np"
-{
+__attribute__((weak)) int FsSprite_render(NPObject * self, SEL _cmd) {
 #line 275 "tests/full_syntax_test.np"
     __auto_type __nepa_eh_tmp_68 = (&NEPA_VTABLE_$_FsEngine__FsRenderable)->render(self, __nepa_sel_render);
     return (10 + __nepa_eh_tmp_68);
@@ -9652,9 +9302,7 @@ __attribute__((weak)) int FsSprite_render(NPObject * self, SEL _cmd)
 
 /* -[FsTypedStore run] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) void FsTypedStore_run(NPObject * self, SEL _cmd) 
-#line 317 "tests/full_syntax_test.np"
-{
+__attribute__((weak)) void FsTypedStore_run(NPObject * self, SEL _cmd) {
 #line 303 "tests/full_syntax_test.np"
     NPMutableArray * arr = (NPMutableArray *)(NPMutableArray_array(&NEPA_CLASS_$_NPMutableArray, __nepa_sel_array));
 #line 304 "tests/full_syntax_test.np"
@@ -9690,34 +9338,29 @@ __attribute__((weak)) void FsTypedStore_run(NPObject * self, SEL _cmd)
 }
 
 /* -[FsGuarded take_] */
-__attribute__((weak)) void FsGuarded_take_(NPObject * self, SEL _cmd, NPString * s) 
+__attribute__((weak)) void FsGuarded_take_(NPObject * self, SEL _cmd, NPString * s) {
 #line 747 "tests/full_syntax_test.np"
-{
     __auto_type __nepa_eh_tmp_135 = ({ NPObject *__nepa_tmp_166 = ((NPObject *)(s)); __nepa_tmp_166 ? ((const char * (*)(NPObject *, SEL))((struct nepa_vtable *)__nepa_tmp_166->isa->vtable)->UTF8String)(__nepa_tmp_166, __nepa_sel_UTF8String) : 0; });
     printf("5.1 region take %s\n", __nepa_eh_tmp_135);
 }
 
 /* -[FsGuarded optOut_] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) void FsGuarded_optOut_(NPObject * self, SEL _cmd, NPString * s) 
+__attribute__((weak)) void FsGuarded_optOut_(NPObject * self, SEL _cmd, NPString * s) {
 #line 748 "tests/full_syntax_test.np"
-{
     printf("5.2 opt %s\n", s ? ({ NPObject *__nepa_tmp_167 = ((NPObject *)(s)); __nepa_tmp_167 ? ((const char * (*)(NPObject *, SEL))((struct nepa_vtable *)__nepa_tmp_167->isa->vtable)->UTF8String)(__nepa_tmp_167, __nepa_sel_UTF8String) : 0; }) : "(nil)");
 }
 
 /* -[FsGuarded produce] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPString * FsGuarded_produce(NPObject * self, SEL _cmd) 
+__attribute__((weak)) NPString * FsGuarded_produce(NPObject * self, SEL _cmd) {
 #line 749 "tests/full_syntax_test.np"
-{
     return nepa_stringFromCstr("made");
 }
 
 /* -[FsAnnotated pre_post_] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) void FsAnnotated_pre_post_(NPObject * self, SEL _cmd, NPString * a, NPString * b) 
-#line 762 "tests/full_syntax_test.np"
-{
+__attribute__((weak)) void FsAnnotated_pre_post_(NPObject * self, SEL _cmd, NPString * a, NPString * b) {
 #line 761 "tests/full_syntax_test.np"
     __auto_type __nepa_eh_tmp_136 = ({ NPObject *__nepa_tmp_168 = ((NPObject *)(a)); __nepa_tmp_168 ? ((const char * (*)(NPObject *, SEL))((struct nepa_vtable *)__nepa_tmp_168->isa->vtable)->UTF8String)(__nepa_tmp_168, __nepa_sel_UTF8String) : 0; });
     __auto_type __nepa_eh_tmp_137 = ({ NPObject *__nepa_tmp_169 = ((NPObject *)(b)); __nepa_tmp_169 ? ((const char * (*)(NPObject *, SEL))((struct nepa_vtable *)__nepa_tmp_169->isa->vtable)->UTF8String)(__nepa_tmp_169, __nepa_sel_UTF8String) : 0; });
@@ -9726,34 +9369,28 @@ __attribute__((weak)) void FsAnnotated_pre_post_(NPObject * self, SEL _cmd, NPSt
 
 /* -[FsAnnotated maybe] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPString * FsAnnotated_maybe(NPObject * self, SEL _cmd) 
+__attribute__((weak)) NPString * FsAnnotated_maybe(NPObject * self, SEL _cmd) {
 #line 763 "tests/full_syntax_test.np"
-{
     return NULL;
 }
 
 /* -[FsAnnotated maybeC] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPString * FsAnnotated_maybeC(NPObject * self, SEL _cmd) 
+__attribute__((weak)) NPString * FsAnnotated_maybeC(NPObject * self, SEL _cmd) {
 #line 764 "tests/full_syntax_test.np"
-{
     return nepa_stringFromCstr("c");
 }
 
 /* -[FsModes mix_point_] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) int FsModes_mix_point_(NPObject * self, SEL _cmd, FsMode m, struct FsPoint p) 
-#line 778 "tests/full_syntax_test.np"
-{
+__attribute__((weak)) int FsModes_mix_point_(NPObject * self, SEL _cmd, FsMode m, struct FsPoint p) {
 #line 777 "tests/full_syntax_test.np"
     return (((int)m + (p.x * 10)) + p.y);
 }
 
 /* -[FsParser strictParse_] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) int FsParser_strictParse_(NPObject * self, SEL _cmd, NPString * s) 
-#line 793 "tests/full_syntax_test.np"
-{
+__attribute__((weak)) int FsParser_strictParse_(NPObject * self, SEL _cmd, NPString * s) {
 #line 791 "tests/full_syntax_test.np"
     __auto_type __nepa_eh_tmp_139 = ({ NPObject *__nepa_tmp_170 = ((NPObject *)(s)); __nepa_tmp_170 ? ((size_t (*)(NPObject *, SEL))((struct nepa_vtable *)__nepa_tmp_170->isa->vtable)->length)(__nepa_tmp_170, __nepa_sel_length) : (size_t){0}; });
     if ((__nepa_eh_tmp_139 > 3)) {
@@ -9781,9 +9418,7 @@ __attribute__((weak)) int FsParser_strictParse_(NPObject * self, SEL _cmd, NPStr
 }
 
 /* -[FsParser looseParse_] */
-__attribute__((weak)) int FsParser_looseParse_(NPObject * self, SEL _cmd, NPString * s) 
-#line 799 "tests/full_syntax_test.np"
-{
+__attribute__((weak)) int FsParser_looseParse_(NPObject * self, SEL _cmd, NPString * s) {
 #line 797 "tests/full_syntax_test.np"
     if ((s == NULL)) {
 #line 796 "tests/full_syntax_test.np"
@@ -9810,9 +9445,8 @@ __attribute__((weak)) int FsParser_looseParse_(NPObject * self, SEL _cmd, NPStri
 }
 
 /* -[FsFetcher compute_] */
-__attribute__((weak)) int FsFetcher_compute_(NPObject * self, SEL _cmd, int n) 
+__attribute__((weak)) int FsFetcher_compute_(NPObject * self, SEL _cmd, int n) {
 #line 815 "tests/full_syntax_test.np"
-{
     NPTask * __nepa_task = (NPTask *)(nepa_task_create(nepa_async_state_compute_, self, sizeof(struct compute__frame)));
     ((struct compute__frame *)__nepa_task->frame)->n = n;
     long __nepa_r = (long)nepa_task_join(__nepa_task);
@@ -9821,25 +9455,22 @@ __attribute__((weak)) int FsFetcher_compute_(NPObject * self, SEL _cmd, int n)
 
 /* -[FsFetcher helper_] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) int FsFetcher_helper_(NPObject * self, SEL _cmd, int n) 
+__attribute__((weak)) int FsFetcher_helper_(NPObject * self, SEL _cmd, int n) {
 #line 811 "tests/full_syntax_test.np"
-{
     return (n + 1);
 }
 
 /* +[FsFetcher runAll] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) void FsFetcher_runAll(NPClass * self, SEL _cmd) 
+__attribute__((weak)) void FsFetcher_runAll(NPClass * self, SEL _cmd) {
 #line 820 "tests/full_syntax_test.np"
-{
     NPTask * __nepa_task = (NPTask *)(nepa_task_create(nepa_async_state_runAll, self, sizeof(struct runAll_frame)));
     nepa_task_join(__nepa_task);
 }
 
 #line 1 "<nepa-generated>"
-__attribute__((weak)) int nepa_async_state_compute_(NPTask * t) 
+__attribute__((weak)) int nepa_async_state_compute_(NPTask * t) {
 #line 815 "tests/full_syntax_test.np"
-{
     switch (t->state) {
         case 1:
             {
@@ -9867,9 +9498,8 @@ __attribute__((weak)) int nepa_async_state_compute_(NPTask * t)
 }
 
 #line 1 "<nepa-generated>"
-__attribute__((weak)) int nepa_async_state_runAll(NPTask * t) 
+__attribute__((weak)) int nepa_async_state_runAll(NPTask * t) {
 #line 820 "tests/full_syntax_test.np"
-{
     switch (t->state) {
         case 1:
             {
@@ -9900,9 +9530,7 @@ __attribute__((weak)) int nepa_async_state_runAll(NPTask * t)
 int pred_eval_idx(nepa_pred_node * nodes, int idx, NPObject * object);
 
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPObject * pred_leaf(nepa_pred_node * nodes, int idx, NPObject * object) 
-#line 513 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
-{
+__attribute__((weak)) NPObject * pred_leaf(nepa_pred_node * nodes, int idx, NPObject * object) {
 #line 494 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
     if ((idx < 0)) {
         return NULL;
@@ -9971,9 +9599,7 @@ __attribute__((weak)) NPObject * pred_leaf(nepa_pred_node * nodes, int idx, NPOb
     }
 }
 
-__attribute__((weak)) int pred_is_npnumber(NPObject * v) 
-#line 518 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
-{
+__attribute__((weak)) int pred_is_npnumber(NPObject * v) {
 #line 516 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
     if (!v) {
         return 0;
@@ -9985,9 +9611,7 @@ __attribute__((weak)) int pred_is_npnumber(NPObject * v)
 }
 
 #line 1 "<nepa-generated>"
-__attribute__((weak)) int pred_is_npstring(NPObject * v) 
-#line 523 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
-{
+__attribute__((weak)) int pred_is_npstring(NPObject * v) {
 #line 521 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
     if (!v) {
         return 0;
@@ -9999,9 +9623,7 @@ __attribute__((weak)) int pred_is_npstring(NPObject * v)
 }
 
 #line 1 "<nepa-generated>"
-__attribute__((weak)) int pred_is_nparray(NPObject * v) 
-#line 528 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
-{
+__attribute__((weak)) int pred_is_nparray(NPObject * v) {
 #line 526 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
     if (!v) {
         return 0;
@@ -10013,17 +9635,13 @@ __attribute__((weak)) int pred_is_nparray(NPObject * v)
 }
 
 #line 1 "<nepa-generated>"
-__attribute__((weak)) double pred_num(NPObject * v) 
-#line 532 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
-{
+__attribute__((weak)) double pred_num(NPObject * v) {
 #line 531 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
     return ({ NPObject *__nepa_tmp_180 = ((NPObject *)((NPNumber *)v)); __nepa_tmp_180 ? ((double (*)(NPObject *, SEL))((struct nepa_vtable *)__nepa_tmp_180->isa->vtable)->doubleValue)(__nepa_tmp_180, __nepa_sel_doubleValue) : (double){0}; });
 }
 
 #line 1 "<nepa-generated>"
-__attribute__((weak)) int pred_compare(NPObject * a, NPObject * b, int op) 
-#line 566 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
-{
+__attribute__((weak)) int pred_compare(NPObject * a, NPObject * b, int op) {
 #line 543 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
     if ((!a || !b)) {
 #line 539 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
@@ -10105,17 +9723,13 @@ __attribute__((weak)) int pred_compare(NPObject * a, NPObject * b, int op)
     }
 }
 
-__attribute__((weak)) char pred_lc(char c) 
-#line 571 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
-{
+__attribute__((weak)) char pred_lc(char c) {
 #line 570 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
     return (((c >= 'A') && (c <= 'Z'))) ? (char)(((c - 'A') + 'a')) : c;
 }
 
 #line 1 "<nepa-generated>"
-__attribute__((weak)) int pred_streq_ci(const char * a, const char * b) 
-#line 578 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
-{
+__attribute__((weak)) int pred_streq_ci(const char * a, const char * b) {
 #line 576 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
     while ((*a && *b)) {
 #line 574 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
@@ -10131,9 +9745,7 @@ __attribute__((weak)) int pred_streq_ci(const char * a, const char * b)
 }
 
 #line 1 "<nepa-generated>"
-__attribute__((weak)) int pred_has_prefix(const char * s, const char * pre, int ci) 
-#line 587 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
-{
+__attribute__((weak)) int pred_has_prefix(const char * s, const char * pre, int ci) {
 #line 580 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
     size_t n = strlen(pre);
 #line 581 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
@@ -10156,9 +9768,7 @@ __attribute__((weak)) int pred_has_prefix(const char * s, const char * pre, int 
 }
 
 #line 1 "<nepa-generated>"
-__attribute__((weak)) int pred_contains(const char * s, const char * pat, int ci) 
-#line 600 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
-{
+__attribute__((weak)) int pred_contains(const char * s, const char * pat, int ci) {
 #line 589 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
     if (!*pat) {
         return 1;
@@ -10191,9 +9801,7 @@ __attribute__((weak)) int pred_contains(const char * s, const char * pat, int ci
 }
 
 #line 1 "<nepa-generated>"
-__attribute__((weak)) int pred_like(const char * s, const char * pat, int ci) 
-#line 621 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
-{
+__attribute__((weak)) int pred_like(const char * s, const char * pat, int ci) {
 #line 619 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
     while (*pat) {
 #line 612 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
@@ -10247,9 +9855,7 @@ __attribute__((weak)) int pred_like(const char * s, const char * pat, int ci)
 int pred_re_seq(const char * re, const char * s, const char * end);
 
 #line 1 "<nepa-generated>"
-__attribute__((weak)) char * pred_re_top_alt(const char * re) 
-#line 649 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
-{
+__attribute__((weak)) char * pred_re_top_alt(const char * re) {
 #line 631 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
     int depth = 0;
 #line 632 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
@@ -10316,9 +9922,7 @@ __attribute__((weak)) char * pred_re_top_alt(const char * re)
     }
 }
 
-__attribute__((weak)) char * pred_re_group_end(const char * re) 
-#line 670 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
-{
+__attribute__((weak)) char * pred_re_group_end(const char * re) {
 #line 653 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
     int depth = 0;
 #line 654 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
@@ -10380,9 +9984,7 @@ __attribute__((weak)) char * pred_re_group_end(const char * re)
     }
 }
 
-__attribute__((weak)) int pred_re_one(const char * re, char c) 
-#line 697 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
-{
+__attribute__((weak)) int pred_re_one(const char * re, char c) {
 #line 674 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
     if ((*re == '.')) {
         return (c != '\x00');
@@ -10449,9 +10051,7 @@ __attribute__((weak)) int pred_re_one(const char * re, char c)
     }
 }
 
-__attribute__((weak)) int pred_grep(const char * body, const char * rest, const char * s, const char * end) 
-#line 706 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
-{
+__attribute__((weak)) int pred_grep(const char * body, const char * rest, const char * s, const char * end) {
 #line 701 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
     if (pred_re_seq(rest, s, end)) {
         return 1;
@@ -10481,9 +10081,7 @@ __attribute__((weak)) int pred_grep(const char * body, const char * rest, const 
     }
 }
 
-__attribute__((weak)) int pred_re_seq(const char * re, const char * s, const char * end) 
-#line 783 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
-{
+__attribute__((weak)) int pred_re_seq(const char * re, const char * s, const char * end) {
 #line 710 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
     char * bar = (char *)(pred_re_top_alt(re));
 #line 1 "<nepa-generated>"
@@ -10729,9 +10327,7 @@ __attribute__((weak)) int pred_re_seq(const char * re, const char * s, const cha
     }
 }
 
-__attribute__((weak)) int pred_re_match(const char * re, const char * s) 
-#line 789 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
-{
+__attribute__((weak)) int pred_re_match(const char * re, const char * s) {
 #line 787 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
     if ((*re == '^')) {
         (re)++;
@@ -10744,9 +10340,7 @@ __attribute__((weak)) int pred_re_match(const char * re, const char * s)
     }
 }
 
-__attribute__((weak)) int pred_matches(const char * re, const char * s, int ci) 
-#line 803 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
-{
+__attribute__((weak)) int pred_matches(const char * re, const char * s, int ci) {
 #line 801 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
     if (ci) {
 #line 793 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
@@ -10783,9 +10377,7 @@ __attribute__((weak)) int pred_matches(const char * re, const char * s, int ci)
     }
 }
 
-__attribute__((weak)) int pred_strop(nepa_pred_node * nodes, int idx, NPObject * object) 
-#line 828 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
-{
+__attribute__((weak)) int pred_strop(nepa_pred_node * nodes, int idx, NPObject * object) {
 #line 807 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
     nepa_pred_node * n = &nodes[idx];
 #line 808 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
@@ -10859,9 +10451,7 @@ __attribute__((weak)) int pred_strop(nepa_pred_node * nodes, int idx, NPObject *
     }
 }
 
-__attribute__((weak)) int pred_in(nepa_pred_node * nodes, int idx, NPObject * object) 
-#line 842 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
-{
+__attribute__((weak)) int pred_in(nepa_pred_node * nodes, int idx, NPObject * object) {
 #line 833 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
     nepa_pred_node * n = &nodes[idx];
 #line 834 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
@@ -10905,9 +10495,7 @@ __attribute__((weak)) int pred_in(nepa_pred_node * nodes, int idx, NPObject * ob
     }
 }
 
-__attribute__((weak)) int pred_between(nepa_pred_node * nodes, int idx, NPObject * object) 
-#line 854 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
-{
+__attribute__((weak)) int pred_between(nepa_pred_node * nodes, int idx, NPObject * object) {
 #line 846 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
     nepa_pred_node * n = &nodes[idx];
 #line 847 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
@@ -10945,9 +10533,7 @@ __attribute__((weak)) int pred_between(nepa_pred_node * nodes, int idx, NPObject
     }
 }
 
-__attribute__((weak)) int pred_quant(nepa_pred_node * nodes, int idx, NPObject * object) 
-#line 870 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
-{
+__attribute__((weak)) int pred_quant(nepa_pred_node * nodes, int idx, NPObject * object) {
 #line 858 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
     nepa_pred_node * n = &nodes[idx];
 #line 859 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
@@ -11000,9 +10586,7 @@ __attribute__((weak)) int pred_quant(nepa_pred_node * nodes, int idx, NPObject *
     }
 }
 
-__attribute__((weak)) int pred_eval_idx(nepa_pred_node * nodes, int idx, NPObject * object) 
-#line 890 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
-{
+__attribute__((weak)) int pred_eval_idx(nepa_pred_node * nodes, int idx, NPObject * object) {
 #line 873 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
     if ((idx < 0)) {
         return 0;
@@ -11110,16 +10694,13 @@ int fs_asm_add3(int a, int b, int c);
 
 __asm__ (".text\n");
 
-__attribute__((weak)) int fs_double_it(int v) 
+__attribute__((weak)) int fs_double_it(int v) {
 #line 61 "tests/full_syntax_test.np"
-{
     return (v * 2);
 }
 
 #line 1 "<nepa-generated>"
-__attribute__((weak)) int fs_format_fn(const char * fmt, ...) 
-#line 69 "tests/full_syntax_test.np"
-{
+__attribute__((weak)) int fs_format_fn(const char * fmt, ...) {
 #line 64 "tests/full_syntax_test.np"
     va_list ap;
 #line 65 "tests/full_syntax_test.np"
@@ -11141,9 +10722,7 @@ __attribute__((weak)) int fs_format_fn(const char * fmt, ...)
     }
 }
 
-__attribute__((weak)) void sec1_c_superset(void ) 
-#line 180 "tests/full_syntax_test.np"
-{
+__attribute__((weak)) void sec1_c_superset(void ) {
 #line 72 "tests/full_syntax_test.np"
     printf("== §1 C superset ==\n");
 #line 75 "tests/full_syntax_test.np"
@@ -11339,9 +10918,7 @@ skip:
 }
 
 
-__attribute__((weak)) void sec2_objects(void ) 
-#line 365 "tests/full_syntax_test.np"
-{
+__attribute__((weak)) void sec2_objects(void ) {
 #line 321 "tests/full_syntax_test.np"
     printf("== §2 objects ==\n");
 #line 324 "tests/full_syntax_test.np"
@@ -11417,9 +10994,8 @@ __attribute__((weak)) void sec2_objects(void )
     nepa_release(sp);
 }
 
-__attribute__((weak)) int fs_call_block(FsIntBlock b, int x, int y) 
+__attribute__((weak)) int fs_call_block(FsIntBlock b, int x, int y) {
 #line 374 "tests/full_syntax_test.np"
-{
     return b(x, y);
 #line 1 "<nepa-generated>"
     if ((__nepa_eh_flag == 1)) {
@@ -11427,9 +11003,7 @@ __attribute__((weak)) int fs_call_block(FsIntBlock b, int x, int y)
     }
 }
 
-__attribute__((weak)) void sec3_expressions(void ) 
-#line 483 "tests/full_syntax_test.np"
-{
+__attribute__((weak)) void sec3_expressions(void ) {
 #line 377 "tests/full_syntax_test.np"
     printf("== §3 expressions ==\n");
 #line 378 "tests/full_syntax_test.np"
@@ -11656,9 +11230,7 @@ __attribute__((weak)) void sec3_expressions(void )
     nepa_release(sp);
 }
 
-__attribute__((weak)) void sec4_control_runtime(void ) 
-#line 727 "tests/full_syntax_test.np"
-{
+__attribute__((weak)) void sec4_control_runtime(void ) {
 #line 502 "tests/full_syntax_test.np"
     printf("== §4 control/runtime ==\n");
 #line 505 "tests/full_syntax_test.np"
@@ -12357,24 +11929,20 @@ __nepa_sw4_end:
     nepa_release(subj);
 }
 
-__attribute__((weak)) NPString * fs_maybe_fn(void ) 
+__attribute__((weak)) NPString * fs_maybe_fn(void ) {
 #line 768 "tests/full_syntax_test.np"
-{
     return NULL;
 }
 
 #line 1 "<nepa-generated>"
-__attribute__((weak)) void fs_take_fn(NPString * s) 
+__attribute__((weak)) void fs_take_fn(NPString * s) {
 #line 769 "tests/full_syntax_test.np"
-{
     __auto_type __nepa_eh_tmp_138 = ({ NPObject *__nepa_tmp_283 = ((NPObject *)(s)); __nepa_tmp_283 ? ((const char * (*)(NPObject *, SEL))((struct nepa_vtable *)__nepa_tmp_283->isa->vtable)->UTF8String)(__nepa_tmp_283, __nepa_sel_UTF8String) : 0; });
     printf("5.4 fn %s\n", __nepa_eh_tmp_138);
 }
 
 #line 1 "<nepa-generated>"
-__attribute__((weak)) void sec5_misc(void ) 
-#line 900 "tests/full_syntax_test.np"
-{
+__attribute__((weak)) void sec5_misc(void ) {
 #line 824 "tests/full_syntax_test.np"
     printf("== §5 nullability/throws/async/asm ==\n");
 #line 827 "tests/full_syntax_test.np"
@@ -12647,9 +12215,7 @@ __attribute__((weak)) int main(void ) {
     }
 }
 
-__attribute__((weak)) size_t pred_push(PredP * p, int tag, int op, int a, int b) 
-#line 58 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
-{
+__attribute__((weak)) size_t pred_push(PredP * p, int tag, int op, int a, int b) {
 #line 53 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
     if ((p->count == p->cap)) {
 #line 50 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
@@ -12676,9 +12242,7 @@ __attribute__((weak)) size_t pred_push(PredP * p, int tag, int op, int a, int b)
 }
 
 #line 1 "<nepa-generated>"
-__attribute__((weak)) size_t pred_push_key(PredP * p, const char * begin, size_t len) 
-#line 67 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
-{
+__attribute__((weak)) size_t pred_push_key(PredP * p, const char * begin, size_t len) {
 #line 61 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
     size_t idx = pred_push(p, 7, 0, -1, -1);
 #line 62 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
@@ -12697,9 +12261,7 @@ __attribute__((weak)) size_t pred_push_key(PredP * p, const char * begin, size_t
 }
 
 #line 1 "<nepa-generated>"
-__attribute__((weak)) size_t pred_push_lit_str(PredP * p, const char * begin, size_t len) 
-#line 79 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
-{
+__attribute__((weak)) size_t pred_push_lit_str(PredP * p, const char * begin, size_t len) {
 #line 70 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
     size_t idx = pred_push(p, 8, 0, -1, -1);
 #line 71 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
@@ -12722,9 +12284,7 @@ __attribute__((weak)) size_t pred_push_lit_str(PredP * p, const char * begin, si
 }
 
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPString * pred_str_lit(PredP * p) 
-#line 99 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
-{
+__attribute__((weak)) NPString * pred_str_lit(PredP * p) {
 #line 85 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
     if ((*p->s != '\''))     return NULL;
 #line 86 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
@@ -12764,9 +12324,7 @@ __attribute__((weak)) NPString * pred_str_lit(PredP * p)
 }
 
 #line 1 "<nepa-generated>"
-__attribute__((weak)) size_t pred_push_lit_num(PredP * p, double d) 
-#line 107 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
-{
+__attribute__((weak)) size_t pred_push_lit_num(PredP * p, double d) {
 #line 102 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
     size_t idx = pred_push(p, 8, 0, -1, -1);
 #line 103 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
@@ -12780,9 +12338,7 @@ __attribute__((weak)) size_t pred_push_lit_num(PredP * p, double d)
 }
 
 #line 1 "<nepa-generated>"
-__attribute__((weak)) void pred_fail(PredP * p, const char * msg) 
-#line 114 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
-{
+__attribute__((weak)) void pred_fail(PredP * p, const char * msg) {
 #line 113 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
     if (!p->failed) {
 #line 111 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
@@ -12793,17 +12349,13 @@ __attribute__((weak)) void pred_fail(PredP * p, const char * msg)
 }
 
 #line 1 "<nepa-generated>"
-__attribute__((weak)) void pred_skipws(PredP * p) 
-#line 118 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
-{
+__attribute__((weak)) void pred_skipws(PredP * p) {
 #line 117 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
     while (((((*p->s == ' ') || (*p->s == '\t')) || (*p->s == '\n')) || (*p->s == '\r')))     (p->s)++;
 }
 
 #line 1 "<nepa-generated>"
-__attribute__((weak)) int pred_word(PredP * p, const char * w) 
-#line 127 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
-{
+__attribute__((weak)) int pred_word(PredP * p, const char * w) {
 #line 121 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
     size_t n = strlen(w);
 #line 122 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
@@ -12819,9 +12371,7 @@ __attribute__((weak)) int pred_word(PredP * p, const char * w)
 }
 
 #line 1 "<nepa-generated>"
-__attribute__((weak)) int pred_opword(PredP * p, const char * w, int * ci) 
-#line 141 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
-{
+__attribute__((weak)) int pred_opword(PredP * p, const char * w, int * ci) {
 #line 131 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
     if (!pred_word(p, w))     return 0;
 #line 132 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
@@ -12835,9 +12385,7 @@ __attribute__((weak)) int pred_opword(PredP * p, const char * w, int * ci)
 #line 136 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
         (p->s += 3);
     }
-    else 
-#line 139 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
-    if ((((p->s[0] == '[') && (((p->s[1] == 'd') || (p->s[1] == 'D')))) && (p->s[2] == ']'))) {
+    else     if ((((p->s[0] == '[') && (((p->s[1] == 'd') || (p->s[1] == 'D')))) && (p->s[2] == ']'))) {
 #line 138 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
         (p->s += 3);
     }
@@ -12850,9 +12398,7 @@ size_t pred_or(PredP * p);
 size_t pred_cmp_rest(PredP * p, size_t left);
 
 #line 1 "<nepa-generated>"
-__attribute__((weak)) size_t pred_agg_lit(PredP * p) 
-#line 179 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
-{
+__attribute__((weak)) size_t pred_agg_lit(PredP * p) {
 #line 152 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
     (p->s)++;
 #line 153 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
@@ -12919,9 +12465,7 @@ __attribute__((weak)) size_t pred_agg_lit(PredP * p)
 }
 
 #line 1 "<nepa-generated>"
-__attribute__((weak)) size_t pred_primary(PredP * p) 
-#line 244 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
-{
+__attribute__((weak)) size_t pred_primary(PredP * p) {
 #line 183 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
     pred_skipws(p);
 #line 184 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
@@ -12984,17 +12528,9 @@ __attribute__((weak)) size_t pred_primary(PredP * p)
 #line 215 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
     int quant = -1;
 #line 218 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
-    if (pred_word(p, "ANY")) 
-#line 216 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
-    quant = 0;
-    else 
-#line 218 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
-    if (pred_word(p, "ALL")) 
-#line 217 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
-    quant = 1;
-    else 
-#line 218 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
-    if (pred_word(p, "NONE"))     quant = 2;
+    if (pred_word(p, "ANY"))     quant = 0;
+    else     if (pred_word(p, "ALL"))     quant = 1;
+    else     if (pred_word(p, "NONE"))     quant = 2;
 #line 234 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
     if ((quant >= 0)) {
 #line 220 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
@@ -13037,9 +12573,7 @@ __attribute__((weak)) size_t pred_primary(PredP * p)
 }
 
 #line 1 "<nepa-generated>"
-__attribute__((weak)) size_t pred_cmp(PredP * p) 
-#line 263 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
-{
+__attribute__((weak)) size_t pred_cmp(PredP * p) {
 #line 252 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
     pred_skipws(p);
 #line 253 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
@@ -13060,9 +12594,7 @@ __attribute__((weak)) size_t pred_cmp(PredP * p)
 }
 
 #line 1 "<nepa-generated>"
-__attribute__((weak)) size_t pred_cmp_rest(PredP * p, size_t left) 
-#line 310 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
-{
+__attribute__((weak)) size_t pred_cmp_rest(PredP * p, size_t left) {
 #line 268 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
     pred_skipws(p);
 #line 269 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
@@ -13157,9 +12689,7 @@ __attribute__((weak)) size_t pred_cmp_rest(PredP * p, size_t left)
 }
 
 #line 1 "<nepa-generated>"
-__attribute__((weak)) size_t pred_and(PredP * p) 
-#line 326 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
-{
+__attribute__((weak)) size_t pred_and(PredP * p) {
 #line 313 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
     size_t left = pred_cmp(p);
 #line 324 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
@@ -13173,12 +12703,8 @@ __attribute__((weak)) size_t pred_and(PredP * p)
 #line 318 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
         int matched = 0;
 #line 320 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
-        if (pred_opword(p, "AND", &ci)) 
-#line 319 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
-        matched = 1;
-        else 
-#line 320 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
-        if (((p->s[0] == '&') && (p->s[1] == '&'))) {
+        if (pred_opword(p, "AND", &ci))         matched = 1;
+        else         if (((p->s[0] == '&') && (p->s[1] == '&'))) {
             (p->s += 2);
             matched = 1;
         }
@@ -13194,9 +12720,7 @@ __attribute__((weak)) size_t pred_and(PredP * p)
 }
 
 #line 1 "<nepa-generated>"
-__attribute__((weak)) size_t pred_or(PredP * p) 
-#line 342 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
-{
+__attribute__((weak)) size_t pred_or(PredP * p) {
 #line 329 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
     size_t left = pred_and(p);
 #line 340 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
@@ -13210,12 +12734,8 @@ __attribute__((weak)) size_t pred_or(PredP * p)
 #line 334 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
         int matched = 0;
 #line 336 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
-        if (pred_opword(p, "OR", &ci)) 
-#line 335 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
-        matched = 1;
-        else 
-#line 336 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
-        if (((p->s[0] == '|') && (p->s[1] == '|'))) {
+        if (pred_opword(p, "OR", &ci))         matched = 1;
+        else         if (((p->s[0] == '|') && (p->s[1] == '|'))) {
             (p->s += 2);
             matched = 1;
         }
@@ -13231,9 +12751,7 @@ __attribute__((weak)) size_t pred_or(PredP * p)
 }
 
 #line 1 "<nepa-generated>"
-__attribute__((weak)) int pred_parse(const char * src, nepa_pred_node * * out_nodes, size_t * out_count, size_t * out_root) 
-#line 366 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
-{
+__attribute__((weak)) int pred_parse(const char * src, nepa_pred_node * * out_nodes, size_t * out_count, size_t * out_root) {
 #line 348 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
     PredP p;
 #line 349 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPPredicate.np"
@@ -13272,9 +12790,7 @@ __attribute__((weak)) int pred_parse(const char * src, nepa_pred_node * * out_no
 
 /* +[NPMutableArray<NPString *> arrayWithCapacity_] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPMutableArray * NPMutableArray_NPString_ptr_arrayWithCapacity_(NPClass * self, SEL _cmd, size_t capacity) 
-#line 54 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableArray.np"
-{
+__attribute__((weak)) NPMutableArray * NPMutableArray_NPString_ptr_arrayWithCapacity_(NPClass * self, SEL _cmd, size_t capacity) {
 #line 53 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableArray.np"
     {
 #line 52 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableArray.np"
@@ -13284,9 +12800,7 @@ __attribute__((weak)) NPMutableArray * NPMutableArray_NPString_ptr_arrayWithCapa
 
 /* +[NPMutableArray<NPString *> removeLastObject] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPMutableArray * NPMutableArray_NPString_ptr_array(NPClass * self, SEL _cmd) 
-#line 60 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableArray.np"
-{
+__attribute__((weak)) NPMutableArray * NPMutableArray_NPString_ptr_array(NPClass * self, SEL _cmd) {
 #line 59 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableArray.np"
     {
 #line 58 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableArray.np"
@@ -13296,9 +12810,7 @@ __attribute__((weak)) NPMutableArray * NPMutableArray_NPString_ptr_array(NPClass
 
 /* +[NPMutableArray<NPString *> removeObjectAtIndex:] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPMutableArray * NPMutableArray_NPString_ptr_arrayWithObject_(NPClass * self, SEL _cmd, NPString * obj) 
-#line 70 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableArray.np"
-{
+__attribute__((weak)) NPMutableArray * NPMutableArray_NPString_ptr_arrayWithObject_(NPClass * self, SEL _cmd, NPString * obj) {
 #line 69 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableArray.np"
     {
 #line 64 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableArray.np"
@@ -13315,9 +12827,7 @@ __attribute__((weak)) NPMutableArray * NPMutableArray_NPString_ptr_arrayWithObje
 
 /* +[NPMutableArray<NPString *> insertObject:atIndex:] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPMutableArray * NPMutableArray_NPString_ptr_arrayWithObjects_count_(NPClass * self, SEL _cmd, NPObject * * objs, size_t n) 
-#line 84 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableArray.np"
-{
+__attribute__((weak)) NPMutableArray * NPMutableArray_NPString_ptr_arrayWithObjects_count_(NPClass * self, SEL _cmd, NPObject * * objs, size_t n) {
 #line 83 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableArray.np"
     {
 #line 74 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableArray.np"
@@ -13340,18 +12850,14 @@ __attribute__((weak)) NPMutableArray * NPMutableArray_NPString_ptr_arrayWithObje
 
 /* -[NPMutableArray<NPString *> arrayWithCapacity:] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPMutableArray * NPMutableArray_NPString_ptr_init(NPObject * self, SEL _cmd) 
-#line 27 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableArray.np"
-{
+__attribute__((weak)) NPMutableArray * NPMutableArray_NPString_ptr_init(NPObject * self, SEL _cmd) {
 #line 26 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableArray.np"
     return (NPMutableArray *)({ NPObject *__nepa_tmp_317 = ((NPObject *)(self)); __nepa_tmp_317 ? ((NPMutableArray * (*)(NPObject *, SEL, size_t))((struct nepa_vtable *)__nepa_tmp_317->isa->vtable)->initWithCapacity_)(__nepa_tmp_317, __nepa_sel_initWithCapacity_, 0) : 0; });
 }
 
 /* -[NPMutableArray<NPString *> initWithCapacity_] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPMutableArray * NPMutableArray_NPString_ptr_initWithCapacity_(NPObject * self, SEL _cmd, size_t capacity) 
-#line 23 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableArray.np"
-{
+__attribute__((weak)) NPMutableArray * NPMutableArray_NPString_ptr_initWithCapacity_(NPObject * self, SEL _cmd, size_t capacity) {
 #line 9 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableArray.np"
     self = (&NEPA_VTABLE_$_NPObject)->init(self, __nepa_sel_init);
 #line 21 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableArray.np"
@@ -13381,9 +12887,7 @@ __attribute__((weak)) NPMutableArray * NPMutableArray_NPString_ptr_initWithCapac
 
 /* -[NPMutableArray<NPString *> initWithArray_] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPMutableArray * NPMutableArray_NPString_ptr_initWithArray_(NPObject * self, SEL _cmd, NPArray * other) 
-#line 38 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableArray.np"
-{
+__attribute__((weak)) NPMutableArray * NPMutableArray_NPString_ptr_initWithArray_(NPObject * self, SEL _cmd, NPArray * other) {
 #line 30 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableArray.np"
     self = ({ NPObject *__nepa_tmp_318 = ((NPObject *)(self)); __nepa_tmp_318 ? ((NPMutableArray * (*)(NPObject *, SEL))((struct nepa_vtable *)__nepa_tmp_318->isa->vtable)->init)(__nepa_tmp_318, __nepa_sel_init) : 0; });
 #line 36 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableArray.np"
@@ -13403,9 +12907,7 @@ __attribute__((weak)) NPMutableArray * NPMutableArray_NPString_ptr_initWithArray
 
 /* -[NPMutableArray<NPString *> initWithObjects_count_] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPMutableArray * NPMutableArray_NPString_ptr_initWithObjects_count_(NPObject * self, SEL _cmd, NPObject * * objs, size_t n) 
-#line 48 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableArray.np"
-{
+__attribute__((weak)) NPMutableArray * NPMutableArray_NPString_ptr_initWithObjects_count_(NPObject * self, SEL _cmd, NPObject * * objs, size_t n) {
 #line 41 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableArray.np"
     self = ({ NPObject *__nepa_tmp_322 = ((NPObject *)(self)); __nepa_tmp_322 ? ((NPMutableArray * (*)(NPObject *, SEL))((struct nepa_vtable *)__nepa_tmp_322->isa->vtable)->init)(__nepa_tmp_322, __nepa_sel_init) : 0; });
 #line 46 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableArray.np"
@@ -13422,9 +12924,7 @@ __attribute__((weak)) NPMutableArray * NPMutableArray_NPString_ptr_initWithObjec
 
 /* -[NPMutableArray<NPString *> addObject_] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) void NPMutableArray_NPString_ptr_addObject_(NPObject * self, SEL _cmd, NPString * obj) 
-#line 97 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableArray.np"
-{
+__attribute__((weak)) void NPMutableArray_NPString_ptr_addObject_(NPObject * self, SEL _cmd, NPString * obj) {
 #line 87 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableArray.np"
     if (!obj) {
         return;
@@ -13452,9 +12952,7 @@ __attribute__((weak)) void NPMutableArray_NPString_ptr_addObject_(NPObject * sel
 
 /* -[NPMutableArray<NPString *> addObjectsFromArray_] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) void NPMutableArray_NPString_ptr_addObjectsFromArray_(NPObject * self, SEL _cmd, NPArray * other) 
-#line 105 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableArray.np"
-{
+__attribute__((weak)) void NPMutableArray_NPString_ptr_addObjectsFromArray_(NPObject * self, SEL _cmd, NPArray * other) {
 #line 100 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableArray.np"
     if (!other) {
         return;
@@ -13471,9 +12969,7 @@ __attribute__((weak)) void NPMutableArray_NPString_ptr_addObjectsFromArray_(NPOb
 
 /* -[NPMutableArray<NPString *> insertObject_atIndex_] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) void NPMutableArray_NPString_ptr_insertObject_atIndex_(NPObject * self, SEL _cmd, NPString * obj, size_t index) 
-#line 120 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableArray.np"
-{
+__attribute__((weak)) void NPMutableArray_NPString_ptr_insertObject_atIndex_(NPObject * self, SEL _cmd, NPString * obj, size_t index) {
 #line 108 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableArray.np"
     if (!obj) {
         return;
@@ -13507,9 +13003,7 @@ __attribute__((weak)) void NPMutableArray_NPString_ptr_insertObject_atIndex_(NPO
 
 /* -[NPMutableArray<NPString *> removeObjectAtIndex_] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) void NPMutableArray_NPString_ptr_removeObjectAtIndex_(NPObject * self, SEL _cmd, size_t index) 
-#line 130 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableArray.np"
-{
+__attribute__((weak)) void NPMutableArray_NPString_ptr_removeObjectAtIndex_(NPObject * self, SEL _cmd, size_t index) {
 #line 123 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableArray.np"
     if ((index >= ((struct NPMutableArray_NPString_ptr *)self)->_count)) {
         return;
@@ -13529,9 +13023,7 @@ __attribute__((weak)) void NPMutableArray_NPString_ptr_removeObjectAtIndex_(NPOb
 
 /* -[NPMutableArray<NPString *> removeLastObject] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) void NPMutableArray_NPString_ptr_removeLastObject(NPObject * self, SEL _cmd) 
-#line 135 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableArray.np"
-{
+__attribute__((weak)) void NPMutableArray_NPString_ptr_removeLastObject(NPObject * self, SEL _cmd) {
 #line 133 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableArray.np"
     if ((((struct NPMutableArray_NPString_ptr *)self)->_count == 0)) {
         return;
@@ -13542,9 +13034,7 @@ __attribute__((weak)) void NPMutableArray_NPString_ptr_removeLastObject(NPObject
 
 /* -[NPMutableArray<NPString *> removeObject_] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) void NPMutableArray_NPString_ptr_removeObject_(NPObject * self, SEL _cmd, NPString * obj) 
-#line 145 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableArray.np"
-{
+__attribute__((weak)) void NPMutableArray_NPString_ptr_removeObject_(NPObject * self, SEL _cmd, NPString * obj) {
 #line 138 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableArray.np"
     if (!obj) {
         return;
@@ -13563,9 +13053,7 @@ __attribute__((weak)) void NPMutableArray_NPString_ptr_removeObject_(NPObject * 
 
 /* -[NPMutableArray<NPString *> removeAllObjects] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) void NPMutableArray_NPString_ptr_removeAllObjects(NPObject * self, SEL _cmd) 
-#line 154 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableArray.np"
-{
+__attribute__((weak)) void NPMutableArray_NPString_ptr_removeAllObjects(NPObject * self, SEL _cmd) {
 #line 152 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableArray.np"
     for (size_t i = 0;  (i < ((struct NPMutableArray_NPString_ptr *)self)->_count); (i)++) {
 #line 151 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableArray.np"
@@ -13580,9 +13068,7 @@ __attribute__((weak)) void NPMutableArray_NPString_ptr_removeAllObjects(NPObject
 
 /* -[NPMutableArray<NPString *> replaceObjectAtIndex_withObject_] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) void NPMutableArray_NPString_ptr_replaceObjectAtIndex_withObject_(NPObject * self, SEL _cmd, size_t index, NPString * obj) 
-#line 163 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableArray.np"
-{
+__attribute__((weak)) void NPMutableArray_NPString_ptr_replaceObjectAtIndex_withObject_(NPObject * self, SEL _cmd, size_t index, NPString * obj) {
 #line 157 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableArray.np"
     if ((!obj || (index >= ((struct NPMutableArray_NPString_ptr *)self)->_count))) {
         return;
@@ -13600,9 +13086,7 @@ __attribute__((weak)) void NPMutableArray_NPString_ptr_replaceObjectAtIndex_with
 
 /* -[NPMutableArray<NPString *> exchangeObjectAtIndex_withObjectAtIndex_] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) void NPMutableArray_NPString_ptr_exchangeObjectAtIndex_withObjectAtIndex_(NPObject * self, SEL _cmd, size_t a, size_t b) 
-#line 170 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableArray.np"
-{
+__attribute__((weak)) void NPMutableArray_NPString_ptr_exchangeObjectAtIndex_withObjectAtIndex_(NPObject * self, SEL _cmd, size_t a, size_t b) {
 #line 166 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableArray.np"
     if (((a >= ((struct NPMutableArray_NPString_ptr *)self)->_count) || (b >= ((struct NPMutableArray_NPString_ptr *)self)->_count))) {
         return;
@@ -13617,9 +13101,7 @@ __attribute__((weak)) void NPMutableArray_NPString_ptr_exchangeObjectAtIndex_wit
 
 /* -[NPMutableArray<NPString *> setObject_atIndex_] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) void NPMutableArray_NPString_ptr_setObject_atIndex_(NPObject * self, SEL _cmd, NPString * obj, size_t index) 
-#line 175 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableArray.np"
-{
+__attribute__((weak)) void NPMutableArray_NPString_ptr_setObject_atIndex_(NPObject * self, SEL _cmd, NPString * obj, size_t index) {
 #line 173 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableArray.np"
     if ((!obj || (index >= ((struct NPMutableArray_NPString_ptr *)self)->_count))) {
         return;
@@ -13630,9 +13112,7 @@ __attribute__((weak)) void NPMutableArray_NPString_ptr_setObject_atIndex_(NPObje
 
 /* -[NPMutableArray<NPString *> filterUsingPredicate_] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) void NPMutableArray_NPString_ptr_filterUsingPredicate_(NPObject * self, SEL _cmd, NPPredicate * pred) 
-#line 195 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableArray.np"
-{
+__attribute__((weak)) void NPMutableArray_NPString_ptr_filterUsingPredicate_(NPObject * self, SEL _cmd, NPPredicate * pred) {
 #line 183 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPMutableArray.np"
     if (!pred) {
         return;
@@ -13664,9 +13144,7 @@ __attribute__((weak)) void NPMutableArray_NPString_ptr_filterUsingPredicate_(NPO
 
 /* -[FsBox<NPMutableString *> initWith_] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) FsBox * FsBox_NPMutableString_ptr_initWith_(NPObject * self, SEL _cmd, NPMutableString * v) 
-#line 225 "tests/full_syntax_test.np"
-{
+__attribute__((weak)) FsBox * FsBox_NPMutableString_ptr_initWith_(NPObject * self, SEL _cmd, NPMutableString * v) {
 #line 222 "tests/full_syntax_test.np"
     self = (&NEPA_VTABLE_$_NPObject)->init(self, __nepa_sel_init);
 #line 223 "tests/full_syntax_test.np"
@@ -13679,25 +13157,21 @@ __attribute__((weak)) FsBox * FsBox_NPMutableString_ptr_initWith_(NPObject * sel
 
 /* -[FsBox<NPMutableString *> value] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPMutableString * FsBox_NPMutableString_ptr_value(NPObject * self, SEL _cmd) 
+__attribute__((weak)) NPMutableString * FsBox_NPMutableString_ptr_value(NPObject * self, SEL _cmd) {
 #line 226 "tests/full_syntax_test.np"
-{
     return ((struct FsBox_NPMutableString_ptr *)self)->_value;
 }
 
 /* -[FsBox<NPMutableString *> setValue_] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) void FsBox_NPMutableString_ptr_setValue_(NPObject * self, SEL _cmd, NPMutableString * v) 
+__attribute__((weak)) void FsBox_NPMutableString_ptr_setValue_(NPObject * self, SEL _cmd, NPMutableString * v) {
 #line 227 "tests/full_syntax_test.np"
-{
     ((struct FsBox_NPMutableString_ptr *)self)->_value = v;
 }
 
 /* +[NPArray<NPNumber *> indexOfObjectMatchingPredicate:] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPObject * NPArray_NPNumber_ptr_arrayWithObjects_count_(NPClass * self, SEL _cmd, NPObject * * objs, size_t n) 
-#line 36 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPArray.np"
-{
+__attribute__((weak)) NPObject * NPArray_NPNumber_ptr_arrayWithObjects_count_(NPClass * self, SEL _cmd, NPObject * * objs, size_t n) {
 #line 23 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPArray.np"
     NPObject *__nepa_tmp_331 = (NPObject_alloc(self, __nepa_sel_alloc));
     NPArray * arr = (NPArray *)(__nepa_tmp_331 ? ((struct nepa_vtable *)__nepa_tmp_331->isa->vtable)->init(__nepa_tmp_331, __nepa_sel_init) : 0);
@@ -13731,36 +13205,28 @@ __attribute__((weak)) NPObject * NPArray_NPNumber_ptr_arrayWithObjects_count_(NP
 
 /* +[NPArray<NPNumber *> copy] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPObject * NPArray_NPNumber_ptr_arrayWithObject_(NPClass * self, SEL _cmd, NPNumber * obj) 
-#line 40 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPArray.np"
-{
+__attribute__((weak)) NPObject * NPArray_NPNumber_ptr_arrayWithObject_(NPClass * self, SEL _cmd, NPNumber * obj) {
 #line 39 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPArray.np"
     return NPArray_NPNumber_ptr_arrayWithObjects_count_(self, __nepa_sel_arrayWithObjects_count_, &obj, 1);
 }
 
 /* +[NPArray<NPNumber *> description] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPObject * NPArray_NPNumber_ptr_array(NPClass * self, SEL _cmd) 
-#line 44 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPArray.np"
-{
+__attribute__((weak)) NPObject * NPArray_NPNumber_ptr_array(NPClass * self, SEL _cmd) {
 #line 43 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPArray.np"
     return NPArray_NPNumber_ptr_arrayWithObjects_count_(self, __nepa_sel_arrayWithObjects_count_, NULL, 0);
 }
 
 /* -[NPArray<NPNumber *> dealloc] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) size_t NPArray_NPNumber_ptr_count(NPObject * self, SEL _cmd) 
-#line 48 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPArray.np"
-{
+__attribute__((weak)) size_t NPArray_NPNumber_ptr_count(NPObject * self, SEL _cmd) {
 #line 47 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPArray.np"
     return ((struct NPArray_NPNumber_ptr *)self)->_count;
 }
 
 /* -[NPArray<NPNumber *> objectAtIndex_] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPNumber * NPArray_NPNumber_ptr_objectAtIndex_(NPObject * self, SEL _cmd, size_t index) 
-#line 53 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPArray.np"
-{
+__attribute__((weak)) NPNumber * NPArray_NPNumber_ptr_objectAtIndex_(NPObject * self, SEL _cmd, size_t index) {
 #line 51 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPArray.np"
     if ((index >= ((struct NPArray_NPNumber_ptr *)self)->_count)) {
         return NULL;
@@ -13771,27 +13237,21 @@ __attribute__((weak)) NPNumber * NPArray_NPNumber_ptr_objectAtIndex_(NPObject * 
 
 /* -[NPArray<NPNumber *> firstObject] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPNumber * NPArray_NPNumber_ptr_firstObject(NPObject * self, SEL _cmd) 
-#line 57 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPArray.np"
-{
+__attribute__((weak)) NPNumber * NPArray_NPNumber_ptr_firstObject(NPObject * self, SEL _cmd) {
 #line 56 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPArray.np"
     return (((struct NPArray_NPNumber_ptr *)self)->_count > 0) ? ((struct NPArray_NPNumber_ptr *)self)->_items[0] : NULL;
 }
 
 /* -[NPArray<NPNumber *> lastObject] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPNumber * NPArray_NPNumber_ptr_lastObject(NPObject * self, SEL _cmd) 
-#line 61 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPArray.np"
-{
+__attribute__((weak)) NPNumber * NPArray_NPNumber_ptr_lastObject(NPObject * self, SEL _cmd) {
 #line 60 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPArray.np"
     return (((struct NPArray_NPNumber_ptr *)self)->_count > 0) ? ((struct NPArray_NPNumber_ptr *)self)->_items[(((struct NPArray_NPNumber_ptr *)self)->_count - 1)] : NULL;
 }
 
 /* -[NPArray<NPNumber *> containsObject_] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) _Bool NPArray_NPNumber_ptr_containsObject_(NPObject * self, SEL _cmd, NPNumber * obj) 
-#line 68 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPArray.np"
-{
+__attribute__((weak)) _Bool NPArray_NPNumber_ptr_containsObject_(NPObject * self, SEL _cmd, NPNumber * obj) {
 #line 66 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPArray.np"
     for (size_t i = 0;  (i < ((struct NPArray_NPNumber_ptr *)self)->_count); (i)++) {
 #line 65 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPArray.np"
@@ -13805,9 +13265,7 @@ __attribute__((weak)) _Bool NPArray_NPNumber_ptr_containsObject_(NPObject * self
 
 /* -[NPArray<NPNumber *> indexOfObject_] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) size_t NPArray_NPNumber_ptr_indexOfObject_(NPObject * self, SEL _cmd, NPNumber * obj) 
-#line 75 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPArray.np"
-{
+__attribute__((weak)) size_t NPArray_NPNumber_ptr_indexOfObject_(NPObject * self, SEL _cmd, NPNumber * obj) {
 #line 73 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPArray.np"
     for (size_t i = 0;  (i < ((struct NPArray_NPNumber_ptr *)self)->_count); (i)++) {
 #line 72 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPArray.np"
@@ -13821,9 +13279,7 @@ __attribute__((weak)) size_t NPArray_NPNumber_ptr_indexOfObject_(NPObject * self
 
 /* -[NPArray<NPNumber *> filteredArrayUsingPredicate_] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPArray * NPArray_NPNumber_ptr_filteredArrayUsingPredicate_(NPObject * self, SEL _cmd, NPPredicate * pred) 
-#line 102 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPArray.np"
-{
+__attribute__((weak)) NPArray * NPArray_NPNumber_ptr_filteredArrayUsingPredicate_(NPObject * self, SEL _cmd, NPPredicate * pred) {
 #line 84 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPArray.np"
     if (!pred) {
 #line 83 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPArray.np"
@@ -13863,9 +13319,7 @@ __attribute__((weak)) NPArray * NPArray_NPNumber_ptr_filteredArrayUsingPredicate
 
 /* -[NPArray<NPNumber *> indexOfObjectMatchingPredicate_] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) size_t NPArray_NPNumber_ptr_indexOfObjectMatchingPredicate_(NPObject * self, SEL _cmd, NPPredicate * pred) 
-#line 113 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPArray.np"
-{
+__attribute__((weak)) size_t NPArray_NPNumber_ptr_indexOfObjectMatchingPredicate_(NPObject * self, SEL _cmd, NPPredicate * pred) {
 #line 106 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPArray.np"
     if (!pred) {
         return (size_t)-1;
@@ -13884,9 +13338,7 @@ __attribute__((weak)) size_t NPArray_NPNumber_ptr_indexOfObjectMatchingPredicate
 
 /* -[NPArray<NPNumber *> copy] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPObject * NPArray_NPNumber_ptr_copy(NPObject * self, SEL _cmd) 
-#line 119 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPArray.np"
-{
+__attribute__((weak)) NPObject * NPArray_NPNumber_ptr_copy(NPObject * self, SEL _cmd) {
 #line 118 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPArray.np"
     __auto_type __nepa_eh_tmp_2 = NPArray_NPNumber_ptr_arrayWithObjects_count_(&NEPA_CLASS_$_NPArray, __nepa_sel_arrayWithObjects_count_, ((struct NPArray_NPNumber_ptr *)self)->_items, ((struct NPArray_NPNumber_ptr *)self)->_count);
     return nepa_retain(__nepa_eh_tmp_2);
@@ -13894,9 +13346,7 @@ __attribute__((weak)) NPObject * NPArray_NPNumber_ptr_copy(NPObject * self, SEL 
 
 /* -[NPArray<NPNumber *> containsObject:] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) NPString * NPArray_NPNumber_ptr_description(NPObject * self, SEL _cmd) 
-#line 135 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPArray.np"
-{
+__attribute__((weak)) NPString * NPArray_NPNumber_ptr_description(NPObject * self, SEL _cmd) {
 #line 122 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPArray.np"
     NPString * result = (NPString *)(NPString_stringWithUTF8String_(&NEPA_CLASS_$_NPString, __nepa_sel_stringWithUTF8String_, "["));
 #line 132 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPArray.np"
@@ -13929,9 +13379,7 @@ __attribute__((weak)) NPString * NPArray_NPNumber_ptr_description(NPObject * sel
 
 /* -[NPArray<NPNumber *> arrayWithObject:] */
 #line 1 "<nepa-generated>"
-__attribute__((weak)) void NPArray_NPNumber_ptr_dealloc(NPObject * self, SEL _cmd) 
-#line 20 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPArray.np"
-{
+__attribute__((weak)) void NPArray_NPNumber_ptr_dealloc(NPObject * self, SEL _cmd) {
 #line 14 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPArray.np"
     for (size_t i = 0;  (i < ((struct NPArray_NPNumber_ptr *)self)->_count); (i)++) {
 #line 13 "/Users/cactus/Desktop/01_CodeProjects/nepa-lang/include/Foundation/NPArray.np"

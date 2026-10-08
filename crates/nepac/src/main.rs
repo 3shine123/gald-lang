@@ -805,7 +805,8 @@ fn main() {
         println!("                                     GDB show .np/.nh file and line numbers");
         println!("  -line-directives                     Emit #line <file> in generated C so");
         println!("                                     clang diagnostics point back at");
-        println!("                                     the .np/.nh source (default: on)");
+        println!("                                     the .np/.nh source (default: on;");
+        println!("                                     -fno-line-directives to disable)");
         println!("  -fno-nepa-arc                        Disable ARC (MRC)");
         println!("  -ffreestanding                       Bare-metal/freestanding output");
         println!("                                     (no libc headers, no TLS, no bundled");
