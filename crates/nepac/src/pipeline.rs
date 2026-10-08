@@ -3,7 +3,7 @@ use std::fs;
 use nepa_parser::parser::Parser;
 use nepa_binder::Binder;
 use nepa_elaborator::Elaborator;
-use nepa_codegen::{emit_unit_with_headers, emit_unit_with_headers_mapped, emit_bridge_header};
+use nepa_codegen::{emit_unit_with_headers_mapped, emit_bridge_header};
 use nepa_preprocessor::Preprocessor;
 use nepa_symbol::SymbolTable;
 use nepa_ast::ast::*;
