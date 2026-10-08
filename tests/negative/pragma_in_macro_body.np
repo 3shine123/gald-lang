@@ -2,13 +2,13 @@
  *
  * `_Pragma` inside a macro body: §6.10.9 defines the pragma at the *invocation*
  * site, relative to the tokens around the call. A source-level expander has no
- * position to place it, so nopac refuses instead of dropping the pragma
+ * position to place it, so nepac refuses instead of dropping the pragma
  * somewhere harmless-looking.
  *
  * Expected (exit != 0), from the preprocessor's macro-expansion step:
  *
  *     Macro expansion failed:
- *     [cpp] line 18: macro 'PUSH' has '_Pragma' in its body, which nopa cannot
+ *     [cpp] line 18: macro 'PUSH' has '_Pragma' in its body, which nepa cannot
  *     expand — '_Pragma' (ISO/IEC 9899:2011 §6.10.9) takes effect at the
  *     invocation site during preprocessing, and a source-level expander has no
  *     position to place it; write the _Pragma(...) directly on its own source

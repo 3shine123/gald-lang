@@ -1,0 +1,3 @@
+Category TU absent: the owner TU references Dog_trickCount as a strong
+extern (D1, doc/categories_protocol_plan.md); the link must fail with an
+undefined-symbol error instead of a NULL-slot segfault at runtime.

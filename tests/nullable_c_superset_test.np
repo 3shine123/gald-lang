@@ -2,7 +2,7 @@
 
 // C-superset guard for nullability: `nullable` / `nonnull` are CONTEXTUAL, not
 // hard keywords. Every declaration below must compile and run unchanged, or the
-// feature has broken the project's core rule (AGENTS.md: Nopa is a C superset).
+// feature has broken the project's core rule (AGENTS.md: Nepa is a C superset).
 //
 // NOTE on `_Nullable` / `_Nonnull` / `_Null_unspecified`: deliberately NOT
 // tested here. Those are reserved words in clang, so plain C rejects them as

@@ -72,7 +72,7 @@ const KW_TABLE: &[(&str, KeywordKind)] = &[
     // `in` is deliberately NOT a keyword: ObjC/clang treat it as a contextual
     // keyword recognised only inside a for-in header (position-based), so C
     // identifiers named `in` (variables, struct fields, `x.in` member access)
-    // stay legal — nopa is a C superset. The parser matches the token TEXT
+    // stay legal — nepa is a C superset. The parser matches the token TEXT
     // `in` at the for-header position instead.
     ("break", KeywordKind::Break),
     ("continue", KeywordKind::Continue),

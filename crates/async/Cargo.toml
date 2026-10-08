@@ -1,8 +1,8 @@
 [package]
-name = "nopa-async"
+name = "nepa-async"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-nopa-ast = { path = "../ast" }
-nopa-cst = { path = "../cst" }
+nepa-ast = { path = "../ast" }
+nepa-cst = { path = "../cst" }

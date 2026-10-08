@@ -8,10 +8,10 @@
 - (void)dealloc {
     for (size_t i = 0; i < _count; i++) {
         if (_keys[i]) {
-            nopa_release(_keys[i]);
+            nepa_release(_keys[i]);
         }
         if (_values[i]) {
-            nopa_release(_values[i]);
+            nepa_release(_values[i]);
         }
     }
     free(_keys);
@@ -47,8 +47,8 @@
                     if (!keys[i]) {
                         continue;
                     }
-                    ks[stored] = nopa_retain(keys[i]);
-                    vs[stored] = values[i] ? nopa_retain(values[i]) : NULL;
+                    ks[stored] = nepa_retain(keys[i]);
+                    vs[stored] = values[i] ? nepa_retain(values[i]) : NULL;
                     stored++;
                 }
                 dict->_keys = ks;
@@ -110,7 +110,7 @@
 // `-copy` honors the ObjC convention: the caller owns the result (+1).
 // Returns an immutable NPDictionary even when invoked on a mutable subclass.
 - (id)copy {
-    return nopa_retain([NPDictionary dictionaryWithObjects:_values forKeys:_keys count:_count]);
+    return nepa_retain([NPDictionary dictionaryWithObjects:_values forKeys:_keys count:_count]);
 }
 
 - (NPString *)description {

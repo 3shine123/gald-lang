@@ -7,6 +7,6 @@ int main() {
     id<Greeter> g = r;
     printf("%s\n", GreetVia(g, "you"));
     printf("mood=%s\n", [r mood]);
-    nopa_release(r);
+    nepa_release(r);
     return 0;
 }

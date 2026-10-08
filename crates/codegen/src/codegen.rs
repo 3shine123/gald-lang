@@ -2,8 +2,8 @@ use std::fmt::Write;
 use std::sync::atomic::{AtomicU8, AtomicUsize, Ordering};
 use std::sync::{Mutex, OnceLock};
 use std::collections::HashMap;
-use nopa_ast::*;
-use nopa_cst::{TypePrim, CstParam};
+use nepa_ast::*;
+use nepa_cst::{TypePrim, CstParam};
 use attrs::Backend;
 
 // ─── Temp variable counter ─────────────────────────────────────────────────
@@ -69,11 +69,11 @@ fn meta_symbol(kind: &str, flat: &str) -> String {
         1 | 2 => "$_",  // clang=1, gcc=2
         _ => "",        // portable=0
     };
-    format!("NOPA_{}{}{}", kind, sep, flat)
+    format!("NEPA_{}{}{}", kind, sep, flat)
 }
 
 /// FNV-1a fingerprint of the uniform vtable layout, i.e. of the (sorted) set of
-/// instance-method names this translation unit compiled a `struct nopa_vtable`
+/// instance-method names this translation unit compiled a `struct nepa_vtable`
 /// for. Two units agree iff they saw the same method set; the value is stamped
 /// into every vtable instance and verified at load time so a cross-TU layout
 /// mismatch aborts with a clear message instead of dispatching garbage.
@@ -198,13 +198,13 @@ fn is_clang_backend() -> bool {
 }
 
 /// Block-typed value in C. clang: `RT (^)(params)`. gcc/portable: an opaque
-/// pointer to the shared `struct __nopa_block_header` (all literal structs
+/// pointer to the shared `struct __nepa_block_header` (all literal structs
 /// start with that header; call via `->invoke`).
 fn block_type_c_str(ret: &str, _params: &str) -> String {
     if is_clang_backend() {
         format!("{} (^)({})", ret, _params)
     } else {
-        "struct __nopa_block_header *".to_string()
+        "struct __nepa_block_header *".to_string()
     }
 }
 
@@ -232,7 +232,7 @@ fn sanitize_sel_name(sel: &str) -> String {
 }
 
 fn sel_const_name(sel: &str) -> String {
-    format!("__nopa_sel_{}", sanitize_sel_name(sel))
+    format!("__nepa_sel_{}", sanitize_sel_name(sel))
 }
 
 // ─── C99 AST types ────────────────────────────────────────────────────────────
@@ -410,10 +410,10 @@ pub struct CgUnit {
     pub selectors: Vec<String>,
     pub classes: Vec<CgClassMeta>,
     pub global_instance_method_names: Vec<String>,
-    /// Struct tags whose `==`/`!=` the checker rewrote to `nopa_struct_eq_<tag>`
+    /// Struct tags whose `==`/`!=` the checker rewrote to `nepa_struct_eq_<tag>`
     /// calls. One field-wise comparison function is emitted per tag, on demand.
     pub struct_eq_tags: Vec<String>,
-    /// `-fno-nopa-arc`: manual retain/release. Object ivars are then the
+    /// `-fno-nepa-arc`: manual retain/release. Object ivars are then the
     /// programmer's to release, so no ARC dealloc wrapper is generated.
     pub no_arc: bool,
     /// Classes whose `@implementation` sits in **this** TU's main file (not in
@@ -440,10 +440,15 @@ pub struct CgUnit {
     /// itself; with neither, every method is shared (the pre-R3 behavior).
     pub vtable_sig_names: Vec<String>,
     /// True when this TU can see the NPPredicate declaration (pipeline: a
-    /// transitive nopa `#import` of NPPredicate). Gates KVC accessor-table
-    /// emission (NOPA_KVC_$_<Class>): a TU that never touches predicates
+    /// transitive nepa `#import` of NPPredicate). Gates KVC accessor-table
+    /// emission (NEPA_KVC_$_<Class>): a TU that never touches predicates
     /// pays nothing. See doc/nppredicate_plan.md §2.
     pub kvc: bool,
+    /// Protocol declarations visible in this unit: (name, parents, required,
+    /// optional). Emitted as static `NPProtocol` instances (D5.2,
+    /// doc/categories_protocol_plan.md) so `conformsToProtocol:` can answer
+    /// from metadata. Owner-only emission (strong) follows the R2 rule.
+    pub protocols: Vec<(String, Vec<String>, Vec<String>, Vec<String>)>,
 }
 
 #[derive(Debug, Clone)]
@@ -457,12 +462,19 @@ pub struct CgClassMeta {
     pub method_params_list: Vec<Vec<(String, String)>>,
     pub method_variadic: Vec<bool>, // parallel to method_names: true → C `...` method
     pub method_owners: Vec<String>,
+    /// Names of category-introduced methods. Keyed by NAME: `method_names`
+    /// is re-merged with inherited methods between unit construction and
+    /// vtable emission, so any index-parallel array goes stale in between
+    /// (seen live: built with 2 names, emitted with 11).
+    pub category_method_names: std::collections::HashSet<String>,
     pub vtable_indices: Vec<i32>,
     pub ivar_types: Vec<String>,
     pub ivar_names: Vec<String>,
     pub ivar_weak: Vec<bool>,
     pub properties: Vec<String>,
     pub has_impl: bool,
+    /// Protocol conformances for the static metadata table (D5.2).
+    pub protocols: Vec<String>,
 }
 
 // ─── AST Type → C string ─────────────────────────────────────────────────────
@@ -476,9 +488,9 @@ pub struct CgClassMeta {
 /// *referent's* weak list in sync:
 ///
 /// ```c
-/// (nopa_weakUnregister((NPObject **)&target),
+/// (nepa_weakUnregister((NPObject **)&target),
 ///  target = value,
-///  nopa_weakRegister((NPObject **)&target, (NPObject *)value))
+///  nepa_weakRegister((NPObject **)&target, (NPObject *)value))
 /// ```
 ///
 /// Used for both explicit `self->_weakIvar = v` writes and weak property
@@ -518,23 +530,23 @@ fn build_weak_write(
     CgExpr {
         kind: CgExprKind::Comma, type_str, line, col,
         data: CgExprData::Comma(vec![
-            call("nopa_weakUnregister", vec![cast_addr.clone()]),
+            call("nepa_weakUnregister", vec![cast_addr.clone()]),
             CgExpr {
                 kind: CgExprKind::Assign, type_str: None, line, col,
                 data: CgExprData::Assign { target: Box::new(target), value: Box::new(value) },
             },
-            call("nopa_weakRegister", vec![cast_addr, cast_value]),
+            call("nepa_weakRegister", vec![cast_addr, cast_value]),
         ]),
     }
 }
 
 fn is_owned_object_ivar_type(ty: &str) -> bool {
     let t = ty.trim();
-    // `id` (and the runtime's `nopa_id_t`) are object pointers spelled without
+    // `id` (and the runtime's `nepa_id_t`) are object pointers spelled without
     // a `*`, so they never reach the pointer checks below.
-    if t == "id" || t == "nopa_id_t" { return true; }
+    if t == "id" || t == "nepa_id_t" { return true; }
     if t.contains("(*") { return false; }                  // function pointer
-    if t.contains("struct __nopa_block") { return false; }  // block layout
+    if t.contains("struct __nepa_block") { return false; }  // block layout
     if !t.ends_with('*') { return false; }
     // Exactly ONE level of indirection. `NPObject **` is a C array of objects
     // (Foundation's NPArray/NPDictionary back `_items`/`_keys`/`_values` with
@@ -569,7 +581,7 @@ fn owned_ivars_of(cm: &CgClassMeta) -> Vec<String> {
 ///     or an OO cascade), and a synthesized release on top of that is a double
 ///     free. A class that declares `dealloc` has declared its ivar policy.
 ///
-/// Releasing only `nopa_release`-style is nil-safe, so a half-initialized
+/// Releasing only `nepa_release`-style is nil-safe, so a half-initialized
 /// object is safe to destroy, and order is REVERSE declaration (stack order).
 /// The wrapper never rewrites the user's body; it *is* the class's `dealloc`
 /// entry in the metadata table.
@@ -596,7 +608,7 @@ fn emit_arc_dealloc_wrappers(classes: &[CgClassMeta]) -> (std::collections::Hash
         let flat = name_flat(&c.class_name);
         if owned.get(&flat).map_or(true, |v| v.is_empty()) { continue; }
         if has_user_dealloc(c) { continue; }
-        names.insert(flat.clone(), format!("{}__nopa_arc_dealloc", flat));
+        names.insert(flat.clone(), format!("{}__nepa_arc_dealloc", flat));
     }
 
     let mut defs = String::new();
@@ -610,7 +622,7 @@ fn emit_arc_dealloc_wrappers(classes: &[CgClassMeta]) -> (std::collections::Hash
         let entry = match c.super_name.as_deref().map(name_flat) {
             Some(sup) => {
                 if names.contains_key(&sup) {
-                    format!("    {}__nopa_arc_dealloc(self, _cmd);\n", sup)
+                    format!("    {}__nepa_arc_dealloc(self, _cmd);\n", sup)
                 } else {
                     let sup_user = classes
                         .iter()
@@ -632,12 +644,12 @@ fn emit_arc_dealloc_wrappers(classes: &[CgClassMeta]) -> (std::collections::Hash
         let releases: String = ivars
             .iter()
             .rev()
-            .map(|n| format!("    nopa_release(((struct {} *)self)->{});\n", flat, n))
+            .map(|n| format!("    nepa_release(((struct {} *)self)->{});\n", flat, n))
             .collect();
 
         defs.push_str(&format!(
             "/* ARC: release '{}'s owned ivars (no user dealloc) */\n\
-             static void {}__nopa_arc_dealloc(NPObject * self, SEL _cmd) {{\n{}{}}}\n\n",
+             static void {}__nepa_arc_dealloc(NPObject * self, SEL _cmd) {{\n{}{}}}\n\n",
             c.class_name,
             flat,
             entry,
@@ -794,7 +806,7 @@ fn mangle_one_arg(arg: &str) -> String {
     s
 }
 
-fn cst_type_to_c_str(ct: &nopa_cst::CstType) -> String {
+fn cst_type_to_c_str(ct: &nepa_cst::CstType) -> String {
     if ct.is_fn_ptr {
         let ret = ct.subtype.as_ref().map(|s| cst_type_to_c_str(s)).unwrap_or_else(|| "void".into());
         let mut params = String::new();
@@ -934,7 +946,7 @@ pub fn ast_type_to_c_str(t: &AstType) -> String {
             if is_clang_backend() {
                 return format!("{} (^{})({})", ret, bn, params);
             }
-            return format!("struct __nopa_block_header *{}", bn);
+            return format!("struct __nepa_block_header *{}", bn);
         }
         return block_type_c_str(&ret, &params);
     }
@@ -1099,6 +1111,16 @@ struct ClassInfo {
     method_params_list: Vec<Vec<(String, String)>>,
     method_variadic: Vec<bool>, // parallel to method_names: true → C `...` method
     method_owners: Vec<String>,
+    /// Names of methods introduced by a category declaration (`@interface
+    /// Dog (Tricks)`) in this unit. Keyed by NAME, not a parallel array:
+    /// method_names gets appended out of order (inherited/global methods
+    /// merge later), so index-parallel tracking silently misaligns.
+    category_method_names: std::collections::HashSet<String>,
+    /// Protocol names this class conforms to, resolved to FQN by the
+    /// elaborator. Emitted into the class's static protocol table (D5.2,
+    /// doc/categories_protocol_plan.md §7): `protocol_count` stops being
+    /// hardcoded 0 and the runtime query can answer conformances.
+    protocols: Vec<String>,
     ivar_types: Vec<String>,
     ivar_names: Vec<String>,
     ivar_weak: Vec<bool>,
@@ -1253,7 +1275,7 @@ fn expand_nplog_format(fmt: &str, args: &[AstExpr], class_infos: &std::collectio
 }
 
 /// Build the format argument for NPLog: when NPString is available, emit
-/// `(NPString *)nopa_stringFromCstr("...")` so the format is passed as an NPString.
+/// `(NPString *)nepa_stringFromCstr("...")` so the format is passed as an NPString.
 /// When NPString is absent, fall back to a raw C string (graceful degradation).
 fn nplog_format_arg(fmt: String, has_npstring: bool, line: usize, col: usize) -> CgExpr {
     if has_npstring {
@@ -1264,7 +1286,7 @@ fn nplog_format_arg(fmt: String, has_npstring: bool, line: usize, col: usize) ->
                 expr: Box::new(CgExpr {
                     kind: CgExprKind::Call, type_str: Some("NPObject *".into()), line, col,
                     data: CgExprData::Call {
-                        name: "nopa_stringFromCstr".into(),
+                        name: "nepa_stringFromCstr".into(),
                         args: vec![CgExpr { kind: CgExprKind::String, type_str: None, line, col, data: CgExprData::String(fmt) }],
                         vtable_class: None, alt_vtable_classes: vec![], is_class_method: false, is_super: false,
                         sel_const_name: None, method_index: None,
@@ -1317,7 +1339,7 @@ fn convert_expr(ae: &AstExpr, class_infos: &std::collections::BTreeMap<String, C
                 CgExpr {
                     kind: CgExprKind::Call, type_str: Some("NPObject *".into()), line, col,
                     data: CgExprData::Call {
-                        name: "nopa_stringFromCstr".into(),
+                        name: "nepa_stringFromCstr".into(),
                         args: vec![CgExpr { kind: CgExprKind::String, type_str: None, line, col, data: CgExprData::String(s.clone()) }],
                         vtable_class: None, alt_vtable_classes: vec![],
                         is_class_method: false, is_super: false,
@@ -1367,12 +1389,12 @@ fn convert_expr(ae: &AstExpr, class_infos: &std::collections::BTreeMap<String, C
             CgExpr { kind: CgExprKind::Arrow, type_str, line, col, data: CgExprData::Arrow { obj: Box::new(obj_cg), field } }
         }
         AstExprData::MsgSend { receiver, selector, args, is_class_method, is_super, super_name, .. } => {
-            // Special case: [receiver class] -> ((NPClass *)((nopa_root *)receiver)->isa)
+            // Special case: [receiver class] -> ((NPClass *)((nepa_root *)receiver)->isa)
             // The "class" method is auto-generated on every meta vtable but NOT registered
             // in class_infos, so normal vtable dispatch can't find it. Emit the direct
             // ivar access which is semantically equivalent for all ObjC objects.
             // When the receiver is a class name (e.g. `[Array class]`), emit
-            // `&nopa_<flat>_class` directly instead.
+            // `&nepa_<flat>_class` directly instead.
             if selector == "class" && !*is_super && args.is_empty() {
                 if let AstExprData::VarRef { ref name, .. } = receiver.data {
                     let flat = name_flat(name);
@@ -1397,7 +1419,7 @@ fn convert_expr(ae: &AstExpr, class_infos: &std::collections::BTreeMap<String, C
                         obj: Box::new(CgExpr {
                             kind: CgExprKind::Cast, type_str: None, line, col,
                             data: CgExprData::Cast {
-                                target_type: "nopa_root *".to_string(),
+                                target_type: "nepa_root *".to_string(),
                                 expr: Box::new(obj_cg),
                             },
                         }),
@@ -1424,7 +1446,7 @@ fn convert_expr(ae: &AstExpr, class_infos: &std::collections::BTreeMap<String, C
             //     protocol stub from propagate_protocol_methods).
             //   - The uniform vtable makes this a compile-time-known member
             //     name: selectors map 1:1 to sanitized member names.
-            // Emits: nopa_resp_<member>(recv_expr) — the helper is declared as
+            // Emits: nepa_resp_<member>(recv_expr) — the helper is declared as
             // a static CgDecl::Function here and emitted after the vtable
             // struct definition in emit_unit_with_headers.
             if selector == "respondsToSelector:" && !*is_super && args.len() == 1 {
@@ -1445,7 +1467,7 @@ fn convert_expr(ae: &AstExpr, class_infos: &std::collections::BTreeMap<String, C
                         return CgExpr {
                             kind: CgExprKind::Call, type_str, line, col,
                             data: CgExprData::Call {
-                                name: format!("nopa_resp_{}", member),
+                                name: format!("nepa_resp_{}", member),
                                 args: vec![convert_expr(receiver, &class_infos)],
                                 vtable_class: None,
                                 alt_vtable_classes: Vec::new(),
@@ -1465,6 +1487,48 @@ fn convert_expr(ae: &AstExpr, class_infos: &std::collections::BTreeMap<String, C
                         return CgExpr {
                             kind: CgExprKind::Int, type_str, line, col,
                             data: CgExprData::Int(0),
+                        };
+                    }
+                }
+            }
+            // Special case: [receiver conformsToProtocol:@protocol(P)] ->
+            // nepa_class_conformsToProtocol(recv->isa, &NEPA_PROTO_$_P) —
+            // metadata-based runtime query (D5.2). The protocol table must
+            // be declared in this TU (a @protocol decl or a conforming
+            // class brings the static instance in); otherwise the static
+            // answer is NO, mirroring the respondsToSelector: fallback.
+            if selector == "conformsToProtocol:" && !*is_super && args.len() == 1 {
+                if let AstExprData::Selector(s) = &args[0].data {
+                    // @protocol(P) arrives as selector text "P" (parser maps
+                    // the @protocol(...) expression onto a Selector expr).
+                    let pname = s.trim_start_matches("@protocol").trim().to_string();
+                    let pname = pname.trim_end_matches(':').to_string();
+                    if !pname.is_empty() {
+                        let recv_c = convert_expr(receiver, &class_infos);
+                        // The runtime query wants the NPClass: receiver -> isa
+                        // (NPObject's isa field), not the receiver itself.
+                        let recv_isa = CgExpr {
+                            kind: CgExprKind::Arrow, type_str: None, line, col,
+                            data: CgExprData::Arrow { obj: Box::new(recv_c), field: "isa".into() },
+                        };
+                        return CgExpr {
+                            kind: CgExprKind::Call, type_str, line, col,
+                            data: CgExprData::Call {
+                                name: "nepa_class_conformsToProtocol".into(),
+                                args: vec![
+                                    recv_isa,
+                                    CgExpr {
+                                        kind: CgExprKind::Ident, type_str: Some("struct NPProtocol *".to_string()), line, col,
+                                        data: CgExprData::Ident(format!("&NEPA_PROTO_$_{}", name_flat(&pname))),
+                                    },
+                                ],
+                                vtable_class: None,
+                                alt_vtable_classes: Vec::new(),
+                                is_class_method: false,
+                                is_super: false,
+                                sel_const_name: None,
+                                method_index: None,
+                            },
                         };
                     }
                 }
@@ -1638,7 +1702,7 @@ fn convert_expr(ae: &AstExpr, class_infos: &std::collections::BTreeMap<String, C
                         // For self/super class method calls, pass self directly (it's already a class pointer)
                         // NOTE: a super class-method send (`[super alloc]`) must pass
                         // `self`, NOT the identifier `super` (which is not a C
-                        // identifier and only makes sense to the nopa parser).
+                        // identifier and only makes sense to the nepa parser).
                         let cls_addr = if rc == "self" || (rc == "super" && *is_super) {
                             // `super` as receiver → pass `self` (in a class method
                             // self IS the NPClass*; `super` is not a C identifier).
@@ -1723,7 +1787,7 @@ fn convert_expr(ae: &AstExpr, class_infos: &std::collections::BTreeMap<String, C
         }
         AstExprData::FuncCall { name, args, callee, .. } => {
             // NPLog(@"...%@...", arg1, arg2): resolve `%@` at COMPILE TIME per
-            // the nopa static-dispatch model. No runtime reflection is allowed.
+            // the nepa static-dispatch model. No runtime reflection is allowed.
             // Each `%@` arg becomes  arg ? [[arg description] UTF8String] : "(null)"
             // and the format's `%@` is rewritten to `%s`.
             if name == "NPLog" && callee.is_none() && !args.is_empty() {
@@ -2017,7 +2081,7 @@ fn convert_expr(ae: &AstExpr, class_infos: &std::collections::BTreeMap<String, C
         }
         AstExprData::ArrayLit(elements) => {
             if class_infos.contains_key("NPArray") {
-                // @[a, b, c] → nopa_array_create(3, a, b, c)
+                // @[a, b, c] → nepa_array_create(3, a, b, c)
                 let mut cg_args = Vec::with_capacity(elements.len() + 1);
                 cg_args.push(CgExpr { kind: CgExprKind::Int, type_str: None, line, col, data: CgExprData::Int(elements.len() as i64) });
                 for el in elements {
@@ -2025,7 +2089,7 @@ fn convert_expr(ae: &AstExpr, class_infos: &std::collections::BTreeMap<String, C
                 }
                 CgExpr { kind: CgExprKind::Call, type_str: Some("NPObject *".into()), line, col,
                     data: CgExprData::Call {
-                        name: "nopa_array_create".into(), args: cg_args,
+                        name: "nepa_array_create".into(), args: cg_args,
                         vtable_class: None, alt_vtable_classes: vec![], is_class_method: false, is_super: false,
                         sel_const_name: None, method_index: None,
                     },
@@ -2039,7 +2103,7 @@ fn convert_expr(ae: &AstExpr, class_infos: &std::collections::BTreeMap<String, C
         }
         AstExprData::DictLit { keys, values } => {
             if class_infos.contains_key("NPDictionary") {
-                // @{k: v, ...} → nopa_dictionary_create(n, k1, v1, ..., kn, vn)
+                // @{k: v, ...} → nepa_dictionary_create(n, k1, v1, ..., kn, vn)
                 let stored = keys.len().min(values.len());
                 let mut cg_args = Vec::with_capacity(stored * 2 + 1);
                 cg_args.push(CgExpr { kind: CgExprKind::Int, type_str: None, line, col, data: CgExprData::Int(stored as i64) });
@@ -2049,7 +2113,7 @@ fn convert_expr(ae: &AstExpr, class_infos: &std::collections::BTreeMap<String, C
                 }
                 CgExpr { kind: CgExprKind::Call, type_str: Some("NPObject *".into()), line, col,
                     data: CgExprData::Call {
-                        name: "nopa_dictionary_create".into(), args: cg_args,
+                        name: "nepa_dictionary_create".into(), args: cg_args,
                         vtable_class: None, alt_vtable_classes: vec![], is_class_method: false, is_super: false,
                         sel_const_name: None, method_index: None,
                     },
@@ -2121,7 +2185,7 @@ fn convert_expr(ae: &AstExpr, class_infos: &std::collections::BTreeMap<String, C
         }
         AstExprData::Block { params, return_type, body } => {
             let tid = next_temp_id();
-            let func_name = format!("__nopa_block_{}", tid);
+            let func_name = format!("__nepa_block_{}", tid);
             let rt = return_type.as_ref().map(|t| ast_type_to_c_str(t))
                 .unwrap_or_else(|| infer_block_return_type(body.as_deref()));
             let mut cg_params = Vec::new();
@@ -2135,7 +2199,7 @@ fn convert_expr(ae: &AstExpr, class_infos: &std::collections::BTreeMap<String, C
             // module-level buffer so they are available when emit_unit_with_headers runs.
             if !is_clang_backend() {
                 let mut defs = block_defs();
-                let layout_name = format!("__nopa_block_layout_{}", tid);
+                let layout_name = format!("__nepa_block_layout_{}", tid);
                 let mut params_sig = String::new();
                 for (i, (pt, pn)) in cg_params.iter().enumerate() {
                     if i > 0 { params_sig.push_str(", "); }
@@ -2416,11 +2480,11 @@ fn convert_stmt(as_: &AstStmt, class_infos: &std::collections::BTreeMap<String, 
             stmts.push(CgStmt {
                 kind: CgStmtKind::Decl, line: 0, col: 0,
                 data: CgStmtData::Decl {
-                    decl_type: "nopa_autoreleasepool_t *".into(),
-                    name: "__nopa_pool".into(),
+                    decl_type: "nepa_autoreleasepool_t *".into(),
+                    name: "__nepa_pool".into(),
                     init: Some(Box::new(CgExpr {
                         kind: CgExprKind::Ident, type_str: None, line: 0, col: 0,
-                        data: CgExprData::Ident("nopa_autoreleasepoolPush()".into()),
+                        data: CgExprData::Ident("nepa_autoreleasepoolPush()".into()),
                     })),
                     array_suffix: None,
                     is_static: false,
@@ -2435,7 +2499,7 @@ fn convert_stmt(as_: &AstStmt, class_infos: &std::collections::BTreeMap<String, 
                 kind: CgStmtKind::Expr, line: 0, col: 0,
                 data: CgStmtData::Expr(CgExpr {
                     kind: CgExprKind::Ident, type_str: None, line: 0, col: 0,
-                    data: CgExprData::Ident("nopa_autoreleasepoolPop(__nopa_pool)".into()),
+                    data: CgExprData::Ident("nepa_autoreleasepoolPop(__nepa_pool)".into()),
                 }),
             });
             CgStmt { kind: CgStmtKind::Compound, line, col, data: CgStmtData::Compound(stmts) }
@@ -2453,8 +2517,8 @@ fn convert_stmt(as_: &AstStmt, class_infos: &std::collections::BTreeMap<String, 
         }
         AstStmtData::Synchronized { lock, body } => {
             // @synchronized (obj) { ... } — real mutual exclusion:
-            //   { long __nopa_sync_N __attribute__((cleanup(nopa_syncAutoCleanup)))
-            //       = nopa_syncLock((void *)obj);
+            //   { long __nepa_sync_N __attribute__((cleanup(nepa_syncAutoCleanup)))
+            //       = nepa_syncLock((void *)obj);
             //     <body> }
             // The cleanup attribute releases the lock on every scope exit
             // (normal end, return, break, continue). A @throw escaping the
@@ -2463,7 +2527,7 @@ fn convert_stmt(as_: &AstStmt, class_infos: &std::collections::BTreeMap<String, 
             // builds: lock/unlock are single-core no-ops (runtime_freestanding.c).
             let lock_cg = convert_expr(lock, class_infos);
             let body_cg = convert_stmt(body, class_infos);
-            let holder = format!("__nopa_sync_{}", next_temp_id());
+            let holder = format!("__nepa_sync_{}", next_temp_id());
             let mut stmts: Vec<CgStmt> = Vec::new();
             stmts.push(CgStmt {
                 kind: CgStmtKind::Decl, line, col,
@@ -2473,7 +2537,7 @@ fn convert_stmt(as_: &AstStmt, class_infos: &std::collections::BTreeMap<String, 
                     init: Some(Box::new(CgExpr {
                         kind: CgExprKind::Call, type_str: None, line, col,
                         data: CgExprData::Call {
-                            name: "nopa_syncLock".into(),
+                            name: "nepa_syncLock".into(),
                             args: vec![CgExpr {
                                 kind: CgExprKind::Cast, type_str: None, line, col,
                                 data: CgExprData::Cast {
@@ -2488,7 +2552,7 @@ fn convert_stmt(as_: &AstStmt, class_infos: &std::collections::BTreeMap<String, 
                     })),
                     array_suffix: None, is_static: false, is_weak: false, is_block: false,
                     next: vec![],
-                    attributes: vec!["cleanup(nopa_syncAutoCleanup)".into()],
+                    attributes: vec!["cleanup(nepa_syncAutoCleanup)".into()],
                 },
             });
             match body_cg.data {
@@ -2504,7 +2568,7 @@ fn convert_stmt(as_: &AstStmt, class_infos: &std::collections::BTreeMap<String, 
             // return, break/continue — see crates/arc). An earlier
             // "unwind-lift" shadow mechanism here DOUBLE-RELEASED: ARC
             // already releases owned locals before @throw, and the lift's
-            // shadow release was not gated on __nopa_state == 1, so even the
+            // shadow release was not gated on __nepa_state == 1, so even the
             // normal no-throw path hit freed memory (ASan UAF, verified).
             // Removed; policy is prefer leak over double-release (Unknown-
             // merge locals may leak on the throw path — same conservative
@@ -2513,15 +2577,15 @@ fn convert_stmt(as_: &AstStmt, class_infos: &std::collections::BTreeMap<String, 
             let finally_cg = finally_block.as_ref().map(|fb| convert_stmt(fb, class_infos));
 
             // Build the catch blocks: each Catch { param, body } becomes:
-            //   { param_type param_name = __nopa_exception_value; body }
-            // Wrap in "if (__nopa_state == 1) { __nopa_state = 2; <catches> }"
+            //   { param_type param_name = __nepa_exception_value; body }
+            // Wrap in "if (__nepa_state == 1) { __nepa_state = 2; <catches> }"
 let mut catch_body: Vec<CgStmt> = Vec::new();
             if !catches.is_empty() {
                 for c in catches.iter() {
                     if let AstStmtData::Catch { param, body } = &c.data {
                         let mut catch_stmts: Vec<CgStmt> = Vec::new();
                         // Each catch starts by marking state=2 so later catches
-                        // won't match (they check __nopa_state == 1).
+                        // won't match (they check __nepa_state == 1).
                         catch_stmts.push(CgStmt {
                             kind: CgStmtKind::Expr, line, col,
                             data: CgStmtData::Expr(CgExpr {
@@ -2529,7 +2593,7 @@ let mut catch_body: Vec<CgStmt> = Vec::new();
                                 data: CgExprData::Assign {
                                     target: Box::new(CgExpr {
                                         kind: CgExprKind::Ident, type_str: None, line, col,
-                                        data: CgExprData::Ident("__nopa_state".into()),
+                                        data: CgExprData::Ident("__nepa_state".into()),
                                     }),
                                     value: Box::new(CgExpr {
                                         kind: CgExprKind::Int, type_str: None, line, col,
@@ -2544,13 +2608,13 @@ let mut catch_body: Vec<CgStmt> = Vec::new();
                         let param_name = param.name.clone().unwrap_or_else(|| "exc".into());
                         // Only emit a value-initialized declaration when the catch body
                         // actually references the parameter. Otherwise emitting
-                        // `T e = __nopa_exception_value;` produces a dead store
+                        // `T e = __nepa_exception_value;` produces a dead store
                         // (clang -Wunused-but-set-variable / analyzer DeadStores).
                         // When unused, declare the name without an initializer and
                         // add `(void)name;` to silence the unused-variable warning.
                         let param_used = stmt_refs_name(&*body, &param_name);
                         if param_used {
-                            // Cast __nopa_exception_value (an NPObject *) to the catch
+                            // Cast __nepa_exception_value (an NPObject *) to the catch
                             // param type so typed catches don't trigger incompatible
                             // pointer types with -Wall -Wextra.
                             let cast_ctor = CgExpr {
@@ -2559,7 +2623,7 @@ let mut catch_body: Vec<CgStmt> = Vec::new();
                                     target_type: param_type.clone(),
                                     expr: Box::new(CgExpr {
                                         kind: CgExprKind::Ident, type_str: None, line, col,
-                                        data: CgExprData::Ident("__nopa_exception_value".into()),
+                                        data: CgExprData::Ident("__nepa_exception_value".into()),
                                     }),
                                 },
                             };
@@ -2620,9 +2684,9 @@ let mut catch_body: Vec<CgStmt> = Vec::new();
                             let name = t.name.as_ref()?;
                             let flat = name_flat(name);
                             if !class_infos.contains_key(&flat) { return None; }
-                            // Build: __nopa_eh_isa((NPObject *)__nopa_exception_value,
-                            //                       &nopa_Flat_class)
-                            // __nopa_eh_isa walks the superclass chain and is
+                            // Build: __nepa_eh_isa((NPObject *)__nepa_exception_value,
+                            //                       &nepa_Flat_class)
+                            // __nepa_eh_isa walks the superclass chain and is
                             // nil-safe (runtime.c) — a subclass instance matches a
                             // parent-class arm. The old exact `isa ==` comparison
                             // silently failed to catch subclasses (probe: throw
@@ -2632,7 +2696,7 @@ let mut catch_body: Vec<CgStmt> = Vec::new();
                             Some(CgExpr {
                                 kind: CgExprKind::Call, type_str: None, line, col,
                                 data: CgExprData::Call {
-                                    name: "__nopa_eh_isa".into(),
+                                    name: "__nepa_eh_isa".into(),
                                     args: vec![
                                         CgExpr {
                                             kind: CgExprKind::Cast, type_str: None, line, col,
@@ -2640,7 +2704,7 @@ let mut catch_body: Vec<CgStmt> = Vec::new();
                                                 target_type: "NPObject *".into(),
                                                 expr: Box::new(CgExpr {
                                                     kind: CgExprKind::Ident, type_str: None, line, col,
-                                                    data: CgExprData::Ident("__nopa_exception_value".into()),
+                                                    data: CgExprData::Ident("__nepa_exception_value".into()),
                                                 }),
                                             },
                                         },
@@ -2681,14 +2745,14 @@ let mut catch_body: Vec<CgStmt> = Vec::new();
                                 data: CgStmtData::Compound(catch_stmts),
                             })
                         };
-                        // if (__nopa_state == 1) { ... }
+                        // if (__nepa_state == 1) { ... }
                         let state_cond = CgExpr {
                             kind: CgExprKind::Binary, type_str: None, line, col,
                             data: CgExprData::Binary {
                                 op_str: "==".into(),
                                 left: Box::new(CgExpr {
                                     kind: CgExprKind::Ident, type_str: None, line, col,
-                                    data: CgExprData::Ident("__nopa_state".into()),
+                                    data: CgExprData::Ident("__nepa_state".into()),
                                 }),
                                 right: Box::new(CgExpr {
                                     kind: CgExprKind::Int, type_str: None, line, col,
@@ -2710,24 +2774,24 @@ let mut catch_body: Vec<CgStmt> = Vec::new();
 
             // ── Build the full try/catch/finally pattern ──
             // {
-            //   jmp_buf __nopa_saved;
-            //   memcpy(__nopa_saved, __nopa_exception_buf, sizeof(jmp_buf));
-            //   volatile int __nopa_state = 0;
-            //   if (setjmp(__nopa_exception_buf) != 0) { __nopa_state = 1; }
-            //   if (__nopa_state == 0) { <try_body> }
+            //   jmp_buf __nepa_saved;
+            //   memcpy(__nepa_saved, __nepa_exception_buf, sizeof(jmp_buf));
+            //   volatile int __nepa_state = 0;
+            //   if (setjmp(__nepa_exception_buf) != 0) { __nepa_state = 1; }
+            //   if (__nepa_state == 0) { <try_body> }
             //   <catch_body_if_state_1>
-            //   memcpy(__nopa_exception_buf, __nopa_saved, sizeof(jmp_buf));
+            //   memcpy(__nepa_exception_buf, __nepa_saved, sizeof(jmp_buf));
             //   <finally_block>
-            //   if (__nopa_state == 1) { longjmp(...); }
+            //   if (__nepa_state == 1) { longjmp(...); }
             // }
             let mut try_stmts: Vec<CgStmt> = Vec::new();
 
-            // jmp_buf __nopa_saved;
+            // jmp_buf __nepa_saved;
             try_stmts.push(CgStmt {
                 kind: CgStmtKind::Decl, line, col,
                 data: CgStmtData::Decl {
                     decl_type: "jmp_buf".into(),
-                    name: "__nopa_saved".into(),
+                    name: "__nepa_saved".into(),
                     init: None,
                     array_suffix: None,
                     is_static: false,
@@ -2738,7 +2802,7 @@ let mut catch_body: Vec<CgStmt> = Vec::new();
                 },
             });
 
-            // memcpy(__nopa_saved, __nopa_exception_buf, sizeof(jmp_buf));
+            // memcpy(__nepa_saved, __nepa_exception_buf, sizeof(jmp_buf));
             try_stmts.push(CgStmt {
                 kind: CgStmtKind::Expr, line, col,
                 data: CgStmtData::Expr(CgExpr {
@@ -2748,11 +2812,11 @@ let mut catch_body: Vec<CgStmt> = Vec::new();
                         args: vec![
                             CgExpr {
                                 kind: CgExprKind::Ident, type_str: None, line, col,
-                                data: CgExprData::Ident("__nopa_saved".into()),
+                                data: CgExprData::Ident("__nepa_saved".into()),
                             },
                             CgExpr {
                                 kind: CgExprKind::Ident, type_str: None, line, col,
-                                data: CgExprData::Ident("__nopa_exception_buf".into()),
+                                data: CgExprData::Ident("__nepa_exception_buf".into()),
                             },
                             CgExpr {
                                 kind: CgExprKind::Sizeof, type_str: None, line, col,
@@ -2768,12 +2832,12 @@ let mut catch_body: Vec<CgStmt> = Vec::new();
                 }),
             });
 
-            // volatile int __nopa_state = 0;
+            // volatile int __nepa_state = 0;
             try_stmts.push(CgStmt {
                 kind: CgStmtKind::Decl, line, col,
                 data: CgStmtData::Decl {
                     decl_type: "volatile int".into(),
-                    name: "__nopa_state".into(),
+                    name: "__nepa_state".into(),
                     init: Some(Box::new(CgExpr {
                         kind: CgExprKind::Int, type_str: None, line, col,
                         data: CgExprData::Int(0),
@@ -2787,7 +2851,7 @@ let mut catch_body: Vec<CgStmt> = Vec::new();
                 },
             });
 
-            // if (setjmp(__nopa_exception_buf) != 0) { __nopa_state = 1; }
+            // if (setjmp(__nepa_exception_buf) != 0) { __nepa_state = 1; }
             try_stmts.push(CgStmt {
                 kind: CgStmtKind::If, line, col,
                 data: CgStmtData::If {
@@ -2801,7 +2865,7 @@ let mut catch_body: Vec<CgStmt> = Vec::new();
                                     name: "setjmp".into(),
                                     args: vec![CgExpr {
                                         kind: CgExprKind::Ident, type_str: None, line, col,
-                                        data: CgExprData::Ident("__nopa_exception_buf".into()),
+                                        data: CgExprData::Ident("__nepa_exception_buf".into()),
                                     }],
                                     vtable_class: None, alt_vtable_classes: vec![],
                                     is_class_method: false, is_super: false, sel_const_name: None, method_index: None,
@@ -2820,7 +2884,7 @@ let mut catch_body: Vec<CgStmt> = Vec::new();
                             data: CgExprData::Assign {
                                 target: Box::new(CgExpr {
                                     kind: CgExprKind::Ident, type_str: None, line, col,
-                                    data: CgExprData::Ident("__nopa_state".into()),
+                                    data: CgExprData::Ident("__nepa_state".into()),
                                 }),
                                 value: Box::new(CgExpr {
                                     kind: CgExprKind::Int, type_str: None, line, col,
@@ -2833,7 +2897,7 @@ let mut catch_body: Vec<CgStmt> = Vec::new();
                 },
             });
 
-            // if (__nopa_state == 0) { <try_body> }
+            // if (__nepa_state == 0) { <try_body> }
             try_stmts.push(CgStmt {
                 kind: CgStmtKind::If, line, col,
                 data: CgStmtData::If {
@@ -2843,7 +2907,7 @@ let mut catch_body: Vec<CgStmt> = Vec::new();
                             op_str: "==".into(),
                             left: Box::new(CgExpr {
                                 kind: CgExprKind::Ident, type_str: None, line, col,
-                                data: CgExprData::Ident("__nopa_state".into()),
+                                data: CgExprData::Ident("__nepa_state".into()),
                             }),
                             right: Box::new(CgExpr {
                                 kind: CgExprKind::Int, type_str: None, line, col,
@@ -2867,8 +2931,8 @@ let mut catch_body: Vec<CgStmt> = Vec::new();
                     data: CgExprData::Call {
                         name: "memcpy".into(),
                         args: vec![
-                            CgExpr { kind: CgExprKind::Ident, type_str: None, line, col, data: CgExprData::Ident("__nopa_exception_buf".into()) },
-                            CgExpr { kind: CgExprKind::Ident, type_str: None, line, col, data: CgExprData::Ident("__nopa_saved".into()) },
+                            CgExpr { kind: CgExprKind::Ident, type_str: None, line, col, data: CgExprData::Ident("__nepa_exception_buf".into()) },
+                            CgExpr { kind: CgExprKind::Ident, type_str: None, line, col, data: CgExprData::Ident("__nepa_saved".into()) },
                             CgExpr { kind: CgExprKind::Sizeof, type_str: None, line, col, data: CgExprData::Sizeof { type_str: "jmp_buf".into(), is_alignof: false } },
                         ],
                         vtable_class: None, alt_vtable_classes: vec![],
@@ -2880,7 +2944,7 @@ let mut catch_body: Vec<CgStmt> = Vec::new();
             // catch blocks (if any)
             try_stmts.extend(catch_body);
 
-            // memcpy(__nopa_exception_buf, __nopa_saved, sizeof(jmp_buf));
+            // memcpy(__nepa_exception_buf, __nepa_saved, sizeof(jmp_buf));
             try_stmts.push(CgStmt {
                 kind: CgStmtKind::Expr, line, col,
                 data: CgStmtData::Expr(CgExpr {
@@ -2888,8 +2952,8 @@ let mut catch_body: Vec<CgStmt> = Vec::new();
                     data: CgExprData::Call {
                         name: "memcpy".into(),
                         args: vec![
-                            CgExpr { kind: CgExprKind::Ident, type_str: None, line, col, data: CgExprData::Ident("__nopa_exception_buf".into()) },
-                            CgExpr { kind: CgExprKind::Ident, type_str: None, line, col, data: CgExprData::Ident("__nopa_saved".into()) },
+                            CgExpr { kind: CgExprKind::Ident, type_str: None, line, col, data: CgExprData::Ident("__nepa_exception_buf".into()) },
+                            CgExpr { kind: CgExprKind::Ident, type_str: None, line, col, data: CgExprData::Ident("__nepa_saved".into()) },
                             CgExpr { kind: CgExprKind::Sizeof, type_str: None, line, col, data: CgExprData::Sizeof { type_str: "jmp_buf".into(), is_alignof: false } },
                         ],
                         vtable_class: None, alt_vtable_classes: vec![],
@@ -2905,13 +2969,13 @@ let mut catch_body: Vec<CgStmt> = Vec::new();
 
             // NOTE: no unwind-path release here. An earlier "unwind-lift"
             // shadow mechanism released lifted locals before the rethrow
-            // longjmp, but (a) it was NOT gated on __nopa_state == 1, so the
+            // longjmp, but (a) it was NOT gated on __nepa_state == 1, so the
             // NORMAL no-throw path double-released (ASan UAF, verified), and
             // (b) ARC already releases owned locals before @throw
             // (crates/arc). ARC is the single owner of automatic release
             // insertion; prefer leak over double-release.
 
-            // if (__nopa_state == 1) { longjmp(__nopa_exception_buf, 1); }
+            // if (__nepa_state == 1) { longjmp(__nepa_exception_buf, 1); }
             try_stmts.push(CgStmt {
                 kind: CgStmtKind::If, line, col,
                 data: CgStmtData::If {
@@ -2921,7 +2985,7 @@ let mut catch_body: Vec<CgStmt> = Vec::new();
                             op_str: "==".into(),
                             left: Box::new(CgExpr {
                                 kind: CgExprKind::Ident, type_str: None, line, col,
-                                data: CgExprData::Ident("__nopa_state".into()),
+                                data: CgExprData::Ident("__nepa_state".into()),
                             }),
                             right: Box::new(CgExpr {
                                 kind: CgExprKind::Int, type_str: None, line, col,
@@ -2936,7 +3000,7 @@ let mut catch_body: Vec<CgStmt> = Vec::new();
                             data: CgExprData::Call {
                                 name: "longjmp".into(),
                                 args: vec![
-                                    CgExpr { kind: CgExprKind::Ident, type_str: None, line, col, data: CgExprData::Ident("__nopa_exception_buf".into()) },
+                                    CgExpr { kind: CgExprKind::Ident, type_str: None, line, col, data: CgExprData::Ident("__nepa_exception_buf".into()) },
                                     CgExpr { kind: CgExprKind::Int, type_str: None, line, col, data: CgExprData::Int(1) },
                                 ],
                                 vtable_class: None, alt_vtable_classes: vec![],
@@ -2956,7 +3020,7 @@ let mut catch_body: Vec<CgStmt> = Vec::new();
         AstStmtData::Throw(expr) => {
             let mut stmts: Vec<CgStmt> = Vec::new();
             if let Some(e) = expr {
-                // __nopa_exception_value = (expr);
+                // __nepa_exception_value = (expr);
                 stmts.push(CgStmt {
                     kind: CgStmtKind::Expr, line, col,
                     data: CgStmtData::Expr(CgExpr {
@@ -2964,14 +3028,14 @@ let mut catch_body: Vec<CgStmt> = Vec::new();
                         data: CgExprData::Assign {
                             target: Box::new(CgExpr {
                                 kind: CgExprKind::Ident, type_str: None, line, col,
-                                data: CgExprData::Ident("__nopa_exception_value".into()),
+                                data: CgExprData::Ident("__nepa_exception_value".into()),
                             }),
                             value: Box::new(convert_expr(e, class_infos)),
                         },
                     }),
                 });
             }
-            // longjmp(__nopa_exception_buf, 1);
+            // longjmp(__nepa_exception_buf, 1);
             stmts.push(CgStmt {
                 kind: CgStmtKind::Expr, line, col,
                 data: CgStmtData::Expr(CgExpr {
@@ -2981,7 +3045,7 @@ let mut catch_body: Vec<CgStmt> = Vec::new();
                         args: vec![
                             CgExpr {
                                 kind: CgExprKind::Ident, type_str: None, line, col,
-                                data: CgExprData::Ident("__nopa_exception_buf".into()),
+                                data: CgExprData::Ident("__nepa_exception_buf".into()),
                             },
                             CgExpr {
                                 kind: CgExprKind::Int, type_str: None, line, col,
@@ -3057,7 +3121,7 @@ fn convert_decl(ad: &AstDecl, class_infos: &std::collections::BTreeMap<String, C
                             data: CgStmtData::Expr(CgExpr {
                                 kind: CgExprKind::Call, type_str: None, line: 0, col: 0,
                                     data: CgExprData::Call {
-                                        name: "nopa_metaInit".into(),
+                                        name: "nepa_metaInit".into(),
                                         args: Vec::new(),
                         vtable_class: None,
                         alt_vtable_classes: vec![],
@@ -3106,7 +3170,7 @@ fn convert_decl(ad: &AstDecl, class_infos: &std::collections::BTreeMap<String, C
                     || FNPTR_TYPEDEF_NAMES.get().map_or(false, |m| m.lock().unwrap().contains(&type_str));
                 let is_block = !is_fnptr && (
                     var_type.as_ref().map_or(false, |t| t.is_block)
-                        || type_str.contains("__nopa_block_header")
+                        || type_str.contains("__nepa_block_header")
                         || BLOCK_TYPEDEF_NAMES.get().map_or(false, |m| m.lock().unwrap().contains_key(&type_str)));
                 if is_block {
                     let mut bv = block_vars();
@@ -3325,10 +3389,10 @@ fn split_array_type(t: &str) -> (&str, &str) {
 /// split on `[` (an fnptr array has its `[N]` inside the declarator), so
 /// they are emitted verbatim with no separate name.
 /// Emit one field-wise value-comparison function per struct tag the checker
-/// marked (`nopa_struct_eq_<tag>`). `a == b` on two value structs is a C
+/// marked (`nepa_struct_eq_<tag>`). `a == b` on two value structs is a C
 /// compile error, so the checker rewrites it to a call to these functions.
 /// Field comparison rules:
-///   - nested struct (by value)  → recursive `nopa_struct_eq_<inner>(a.f, b.f)`
+///   - nested struct (by value)  → recursive `nepa_struct_eq_<inner>(a.f, b.f)`
 ///   - array field               → `memcmp(a.f, b.f, sizeof a.f) == 0`
 ///   - everything else (scalars, pointers) → `a.f == b.f`
 /// Static and only emitted for tags actually used, so no unused warnings.
@@ -3362,7 +3426,7 @@ fn emit_struct_eq_functions(unit: &CgUnit, out: &mut String) {
     }
     // Expand the tag set with nested value-struct fields (transitively):
     // `struct Outer { struct Inner in; }` used with `==` must also emit (and
-    // forward-declare) nopa_struct_eq_Inner, even if Inner is never compared
+    // forward-declare) nepa_struct_eq_Inner, even if Inner is never compared
     // directly. Closures/fields_of are immutable here, so re-scan until fixed.
     let mut tags: Vec<String> = unit.struct_eq_tags.clone();
     let mut i = 0;
@@ -3382,16 +3446,16 @@ fn emit_struct_eq_functions(unit: &CgUnit, out: &mut String) {
     }
     for tag in &tags {
         // Forward declarations first: nested structs may reference
-        // nopa_struct_eq_<inner> defined later in this loop (C99 forbids
+        // nepa_struct_eq_<inner> defined later in this loop (C99 forbids
         // implicit declarations, so emission order must not matter).
-        let _ = write!(out, "static int nopa_struct_eq_{tag}(struct {tag} a, struct {tag} b);\n");
+        let _ = write!(out, "static int nepa_struct_eq_{tag}(struct {tag} a, struct {tag} b);\n");
     }
     if !unit.struct_eq_tags.is_empty() {
         out.push('\n');
     }
     for tag in &tags {
         let _ = write!(out, "/* Value equality for struct {tag} (generated for `==` on value structs) */\n");
-        let _ = write!(out, "static int nopa_struct_eq_{tag}(struct {tag} a, struct {tag} b) {{\n");
+        let _ = write!(out, "static int nepa_struct_eq_{tag}(struct {tag} a, struct {tag} b) {{\n");
         match fields_of.get(tag.as_str()) {
             Some(fields) if !fields.is_empty() => {
                 let mut parts: Vec<String> = Vec::new();
@@ -3399,7 +3463,7 @@ fn emit_struct_eq_functions(unit: &CgUnit, out: &mut String) {
                     if is_array_type(ft) {
                         parts.push(format!("memcmp(a.{fn_}, b.{fn_}, sizeof a.{fn_}) == 0"));
                     } else if let Some(inner) = nested_value_tag(ft, &fields_of) {
-                        parts.push(format!("nopa_struct_eq_{inner}(a.{fn_}, b.{fn_})"));
+                        parts.push(format!("nepa_struct_eq_{inner}(a.{fn_}, b.{fn_})"));
                     } else {
                         parts.push(format!("a.{fn_} == b.{fn_}"));
                     }
@@ -4036,12 +4100,14 @@ pub fn ast_to_cg_unit_with_slots_ext(
             method_params_list: Vec::new(),
             method_variadic: Vec::new(),
             method_owners: Vec::new(),
+            category_method_names: std::collections::HashSet::new(),
+            protocols: Vec::new(),
             ivar_types: Vec::new(),
             ivar_names: Vec::new(),
             ivar_weak: Vec::new(),
             has_impl_decl: false,
         });
-        if let AstDeclData::Class { methods: ref class_methods, .. } = &d.data {
+        if let AstDeclData::Class { methods: ref class_methods, is_category, .. } = &d.data {
             for m in class_methods {
                 if let Some(ref mname) = m.name {
                     let sanitized = sanitize_sel_name(mname);
@@ -4059,6 +4125,7 @@ pub fn ast_to_cg_unit_with_slots_ext(
                             info.method_params_list.push(Vec::new());
                             info.method_variadic.push(has_variadic_m);
                             info.method_owners.push(flat.clone());
+                            if *is_category { info.category_method_names.insert(sanitized.clone()); }
                         }
                     }
                 }
@@ -4091,13 +4158,27 @@ pub fn ast_to_cg_unit_with_slots_ext(
             method_params_list: Vec::new(),
             method_variadic: Vec::new(),
             method_owners: Vec::new(),
+            category_method_names: std::collections::HashSet::new(),
+            protocols: Vec::new(),
             ivar_types: Vec::new(),
             ivar_names: Vec::new(),
             ivar_weak: Vec::new(),
             has_impl_decl: false,
         });
 
-        if let AstDeclData::Class { methods: ref class_methods, ivars: ref class_ivars, properties: ref class_properties, is_implementation, .. } = &d.data {
+        if let AstDeclData::Class { methods: ref class_methods, ivars: ref class_ivars, properties: ref class_properties, is_implementation, protocols: ref ast_protocols, type_params: ref tp, .. } = &d.data {
+            if !ast_protocols.is_empty() {
+                if let Some(info) = class_infos.get_mut(&flat) {
+                    for p in ast_protocols {
+                        // Generic type params (`NPArray<T>` under the umbrella)
+                        // arrive in the same slot as protocol names in some
+                        // spellings; they are not protocols — emitting
+                        // &NEPA_PROTO_$_T would be a dangling reference.
+                        if tp.contains(p) { continue; }
+                        if !info.protocols.contains(p) { info.protocols.push(p.clone()); }
+                    }
+                }
+            }
             if *is_implementation {
                 if let Some(info) = class_infos.get_mut(&flat) {
                     info.has_impl_decl = true;
@@ -4307,7 +4388,7 @@ pub fn ast_to_cg_unit_with_slots_ext(
                         info.method_params_list.push(fn_params.clone());
                         info.method_variadic.push(is_variadic_m);
                         info.method_owners.push(flat.clone());
-
+                        
                         decls.push(CgDecl {
                             kind: CgDeclKind::Function, name: fn_name,
                             data: CgDeclData::Function {
@@ -4364,11 +4445,11 @@ pub fn ast_to_cg_unit_with_slots_ext(
                                 line: 0, col: 0,
                                 data: AstExprData::Cast {
                                     target_type: AstType {
-                                        prim: nopa_cst::TypePrim::Named,
+                                        prim: nepa_cst::TypePrim::Named,
                                         is_pointer: true,
                                         is_struct: true,
                                         name: Some(flat.clone()),
-                                        ..AstType::new(nopa_cst::TypePrim::Named)
+                                        ..AstType::new(nepa_cst::TypePrim::Named)
                                     },
                                     expr: Box::new(AstExpr {
                                         kind: AstExprKind::Self_,
@@ -4424,7 +4505,7 @@ pub fn ast_to_cg_unit_with_slots_ext(
                             info.method_return_types.push(it.clone());
                             info.method_params_list.push(getter_params_clone);
                             info.method_owners.push(flat.clone());
-                        }
+                                                    }
                     }
 
                     if !*is_readonly {
@@ -4450,11 +4531,11 @@ pub fn ast_to_cg_unit_with_slots_ext(
                                         line: 0, col: 0,
                                         data: AstExprData::Cast {
                                             target_type: AstType {
-                                                prim: nopa_cst::TypePrim::Named,
+                                                prim: nepa_cst::TypePrim::Named,
                                                 is_pointer: true,
                                                 is_struct: true,
                                                 name: Some(flat.clone()),
-                                                ..AstType::new(nopa_cst::TypePrim::Named)
+                                                ..AstType::new(nepa_cst::TypePrim::Named)
                                             },
                                             expr: Box::new(AstExpr {
                                                 kind: AstExprKind::Self_,
@@ -4509,7 +4590,7 @@ pub fn ast_to_cg_unit_with_slots_ext(
                                 info.method_return_types.push("void".to_string());
                                 info.method_params_list.push(setter_params_clone);
                                 info.method_owners.push(flat.clone());
-                            }
+                                                            }
                             // Also fix the existing declaration's parameter name if it's still "value"
                             if let Some(existing) = decls.iter_mut().find(|d| d.name == setter_fn_name) {
                                 if let CgDeclData::Function { ref mut params, .. } = existing.data {
@@ -4580,7 +4661,7 @@ pub fn ast_to_cg_unit_with_slots_ext(
                                             CgStmt { kind: CgStmtKind::Expr, line: 0, col: 0, data: CgStmtData::Expr(CgExpr {
                                                 kind: CgExprKind::Call, type_str: None, line: 0, col: 0,
                                                 data: CgExprData::Call {
-                                                    name: "nopa_weakUnregister".into(),
+                                                    name: "nepa_weakUnregister".into(),
                                                     args: vec![cast_addr.clone()],
                                                     vtable_class: None, alt_vtable_classes: vec![], is_class_method: false, is_super: false, sel_const_name: None, method_index: None,
                                                 },
@@ -4589,7 +4670,7 @@ pub fn ast_to_cg_unit_with_slots_ext(
                                             CgStmt { kind: CgStmtKind::Expr, line: 0, col: 0, data: CgStmtData::Expr(CgExpr {
                                                 kind: CgExprKind::Call, type_str: None, line: 0, col: 0,
                                                 data: CgExprData::Call {
-                                                    name: "nopa_weakRegister".into(),
+                                                    name: "nepa_weakRegister".into(),
                                                     args: vec![cast_addr.clone(), cast_value],
                                                     vtable_class: None, alt_vtable_classes: vec![], is_class_method: false, is_super: false, sel_const_name: None, method_index: None,
                                                 },
@@ -4618,7 +4699,7 @@ pub fn ast_to_cg_unit_with_slots_ext(
                             info.method_return_types.push("void".to_string());
                             info.method_params_list.push(setter_params_clone);
                             info.method_owners.push(flat.clone());
-                        }
+                                                    }
                     }
                 }
             }
@@ -4738,7 +4819,7 @@ pub fn ast_to_cg_unit_with_slots_ext(
     // class's ClassInfo (substituting T → concrete type in ivar/method
     // signatures) under the mangled flat name so codegen emits a standalone
     // struct/vtable/class metadata per instantiation. Without this, references
-    // to `nopa_DataPack_QuantumToken_ptr_class` are undeclared.
+    // to `nepa_DataPack_QuantumToken_ptr_class` are undeclared.
     let mut generic_instantiations: Vec<(String, Vec<AstType>)> = Vec::new();
     // Structured collection: any AstType carrying non-empty `type_args` IS an
     // instantiation (fqn + args read directly — no string re-parsing). This
@@ -5116,12 +5197,14 @@ method_names: info.method_names,
             method_params_list: info.method_params_list,
             method_variadic: info.method_variadic,
             method_owners: info.method_owners,
+            category_method_names: info.category_method_names,
             vtable_indices: Vec::new(),
             ivar_types: info.ivar_types,
             ivar_names: info.ivar_names,
             ivar_weak: info.ivar_weak,
             properties: Vec::new(),
             has_impl: info.method_bodies.iter().any(|b| b.is_some()) || info.has_impl_decl,
+            protocols: info.protocols.clone(),
         });
     }
 
@@ -5289,7 +5372,7 @@ method_names: info.method_names,
                         .unwrap_or_else(|| "NPObject *, SEL".into());
                     // Variadic method → C `...` in the fn-ptr type; the dispatch
                     // cast must match the emitted variadic signature exactly
-                    // (nopa has no msgSend runtime to paper over a mismatch).
+                    // (nepa has no msgSend runtime to paper over a mismatch).
                     let v = cm.method_variadic.get(pos).copied().unwrap_or(false);
                     let ellipsis = if v { ", ..." } else { "" };
                     signature = Some(format!("{} (*)({}{})", rt, params, ellipsis));
@@ -5351,7 +5434,25 @@ method_names: info.method_names,
     // `no_arc` stays false here: this entry point feeds the header/prototype
     // paths, which never emit the ARC dealloc wrappers (that decision belongs
     // to the pipeline, which sets the flag on its own CgUnit).
-    let mut unit = CgUnit { decls, filename: ast.filename.clone(), c_headers: Vec::new(), selectors, classes, global_instance_method_names, struct_eq_tags: Vec::new(), no_arc: false, owned_classes: std::collections::HashSet::new(), vtable_sig_names, kvc: false };
+    // Protocol declarations for the static metadata table (D5.2): collect
+    // every @protocol in the unit with its parents and required/optional
+    // selector lists (binder-recorded order preserved by the elaborator).
+    let mut protocol_table: Vec<(String, Vec<String>, Vec<String>, Vec<String>)> = Vec::new();
+    fn collect_protocols(decls: &[AstDecl], out: &mut Vec<(String, Vec<String>, Vec<String>, Vec<String>)>) {
+        for d in decls {
+            match &d.data {
+                AstDeclData::Namespace(inner) => collect_protocols(inner, out),
+                AstDeclData::Protocol { parents, required_methods, optional_methods } => {
+                    if let Some(ref name) = d.name {
+                        out.push((name.clone(), parents.clone(), required_methods.clone(), optional_methods.clone()));
+                    }
+                }
+                _ => {}
+            }
+        }
+    }
+    collect_protocols(&ast.decls, &mut protocol_table);
+    let mut unit = CgUnit { decls, filename: ast.filename.clone(), c_headers: Vec::new(), selectors, classes, global_instance_method_names, struct_eq_tags: Vec::new(), no_arc: false, owned_classes: std::collections::HashSet::new(), vtable_sig_names, kvc: false, protocols: protocol_table };
     // The authoritative record of which method function bodies exist: every
     // `CgDeclData::Function` with a body. This covers paths that do not go
     // through `ClassInfo::method_bodies` — notably @property-synthesised
@@ -5523,7 +5624,7 @@ fn rewrite_block_var_refs(unit: &mut CgUnit) {
 /// Zeroing-weak assignment rewrite for local `__weak` variables (M1).
 ///
 /// A weak local is registered with the runtime at declaration time (the Decl
-/// emitter emits `nopa_weakRegister((NPObject **)&name, (NPObject *)init)`),
+/// emitter emits `nepa_weakRegister((NPObject **)&name, (NPObject *)init)`),
 /// but a later plain assignment (`weakref = strong`) bypassed the weak table:
 /// the slot stayed registered against the old target (often the initial
 /// NULL), so deallocating the newly-assigned target never zeroed the
@@ -5620,11 +5721,11 @@ fn rewrite_weak_stmt(stmt: &mut CgStmt, weak: &std::collections::HashSet<String>
     }
 }
 
-/// Build `{ __auto_type tmp = <value>; nopa_weakUnregister((NPObject **)&w);
-/// w = tmp; nopa_weakRegister((NPObject **)&w, (NPObject *)tmp); }` — the
+/// Build `{ __auto_type tmp = <value>; nepa_weakUnregister((NPObject **)&w);
+/// w = tmp; nepa_weakRegister((NPObject **)&w, (NPObject *)tmp); }` — the
 /// statement-level analogue of the weak-ivar setter's comma sequence.
 fn build_weak_assign_stmts(name: &str, value: Box<CgExpr>, line: usize, col: usize) -> CgStmt {
-    let tmp = format!("__nopa_weak_val_{}", next_temp_id());
+    let tmp = format!("__nepa_weak_val_{}", next_temp_id());
     let ident = |n: &str| CgExpr {
         kind: CgExprKind::Ident, type_str: None, line, col,
         data: CgExprData::Ident(n.to_string()),
@@ -5666,7 +5767,7 @@ fn build_weak_assign_stmts(name: &str, value: Box<CgExpr>, line: usize, col: usi
                 },
             },
             // 2. Detach the slot from its previous target.
-            mk_call("nopa_weakUnregister", vec![cast_addr]),
+            mk_call("nepa_weakUnregister", vec![cast_addr]),
             // 3. The assignment itself.
             CgStmt {
                 kind: CgStmtKind::Expr, line, col,
@@ -5679,7 +5780,7 @@ fn build_weak_assign_stmts(name: &str, value: Box<CgExpr>, line: usize, col: usi
                 }),
             },
             // 4. Re-register against the new target.
-            mk_call("nopa_weakRegister", vec![
+            mk_call("nepa_weakRegister", vec![
                 CgExpr {
                     kind: CgExprKind::Cast, type_str: None, line, col,
                     data: CgExprData::Cast {
@@ -5906,26 +6007,26 @@ fn emit_expr(e: &CgExpr, out: &mut String) {
                     out.push(')');
                 } else {
                     // Instance method: uniform vtable member access through isa.
-                    // ((struct nopa_vtable *)receiver->isa->vtable)->method(args)
+                    // ((struct nepa_vtable *)receiver->isa->vtable)->method(args)
                     let sel = sel_const_name.as_deref().unwrap_or("0");
                     // Instance message send: guard the receiver against nil so
                     // `[nil msg]` is a safe no-op returning 0/nil, matching ObjC
                     // nil-messaging semantics. The receiver is evaluated once into
                     // a temp, then dispatched only if non-nil:
-                    //   ({ NPObject *__nopa_tmp_N = ((NPObject *)(recv));
-                    //      __nopa_tmp_N ? <dispatch>(__nopa_tmp_N, sel, ...) : 0; })
+                    //   ({ NPObject *__nepa_tmp_N = ((NPObject *)(recv));
+                    //      __nepa_tmp_N ? <dispatch>(__nepa_tmp_N, sel, ...) : 0; })
                     // This works for both value-returning and void-returning sends.
                     let tid = next_temp_id();
-                    let _ = write!(out, "({{ NPObject *__nopa_tmp_{} = ((NPObject *)(", tid);
+                    let _ = write!(out, "({{ NPObject *__nepa_tmp_{} = ((NPObject *)(", tid);
                     if !args.is_empty() {
                         emit_expr(&args[0], out);
                         out.push_str(")");
                     } else { out.push_str("0)"); }
-                    let _ = write!(out, "); __nopa_tmp_{} ? ", tid);
+                    let _ = write!(out, "); __nepa_tmp_{} ? ", tid);
                     let has_cast = emit_vtable_fp_cast(out, &vc_flat, name);
-                    let _ = write!(out, "((struct nopa_vtable *)__nopa_tmp_{}->isa->vtable)->{}", tid, name);
+                    let _ = write!(out, "((struct nepa_vtable *)__nepa_tmp_{}->isa->vtable)->{}", tid, name);
                     if has_cast { out.push(')'); }
-                    let _ = write!(out, "(__nopa_tmp_{}", tid);
+                    let _ = write!(out, "(__nepa_tmp_{}", tid);
                     let _ = write!(out, ", {}", sel);
                     for (i, arg) in args[1..].iter().enumerate() {
                         out.push_str(", ");
@@ -5944,7 +6045,7 @@ fn emit_expr(e: &CgExpr, out: &mut String) {
                     let _ = write!(out, ") : {}; }})", fb);
                 }
             } else if name == "autorelease" {
-                // autorelease is a no-op in Nopa's non-ARC runtime; just return receiver
+                // autorelease is a no-op in Nepa's non-ARC runtime; just return receiver
                 if !args.is_empty() { emit_expr(&args[0], out); }
             } else {
                 // Direct C function call
@@ -6064,8 +6165,8 @@ fn emit_expr(e: &CgExpr, out: &mut String) {
                 // gcc/portable: use-site is a compound-literal struct initializer.
                 // The struct + invoke definitions were already emitted in the
                 // block_defs buffer during convert_expr.
-                let tid = data.func_name.trim_start_matches("__nopa_block_").to_string();
-                let _ = write!(out, "(struct __nopa_block_header *)&(struct __nopa_block_layout_{}){{ .isa=NULL, .flags=0, .reserved=0, .invoke={} }}", tid, data.func_name);
+                let tid = data.func_name.trim_start_matches("__nepa_block_").to_string();
+                let _ = write!(out, "(struct __nepa_block_header *)&(struct __nepa_block_layout_{}){{ .isa=NULL, .flags=0, .reserved=0, .invoke={} }}", tid, data.func_name);
             }
         }
     }
@@ -6391,7 +6492,7 @@ pub fn emit_stmt(s: &CgStmt, out: &mut String, indent: usize) {
         }
         CgStmtData::Decl { decl_type, name, init, array_suffix, is_static, is_weak, is_block, next, attributes } => {
             if *is_block {
-                let byref_name = format!("__nopa_byref_{}", name);
+                let byref_name = format!("__nepa_byref_{}", name);
                 let _ = write!(out, "{}struct {} {{\n", ind, byref_name);
                 let _ = write!(out, "{}    void *__isa;\n", ind);
                 let _ = write!(out, "{}    struct {} *__forwarding;\n", ind, byref_name);
@@ -6430,8 +6531,8 @@ pub fn emit_stmt(s: &CgStmt, out: &mut String, indent: usize) {
                     out.push_str(&ind);
                     if !args.is_empty() {
                             let tid = next_temp_id();
-                            // Emit: NPObject *__nopa_tmp_N = receiver;
-                            let _ = write!(out, "NPObject *__nopa_tmp_{} = (", tid);
+                            // Emit: NPObject *__nepa_tmp_N = receiver;
+                            let _ = write!(out, "NPObject *__nepa_tmp_{} = (", tid);
                             emit_expr(&args[0], out);
                             out.push_str(");\n");
                             out.push_str(&ind);
@@ -6448,8 +6549,8 @@ pub fn emit_stmt(s: &CgStmt, out: &mut String, indent: usize) {
                             } else {
                                 out.push_str(" = ");
                             }
-                            let _ = write!(out, "__nopa_tmp_{} ? ((struct nopa_vtable *)__nopa_tmp_{}->isa->vtable)->{}(", tid, tid, method_name);
-                            let _ = write!(out, "__nopa_tmp_{}", tid);
+                            let _ = write!(out, "__nepa_tmp_{} ? ((struct nepa_vtable *)__nepa_tmp_{}->isa->vtable)->{}(", tid, tid, method_name);
+                            let _ = write!(out, "__nepa_tmp_{}", tid);
                         let _ = write!(out, ", {}", sel_const_name.as_deref().unwrap_or("0"));
                         for arg in &args[1..] {
                             out.push_str(", ");
@@ -6466,7 +6567,7 @@ pub fn emit_stmt(s: &CgStmt, out: &mut String, indent: usize) {
                         out.push(' ');
                         out.push_str(name);
                         if let Some(suffix) = array_suffix { out.push_str(suffix); }
-                        let _ = write!(out, " = ((struct nopa_vtable *)0)->{}(", method_name);
+                        let _ = write!(out, " = ((struct nepa_vtable *)0)->{}(", method_name);
                         let _ = write!(out, "{}", sel_const_name.as_deref().unwrap_or("0"));
                         out.push_str(");\n");
                     }
@@ -6507,7 +6608,7 @@ pub fn emit_stmt(s: &CgStmt, out: &mut String, indent: usize) {
                     out.push_str(decl_type);
                 } else {
                     out.push_str(decl_type);
-                    if *is_weak { out.push_str(" __attribute__((cleanup(nopa_weakAutoCleanup)))"); }
+                    if *is_weak { out.push_str(" __attribute__((cleanup(nepa_weakAutoCleanup)))"); }
                     out.push(' ');
                     out.push_str(name);
                 }
@@ -6564,7 +6665,7 @@ pub fn emit_stmt(s: &CgStmt, out: &mut String, indent: usize) {
                 out.push_str(";\n");
                 if *is_weak {
                     if let Some(ref init_expr) = init {
-                        let _ = write!(out, "{}nopa_weakRegister((NPObject **)&{}, (NPObject *)", ind, name);
+                        let _ = write!(out, "{}nepa_weakRegister((NPObject **)&{}, (NPObject *)", ind, name);
                         emit_expr(init_expr, out);
                         out.push_str(");\n");
                     }
@@ -6577,7 +6678,7 @@ pub fn emit_stmt(s: &CgStmt, out: &mut String, indent: usize) {
         CgStmtData::Empty => {}
         CgStmtData::ForIn { var_name, collection, body } => {
             out.push_str(&ind);
-            let _ = write!(out, "{{ size_t _count = nopa_array_count(");
+            let _ = write!(out, "{{ size_t _count = nepa_array_count(");
             emit_expr(collection, out);
             out.push_str(");\n");
             let _ = write!(out, "{}for (size_t _i = 0; _i < _count; _i++) {{\n", ind);
@@ -6646,7 +6747,7 @@ pub fn emit_decl(d: &CgDecl, out: &mut String) {
         }
         CgDeclData::Variable { var_type, init, is_static, is_const, is_block, next, .. } => {
             if *is_block {
-                let byref_name = format!("__nopa_byref_{}", d.name);
+                let byref_name = format!("__nepa_byref_{}", d.name);
                 let _ = write!(out, "struct {} {{\n", byref_name);
                 out.push_str("    void *__isa;\n");
                 let _ = write!(out, "    struct {} *__forwarding;\n", byref_name);
@@ -6848,21 +6949,21 @@ pub fn emit_unit_with_headers(unit: &CgUnit, c_headers: &[String], search_dirs: 
     let mut out = String::new();
     if comments {
         let _ = writeln!(out, "/* ============================================================");
-        let _ = writeln!(out, "   Generated by nopac — Nopa → C transpiler");
+        let _ = writeln!(out, "   Generated by nepac — Nepa → C transpiler");
         let _ = writeln!(out, "   source : {}", unit.filename);
         let _ = writeln!(out, "   backend: {}", backend);
         let _ = writeln!(out, "   ============================================================ */");
         out.push('\n');
     } else {
-        out.push_str("// Generated by nopac\n");
+        out.push_str("// Generated by nepac\n");
     }
     section_comment(&mut out, comments, "Section 1 · Requires & defines");
     if freestanding {
         // Bare-metal mode: no libc headers. The runtime header's
-        // __NOPA_FREESTANDING branch provides the types, jmp_buf (via
+        // __NEPA_FREESTANDING branch provides the types, jmp_buf (via
         // builtins) and non-TLS exception state.
-        out.push_str("#define __NOPA_FREESTANDING 1\n");
-        out.push_str("#include <nopa/runtime.h>\n");
+        out.push_str("#define __NEPA_FREESTANDING 1\n");
+        out.push_str("#include <nepa/runtime.h>\n");
     } else {
         let has_string_h = c_headers.iter().any(|h| h.contains("string.h"));
         if !has_string_h {
@@ -6876,14 +6977,14 @@ pub fn emit_unit_with_headers(unit: &CgUnit, c_headers: &[String], search_dirs: 
         if !has_stdlib_h {
             out.push_str("#include <stdlib.h>\n");
         }
-        // -eh checked emits reads/writes of the EH globals (__nopa_eh_flag/
-        // __nopa_eh_val) and calls __nopa_eh_isa in EVERY function with a
+        // -eh checked emits reads/writes of the EH globals (__nepa_eh_flag/
+        // __nepa_eh_val) and calls __nepa_eh_isa in EVERY function with a
         // throwing callee. Their declarations live only in runtime.h; a pure
         // C-superset file (no Foundation import, no block literal) otherwise
         // generates C with undeclared identifiers (second-referendum root
         // cause). runtime.h is a plain C header — harmless to include.
-        if eh_checked && !c_headers.iter().any(|h| h.contains("nopa/runtime.h")) {
-            out.push_str("#include <nopa/runtime.h>\n");
+        if eh_checked && !c_headers.iter().any(|h| h.contains("nepa/runtime.h")) {
+            out.push_str("#include <nepa/runtime.h>\n");
         }
     }
     for h in c_headers {
@@ -6928,7 +7029,7 @@ pub fn emit_unit_with_headers(unit: &CgUnit, c_headers: &[String], search_dirs: 
     section_comment(&mut out, comments, "Section 2 · Forward declarations");
     {
         if any_has_instance {
-            let _ = write!(out, "struct nopa_vtable;\n");
+            let _ = write!(out, "struct nepa_vtable;\n");
         }
         for cm in &unit.classes {
             let flat_cn = name_flat(&cm.class_name);
@@ -6954,21 +7055,21 @@ pub fn emit_unit_with_headers(unit: &CgUnit, c_headers: &[String], search_dirs: 
     section_comment(&mut out, comments, "Section 4 · Type declarations & typedefs");
     for cm in &unit.classes {
         let fc = name_flat(&cm.class_name);
-        if fc == "nopa_root" || fc == "NPObject" {
+        if fc == "nepa_root" || fc == "NPObject" {
             // Emit full struct definitions with include guard so that if
             // runtime.h (which already defines them) is included first,
             // these are silently skipped.  If runtime.h is NOT available,
             // these definitions ensure the generated code compiles.
-            // Guards must match those used in include/nopa/runtime.h.
-            let guard = if fc == "nopa_root" {
-                "NOPA_ROOT_DEFINED"
+            // Guards must match those used in include/nepa/runtime.h.
+            let guard = if fc == "nepa_root" {
+                "NEPA_ROOT_DEFINED"
             } else {
                 "NPOBJECT_DEFINED"
             };
             let _ = writeln!(out, "#ifndef {}", guard);
             let _ = writeln!(out, "#define {}", guard);
             let _ = writeln!(out, "struct {} {{", fc);
-            if fc == "nopa_root" {
+            if fc == "nepa_root" {
                 let _ = writeln!(out, "    struct NPClass *isa;");
             } else {
                 let _ = writeln!(out, "    struct NPClass *isa;");
@@ -6999,7 +7100,7 @@ pub fn emit_unit_with_headers(unit: &CgUnit, c_headers: &[String], search_dirs: 
             let mut any = false;
             for n in names {
                 let fc = name_flat(n);
-                if fc == "nopa_root" || fc == "NPObject" { continue; }
+                if fc == "nepa_root" || fc == "NPObject" { continue; }
                 if unit.classes.iter().any(|cm| name_flat(&cm.class_name) == fc) { continue; }
                 let _ = write!(out, "struct {};\n", fc);
                 let _ = write!(out, "typedef struct {} {};\n", fc, fc);
@@ -7099,7 +7200,7 @@ pub fn emit_unit_with_headers(unit: &CgUnit, c_headers: &[String], search_dirs: 
     for decl in &unit.decls {
         if let CgDeclData::Variable { ref var_type, ref init, is_static, is_const, is_block, .. } = decl.data {
             if is_block {
-                let byref_name = format!("__nopa_byref_{}", decl.name);
+                let byref_name = format!("__nepa_byref_{}", decl.name);
                 let _ = write!(out, "struct {} {{\n", byref_name);
                 out.push_str("    void *__isa;\n");
                 let _ = write!(out, "    struct {} *__forwarding;\n", byref_name);
@@ -7177,27 +7278,27 @@ pub fn emit_unit_with_headers(unit: &CgUnit, c_headers: &[String], search_dirs: 
         let sig: u64 = vtable_layout_sig(&unit.vtable_sig_names);
         let _ = write!(out, "/* vtable layout signature: {:016x} (shared methods: {}) */\n", sig, unit.vtable_sig_names.len());
         // The diagnostic needs <stdio.h>, which a translation unit that only
-        // includes <nopa/runtime.h> may not pull in — and freestanding builds
+        // includes <nepa/runtime.h> may not pull in — and freestanding builds
         // have no stdio at all. When the standard headers are absent we still
         // need the failure to be loud, so fall back to __builtin_trap() (a
         // compiler builtin, available in hosted and freestanding alike) rather
         // than declaring stdio symbols this TU may not link against.
         let has_stdio = c_headers.iter().any(|h| h.contains("stdio.h"));
-        let _ = write!(out, "__attribute__((weak)) void nopa_verify_vtable_sig(unsigned long long winner, unsigned long long mine, const char *method_list) {{\n");
+        let _ = write!(out, "__attribute__((weak)) void nepa_verify_vtable_sig(unsigned long long winner, unsigned long long mine, const char *method_list) {{\n");
         let _ = write!(out, "    if (winner != mine) {{\n");
         if has_stdio {
             let _ = write!(out, "        fprintf(stderr,\n");
-            let _ = write!(out, "            \"nopa: fatal: vtable layout mismatch across translation units.\\n\"\n");
+            let _ = write!(out, "            \"nepa: fatal: vtable layout mismatch across translation units.\\n\"\n");
             let _ = write!(out, "            \"  linked vtable sig %016llx, this translation unit sig %016llx\\n\"\n");
             let _ = write!(out, "            \"\\n\"\n");
-            let _ = write!(out, "            \"Nopa builds one uniform 'struct nopa_vtable' per translation unit over the\\n\"\n");
+            let _ = write!(out, "            \"Nepa builds one uniform 'struct nepa_vtable' per translation unit over the\\n\"\n");
             let _ = write!(out, "            \"public method segment: the selectors declared in the @interfaces the TUs\\n\"\n");
             let _ = write!(out, "            \"import (or the shared --slots manifest). R1 keeps that segment at\\n\"\n");
             let _ = write!(out, "            \"identical slot indices in every TU, so two TUs whose public segments\\n\"\n");
             let _ = write!(out, "            \"disagree dispatch through different layouts, while the linker\\n\"\n");
             let _ = write!(out, "            \"weak-merges the vtable instances into one allocation.\\n\"\n");
             let _ = write!(out, "            \"\\n\"\n");
-            let _ = write!(out, "            \"Re-running nopac does NOT help: the shared method sets really do differ.\\n\"\n");
+            let _ = write!(out, "            \"Re-running nepac does NOT help: the shared method sets really do differ.\\n\"\n");
             let _ = write!(out, "            \"The usual cause is the two TUs importing different or differently\\n\"\n");
             let _ = write!(out, "            \"versioned headers. Make the shared declarations identical, or build the\\n\"\n");
             let _ = write!(out, "            \"affected classes as a single TU. TU-local private methods do not\\n\"\n");
@@ -7211,7 +7312,7 @@ pub fn emit_unit_with_headers(unit: &CgUnit, c_headers: &[String], search_dirs: 
             let _ = write!(out, "        __builtin_trap();\n");
         }
         let _ = write!(out, "    }}\n}}\n\n");
-        let _ = write!(out, "struct nopa_vtable {{\n");
+        let _ = write!(out, "struct nepa_vtable {{\n");
         let _ = write!(out, "    unsigned long long __sig;\n");
         for mname in &unit.global_instance_method_names {
             let (_, ptr_type) = METHOD_METADATA.get().unwrap().get(mname.as_str()).unwrap();
@@ -7235,8 +7336,8 @@ pub fn emit_unit_with_headers(unit: &CgUnit, c_headers: &[String], search_dirs: 
         for member in members {
             let _ = write!(out,
                 "/* respondsToSelector: helper for selector member '{member}' */\n\
-                 static BOOL nopa_resp_{member}(NPObject *__o) {{\n\
-                     return __o && ((struct nopa_vtable *)__o->isa->vtable)->{member} != 0;\n\
+                 static BOOL nepa_resp_{member}(NPObject *__o) {{\n\
+                     return __o && ((struct nepa_vtable *)__o->isa->vtable)->{member} != 0;\n\
                  }}\n\n",
                 member = member);
         }
@@ -7290,7 +7391,7 @@ pub fn emit_unit_with_headers(unit: &CgUnit, c_headers: &[String], search_dirs: 
         let _ = write!(out, "    struct NPClass *isa;\n");
         let _ = write!(out, "    uint32_t retain_count;\n");
         // Walk superclass chain and emit ancestor ivars (flat, not embedded).
-        // Each non-root struct starts with isa+retain_count (matching nopa_root)
+        // Each non-root struct starts with isa+retain_count (matching nepa_root)
         // followed by all ancestor ivars, then this class's own ivars.
         let mut chain: Vec<&CgClassMeta> = Vec::new();
         let mut cur = cm;
@@ -7336,7 +7437,7 @@ pub fn emit_unit_with_headers(unit: &CgUnit, c_headers: &[String], search_dirs: 
         let _ = write!(out, "extern NPClass {};\n", meta_symbol("CLASS_", &name_flat(&cm.class_name)));
     }
     if !unit.classes.is_empty() {
-        out.push_str("void nopa_metaInit(void);\n\n");
+        out.push_str("void nepa_metaInit(void);\n\n");
     }
 
     // Instance vtable instances (per-class typed, with designated initializers)
@@ -7351,7 +7452,7 @@ pub fn emit_unit_with_headers(unit: &CgUnit, c_headers: &[String], search_dirs: 
         }
         // R2: the TU that owns the @implementation emits strong metadata.
         let cw = if unit.owned_classes.contains(&cm.class_name) { "" } else { "__attribute__((weak)) " };
-        let _ = write!(out, "{}struct nopa_vtable {} = {{\n", cw, meta_symbol("VTABLE_", &flat_cn));
+        let _ = write!(out, "{}struct nepa_vtable {} = {{\n", cw, meta_symbol("VTABLE_", &flat_cn));
         // Stamp the layout signature this instance was built for, so whichever
         // copy of this instance wins the linker's weak merge also carries the
         // layout it was actually initialized against.
@@ -7376,7 +7477,17 @@ pub fn emit_unit_with_headers(unit: &CgUnit, c_headers: &[String], search_dirs: 
                     //    this TU) → keep NULL; the slot is preserved for
                     //    layout stability and the owner TU's instance (strong
                     //    under R2) wins the merge with the real reference.
-                    if method_is_emitted(&owner, mname) || owner != flat_cn {
+                    //  * category-introduced method (declared in a shared .nh
+                    //    category @interface, implemented in another TU) →
+                    //    reference `Owner_method` as a strong extern (D1
+                    //    backup plan): the category TU emits the definition
+                    //    (weak, so it merges); if that TU is not linked the
+                    //    reference fails loudly at link time on every
+                    //    platform — probes/xcat P1 showed macOS ld rejects
+                    //    undefined weak symbols anyway, so strong extern is
+                    //    the stable semantics (doc/categories_protocol_plan.md).
+                    let is_cat = cm.category_method_names.contains(mname);
+                    if method_is_emitted(&owner, mname) || owner != flat_cn || is_cat {
                         let (_, ptr_type) = METHOD_METADATA.get().unwrap().get(mname.as_str()).unwrap();
                         let _ = write!(out, "    .{} = ({}){}_{},\n", mname, ptr_type, owner, mname);
                     } else {
@@ -7440,10 +7551,10 @@ pub fn emit_unit_with_headers(unit: &CgUnit, c_headers: &[String], search_dirs: 
     }
 
     // ARC dealloc wrappers — computed and emitted BEFORE the class-metadata
-    // section: both `nopa_metaInit` and the owned-class static definitions
+    // section: both `nepa_metaInit` and the owned-class static definitions
     // below reference the wrappers by name, and the wrappers are `static`, so
     // the definition must precede every reference (no forward declaration).
-    // Skipped entirely under `-fno-nopa-arc`: MRC means the programmer owns
+    // Skipped entirely under `-fno-nepa-arc`: MRC means the programmer owns
     // the ivars.
     let (arc_dealloc_names, arc_dealloc_defs) = if unit.no_arc {
         (std::collections::HashMap::new(), String::new())
@@ -7502,7 +7613,7 @@ pub fn emit_unit_with_headers(unit: &CgUnit, c_headers: &[String], search_dirs: 
                 // Same reference rule as the vtable slots (see the meta
                 // vtable emission above): own methods need a body in this TU.
                 if owner == flat && !method_is_emitted(&owner, mname) { continue; }
-                let wrapper = format!("nopa_kvc_wrap_{}_{}", flat, mname);
+                let wrapper = format!("nepa_kvc_wrap_{}_{}", flat, mname);
                 let fn_sym = format!("{}_{}", owner, mname);
                 let sel = sel_const_name(mname);
                 // Scalar whitelist: only clearly-scalar return types box via
@@ -7561,21 +7672,21 @@ pub fn emit_unit_with_headers(unit: &CgUnit, c_headers: &[String], search_dirs: 
                     continue;
                 } else if rt.contains("double") || rt.contains("float") {
                     // Class-method send: the receiver is the class object
-                    // (&NOPA_CLASS_$_NPNumber), same as an ordinary
+                    // (&NEPA_CLASS_$_NPNumber), same as an ordinary
                     // [NPNumber numberWithDouble:] lowering — NOT self.
                     let _ = write!(kvc_out,
-                        "static id {w}(id self) {{\n    return NPNumber_numberWithDouble_(&NOPA_CLASS_$_NPNumber, {s}, {f}((NPObject *)self, {s}));\n}}\n\n",
+                        "static id {w}(id self) {{\n    return NPNumber_numberWithDouble_(&NEPA_CLASS_$_NPNumber, {s}, {f}((NPObject *)self, {s}));\n}}\n\n",
                         w = wrapper, f = fn_sym, s = sel);
                 } else {
                     let _ = write!(kvc_out,
-                        "static id {w}(id self) {{\n    return NPNumber_numberWithInt_(&NOPA_CLASS_$_NPNumber, {s}, {f}((NPObject *)self, {s}));\n}}\n\n",
+                        "static id {w}(id self) {{\n    return NPNumber_numberWithInt_(&NEPA_CLASS_$_NPNumber, {s}, {f}((NPObject *)self, {s}));\n}}\n\n",
                         w = wrapper, f = fn_sym, s = sel);
                 }
                 entries.push((mname.clone(), wrapper));
             }
             if entries.is_empty() { continue; }
             let sym = meta_symbol("KVC_", &flat);
-            let _ = write!(kvc_out, "static const nopa_kvc_entry {}[] = {{\n", sym);
+            let _ = write!(kvc_out, "static const nepa_kvc_entry {}[] = {{\n", sym);
             for (key, wrapper) in &entries {
                 let _ = write!(kvc_out, "    {{ .key = \"{}\", .get = {} }},\n", key, wrapper);
             }
@@ -7589,23 +7700,107 @@ pub fn emit_unit_with_headers(unit: &CgUnit, c_headers: &[String], search_dirs: 
 
     // Class metadata variables. Two lifetimes:
     //  * default: a tentative definition (a common symbol), so the per-TU
-    //    copies merge harmlessly; the *contents* are written by `nopa_metaInit`
+    //    copies merge harmlessly; the *contents* are written by `nepa_metaInit`
     //    below (weak — it only back-fills what static initialization did not
     //    already cover).
     //  * classes this TU OWNS (rule R2 — the @implementation is in this TU's
     //    main file): one fully initialized STRONG
-    //    definition. `nopa_metaInit` is weak-merged — only one TU's copy runs,
+    //    definition. `nepa_metaInit` is weak-merged — only one TU's copy runs,
     //    and it only initializes the classes THAT TU can see — so a class that
     //    exists only in the losing TU would stay zeroed (NULL vtable → segfault
     //    on its first alloc/init; pinned by
     //    tests/multi_tu/11_vtable_private_slots: the client's own class `App`
     //    vanished the moment the shared __sig guard stopped aborting first).
     //    Static initialization runs at load time in every scenario, needs no
-    //    constructor ordering, works freestanding, and a later nopa_metaInit
+    //    constructor ordering, works freestanding, and a later nepa_metaInit
     //    over it rewrites identical values (an idempotent no-op). References
     //    are safe: Section 9 already `extern`-declares every class symbol,
     //    and the vtable instances live in Section 10.
     section_comment(&mut out, comments, "Section 11 · Class metadata initialization");
+    // Static NPProtocol instances (D5.2): one per @protocol declared in this
+    // unit, R2-linked — strong here, weak extern elsewhere. Selector names
+    // are stored colon-stripped (the vtable symbol convention).
+    for (pname, parents, required, optional) in &unit.protocols {
+        // ObjC spelling `@protocol P <ClassName>` puts a CLASS in the parent
+        // list; classes have no NPProtocol instance, so referencing one would
+        // be an undefined symbol (seen live: tt.np's
+        // `@protocol NPCollectionDelegate <NPObject>`). Drop class parents —
+        // their methods already reach conforming classes via the vtable.
+        let class_names: std::collections::HashSet<String> = unit.classes.iter().map(|c| c.class_name.clone()).collect();
+        let parents: Vec<&String> = parents.iter().filter(|p| !class_names.contains(*p)).collect();
+        let pflat = name_flat(pname);
+        let _ = write!(out, "__attribute__((used)) static struct NPProtocol NEPA_PROTO_$_{} = {{
+", pflat);
+        let _ = write!(out, "    .name = \"{}\",
+", pname);
+        if parents.is_empty() {
+            out.push_str("    .parents = NULL,
+    .parent_count = 0,
+");
+        } else {
+            let _ = write!(out, "    .parents = (struct NPProtocol *[]){{");
+            for (i, pp) in parents.iter().enumerate() {
+                if i > 0 { out.push_str(", "); }
+                let _ = write!(out, "&NEPA_PROTO_$_{}", name_flat(pp));
+            }
+            out.push_str("},
+");
+            let _ = write!(out, "    .parent_count = {},
+", parents.len());
+        }
+        let emit_methods = |out: &mut String, field: &str, count_field: &str, methods: &[String]| {
+            if methods.is_empty() {
+                let _ = write!(out, "    .{} = NULL,\n    .{} = 0,\n", field, count_field);
+            } else {
+                let _ = write!(out, "    .{} = (NPProtocolMethod[]){{", field);
+                for (i, m) in methods.iter().enumerate() {
+                    if i > 0 { out.push_str(", "); }
+                    let _ = write!(out, "{{ .name = \"{}\", .encoding = \"\" }}", m.trim_end_matches(':'));
+                }
+                out.push_str("},\n");
+                let _ = write!(out, "    .{} = {},\n", count_field, methods.len());
+            }
+        };
+        emit_methods(&mut out, "required_methods", "required_count", required);
+        emit_methods(&mut out, "optional_methods", "optional_count", optional);
+        out.push_str("};
+
+");
+    }
+    // Per-class protocol-pointer arrays: NAMED static storage, never inline
+    // compound literals. nepa_metaInit re-assigns the whole NPClass with a
+    // compound literal — an inline `struct NPProtocol *[]` there would live
+    // on the stack and dangle after metaInit returns (segfault on first
+    // conformsToProtocol: walk; seen live with plist pointing into the stack).
+    // Protocol refs use the SHORT name: the static instance above is emitted
+    // under the declaration name, while class conformance lists carry the
+    // namespace FQN (`LogTool::LogEntryProtocol` — name_flat would mash that
+    // into "LogTool", an undefined symbol).
+    let proto_short = |p: &String| -> String {
+        name_flat(p.rsplit("::").next().unwrap_or(p))
+    };
+    let declared: std::collections::HashSet<String> = unit.protocols.iter().map(|(n, _, _, _)| name_flat(n)).collect();
+    // Conformances with a static table in this unit, in declaration order. A
+    // name that resolves to nothing declared here (e.g. a namespace prefix
+    // that lost its `::Suffix` upstream) is dropped — referencing it would be
+    // an undefined symbol, and a missing metadata entry is safer than a wrong
+    // one. BOTH the pointer arrays and the NPClass initializers must go
+    // through this same filter or they disagree (undefined-symbol build
+    // failure seen live in log_analyzer.np).
+    let known_protocols = |cm: &CgClassMeta| -> Vec<String> {
+        cm.protocols.iter().filter(|p| declared.contains(&proto_short(p))).cloned().collect()
+    };
+    for cm in &unit.classes {
+        let known = known_protocols(cm);
+        if known.is_empty() { continue; }
+        let flat = name_flat(&cm.class_name);
+        let _ = write!(out, "__attribute__((used)) static struct NPProtocol *NEPA_PROTOS_$_{}[] = {{", flat);
+        for (i, p) in known.iter().enumerate() {
+            if i > 0 { out.push_str(", "); }
+            let _ = write!(out, "&NEPA_PROTO_$_{}", proto_short(p));
+        }
+        out.push_str("};\n");
+    }
     for cm in &unit.classes {
         let flat = name_flat(&cm.class_name);
         let sym = meta_symbol("CLASS_", &flat);
@@ -7637,8 +7832,14 @@ pub fn emit_unit_with_headers(unit: &CgUnit, c_headers: &[String], search_dirs: 
         } else {
             out.push_str(&format!("        .class_vtable = &{}_inst,\n", meta_symbol("META_VTABLE_", &flat)));
         }
-        out.push_str("        .protocol_count = 0,\n");
-        // .dealloc — same rule as nopa_metaInit below: an ARC-owned-ivar
+        let known = known_protocols(cm);
+        if known.is_empty() {
+            out.push_str("        .protocols = NULL,\n        .protocol_count = 0,\n");
+        } else {
+            let _ = write!(out, "        .protocols = NEPA_PROTOS_$_{},\n", flat);
+            let _ = write!(out, "        .protocol_count = {},\n", known.len());
+        }
+        // .dealloc — same rule as nepa_metaInit below: an ARC-owned-ivar
         // wrapper when one was generated for this class, else the class's own
         // dealloc, else NULL.
         if let Some(wrapper) = arc_dealloc_names.get(&flat) {
@@ -7655,7 +7856,7 @@ pub fn emit_unit_with_headers(unit: &CgUnit, c_headers: &[String], search_dirs: 
         }
         // KVC table pointer — owner static metadata only. Decl-only clients
         // leave it NULL: their tentative-definition stubs must not clobber the
-        // owner's table under weak merging (nopa_metaInit writes full struct
+        // owner's table under weak merging (nepa_metaInit writes full struct
         // literals and would reset the field if it carried a pointer here).
         if let Some(sym) = kvc_syms.get(&flat) {
             out.push_str(&format!("        .kvc_entries = {},\n", sym));
@@ -7665,35 +7866,35 @@ pub fn emit_unit_with_headers(unit: &CgUnit, c_headers: &[String], search_dirs: 
     if !unit.classes.is_empty() { out.push('\n'); }
 
     // Cross-TU vtable layout check. This lives in a per-TU constructor (not
-    // in nopa_metaInit, which is weak-merged so only one TU's copy runs):
+    // in nepa_metaInit, which is weak-merged so only one TU's copy runs):
     // every TU's constructor is registered with the loader and runs, so each
     // translation unit validates its own compiled layout. Each vtable
     // instance carries the signature it was initialized for as its first
     // member; under R3 that signature covers the SHARED segment only (public
     // methods / manifest), so a TU-local private tail never trips it — a
     // mismatch means the shared layouts disagree, and dispatch through this
-    // TU's `struct nopa_vtable` layout would read the wrong slot. Abort with
+    // TU's `struct nepa_vtable` layout would read the wrong slot. Abort with
     // a clear message instead.
     if any_has_instance && !unit.classes.is_empty() {
         let method_list: Vec<String> = unit.global_instance_method_names.clone();
-        let _ = write!(out, "__attribute__((constructor)) static void __nopa_vtable_layout_check(void) {{\n");
+        let _ = write!(out, "__attribute__((constructor)) static void __nepa_vtable_layout_check(void) {{\n");
         for cm in &unit.classes {
             if cm.method_names.is_empty() && cm.super_name.is_none() { continue; }
             let vt_sym = meta_symbol("VTABLE_", &name_flat(&cm.class_name));
-            let _ = write!(out, "    nopa_verify_vtable_sig((&{})->__sig, 0x{:016x}ULL, \"{} | class {} | tu {}\");\n",
+            let _ = write!(out, "    nepa_verify_vtable_sig((&{})->__sig, 0x{:016x}ULL, \"{} | class {} | tu {}\");\n",
                 vt_sym, vtable_sig, method_list.join(" "), cm.class_name, unit.filename);
         }
         let _ = write!(out, "}}\n\n");
     }
 
     // (ARC dealloc wrappers are computed and emitted above, before Section 11:
-    // both the owned-class static definitions and nopa_metaInit reference them.)
+    // both the owned-class static definitions and nepa_metaInit reference them.)
 
-    // nopa_metaInit() — always emitted (weak, empty when the unit has no
-    // classes): hand-written `main` naturally calls nopa_meta_init(), and a
+    // nepa_metaInit() — always emitted (weak, empty when the unit has no
+    // classes): hand-written `main` naturally calls nepa_meta_init(), and a
     // class-less TU must still link.
     {
-        out.push_str(&format!("{}void nopa_metaInit(void) {{\n", meta_weak));
+        out.push_str(&format!("{}void nepa_metaInit(void) {{\n", meta_weak));
         for cm in &unit.classes {
             let _ = write!(out, "    {} = (NPClass){{\n", meta_symbol("CLASS_", &name_flat(&cm.class_name)));
             out.push_str(&format!("        .name = \"{}\",\n", cm.class_name));
@@ -7719,8 +7920,14 @@ pub fn emit_unit_with_headers(unit: &CgUnit, c_headers: &[String], search_dirs: 
             } else {
                 out.push_str(&format!("        .class_vtable = &{}_inst,\n", meta_symbol("META_VTABLE_", &name_flat(&cm.class_name))));
             }
-            out.push_str("        .protocol_count = 0,\n");
-            // .dealloc — populate from the vtable so nopa_release() can call it.
+            let known = known_protocols(cm);
+            if known.is_empty() {
+                out.push_str("        .protocols = NULL,\n        .protocol_count = 0,\n");
+            } else {
+                let _ = write!(out, "        .protocols = NEPA_PROTOS_$_{},\n", name_flat(&cm.class_name));
+                let _ = write!(out, "        .protocol_count = {},\n", known.len());
+            }
+            // .dealloc — populate from the vtable so nepa_release() can call it.
             // A class with owned object ivars points at a generated wrapper
             // (see emit_arc_dealloc_wrappers): it runs the class's normal
             // dealloc chain and then releases the ivars ARC owns.
@@ -7750,17 +7957,17 @@ pub fn emit_unit_with_headers(unit: &CgUnit, c_headers: &[String], search_dirs: 
         }
         out.push_str("}\n\n");
         // snake_case alias: every other runtime symbol is snake_case, so
-        // hand-written host code calls `nopa_meta_init()`. Weak like the
+        // hand-written host code calls `nepa_meta_init()`. Weak like the
         // original so the many per-TU copies coalesce to one.
-        out.push_str(&format!("{}void nopa_meta_init(void) {{ nopa_metaInit(); }}\n\n", meta_weak));
+        out.push_str(&format!("{}void nepa_meta_init(void) {{ nepa_metaInit(); }}\n\n", meta_weak));
     }
 
-    // nopa_stringFromCstr — emitted when NPString class is present.
+    // nepa_stringFromCstr — emitted when NPString class is present.
     // Hosted builds INTERN: identical contents map to ONE shared instance
     // (ObjC constant-`@"..."` semantics), so pointer equality across literal
     // occurrences works (`containsObject:`/`indexOfObject:` with a fresh
     // `@"key"` now finds the stored element). The table retains the object once
-    // (see the `nopa_retain` below) so it truly owns its +1 forever — the
+    // (see the `nepa_retain` below) so it truly owns its +1 forever — the
     // result is a shared constant, not a pooled temporary; MRC code must not
     // release it (same rule as ObjC constant strings). Table cap 256: when full,
     // fall back to a fresh
@@ -7769,10 +7976,10 @@ pub fn emit_unit_with_headers(unit: &CgUnit, c_headers: &[String], search_dirs: 
     //     table. Freestanding keeps the old fresh-object body (no <string.h>).
     section_comment(&mut out, comments, "Section 12 · Runtime support");
     if unit.classes.iter().any(|c| c.class_name == "NPString") {
-        out.push_str("__attribute__((weak)) NPObject *nopa_stringFromCstr(const char *cstr) {\n");
-        out.push_str("#ifdef __NOPA_FREESTANDING\n");
+        out.push_str("__attribute__((weak)) NPObject *nepa_stringFromCstr(const char *cstr) {\n");
+        out.push_str("#ifdef __NEPA_FREESTANDING\n");
         out.push_str("    if (!cstr) cstr = \"\";\n");
-        out.push_str(&format!("    NPObject *obj = nopa_alloc(&{});\n", meta_symbol("CLASS_", "NPString")));
+        out.push_str(&format!("    NPObject *obj = nepa_alloc(&{});\n", meta_symbol("CLASS_", "NPString")));
         out.push_str("    if (!obj) return NULL;\n");
         out.push_str("    struct NPString *str = (struct NPString *)obj;\n");
         out.push_str("    size_t len = strlen(cstr);\n");
@@ -7781,16 +7988,16 @@ pub fn emit_unit_with_headers(unit: &CgUnit, c_headers: &[String], search_dirs: 
         out.push_str("    str->_length = len;\n");
         out.push_str("    str->_hash = 0;\n");
         out.push_str("    str->_hashIsValid = 0;\n");
-        out.push_str("    return nopa_autorelease(obj);\n");
+        out.push_str("    return nepa_autorelease(obj);\n");
         out.push_str("#else\n");
         out.push_str("    if (!cstr) cstr = \"\";\n");
-        out.push_str("    static struct { const char *cstr; NPObject *obj; } nopa_intern_table[256];\n");
-        out.push_str("    static int nopa_intern_count = 0;\n");
-        out.push_str("    for (int i = 0; i < nopa_intern_count; i++) {\n");
-        out.push_str("        if (nopa_intern_table[i].cstr == cstr || strcmp(nopa_intern_table[i].cstr, cstr) == 0)\n");
-        out.push_str("            return nopa_intern_table[i].obj;\n");
+        out.push_str("    static struct { const char *cstr; NPObject *obj; } nepa_intern_table[256];\n");
+        out.push_str("    static int nepa_intern_count = 0;\n");
+        out.push_str("    for (int i = 0; i < nepa_intern_count; i++) {\n");
+        out.push_str("        if (nepa_intern_table[i].cstr == cstr || strcmp(nepa_intern_table[i].cstr, cstr) == 0)\n");
+        out.push_str("            return nepa_intern_table[i].obj;\n");
         out.push_str("    }\n");
-        out.push_str(&format!("    NPObject *obj = nopa_alloc(&{});\n", meta_symbol("CLASS_", "NPString")));
+        out.push_str(&format!("    NPObject *obj = nepa_alloc(&{});\n", meta_symbol("CLASS_", "NPString")));
         out.push_str("    if (!obj) return NULL;\n");
         out.push_str("    struct NPString *str = (struct NPString *)obj;\n");
         out.push_str("    size_t len = strlen(cstr);\n");
@@ -7806,21 +8013,21 @@ pub fn emit_unit_with_headers(unit: &CgUnit, c_headers: &[String], search_dirs: 
         // table's only reference, free the "immortal" constant, and leave the
         // table pointing at freed memory (heap-use-after-free in the next
         // intern lookup's strcmp). See doc/arc_intern_uaf.md.
-        out.push_str("    nopa_retain(obj);\n");
-        out.push_str("    if (nopa_intern_count < 256) {\n");
-        out.push_str("        nopa_intern_table[nopa_intern_count].cstr = str->_cstr;\n");
-        out.push_str("        nopa_intern_table[nopa_intern_count].obj = obj;\n");
-        out.push_str("        nopa_intern_count++;\n");
+        out.push_str("    nepa_retain(obj);\n");
+        out.push_str("    if (nepa_intern_count < 256) {\n");
+        out.push_str("        nepa_intern_table[nepa_intern_count].cstr = str->_cstr;\n");
+        out.push_str("        nepa_intern_table[nepa_intern_count].obj = obj;\n");
+        out.push_str("        nepa_intern_count++;\n");
         out.push_str("    }\n");
         out.push_str("    return obj;\n");
         out.push_str("#endif\n");
         out.push_str("}\n\n");
     }
 
-    // nopa_array_create — emitted when NPArray class is present
+    // nepa_array_create — emitted when NPArray class is present
     if unit.classes.iter().any(|c| c.class_name == "NPArray") {
-        out.push_str("__attribute__((weak)) NPObject *nopa_array_create(size_t count, ...) {\n");
-        out.push_str(&format!("    NPObject *arr = nopa_alloc(&{});\n", meta_symbol("CLASS_", "NPArray")));
+        out.push_str("__attribute__((weak)) NPObject *nepa_array_create(size_t count, ...) {\n");
+        out.push_str(&format!("    NPObject *arr = nepa_alloc(&{});\n", meta_symbol("CLASS_", "NPArray")));
         out.push_str("    if (!arr) return NULL;\n");
         out.push_str("    struct NPArray *a = (struct NPArray *)arr;\n");
         out.push_str("    if (count > 0) {\n");
@@ -7830,22 +8037,22 @@ pub fn emit_unit_with_headers(unit: &CgUnit, c_headers: &[String], search_dirs: 
         out.push_str("            va_start(ap, count);\n");
         out.push_str("            for (size_t i = 0; i < count; i++) {\n");
         out.push_str("                NPObject *obj = va_arg(ap, NPObject *);\n");
-        out.push_str("                a->_items[i] = obj ? nopa_retain(obj) : NULL;\n");
+        out.push_str("                a->_items[i] = obj ? nepa_retain(obj) : NULL;\n");
         out.push_str("            }\n");
         out.push_str("            va_end(ap);\n");
         out.push_str("            a->_count = count;\n");
         out.push_str("            a->_capacity = count;\n");
         out.push_str("        }\n");
         out.push_str("    }\n");
-        out.push_str("    return nopa_autorelease(arr);\n");
+        out.push_str("    return nepa_autorelease(arr);\n");
         out.push_str("}\n\n");
     }
 
-    // nopa_dictionary_create — emitted when NPDictionary class is present.
+    // nepa_dictionary_create — emitted when NPDictionary class is present.
     // Alternating key/value varargs, one pair per `@{}` entry.
     if unit.classes.iter().any(|c| c.class_name == "NPDictionary") {
-        out.push_str("__attribute__((weak)) NPObject *nopa_dictionary_create(size_t count, ...) {\n");
-        out.push_str(&format!("    NPObject *obj = nopa_alloc(&{});\n", meta_symbol("CLASS_", "NPDictionary")));
+        out.push_str("__attribute__((weak)) NPObject *nepa_dictionary_create(size_t count, ...) {\n");
+        out.push_str(&format!("    NPObject *obj = nepa_alloc(&{});\n", meta_symbol("CLASS_", "NPDictionary")));
         out.push_str("    if (!obj) return NULL;\n");
         out.push_str("    struct NPDictionary *dict = (struct NPDictionary *)obj;\n");
         out.push_str("    if (count > 0) {\n");
@@ -7859,8 +8066,8 @@ pub fn emit_unit_with_headers(unit: &CgUnit, c_headers: &[String], search_dirs: 
         out.push_str("                NPObject *k = va_arg(ap, NPObject *);\n");
         out.push_str("                NPObject *v = va_arg(ap, NPObject *);\n");
         out.push_str("                if (!k) continue;\n");
-        out.push_str("                dict->_keys[stored] = nopa_retain(k);\n");
-        out.push_str("                dict->_values[stored] = v ? nopa_retain(v) : NULL;\n");
+        out.push_str("                dict->_keys[stored] = nepa_retain(k);\n");
+        out.push_str("                dict->_values[stored] = v ? nepa_retain(v) : NULL;\n");
         out.push_str("                stored++;\n");
         out.push_str("            }\n");
         out.push_str("            va_end(ap);\n");
@@ -7868,13 +8075,13 @@ pub fn emit_unit_with_headers(unit: &CgUnit, c_headers: &[String], search_dirs: 
         out.push_str("            dict->_capacity = count;\n");
         out.push_str("        }\n");
         out.push_str("    }\n");
-        out.push_str("    return nopa_autorelease(obj);\n");
+        out.push_str("    return nepa_autorelease(obj);\n");
         out.push_str("}\n\n");
     }
 
     // ─── Block header struct (gcc/portable: shared by all expanded blocks) ──
     if !is_clang_backend() {
-        out.push_str("struct __nopa_block_header {\n    void *isa;\n    int flags;\n    int reserved;\n    void (*invoke)(void *, ...);\n};\n\n");
+        out.push_str("struct __nepa_block_header {\n    void *isa;\n    int flags;\n    int reserved;\n    void (*invoke)(void *, ...);\n};\n\n");
     }
 
     // ─── Block expansion definitions (gcc/portable) ──
@@ -7943,23 +8150,23 @@ pub fn emit_unit(unit: &CgUnit) -> String {
     emit_unit_with_headers(unit, &[], &[], false, Backend::Portable, false, false)
 }
 
-/// Generate a C bridge header so plain C code can call Nopa methods without
+/// Generate a C bridge header so plain C code can call Nepa methods without
 /// writing vtable dispatch or SEL constants by hand.
 ///
 /// For each class method and instance method it emits:
 ///   - an `extern` declaration of the generated function (`Class_method`),
-///   - a `static inline` wrapper `nopa_Class_method(...)` that hides the SEL
+///   - a `static inline` wrapper `nepa_Class_method(...)` that hides the SEL
 ///     (and the class object for class methods).
 ///
 /// Usage from C:
-///   #include "nopa_bridge.h"
-///   NPString *s = nopa_NPString_stringWithUTF8String("hello");
-///   const char *c = nopa_NPString_UTF8String(s);
+///   #include "nepa_bridge.h"
+///   NPString *s = nepa_NPString_stringWithUTF8String("hello");
+///   const char *c = nepa_NPString_UTF8String(s);
 /// Emit the call of the wrapped method inside a bridge-header inline wrapper,
 /// followed by the checked-EH guard. `-eh checked` compiles `@throw` into
-/// `__nopa_eh_flag = 1` + a zero return, so a pure-C caller that ignores the
+/// `__nepa_eh_flag = 1` + a zero return, so a pure-C caller that ignores the
 /// flag would swallow the exception silently. The wrapper checks it and aborts
-/// with ObjC wording (`nopa_eh_uncaught` lives in runtime.c; runtime.h is
+/// with ObjC wording (`nepa_eh_uncaught` lives in runtime.c; runtime.h is
 /// already included at the top of every bridge header). The checked backend
 /// settles every frame before returning, so there is nothing left to clean up
 /// at this boundary — aborting is the safe downgrade.
@@ -7967,20 +8174,20 @@ fn emit_bridge_eh_guard(out: &mut String, ret: &str, call: &str) {
     if ret == "void" {
         out.push_str(&format!("    {};\n", call));
     } else {
-        out.push_str(&format!("    {} __nopa_ret = {};\n", ret, call));
+        out.push_str(&format!("    {} __nepa_ret = {};\n", ret, call));
     }
-    out.push_str("    if (__nopa_eh_flag) { nopa_eh_uncaught(); }\n");
+    out.push_str("    if (__nepa_eh_flag) { nepa_eh_uncaught(); }\n");
     if ret != "void" {
-        out.push_str("    return __nopa_ret;\n");
+        out.push_str("    return __nepa_ret;\n");
     }
 }
 
 pub fn emit_bridge_header(unit: &CgUnit) -> String {
     let mut out = String::new();
-    out.push_str("// Automatically generated by nopac --emit-bridge-header. Do not edit.\n");
-    out.push_str("#ifndef NOPA_BRIDGE_H\n");
-    out.push_str("#define NOPA_BRIDGE_H\n\n");
-    out.push_str("#include <nopa/runtime.h>\n\n");
+    out.push_str("// Automatically generated by nepac --emit-bridge-header. Do not edit.\n");
+    out.push_str("#ifndef NEPA_BRIDGE_H\n");
+    out.push_str("#define NEPA_BRIDGE_H\n\n");
+    out.push_str("#include <nepa/runtime.h>\n\n");
 
     // Forward-declare all class structs.
     for cls in &unit.classes {
@@ -7989,17 +8196,17 @@ pub fn emit_bridge_header(unit: &CgUnit) -> String {
         out.push_str(&format!("typedef struct {} {};\n", flat, flat));
     }
     out.push_str("typedef struct { size_t location; size_t length; } NPRange;\n\n");
-    out.push_str("extern void nopa_metaInit(void);\n\n");
+    out.push_str("extern void nepa_metaInit(void);\n\n");
 
     for cls in &unit.classes {
         let flat = name_flat(&cls.class_name);
-        if flat == "nopa_root" { continue; }
+        if flat == "nepa_root" { continue; }
         for (i, sel) in cls.method_names.iter().enumerate() {
             let is_class = cls.is_class_methods.get(i).copied().unwrap_or(false);
             let ret = cls.method_return_types.get(i).cloned().unwrap_or_else(|| "void".into());
             let params = cls.method_params_list.get(i).cloned().unwrap_or_default();
             let fn_name = format!("{}_{}", flat, sel);
-            let wrapper_name = format!("nopa_{}_{}", flat, sel);
+            let wrapper_name = format!("nepa_{}_{}", flat, sel);
             let orig_sel = cls.method_sel_names.get(i).cloned().unwrap_or_else(|| sel.clone());
 
             // method_params_list includes self and _cmd as the first two entries.
@@ -8018,12 +8225,12 @@ pub fn emit_bridge_header(unit: &CgUnit) -> String {
                     format!("NPClass *self, SEL _cmd, {}", decl_params.join(", "))
                 };
                 out.push_str(&format!("extern {} {}({});\n", ret, fn_name, sig));
-                out.push_str(&format!("extern NPClass NOPA_CLASS_$_{};\n\n", flat));
+                out.push_str(&format!("extern NPClass NEPA_CLASS_$_{};\n\n", flat));
                 out.push_str(&format!("static inline {} {}({}) {{\n",
                     ret, wrapper_name,
                     if decl_params.is_empty() { "void".to_string() } else { decl_params.join(", ") }));
                 out.push_str(&format!("    SEL _sel = sel_registerName(\"{}\");\n", orig_sel));
-                let call = format!("{}(&NOPA_CLASS_$_{}, _sel{})",
+                let call = format!("{}(&NEPA_CLASS_$_{}, _sel{})",
                     fn_name, flat,
                     if call_names.is_empty() { String::new() } else { format!(", {}", call_names.join(", ")) });
                 emit_bridge_eh_guard(&mut out, &ret, &call);
@@ -8047,7 +8254,7 @@ pub fn emit_bridge_header(unit: &CgUnit) -> String {
             }
         }
     }
-    out.push_str("#endif /* NOPA_BRIDGE_H */\n");
+    out.push_str("#endif /* NEPA_BRIDGE_H */\n");
     out
 }
 #[cfg(test)]
@@ -8074,7 +8281,7 @@ mod vtable_sig_tests {
 
     /// The signature must travel inside the vtable struct (first member) so it
     /// is weak-merged together with the instance that actually won the link,
-    /// and the check must live in a per-TU constructor — `nopa_metaInit` is
+    /// and the check must live in a per-TU constructor — `nepa_metaInit` is
     /// weak-merged, so only one TU's copy would ever run.
     #[test]
     fn signature_travels_in_vtable_and_check_runs_per_tu() {
@@ -8098,17 +8305,20 @@ mod vtable_sig_tests {
                 method_params_list: vec![vec![]],
                 method_variadic: vec![false],
                 method_owners: vec!["Probe".to_string()],
+                category_method_names: std::collections::HashSet::new(),
                 vtable_indices: vec![2],
                 ivar_types: Vec::new(),
                 ivar_names: Vec::new(),
                 ivar_weak: Vec::new(),
                 properties: Vec::new(),
                 has_impl: true,
+                protocols: Vec::new(),
             }],
             struct_eq_tags: Vec::new(),
             no_arc: false,
             owned_classes: std::collections::HashSet::new(),
             kvc: false,
+            protocols: Vec::new(),
             global_instance_method_names: vec![
                 "dealloc".into(), "init".into(), "ping".into(), "release".into(), "retain".into(),
             ],
@@ -8131,10 +8341,10 @@ mod vtable_sig_tests {
             "vtable struct must carry a __sig member so it merges with the instance"
         );
         assert!(
-            c.contains("__attribute__((constructor)) static void __nopa_vtable_layout_check(void)"),
-            "the layout check must live in a per-TU constructor, not in weak-merged nopa_metaInit"
+            c.contains("__attribute__((constructor)) static void __nepa_vtable_layout_check(void)"),
+            "the layout check must live in a per-TU constructor, not in weak-merged nepa_metaInit"
         );
-        assert!(c.contains("nopa_verify_vtable_sig"), "the verifier must be emitted");
+        assert!(c.contains("nepa_verify_vtable_sig"), "the verifier must be emitted");
     }
 
     /// R3: a TU-local private method must not change the fingerprint. A legal
@@ -8198,11 +8408,11 @@ mod vtable_sig_tests {
 }
 
 /// Regression guard for the second-referendum root cause: `-eh checked`
-/// writes `__nopa_eh_flag` / `__nopa_eh_val` in every function with a
-/// throwing callee, but their declarations live only in `nopa/runtime.h`.
+/// writes `__nepa_eh_flag` / `__nepa_eh_val` in every function with a
+/// throwing callee, but their declarations live only in `nepa/runtime.h`.
 /// A pure C-superset file (no Foundation import, no block literal) generates
 /// C that never pulled runtime.h in, so clang rejected the whole unit with
-/// `use of undeclared identifier '__nopa_eh_flag'`. The include must not
+/// `use of undeclared identifier '__nepa_eh_flag'`. The include must not
 /// depend on the Foundation/blocks heuristic.
 #[cfg(test)]
 mod eh_runtime_include_tests {
@@ -8220,6 +8430,7 @@ mod eh_runtime_include_tests {
             no_arc: false,
             owned_classes: std::collections::HashSet::new(),
             kvc: false,
+            protocols: Vec::new(),
             vtable_sig_names: Vec::new(),
         }
     }
@@ -8229,9 +8440,9 @@ mod eh_runtime_include_tests {
         let unit = unit_with_c_headers(vec!["#include <stdio.h>".to_string()]);
         let c = emit_unit_with_headers(&unit, &unit.c_headers, &[], false, Backend::Clang, false, true);
         assert!(
-            c.contains("#include <nopa/runtime.h>"),
+            c.contains("#include <nepa/runtime.h>"),
             "a pure C-superset unit compiled with -eh checked must include runtime.h — \
-             __nopa_eh_flag/__nopa_eh_val are otherwise undeclared (referendum #2)"
+             __nepa_eh_flag/__nepa_eh_val are otherwise undeclared (referendum #2)"
         );
     }
 
@@ -8240,23 +8451,23 @@ mod eh_runtime_include_tests {
         let unit = unit_with_c_headers(vec!["#include <stdio.h>".to_string()]);
         let c = emit_unit_with_headers(&unit, &unit.c_headers, &[], false, Backend::Clang, false, false);
         assert!(
-            !c.contains("#include <nopa/runtime.h>"),
+            !c.contains("#include <nepa/runtime.h>"),
             "the default sjlj backend emits no EH global access — runtime.h must not \
              be dragged in (zero behavior change for the default path)"
         );
     }
 
     /// No duplicate include when the file already pulls runtime.h itself
-    /// (the trace goldens do `#import nopa/runtime.h` directly).
+    /// (the trace goldens do `#import nepa/runtime.h` directly).
     #[test]
     fn eh_checked_does_not_duplicate_an_existing_runtime_h_include() {
         let unit = unit_with_c_headers(vec![
             "#include <stdio.h>".to_string(),
-            "#include <nopa/runtime.h>".to_string(),
+            "#include <nepa/runtime.h>".to_string(),
         ]);
         let c = emit_unit_with_headers(&unit, &unit.c_headers, &[], false, Backend::Clang, false, true);
         assert_eq!(
-            c.matches("#include <nopa/runtime.h>").count(),
+            c.matches("#include <nepa/runtime.h>").count(),
             1,
             "runtime.h must not be included twice"
         );

@@ -1,4 +1,4 @@
 [package]
-name = "nopa-lexer"
+name = "nepa-lexer"
 version = "0.1.0"
 edition = "2021"

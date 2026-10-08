@@ -1,0 +1,28 @@
+[package]
+name = "nepac"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+nepa-cst = { path = "../cst" }
+nepa-parser = { path = "../parser" }
+nepa-binder = { path = "../binder" }
+nepa-elaborator = { path = "../elaborator" }
+nepa-codegen = { path = "../codegen" }
+nepa-preprocessor = { path = "../preprocessor" }
+nepa-symbol = { path = "../symbol" }
+nepa-ast = { path = "../ast" }
+nepa-cfg = { path = "../cfg" }
+nepa-arc = { path = "../arc" }
+nepa-async = { path = "../async" }
+nepa-eh = { path = "../eh" }
+nepa-defer = { path = "../defer" }
+nepa-pattern = { path = "../pattern" }
+nepa-trace = { path = "../trace" }
+nepa-checker = { path = "../checker" }
+attrs = { path = "../attrs" }
+clap = "4.6.6"
+clap_complete = "4.6.9"
+
+[build-dependencies]
+cc = "1.0"

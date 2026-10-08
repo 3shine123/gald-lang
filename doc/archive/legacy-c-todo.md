@@ -1,7 +1,7 @@
-# Nopa 转译器开发 TODO
+# Nepa 转译器开发 TODO
 
-> Nopa：纯静态 Objective-C 方言、C 的超集语言，转译到 C99
-> 编译器：nopac | 运行时：libnopa | 标准库：Foundation（NP-前缀）
+> Nepa：纯静态 Objective-C 方言、C 的超集语言，转译到 C99
+> 编译器：nepac | 运行时：libnepa | 标准库：Foundation（NP-前缀）
 > 核心特性：自动静态 ARC、CFG 分析、VTable 多态、完整 ObjC 语法兼容
 
 > ⚠️ **历史文件**：本 TODO 是早期 **C 版** 计划，已与当前 **Rust 重写版** 的实现脱节
@@ -21,7 +21,7 @@
 ### 0.2 测试框架
 
 - [ ] 设计测试目录结构（unit/、integration/、fixtures/）
-- [ ] 实现测试运行器（C 或 Nopa 编写）
+- [ ] 实现测试运行器（C 或 Nepa 编写）
 - [ ] 支持：编译测试、运行测试、输出对比、回归测试
 - [ ] 集成到 Makefile（`make test`）
 
@@ -164,7 +164,7 @@
 
 ### 3.1 VTable 布局计算
 
-- [x] 设计 VTable 结构（nopa_vtable in object.h）
+- [x] 设计 VTable 结构（nepa_vtable in object.h）
 - [x] 实现方法索引分配算法（根类从 0、子类继承、覆盖保持相同、追加新方法）
 - [x] 生成索引常量宏
 - [x] 处理类方法 VTable（元类 VTable）
@@ -174,7 +174,7 @@
 
 ### 3.2 对象内存布局
 
-- [x] 设计对象头结构（nopa_object：isa 指针）
+- [x] 设计对象头结构（nepa_object：isa 指针）
 - [x] 计算 ivar 偏移量（父类在前、子类在后）
 - [x] 生成对象结构体定义（C struct）
 - [ ] 生成 ivar 访问宏/内联函数
@@ -183,10 +183,10 @@
 ### 3.3 类元数据生成
 
 - [x] 设计类元数据结构（NPClass 含 name/superclass/instance_size/vtable）
-- [x] 生成类元数据常量定义（nopa_ClassName_class 变量）
+- [x] 生成类元数据常量定义（nepa_ClassName_class 变量）
 - [x] 实现 +alloc 通用逻辑（NPObject 的 +alloc 方法）
 - [x] 实现 +init 方法（NPObject 的 -init 方法）
-- [x] 实现 +class 方法（自动生成 nopa_ClassName_getClass C 函数）
+- [x] 实现 +class 方法（自动生成 nepa_ClassName_getClass C 函数）
 - [x] 编写类元数据测试（integration/test_class_meta.sh，12 项检查）
 
 ### 3.4 选择器（SEL）表
@@ -267,7 +267,7 @@
 ### 5.4 Retain/Release 插入
 
 - [x] 实现插入点确定
-- [x] 生成 nopa_retain() / nopa_release() 调用
+- [x] 生成 nepa_retain() / nepa_release() 调用
 - [x] 优化冗余 retain/release 对
 - [x] 编写插入测试（3 测试）
 
@@ -291,7 +291,7 @@
 - [x] 实现 C99 AST 生命周期管理
 - [x] 编写 C99 AST 测试（7 测试）
 
-### 6.2 Nopa AST 到 C99 AST 转换
+### 6.2 Nepa AST 到 C99 AST 转换
 
 - [x] 实现方法转换（含 self, _cmd 参数）
 - [x] 实现消息发送转换（vtable 静态派发：`((struct vtable *)obj->isa->vtable)->method(args)`）
@@ -300,7 +300,7 @@
 - [x] 实现类定义转换（struct 含 ivar 字段展开：类型+字段名）
 - [x] 实现属性访问转换（ivar 内联 + vtable 派发 getter/setter）
 - [x] 实现 Block 转换（struct + invoke 函数 + 注册/发射）
-- [x] 实现异常转换（@try → label/goto 模式，@throw → goto __nopa_throw）
+- [x] 实现异常转换（@try → label/goto 模式，@throw → goto __nepa_throw）
 - [x] 编写 CodeGen 单元测试（12+10 测试）
 
 ### 6.3 头文件生成（.h → .h）
@@ -314,11 +314,11 @@
 
 - [x] 生成 #include 指令（收集自源码 .h 递归导入）
 - [x] 生成 struct 定义（对象头：isa + retain_count，跳过 NPObject/NPClass 由 runtime.h 提供）
-- [x] 生成静态常量（VTable 索引宏：`#define nopa_Class_vtable_index_method N`）
+- [x] 生成静态常量（VTable 索引宏：`#define nepa_Class_vtable_index_method N`）
 - [x] 生成 VTable struct 类型定义 + vtable 实例初始化
-- [x] 生成类元数据初始化（nopa_init() 函数）
+- [x] 生成类元数据初始化（nepa_init() 函数）
 - [x] 生成方法实现函数（含 @synthesize 生成的 getter/setter）
-- [x] 生成辅助函数（nopa_init 初始化）
+- [x] 生成辅助函数（nepa_init 初始化）
 - [x] 格式化输出
 
 ### 6.5 代码优化（生成期）
@@ -331,59 +331,59 @@
 
 ---
 
-## 阶段 7：运行时（libnopa）
+## 阶段 7：运行时（libnepa）
 
 ### 7.1 核心运行时
 
-- [x] 定义 nopa_object / nopa_class / nopa_vtable 基础结构（object.h）
+- [x] 定义 nepa_object / nepa_class / nepa_vtable 基础结构（object.h）
 - [x] 定义 NPObject / NPClass 公共类型（object.h，与生成代码一致）
-- [x] 实现 nopa_retain()（递增 retain_count）
-- [x] 实现 nopa_release()（递减，到 0 时 free）
-- [x] 实现 nopa_alloc()（calloc + 设 isa + retain_count=1）
-- [x] 实现 nopa_init()（返回 self）
-- [x] 实现 nopa_autorelease()
-- [x] 实现 np_class_create / np_vtable_alloc / np_object_alloc（nopa_class.c）
-- [x] 运行时头文件统一为 object.h（无 nopa_msgSend / sel_registerName）
-- [ ] 实现 nopa_dealloc()（释放对象内存）
-- [ ] 实现 nopa_copy()
-- [ ] 实现 nopa_hash() / nopa_isEqual()
-- [ ] 实现 nopa_description()
+- [x] 实现 nepa_retain()（递增 retain_count）
+- [x] 实现 nepa_release()（递减，到 0 时 free）
+- [x] 实现 nepa_alloc()（calloc + 设 isa + retain_count=1）
+- [x] 实现 nepa_init()（返回 self）
+- [x] 实现 nepa_autorelease()
+- [x] 实现 np_class_create / np_vtable_alloc / np_object_alloc（nepa_class.c）
+- [x] 运行时头文件统一为 object.h（无 nepa_msgSend / sel_registerName）
+- [ ] 实现 nepa_dealloc()（释放对象内存）
+- [ ] 实现 nepa_copy()
+- [ ] 实现 nepa_hash() / nepa_isEqual()
+- [ ] 实现 nepa_description()
 - [ ] 编写运行时核心测试
 
 ### 7.2 Block 运行时支持
 
 - [ ] 定义 NPConcreteStackBlock / NPConcreteGlobalBlock / NPConcreteMallocBlock
-- [ ] 实现 nopa_Block_copy() / nopa_Block_release()
+- [ ] 实现 nepa_Block_copy() / nepa_Block_release()
 - [ ] 实现 Block 的 retain/release 语义
 - [ ] 编写 Block 运行时测试
 
 ### 7.3 弱引用支持
 
 - [ ] 设计弱引用表
-- [ ] 实现 nopa_storeWeak / nopa_loadWeak / nopa_destroyWeak
-- [ ] 在 nopa_release() 到 0 时自动置零所有弱引用
+- [ ] 实现 nepa_storeWeak / nepa_loadWeak / nepa_destroyWeak
+- [ ] 在 nepa_release() 到 0 时自动置零所有弱引用
 - [ ] 实现弱引用表线程安全
 - [ ] 编写弱引用测试
 
 ### 7.4 自动释放池
 
-- [x] 设计 nopa_autoreleasepool 结构
-- [x] 实现 nopa_autoreleasepool_push() / pop()
-- [x] 实现 nopa_autorelease()
+- [x] 设计 nepa_autoreleasepool 结构
+- [x] 实现 nepa_autoreleasepool_push() / pop()
+- [x] 实现 nepa_autorelease()
 - [x] 处理线程局部存储（__thread）
 - [x] 编写自动释放池测试（lang-test/golden/05_autoreleasepool/ 4 个 .np 文件）
 
 ### 7.5 异常支持（可选）✅ 已实现（Rust 版）
 
 - [x] 基于 setjmp/longjmp 的异常机制
-- [x] ~~实现 nopa_try / nopa_catch / nopa_finally 宏~~（Rust 版直接把 `@try/@catch/@finally` 降级为 setjmp/longjmp，无宏）
+- [x] ~~实现 nepa_try / nepa_catch / nepa_finally 宏~~（Rust 版直接把 `@try/@catch/@finally` 降级为 setjmp/longjmp，无宏）
 - [x] 实现异常对象传递
 - [ ] 处理异常路径的 ARC（同一函数内 `@throw` 会在重抛前释放局部对象；**跨函数 unwind 仍泄漏**，待修）
 - [x] 编写异常测试
 
 ### 7.6 线程支持
 
-- [ ] 实现 nopa_thread_create() / join()
+- [ ] 实现 nepa_thread_create() / join()
 - [ ] 实现线程局部存储
 - [ ] 实现原子操作封装
 - [ ] 编写线程测试
@@ -485,36 +485,36 @@
 ### 9.4 调试支持
 
 - [ ] ~~生成调试信息~~
-- [ ] ~~映射 Nopa 源码行到 C 源码行~~
+- [ ] ~~映射 Nepa 源码行到 C 源码行~~
 - [ ] ~~支持 GDB/LLDB 调试~~
-- [ ] ~~实现 nopa-gdb 包装脚本~~
+- [ ] ~~实现 nepa-gdb 包装脚本~~
 
 ---
 
 ## 阶段 10：编译器自举
 
-### 10.1 用 Nopa 重写前端
+### 10.1 用 Nepa 重写前端
 
-- [ ] 用 Nopa 实现 Lexer
-- [ ] 用 Nopa 实现 Parser
-- [ ] 用 Nopa 实现 CST
-- [ ] 用 Nopa 实现符号表
-- [ ] 用 Nopa 实现类型检查器
-- [ ] 用 Nopa 实现 Elaborator
-- [ ] 用 C 编写 Nopa 运行时（保持）
+- [ ] 用 Nepa 实现 Lexer
+- [ ] 用 Nepa 实现 Parser
+- [ ] 用 Nepa 实现 CST
+- [ ] 用 Nepa 实现符号表
+- [ ] 用 Nepa 实现类型检查器
+- [ ] 用 Nepa 实现 Elaborator
+- [ ] 用 C 编写 Nepa 运行时（保持）
 
 ### 10.2 自举验证
 
-- [ ] 用 C-nopac 编译 Nopa-nopac
-- [ ] 得到 Nopa-nopac 可执行文件
-- [ ] 用 Nopa-nopac 编译自身
+- [ ] 用 C-nepac 编译 Nepa-nepac
+- [ ] 得到 Nepa-nepac 可执行文件
+- [ ] 用 Nepa-nepac 编译自身
 - [ ] 比较两次输出的一致性
 - [ ] 修复不一致问题
 - [ ] 实现自举后的持续集成
 
 ### 10.3 性能优化
 
-- [ ] 分析 Nopa-nopac 性能瓶颈
+- [ ] 分析 Nepa-nepac 性能瓶颈
 - [ ] 优化 AST 内存布局
 - [ ] 优化符号表查找
 - [ ] 优化字符串处理
@@ -526,36 +526,36 @@
 
 | 类型       | 扩展名        | 示例                                |
 | -------- | ---------- | --------------------------------- |
-| Nopa 头文件 | .h        | `Foundation.nh`, `NPString.nh`    |
-| Nopa 源文件 | .np        | `main.np`, `NPPerson.np`          |
-| C 头文件    | .h         | `noparuntime.h`, `NPPerson.h`（生成） |
+| Nepa 头文件 | .h        | `Foundation.nh`, `NPString.nh`    |
+| Nepa 源文件 | .np        | `main.np`, `NPPerson.np`          |
+| C 头文件    | .h         | `neparuntime.h`, `NPPerson.h`（生成） |
 | C 源文件    | .c         | `main.c`, `NPPerson.c`（生成）        |
 | 对象文件     | .o         | `main.o`                          |
 | 可执行文件    | 无          | `myapp`                           |
-| 静态库      | .a         | `libnopa.a`                       |
-| 动态库      | .so/.dylib | `libnopa.so`                      |
+| 静态库      | .a         | `libnepa.a`                       |
+| 动态库      | .so/.dylib | `libnepa.so`                      |
 
 ## 附录：命名前缀规范
 
 | 范畴             | 前缀                  | 示例                                              |
 | -------------- | ------------------- | ----------------------------------------------- |
 | 标准库类           | NP                  | `NPObject`, `NPString`, `NPArray`               |
-| 运行时函数          | nopa_               | `nopa_retain()`, `nopa_release()`               |
-| 运行时类型          | nopa_               | `nopa_object`, `nopa_class`                     |
-| 编译器生成结构        | nopa_               | `nopa_NPString`, `nopa_NPString_vtable`         |
-| 编译器生成函数        | nopa_ClassName_     | `nopa_NPString_length()`                        |
-| 编译器生成常量        | nopa_               | `nopa_NPString_class`, `nopa_sel_initWithName_` |
-| Block 内部结构     | __nopa_block_       | `__nopa_block_adder_0`                          |
-| Block byref 结构 | __nopa_block_byref_ | `__nopa_block_byref_counter`                    |
-| 内部临时变量         | __nopa_             | `__nopa_try_buf`, `__nopa_state`                |
+| 运行时函数          | nepa_               | `nepa_retain()`, `nepa_release()`               |
+| 运行时类型          | nepa_               | `nepa_object`, `nepa_class`                     |
+| 编译器生成结构        | nepa_               | `nepa_NPString`, `nepa_NPString_vtable`         |
+| 编译器生成函数        | nepa_ClassName_     | `nepa_NPString_length()`                        |
+| 编译器生成常量        | nepa_               | `nepa_NPString_class`, `nepa_sel_initWithName_` |
+| Block 内部结构     | __nepa_block_       | `__nepa_block_adder_0`                          |
+| Block byref 结构 | __nepa_block_byref_ | `__nepa_block_byref_counter`                    |
+| 内部临时变量         | __nepa_             | `__nepa_try_buf`, `__nepa_state`                |
 
 ## 附录：测试统计
 
 | 测试套件                 | 测试数量    | 状态       |
 | -------------------- | -------:| -------- |
-| nopa_lexer           | 14      | ✅        |
-| nopa_parser          | 6       | ✅        |
-| nopa_preprocessor    | 1       | ✅        |
+| nepa_lexer           | 14      | ✅        |
+| nepa_parser          | 6       | ✅        |
+| nepa_preprocessor    | 1       | ✅        |
 | **总计**               | **21**  | **全部通过** |
 
 ## 附录：完成进度概览

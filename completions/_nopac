@@ -1,17 +1,17 @@
-#compdef nopac
+#compdef nepac
 
-_nopac() {
+_nepac() {
     if [[ $CURRENT -eq 2 ]]; then
         if [[ $PREFIX == -* ]]; then
             _arguments \
                 '-Werror[promote warnings to errors]' \
-                '-emit-bridge-header[emit a C bridge header for calling Nopa from C]' \
-                '-rewrite-nopa[transpile to C only (no link)]' \
+                '-emit-bridge-header[emit a C bridge header for calling Nepa from C]' \
+                '-rewrite-nepa[transpile to C only (no link)]' \
                 '-v[show verbose transpilation info]' \
                 '--verbose[show verbose transpilation info]' \
                 '--version[print version and exit]' \
-                '-fnopa-arc[enable ARC (default)]' \
-                '-fno-nopa-arc[disable ARC (MRC)]' \
+                '-fnepa-arc[enable ARC (default)]' \
+                '-fno-nepa-arc[disable ARC (MRC)]' \
                 '-fno-checker[skip type checking]' \
                 '-eh[exception backend: checked (default) or legacy/sjlj (setjmp/longjmp rollback)]' \
                 '-ffreestanding[bare-metal/freestanding output]' \
@@ -29,7 +29,7 @@ _nopac() {
                 '-asm[link a real assembly file (repeatable)]' \
                 '-arch[target arch]'
         else
-            _values 'nopac command' 'run'
+            _values 'nepac command' 'run'
             _files
         fi
         return

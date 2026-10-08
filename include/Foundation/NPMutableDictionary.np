@@ -70,9 +70,9 @@
         if (_keys[i] && [_keys[i] isEqual:key]) {
             if (_values[i] != value) {
                 NPObject *old = _values[i];
-                _values[i] = nopa_retain(value);
+                _values[i] = nepa_retain(value);
                 if (old) {
-                    nopa_release(old);
+                    nepa_release(old);
                 }
             }
             return;
@@ -88,8 +88,8 @@
         _values = vs;
         _capacity = newcap;
     }
-    _keys[_count] = nopa_retain(key);
-    _values[_count] = nopa_retain(value);
+    _keys[_count] = nepa_retain(key);
+    _values[_count] = nepa_retain(value);
     _count++;
 }
 
@@ -113,10 +113,10 @@
             memmove(_values + i, _values + i + 1, (_count - i - 1) * sizeof(NPObject *));
             _count--;
             if (k) {
-                nopa_release(k);
+                nepa_release(k);
             }
             if (v) {
-                nopa_release(v);
+                nepa_release(v);
             }
             return;
         }
@@ -126,10 +126,10 @@
 - (void)removeAllObjects {
     for (size_t i = 0; i < _count; i++) {
         if (_keys[i]) {
-            nopa_release(_keys[i]);
+            nepa_release(_keys[i]);
         }
         if (_values[i]) {
-            nopa_release(_values[i]);
+            nepa_release(_values[i]);
         }
     }
     _count = 0;

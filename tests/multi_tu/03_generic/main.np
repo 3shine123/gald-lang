@@ -13,6 +13,6 @@ int main() {
     printf("top=%d\n", *top);
     printf("size2=%d\n", [s size]);
     printf("helper=%d\n", StackHelper());
-    nopa_release(s);
+    nepa_release(s);
     return 0;
 }

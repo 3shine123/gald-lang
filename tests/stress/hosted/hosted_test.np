@@ -1,5 +1,5 @@
 // hosted_test.np — FULL-syntax stress test against the standard library
-// (Foundation). Runs via:  nopac run hosted_test.np -asm asm_host.s
+// (Foundation). Runs via:  nepac run hosted_test.np -asm asm_host.s
 // Companion to the freestanding stress (tests/stress/baremetal) — this one
 // uses Foundation + ARC + @await, everything the bare-metal build can't.
 
@@ -202,7 +202,7 @@ static void check_struct_eq(void) {
 - (T) value { return _v; }
 @end
 
-// C functions receiving nopa objects
+// C functions receiving nepa objects
 static int poke_speak(id<Stress::Speaker> s) { [s speak]; return 1; }
 
 // ── @throws 声明标注：typed / bare / 本地 @try 豁免（编译期对账） ──

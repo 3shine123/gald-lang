@@ -1,9 +1,9 @@
 /* ─────────────────────────────────────────────────────────────────────────
  * LibUI.nh — ObjC-style declarations for the libui-ng wrapper.
  *
- * Pure Nopa: no `struct uiXxx` ever leaks out of LibUI.np. Every widget
+ * Pure Nepa: no `struct uiXxx` ever leaks out of LibUI.np. Every widget
  * inherits from `Control`, so `append:`/`setContent:` take a `Control *`
- * and you never touch a handle yourself. Callbacks take Nopa blocks.
+ * and you never touch a handle yourself. Callbacks take Nepa blocks.
  * ───────────────────────────────────────────────────────────────────────── */
 
 #ifndef LIBUI_NH

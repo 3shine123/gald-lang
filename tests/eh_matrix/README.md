@@ -1,6 +1,6 @@
 # EH 验收矩阵（`-eh checked` 默认化）
 
-> 状态：**已切换默认**（`DEFAULT_EH_CHECKED = true`，`crates/nopac/src/pipeline.rs`）。
+> 状态：**已切换默认**（`DEFAULT_EH_CHECKED = true`，`crates/nepac/src/pipeline.rs`）。
 > `-eh legacy`（别名 `-eh sjlj`）是完整回退。
 
 ## 为什么存在
@@ -25,10 +25,10 @@
 
 ```bash
 # 三模式验收矩阵（18 场景 x 3 模式 + 默认后端门）
-NOPAC=target/release/nopac ./tests/eh_matrix/run_eh_matrix.sh
+NEPAC=target/release/nepac ./tests/eh_matrix/run_eh_matrix.sh
 
 # 生成代码质量统计（守卫数/行数/体积/编译时间）+ 守卫密度硬门
-NOPAC=target/release/nopac ./tests/eh_matrix/gen_quality.sh
+NEPAC=target/release/nepac ./tests/eh_matrix/gen_quality.sh
 ```
 
 ## 场景（18）
@@ -42,9 +42,9 @@ NOPAC=target/release/nopac ./tests/eh_matrix/gen_quality.sh
 | 05 | `@throw` 后重新抛出 | `tests/eh_diff/04_rethrow.np` | 不得重入同层 catch |
 | 06 | 异常跨函数传播 | `tests/eh_diff/01_cross_frame_release.np` | **checked-only**（见已知限制 1） |
 | 07 | ARC | `golden/04_arc/retain_release.np` | |
-| 08 | MRC | 同上 + `-fno-nopa-arc` | 无 `.out` 参照（MRC 不打印 dealloc） |
+| 08 | MRC | 同上 + `-fno-nepa-arc` | 无 `.out` 参照（MRC 不打印 dealloc） |
 | 09 | `@autoreleasepool` | `golden/05_autoreleasepool/nested_pool.np` | |
-| 10 | 多文件 Nopa | `tests/multi_tu/run_multi_tu.sh`（全部用例） | 跨 TU 布局 + Foundation 内联大 TU |
+| 10 | 多文件 Nepa | `tests/multi_tu/run_multi_tu.sh`（全部用例） | 跨 TU 布局 + Foundation 内联大 TU |
 | 11 | Foundation 大文件 | `golden/13_foundation/04_npstring/npstring_test.np` | |
 | 12 | 纯 C 超集 | `golden/22_c_superset/c_superset.np` | 无 Foundation/无 block 的生成 C 也须含 EH 声明 |
 | 13 | `-ffreestanding` | `golden/25_freestanding/`（golden/25 方法论） | 裸机转译 + host 编译链接运行 |
@@ -60,7 +60,7 @@ NOPAC=target/release/nopac ./tests/eh_matrix/gen_quality.sh
 
 ## 生成代码质量（`gen_quality.sh`）
 
-`guards` = 生成 C 中 `__nopa_eh_flag` 的出现次数；`setjmp` = `setjmp|longjmp` 次数。
+`guards` = 生成 C 中 `__nepa_eh_flag` 的出现次数；`setjmp` = `setjmp|longjmp` 次数。
 
 | 用例 | default 行/守卫/setjmp | checked 行/守卫/setjmp | legacy 行/守卫/setjmp |
 |---|---|---|---|
@@ -84,15 +84,15 @@ NOPAC=target/release/nopac ./tests/eh_matrix/gen_quality.sh
   0.108s → 0.134s）。无显著回归。
 - **体积**：小文件 +2.7% ~ +3.1%；`big_file` +11.3%。见已知限制 2。
 
-> ⚠️ **统计口径**：必须用 `grep -c '__nopa_eh_flag'`（任意出现），不能用
-> `grep -c 'if (__nopa_eh_flag'` —— codegen 会把条件括起来
-> （`if ((__nopa_eh_flag == 0))`），前缀匹配会**恒为 0**，把有守卫的程序
+> ⚠️ **统计口径**：必须用 `grep -c '__nepa_eh_flag'`（任意出现），不能用
+> `grep -c 'if (__nepa_eh_flag'` —— codegen 会把条件括起来
+> （`if ((__nepa_eh_flag == 0))`），前缀匹配会**恒为 0**，把有守卫的程序
 > 误报成零守卫。
 
 ## 已知限制
 
 1. **`06_cross_frame`：sjlj 后端不支持**（`default`/`legacy` rc=1，`checked` PASS）。
-   原因有两层：(a) sjlj 的 `longjmp` 跳过中间帧的 scope-end `nopa_release`（README
+   原因有两层：(a) sjlj 的 `longjmp` 跳过中间帧的 scope-end `nepa_release`（README
    已记录的 sjlj 经典限制）；(b) 该用例为 checked 编写，其 `@throw` 未标注
    `@throws`，而**只有 sjlj 模式**的 checker 会执行 `@throws` 逃逸检查并拒绝它。
    两条都是**既有行为**，`default` 与 `legacy` 在此完全一致 → 回退仍然保真。
@@ -106,10 +106,10 @@ NOPAC=target/release/nopac ./tests/eh_matrix/gen_quality.sh
    全局快速路径（当前未做）。
 
 3. **既有 ARC 顺序缺陷（与 EH 无关，本次未修）**：
-   `return <表达式使用 owned 局部对象>;` 会在**求值之前**插入 `nopa_release`，
+   `return <表达式使用 owned 局部对象>;` 会在**求值之前**插入 `nepa_release`，
    即 use-after-free。最小复现：
 
-   ```nopa
+   ```nepa
    #import <Foundation/Foundation.nh>
    // Holder 持有 NPString *_s；- (NPString *)text { return _s; }
    int main() {
@@ -119,7 +119,7 @@ NOPAC=target/release/nopac ./tests/eh_matrix/gen_quality.sh
    ```
 
    实测 `default`/`legacy` rc=1，`checked` rc=0 —— checked 之所以正确，是因为
-   EH 的表达式线性化把 `[[h text] length]` 提到 `nopa_release(h)` 之前（**偶然**
+   EH 的表达式线性化把 `[[h text] length]` 提到 `nepa_release(h)` 之前（**偶然**
    规避，不是修复）。此缺陷在 HEAD 上即存在，属于 ARC，不在本次 EH 切换范围内，
    已在报告中标出。矩阵的 `samples/no_throw_plain.np` 刻意避开该形状以免干扰
    守卫密度判据。

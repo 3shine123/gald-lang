@@ -1,20 +1,21 @@
-- nopa-lang 多 TU 铁律：每个类的方法必须对所有链接的 TU 可见（写在共享 .gh 里）；方法集不同的 TU 链接会 vtable 错配——codegen 已发 __sig 签名 + per-TU constructor 启动期 abort（不能放 gald_metaInit，它被 weak 合并）。测试套件 tests/multi_tu/run_multi_tu.sh 9 场景。
-- nopa-lang parser 教训：(1) consume() 失败不能 advance()——会吃掉下一声明的首 token 造成隔行吞错误（已修，error_recovery.rs 4 测试守护）；(2) 批量删代码别用行号定位（会踩过期行号切坏文件），用内容匹配或 git diff 对照；调试 parser 循环用临时 eprintln hook 而非猜测。
-- gald 派发铁律：没有 msgSend，全部走静态 vtable；语义与 ObjC 一致但底层实现不同。variadic 方法的 vtable fn-ptr cast 必须带 `...`（如 `objc_msgSend` cast 先例）。
-- nopa-lang tests/eh_diff/run_eh_diff.sh 内部会切换工作目录——GALDC= 必须给绝对路径，相对路径会让 7 个用例全部变成 gald_rc=127 "No such file or directory" 的假失败。
-- gald codegen 位置铁律：文件级 RawLine（`_Pragma(...)`/`#pragma mark`）必须与 struct 定义按源码顺序交错发射——现在由 emit_aggregate_definitions(Section 5) 承担（源码序行走 + 依赖按需前拉，返回 bool），主声明流在 aggregates_emitted 时跳过 RawLine；否则 `_Pragma("pack(push,1)")` 会落在 struct 定义之后，pack 静默失效（实测 Packed=8 而非 5）。
-- gald 符号表存 selector 时抹掉全部冒号（`setObject:atIndex:`→`setObjectatIndex`），任何按 selector 查类方法的判据必须去掉每一个冒号，只 trim 尾冒号会让多段 selector 静默匹配失败。
-- galdc 生成的 C 里 case/goto 标签（`label:`）故意不缩进、顶左格，这是 C 常规写法，不是格式错乱，别当 bug "修"。
-- gald typed @catch 已改为 isKindOf 链（sjlj codegen 发 __gald_eh_isa，走 superclass 链；eh checked/裸机原本就对）——抛子类、catch 父类命中，与 ObjC 一致；臂序消费防双捕已探针实证。旧"精确 isa 匹配偏差"记载作废。
-- gald checker 的 method_params 按 selector 全局键控是 last-writer-wins——两个类声明同名 selector 不同形参（如 tt.gm 的 objectForKey:(const char*) vs NPDictionary 的 (K)）会互相覆盖产生误报；已加 method_param_decls 全声明表，字符串类检查走"全声明共识门"（全一致才报，method_kinds 同款纪律）。
-- gald @synchronized 已是真互斥（runtime.c C11 atomic_flag 256 桶自旋 + cleanup(gald_syncAutoCleanup) 解锁，return/break 均释放；@throw 越块 longjmp 绕过 cleanup → checker 对锁块内 @throw 发 warning；裸机同签名 no-op）；__weak 赋值由 rewrite_weak_assigns 重注册（unregister→assign→register）——zeroing 验证必须用 owned 源（alloc+init），便利构造器 autoreleased 不销毁、会假阴性。
-- gald preprocessor 过滤含 gald 语法（@"..."/消息发送/block）的 #define 不进 C 透传（判据 cpp::body_has_gald_syntax）——#define X @"..." 是非法 C；gald 宏表照常注册，galdc 自己展开调用点，C 轨丢行零损失。
-- nopa-lang Foundation 按 .gm 分 TU 的元数据方案已定案 A（owner 静态初始化=铺满 §10 既有机制）；B（registration fragment）存档、复活条件=动态加载/运行时算值/反射；探针 9/9 个 Foundation .gm 已可独立编译；定案+路线图在 doc/stable_slots_plan.md §11
+- nepa-lang 多 TU 铁律：每个类的方法必须对所有链接的 TU 可见（写在共享 .gh 里）；方法集不同的 TU 链接会 vtable 错配——codegen 已发 __sig 签名 + per-TU constructor 启动期 abort（不能放 nepa_metaInit，它被 weak 合并）。测试套件 tests/multi_tu/run_multi_tu.sh 9 场景。
+- nepa-lang parser 教训：(1) consume() 失败不能 advance()——会吃掉下一声明的首 token 造成隔行吞错误（已修，error_recovery.rs 4 测试守护）；(2) 批量删代码别用行号定位（会踩过期行号切坏文件），用内容匹配或 git diff 对照；调试 parser 循环用临时 eprintln hook 而非猜测。
+- nepa 派发铁律：没有 msgSend，全部走静态 vtable；语义与 ObjC 一致但底层实现不同。variadic 方法的 vtable fn-ptr cast 必须带 `...`（如 `objc_msgSend` cast 先例）。
+- nepa-lang tests/eh_diff/run_eh_diff.sh 内部会切换工作目录——NEPAC= 必须给绝对路径，相对路径会让 7 个用例全部变成 nepac_rc=127 "No such file or directory" 的假失败。
+- nepa codegen 位置铁律：文件级 RawLine（`_Pragma(...)`/`#pragma mark`）必须与 struct 定义按源码顺序交错发射——现在由 emit_aggregate_definitions(Section 5) 承担（源码序行走 + 依赖按需前拉，返回 bool），主声明流在 aggregates_emitted 时跳过 RawLine；否则 `_Pragma("pack(push,1)")` 会落在 struct 定义之后，pack 静默失效（实测 Packed=8 而非 5）。
+- nepa 符号表存 selector 时抹掉全部冒号（`setObject:atIndex:`→`setObjectatIndex`），任何按 selector 查类方法的判据必须去掉每一个冒号，只 trim 尾冒号会让多段 selector 静默匹配失败。
+- nepac 生成的 C 里 case/goto 标签（`label:`）故意不缩进、顶左格，这是 C 常规写法，不是格式错乱，别当 bug "修"。
+- nepa typed @catch 已改为 isKindOf 链（sjlj codegen 发 __nepa_eh_isa，走 superclass 链；eh checked/裸机原本就对）——抛子类、catch 父类命中，与 ObjC 一致；臂序消费防双捕已探针实证。旧"精确 isa 匹配偏差"记载作废。
+- nepa checker 的 method_params 按 selector 全局键控是 last-writer-wins——两个类声明同名 selector 不同形参（如 tt.gm 的 objectForKey:(const char*) vs NPDictionary 的 (K)）会互相覆盖产生误报；已加 method_param_decls 全声明表，字符串类检查走"全声明共识门"（全一致才报，method_kinds 同款纪律）。
+- nepa @synchronized 已是真互斥（runtime.c C11 atomic_flag 256 桶自旋 + cleanup(nepa_syncAutoCleanup) 解锁，return/break 均释放；@throw 越块 longjmp 绕过 cleanup → checker 对锁块内 @throw 发 warning；裸机同签名 no-op）；__weak 赋值由 rewrite_weak_assigns 重注册（unregister→assign→register）——zeroing 验证必须用 owned 源（alloc+init），便利构造器 autoreleased 不销毁、会假阴性。
+- nepa preprocessor 过滤含 nepa 语法（@"..."/消息发送/block）的 #define 不进 C 透传（判据 cpp::body_has_nepa_syntax）——#define X @"..." 是非法 C；nepa 宏表照常注册，nepac 自己展开调用点，C 轨丢行零损失。
+- nepa-lang Foundation 按 .gm 分 TU 的元数据方案已定案 A（owner 静态初始化=铺满 §10 既有机制）；B（registration fragment）存档、复活条件=动态加载/运行时算值/反射；探针 9/9 个 Foundation .gm 已可独立编译；定案+路线图在 doc/stable_slots_plan.md §11
 - Commit messages: write in ENGLISH — user reacted negatively ("我靠提交怎么都是中文？") to Chinese-language commits; history left as-is by their choice, but new commits should use English natural language (Conventional Commit types/scopes unchanged).
-- Nopa 改名定案（用户纠正）：库文件名保留全称 libnopa.a / libnopafoundation.a，绝不缩写为 libnp*；头 .nh、实现 .np；编译器 nopac；NP- 类前缀不变。
-- nopa-lang KVC 包装 getter 发射铁律：仅返回类型=内建标量（NPNumber 装箱）或 id/instancetype/指向非内建类型的指针（对象路径）才发条目；按值 struct（NPRange）与指向内建的指针（int */char */void *）必须跳过——前者 (id) 转换非法、后者把指针当 int 装箱（-Wint-conversion）。且 NPArray.nh/NPSet.nh 导入 NPPredicate.nh 会传递性打开所有 import 它们的 TU 的 KVC 门控，改动后必须复跑 tests/ 全量基线。
-- nopa 中 `self` 是保留关键字：在普通 static C 函数里用 `self` 当局部变量名会生成 C 错误 `use of undeclared identifier 'self'`，必须改名（如 subject）。
-- nopa-lang 泛型协议约束（T : Proto）已实现：checker 两挂载点（check_decl Variable 臂实例化检查 + 单元级继承重申/弱化检查）；关键坑——binder 原本不把 @interface 的 <> 协议列表写入类符号 protocols 字段（曾无消费方），checker 靠符号表判合规会全量误报，已在 binder ClassInterface 臂补写（协议名预解析防 E0502 借用冲突）。设计定稿 doc/generic_bounds_plan.md；bound 零 codegen，golden 逐字节不变。
-- nopa-lang checker selector 可见性检查是 warning 不是 error（伞头下 Foundation 源内 15 处 receiver 误解析误报所致，error 会打崩基线）；未声明 selector 的程序仍会运行期 NULL 槽 segv，已记 ROADMAP「Checker known limitations」。
-- nopa-lang categories/协议跨 TU 方案已定稿未实施：doc/categories_protocol_plan.md，核心 = 弱符号 vtable 槽（链接器当运行时，等价 ObjC attachCategories）+ 备胎强 extern（取决于探针 P1 弱未定义取址是否为 NULL）；D1-D6 决策 + P0-P4 探针先行，实施时按文档四阶段走。
-- nopa-lang golden 46 目录名是 `tests/golden/46_generic_bounds(T : Proto)`（含括号和空格），shell 引用必须加引号；漏引会 rc=1 "No such file or directory" 假失败（本会话踩过两次）。
+- Nepa 改名定案（用户纠正）：库文件名保留全称 libnepa.a / libnepafoundation.a，绝不缩写为 libnp*；头 .nh、实现 .np；编译器 nepac；NP- 类前缀不变。
+- nepa-lang KVC 包装 getter 发射铁律：仅返回类型=内建标量（NPNumber 装箱）或 id/instancetype/指向非内建类型的指针（对象路径）才发条目；按值 struct（NPRange）与指向内建的指针（int */char */void *）必须跳过——前者 (id) 转换非法、后者把指针当 int 装箱（-Wint-conversion）。且 NPArray.nh/NPSet.nh 导入 NPPredicate.nh 会传递性打开所有 import 它们的 TU 的 KVC 门控，改动后必须复跑 tests/ 全量基线。
+- nepa 中 `self` 是保留关键字：在普通 static C 函数里用 `self` 当局部变量名会生成 C 错误 `use of undeclared identifier 'self'`，必须改名（如 subject）。
+- nepa-lang 泛型协议约束（T : Proto）已实现：checker 两挂载点（check_decl Variable 臂实例化检查 + 单元级继承重申/弱化检查）；关键坑——binder 原本不把 @interface 的 <> 协议列表写入类符号 protocols 字段（曾无消费方），checker 靠符号表判合规会全量误报，已在 binder ClassInterface 臂补写（协议名预解析防 E0502 借用冲突）。设计定稿 doc/generic_bounds_plan.md；bound 零 codegen，golden 逐字节不变。
+- nepa-lang categories/协议跨 TU 方案已定稿未实施：doc/categories_protocol_plan.md，核心 = 弱符号 vtable 槽（链接器当运行时，等价 ObjC attachCategories）+ 备胎强 extern（取决于探针 P1 弱未定义取址是否为 NULL）；D1-D6 决策 + P0-P4 探针先行，实施时按文档四阶段走。
+- nepa-lang golden 46 目录名是 `tests/golden/46_generic_bounds(T : Proto)`（含括号和空格），shell 引用必须加引号；漏引会 rc=1 "No such file or directory" 假失败（本会话踩过两次）。
+- nepa-lang selector 可见性检查已升为用户源 error，三豁免门（checker lib.rs is_vtable_exempt_selector 附近）：Foundation 源静默 + is_vtable_exempt_selector（respondsToSelector: 与 init/copy/mutableCopy/retain/release/autorelease/dealloc/class/description——这些不走红 receiver 自身 vtable 槽）+ method_param_decls 全声明表含该 selector（TU 内任意类声明过 = uniform vtable 有槽，跨类守卫式发送是既有习语）；@property 合成访问器登记进 per-class 表时不得加 ivar 存在守卫（@synthesize 的 _ivar 在 ivars 里但访问器照发，加了守卫 tt.np 出 7 误报）
+- nepa-lang 泛型类方法返回 ABI 探针定案（probes/genret/）：单 TU 全通——g1 双实例化特化 vtable cast 各自正确（NPString*/NPNumber*）、g3 fn-ptr 流转、g4 ARC 返回无多余释放；跨 TU 两种断法——lib TU 未提及实例化→链接期 undefined 专用符号（Factory_NPString_ptr_make），仅变量声明提及→特化 vtable 形状与 client 分歧→启动 __sig 大声 abort（R3 兜底，未静默错派发）；类+实例同名 selector 混发 checker 拒绝且非泛型同样拒绝（g5c 对照）→ 保守设计非泛型 bug；ROADMAP 已改为单TU[x]/跨TU[ ] 两条

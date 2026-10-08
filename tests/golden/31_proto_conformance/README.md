@@ -9,7 +9,7 @@
 `.out` 是程序 stdout 快照。`test_all.py` 只校验退出码（不比对 `.out`），输出有变化时需同步更新快照。
 
 ```bash
-./target/debug/nopac run tests/golden/31_proto_conformance/proto_conformance_test.np
+./target/debug/nepac run tests/golden/31_proto_conformance/proto_conformance_test.np
 ```
 
 ## 行为
@@ -53,7 +53,7 @@ required method 'draw' from protocol 'Drawable'
 `tests/negative/` 已在 `test_all.py` 的 glob 中排除（`"negative" not in p.parts`），避免被当作普通 FAIL。验证方式：
 
 ```bash
-./target/debug/nopac run tests/negative/proto_missing_method.np   # 期望非 0 退出 + 上述错误信息
+./target/debug/nepac run tests/negative/proto_missing_method.np   # 期望非 0 退出 + 上述错误信息
 ```
 
 ## 实现要点

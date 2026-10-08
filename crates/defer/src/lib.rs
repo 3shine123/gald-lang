@@ -35,7 +35,7 @@
 //!
 //! Codegen sees ordinary statements afterwards; zero codegen changes.
 
-use nopa_ast::ast::*;
+use nepa_ast::ast::*;
 
 pub struct DeferDiagnostics {
     pub errors: Vec<String>,

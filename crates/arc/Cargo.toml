@@ -1,10 +1,10 @@
 [package]
-name = "nopa-arc"
+name = "nepa-arc"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-nopa-ast = { path = "../ast" }
-nopa-cfg = { path = "../cfg" }
-nopa-ownership = { path = "../ownership" }
-nopa-cst = { path = "../cst" }
+nepa-ast = { path = "../ast" }
+nepa-cfg = { path = "../cfg" }
+nepa-ownership = { path = "../ownership" }
+nepa-cst = { path = "../cst" }

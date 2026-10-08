@@ -1,10 +1,10 @@
 // gcc_stress.np — 极端的 GCC 编译器扩展压测（可运行子集）。
-// 只使用 nopac 语法分析器已完整支持的构造；解析器缺口见 gcc_torture.np。
-// 运行：nopac -rewrite-nopa -backend gcc gcc_stress.np -o /tmp/gcc_stress.c
-//       gcc -I include -o /tmp/gcc_stress /tmp/gcc_stress.c include/nopa/runtime.c
+// 只使用 nepac 语法分析器已完整支持的构造；解析器缺口见 gcc_torture.np。
+// 运行：nepac -rewrite-nepa -backend gcc gcc_stress.np -o /tmp/gcc_stress.c
+//       gcc -I include -o /tmp/gcc_stress /tmp/gcc_stress.c include/nepa/runtime.c
 //       /tmp/gcc_stress
 // 注：本机无真 gcc，用 clang 做 C 编译（gcc-only 属性大多被 clang 容忍为 no-op）；
-//     属性门禁由 nopac 的 -backend gcc 校验。
+//     属性门禁由 nepac 的 -backend gcc 校验。
 
 #include <stdio.h>
 

@@ -1,20 +1,20 @@
 # System Monitor
 # Run: make run
 
-NOPAC = ../../target/debug/nopac
+NEPAC = ../../target/debug/nepac
 NCURSES = /opt/homebrew/opt/ncurses
 
 all: sysmon
 
 sysmon.c: sysmon.np
-	$(NOPAC) -rewrite-nopa sysmon.np -o sysmon.c -fno-nopa-arc
+	$(NEPAC) -rewrite-nepa sysmon.np -o sysmon.c -fno-nepa-arc
 
 sysmon: sysmon.c
 	clang -std=c99 -fblocks \
 		-I ../../include -I ../../include/Foundation -I ../../include/Terminal \
 		-I $(NCURSES)/include \
 		sysmon.c \
-		../../include/nopa/runtime.c \
+		../../include/nepa/runtime.c \
 		../../include/Terminal/ncurses_mouse.c \
 		../../include/Terminal/sysinfo.c \
 		$(NCURSES)/lib/libncurses.dylib \

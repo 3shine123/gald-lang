@@ -1,5 +1,5 @@
-#include "nopa/parser.h"
-#include "nopa/lexer.h"
+#include "nepa/parser.h"
+#include "nepa/lexer.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -610,7 +610,7 @@ static void test_stmt_throw(void) {
 // ── combined / realistic ───────────────────────────────────────────────────
 
 static void test_realistic_class(void) {
-    TEST("realistic Nopa class with multiple methods");
+    TEST("realistic Nepa class with multiple methods");
     const char *src =
         "@interface MyClass : NSObject <MyProtocol> {\n"
         "    int count;\n"

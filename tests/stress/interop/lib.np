@@ -1,20 +1,20 @@
-// lib.np — library TU for three-way interop: Nopa C + plain C + assembly.
+// lib.np — library TU for three-way interop: Nepa C + plain C + assembly.
 // NO main (library-style; linked into a C host program). Build (build.sh):
-//   nopac -rewrite-nopa lib.np -o lib.c -emit-bridge-header lib.h
+//   nepac -rewrite-nepa lib.np -o lib.c -emit-bridge-header lib.h
 // The C caller (caller.c) includes lib.h and links lib.c + helper.c +
-// asm_lib.s + runtime.c. Caller's main() must call nopa_metaInit() first.
+// asm_lib.s + runtime.c. Caller's main() must call nepa_metaInit() first.
 
 // real ARM64 assembly (asm_lib.s)
 extern int asm_square(int v);
 extern int asm_add3(int a, int b, int c);
 
-// plain C (helper.c) — nopa calls INTO C
+// plain C (helper.c) — nepa calls INTO C
 extern int c_helper_mul(int a, int b);
 
 typedef int (^IntBin)(int, int);
 
 // ── a plain function the C side can call through the bridge ──
-int nopa_add(int a, int b) {
+int nepa_add(int a, int b) {
     return a + b + asm_add3(0, 0, 0) * 0;   // asm linked in, folded here
 }
 

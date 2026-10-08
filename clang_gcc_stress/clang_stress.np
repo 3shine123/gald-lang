@@ -1,7 +1,7 @@
 // clang_stress.np — 极端的 Clang 编译器扩展压测（可运行子集）。
-// 只使用 nopac 语法分析器已完整支持的构造；解析器缺口见 clang_torture.np。
-// 运行：nopac -rewrite-nopa -backend clang clang_stress.np -o /tmp/clang_stress.c
-//       clang -I include -o /tmp/clang_stress /tmp/clang_stress.c include/nopa/runtime.c
+// 只使用 nepac 语法分析器已完整支持的构造；解析器缺口见 clang_torture.np。
+// 运行：nepac -rewrite-nepa -backend clang clang_stress.np -o /tmp/clang_stress.c
+//       clang -I include -o /tmp/clang_stress /tmp/clang_stress.c include/nepa/runtime.c
 //       /tmp/clang_stress
 
 #include <stdio.h>

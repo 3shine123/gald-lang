@@ -1,0 +1,8 @@
+#import <Foundation/Foundation.nh>
+#import "dog.nh"
+int main(void) {
+    Dog *d = [[Dog alloc] init];
+    int n = [d trickCount];
+    NPLog(@"tricks=%d", n);
+    return 0;
+}

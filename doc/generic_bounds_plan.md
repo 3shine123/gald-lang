@@ -3,12 +3,12 @@
 > 状态：设计定稿，未实现。探针（`probes/probe_generic_bound*.np`）证实现状：
 > parser 在 `T :` 处报 `expected '>' after type params`——bound 语法完全不存在。
 > 本规划对齐 ObjC lightweight generics（clang 3.7，有语法无强制）并升级为
-> **编译期强制**——nopa 单态化的实例化点是天然检查点，ObjC 做不到的这里做得到。
+> **编译期强制**——nepa 单态化的实例化点是天然检查点，ObjC 做不到的这里做得到。
 
 ## 1. 语法
 
-```nopa
-// bound = 协议名（裸用，不加 id<> —— nopa 协议类型本就是编译期标签）
+```nepa
+// bound = 协议名（裸用，不加 id<> —— nepa 协议类型本就是编译期标签）
 @interface Box<T : Greetable> : NPObject {
     T _value;
 }
@@ -25,7 +25,7 @@
 决策记录：
 
 - **接受 ObjC 拼写 `T : id<Summable>`，剥掉 `id<>` 后按裸协议名存储**。
-  设计原则：ObjC 程序员写 nopa 必须零词典成本——nopa 的生存策略是「ObjC
+  设计原则：ObjC 程序员写 nepa 必须零词典成本——nepa 的生存策略是「ObjC
   语义 + 静态实现」，拼写偏离 ObjC 等于给迁移者加税。同时**也接受裸协议名
   `T : Summable`**（更简洁的本地习惯拼写）；两种拼法等价，存储与诊断统一
   用裸名。类指针 bound（`T : NSObject *`）同样接受，验证规则见 §3。
@@ -49,7 +49,7 @@
 
 唯一需要触发的位置是**显式特化的实例化点**：
 
-```nopa
+```nepa
 Box<NPString *> *b = ...;    // 检查：NPString 声明了 <Greetable>？
 Box<id> *e = ...;            // 放行（逃逸通道，见下）
 Box *bare = ...;             // 裸拼写：无 type_args，不触发（擦除兼容）

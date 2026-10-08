@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-__asm__(".section .note.nopa_asm, \"a\"");
+__asm__(".section .note.nepa_asm, \"a\"");
 
 int main() {
     // Basic asm

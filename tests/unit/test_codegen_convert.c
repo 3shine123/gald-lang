@@ -1,6 +1,6 @@
-#include "nopa/codegen.h"
-#include "nopa/ast.h"
-#include "nopa/symbol.h"
+#include "nepa/codegen.h"
+#include "nepa/ast.h"
+#include "nepa/symbol.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -16,7 +16,7 @@ static symbol_t *make_func(const char *name) {
     symbol_t *s = sym_alloc(SYM_FUNCTION, name);
     s->data.func.return_type = np_type_from_cst(NULL);
     if (!s->data.func.return_type) {
-        s->data.func.return_type = calloc(1, sizeof(nopa_type_t));
+        s->data.func.return_type = calloc(1, sizeof(nepa_type_t));
     }
     s->data.func.return_type->prim = TYPE_VOID;
     return s;

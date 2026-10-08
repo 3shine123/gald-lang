@@ -1,9 +1,9 @@
 [package]
-name = "nopa-trace"
+name = "nepa-trace"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-nopa-ast = { path = "../ast" }
-nopa-ownership = { path = "../ownership" }
-nopa-cst = { path = "../cst" }
+nepa-ast = { path = "../ast" }
+nepa-ownership = { path = "../ownership" }
+nepa-cst = { path = "../cst" }

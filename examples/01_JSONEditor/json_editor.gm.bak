@@ -1,5 +1,5 @@
-// json_editor.np — Nopa 全特性 JSON 编辑器
-// 编译: nopac run tests/JSONEditor/json_editor.np -fno-nopa-arc
+// json_editor.np — Nepa 全特性 JSON 编辑器
+// 编译: nepac run tests/JSONEditor/json_editor.np -fno-nepa-arc
 // 特性覆盖: @protocol, @interface, @implementation, @property, @synthesize,
 //           @namespace, 继承, @category, 泛型<T>, Block, @selector,
 //           @try/@catch/@throw, @autoreleasepool, @public weak, instancetype
@@ -907,7 +907,7 @@ static int read_line(char *buf, int size) {
 // ============================================================================
 int main(int argc, const char *argv[]) {
     @autoreleasepool {
-        printf("═══ Nopa Full Feature Demo ═══\n\n");
+        printf("═══ Nepa Full Feature Demo ═══\n\n");
         printf("Features:\n");
         printf("  @namespace JSON { ... } — 7 classes\n");
         printf("  @protocol Value — polymorphic dispatch\n");

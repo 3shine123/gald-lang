@@ -1,13 +1,13 @@
-#ifndef NOPA_RUNTIME_H
-#define NOPA_RUNTIME_H
+#ifndef NEPA_RUNTIME_H
+#define NEPA_RUNTIME_H
 
 /*
- * Nopa runtime header.
+ * Nepa runtime header.
  *
  * Two modes:
  *   default               — host/OS mode: pulls in libc <setjmp.h>/<stdarg.h>,
  *                           exception state is thread-local (__thread).
- *   __NOPA_FREESTANDING   — bare-metal mode (set by `nopac -fno-libc`):
+ *   __NEPA_FREESTANDING   — bare-metal mode (set by `nepac -fno-libc`):
  *                           no libc headers; setjmp/longjmp map to Clang
  *                           builtins; exception state is plain globals
  *                           (single-core assumption). The user supplies
@@ -18,7 +18,7 @@
 #include <stddef.h>
 #include <stdbool.h>
 
-#ifdef __NOPA_FREESTANDING
+#ifdef __NEPA_FREESTANDING
 typedef void *jmp_buf[16];
 #define setjmp(env)         __builtin_setjmp(env)
 #define longjmp(env, val)   __builtin_longjmp((env), (val))
@@ -40,15 +40,15 @@ typedef struct {
 } SEL;
 
 typedef struct NPClass NPClass;
-typedef struct nopa_root nopa_root;
+typedef struct nepa_root nepa_root;
 typedef struct NPObject NPObject;
 typedef struct NPString NPString;
 typedef NPObject *id;
-typedef NPObject *nopa_id_t;
+typedef NPObject *nepa_id_t;
 
-/* Always declared: the transpiler's nopa_metaInit() references it.
+/* Always declared: the transpiler's nepa_metaInit() references it.
  * Definition comes from the user (freestanding) or Foundation (host). */
-extern NPClass NOPA_CLASS_$_nopa_root;
+extern NPClass NEPA_CLASS_$_nepa_root;
 
 /* memcpy is used by the @try/@catch @finally jmp_buf save/restore
  * (the generated code always calls memcpy for nesting save/restore).
@@ -57,17 +57,17 @@ extern NPClass NOPA_CLASS_$_nopa_root;
 void *memcpy(void *dst, const void *src, size_t n);
 #endif
 
-#ifdef __NOPA_FREESTANDING
+#ifdef __NEPA_FREESTANDING
 
-#ifndef NOPA_ROOT_DEFINED
-#define NOPA_ROOT_DEFINED
-struct nopa_root {
+#ifndef NEPA_ROOT_DEFINED
+#define NEPA_ROOT_DEFINED
+struct nepa_root {
     struct NPClass *isa;
     uint32_t retain_count;
 };
 #endif
 
-#endif /* end of __NOPA_FREESTANDING guarded structs */
+#endif /* end of __NEPA_FREESTANDING guarded structs */
 
 #ifndef NPOBJECT_DEFINED
 #define NPOBJECT_DEFINED
@@ -78,20 +78,20 @@ struct NPObject {
 #endif
 
 /* Key-value-coding accessor table for this class (NPPredicate support).
- * Emitted by codegen as the static array NOPA_KVC_$_<Class> when the TU can
+ * Emitted by codegen as the static array NEPA_KVC_$_<Class> when the TU can
  * see the NPPredicate declaration; the last entry's key is NULL (sentinel).
- * NULL on classes compiled without KVC emission — nopa_kvc_lookup skips
+ * NULL on classes compiled without KVC emission — nepa_kvc_lookup skips
  * those levels and walks on to the superclass. Appended last: existing
  * designated-initializer metadata (`.field = ...`) leaves it NULL. */
 /* Key-value-coding accessor table entry (NPPredicate support).
- * Emitted by codegen as the static array NOPA_KVC_$_<Class> when the TU can
+ * Emitted by codegen as the static array NEPA_KVC_$_<Class> when the TU can
  * see the NPPredicate declaration; the last entry's key is NULL (sentinel).
  * The getter wraps an ordinary static vtable dispatch and returns a boxed
  * result (scalars become NPNumber), so the engine needs no reflection. */
-typedef struct nopa_kvc_entry {
+typedef struct nepa_kvc_entry {
     const char *key;            /* NULL marks the sentinel end */
     id (*get)(id self);
-} nopa_kvc_entry;
+} nepa_kvc_entry;
 
 struct NPClass {
     const char *name;
@@ -101,14 +101,14 @@ struct NPClass {
     void *class_vtable;
     struct NPProtocol **protocols;
     int protocol_count;
-    /* Populated by nopa_metaInit() (codegen). nopa_release() calls it when the
+    /* Populated by nepa_metaInit() (codegen). nepa_release() calls it when the
      * retain count reaches 0, so per-class dealloc cleanup (free-ing ivars)
      * actually runs. NULL if the class defines no instance dealloc. */
     void (*dealloc)(NPObject *, SEL);
     /* KVC: key → getter (id (*)(id)). Compiled-time table, no reflection:
      * a key lookup walks the isa chain comparing key strings, then calls
      * the getter — which is an ordinary static vtable dispatch inside. */
-    const struct nopa_kvc_entry *kvc_entries;
+    const struct nepa_kvc_entry *kvc_entries;
 };
 
 // ─── Protocol types ──────────────────────────────────────────────────────────
@@ -127,6 +127,15 @@ struct NPProtocol {
     NPProtocolMethod *optional_methods;
     int optional_count;
 };
+
+/* Protocol conformance query (D5.2, doc/categories_protocol_plan.md): walks
+   the class chain AND each class's protocol list (parents recursively),
+   comparing selector-name coverage of `proto`'s required methods against
+   the classes' vtables is NOT possible here (no selector → slot map), so
+   conformance is metadata-based: proto identity/name match or required-method
+   subset check against the class's protocol graph. NULL-safe: any argument
+   NULL → 0. */
+int nepa_class_conformsToProtocol(NPClass *cls, struct NPProtocol *proto);
 
 // ─── Internal types (for runtime implementation) ────────────────────────────────
 
@@ -156,88 +165,88 @@ struct np_object {
 
 SEL sel_registerName(const char *name);
 
-/* Class-metadata initialization. The transpiler emits `nopa_metaInit()` at the
+/* Class-metadata initialization. The transpiler emits `nepa_metaInit()` at the
  * top of every `main` and declares it in generated C; every other symbol in this
  * header is snake_case, so hand-written host code naturally reaches for
- * `nopa_meta_init()` and hits an implicit-declaration error. This alias accepts
+ * `nepa_meta_init()` and hits an implicit-declaration error. This alias accepts
  * that spelling. The target is defined by the generated C (weak, so exactly one
  * TU's copy wins the link); it is not declared here because a declaration would
  * force every TU — including ones with no classes — to define it. */
-void nopa_meta_init(void);
+void nepa_meta_init(void);
 
 /* Memory allocator (user-provided in freestanding; libc calloc/free on host).
- * nopa_malloc must zero-initialize memory. */
-void *nopa_malloc(size_t size);
-void  nopa_free(void *ptr);
+ * nepa_malloc must zero-initialize memory. */
+void *nepa_malloc(size_t size);
+void  nepa_free(void *ptr);
 
-NPObject *nopa_alloc(NPClass *cls);
-NPObject *nopa_init(NPObject *self);
+NPObject *nepa_alloc(NPClass *cls);
+NPObject *nepa_init(NPObject *self);
 
 // Exception globals (TLS for thread safety; plain globals in freestanding)
-#ifdef __NOPA_FREESTANDING
-extern jmp_buf __nopa_exception_buf;
-extern id     __nopa_exception_value;
+#ifdef __NEPA_FREESTANDING
+extern jmp_buf __nepa_exception_buf;
+extern id     __nepa_exception_value;
 #else
-extern __thread jmp_buf __nopa_exception_buf;
-extern __thread id     __nopa_exception_value;
+extern __thread jmp_buf __nepa_exception_buf;
+extern __thread id     __nepa_exception_value;
 #endif
 
 // Checked-exception (-eh checked) error flag: 1 while an error propagates.
-// Set by desugared `@throw`, cleared by the matching `@catch`; every nopa
+// Set by desugared `@throw`, cleared by the matching `@catch`; every nepa
 // call site checks it and early-returns to propagate. Same TLS/freestanding
 // split as the sjlj exception state above.
-#ifdef __NOPA_FREESTANDING
-extern int  __nopa_eh_flag;
-extern id   __nopa_eh_val;
+#ifdef __NEPA_FREESTANDING
+extern int  __nepa_eh_flag;
+extern id   __nepa_eh_val;
 #else
-extern __thread int  __nopa_eh_flag;
-extern __thread id   __nopa_eh_val;
+extern __thread int  __nepa_eh_flag;
+extern __thread id   __nepa_eh_val;
 #endif
 /* Isa check for typed catches: 1 when obj's isa chain matches cls.
- * NULL obj never matches. The desugar passes &NOPA_CLASS_$_<Flat> for the
+ * NULL obj never matches. The desugar passes &NEPA_CLASS_$_<Flat> for the
  * catch type (codegen emits the extern declaration in the same TU). */
-int __nopa_eh_isa(NPObject *obj, NPClass *cls);
+int __nepa_eh_isa(NPObject *obj, NPClass *cls);
 /* Uncaught checked exception escaped main: print ObjC wording + abort().
  * Called by main's function-tail guard (desugar) instead of `return zero`. */
-void nopa_eh_uncaught(void);
+void nepa_eh_uncaught(void);
 
-NPObject *nopa_retain(NPObject *obj);
-void nopa_release(NPObject *obj);
-NPObject *nopa_autorelease(NPObject *obj);
-BOOL nopa_isKindOf(NPObject *obj, NPClass *cls);
-/* Official ObjC spelling of nopa_isKindOf (same isa-chain walk). */
-BOOL nopa_isKindOfClass(NPObject *obj, NPClass *cls);
+NPObject *nepa_retain(NPObject *obj);
+void nepa_release(NPObject *obj);
+NPObject *nepa_autorelease(NPObject *obj);
+BOOL nepa_isKindOf(NPObject *obj, NPClass *cls);
+/* Official ObjC spelling of nepa_isKindOf (same isa-chain walk). */
+BOOL nepa_isKindOfClass(NPObject *obj, NPClass *cls);
 
 /* KVC lookup: walk obj's isa chain, scan each class's kvc_entries table for
  * `key`, call the getter. NULL when no class in the chain declares the key
  * (the caller — valueForKey: / the predicate engine — reports the error).
  * Lives here so the NPPredicate engine (Foundation) and a direct valueForKey:
  * call share one implementation. */
-id nopa_kvc_value(id obj, const char *key);
+id nepa_kvc_value(id obj, const char *key);
 
 // ─── Autorelease pool API ────────────────────────────────────────────────────────
 
-typedef struct nopa_autoreleasepool nopa_autoreleasepool_t;
-nopa_autoreleasepool_t *nopa_autoreleasepoolPush(void);
-void nopa_autoreleasepoolPop(nopa_autoreleasepool_t *pool);
+typedef struct nepa_autoreleasepool nepa_autoreleasepool_t;
+nepa_autoreleasepool_t *nepa_autoreleasepoolPush(void);
+void nepa_autoreleasepoolPop(nepa_autoreleasepool_t *pool);
 
 // ─── Async task API (route map item #4) ─────────────────────────────────────
 
 /* A cooperative async task. The desugared async method is a state machine:
  * each `await` splits the body into a segment stored in one switch state.
- * The generated method body creates a task, pumps nopa_task_resume until the
+ * The generated method body creates a task, pumps nepa_task_resume until the
  * state machine finishes (single-threaded cooperative scheduling: pumping
  * always makes progress), and reads the result from the frame. */
 typedef struct NPTask NPTask;
 
 /* State-machine entry written by the desugar pass.
  * Returns 0 = suspended at an await, 1 = finished. */
-typedef int (*nopa_task_entry_fn)(NPTask *task);
+typedef int (*nepa_task_entry_fn)(NPTask *task);
 
 struct NPTask {
     int state;                          /* current state-machine state */
     int finished;                       /* 0 = running/suspended, 1 = done */
-    nopa_task_entry_fn entry;           /* state machine body */
+    nepa_task_entry_fn entry;           /* state machine body */
     NPObject *self_obj;                 /* receiver the method runs on */
     void *frame;                        /* lifted locals (per-method struct) */
     void *result;                       /* return value slot (caller casts) */
@@ -246,17 +255,17 @@ struct NPTask {
 
 /* Create a task. `frame_size` is the size of the method's lifted-locals
  * struct; the frame is zero-initialized and owned by the task. */
-NPTask *nopa_task_create(nopa_task_entry_fn entry, NPObject *self_obj, size_t frame_size);
+NPTask *nepa_task_create(nepa_task_entry_fn entry, NPObject *self_obj, size_t frame_size);
 
 /* Run the state machine until it suspends (return 0) or finishes (return 1). */
-int nopa_task_resume(NPTask *task);
+int nepa_task_resume(NPTask *task);
 
 /* Pump the task to completion (cooperative single-thread scheduling) and
  * free it. Returns the task's result slot value. */
-void *nopa_task_join(NPTask *task);
+void *nepa_task_join(NPTask *task);
 
 /* Mark the task finished (called by the state machine's final state). */
-void nopa_task_finish(NPTask *task);
+void nepa_task_finish(NPTask *task);
 
 // ─── Internal API (for runtime implementation) ───────────────────────────────────
 
@@ -271,7 +280,7 @@ void np_object_dealloc(np_object_t *obj);
 // ─── Logging (like NSLog / NSObjCRuntime.h) ───────────────────────────────────
 
 void NPLog(NPString *format, ...);
-#ifndef __NOPA_FREESTANDING
+#ifndef __NEPA_FREESTANDING
 void __NPLogv(NPString *format, va_list args);
 #endif
 
@@ -288,20 +297,20 @@ void _Block_release(const void *aBlock);
 
 // ─── Weak reference API ─────────────────────────────────────────────────────────
 
-void nopa_weakRegister(NPObject **weak_loc, NPObject *target);
-void nopa_weakUnregister(NPObject **weak_loc);
-void nopa_weakClearAll(NPObject *target);
+void nepa_weakRegister(NPObject **weak_loc, NPObject *target);
+void nepa_weakUnregister(NPObject **weak_loc);
+void nepa_weakClearAll(NPObject *target);
 
 // ─── String literals ──────────────────────────────────────────────────────────
 
-NPObject *nopa_stringFromCstr(const char *cstr);
-void nopa_weakAutoCleanup(void *ptr);
+NPObject *nepa_stringFromCstr(const char *cstr);
+void nepa_weakAutoCleanup(void *ptr);
 
 // ─── @synchronized monitors ──────────────────────────────────────────────────
 //
 // Per-object lock table keyed by object address (FNV-1a into a fixed bucket
-// array). `nopa_syncLock` spins until the bucket's atomic flag is acquired and
-// returns the bucket index to hand to `nopa_syncUnlock`; the generated code
+// array). `nepa_syncLock` spins until the bucket's atomic flag is acquired and
+// returns the bucket index to hand to `nepa_syncUnlock`; the generated code
 // holds it in a `long` whose cleanup attribute releases the lock on every
 // scope exit (return/break/continue included — `longjmp` past the scope is
 // the one exit the attribute cannot see, so the checker warns on `@throw`
@@ -311,9 +320,9 @@ void nopa_weakAutoCleanup(void *ptr);
 // exclusion. Freestanding builds keep the API (single-core: lock/unlock are
 // no-ops) so transpiled code compiles unchanged.
 
-long nopa_syncLock(void *object);
-void nopa_syncUnlock(long bucket);
-void nopa_syncAutoCleanup(void *ptr);   // cleanup attr: long* → unlock
+long nepa_syncLock(void *object);
+void nepa_syncUnlock(long bucket);
+void nepa_syncAutoCleanup(void *ptr);   // cleanup attr: long* → unlock
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
 
@@ -322,4 +331,4 @@ void nopa_syncAutoCleanup(void *ptr);   // cleanup attr: long* → unlock
 #define NP_CLASS_SUPER(cls)       ((cls)->superclass)
 #define NP_VTABLE_LOOKUP(obj, idx)  ((obj)->isa->vtable->methods[(idx)])
 
-#endif /* NOPA_OBJECT_H */
+#endif /* NEPA_OBJECT_H */

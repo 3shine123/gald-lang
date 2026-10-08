@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
-#include <nopa/runtime.h>
+#include <nepa/runtime.h>
 #include "kernel.h"
 
 /* ================= freestanding libc bits ================= */
@@ -357,7 +357,7 @@ void kprintf(const char *fmt, ...) {
     va_end(ap);
 }
 
-/* ================= Nopa module exports ================= */
+/* ================= Nepa module exports ================= */
 
 void soma_core_boot(void);
 void soma_io_wait(void);
@@ -367,31 +367,31 @@ unsigned int soma_xorshift(unsigned int seed);
 unsigned int soma_fnv1a(const char *s);
 unsigned int soma_rotl(unsigned int v, int sh);
 
-/* Nopa @namespace SomaCore + @interface Calculator (implicit root class) */
+/* Nepa @namespace SomaCore + @interface Calculator (implicit root class) */
 struct SomaCore__Calculator {
     struct NPClass *isa;
     uint32_t retain_count;
     int total;
 };
-extern NPClass nopa_SomaCore__Calculator_class;
-extern void nopa_meta_init(void);
+extern NPClass nepa_SomaCore__Calculator_class;
+extern void nepa_meta_init(void);
 void soma_class_demo(void);
 void soma_instance_demo(struct SomaCore__Calculator *acc);
 
-/* Nopa @interface NPIoError — exception object for @try/@catch */
+/* Nepa @interface NPIoError — exception object for @try/@catch */
 struct SomaCore__NPIoError {
     struct NPClass *isa;
     uint32_t retain_count;
     int code;
 };
-extern NPClass nopa_SomaCore__NPIoError_class;
+extern NPClass nepa_SomaCore__NPIoError_class;
 void soma_exc_demo(id err);
 void soma_heap_demo(void);
 void soma_advanced_demo(void);
 void soma_kbd_demo(void);
 
-/* Runtime globals (nopa___nopa_root_class, __nopa_exception_buf,
- * __nopa_exception_value, memcpy) are provided by runtime_freestanding.c. */
+/* Runtime globals (nepa___nepa_root_class, __nepa_exception_buf,
+ * __nepa_exception_value, memcpy) are provided by runtime_freestanding.c. */
 void kmain(void) {
     extern volatile uint32_t tick;
 
@@ -402,26 +402,26 @@ void kmain(void) {
     pit_init(100);
 
     kputs("\n=== SOMA KERNEL (i686, 32-bit protected mode) ===\n");
-    kputs("built: clang + nasm + nopac transpile, ran under qemu-system-i386\n");
+    kputs("built: clang + nasm + nepac transpile, ran under qemu-system-i386\n");
 
-    /* Nopa -> C : the Nopa module prints via kputs/kputdec/kputhex */
+    /* Nepa -> C : the Nepa module prints via kputs/kputdec/kputhex */
     soma_core_boot();
 
-    /* Nopa advanced features: @namespace + @interface (implicit root class).
-     * nopa_meta_init() (emitted weak by the transpiler) fills in class
+    /* Nepa advanced features: @namespace + @interface (implicit root class).
+     * nepa_meta_init() (emitted weak by the transpiler) fills in class
      * metadata; the implicit root class metadata is defined above. */
-    nopa_meta_init();
+    nepa_meta_init();
     soma_class_demo();
 
     struct SomaCore__Calculator acc;
     memset(&acc, 0, sizeof(acc));
-    acc.isa = &nopa_SomaCore__Calculator_class;   /* hand-built instance */
+    acc.isa = &nepa_SomaCore__Calculator_class;   /* hand-built instance */
     soma_instance_demo(&acc);
 
     /* @try/@catch/@finally on bare metal: throw a hand-built NPIoError */
     struct SomaCore__NPIoError err;
     memset(&err, 0, sizeof(err));
-    err.isa = &nopa_SomaCore__NPIoError_class;
+    err.isa = &nepa_SomaCore__NPIoError_class;
     err.code = 42;
     soma_exc_demo((id)&err);
 
@@ -431,13 +431,13 @@ void kmain(void) {
     /* @protocol + @property + @synthesize + @public ivar access */
     soma_advanced_demo();
 
-    /* C -> Nopa : kernel calls Nopa math functions directly */
-    kprintf("[c] call Nopa: fib(15)=%d gcd(1071,462)=%d\n",
+    /* C -> Nepa : kernel calls Nepa math functions directly */
+    kprintf("[c] call Nepa: fib(15)=%d gcd(1071,462)=%d\n",
             soma_fib(15), soma_gcd(1071, 462));
-    kprintf("[c] call Nopa: rotl(0x12345678,4)=0x%x\n", soma_rotl(0x12345678u, 4));
-    kprintf("[c] call Nopa: fnv1a(\"nopa\")=0x%x\n", soma_fnv1a("nopa"));
+    kprintf("[c] call Nepa: rotl(0x12345678,4)=0x%x\n", soma_rotl(0x12345678u, 4));
+    kprintf("[c] call Nepa: fnv1a(\"nepa\")=0x%x\n", soma_fnv1a("nepa"));
 
-    /* Nopa inline asm io_wait (outb to 0x80) used from C */
+    /* Nepa inline asm io_wait (outb to 0x80) used from C */
     for (int i = 0; i < 16; i++) soma_io_wait();
 
     asm volatile("sti");

@@ -1,7 +1,7 @@
 [package]
-name = "nopa-symbol"
+name = "nepa-symbol"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-nopa-cst = { path = "../cst" }
+nepa-cst = { path = "../cst" }

@@ -5,7 +5,7 @@
 // 预编译库里存一份 —— 也就是 Objective-C 的模型。
 //
 //     #import <Foundation/Foundation.nh>            // 纯声明
-//     nopac app.np -I include -L <libdir> -lnopafoundation -o app
+//     nepac app.np -I include -L <libdir> -lnepafoundation -o app
 //
 // 自包含单 TU 构建（实现内联进每个使用者，无需库）导入实现伞头：
 //
@@ -15,7 +15,7 @@
 #include <stdint.h>
 #include <stddef.h>
 
-#include "nopa/runtime.h"
+#include "nepa/runtime.h"
 
 #import "NPObject.nh"
 #import "NPString.nh"

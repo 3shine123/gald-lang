@@ -5,7 +5,7 @@
 //   marker to `T` + an async_marker flag — pure compile-time metadata: the
 //   emitted C signature is just `T` (verified: `NPAsync` appears 0 times in
 //   the generated C).
-// - Reconciliation (nopa_async::check_unit, pre-desugar):
+// - Reconciliation (nepa_async::check_unit, pre-desugar):
 //     marked + @await    → ok
 //     marked, no @await  → error ("the marker must not lie")
 //     await, unmarked    → warning (-Werror escalates)

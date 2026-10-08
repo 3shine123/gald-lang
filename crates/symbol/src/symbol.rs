@@ -1,4 +1,4 @@
-use nopa_cst::{CstType, TypePrim};
+use nepa_cst::{CstType, TypePrim};
 
 // ─── Symbol kinds ───────────────────────────────────────────────────────────
 

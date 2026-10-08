@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Regenerate the nopa attribute classification table from the official
+"""Regenerate the nepa attribute classification table from the official
 Clang and GCC documentation.
 
 Scrapes:

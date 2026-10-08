@@ -1,12 +1,12 @@
 /* ─────────────────────────────────────────────────────────────────────────
- * Cocoa.np — pure-Nopa AppKit bridge (Apple-only).
+ * Cocoa.np — pure-Nepa AppKit bridge (Apple-only).
  *
- * Nopa is a C superset: we talk to libobjc directly — no .m file, no
+ * Nepa is a C superset: we talk to libobjc directly — no .m file, no
  * framework headers. The whole namespace is guarded by
- * `#if defined(__APPLE__)` (the nopa preprocessor knows __APPLE__, so other
+ * `#if defined(__APPLE__)` (the nepa preprocessor knows __APPLE__, so other
  * platforms compile an empty namespace).
  *
- * Why dlsym: nopa's runtime exports its own `sel_registerName`, which
+ * Why dlsym: nepa's runtime exports its own `sel_registerName`, which
  * shadows libobjc's at link time; and the real objc_msgSend must be handed
  * the *registered* SEL pointer (the runtime uses the pointer value as the
  * cache key), not a name string. So we fetch both entry points from
@@ -24,7 +24,7 @@
     extern void *objc_getClass(const char *name);
 
     /* objc_msgSend, one typed pointer per calling shape. (Note: 'self' is
-     * a keyword in nopa — never use it as a parameter name anywhere.) */
+     * a keyword in nepa — never use it as a parameter name anywhere.) */
     static void *(*nk_msgSend0)(void *target, void *sel) = 0;
     static void *(*nk_msgSendL)(void *target, void *sel, long v) = 0;
     static void *(*nk_msgSendC)(void *target, void *sel, char v) = 0;

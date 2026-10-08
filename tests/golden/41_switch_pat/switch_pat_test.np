@@ -1,6 +1,6 @@
 #import <Foundation/Foundation.np>
 
-// M1 pattern-switch lowering (crate nopa-pattern, Step 3.95).
+// M1 pattern-switch lowering (crate nepa-pattern, Step 3.95).
 // Exercises: Bind arm (isKindOfClass:), object-literal arm (isEqual:),
 // dangling-comparison Cond arm, `default:` body, `break` -> goto end, and a
 // nested loop whose `break` must bind to the loop (not the switch).

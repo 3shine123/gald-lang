@@ -1,22 +1,22 @@
 use std::path::Path;
 use std::fs;
-use nopa_parser::parser::Parser;
-use nopa_binder::Binder;
-use nopa_elaborator::Elaborator;
-use nopa_codegen::{emit_unit_with_headers, emit_bridge_header};
-use nopa_preprocessor::Preprocessor;
-use nopa_symbol::SymbolTable;
-use nopa_ast::ast::*;
-use nopa_cfg::cfg_build;
-use nopa_arc::{arc_local_analyze, arc_global_analyze, arc_analyze_loops, arc_insert_actions, arc_optimize_pairs};
-use nopa_checker::Checker;
-use nopa_trace::{trace_refcounts, TraceOptions};
+use nepa_parser::parser::Parser;
+use nepa_binder::Binder;
+use nepa_elaborator::Elaborator;
+use nepa_codegen::{emit_unit_with_headers, emit_bridge_header};
+use nepa_preprocessor::Preprocessor;
+use nepa_symbol::SymbolTable;
+use nepa_ast::ast::*;
+use nepa_cfg::cfg_build;
+use nepa_arc::{arc_local_analyze, arc_global_analyze, arc_analyze_loops, arc_insert_actions, arc_optimize_pairs};
+use nepa_checker::Checker;
+use nepa_trace::{trace_refcounts, TraceOptions};
 use attrs::{Backend, disposition, AttrDisposition};
 
 /// Default exception backend.
 ///
 /// `true` = `-eh checked`: the explicit flag + guard lowering in `crates/eh`
-/// (each `@throw` arms `__nopa_eh_flag` and returns; every call site that may
+/// (each `@throw` arms `__nepa_eh_flag` and returns; every call site that may
 /// throw is guarded; the function tail propagates). ARC settles every frame on
 /// the way out, so a cross-function throw releases intermediate frames'
 /// owned locals — the sjlj backend's documented limitation.
@@ -123,7 +123,7 @@ impl Pipeline {
             Some(names) => {
                 if self.verbose {
                     eprintln!(
-                        "[nopac] C type table: {} names from {} passthrough header(s)",
+                        "[nepac] C type table: {} names from {} passthrough header(s)",
                         names.len(),
                         pre.c_headers.len()
                     );
@@ -132,7 +132,7 @@ impl Pipeline {
             }
             None => {
                 if self.verbose {
-                    eprintln!("[nopac] C type probe unavailable — using the builtin type list");
+                    eprintln!("[nepac] C type probe unavailable — using the builtin type list");
                 }
                 (Vec::new(), false)
             }
@@ -155,13 +155,13 @@ impl Pipeline {
     }
 
     pub fn transpile(&mut self, source: &str, filename: &str) -> Result<String, String> {
-        // `__NOPA__` is always defined: nopa headers can guard objc-style
-        // syntax behind `#ifdef __NOPA__` so a plain C compiler sees only the
-        // C-compatible subset when the header is used directly (without nopac).
+        // `__NEPA__` is always defined: nepa headers can guard objc-style
+        // syntax behind `#ifdef __NEPA__` so a plain C compiler sees only the
+        // C-compatible subset when the header is used directly (without nepac).
         let extra_macros: &[&str] = match self.backend {
-            attrs::Backend::Clang => &["__clang__", "__GNUC__", "__NOPA__"],
-            attrs::Backend::Gcc => &["__GNUC__", "__NOPA__"],
-            attrs::Backend::Portable => &["__GNUC__", "__NOPA__"],
+            attrs::Backend::Clang => &["__clang__", "__GNUC__", "__NEPA__"],
+            attrs::Backend::Gcc => &["__GNUC__", "__NEPA__"],
+            attrs::Backend::Portable => &["__GNUC__", "__NEPA__"],
         };
         let pre = Preprocessor::process(source, filename, &self.search_dirs, extra_macros)?;
 
@@ -173,9 +173,9 @@ impl Pipeline {
         // not authoritative, and the parser keeps its historical fallbacks.
         let (c_type_names, c_types_complete) = self.c_type_names(&pre, extra_macros, filename);
 
-        // Step 1: Parse the resolved nopa source
-        if self.verbose { eprintln!("[nopac] parsing..."); }
-        let mut parser = Parser::with_c_type_names(&pre.resolved_nopa, &c_type_names, c_types_complete);
+        // Step 1: Parse the resolved nepa source
+        if self.verbose { eprintln!("[nepac] parsing..."); }
+        let mut parser = Parser::with_c_type_names(&pre.resolved_nepa, &c_type_names, c_types_complete);
         // The parser reads one inlined buffer, so it has no `#include` boundary
         // of its own. The line→file map is the only way it can scope an
         // `NP_ASSUME_NONNULL` region to the file that opened it — without this
@@ -192,7 +192,7 @@ impl Pipeline {
         }
 
         // Step 2: Bind names
-        if self.verbose { eprintln!("[nopac] binding names..."); }
+        if self.verbose { eprintln!("[nepac] binding names..."); }
         let symtab = SymbolTable::new();
         let mut binder = Binder::new(symtab);
         if binder.bind(&mut cst) != 0 {
@@ -201,7 +201,7 @@ impl Pipeline {
         }
 
         // Step 3: Elaborate CST → AST
-        if self.verbose { eprintln!("[nopac] elaborating..."); }
+        if self.verbose { eprintln!("[nepac] elaborating..."); }
         let symtab_for_checker = binder.symtab.clone();
         let mut elaborator = Elaborator::new(Some(binder.symtab));
         elaborator.verbose = self.verbose;
@@ -216,14 +216,14 @@ impl Pipeline {
         // ARC already releases for (running it after would reintroduce the
         // sjlj cross-function leak this backend exists to fix).
         if self.eh_checked {
-            if self.verbose { eprintln!("[nopac] eh desugar (checked)..."); }
-            let eh_diags = nopa_eh::check_unit(&ast);
+            if self.verbose { eprintln!("[nepac] eh desugar (checked)..."); }
+            let eh_diags = nepa_eh::check_unit(&ast);
             if !eh_diags.errors.is_empty() {
                 self.has_error = true;
                 self.error_msg = format!("EH check failed:\n{}", prefix_lines("[eh]", &translate_lines(&eh_diags.errors.join("\n"), &pre.source_map)));
                 return Err(self.error_msg.clone());
             }
-            nopa_eh::desugar_unit(&mut ast);
+            nepa_eh::desugar_unit(&mut ast);
         }
 
         // Step 3.9: @defer splicing — AFTER eh desugar (checked-mode throws
@@ -231,8 +231,8 @@ impl Pipeline {
         // releases land after the user's defer statements (deferred code runs
         // while objects are still alive). See AGENTS.md `@defer` section.
         {
-            if self.verbose { eprintln!("[nopac] defer desugar..."); }
-            let defer_diags = nopa_defer::desugar_unit(&mut ast);
+            if self.verbose { eprintln!("[nepac] defer desugar..."); }
+            let defer_diags = nepa_defer::desugar_unit(&mut ast);
             if !defer_diags.errors.is_empty() {
                 self.has_error = true;
                 self.error_msg = format!("Defer check failed:\n{}", prefix_lines("[defer]", &translate_lines(&defer_diags.errors.join("\n"), &pre.source_map)));
@@ -249,8 +249,8 @@ impl Pipeline {
         // it). Runs before ARC so the injected cleanup stays after the finally
         // copy — the finally sees its locals alive.
         if !self.eh_checked {
-            if self.verbose { eprintln!("[nopac] legacy @finally splice..."); }
-            nopa_eh::splice_finally_exits(&mut ast);
+            if self.verbose { eprintln!("[nepac] legacy @finally splice..."); }
+            nepa_eh::splice_finally_exits(&mut ast);
         }
 
         // Step 3.95: Pattern-switch lowering — AFTER defer splicing (defer
@@ -259,12 +259,12 @@ impl Pipeline {
         // ever see plain C statements: If/Decl/Goto/Label — zero new arms
         // downstream). See AGENTS.md pattern-switch section.
         {
-            if self.verbose { eprintln!("[nopac] pattern-switch lowering..."); }
-            nopa_pattern::desugar_unit(&mut ast);
+            if self.verbose { eprintln!("[nepac] pattern-switch lowering..."); }
+            nepa_pattern::desugar_unit(&mut ast);
         }
 
-        // Step 4: ARC analysis (skipped when -fno-nopa-arc is set)
-        if self.verbose { eprintln!("[nopac] ARC analysis..."); }
+        // Step 4: ARC analysis (skipped when -fno-nepa-arc is set)
+        if self.verbose { eprintln!("[nepac] ARC analysis..."); }
         if !self.no_arc {
             for decl in &mut ast.decls {
                 match &mut decl.data {
@@ -328,7 +328,7 @@ impl Pipeline {
 
         // Step 4.5: Reference-count trace (skips codegen entirely)
         if self.trace_refcount {
-            if self.verbose { eprintln!("[nopac] tracing refcounts..."); }
+            if self.verbose { eprintln!("[nepac] tracing refcounts..."); }
             let opts = TraceOptions {
                 max_iters: self.trace_max_iters,
                 color: self.trace_color,
@@ -340,8 +340,8 @@ impl Pipeline {
         // every async method body into the task-driven form (route map item
         // #4). check_unit runs on the ORIGINAL AST; desugar_unit rewrites it
         // in place before ARC/checker see the method bodies.
-        if self.verbose { eprintln!("[nopac] async analysis..."); }
-        let async_diags = nopa_async::check_unit(&ast);
+        if self.verbose { eprintln!("[nepac] async analysis..."); }
+        let async_diags = nepa_async::check_unit(&ast);
         if !async_diags.errors.is_empty() {
             self.has_error = true;
             self.error_msg = format!("Async check failed:\n{}", prefix_lines("[async]", &translate_lines(&async_diags.errors.join("\n"), &pre.source_map)));
@@ -361,10 +361,10 @@ impl Pipeline {
                 eprintln!("\x1b[1;35m[async] warning:\x1b[0m {}", translate_lines(w, &pre.source_map));
             }
         }
-        nopa_async::desugar_unit_m2(&mut ast);
+        nepa_async::desugar_unit_m2(&mut ast);
 
         // Step 5: Check types (skipped when -fno-checker is set)
-        if self.verbose { eprintln!("[nopac] checking types..."); }
+        if self.verbose { eprintln!("[nepac] checking types..."); }
         let mut struct_eq_tags: Vec<String> = Vec::new();
         if !self.no_checker {
             let mut checker = Checker::new(Some(symtab_for_checker));
@@ -390,14 +390,14 @@ impl Pipeline {
         }
 
         // Step 5.5: Validate __attribute__ against backend
-        if self.verbose { eprintln!("[nopac] validating attributes..."); }
+        if self.verbose { eprintln!("[nepac] validating attributes..."); }
         self.validate_attrs(&ast);
         if self.has_error {
             return Err(self.error_msg.clone());
         }
 
         // Step 6: Generate C code
-        if self.verbose { eprintln!("[nopac] generating C code..."); }
+        if self.verbose { eprintln!("[nepac] generating C code..."); }
         // Slots manifest: read the assigned method order (if the file exists)
         // BEFORE codegen, and write the post-compile assignment back after.
         let slots: Option<Vec<String>> = self.slots_manifest.as_ref().and_then(|path| {
@@ -413,18 +413,18 @@ impl Pipeline {
         // R2: the classes this TU owns (its `@implementation`s live in the main
         // file). Their metadata is emitted strong, everyone else's stays weak.
         let owned_classes = collect_owned_classes(&ast, filename, &pre.source_map);
-        let mut cg = nopa_codegen::ast_to_cg_unit_with_slots_ext(
+        let mut cg = nepa_codegen::ast_to_cg_unit_with_slots_ext(
             &ast, self.backend, slots.as_deref(), Some(&public_methods),
         );
         // KVC gate: emit accessor tables only when this TU can see the
-        // NPPredicate declaration (a transitive nopa #import — the same
+        // NPPredicate declaration (a transitive nepa #import — the same
         // resolved-source scan the auto-link decision rests on). The name
         // appears in the inlined buffer exactly when its declaring header
         // was imported; a plain string mention cannot occur otherwise
         // (NPPredicate is not a user-spellable identifier until declared).
-        cg.kvc = pre.resolved_nopa.contains("NPPredicate");
+        cg.kvc = pre.resolved_nepa.contains("NPPredicate");
         // Struct tags whose `==`/`!=` the checker rewrote to value-comparison
-        // calls; codegen emits one field-wise `nopa_struct_eq_<tag>` per tag.
+        // calls; codegen emits one field-wise `nepa_struct_eq_<tag>` per tag.
         cg.struct_eq_tags = struct_eq_tags;
         cg.no_arc = self.no_arc;
         cg.owned_classes = owned_classes;
@@ -444,7 +444,7 @@ impl Pipeline {
 
         // Step 6.5: Generate bridge header (if requested)
         if let Some(ref path) = self.bridge_header {
-            if self.verbose { eprintln!("[nopac] writing bridge header: {}", path); }
+            if self.verbose { eprintln!("[nepac] writing bridge header: {}", path); }
             let bridge = emit_bridge_header(&cg);
             fs::write(path, &bridge)
                 .map_err(|e| format!("cannot write bridge header {}: {}", path, e))?;
@@ -515,7 +515,7 @@ fn prefix_lines(stage: &str, msg: &str) -> String {
 /// line points at the original source file (via the preprocessor's line map)
 /// instead of the flattened inlined buffer. Lines that can't be mapped are
 /// left untouched.
-fn translate_lines(msg: &str, sm: &nopa_cst::source_map::SourceMap) -> String {
+fn translate_lines(msg: &str, sm: &nepa_cst::source_map::SourceMap) -> String {
     if sm.is_empty() { return msg.to_string(); }
     msg.lines().map(|l| {
         // Parse leading `LINE:COL: ` (or `LINE: `)
@@ -563,7 +563,7 @@ fn translate_lines(msg: &str, sm: &nopa_cst::source_map::SourceMap) -> String {
 fn collect_public_methods(
     ast: &AstUnit,
     main_file: &str,
-    map: &nopa_cst::SourceMap,
+    map: &nepa_cst::SourceMap,
 ) -> std::collections::HashSet<String> {
     use std::collections::HashSet;
     let mut set: HashSet<String> = HashSet::new();
@@ -608,18 +608,24 @@ fn collect_public_methods(
 fn collect_owned_classes(
     ast: &AstUnit,
     main_file: &str,
-    map: &nopa_cst::SourceMap,
+    map: &nepa_cst::SourceMap,
 ) -> std::collections::HashSet<String> {
     use std::collections::HashSet;
     fn walk(
         decls: &[AstDecl],
         main_file: &str,
-        map: &nopa_cst::SourceMap,
+        map: &nepa_cst::SourceMap,
         set: &mut HashSet<String>,
     ) {
         for d in decls {
             match &d.data {
                 AstDeclData::Namespace(inner) => walk(inner, main_file, map, set),
+                // A category implementation (`@implementation Dog (Tricks)`)
+                // contributes method definitions only — it must NOT claim
+                // class ownership, or linking owner + category TUs fails with
+                // duplicate metadata symbols (probes/xcat P0). See
+                // doc/categories_protocol_plan.md D1.
+                AstDeclData::Class { is_implementation: true, is_category: true, .. } => {}
                 AstDeclData::Class { is_implementation: true, .. } => {
                     let (file, _) = map.locate(d.line);
                     // Mirror the "imported" test in collect_public_methods, so

@@ -1,5 +1,5 @@
 // lang-test/static_generics_zero_cost_test.np
-// Nopa 语言「编译期单态化泛型与零开销模板展开」全新功能高压压测
+// Nepa 语言「编译期单态化泛型与零开销模板展开」全新功能高压压测
 // 聚焦：泛型类符号隔离、泛型方法精准类型替换、泛型类型别名、三元副作用终极收敛
 
 #include <stdio.h>
@@ -130,14 +130,14 @@ int main(int argc, const char* argv[])
 {
     @autoreleasepool {
         printf("====================================================================\n");
-        printf(">>>    nopac 编译器「零开销单态化泛型与别名融合」全新特性压测     <<<\n");
+        printf(">>>    nepac 编译器「零开销单态化泛型与别名融合」全新特性压测     <<<\n");
         printf("====================================================================\n\n");
 
         // ----------------------------------------------------
         // 测试点 1：实例化第一套泛型特化对象
         printf("--- 1. 实例化单态化泛型类 VectorBuffer<RenderPoint2D*> ---\n");
         
-        // 编译器必须在底层生成专属的 C 结构体符号，例如 struct nopa_VectorBuffer_RenderPoint2D_ptr
+        // 编译器必须在底层生成专属的 C 结构体符号，例如 struct nepa_VectorBuffer_RenderPoint2D_ptr
         VectorBuffer<RenderPoint2D*>* pointBuffer = [[VectorBuffer<RenderPoint2D*> alloc] init];
         
         RenderPoint2D* p1 = [[RenderPoint2D alloc] initWithX:10.5f Y:20.8f];
@@ -161,9 +161,9 @@ int main(int argc, const char* argv[])
         [redColor release];
 
         // ⚠️【静态类型安全边界校验】：
-        // 如果你的泛型做到了真正的“ObjC语法，C++单态化实现”，那么在 Nopa 代码里尝试调用：
+        // 如果你的泛型做到了真正的“ObjC语法，C++单态化实现”，那么在 Nepa 代码里尝试调用：
         // [colorBuffer enqueueElement:p1];
-        // 你的 nopac 编译器应当能在前端语义分析阶段精准拦截，并爆出“类型不匹配”错误，而不是通过 id 擦除任由其混过去！
+        // 你的 nepac 编译器应当能在前端语义分析阶段精准拦截，并爆出“类型不匹配”错误，而不是通过 id 擦除任由其混过去！
 
         // ----------------------------------------------------
         // 测试点 3：使用泛型特化别名指针进行数据流操作

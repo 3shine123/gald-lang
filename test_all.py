@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 """
-nopa test runner — parallel transpile + compile + run with timeout.
+nepa test runner — parallel transpile + compile + run with timeout.
 Usage: python3 test_all.py [-j JOBS]
 
-Environment overrides (useful for cross-platform testing, e.g. a musl nopac
+Environment overrides (useful for cross-platform testing, e.g. a musl nepac
 inside a Linux VM against the repo mounted at /mnt/mac):
-  NOPAC=/path/to/nopac   binary under test (default: target/debug/nopac;
-                         same convention as run_trace_golden.sh's NOPAC=)
-  NOPA_CC="clang ..."    C compiler + flags nopac passes through to the backend
-                         (e.g. extra -I/-L/-l). Leave unset to use nopac's
+  NEPAC=/path/to/nepac   binary under test (default: target/debug/nepac;
+                         same convention as run_trace_golden.sh's NEPAC=)
+  NEPA_CC="clang ..."    C compiler + flags nepac passes through to the backend
+                         (e.g. extra -I/-L/-l). Leave unset to use nepac's
                          built-in selection (clang; zig cc on Windows).
 """
 
@@ -26,9 +26,9 @@ PROJECT = Path(__file__).resolve().parent
 BUILDDIR = PROJECT / "builddir"
 INCLUDE = PROJECT / "include"
 
-# Binary override: NOPAC=/path/to/nopac python3 test_all.py  (e.g. cross-platform
-# testing with a musl binary on Linux VMs; same convention as run_trace_golden.sh's NOPAC=)
-NOPAC = Path(os.environ.get("NOPAC", str(PROJECT / "target" / "debug" / "nopac")))
+# Binary override: NEPAC=/path/to/nepac python3 test_all.py  (e.g. cross-platform
+# testing with a musl binary on Linux VMs; same convention as run_trace_golden.sh's NEPAC=)
+NEPAC = Path(os.environ.get("NEPAC", str(PROJECT / "target" / "debug" / "nepac")))
 RUN_TIMEOUT = 3
 
 # ── Collect test binary names from .np files ──
@@ -73,10 +73,10 @@ for f in GM_FILES:
     stem = f.stem
     TEST_BINS.add(f"/tmp/{stem}")
 
-# ── Cleanup: kill orphaned nopac processes + leftover test binaries on exit ──
+# ── Cleanup: kill orphaned nepac processes + leftover test binaries on exit ──
 def _cleanup():
-    # Kill nopac itself
-    subprocess.run(["pkill", "-f", r"target/(debug|release)/nopac"], capture_output=True)
+    # Kill nepac itself
+    subprocess.run(["pkill", "-f", r"target/(debug|release)/nepac"], capture_output=True)
     # Kill all compiled test binaries (e.g. /tmp/core_fusion, /tmp/tt, …)
     for bin_path in TEST_BINS:
         subprocess.run(["pkill", "-f", f"^{bin_path}($| )"], capture_output=True)
@@ -179,12 +179,12 @@ def _needs_mrc(gm_path: Path) -> bool:
     # Check for manual retain/release/dealloc/autorelease calls
     has_mrc = bool(_re.search(r"\[\w+\s+(retain|release|autorelease|dealloc)\]", stripped))
     # Also check for ARC annotations in the file
-    has_arc_flag = bool(_re.search(r"-fno-nopa-arc", stripped))
+    has_arc_flag = bool(_re.search(r"-fno-nepa-arc", stripped))
     return has_mrc or has_arc_flag
 
 
 def _run_np(cmd: list, gm_path: Path, timeout: int) -> tuple:
-    """Run nopac with the given command, return (stdout, stderr, returncode, timed_out)."""
+    """Run nepac with the given command, return (stdout, stderr, returncode, timed_out)."""
     try:
         proc = subprocess.Popen(
             cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
@@ -219,10 +219,10 @@ def _compile_only(gm_path: Path, asm_args: list[str], inc_args: list[str],
     (interactive programs block on stdin and hit the timeout). Transpile +
     compile + link into a real binary must still succeed; that is the strongest
     verdict reachable without a TTY. Tries ARC first, then MRC (same fallback
-    the runner applies to `nopac run`)."""
-    for extra, label in (([], "ARC"), (["-fno-nopa-arc"], "MRC")):
+    the runner applies to `nepac run`)."""
+    for extra, label in (([], "ARC"), (["-fno-nepa-arc"], "MRC")):
         bin_path = Path(tmpdir) / (gm_path.stem + ".compileonly")
-        cmd = [str(NOPAC), str(gm_path), "-o", str(bin_path)] + asm_args + inc_args + extra
+        cmd = [str(NEPAC), str(gm_path), "-o", str(bin_path)] + asm_args + inc_args + extra
         try:
             proc = subprocess.run(cmd, capture_output=True, text=True,
                                   timeout=60, cwd=str(gm_path.parent))
@@ -235,7 +235,7 @@ def _compile_only(gm_path: Path, asm_args: list[str], inc_args: list[str],
 
 def process_gm(gm_file: str, tmpdir: Path) -> tuple[str, bool, list[str], str]:
     """
-    Run one .np file via `nopac run`.
+    Run one .np file via `nepac run`.
     First tries with ARC (default), then retries with MRC if it fails.
     Returns (relative_path, passed, info_lines, status_tag).
     """
@@ -270,7 +270,7 @@ def process_gm(gm_file: str, tmpdir: Path) -> tuple[str, bool, list[str], str]:
     inc_args = ["-I", str(gm_path.parent)]
 
     # Try with ARC first
-    cmd = [str(NOPAC), "run", str(gm_path)] + asm_args + inc_args
+    cmd = [str(NEPAC), "run", str(gm_path)] + asm_args + inc_args
     stdout, stderr, rc, timed_out = _run_np(cmd, gm_path, RUN_TIMEOUT + 2)
 
     if timed_out:
@@ -289,7 +289,7 @@ def process_gm(gm_file: str, tmpdir: Path) -> tuple[str, bool, list[str], str]:
         return rel, True, out_lines, "PASS"
 
     # ARC failed — retry with MRC
-    mrc_cmd = [str(NOPAC), "run", str(gm_path), "-fno-nopa-arc"] + asm_args + inc_args
+    mrc_cmd = [str(NEPAC), "run", str(gm_path), "-fno-nepa-arc"] + asm_args + inc_args
     mrc_stdout, mrc_stderr, mrc_rc, mrc_timed_out = _run_np(mrc_cmd, gm_path, RUN_TIMEOUT + 2)
 
     if mrc_timed_out:
@@ -347,7 +347,7 @@ def process_gm(gm_file: str, tmpdir: Path) -> tuple[str, bool, list[str], str]:
 # ── main ─────────────────────────────────────────────────────────
 
 def main():
-    parser = argparse.ArgumentParser(description="nopa test runner")
+    parser = argparse.ArgumentParser(description="nepa test runner")
     parser.add_argument("-j", type=int, default=0, help="parallel jobs (default: CPU count)")
     args = parser.parse_args()
     JOBS = args.j if args.j else (os.cpu_count() or 4)
@@ -376,7 +376,7 @@ def main():
     gm_retry = 0
     gm_retry_suspect = 0
     if gm_files:
-        with tempfile.TemporaryDirectory(prefix="nopa_test_") as tmpdir_str:
+        with tempfile.TemporaryDirectory(prefix="nepa_test_") as tmpdir_str:
             tmpdir = Path(tmpdir_str)
             with ThreadPoolExecutor(max_workers=JOBS) as executor:
                 futures = {executor.submit(process_gm, str(f), tmpdir): f for f in gm_files}
@@ -422,7 +422,7 @@ def main():
     ex_retry = 0
     ex_retry_suspect = 0
     if example_files:
-        with tempfile.TemporaryDirectory(prefix="nopa_example_") as tmpdir_str:
+        with tempfile.TemporaryDirectory(prefix="nepa_example_") as tmpdir_str:
             tmpdir = Path(tmpdir_str)
             with ThreadPoolExecutor(max_workers=JOBS) as executor:
                 futures = {executor.submit(process_gm, str(f), tmpdir): f for f in example_files}

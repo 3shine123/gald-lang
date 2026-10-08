@@ -5,7 +5,7 @@
    defines it. If the mangling or the vtable emission differs between the two,
    this is where it shows.
 
-   Ivars live on the @interface (Nopa convention). The `T _storage[4]` slot is
+   Ivars live on the @interface (Nepa convention). The `T _storage[4]` slot is
    what monomorphisation substitutes: `int * _storage[4]` in the specialised
    C struct. */
 @interface Stack<T> : NPObject {

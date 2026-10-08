@@ -1,4 +1,4 @@
-// json_editor_types.nh — Nopa 全特性 JSON 编辑器 · 类型声明
+// json_editor_types.nh — Nepa 全特性 JSON 编辑器 · 类型声明
 #import <Foundation/Foundation.nh>
 
 @namespace JSON

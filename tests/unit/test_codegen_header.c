@@ -1,4 +1,4 @@
-#include "nopa/codegen.h"
+#include "nepa/codegen.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -80,7 +80,7 @@ static void test_header_runtime_include(void) {
 
     char *s = emit_header_to_str(u, "X_H");
     ASSERT(s != NULL, "got output");
-    ASSERT(strstr(s, "#include <nopa/runtime.h>") != NULL, "has runtime.h");
+    ASSERT(strstr(s, "#include <nepa/runtime.h>") != NULL, "has runtime.h");
     free(s);
     cg_unit_free(u);
     PASS();
@@ -93,8 +93,8 @@ static void test_header_class_meta(void) {
 
     char *s = emit_header_to_str(u, "META_H");
     ASSERT(s != NULL, "got output");
-    ASSERT(strstr(s, "extern NPClass nopa_Foo_class") != NULL, "has class extern");
-    ASSERT(strstr(s, "void nopa_meta_init(void)") != NULL, "has init decl");
+    ASSERT(strstr(s, "extern NPClass nepa_Foo_class") != NULL, "has class extern");
+    ASSERT(strstr(s, "void nepa_meta_init(void)") != NULL, "has init decl");
     free(s);
     cg_unit_free(u);
     PASS();
@@ -109,7 +109,7 @@ static void test_header_vtable_forward(void) {
 
     char *s = emit_header_to_str(u, "VT_H");
     ASSERT(s != NULL, "got output");
-    ASSERT(strstr(s, "struct nopa_Bar_vtable") != NULL, "has vtable forward");
+    ASSERT(strstr(s, "struct nepa_Bar_vtable") != NULL, "has vtable forward");
     free(s);
     cg_unit_free(u);
     PASS();

@@ -12,16 +12,16 @@
 
 | # | 规则 | 反例（修复前） |
 |---|---|---|
-| 1 | 退出表达式**读取**了某 owned 局部 → 先求值到临时变量，再 release，最后 return/throw | `return [[h text] length] - 5;` 先 `nopa_release(h)` → UAF |
-| 2 | 所有权**转移**只认两类：裸局部 `return h;`，或显式的 `return nopa_autorelease(h);` / `return [h autorelease];` | `return [h text];` 曾被当作转移 → `h` 永不释放（泄漏） |
+| 1 | 退出表达式**读取**了某 owned 局部 → 先求值到临时变量，再 release，最后 return/throw | `return [[h text] length] - 5;` 先 `nepa_release(h)` → UAF |
+| 2 | 所有权**转移**只认两类：裸局部 `return h;`，或显式的 `return nepa_autorelease(h);` / `return [h autorelease];` | `return [h text];` 曾被当作转移 → `h` 永不释放（泄漏） |
 | 3 | `@throw` 只释放**最近 `@try` 边界以内**的局部；边界之外的局部在 handler 返回后仍然有效 | `@throw` 释放了函数级局部，函数尾再释放一次 → 双释放 |
 
 规则 1 的 lowering：
 
 ```c
-__auto_type __nopa_arc_ret_N = <完整求值的退出表达式>;   /* 只在表达式确实读局部时生成 */
-nopa_release(<局部>);                                    /* 逆序，与既有 ARC 一致 */
-return __nopa_arc_ret_N;                                 /* 或 @throw __nopa_arc_ret_N */
+__auto_type __nepa_arc_ret_N = <完整求值的退出表达式>;   /* 只在表达式确实读局部时生成 */
+nepa_release(<局部>);                                    /* 逆序，与既有 ARC 一致 */
+return __nepa_arc_ret_N;                                 /* 或 @throw __nepa_arc_ret_N */
 ```
 
 仅在必要时引入临时变量（表达式不读任何待释放局部时直接插 release，不加临时变量）。临时变量是**已算好值的普通副本**，不引入额外 retain/release。
@@ -59,7 +59,7 @@ return __nopa_arc_ret_N;                                 /* 或 @throw __nopa_ar
 - `.np` 的 `NPLog` 输出走 **stderr**（`runtime.c`），runner 合并两个流后比对
 
 ```bash
-NOPAC=target/release/nopac ./tests/arc_order/run_arc_order.sh
+NEPAC=target/release/nepac ./tests/arc_order/run_arc_order.sh
 ```
 
 另有 ASan 强验证（见下）。
@@ -70,7 +70,7 @@ NOPAC=target/release/nopac ./tests/arc_order/run_arc_order.sh
 |---|---|
 | `crates/arc/src/arc.rs` | 新增 `insert_exit_cleanup`（规则 1/2）、`transferred_var`（规则 2）、`collect_captures_*`（block 捕获感知）、`throw_floor`（规则 3）；移除 `clear_all` 与"return 前盲插 release" |
 | `crates/eh/src/lib.rs` | checked 后端：`rewrite_try` 把 `@finally` 体 splice 到 try 体内每个 `return` 之前（新的 `splice_finally_before_exits`）；新增 `pub fn splice_finally_exits` 供 legacy 使用 |
-| `crates/nopac/src/pipeline.rs` | legacy（sjlj）路径新增 `@finally` 早退 splice pass（Step 3.92，在 ARC 之前） |
+| `crates/nepac/src/pipeline.rs` | legacy（sjlj）路径新增 `@finally` 早退 splice pass（Step 3.92，在 ARC 之前） |
 
 ### 为什么不重复释放
 
@@ -86,7 +86,7 @@ NOPAC=target/release/nopac ./tests/arc_order/run_arc_order.sh
 
 C 的 label 是**函数级**的，`goto` 可以跳出任意嵌套块——跳过的那些作用域的 owned
 局部原本无人释放（pattern-switch lowering 生成的正是这个形状：arm body 在嵌套
-compound 里，`goto __nopa_swN_end` 跳出去）。
+compound 里，`goto __nepa_swN_end` 跳出去）。
 
 判定用**作用域路径**（从函数体到该语句列表的语句索引序列）而非单纯深度：
 
@@ -111,12 +111,12 @@ compound 里，`goto __nopa_swN_end` 跳出去）。
 
 判定 owned ivar：仅**单级**对象指针（`NPObject **` 这类 C 数组排除——它曾导致
 `NPArray._items` 被当作对象释放而崩溃），排除 weak / 函数指针 / block / C 标量指针；
-`id` 计入。释放用 `nopa_release`（nil 安全，部分初始化对象安全）。
+`id` 计入。释放用 `nepa_release`（nil 安全，部分初始化对象安全）。
 
 判定「自定义 dealloc」必须看 `method_owners == 本类`——`method_names` 也含**继承**条目，
 否则任何 `NPObject` 子类都会被当作"写了 dealloc"而失去合成。
 
-**MRC（`-fno-nopa-arc`）下完全不生成**（`CgUnit.no_arc` 门控）：手写保留计数的程序里
+**MRC（`-fno-nepa-arc`）下完全不生成**（`CgUnit.no_arc` 门控）：手写保留计数的程序里
 ivar 归程序员所有。
 
 ## 修复位置（汇总）
@@ -125,7 +125,7 @@ ivar 归程序员所有。
 |---|---|
 | `crates/arc/src/arc.rs` | `insert_exit_cleanup`（退出表达式先求值后清理）、`transferred_var`（所有权转移只认裸局部/autorelease）、`collect_captures_*`（block 捕获感知）、`throw_floor`（`@throw` 按最近 `@try` 限界）、`build_goto_plan` + `walk_labels_gotos`（`goto` 作用域路径分析）、移除 `clear_all` |
 | `crates/eh/src/lib.rs` | `rewrite_try` 把 `@finally` 体 splice 到 try 体内每个 `return` 前（`splice_finally_before_exits`）；`pub fn splice_finally_exits` 供 legacy 使用 |
-| `crates/nopac/src/pipeline.rs` | legacy 的 `@finally` 早退 splice pass（Step 3.92）；ARC 错误上报 |
+| `crates/nepac/src/pipeline.rs` | legacy 的 `@finally` 早退 splice pass（Step 3.92）；ARC 错误上报 |
 | `crates/codegen/src/codegen.rs` | `emit_arc_dealloc_wrappers`（合成 ivar 释放）、`owned_ivars_of` / `is_owned_object_ivar_type`、`CgUnit.no_arc` |
 | `crates/parser/src/parser.rs` | block 字面量参数表中的无名 `void` 视为空参数（`^int(void)` ≡ `^int()`） |
 
@@ -138,8 +138,8 @@ ivar 归程序员所有。
 
 ```bash
 for c in tests/arc_order/[0-9][0-9]_*.np; do
-  ./target/release/nopac -rewrite-nopa -o /tmp/a.c "$c"
-  clang -fsanitize=address -fblocks -w -I include -o /tmp/a /tmp/a.c include/nopa/runtime.c
+  ./target/release/nepac -rewrite-nepa -o /tmp/a.c "$c"
+  clang -fsanitize=address -fblocks -w -I include -o /tmp/a /tmp/a.c include/nepa/runtime.c
   /tmp/a
 done
 ```

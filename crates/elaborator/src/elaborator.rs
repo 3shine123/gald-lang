@@ -1,6 +1,6 @@
-use nopa_cst::*;
-use nopa_ast::*;
-use nopa_symbol::symbol::*;
+use nepa_cst::*;
+use nepa_ast::*;
+use nepa_symbol::symbol::*;
 
 pub struct Elaborator {
     pub symtab: Option<SymbolTable>,
@@ -232,7 +232,7 @@ impl Elaborator {
                 // `a = b != c`.
                 let inner = self.convert_expr(e).unwrap_or_else(make_int_expr);
                 AstExpr {
-                    kind: nopa_ast::AstExprKind::Paren, expr_type: inner.expr_type.clone(),
+                    kind: nepa_ast::AstExprKind::Paren, expr_type: inner.expr_type.clone(),
                     line: e.line, col: e.col,
                     data: AstExprData::Paren(Box::new(inner)),
                 }
@@ -822,14 +822,14 @@ impl Elaborator {
                 });
                 AstDecl { kind: AstDeclKind::Function, line, col, name: cd.name.clone(), data: AstDeclData::Function { func_sym, return_type: return_type.as_ref().and_then(|t| self.convert_type(t)).map(Box::new), params: params.clone(), body: converted_body.and_then(|b| b.map(Box::new)), has_variadic: *has_variadic, throws: throws.as_ref().and_then(|t| self.convert_type(t)).map(Box::new), async_marker: *async_marker }, attributes: cd.attributes.clone() }
             }
-            CstDeclData::Class { superclass, ivars, properties, methods, impl_vars, protocols, type_params, type_bounds, .. } => {
+            CstDeclData::Class { superclass, ivars, properties, methods, impl_vars, protocols, type_params, type_bounds, category_name, .. } => {
                 let fqn = self.ns_fqn(cd.name.as_deref().unwrap_or(""));
                 let cls_sym = self.symtab.as_ref().and_then(|st| st.find_class(&fqn)).map(|s| s.name.clone());
                 let cls_sym_clone = cls_sym.clone();
                 self.current_class_sym = cls_sym.clone();
-                // Inject implicit root class nopa_root for classes without explicit superclass
+                // Inject implicit root class nepa_root for classes without explicit superclass
                 let effective_superclass = superclass.as_ref().map(|s| s.clone()).or_else(|| {
-                    if fqn != "nopa_root" { Some("nopa_root".to_string()) } else { None }
+                    if fqn != "nepa_root" { Some("nepa_root".to_string()) } else { None }
                 });
                 let sup_name = effective_superclass.as_ref().and_then(|s| {
                     self.symtab.as_ref().and_then(|st| {
@@ -849,7 +849,7 @@ impl Elaborator {
                         cur = np.next.as_ref().map(|n| n.as_ref());
                     }
                 }
-                let mut ad = AstDecl { kind: AstDeclKind::Class, line, col, name: Some(self.ns_fqn(cd.name.as_deref().unwrap_or(""))), data: AstDeclData::Class { cls_sym: cls_sym_clone, super_name: sup_name, protocols: protocols.clone(), type_params: type_params.clone(), type_bounds: type_bounds.clone(), methods: methods.iter().filter_map(|m| self.convert_decl(m)).collect(), ivars: ivars.iter().filter_map(|iv| self.convert_decl(iv)).collect(), properties: all_properties.iter().filter_map(|p| self.convert_decl(p)).collect(), impl_vars: impl_vars.iter().filter_map(|v| self.convert_decl(v)).collect(), is_implementation: cd.kind == CstDeclKind::ClassImplementation || cd.kind == CstDeclKind::CategoryImplementation }, attributes: cd.attributes.clone() };
+                let mut ad = AstDecl { kind: AstDeclKind::Class, line, col, name: Some(self.ns_fqn(cd.name.as_deref().unwrap_or(""))), data: AstDeclData::Class { cls_sym: cls_sym_clone, super_name: sup_name, protocols: protocols.clone(), type_params: type_params.clone(), type_bounds: type_bounds.clone(), methods: methods.iter().filter_map(|m| self.convert_decl(m)).collect(), ivars: ivars.iter().filter_map(|iv| self.convert_decl(iv)).collect(), properties: all_properties.iter().filter_map(|p| self.convert_decl(p)).collect(), impl_vars: impl_vars.iter().filter_map(|v| self.convert_decl(v)).collect(), is_implementation: cd.kind == CstDeclKind::ClassImplementation || cd.kind == CstDeclKind::CategoryImplementation, is_category: category_name.is_some() }, attributes: cd.attributes.clone() };
                 if let AstDeclData::Class { ref mut methods, .. } = ad.data {
                     if let Some(ref st) = self.symtab {
                         if let Some(ref cls_name) = cls_sym {
@@ -970,7 +970,27 @@ impl Elaborator {
                 let fqns: Vec<String> = names.iter().map(|n| self.ns_fqn(n)).collect();
                 AstDecl { kind: AstDeclKind::ForwardClass, line, col, name: None, data: AstDeclData::ForwardClass { names: fqns }, attributes: Vec::new() }
             }
-            CstDeclData::ProtocolData { .. } => return None,
+            CstDeclData::ProtocolData { ref protocols, .. } => {
+                // Preserve protocol declarations into the AST so codegen can
+                // emit the static NPProtocol metadata (D5.2). The binder has
+                // already recorded required/optional on the symbol for the
+                // checker; here we split the declared methods by the parser's
+                // @optional switch position — simplest reliable split: methods
+                // the binder marked optional. Re-derive from CST order by
+                // reading the method bodies' presence is wrong (both kinds are
+                // bodiless), so we reuse the binder's convention: everything
+                // before the @optional flip is required. The parser lost that
+                // position, so consult the symbol table instead.
+                let (req, opt) = match self.symtab.as_ref().and_then(|st| st.find_protocol(cd.name.as_deref().unwrap_or(""))) {
+                    Some(sym) => match &sym.data {
+                        nepa_symbol::SymbolData::Protocol { required_methods, optional_methods, .. } =>
+                            (required_methods.clone(), optional_methods.clone()),
+                        _ => (Vec::new(), Vec::new()),
+                    },
+                    None => (Vec::new(), Vec::new()),
+                };
+                AstDecl { kind: AstDeclKind::Protocol, line, col, name: cd.name.clone(), data: AstDeclData::Protocol { parents: protocols.clone(), required_methods: req, optional_methods: opt }, attributes: Vec::new() }
+            }
             CstDeclData::Using { .. } => {
                 // @using is handled by the binder; no AST decl needed
                 return None;

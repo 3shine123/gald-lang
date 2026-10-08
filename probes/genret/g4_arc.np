@@ -1,0 +1,25 @@
+// g4 — ARC 返回：类方法 T 返回值在 -farc 下的所有权语义。
+// +defaultValue 返回便利构造器结果（autoreleased，见 stringgWithUTF8String:
+// 先例），经泛型 T 流出后 call-site 不得双重 release；-value 同。
+// 检查点：-farc 编译干净；生成 C 的 call-site 对返回值不做多余释放；
+// vtable cast 带特化返回类型。
+#import <Foundation/Foundation.nh>
+#include <stdio.h>
+
+@interface Box<T> : NPObject
++ (T)defaultValue;
+- (T)value;
+@end
+
+@implementation Box
++ (T)defaultValue { return [NPString stringWithUTF8String:"g4"]; }
+- (T)value { return [NPString stringWithUTF8String:"g4v"]; }
+@end
+
+int main() {
+    NPString *s = [Box<NPString *> defaultValue];
+    Box<NPString *> *b = [[Box<NPString *> alloc] init];
+    NPString *v = [b value];
+    printf("g4-ok\n");
+    return (s != 0) && (v != 0) ? 0 : 1;
+}

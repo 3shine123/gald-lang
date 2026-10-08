@@ -1,9 +1,9 @@
 {
-  "name": "nopa-lang",
-  "displayName": "Nopa Language",
-  "description": "Syntax highlighting and language support for Nopa — a statically-dispatched Objective-C dialect",
+  "name": "nepa-lang",
+  "displayName": "Nepa Language",
+  "description": "Syntax highlighting and language support for Nepa — a statically-dispatched Objective-C dialect",
   "version": "0.2.0",
-  "publisher": "nopa-lang",
+  "publisher": "nepa-lang",
   "engines": {
     "vscode": "^1.80.0"
   },
@@ -13,10 +13,10 @@
   "contributes": {
     "languages": [
       {
-        "id": "nopa",
+        "id": "nepa",
         "aliases": [
-          "Nopa",
-          "nopa",
+          "Nepa",
+          "nepa",
           ".np"
         ],
         "extensions": [
@@ -28,9 +28,9 @@
     ],
     "grammars": [
       {
-        "language": "nopa",
+        "language": "nepa",
         "scopeName": "source.np",
-        "path": "./syntaxes/nopa.tmLanguage.json"
+        "path": "./syntaxes/nepa.tmLanguage.json"
       }
     ]
   }

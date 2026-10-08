@@ -1,0 +1,22 @@
+// g5 — 类+实例并存：同名 selector `make` 在类侧与实例侧同时声明，
+// 且两侧用不同实例化。检查点：生成 C 中类方法与实例方法的符号/cast
+// 不冲突，两侧返回类型各自按 receiver 的实例化替换（NPString * vs
+// NPNumber *）。
+#import <Foundation/Foundation.nh>
+
+@interface Box<T> : NPObject
++ (T)make;
+- (T)make;
+@end
+
+@implementation Box
++ (T)make { return nil; }
+- (T)make { return nil; }
+@end
+
+int main() {
+    NPString *a = [Box<NPString *> make];
+    Box<NPNumber *> *b = [[Box<NPNumber *> alloc] init];
+    NPNumber *n = [b make];
+    return (a == 0) && (n == 0) ? 0 : 1;
+}

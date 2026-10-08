@@ -11,4 +11,4 @@
 
 **用例**：`complex_test.np` — typedef、混算、虚数字面量、`creal/cimag/cabs`，5 行输出（期望值取自 clang 实测）。
 
-**已知限制**：nopa checker 无复数类型推导（`float _Complex` ↔ `double _Complex` 的窄化不告警，clang `-Wall` 也只报 unused——语义由生成的 C 交 clang 保证）；`2.0i` 的 f64 值仍是 2.0（checker 内部），仅发射层保真。
+**已知限制**：nepa checker 无复数类型推导（`float _Complex` ↔ `double _Complex` 的窄化不告警，clang `-Wall` 也只报 unused——语义由生成的 C 交 clang 保证）；`2.0i` 的 f64 值仍是 2.0（checker 内部），仅发射层保真。

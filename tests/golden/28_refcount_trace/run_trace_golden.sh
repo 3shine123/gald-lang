@@ -2,23 +2,23 @@
 # run_trace_golden.sh — run the refcount tracer (-trace-refcount) over
 # tests/golden/28_refcount_trace/*.np and diff the output against *.out.
 # Usage: ./run_trace_golden.sh
-#   NOPAC    path to the nopac binary. Auto-detected: prefer an explicit $NOPAC,
-#           then target/release/nopac, then target/debug/nopac. Auto-detection
+#   NEPAC    path to the nepac binary. Auto-detected: prefer an explicit $NEPAC,
+#           then target/release/nepac, then target/debug/nepac. Auto-detection
 #           matters because a stale binary silently produces line-number-only
 #           diffs that look like real regressions.
 set -u
 cd "$(dirname "$0")/../../.."
 
-if [[ -z "${NOPAC:-}" ]]; then
-    for cand in target/release/nopac target/debug/nopac; do
-        if [[ -x "$cand" ]]; then NOPAC="$cand"; break; fi
+if [[ -z "${NEPAC:-}" ]]; then
+    for cand in target/release/nepac target/debug/nepac; do
+        if [[ -x "$cand" ]]; then NEPAC="$cand"; break; fi
     done
 fi
-if [[ -z "${NOPAC:-}" || ! -x "$NOPAC" ]]; then
-    echo "error: nopac binary not found (build it, or set NOPAC=)" >&2
+if [[ -z "${NEPAC:-}" || ! -x "$NEPAC" ]]; then
+    echo "error: nepac binary not found (build it, or set NEPAC=)" >&2
     exit 2
 fi
-echo "using nopac: $NOPAC"
+echo "using nepac: $NEPAC"
 DIR=tests/golden/28_refcount_trace
 PASS=0
 FAIL=0
@@ -31,7 +31,7 @@ for np in "$DIR"/*.np; do
     fi
     # trace with colors disabled for deterministic diffing
     tmp=/tmp/refcount_trace.$$.txt
-    "$NOPAC" -trace-refcount -trace-no-color -trace-max-iters 2 "$np" > "$tmp" 2>&1
+    "$NEPAC" -trace-refcount -trace-no-color -trace-max-iters 2 "$np" > "$tmp" 2>&1
     rc=$?
     if [[ $rc -ne 0 ]]; then
         echo "FAIL  $np (tracer exit $rc)"

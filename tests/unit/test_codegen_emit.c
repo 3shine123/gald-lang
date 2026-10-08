@@ -1,4 +1,4 @@
-#include "nopa/codegen.h"
+#include "nepa/codegen.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -136,7 +136,7 @@ static void test_emit_call(void) {
     cg_expr_t *a1 = cg_expr_alloc(CEXPR_INT);
     a1->u.int_val = 7;
     cg_expr_t *args[] = {a1};
-    cg_expr_t *call = cg_call_expr("nopa_retain", "void", args, 1);
+    cg_expr_t *call = cg_call_expr("nepa_retain", "void", args, 1);
 
     cg_stmt_t *es = cg_stmt_alloc(CGSTMT_EXPR);
     es->u.expr = call;
@@ -149,7 +149,7 @@ static void test_emit_call(void) {
 
     char *s = emit_to_str(u);
     ASSERT(s != NULL, "got output");
-    ASSERT(strstr(s, "nopa_retain") != NULL, "has nopa_retain");
+    ASSERT(strstr(s, "nepa_retain") != NULL, "has nepa_retain");
     ASSERT(strstr(s, "7") != NULL, "has 7");
     free(s);
     cg_unit_free(u);
@@ -300,13 +300,13 @@ static void test_emit_protocol_meta(void) {
 
     char *s = emit_to_str(u);
     ASSERT(s != NULL, "got output");
-    ASSERT(strstr(s, "nopa_protocol_P") != NULL, "has protocol var");
+    ASSERT(strstr(s, "nepa_protocol_P") != NULL, "has protocol var");
     ASSERT(strstr(s, ".required_methods") != NULL, "has required_methods");
     ASSERT(strstr(s, "doIt") != NULL, "has doIt");
     ASSERT(strstr(s, "getValue") != NULL, "has getValue");
     ASSERT(strstr(s, ".required_count = 2") != NULL, "has required_count");
     ASSERT(strstr(s, ".protocols = (NPProtocol *[])") != NULL, "has class protocols");
-    ASSERT(strstr(s, "&nopa_protocol_P") != NULL, "links to protocol");
+    ASSERT(strstr(s, "&nepa_protocol_P") != NULL, "links to protocol");
     free(s);
     cg_unit_free(u);
     PASS();

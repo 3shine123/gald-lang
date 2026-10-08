@@ -1,0 +1,16 @@
+#import "model.nh"
+
+// Variant: the lib TU mentions the instantiation ONLY via a plain variable
+// declaration inside a body function (the documented 03_generic mention
+// requirement). Expected per ROADMAP claim: link succeeds but the client's
+// send of `+make` either resolves against a divergent vtable shape (startup
+// __sig aborts loudly) or fails otherwise — observe which.
+@implementation Factory
++ (T)make { return nil; }
+- (T)produce { return nil; }
+@end
+
+void FactoryTouch(void) {
+    Factory<NPString *> *t = nil;
+    (void)t;
+}

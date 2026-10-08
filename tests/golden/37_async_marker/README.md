@@ -8,7 +8,7 @@ metadata: the emitted C signature is just `T` — `NPAsync` appears **0 times**
 in the generated C (checked via grep), so vtable layout, cross-TU linking and
 the bridge header are untouched.
 
-## Reconciliation (`nopa_async::check_unit`, pre-desugar)
+## Reconciliation (`nepa_async::check_unit`, pre-desugar)
 
 | declaration | body | verdict |
 |-------------|------|---------|

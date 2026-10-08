@@ -18,7 +18,7 @@ metadata linkage is correct:
 | 4 | two TUs that both `@implementation` the same class fail with `duplicate symbol` (**no flag involved**) | rule R2: ownership is derived from the main file, so a second owner must never merge silently |
 | 5 | a standalone TU — a self-contained `.nh` **or** a `.np` holding an `@implementation` — emits **strong** metadata for its owned class **with no flag** (vtable + meta vtable, `nm`-verified) | the flag must never be something to remember by hand: R2 ownership is derived from the main file, so the standalone-TU workflow is automatic |
 | 6 | a declaration-only `.nh` stays **weak** with no flag | its NULL-filled stubs are the client side of R2 and must lose to the owner's table |
-| 7 | a main file that owns the root classes (`NPObject.np` compiled standalone) compiles clean — `nopa_root`/`NPObject` defined **exactly once** in the generated file | stable-slots §9 blocker 1: Section 4's guarded fallbacks used to be re-emitted unguarded by the class-layout section — a hard C redefinition error |
+| 7 | a main file that owns the root classes (`NPObject.np` compiled standalone) compiles clean — `nepa_root`/`NPObject` defined **exactly once** in the generated file | stable-slots §9 blocker 1: Section 4's guarded fallbacks used to be re-emitted unguarded by the class-layout section — a hard C redefinition error |
 
 There is no flag left to remember: the old `-fstrong-metadata` was deleted when
 plan A landed (per-TU Foundation build, doc/stable_slots_plan.md §11), and
@@ -33,7 +33,7 @@ Plan-A link semantics worth knowing: a client that re-implements a library
 class against the per-TU *archive* is standard C override semantics — the
 library's member stays dormant unless something references its symbols, so
 nothing collides at link time (the duplicate-symbol loudness of check 4
-applies to explicit link inputs, e.g. two TUs in one `nopac main.np lib.np`
+applies to explicit link inputs, e.g. two TUs in one `nepac main.np lib.np`
 command). The override is partial by construction: slots for methods the
 client did not implement stay NULL, so such a client must implement everything
 it dispatches.

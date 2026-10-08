@@ -1,0 +1,21 @@
+// g3 — 函数指针：类方法返回的 T 落在 C 函数指针签名里流转。
+// 检查点：checker 把 [Box<NPString *> defaultValue] 的静态类型判为
+// NPString *（能直接过 fn-ptr 参数检查）；生成 C 的 call 表达式类型
+// 与 fn-ptr 形参类型一致（不是 id 隐转）。
+#import <Foundation/Foundation.nh>
+
+@interface Box<T> : NPObject
++ (T)defaultValue;
+@end
+
+@implementation Box
++ (T)defaultValue { return nil; }
+@end
+
+static NPString *wrap(NPString *p) { return p; }
+
+int main() {
+    NPString *(*fn)(NPString *) = wrap;
+    NPString *s = fn([Box<NPString *> defaultValue]);
+    return s == 0 ? 0 : 1;
+}

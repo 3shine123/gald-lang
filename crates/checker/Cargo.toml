@@ -1,9 +1,9 @@
 [package]
-name = "nopa-checker"
+name = "nepa-checker"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-nopa-cst = { path = "../cst" }
-nopa-ast = { path = "../ast" }
-nopa-symbol = { path = "../symbol" }
+nepa-cst = { path = "../cst" }
+nepa-ast = { path = "../ast" }
+nepa-symbol = { path = "../symbol" }

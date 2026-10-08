@@ -126,15 +126,15 @@ static void call_blocks(void) {
     NPLog(@"block get=%s", get() ? "non-nil" : "nil");
 }
 
-// --- ARC + nullability: releasing a nullable local is legal (nopa_release is
+// --- ARC + nullability: releasing a nullable local is legal (nepa_release is
 // nil-safe by contract: `if (!obj) return;` in runtime.c). The checker's
-// nil-safe whitelist makes a nopa-visible `nonnull` declaration of one
+// nil-safe whitelist makes a nepa-visible `nonnull` declaration of one
 // unenforceable rather than a compile error for every ARC program.
 static void arc_nullable_release(void) {
     @noarc {
         nullable NPObject *o = [[NPObject alloc] init];
-        nopa_release(o);
-        nopa_release(nil);
+        nepa_release(o);
+        nepa_release(nil);
         NPLog(@"arc released");
     }
 }

@@ -1,5 +1,5 @@
 // log_analyzer.np
-// Nopa 工具类型集成测试：系统日志分析器
+// Nepa 工具类型集成测试：系统日志分析器
 // 特性覆盖：@namespace、@protocol、类继承、泛型<T>、Block、@property、@autoreleasepool
 
 #include <stdio.h>
@@ -203,7 +203,7 @@
     - (void)printReport {
         printf("\n");
         printf("╔══════════════════════════════════════╗\n");
-        printf("║      Nopa LogAnalyzer 统计报告       ║\n");
+        printf("║      Nepa LogAnalyzer 统计报告       ║\n");
         printf("╠══════════════════════════════════════╣\n");
         printf("║  总条目数 : %-3d                      ║\n", [_buffer count]);
         printf("║  ERROR    : %-3d  ← 需立即处理       ║\n", _errorCount);
@@ -220,7 +220,7 @@
 int main(int argc, const char *argv[])
 {
     @autoreleasepool {
-        printf(">>> Nopa LogAnalyzer 工具启动\n");
+        printf(">>> Nepa LogAnalyzer 工具启动\n");
         printf(">>> 正在读取模拟系统日志流...\n");
         
         // 模拟 7 行系统日志
@@ -262,7 +262,7 @@ int main(int argc, const char *argv[])
         // 工具特性 3：打印统计摘要
         [engine printReport];
         
-        printf("\n>>> Nopa LogAnalyzer 正常退出\n");
+        printf("\n>>> Nepa LogAnalyzer 正常退出\n");
     }
     return 0;
 }

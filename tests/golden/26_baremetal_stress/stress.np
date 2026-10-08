@@ -1,5 +1,5 @@
-// stress.np — 裸机 Nopa 压测：全方位代码生成质量验证
-// 编译：nopac -rewrite-nopa -fno-libc；链接 runtime_freestanding.c
+// stress.np — 裸机 Nepa 压测：全方位代码生成质量验证
+// 编译：nepac -rewrite-nepa -fno-libc；链接 runtime_freestanding.c
 // 运行：qemu-system-i386（或直接 ./build/stress）
 
 extern void kputs(const char* s);
@@ -38,7 +38,7 @@ extern void kputc(char c);
 
     @implementation Organism
     @synthesize energy;
-    + (instancetype) create { return nopa_alloc(self); }
+    + (instancetype) create { return nepa_alloc(self); }
     - (instancetype) init  { age = 0; vitality = 100; return self; }
     - (int) age     { return age; }
     - (void) grow   { age++; vitality += 10; }
@@ -124,7 +124,7 @@ extern void kputc(char c);
     t->code = c;
     return t;
 }
-+ (instancetype) alloc { return nopa_alloc(self); }
++ (instancetype) alloc { return nepa_alloc(self); }
 - (int) code { return code; }
 - (void) dump {
     kputs("       DebugToken(code="); kputdec(code); kputs(")\n");
@@ -163,7 +163,7 @@ static int local_catch_token(int n, DebugToken *t) {
 }
 
 int main() {
-    nopa_meta_init();
+    nepa_meta_init();
 
     kputs("========== BARE-METAL STRESS TEST ==========\n");
     int passed = 0;
@@ -271,7 +271,7 @@ int main() {
 
     // ── 14. ARC release ──
     total++;
-    // ARC 自动插入 nopa_release(o) 在 main 末尾
+    // ARC 自动插入 nepa_release(o) 在 main 末尾
     // 验证 alloc+init 的实例在 main 结束前被 release
     kputs("[14] ARC auto-release (check runtime)\n");
     passed++;

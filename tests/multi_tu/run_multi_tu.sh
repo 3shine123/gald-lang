@@ -3,13 +3,13 @@
 #
 # WHY THIS EXISTS
 # ---------------
-# Nopa's uniform vtable is built per translation unit from the set of instance
+# Nepa's uniform vtable is built per translation unit from the set of instance
 # methods that TU happens to see. Two TUs that see DIFFERENT method sets compile
-# two different `struct nopa_vtable` layouts, while the linker weak-merges the
+# two different `struct nepa_vtable` layouts, while the linker weak-merges the
 # vtable *instances* into a single allocation. Dispatch through the losing
 # layout then reads the wrong slot: silent garbage or a segfault at whatever
 # offset the miscalculation lands on. Plain C never hits this because every
-# struct definition is spelled out in the source; Nopa synthesises the layout,
+# struct definition is spelled out in the source; Nepa synthesises the layout,
 # so C's type system cannot protect us.
 #
 # This suite pins down, per language feature, whether it survives a cross-TU
@@ -25,7 +25,7 @@
 #
 # Usage:  ./run_multi_tu.sh            run everything
 #         ./run_multi_tu.sh 05_block   run one case (by dir name or number)
-#   NOPAC=path/to/nopac ./run_multi_tu.sh
+#   NEPAC=path/to/nepac ./run_multi_tu.sh
 set -u
 # Resolve the script location BEFORE any cd: $0 may be a relative path, and
 # resolving it after the cd below anchors it to the project root — invoking
@@ -33,32 +33,32 @@ set -u
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 cd "$SCRIPT_DIR/../.."
 
-if [[ -z "${NOPAC:-}" ]]; then
-    for cand in target/debug/nopac target/release/nopac; do
-        if [[ -x "$cand" ]]; then NOPAC="$cand"; break; fi
+if [[ -z "${NEPAC:-}" ]]; then
+    for cand in target/debug/nepac target/release/nepac; do
+        if [[ -x "$cand" ]]; then NEPAC="$cand"; break; fi
     done
 fi
-if [[ -z "${NOPAC:-}" || ! -x "$NOPAC" ]]; then
-    echo "error: nopac binary not found (build it, or set NOPAC=)" >&2
+if [[ -z "${NEPAC:-}" || ! -x "$NEPAC" ]]; then
+    echo "error: nepac binary not found (build it, or set NEPAC=)" >&2
     exit 2
 fi
 
 CASES_ROOT="$SCRIPT_DIR"
-NOPA_INC="$PWD/include"
-WORK="${TMPDIR:-/tmp}/nopa_multi_tu.$$"
+NEPA_INC="$PWD/include"
+WORK="${TMPDIR:-/tmp}/nepa_multi_tu.$$"
 mkdir -p "$WORK"
 trap 'rm -rf "$WORK"' EXIT
 
 FILTER="${1:-}"
 PASS=0; FAIL=0; FAILED_CASES=()
 
-# Emitted C needs -I include (nopa/runtime.h) and the case dir (its own .nh).
+# Emitted C needs -I include (nepa/runtime.h) and the case dir (its own .nh).
 # Note: Foundation is NOT imported by most cases — a case that only needs a
 # base class uses the implicit root, which keeps the method set (and therefore
 # the vtable layout) as small as possible. That is deliberate: the fewer
 # selectors a case drags in, the more precisely a failure points at the
 # feature under test.
-INCS=(-I "$NOPA_INC" -I "$NOPA_INC/Foundation")
+INCS=(-I "$NEPA_INC" -I "$NEPA_INC/Foundation")
 
 run_case() {
     local dir="$1" name
@@ -75,7 +75,7 @@ run_case() {
     # 1. transpile every TU separately
     # A case may pin a stable cross-TU vtable layout: a SLOTS_MANIFEST marker
     # file in the case dir makes every TU compile with --slots <path>. The
-    # manifest lives in the WORK dir (nopac writes the assignment back after
+    # manifest lives in the WORK dir (nepac writes the assignment back after
     # each compile; the case dir must stay clean). First TU creates it; the
     # append-only contract means later TUs keep its slot order.
     local slots_args=()
@@ -83,7 +83,7 @@ run_case() {
         slots_args=(--slots "$out/slots.manifest")
     fi
 
-    # NATIVE marker: drive nopac's own multi-input mode (`nopac main.np
+    # NATIVE marker: drive nepac's own multi-input mode (`nepac main.np
     # lib.np -o app`) instead of transpile-each-then-clang. Keeps the
     # compiler's multi-TU feature itself under test, not just the link
     # mechanics it shares with every other case.
@@ -91,18 +91,18 @@ run_case() {
     [[ -f "$dir/NATIVE" ]] && native=1
 
     # Optional EH backend selection for the acceptance matrix:
-    #   NOPA_EH_FLAG="-eh checked" ./run_multi_tu.sh
+    #   NEPA_EH_FLAG="-eh checked" ./run_multi_tu.sh
     # Unset (the default) = the shipped default backend, zero behavior change.
     local eh_args=()
-    if [[ -n "${NOPA_EH_FLAG:-}" ]]; then
+    if [[ -n "${NEPA_EH_FLAG:-}" ]]; then
         # shellcheck disable=SC2206
-        eh_args=(${NOPA_EH_FLAG})
+        eh_args=(${NEPA_EH_FLAG})
     fi
 
     local tsrc objs=() t
     if [[ $native -eq 1 ]]; then
-        # NATIVE: one nopac command compiles and links every TU — the same
-        # job every other case does with per-TU -rewrite-nopa + clang below.
+        # NATIVE: one nepac command compiles and links every TU — the same
+        # job every other case does with per-TU -rewrite-nepa + clang below.
         # main.np is the main TU (first input); the rest are extras.
         local main_tu="" log="$out/$name.transpile.log"
         local rest=()
@@ -117,7 +117,7 @@ run_case() {
             main_tu="${sources[0]}"
             rest=("${sources[@]:1}")
         fi
-        if ! "$NOPAC" "$main_tu" ${rest[@]+"${rest[@]}"} -I "$dir" "${INCS[@]}" \
+        if ! "$NEPAC" "$main_tu" ${rest[@]+"${rest[@]}"} -I "$dir" "${INCS[@]}" \
                 ${slots_args[@]+"${slots_args[@]}"} ${eh_args[@]+"${eh_args[@]}"} \
                 -o "$out/$name.bin" > "$log" 2>&1; then
             if [[ -f "$dir/EXPECT_FAIL" ]]; then
@@ -132,14 +132,14 @@ run_case() {
         # 1. transpile every TU separately
         # A case may pin a stable cross-TU vtable layout: a SLOTS_MANIFEST marker
         # file in the case dir makes every TU compile with --slots <path>. The
-        # manifest lives in the WORK dir (nopac writes the assignment back after
+        # manifest lives in the WORK dir (nepac writes the assignment back after
         # each compile; the case dir must stay clean). First TU creates it; the
         # append-only contract means later TUs keep its slot order.
         for t in "${sources[@]}"; do
             tsrc="$out/$(basename "${t%.np}").c"
             # NOTE: macOS bash 3.2 under `set -u` rejects "${empty_arr[@]}" —
             # the conditional expansion keeps empty slots_args legal.
-            if ! "$NOPAC" -rewrite-nopa "$t" -o "$tsrc" -I "$dir" "${INCS[@]}" ${slots_args[@]+"${slots_args[@]}"} ${eh_args[@]+"${eh_args[@]}"} > "$out/$name.transpile.log" 2>&1; then
+            if ! "$NEPAC" -rewrite-nepa "$t" -o "$tsrc" -I "$dir" "${INCS[@]}" ${slots_args[@]+"${slots_args[@]}"} ${eh_args[@]+"${eh_args[@]}"} > "$out/$name.transpile.log" 2>&1; then
                 echo "FAIL  $name (transpile)"
                 sed 's/^/      /' "$out/$name.transpile.log" | head -12
                 FAIL=$((FAIL+1)); FAILED_CASES+=("$name"); return
@@ -149,7 +149,7 @@ run_case() {
 
         # 2. link them into one program together with the runtime
         if ! clang -std=c99 -fblocks -w "${INCS[@]}" \
-                "${objs[@]}" "$NOPA_INC/nopa/runtime.c" \
+                "${objs[@]}" "$NEPA_INC/nepa/runtime.c" \
                 -o "$out/$name.bin" > "$out/$name.link.log" 2>&1; then
         # A negative case may legitimately fail at LINK time. Under rule R2 a
         # class's metadata is emitted strong by the TU that owns its
@@ -226,7 +226,7 @@ run_case() {
     PASS=$((PASS+1))
 }
 
-echo "using nopac: $NOPAC"
+echo "using nepac: $NEPAC"
 echo "using clang: $(clang --version | head -1)"
 echo
 

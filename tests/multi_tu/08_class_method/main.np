@@ -11,7 +11,7 @@ int main() {
     Widget *w = [Widget create];
     printf("wid=%d\n", [w widgetId]);
     printf("helper=%d\n", FactoryHelper());
-    nopa_release(f);
-    nopa_release(w);
+    nepa_release(f);
+    nepa_release(w);
     return 0;
 }

@@ -1,31 +1,31 @@
 // Debug harness: parse a .np file, walk the CST, print array-related type info
 // for every variable declaration (recursing into function bodies).
-use nopa_parser::Parser;
+use nepa_parser::Parser;
 
-fn stmt_body(body: &Option<Box<nopa_cst::CstStmt>>) -> Vec<&nopa_cst::CstStmt> {
+fn stmt_body(body: &Option<Box<nepa_cst::CstStmt>>) -> Vec<&nepa_cst::CstStmt> {
     match body.as_deref() {
-        Some(nopa_cst::CstStmt { data: nopa_cst::CstStmtData::Compound(inner), .. }) => {
+        Some(nepa_cst::CstStmt { data: nepa_cst::CstStmtData::Compound(inner), .. }) => {
             inner.iter().collect()
         }
         _ => Vec::new(),
     }
 }
 
-fn print_decl(d: &nopa_cst::CstDecl, depth: usize) {
+fn print_decl(d: &nepa_cst::CstDecl, depth: usize) {
     let pad = "  ".repeat(depth);
     match &d.data {
-        nopa_cst::CstDeclData::Class { category_name, .. } => {
+        nepa_cst::CstDeclData::Class { category_name, .. } => {
             let cat = category_name.as_ref().map(|c| format!(" ({})", c)).unwrap_or_default();
             let kind_str = match d.kind {
-                nopa_cst::CstDeclKind::ClassInterface => "interface",
-                nopa_cst::CstDeclKind::ClassImplementation => "implementation",
+                nepa_cst::CstDeclKind::ClassInterface => "interface",
+                nepa_cst::CstDeclKind::ClassImplementation => "implementation",
                 _ => "class",
             };
             println!("{}{} {}{}", pad, kind_str, d.name.as_deref().unwrap_or("?"), cat);
         }
         _ => {}
     }
-    if let nopa_cst::CstDeclData::Variable { var_type, .. } = &d.data {
+    if let nepa_cst::CstDeclData::Variable { var_type, .. } = &d.data {
         if let Some(t) = var_type {
             println!(
                 "{}var '{}' is_array={} size={} size_name={:?} prim={:?} ptr={} block={}",
@@ -41,12 +41,12 @@ fn print_decl(d: &nopa_cst::CstDecl, depth: usize) {
         }
     }
     match &d.data {
-        nopa_cst::CstDeclData::Function { body, .. } => {
+        nepa_cst::CstDeclData::Function { body, .. } => {
             walk_stmts(&stmt_body(body), depth + 1);
         }
-        nopa_cst::CstDeclData::Class { methods, .. } => {
+        nepa_cst::CstDeclData::Class { methods, .. } => {
             for m in methods {
-                if let nopa_cst::CstDeclData::Function { body, .. } = &m.data {
+                if let nepa_cst::CstDeclData::Function { body, .. } = &m.data {
                     walk_stmts(&stmt_body(body), depth + 2);
                 }
             }
@@ -55,12 +55,12 @@ fn print_decl(d: &nopa_cst::CstDecl, depth: usize) {
     }
 }
 
-fn walk_stmts(stmts: &[&nopa_cst::CstStmt], depth: usize) {
+fn walk_stmts(stmts: &[&nepa_cst::CstStmt], depth: usize) {
     for s in stmts {
         match &s.data {
-            nopa_cst::CstStmtData::Compound(inner) => walk_stmts(&inner.iter().collect::<Vec<_>>(), depth + 1),
-            nopa_cst::CstStmtData::Decl(d) => print_decl(d, depth),
-            nopa_cst::CstStmtData::Expr(_) => {
+            nepa_cst::CstStmtData::Compound(inner) => walk_stmts(&inner.iter().collect::<Vec<_>>(), depth + 1),
+            nepa_cst::CstStmtData::Decl(d) => print_decl(d, depth),
+            nepa_cst::CstStmtData::Expr(_) => {
                 // Cannot recurse into expressions at stmt level without Expr walk; skip
             }
             _ => {}
@@ -78,11 +78,11 @@ fn main() {
         // Replicate pipeline's preprocess step: Foundation etc. gets inlined.
         let dir = std::path::Path::new(&path).parent().map(|p| p.to_string_lossy().to_string()).unwrap_or_default();
         let search_dirs: Vec<String> = vec![dir, "include".to_string(), "include/Foundation".to_string()];
-        let pre = nopa_preprocessor::Preprocessor::process_file(
-            &path, &search_dirs, &["__clang__", "__GNUC__", "__NOPA__"])
+        let pre = nepa_preprocessor::Preprocessor::process_file(
+            &path, &search_dirs, &["__clang__", "__GNUC__", "__NEPA__"])
             .expect("preprocess failed");
-        std::fs::write("/tmp/inline_dump.np", &pre.resolved_nopa).ok();
-        pre.resolved_nopa
+        std::fs::write("/tmp/inline_dump.np", &pre.resolved_nepa).ok();
+        pre.resolved_nepa
     } else {
         std::fs::read_to_string(&path).expect("read file")
     };

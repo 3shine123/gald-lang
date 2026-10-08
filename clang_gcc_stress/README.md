@@ -1,6 +1,6 @@
-# nopac 编译器扩展极端压测 — 全部缺口已修复
+# nepac 编译器扩展极端压测 — 全部缺口已修复
 
-本目录对 nopac 语法分析器做 clang/gcc 编译器扩展的极端压力测试，
+本目录对 nepac 语法分析器做 clang/gcc 编译器扩展的极端压力测试，
 记录**已支持**与**已修复**的构造。所有 17 个已发现的缺口均已修复，
 `run_stress.sh` 23/23 全绿。
 
@@ -55,8 +55,8 @@
 单文件调试：
 
 ```bash
-./target/debug/nopac -rewrite-nopa -backend clang clang_gcc_stress/clang_stress.np -o /tmp/x.c
-clang -I include -o /tmp/x /tmp/x.c include/nopa/runtime.c && /tmp/x
+./target/debug/nepac -rewrite-nepa -backend clang clang_gcc_stress/clang_stress.np -o /tmp/x.c
+clang -I include -o /tmp/x /tmp/x.c include/nepa/runtime.c && /tmp/x
 ```
 
 ## 已知限制

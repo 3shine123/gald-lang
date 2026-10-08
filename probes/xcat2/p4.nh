@@ -1,0 +1,7 @@
+#import <Foundation/Foundation.np>
+@interface Dog : NPObject
+- (instancetype)init;
+@end
+@interface Dog (Tracker)
+- (int)visits;
+@end

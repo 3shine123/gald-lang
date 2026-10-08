@@ -2,8 +2,8 @@
 // types? The end-to-end negative probe compiled and ran with no diagnostic, so
 // the annotation is being lost somewhere between parser and checker. Assert at
 // the earliest point to bisect the pipeline.
-use nopa_cst::*;
-use nopa_parser::Parser;
+use nepa_cst::*;
+use nepa_parser::Parser;
 
 fn methods_of(src: &str) -> Vec<(Option<Nullability>, Vec<(String, Nullability)>)> {
     let mut p = Parser::new(src);
@@ -267,7 +267,7 @@ fn double_ptr_postfix_annotates_middle_level() {
 fn double_ptr_prefix_is_rejected_like_clang() {
     // `nullable NPError * *` — which level did the author mean? clang refuses
     // to guess ("nullability specifier cannot be applied to non-pointer type
-    // 'Widget'", verified against the host SDK); nopa matches that and points
+    // 'Widget'", verified against the host SDK); nepa matches that and points
     // at the postfix spelling that annotates a chosen level.
     let mut p = Parser::new("void f(nullable NPError * * out);\n");
     p.parse_translation_unit();

@@ -1,5 +1,5 @@
 // MUST FAIL: `@{...}` entries have to be Objective-C objects. A bare scalar
-// key or value would otherwise reach `nopa_dictionary_create` as a non-object
+// key or value would otherwise reach `nepa_dictionary_create` as a non-object
 // vararg — it compiles and then reads garbage at runtime.
 #import <Foundation/Foundation.np>
 

@@ -1,7 +1,7 @@
-#include "nopa/binder.h"
-#include "nopa/parser.h"
-#include "nopa/lexer.h"
-#include "nopa/cst.h"
+#include "nepa/binder.h"
+#include "nepa/parser.h"
+#include "nepa/lexer.h"
+#include "nepa/cst.h"
 #include <stdio.h>
 #include <string.h>
 

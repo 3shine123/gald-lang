@@ -1,5 +1,5 @@
 // lang-test/roguelike_dungeon_test.np
-// Nopa 地牢探险游戏 - 纯文本 Roguelike
+// Nepa 地牢探险游戏 - 纯文本 Roguelike
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -89,7 +89,7 @@
     for (int i = 0; i < MAP_W; i++) printf("═");
     printf("╝%s\n", COLOR_RESET);
     printf("%s━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━%s\n", COLOR_CYAN, COLOR_RESET);
-    printf("  %sNopa 地牢探险%s  回合: %d\n", COLOR_YELLOW, COLOR_RESET, [self turnCount]);
+    printf("  %sNepa 地牢探险%s  回合: %d\n", COLOR_YELLOW, COLOR_RESET, [self turnCount]);
     printf("  [W]上 [S]下 [A]左 [D]右  [Q]退出\n");
     printf("  > ");
 }
@@ -114,7 +114,7 @@
 - (void)run {
     printf("\033[2J\033[H");
     printf("%s━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━%s\n", COLOR_CYAN, COLOR_RESET);
-    printf("  %s★ Nopa 地牢探险 ★%s\n", COLOR_YELLOW, COLOR_RESET);
+    printf("  %s★ Nepa 地牢探险 ★%s\n", COLOR_YELLOW, COLOR_RESET);
     printf("  按 [Enter] 开始...");
     fflush(stdout);
     char buf[16];

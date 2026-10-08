@@ -1,43 +1,84 @@
-#include "nopa/runtime.h"
+#include "nepa/runtime.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
 
-// ─── NOPA_CLASS_$_nopa_root (defined weak; codegen's nopa_metaInit fills it) ──
+// ─── NEPA_CLASS_$_nepa_root (defined weak; codegen's nepa_metaInit fills it) ──
 
-__attribute__((weak)) NPClass NOPA_CLASS_$_nopa_root;
+__attribute__((weak)) NPClass NEPA_CLASS_$_nepa_root;
+
+// ─── Protocol conformance (D5.2) ─────────────────────────────────────────────
+
+/* Does `set` of protocol `p` (recursively including parents) require every
+   required method that `target` requires? Name comparison only, colon-stripped
+   (the selector symbol convention). */
+static int proto_covers(const struct NPProtocol *p, const struct NPProtocol *target);
+
+static int proto_requires(const struct NPProtocol *p, const char *sel) {
+    for (int i = 0; i < p->required_count; i++) {
+        if (strcmp(p->required_methods[i].name, sel) == 0) return 1;
+    }
+    for (int i = 0; i < p->parent_count; i++) {
+        if (p->parents[i] && proto_requires(p->parents[i], sel)) return 1;
+    }
+    return 0;
+}
+
+static int proto_covers(const struct NPProtocol *p, const struct NPProtocol *target) {
+    if (!p || !target) return 0;
+    if (p == target) return 1;
+    if (p->name && target->name && strcmp(p->name, target->name) == 0) return 1;
+    /* structural: p requires everything target requires (with parents) */
+    for (int i = 0; i < target->required_count; i++) {
+        if (!proto_requires(p, target->required_methods[i].name)) return 0;
+    }
+    return 1;
+}
+
+static int class_conforms(const NPClass *cls, const struct NPProtocol *proto, int depth) {
+    if (!cls || !proto || depth > 32) return 0;
+    for (int i = 0; i < cls->protocol_count; i++) {
+        if (cls->protocols[i] && proto_covers(cls->protocols[i], proto)) return 1;
+    }
+    /* walk the superclass chain — conformance is inherited */
+    return cls->superclass ? class_conforms(cls->superclass, proto, depth + 1) : 0;
+}
+
+int nepa_class_conformsToProtocol(NPClass *cls, struct NPProtocol *proto) {
+    return class_conforms(cls, proto, 0);
+}
 
 // ─── Exception globals ────────────────────────────────────────────────────────
 
-#ifdef __NOPA_FREESTANDING
-jmp_buf __nopa_exception_buf;
-id      __nopa_exception_value;
+#ifdef __NEPA_FREESTANDING
+jmp_buf __nepa_exception_buf;
+id      __nepa_exception_value;
 #else
-__thread jmp_buf __nopa_exception_buf;
-__thread id     __nopa_exception_value;
+__thread jmp_buf __nepa_exception_buf;
+__thread id     __nepa_exception_value;
 #endif
 
 // ─── Checked-exception (Swift-scheme) error flag ──────────────────────────────
 
-#ifdef __NOPA_FREESTANDING
-int __nopa_eh_flag;
-id   __nopa_eh_val;
+#ifdef __NEPA_FREESTANDING
+int __nepa_eh_flag;
+id   __nepa_eh_val;
 #else
-__thread int __nopa_eh_flag;
-__thread id   __nopa_eh_val;
+__thread int __nepa_eh_flag;
+__thread id   __nepa_eh_val;
 #endif
 
-int __nopa_eh_isa(NPObject *obj, NPClass *cls) {
+int __nepa_eh_isa(NPObject *obj, NPClass *cls) {
     if (!obj || !cls) return 0;
-    return nopa_isKindOf(obj, cls) ? 1 : 0;
+    return nepa_isKindOf(obj, cls) ? 1 : 0;
 }
 
 // Uncaught checked exception: an exception escaped `main` (flag still armed at
 // the function-tail guard of main). Mirror ObjC's wording on stderr, then
 // abort — the process MUST NOT exit 0 with an exception in flight.
-void nopa_eh_uncaught(void) {
-    const char *cls = (__nopa_eh_val && __nopa_eh_val->isa && __nopa_eh_val->isa->name)
-        ? __nopa_eh_val->isa->name : "?";
+void nepa_eh_uncaught(void) {
+    const char *cls = (__nepa_eh_val && __nepa_eh_val->isa && __nepa_eh_val->isa->name)
+        ? __nepa_eh_val->isa->name : "?";
     fprintf(stderr, "*** Terminating app due to uncaught exception of class '%s'\n", cls);
     abort();
 }
@@ -65,7 +106,7 @@ static WeakEntry *find_entry(NPObject *target) {
     return NULL;
 }
 
-void nopa_weakRegister(NPObject **weak_loc, NPObject *target) {
+void nepa_weakRegister(NPObject **weak_loc, NPObject *target) {
     if (!target || !weak_loc) return;
     WeakEntry *entry = find_entry(target);
     if (!entry) {
@@ -83,7 +124,7 @@ void nopa_weakRegister(NPObject **weak_loc, NPObject *target) {
     entry->slots[entry->count++] = weak_loc;
 }
 
-void nopa_weakUnregister(NPObject **weak_loc) {
+void nepa_weakUnregister(NPObject **weak_loc) {
     if (!weak_loc) return;
     for (int i = 0; i < weak_entries; i++) {
         WeakEntry *entry = &weak_table[i];
@@ -96,7 +137,7 @@ void nopa_weakUnregister(NPObject **weak_loc) {
     }
 }
 
-void nopa_weakClearAll(NPObject *target) {
+void nepa_weakClearAll(NPObject *target) {
     if (!target) return;
     for (int i = 0; i < weak_entries; i++) {
         WeakEntry *entry = &weak_table[i];
@@ -111,8 +152,8 @@ void nopa_weakClearAll(NPObject *target) {
     }
 }
 
-void nopa_weakAutoCleanup(void *ptr) {
-    nopa_weakUnregister((NPObject **)ptr);
+void nepa_weakAutoCleanup(void *ptr) {
+    nepa_weakUnregister((NPObject **)ptr);
 }
 
 // ─── @synchronized monitors ──────────────────────────────────────────────────
@@ -121,15 +162,15 @@ void nopa_weakAutoCleanup(void *ptr) {
 // Hosted implementation: C11 atomics — `atomic_flag` test_and_set is a lock
 // primitive on every platform clang targets here, no pthread dependency, no
 // allocation, no table-growth ceiling. A thread that returns from
-// nopa_syncLock owns bucket[b] until the matching nopa_syncUnlock.
+// nepa_syncLock owns bucket[b] until the matching nepa_syncUnlock.
 
 #include <stdatomic.h>
 
-#define NOPA_SYNC_BUCKETS 256
+#define NEPA_SYNC_BUCKETS 256
 
-static atomic_flag nopa_sync_flags[NOPA_SYNC_BUCKETS];
+static atomic_flag nepa_sync_flags[NEPA_SYNC_BUCKETS];
 
-static unsigned nopa_sync_hash(void *object) {
+static unsigned nepa_sync_hash(void *object) {
     unsigned long v = (unsigned long)(uintptr_t)object;
     unsigned hash = 0x811C9DC5u;
     for (unsigned i = 0; i < sizeof(void *); i++) {
@@ -137,24 +178,24 @@ static unsigned nopa_sync_hash(void *object) {
         hash *= 0x01000193u;
         v >>= 8;
     }
-    return hash % NOPA_SYNC_BUCKETS;
+    return hash % NEPA_SYNC_BUCKETS;
 }
 
-long nopa_syncLock(void *object) {
-    unsigned b = nopa_sync_hash(object);
-    while (atomic_flag_test_and_set_explicit(&nopa_sync_flags[b], memory_order_acquire)) {
+long nepa_syncLock(void *object) {
+    unsigned b = nepa_sync_hash(object);
+    while (atomic_flag_test_and_set_explicit(&nepa_sync_flags[b], memory_order_acquire)) {
         // spin
     }
     return (long)b;
 }
 
-void nopa_syncUnlock(long bucket) {
-    if (bucket < 0 || bucket >= NOPA_SYNC_BUCKETS) return;
-    atomic_flag_clear_explicit(&nopa_sync_flags[bucket], memory_order_release);
+void nepa_syncUnlock(long bucket) {
+    if (bucket < 0 || bucket >= NEPA_SYNC_BUCKETS) return;
+    atomic_flag_clear_explicit(&nepa_sync_flags[bucket], memory_order_release);
 }
 
-void nopa_syncAutoCleanup(void *ptr) {
-    nopa_syncUnlock(*(long *)ptr);
+void nepa_syncAutoCleanup(void *ptr) {
+    nepa_syncUnlock(*(long *)ptr);
 }
 
 // ─── Selectors ───────────────────────────────────────────────────────────────
@@ -171,7 +212,7 @@ SEL sel_registerName(const char *name) {
 
 // ─── Type introspection ─────────────────────────────────────────────────────────
 
-BOOL nopa_isKindOf(NPObject *obj, NPClass *cls) {
+BOOL nepa_isKindOf(NPObject *obj, NPClass *cls) {
     if (!obj || !cls) return 0;
     NPClass *isa = obj->isa;
     while (isa) {
@@ -183,33 +224,33 @@ BOOL nopa_isKindOf(NPObject *obj, NPClass *cls) {
 
 /* Official ObjC spelling of isKindOf: (kept as a compatible alias).
  * Same isa-chain walk. */
-BOOL nopa_isKindOfClass(NPObject *obj, NPClass *cls) {
-    return nopa_isKindOf(obj, cls);
+BOOL nepa_isKindOfClass(NPObject *obj, NPClass *cls) {
+    return nepa_isKindOf(obj, cls);
 }
 
 // ─── Autorelease pool ─────────────────────────────────────────────────────────
 
-struct nopa_autoreleasepool {
-    struct nopa_autoreleasepool *next;
+struct nepa_autoreleasepool {
+    struct nepa_autoreleasepool *next;
     NPObject **objects;
     int count;
     int capacity;
 };
 
-static __thread nopa_autoreleasepool_t *current_pool = NULL;
+static __thread nepa_autoreleasepool_t *current_pool = NULL;
 
-nopa_autoreleasepool_t *nopa_autoreleasepoolPush(void) {
-    nopa_autoreleasepool_t *pool = calloc(1, sizeof(nopa_autoreleasepool_t));
+nepa_autoreleasepool_t *nepa_autoreleasepoolPush(void) {
+    nepa_autoreleasepool_t *pool = calloc(1, sizeof(nepa_autoreleasepool_t));
     if (!pool) return NULL;
     pool->next = current_pool;
     current_pool = pool;
     return pool;
 }
 
-void nopa_autoreleasepoolPop(nopa_autoreleasepool_t *pool) {
+void nepa_autoreleasepoolPop(nepa_autoreleasepool_t *pool) {
     if (!pool) return;
     for (int i = 0; i < pool->count; i++) {
-        nopa_release(pool->objects[i]);
+        nepa_release(pool->objects[i]);
     }
     free(pool->objects);
     current_pool = pool->next;
@@ -218,7 +259,7 @@ void nopa_autoreleasepoolPop(nopa_autoreleasepool_t *pool) {
 
 // ─── Lifecycle ───────────────────────────────────────────────────────────────
 
-NPObject *nopa_alloc(NPClass *cls) {
+NPObject *nepa_alloc(NPClass *cls) {
     if (!cls) return NULL;
     NPObject *obj = (NPObject *)calloc(1, cls->instance_size);
     if (obj) {
@@ -228,24 +269,24 @@ NPObject *nopa_alloc(NPClass *cls) {
     return obj;
 }
 
-NPObject *nopa_init(NPObject *self) {
+NPObject *nepa_init(NPObject *self) {
     return self;
 }
 
-// ─── Refcount debug trace (NOPA_REFCOUNT_DEBUG) ─────────────────────────────
+// ─── Refcount debug trace (NEPA_REFCOUNT_DEBUG) ─────────────────────────────
 // Purely a debug aid: reads the env var once, then prints every retain /
 // release event to stderr. Default OFF — zero behavior change when unset.
 // Static language note: this is plain C control flow baked in at compile
 // time; it adds no runtime dynamism to the language itself.
-static int nopa_rc_debug = -1;   // -1 = not yet resolved
+static int nepa_rc_debug = -1;   // -1 = not yet resolved
 
-static int nopa_rc_debug_enabled(void) {
-    if (nopa_rc_debug < 0)
-        nopa_rc_debug = getenv("NOPA_REFCOUNT_DEBUG") != NULL;
-    return nopa_rc_debug;
+static int nepa_rc_debug_enabled(void) {
+    if (nepa_rc_debug < 0)
+        nepa_rc_debug = getenv("NEPA_REFCOUNT_DEBUG") != NULL;
+    return nepa_rc_debug;
 }
 
-static void nopa_rc_trace(const char *op, NPObject *obj, uint32_t rc_after, const char *note) {
+static void nepa_rc_trace(const char *op, NPObject *obj, uint32_t rc_after, const char *note) {
     const char *cls = (obj->isa && obj->isa->name) ? obj->isa->name : "?";
     if (note)
         fprintf(stderr, "[rc] %s %p %s rc=%u (%s)\n", op, (void *)obj, cls, rc_after, note);
@@ -253,31 +294,31 @@ static void nopa_rc_trace(const char *op, NPObject *obj, uint32_t rc_after, cons
         fprintf(stderr, "[rc] %s %p %s rc=%u\n", op, (void *)obj, cls, rc_after);
 }
 
-NPObject *nopa_retain(NPObject *obj) {
+NPObject *nepa_retain(NPObject *obj) {
     if (!obj) return NULL;
     obj->retain_count++;
-    if (nopa_rc_debug_enabled())
-        nopa_rc_trace("retain", obj, obj->retain_count, NULL);
+    if (nepa_rc_debug_enabled())
+        nepa_rc_trace("retain", obj, obj->retain_count, NULL);
     return obj;
 }
 
-void nopa_release(NPObject *obj) {
+void nepa_release(NPObject *obj) {
     if (!obj) return;
     if (obj->retain_count > 0)
         obj->retain_count--;
-    if (nopa_rc_debug_enabled()) {
+    if (nepa_rc_debug_enabled()) {
         // Under-counting release (already at 0) is a bug worth flagging.
         const char *note = (obj->retain_count == 0 && obj->isa && obj->isa->dealloc)
             ? "dealloc" : NULL;
-        nopa_rc_trace("release", obj, obj->retain_count, note);
+        nepa_rc_trace("release", obj, obj->retain_count, note);
     }
     if (obj->retain_count == 0) {
         // Zero weak references BEFORE dealloc: dealloc may free other objects
         // (strong ivars) whose memory holds a weak slot pointing back to us
         // (e.g. a child's `__weak parent`). Zeroing first avoids a use-after-free.
-        nopa_weakClearAll(obj);
+        nepa_weakClearAll(obj);
         // Call dealloc so ivar cleanup runs. dealloc's `[super dealloc]` calls
-        // the parent's dealloc directly (not nopa_release), so no double-free.
+        // the parent's dealloc directly (not nepa_release), so no double-free.
         if (obj->isa && obj->isa->dealloc) {
             obj->isa->dealloc(obj, (SEL){ .name = "dealloc", .hash = 0xD9929EB3 });
         }
@@ -285,9 +326,9 @@ void nopa_release(NPObject *obj) {
     }
 }
 
-NPObject *nopa_autorelease(NPObject *obj) {
+NPObject *nepa_autorelease(NPObject *obj) {
     if (!obj) return obj;
-    nopa_autoreleasepool_t *pool = current_pool;
+    nepa_autoreleasepool_t *pool = current_pool;
     if (!pool) return obj;
     if (pool->count >= pool->capacity) {
         pool->capacity = pool->capacity ? pool->capacity * 2 : 16;
@@ -299,7 +340,7 @@ NPObject *nopa_autorelease(NPObject *obj) {
 }
 
 // ─── String literals ──────────────────────────────────────────────────────────
-// nopa_stringFromCstr is emitted by the codegen in the generated C code.
+// nepa_stringFromCstr is emitted by the codegen in the generated C code.
 // The runtime.h declaration is used by the generated code to call it.
 // When NPString is not present, @"..." falls back to a regular C string literal.
 
@@ -310,7 +351,7 @@ NPObject *nopa_autorelease(NPObject *obj) {
 // created it (milestone 1). `parent` exists for milestone 2 (task graphs
 // where a suspended task resumes its awaiter).
 
-NPTask *nopa_task_create(nopa_task_entry_fn entry, NPObject *self_obj, size_t frame_size) {
+NPTask *nepa_task_create(nepa_task_entry_fn entry, NPObject *self_obj, size_t frame_size) {
     NPTask *t = (NPTask *)calloc(1, sizeof(NPTask));
     if (!t) return NULL;
     t->state = 1;   /* state 1 = the entry's first case; 0 means "not started" */
@@ -323,7 +364,7 @@ NPTask *nopa_task_create(nopa_task_entry_fn entry, NPObject *self_obj, size_t fr
     return t;
 }
 
-int nopa_task_resume(NPTask *task) {
+int nepa_task_resume(NPTask *task) {
     if (!task || task->finished) return 1;
     if (task->entry) {
         if (task->entry(task) != 0) {
@@ -335,14 +376,14 @@ int nopa_task_resume(NPTask *task) {
     return task->finished ? 1 : 0;
 }
 
-void nopa_task_finish(NPTask *task) {
+void nepa_task_finish(NPTask *task) {
     if (task) task->finished = 1;
 }
 
-void *nopa_task_join(NPTask *task) {
+void *nepa_task_join(NPTask *task) {
     if (!task) return NULL;
     while (!task->finished) {
-        (void)nopa_task_resume(task);
+        (void)nepa_task_resume(task);
     }
     void *result = task->result;
     if (task->frame) free(task->frame);
@@ -357,7 +398,7 @@ void *nopa_task_join(NPTask *task) {
 // mirrors that layout here to reach `_cstr` without depending on the generated
 // header. Keep in sync with NPString.nh (isa/retain_count base + _cstr/_length/
 // _hash/_hashIsValid).
-struct __nopa_npstring_layout {
+struct __nepa_npstring_layout {
     void *isa;
     uint32_t retain_count;
     char *_cstr;
@@ -367,7 +408,7 @@ struct __nopa_npstring_layout {
 };
 
 void NPLog(NPString *format, ...) {
-    const char *cstr = format ? ((struct __nopa_npstring_layout *)format)->_cstr : "";
+    const char *cstr = format ? ((struct __nepa_npstring_layout *)format)->_cstr : "";
     va_list args;
     va_start(args, format);
     vfprintf(stderr, cstr ? cstr : "", args);
@@ -376,24 +417,24 @@ void NPLog(NPString *format, ...) {
 }
 
 void __NPLogv(NPString *format, va_list args) {
-    const char *cstr = format ? ((struct __nopa_npstring_layout *)format)->_cstr : "";
+    const char *cstr = format ? ((struct __nepa_npstring_layout *)format)->_cstr : "";
     vfprintf(stderr, cstr ? cstr : "", args);
     fprintf(stderr, "\n");
 }
 
 // ─── KVC lookup (NPPredicate support) ───────────────────────────────────────
 
-// Walk obj's isa chain and scan each class's NOPA_KVC_$_<Class> table for
+// Walk obj's isa chain and scan each class's NEPA_KVC_$_<Class> table for
 // `key`. Codegen emits the tables (see doc/nppredicate_plan.md §2); classes
 // compiled without KVC emission leave the field NULL and the walk continues
 // to the superclass. The getter itself is an ordinary static vtable dispatch,
 // so this is table-driven lookup, never reflection.
-id nopa_kvc_value(id obj, const char *key) {
+id nepa_kvc_value(id obj, const char *key) {
     if (!obj || !key) return NULL;
-    // Every object (NPObject or nopa_root) starts with the isa pointer.
+    // Every object (NPObject or nepa_root) starts with the isa pointer.
     NPClass *cls = *(NPClass **)obj;
     for (int depth = 0; cls && depth < 64; cls = cls->superclass, depth++) {
-        const nopa_kvc_entry *e = cls->kvc_entries;
+        const nepa_kvc_entry *e = cls->kvc_entries;
         if (!e) continue;
         for (; e->key; e++) {
             if (strcmp(e->key, key) == 0) {

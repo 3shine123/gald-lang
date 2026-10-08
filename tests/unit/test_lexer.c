@@ -1,5 +1,5 @@
-#include "nopa/lexer.h"
-#include "nopa/token.h"
+#include "nepa/lexer.h"
+#include "nepa/token.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>

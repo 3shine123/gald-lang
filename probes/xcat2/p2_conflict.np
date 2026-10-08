@@ -1,0 +1,14 @@
+#import <Foundation/Foundation.np>
+@interface Dog : NPObject
+- (int)trickCount;
+@end
+@interface Dog (Tricks)
+- (int)trickCount;
+@end
+@implementation Dog
+- (int)trickCount { return 1; }
+@end
+@implementation Dog (Tricks)
+- (int)trickCount { return 2; }
+@end
+int main(void) { Dog *d = [[Dog alloc] init]; printf("%d\n", [d trickCount]); return 0; }

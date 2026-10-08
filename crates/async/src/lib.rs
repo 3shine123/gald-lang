@@ -21,7 +21,7 @@
 //!   2. diagnostics: calling a non-void async method from a sync context,
 //!   3. `@try` spanning an await rejection.
 
-use nopa_ast::{AstDecl, AstDeclData, AstExpr, AstExprData, AstExprKind, AstStmt, AstStmtData};
+use nepa_ast::{AstDecl, AstDeclData, AstExpr, AstExprData, AstExprKind, AstStmt, AstStmtData};
 
 /// A method classified as async, with the data the desugar needs.
 pub struct AsyncMethod<'a> {
@@ -137,7 +137,7 @@ pub struct AsyncDiagnostics {
 /// - reject calling a non-void async method from a synchronous context
 ///   (methods not classified async). Milestone 1 reports these; call-graph
 ///   precision improves in later milestones.
-pub fn check_unit(unit: &nopa_ast::AstUnit) -> AsyncDiagnostics {
+pub fn check_unit(unit: &nepa_ast::AstUnit) -> AsyncDiagnostics {
     let mut diags = AsyncDiagnostics { errors: Vec::new(), warnings: Vec::new() };
 
     // ── NPAsync<T> marker reconciliation (AGENTS.md `NPAsync<T>` section) ──
@@ -198,7 +198,7 @@ pub fn check_unit(unit: &nopa_ast::AstUnit) -> AsyncDiagnostics {
             for m in methods {
                 if let (AstDeclData::Method { return_type, .. }, Some(sym)) = (&m.data, &m.name) {
                     let rt_void = return_type.as_ref().map_or(true, |t| {
-                        t.prim == nopa_cst::TypePrim::Void && !t.is_pointer
+                        t.prim == nepa_cst::TypePrim::Void && !t.is_pointer
                     });
                     if method_is_async(m) {
                         async_methods.push((sym.clone(), rt_void));
@@ -381,13 +381,13 @@ fn check_expr_sync_calls(
 /// Rewrite an async method body into the M1 task-driven form:
 ///
 /// ```text
-///     { NPTask *__nopa_task = nopa_task_create(entry_stub, (NPObject *)self, 0);
+///     { NPTask *__nepa_task = nepa_task_create(entry_stub, (NPObject *)self, 0);
 ///       ...original body with `await e` lowered...
-///       nopa_task_join(__nopa_task); }
+///       nepa_task_join(__nepa_task); }
 /// ```
 ///
 
-/// `await e` lowers to `(*__nopa_task->entry)(__nopa_task), (e)` — evaluate
+/// `await e` lowers to `(*__nepa_task->entry)(__nepa_task), (e)` — evaluate
 /// the task's next segment (M1: the entry stub is a no-op returning 1, so
 /// this is a pure sequencing hook), then the awaited expression. This keeps
 /// the AST/observable behavior of M1 identical to synchronous execution while
@@ -399,8 +399,8 @@ fn check_expr_sync_calls(
 /// their return value flows through the expression normally (only callable
 /// from async contexts per the check pass).
 pub fn desugar_method_body(body: &mut AstStmt) {
-    use nopa_ast::{AstStmtKind, AstType};
-    use nopa_cst::TypePrim;
+    use nepa_ast::{AstStmtKind, AstType};
+    use nepa_cst::TypePrim;
 
     let line = body.line;
     let col = body.col;
@@ -442,7 +442,7 @@ pub fn desugar_method_body(body: &mut AstStmt) {
         match &mut e.data {
             AstExprData::Await(inner) => {
                 lower_awaits_expr(inner);
-                // `await e` → `nopa_task_resume(task), (e)`
+                // `await e` → `nepa_task_resume(task), (e)`
                 // Comma: first the hook (advances the task state machine),
                 // then the awaited expression's value is the result. (M1: entry is
                 // NULL so resume finishes the task immediately and returns 1 — a
@@ -451,11 +451,11 @@ pub fn desugar_method_body(body: &mut AstStmt) {
                     kind: AstExprKind::FuncCall, expr_type: None, line, col,
                     data: AstExprData::FuncCall {
                         func: None,
-                        name: "nopa_task_resume".to_string(),
+                        name: "nepa_task_resume".to_string(),
                         callee: None,
                         args: vec![AstExpr {
                             kind: AstExprKind::VarRef, expr_type: None, line, col,
-                            data: AstExprData::VarRef { sym: None, name: "__nopa_task".to_string() },
+                            data: AstExprData::VarRef { sym: None, name: "__nepa_task".to_string() },
                         }],
                     },
                 };
@@ -515,7 +515,7 @@ pub fn desugar_method_body(body: &mut AstStmt) {
         kind: AstExprKind::FuncCall, expr_type: None, line, col,
         data: AstExprData::FuncCall {
             func: None,
-            name: "nopa_task_create".to_string(),
+            name: "nepa_task_create".to_string(),
             callee: None,
             args: vec![
                 AstExpr { kind: AstExprKind::Int, expr_type: None, line, col, data: AstExprData::Int(0) }, // entry: NULL (M1)
@@ -525,8 +525,8 @@ pub fn desugar_method_body(body: &mut AstStmt) {
         },
     };
     let task_decl = AstDecl {
-        kind: nopa_ast::AstDeclKind::Variable,
-        name: Some("__nopa_task".to_string()),
+        kind: nepa_ast::AstDeclKind::Variable,
+        name: Some("__nepa_task".to_string()),
         line, col,
         data: AstDeclData::Variable {
             var_type: Some(Box::new({
@@ -550,11 +550,11 @@ pub fn desugar_method_body(body: &mut AstStmt) {
             kind: AstExprKind::FuncCall, expr_type: None, line, col,
             data: AstExprData::FuncCall {
                 func: None,
-                name: "nopa_task_join".to_string(),
+                name: "nepa_task_join".to_string(),
                 callee: None,
                 args: vec![AstExpr {
                     kind: AstExprKind::VarRef, expr_type: None, line, col,
-                    data: AstExprData::VarRef { sym: None, name: "__nopa_task".to_string() },
+                    data: AstExprData::VarRef { sym: None, name: "__nepa_task".to_string() },
                 }],
             },
         }),
@@ -571,7 +571,7 @@ pub fn desugar_method_body(body: &mut AstStmt) {
 }
 
 /// Apply the desugar over the whole unit: rewrite every async method body.
-pub fn desugar_unit(unit: &mut nopa_ast::AstUnit) {
+pub fn desugar_unit(unit: &mut nepa_ast::AstUnit) {
     for decl in &mut unit.decls {
         if let AstDeclData::Class { methods, .. } = &mut decl.data {
             for m in methods.iter_mut() {
@@ -587,8 +587,8 @@ pub fn desugar_unit(unit: &mut nopa_ast::AstUnit) {
 
 // ─── Milestone 2: real state machine (frame + entry fn + driver) ────────────
 
-use nopa_ast::{AstDeclKind, AstStmtKind, AstType};
-use nopa_cst::TypePrim;
+use nepa_ast::{AstDeclKind, AstStmtKind, AstType};
+use nepa_cst::TypePrim;
 
 /// Named struct field type for the frame: `struct <Method>_frame`.
 fn frame_type_name(symbol: &str) -> String {
@@ -633,12 +633,12 @@ pub fn desugar_method_m2(
     // struct bodies, leaving `sizeof(struct …_frame)` on an incomplete type.
     // Pad so the frame is always a complete type.
     if frame_fields.is_empty() {
-        frame_fields.push(("__nopa_pad".to_string(), AstType::new(TypePrim::Char)));
+        frame_fields.push(("__nepa_pad".to_string(), AstType::new(TypePrim::Char)));
     }
 
     let ftname = frame_type_name(method_symbol);
     let flat = sanitize_symbol(method_symbol);
-    let entry_name = format!("nopa_async_state_{}", flat);
+    let entry_name = format!("nepa_async_state_{}", flat);
 
     // 2. Frame typedef decl.
     // Fields use the Ivar variant: codegen's Struct branch reads
@@ -685,7 +685,7 @@ pub fn desugar_method_m2(
     let final_state = state_counter;
 
     // 4. Entry function:
-    //   static int nopa_async_state_<M>(NPTask *t) {
+    //   static int nepa_async_state_<M>(NPTask *t) {
     //     struct <M>_frame *f = (struct <M>_frame *)t->frame;  // M3 uses f
     //     switch (t->state) {
     //       case 1: ...body with lowered awaits...
@@ -713,7 +713,7 @@ pub fn desugar_method_m2(
     // (f = the frame) and `self` to `t->self_obj`, then rewrite returns to
     // the completion protocol (result/state/return 1).
     let mut case_body_stmts = body_stmts;
-    // Only params are rewritten to `__nopa_f->param` (the frame carries them
+    // Only params are rewritten to `__nepa_f->param` (the frame carries them
     // across the entry boundary). Body-internal locals stay on the C stack:
     // in M2's synchronous-drive model there is no suspension between their
     // declaration and last use, so rewriting their reads to the (never
@@ -728,7 +728,7 @@ pub fn desugar_method_m2(
         kind: AstStmtKind::Decl, line: body.line, col: body.col,
         data: AstStmtData::Decl(AstDecl {
             kind: AstDeclKind::Variable,
-            name: Some("__nopa_f".to_string()),
+            name: Some("__nepa_f".to_string()),
             line: body.line, col: body.col,
             data: AstDeclData::Variable {
                 var_type: Some(Box::new({
@@ -868,13 +868,13 @@ pub fn desugar_method_m2(
     top_decls.push(entry_decl);
 
     // 5. Rewrite the method body: create + join + return cast result.
-    //    NPTask *t = nopa_task_create(nopa_async_state_<M>, self, sizeof(struct <M>_frame));
-    //    join → nopa_task_join(t) discards; result read needs join to return it:
-    //    use (return_type)(long)nopa_task_join(t) for non-void, else plain join.
+    //    NPTask *t = nepa_task_create(nepa_async_state_<M>, self, sizeof(struct <M>_frame));
+    //    join → nepa_task_join(t) discards; result read needs join to return it:
+    //    use (return_type)(long)nepa_task_join(t) for non-void, else plain join.
     let create_call = AstExpr {
         kind: AstExprKind::FuncCall, expr_type: None, line: body.line, col: body.col,
         data: AstExprData::FuncCall {
-            func: None, name: "nopa_task_create".to_string(), callee: None,
+            func: None, name: "nepa_task_create".to_string(), callee: None,
             args: vec![
                 ident_expr(&entry_name, body.line, body.col),
                 ident_expr("self", body.line, body.col),
@@ -904,7 +904,7 @@ pub fn desugar_method_m2(
     let create_call = AstExpr {
         kind: AstExprKind::FuncCall, expr_type: None, line: body.line, col: body.col,
         data: AstExprData::FuncCall {
-            func: None, name: "nopa_task_create".to_string(), callee: None,
+            func: None, name: "nepa_task_create".to_string(), callee: None,
             args: vec![
                 ident_expr(&entry_name, body.line, body.col),
                 ident_expr("self", body.line, body.col),
@@ -913,14 +913,14 @@ pub fn desugar_method_m2(
         },
     };
     // Driver: task create FIRST, then fill frame params, then join.
-    // ((struct <M>_frame *)__nopa_task->frame)->param = param;
+    // ((struct <M>_frame *)__nepa_task->frame)->param = param;
     let mut pre: Vec<AstStmt> = Vec::new();
     let task_decl = AstDecl {
         kind: AstDeclKind::Variable,
-        name: Some("__nopa_task".to_string()),
+        name: Some("__nepa_task".to_string()),
         line: body.line, col: body.col,
         data: AstDeclData::Variable {
-            var_type: Some(Box::new(nopa_task_ptr_type())),
+            var_type: Some(Box::new(nepa_task_ptr_type())),
             init: Some(Box::new(create_call)),
             is_static: false, is_extern: false, is_const: false,
             is_block_qual: false, is_weak: false, next: None,
@@ -929,7 +929,7 @@ pub fn desugar_method_m2(
     };
     pre.push(AstStmt { kind: AstStmtKind::Decl, line: body.line, col: body.col, data: AstStmtData::Decl(task_decl) });
     for (pname, _) in params {
-        // obj expr: (struct FT *)(__nopa_task->frame)
+        // obj expr: (struct FT *)(__nepa_task->frame)
         let frame_access = AstExpr {
             kind: AstExprKind::Cast, expr_type: None, line: body.line, col: body.col,
             data: AstExprData::Cast {
@@ -942,7 +942,7 @@ pub fn desugar_method_m2(
                     t.subtype = Some(Box::new(st));
                     t
                 },
-                expr: Box::new(member_expr("__nopa_task", "frame", body.line, body.col)),
+                expr: Box::new(member_expr("__nepa_task", "frame", body.line, body.col)),
             },
         };
         pre.push(AstStmt {
@@ -968,14 +968,14 @@ pub fn desugar_method_m2(
     let is_void = return_type.map_or(true, |t| t.prim == TypePrim::Void && !t.is_pointer);
     let mut post: Vec<AstStmt> = Vec::new();
     if is_void {
-        post.push(call_stmt("nopa_task_join", vec![ident_expr("__nopa_task", body.line, body.col)], body.line, body.col));
+        post.push(call_stmt("nepa_task_join", vec![ident_expr("__nepa_task", body.line, body.col)], body.line, body.col));
     } else {
-        // long __nopa_r = (long)nopa_task_join(t);
+        // long __nepa_r = (long)nepa_task_join(t);
         post.push(AstStmt {
             kind: AstStmtKind::Decl, line: body.line, col: body.col,
             data: AstStmtData::Decl(AstDecl {
                 kind: AstDeclKind::Variable,
-                name: Some("__nopa_r".to_string()),
+                name: Some("__nepa_r".to_string()),
                 line: body.line, col: body.col,
                 data: AstDeclData::Variable {
                     var_type: Some(Box::new(AstType::new(TypePrim::Long))),
@@ -983,7 +983,7 @@ pub fn desugar_method_m2(
                         kind: AstExprKind::Cast, expr_type: None, line: body.line, col: body.col,
                         data: AstExprData::Cast {
                             target_type: AstType::new(TypePrim::Long),
-                            expr: Box::new(call_expr("nopa_task_join", vec![ident_expr("__nopa_task", body.line, body.col)], body.line, body.col)),
+                            expr: Box::new(call_expr("nepa_task_join", vec![ident_expr("__nepa_task", body.line, body.col)], body.line, body.col)),
                         },
                     })),
                     is_static: false, is_extern: false, is_const: false,
@@ -1011,7 +1011,7 @@ pub fn desugar_method_m2(
     out.extend(rewritten);
     out.extend(post);
     if !is_void {
-        // return (T)__nopa_r;
+        // return (T)__nepa_r;
         let rt = return_type.cloned().unwrap_or_else(|| AstType::new(TypePrim::Int));
         out.push(AstStmt {
             kind: AstStmtKind::Return, line: body.line, col: body.col,
@@ -1019,7 +1019,7 @@ pub fn desugar_method_m2(
                 kind: AstExprKind::Cast, expr_type: None, line: body.line, col: body.col,
                 data: AstExprData::Cast {
                     target_type: rt.clone(),
-                    expr: Box::new(ident_expr("__nopa_r", body.line, body.col)),
+                    expr: Box::new(ident_expr("__nepa_r", body.line, body.col)),
                 },
             }))),
         });
@@ -1123,7 +1123,7 @@ fn lower_awaits_m2_expr(e: &mut AstExpr, state: &mut i32) {
     }
 }
 
-/// Rewrite references inside the entry body: params → `__nopa_f->param`,
+/// Rewrite references inside the entry body: params → `__nepa_f->param`,
 /// `self` → `t->self_obj`. The entry only receives the task, so all
 /// param/self access must go through the frame / task.
 fn rewrite_entry_refs_stmt(s: &mut AstStmt, params: &[(String, AstType)]) {
@@ -1169,8 +1169,8 @@ fn rewrite_entry_refs_expr(e: &mut AstExpr, params: &[(String, AstType)]) {
                 // t->self_obj
                 *e = member_expr("t", "self_obj", line, col);
             } else if params.iter().any(|(n, _)| n == name) {
-                // __nopa_f->param
-                *e = member_expr("__nopa_f", name, line, col);
+                // __nepa_f->param
+                *e = member_expr("__nepa_f", name, line, col);
             }
         }
         AstExprData::MsgSend { receiver, args, .. } => {
@@ -1338,7 +1338,7 @@ fn call_stmt(name: &str, args: Vec<AstExpr>, line: usize, col: usize) -> AstStmt
     AstStmt { kind: AstStmtKind::Expr, line, col, data: AstStmtData::Expr(call_expr(name, args, line, col)) }
 }
 
-fn nopa_task_ptr_type() -> AstType {
+fn nepa_task_ptr_type() -> AstType {
     let mut inner = AstType::new(TypePrim::Named);
     inner.name = Some("NPTask".to_string());
     let mut t = AstType::new(TypePrim::Named);
@@ -1348,14 +1348,14 @@ fn nopa_task_ptr_type() -> AstType {
 }
 
 /// Build a CstParam for the entry function's `(NPTask *t)`.
-fn cst_param(type_name: &str, name: &str) -> nopa_cst::CstParam {
-    let mut t = nopa_cst::CstType::new(TypePrim::Named);
+fn cst_param(type_name: &str, name: &str) -> nepa_cst::CstParam {
+    let mut t = nepa_cst::CstType::new(TypePrim::Named);
     t.name = Some(type_name.to_string());
-    let mut ptr = nopa_cst::CstType::new(TypePrim::Named);
+    let mut ptr = nepa_cst::CstType::new(TypePrim::Named);
     ptr.is_pointer = true;
     ptr.name = Some(type_name.to_string());
     ptr.subtype = Some(Box::new(t));
-    nopa_cst::CstParam {
+    nepa_cst::CstParam {
         name: Some(name.to_string()),
         par_type: Some(Box::new(ptr)),
         external_name: None,
@@ -1365,7 +1365,7 @@ fn cst_param(type_name: &str, name: &str) -> nopa_cst::CstParam {
 }
 
 /// Apply the M2 desugar over the whole unit.
-pub fn desugar_unit_m2(unit: &mut nopa_ast::AstUnit) {
+pub fn desugar_unit_m2(unit: &mut nepa_ast::AstUnit) {
     let mut top_decls: Vec<AstDecl> = Vec::new();
     for decl in unit.decls.iter_mut() {
         if let AstDeclData::Class { methods, .. } = &mut decl.data {

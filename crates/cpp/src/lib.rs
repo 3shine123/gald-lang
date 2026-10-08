@@ -1,14 +1,14 @@
-//! Nopa-side macro expansion.
+//! Nepa-side macro expansion.
 //!
-//! Nopa is a C superset: plain C `#define`s are passed through verbatim to the
+//! Nepa is a C superset: plain C `#define`s are passed through verbatim to the
 //! C compiler, which expands them as usual. But a macro whose body contains
-//! nopa-specific syntax (`[receiver msg]`, `@keyword`, `^{...}`) cannot be
-//! expanded by any C compiler — the body is not C. For those macros nopac
+//! nepa-specific syntax (`[receiver msg]`, `@keyword`, `^{...}`) cannot be
+//! expanded by any C compiler — the body is not C. For those macros nepac
 //! expands them itself, at the source level, before lexing.
 //!
 //! The expansion algorithm follows the C standard's specification of macro
 //! replacement (ISO/IEC 9899:2011 §6.10.3), implemented independently against
-//! nopa's own token model:
+//! nepa's own token model:
 //!
 //! - object-like macros: name → replacement list, then rescan (§6.10.3.1)
 //! - function-like macros: arguments collected on balanced parens, each
@@ -48,17 +48,17 @@ pub struct MacroDef {
     pub body: String,
 }
 
-/// True when the macro body contains nopa-specific syntax that a C compiler
+/// True when the macro body contains nepa-specific syntax that a C compiler
 /// could not expand: an `@` keyword, a message send, or a block literal.
 ///
 /// Heuristic (conservative in the harmless direction): an ObjC message send
 /// has `[` in token-initial position (preceded by whitespace, start of line,
 /// or an opening punctuation), whereas C indexing glues `[` directly onto an
 /// identifier/`)`/`]`. If a pure-C macro is misclassified anyway, expansion is
-/// still harmless — the body has no nopa syntax, so splicing it back yields
+/// still harmless — the body has no nepa syntax, so splicing it back yields
 /// the same text; the only loss is that the definition no longer reaches the
 /// C prelude.
-pub fn body_has_nopa_syntax(body: &str) -> bool {
+pub fn body_has_nepa_syntax(body: &str) -> bool {
     let bytes = body.as_bytes();
     let mut i = 0;
     let mut prev_significant: Option<u8> = None; // last non-space char
@@ -66,7 +66,7 @@ pub fn body_has_nopa_syntax(body: &str) -> bool {
         match bytes[i] {
             b'@' if i + 1 < bytes.len() && !matches!(bytes[i + 1], b' ' | b'\t' | b'(' | b')' | b',' | b';') => {
                 // @keyword, @"boxed literal", @42 — anything ObjC-ish. A lone
-                // @ followed by punctuation/whitespace is not nopa syntax.
+                // @ followed by punctuation/whitespace is not nepa syntax.
                 return true;
             }
             b'[' => {
@@ -228,13 +228,13 @@ fn find_matching_paren(bytes: &[u8], open: usize) -> Option<usize> {
     None
 }
 
-/// Expand every nopa macro invocation in `src`.
+/// Expand every nepa macro invocation in `src`.
 /// Errors describe the problem with a 1-based line number in `src`.
 pub fn expand(src: &str, table: &HashMap<String, MacroDef>) -> Result<String, String> {
     Ok(expand_mapped(src, table)?.0)
 }
 
-/// Expand every nopa macro invocation in `src`, letting a function-like call
+/// Expand every nepa macro invocation in `src`, letting a function-like call
 /// span source lines, and report where each output line came from: `lines[i]`
 /// is the 1-based source line that output line `i` is attributed to.
 ///
@@ -355,7 +355,7 @@ fn expand_line(line: &str, table: &HashMap<String, MacroDef>, active: &mut HashS
                 Some(def) => {
                     if body_has_pragma(&def.body) {
                         return Err(format!(
-                            "macro '{}' has '_Pragma' in its body, which nopa cannot expand — \
+                            "macro '{}' has '_Pragma' in its body, which nepa cannot expand — \
                              '_Pragma' (ISO/IEC 9899:2011 §6.10.9) takes effect at the invocation \
                              site during preprocessing, and a source-level expander has no position \
                              to place it; write the _Pragma(...) directly on its own source line instead",
@@ -676,8 +676,8 @@ mod tests {
 
     #[test]
     fn object_like_plain_passthrough_not_expanded_here() {
-        // A body without nopa syntax is still fine to expand — but preprocessor
-        // only routes nopa-syntax bodies here.
+        // A body without nepa syntax is still fine to expand — but preprocessor
+        // only routes nepa-syntax bodies here.
         let t = tbl(&["#define TWICE(x) ((x) + (x))"]);
         assert_eq!(expand("int y = TWICE(3);", &t).unwrap(), "int y = ((3) + (3));");
     }
@@ -841,14 +841,14 @@ mod tests {
     }
 
     #[test]
-    fn body_has_nopa_detection() {
-        assert!(body_has_nopa_syntax("[v tag]"));
-        assert!(body_has_nopa_syntax("do { [v tag]; } while (0)"));
-        assert!(body_has_nopa_syntax("@throw e"));
-        assert!(body_has_nopa_syntax("^{ return 1; }"));
-        assert!(!body_has_nopa_syntax("tab[x]"));
-        assert!(!body_has_nopa_syntax("((int *)p)[i]"));
-        assert!(!body_has_nopa_syntax("a[i] + b[j]"));
+    fn body_has_nepa_detection() {
+        assert!(body_has_nepa_syntax("[v tag]"));
+        assert!(body_has_nepa_syntax("do { [v tag]; } while (0)"));
+        assert!(body_has_nepa_syntax("@throw e"));
+        assert!(body_has_nepa_syntax("^{ return 1; }"));
+        assert!(!body_has_nepa_syntax("tab[x]"));
+        assert!(!body_has_nepa_syntax("((int *)p)[i]"));
+        assert!(!body_has_nepa_syntax("a[i] + b[j]"));
     }
 
     #[test]

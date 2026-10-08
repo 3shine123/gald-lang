@@ -1,4 +1,4 @@
-# Nopa 当前架构
+# Nepa 当前架构
 
 > 本文是当前架构的**唯一事实来源**，面向新贡献者。
 > 历史决策与迁移过程见：`doc/stable_slots_plan.md`（stable slots / multi-TU 迁移史）、`doc/arc_intern_uaf.md`（ARC intern UAF 修复记录）。
@@ -6,7 +6,7 @@
 
 ## 1. 编译流程
 
-Nopa 是 Objective-C 风格语法转译到 C99 的静态语言。`nopac` 的流水线（Rust，`crates/`）：
+Nepa 是 Objective-C 风格语法转译到 C99 的静态语言。`nepac` 的流水线（Rust，`crates/`）：
 
 ```text
 .np/.nh 源文件
@@ -16,7 +16,7 @@ Nopa 是 Objective-C 风格语法转译到 C99 的静态语言。`nopac` 的流�
   → binder（符号表、selector 注册、协议方法传播）
   → 各降级 pass（eh desugar → defer splice → pattern-switch → ARC 注入 → checker）
   → codegen → C99
-  → C 编译器（clang/gcc）→ .o → 链接 libnopa.a (+ libnopafoundation.a)
+  → C 编译器（clang/gcc）→ .o → 链接 libnepa.a (+ libnepafoundation.a)
 ```
 
 要点：
@@ -24,24 +24,24 @@ Nopa 是 Objective-C 风格语法转译到 C99 的静态语言。`nopac` 的流�
 - **无运行时消息派发**——没有 `objc_msgSend`，全部方法是静态 vtable 派发，选择子在编译期解析为槽位索引。
 - checker 默认开启（协议一致性、类型兼容、格式串检查等）；`-fno-checker` 可关。
 - EH 默认后端 `checked`（见 §9）。
-- 链接期自动带上 `libnopa.a`（运行时）与 `libnopafoundation.a`（若找到，见 §7）。
+- 链接期自动带上 `libnepa.a`（运行时）与 `libnepafoundation.a`（若找到，见 §7）。
 
 ## 2. `.nh` / `.np` 语义
 
 | 扩展名 | 角色 | 说明 |
 |---|---|---|
-| `.nh` | Nopa 头文件 | 声明：`@interface`、`@protocol`、typedef、struct。只经 `#import` 内联，从不直接编译。 |
-| `.np` | Nopa 实现文件 | 定义：`@implementation`、函数、`int main`。两种用法：① **独立 translation unit 编译**（multi-TU 模式）；② 在 self-contained 模式下被 `#import` **内联**进主文件。 |
+| `.nh` | Nepa 头文件 | 声明：`@interface`、`@protocol`、typedef、struct。只经 `#import` 内联，从不直接编译。 |
+| `.np` | Nepa 实现文件 | 定义：`@implementation`、函数、`int main`。两种用法：① **独立 translation unit 编译**（multi-TU 模式）；② 在 self-contained 模式下被 `#import` **内联**进主文件。 |
 
-`#import` 只对 `.nh`/`.np` 做 nopa 内联；`#include` 的 `.h`/`.c` 原样透传给 C 编译器。nopac 总是定义 `__NOPA__` 宏，供需要同时被纯 C 编译器使用的头文件做 `#ifdef` 分支。
+`#import` 只对 `.nh`/`.np` 做 nepa 内联；`#include` 的 `.h`/`.c` 原样透传给 C 编译器。nepac 总是定义 `__NEPA__` 宏，供需要同时被纯 C 编译器使用的头文件做 `#ifdef` 分支。
 
-`.nh` 头文件在 multi-TU 模式下**必须保留完整 struct 布局**（ivar 区）——因为 Nopa 是 C 超集，`@public` ivar 直访、struct 字段访问、成员函数指针调用都是合法用户代码，客户端 TU 需要完整布局，不能把 opaque struct 当默认规则。
+`.nh` 头文件在 multi-TU 模式下**必须保留完整 struct 布局**（ivar 区）——因为 Nepa 是 C 超集，`@public` ivar 直访、struct 字段访问、成员函数指针调用都是合法用户代码，客户端 TU 需要完整布局，不能把 opaque struct 当默认规则。
 
 ## 3. self-contained 与 multi-TU 的区别
 
 ### self-contained / unity mode
 
-```nopa
+```nepa
 #import <Foundation/Foundation.np>   // 自包含伞头：声明 + 实现全部内联
 ```
 
@@ -51,26 +51,26 @@ Nopa 是 Objective-C 风格语法转译到 C99 的静态语言。`nopac` 的流�
 
 ### precompiled Foundation / multi-TU mode（推荐工程模式）
 
-```nopa
+```nepa
 #import <Foundation/Foundation.nh>   // 纯声明伞头：零实现内联
 ```
 
 ```bash
-./tools/build-foundation-lib.sh                    # 构建一次 → libnopafoundation.a
-nopac app.np -o app                                # nopac 自动找到并链接库
+./tools/build-foundation-lib.sh                    # 构建一次 → libnepafoundation.a
+nepac app.np -o app                                # nepac 自动找到并链接库
 # 或显式：
-nopac app.np -I include -L target/foundation -lnopafoundation -o app
+nepac app.np -I include -L target/foundation -lnepafoundation -o app
 ```
 
 - Foundation 只在库里存一份；你的 TU 只生成自己的代码 + 弱占位元数据。
-- 多个 TU 时用多输入：`nopac main.np lib.np -o app`（`.o`/`.a` 也可直接作输入）。
+- 多个 TU 时用多输入：`nepac main.np lib.np -o app`（`.o`/`.a` 也可直接作输入）。
 - auto-link 规则：仅**纯声明客户端**自动链库；TU 内联了 Foundation 实现（`Foundation.np`，直接或经导入的 `.nh` 传递）时跳过，避免库的强 vtable 赢得弱合并而触发 `__sig` 中止。
 
 ## 4. owner / strong / weak metadata 规则（R2）
 
 「owner」= **该类的 `@implementation` 位于本 TU 的 main 文件**（不是经 `#import` 带进来的）。
 
-| TU 角色 | 生成的类元数据（vtable / meta vtable / `NOPA_CLASS_$_X` / getClass） |
+| TU 角色 | 生成的类元数据（vtable / meta vtable / `NEPA_CLASS_$_X` / getClass） |
 |---|---|
 | owner TU | **强符号**（真实表） |
 | 纯声明客户端 / 内联方 | **弱桩**（槽位保留，未实现的方法槽为 NULL） |
@@ -83,7 +83,7 @@ nopac app.np -I include -L target/foundation -lnopafoundation -o app
 
 ## 5. vtable 公共段、私有段与 `__sig`（R1/R3，已完成）
 
-每个类一个 uniform `struct nopa_vtable`（函数指针数组），布局分两段：
+每个类一个 uniform `struct nepa_vtable`（函数指针数组），布局分两段：
 
 ```text
 [公共段] 该类在 #import 展开后（即共享 .nh）声明的方法，字母序
@@ -98,7 +98,7 @@ nopac app.np -I include -L target/foundation -lnopafoundation -o app
 ## 6. class metadata：静态初始化
 
 - owner TU 通过**静态 `NPClass` 定义初始化**类元数据（编译期常量，`__data` 段），不依赖运行期构造调用。
-- `nopa_metaInit` 保留为**兼容路径的幂等回填**：仅 self-contained 单 TU 构建（`#import "*.np"` 伞形内联）中，弱合并后真正被执行的那份会补齐静态初始化没覆盖的部分。正常 owner / multi-TU 路径**不依赖**它。
+- `nepa_metaInit` 保留为**兼容路径的幂等回填**：仅 self-contained 单 TU 构建（`#import "*.np"` 伞形内联）中，弱合并后真正被执行的那份会补齐静态初始化没覆盖的部分。正常 owner / multi-TU 路径**不依赖**它。
 
 ## 7. Foundation 构建方式
 
@@ -106,9 +106,9 @@ nopac app.np -I include -L target/foundation -lnopafoundation -o app
 
 1. 对每个 Foundation 类实现（`NPObject.np` … `NPError.np`），脚本生成一个 wrapper TU = `#import <Foundation/Foundation.nh>`（声明面）+ 该 `.np` 全文（实现）；
 2. 逐个转译、C 编译成 `.o`——每个 wrapper 的 main 文件就是该 `.np` 本身，所以 R2 判定每个类都是 owner，元数据为**强符号**；
-3. `ar` 归档为 `libnopafoundation.a`，`nm` 校验强符号（9/9）。
+3. `ar` 归档为 `libnepafoundation.a`，`nm` 校验强符号（9/9）。
 
-细节：伞头 `Foundation.np` 不是类，被构建脚本显式跳过（归档它会重复内联全部实现）；库经 nopac auto-link 自动链接（查找顺序：二进制旁 → `target/foundation` → `/opt/nopa/lib` → `/usr/local/lib/nopa` → 用户 `-L`），仅对纯声明客户端生效；`-ffreestanding`、shared 模式、显式 `-lnopafoundation` 均抑制自动链接。
+细节：伞头 `Foundation.np` 不是类，被构建脚本显式跳过（归档它会重复内联全部实现）；库经 nepac auto-link 自动链接（查找顺序：二进制旁 → `target/foundation` → `/opt/nepa/lib` → `/usr/local/lib/nepa` → 用户 `-L`），仅对纯声明客户端生效；`-ffreestanding`、shared 模式、显式 `-lnepafoundation` 均抑制自动链接。
 
 ## 8. 泛型：单态化为主，裸拼写擦除兼容
 
@@ -135,37 +135,37 @@ nopac app.np -I include -L target/foundation -lnopafoundation -o app
 ## 11. 推荐命令示例
 
 ```bash
-# 构建 nopac（Rust，debug 二进制在 target/debug/nopac）
+# 构建 nepac（Rust，debug 二进制在 target/debug/nepac）
 cargo build --release
 
 # 单测 + 全量集成测试（test_all.sh 是 test_all.py 的并行包装）
 cargo test --workspace
 ./test_all.sh -j4
 
-# 看 nopac 生成的 C（排查第一步）
-nopac -rewrite-nopa app.np -o app.c
+# 看 nepac 生成的 C（排查第一步）
+nepac -rewrite-nepa app.np -o app.c
 
 # self-contained 模式（单文件、快速试验）
-nopac run hello.np
+nepac run hello.np
 
-# multi-TU（多个 nopa 源 + .o/.a 混合输入）
-nopac main.np lib.np -o app
+# multi-TU（多个 nepa 源 + .o/.a 混合输入）
+nepac main.np lib.np -o app
 
 # 预编译 Foundation 库（推荐工程模式）
 ./tools/build-foundation-lib.sh      # 构建一次
-nopac app.np -o app                  # 纯声明客户端：auto-link
+nepac app.np -o app                  # 纯声明客户端：auto-link
 
 # 其他常用
-nopac -trace-refcount app.np         # 引用计数静态追踪
-nopac app.np -emit-bridge-header app.h -o app.c   # C 桥接头
-nopac -ffreestanding kernel.np       # 裸机（自备运行时）
+nepac -trace-refcount app.np         # 引用计数静态追踪
+nepac app.np -emit-bridge-header app.h -o app.c   # C 桥接头
+nepac -ffreestanding kernel.np       # 裸机（自备运行时）
 ```
 
 ## 12. KVC 与 NPPredicate（谓词 / 过滤）
 
-谓词引擎**全部在 Foundation 库的 C 里**（`NPPredicate.np`）；nopac 从不解析格式串，它只负责发射键值访问表。
+谓词引擎**全部在 Foundation 库的 C 里**（`NPPredicate.np`）；nepac 从不解析格式串，它只负责发射键值访问表。
 
-### KVC 访问表（`NOPA_KVC_$_X`）
+### KVC 访问表（`NEPA_KVC_$_X`）
 
 - **门控**：TU 的展开导入集中出现 `NPPredicate` 时才发射（`#import <Foundation/NPPredicate.nh>`，或经 `NPArray.nh` / `NPSet.nh` 传递性带入）。
 - **归属**：表随类元数据走 —— owner TU 发**强**表（写进静态 `NPClass` 的 `.kvc_entries`），纯声明客户端发弱桩，链接期强表胜出；与 §4 的 R2 是同一套合并规则（`tests/multi_tu/13_kvc_predicate` 守护）。
@@ -174,8 +174,8 @@ nopac -ffreestanding kernel.np       # 裸机（自备运行时）
   - 内建标量 → 走 `NPNumber` 装箱的包装 getter；
   - `id`/`instancetype`/指向非内建类型的指针 → 对象路径（直接返回 `id`）；
   - **按值 struct/union（如 `NPRange`）与指向内建类型的指针（`int *`/`char *`/`void *`）不发表条目** —— 前者 `(id)` 转换非法，后者会把指针当整数装箱（`-Wint-conversion`）；这类键保持未注册，查键按"未命中"处理。
-- **查键**：`nopa_kvc_value(receiver, "key")` 按点号分段走链，任一段未命中即返回 `NULL`。`-valueForKey:` 对未命中**大声 abort**；谓词求值路径把未命中当 `nil`（比较为假、`= nil` 为真）——不会静默误命中。
-- self-contained 伞头构建中 `nopa_metaInit` **幂等回填** `.kvc_entries`（§6）；owner / multi-TU 路径不依赖它。
+- **查键**：`nepa_kvc_value(receiver, "key")` 按点号分段走链，任一段未命中即返回 `NULL`。`-valueForKey:` 对未命中**大声 abort**；谓词求值路径把未命中当 `nil`（比较为假、`= nil` 为真）——不会静默误命中。
+- self-contained 伞头构建中 `nepa_metaInit` **幂等回填** `.kvc_entries`（§6）；owner / multi-TU 路径不依赖它。
 
 ### NPPredicate DSL
 
@@ -183,7 +183,7 @@ nopac -ffreestanding kernel.np       # 裸机（自备运行时）
 
 ### 宿主过滤 API
 
-`NPArray -filteredArrayUsingPredicate:` / `-indexOfObjectMatchingPredicate:`、`NPMutableArray -filterUsingPredicate:`、`NPSet -filteredArrayUsingPredicate:`（Set 子类经 `NPSet.nh` 公共段继承该槽位）；`nil` 谓词 = 恒等（不过滤）。这些方法落在**公共段**，新库因此带新的 `__sig`：升级后需重建 `libnopafoundation.a` 并重编客户端；不新增 ivar、不改存储布局。
+`NPArray -filteredArrayUsingPredicate:` / `-indexOfObjectMatchingPredicate:`、`NPMutableArray -filterUsingPredicate:`、`NPSet -filteredArrayUsingPredicate:`（Set 子类经 `NPSet.nh` 公共段继承该槽位）；`nil` 谓词 = 恒等（不过滤）。这些方法落在**公共段**，新库因此带新的 `__sig`：升级后需重建 `libnepafoundation.a` 并重编客户端；不新增 ivar、不改存储布局。
 
 ### 回归
 

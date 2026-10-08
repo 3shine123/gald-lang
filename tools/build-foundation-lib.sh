@@ -8,7 +8,7 @@
 # ownership makes each owned class's metadata STRONG automatically. No
 # -fstrong-metadata anywhere.
 #
-#   nopac app.np -I include -L<outdir> -lnopafoundation -o app
+#   nepac app.np -I include -L<outdir> -lnepafoundation -o app
 #
 # The client imports `Foundation.nh` — the DECLARATION-ONLY umbrella (per the
 # project's .nh = declarations / .np = implementations convention).
@@ -17,20 +17,20 @@ set -euo pipefail
 root="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$root"
 
-nopac="${NOPAC:-}"
-if [[ -z "$nopac" ]]; then
-    for cand in target/debug/nopac target/release/nopac; do
-        if [[ -x "$cand" ]]; then nopac="$cand"; break; fi
+nepac="${NEPAC:-}"
+if [[ -z "$nepac" ]]; then
+    for cand in target/debug/nepac target/release/nepac; do
+        if [[ -x "$cand" ]]; then nepac="$cand"; break; fi
     done
 fi
-if [[ -z "$nopac" || ! -x "$nopac" ]]; then
-    echo "error: nopac not found (run 'cargo build', or set NOPAC=/path/to/nopac)" >&2
+if [[ -z "$nepac" || ! -x "$nepac" ]]; then
+    echo "error: nepac not found (run 'cargo build', or set NEPAC=/path/to/nepac)" >&2
     exit 2
 fi
 
 outdir="${1:-target/foundation}"
 mkdir -p "$outdir"
-lib="$outdir/libnopafoundation.a"
+lib="$outdir/libnepafoundation.a"
 
 # Mach-O prepends `_` to every C symbol; ELF uses the name as written.
 sym_prefix=""
@@ -57,7 +57,7 @@ nm_is_weak() {
 
 check_strong() {
     local obj="$1" cls="$2"
-    for member in "NOPA_VTABLE_\$_${cls}" "NOPA_META_VTABLE_\$_${cls}_inst" "NOPA_GETCLASS_\$_${cls}"; do
+    for member in "NEPA_VTABLE_\$_${cls}" "NEPA_META_VTABLE_\$_${cls}_inst" "NEPA_GETCLASS_\$_${cls}"; do
         local sym="${sym_prefix}${member}"
         if ! nm "$obj" 2>/dev/null | grep -qF -- " $sym"; then
             echo "  error: symbol $sym not found in $obj" >&2
@@ -98,7 +98,7 @@ for gm in include/Foundation/*.np; do
     { echo '#import <Foundation/Foundation.nh>'; cat "$gm"; } > "$wrap"
     c="$outdir/$name.c"
     o="$outdir/$name.o"
-    "$nopac" -rewrite-nopa "$wrap" -o "$c" -I include -I include/Foundation
+    "$nepac" -rewrite-nepa "$wrap" -o "$c" -I include -I include/Foundation
     clang -c -w "$c" -o "$o" -I include
     objs+=("$o")
     echo "  $name"

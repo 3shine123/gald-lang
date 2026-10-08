@@ -1,13 +1,13 @@
 [-> English](README.md)
 
 <div align="center">
-<img src="doc/assets/Nopa_avatar.svg" alt="Nopa_avatar" width="210">
+<img src="doc/assets/Nepa_avatar.svg" alt="Nepa_avatar" width="210">
 
-# Nopa 编程语言
+# Nepa 编程语言
 
 [**查看项目示例**](#项目示例)
 
-[概述](#概述) · [为什么要创造出 Nopa？](#为什么要创造出-nopa) · [项目示例](#项目示例) · [快速开始](#快速开始) · [语言特性](#语言特性) · [新特性](#新特性) · [编译与运行](#编译与运行) · [代码示例](#代码示例) · [设计原则](#设计原则) · [路线图](#路线图) · [FAQ](#faq)
+[概述](#概述) · [为什么要创造出 Nepa？](#为什么要创造出-nepa) · [项目示例](#项目示例) · [快速开始](#快速开始) · [语言特性](#语言特性) · [新特性](#新特性) · [编译与运行](#编译与运行) · [代码示例](#代码示例) · [设计原则](#设计原则) · [路线图](#路线图) · [FAQ](#faq)
 
 </div>
 
@@ -23,15 +23,15 @@
 
 ## **概述**
 
-Nopa 是一门**纯静态**的 Objective-C 方言（C 超集语言）。Nopa 源码被转译为 C99，再由 Clang 编译为原生机器码。没有运行时消息转发，没有 GC 暂停，没有 JIT 预热——所有方法派发、内存管理、多态都在编译期完成。目前能跑，有小游戏和工具在里面跑着。如果你觉得有意思，可以拿来试试。
+Nepa 是一门**纯静态**的 Objective-C 方言（C 超集语言）。Nepa 源码被转译为 C99，再由 Clang 编译为原生机器码。没有运行时消息转发，没有 GC 暂停，没有 JIT 预热——所有方法派发、内存管理、多态都在编译期完成。目前能跑，有小游戏和工具在里面跑着。如果你觉得有意思，可以拿来试试。
 
 我不是想替代 ObjC 或 Swift，只是单纯怀念 ObjC 的语法，想在静态编译的世界里让它再活一次。☺️
 
 ---
 
-## 为什么要创造出 Nopa？
+## 为什么要创造出 Nepa？
 
-我纯粹是喜欢 ObjC 的消息发送语法 `[obj message]`而已。因为 ObjC 的运行时（`objc_msgSend`）太重了，我又想写一段能直接编译成 C 的 ObjC 代码，所以就有了 Nopa ——— 把 ObjC 的语法静态编译掉，不依赖运行时，生成干净的 C。
+我纯粹是喜欢 ObjC 的消息发送语法 `[obj message]`而已。因为 ObjC 的运行时（`objc_msgSend`）太重了，我又想写一段能直接编译成 C 的 ObjC 代码，所以就有了 Nepa ——— 把 ObjC 的语法静态编译掉，不依赖运行时，生成干净的 C。
 
 这不是一个为生产而准备的语言。它是一个玩具，用来探索"如果把 ObjC 转译到静态 C，会是什么样子"。
 
@@ -57,10 +57,10 @@ Nopa 是一门**纯静态**的 Objective-C 方言（C 超集语言）。Nopa 源
 
 | 项目                    | 说明                                                                      | 运行                            |
 | --------------------- | ----------------------------------------------------------------------- | ----------------------------- |
-| **`04_soma-kernel/`** | 很小的 32 位 i386 操作系统内核（NASM + C + Nopa），裸机 `-ffreestanding` 模式                 | `./run.sh` 或 `./run.sh --gui` |
-| **`03_LibUI/`**       | 基于 [libui-ng](https://github.com/libui-ng/libui-ng) 的 GUI 应用，全部回调纯 Nopa | `./run_libui.sh`              |
+| **`04_soma-kernel/`** | 很小的 32 位 i386 操作系统内核（NASM + C + Nepa），裸机 `-ffreestanding` 模式                 | `./run.sh` 或 `./run.sh --gui` |
+| **`03_LibUI/`**       | 基于 [libui-ng](https://github.com/libui-ng/libui-ng) 的 GUI 应用，全部回调纯 Nepa | `./run_libui.sh`              |
 | **`02_ncurses/`**     | 终端示例（`ncurses_demo`、`sysmon`），使用 `Terminal::Ncurses` 绑定                 | `make run`                    |
-| **`01_JSONEditor/`**  | 多文件 JSON 编辑器，分屏终端预览                                                     | `nopac run json_editor.np`    |
+| **`01_JSONEditor/`**  | 多文件 JSON 编辑器，分屏终端预览                                                     | `nepac run json_editor.np`    |
 
 ---
 
@@ -75,81 +75,81 @@ Nopa 是一门**纯静态**的 Objective-C 方言（C 超集语言）。Nopa 源
 ### 构建
 
 ```bash
-git clone https://github.com/3shine123/nopa-lang.git
-cd nopa-lang
+git clone https://github.com/3shine123/nepa-lang.git
+cd nepa-lang
 cargo build --release
 ```
 
 ### 安装
 
-构建完成后，`nopac` 同目录下会自动生成 `install.sh`（以及头文件和 `libnopa.a`）。直接运行它即可安装到系统：
+构建完成后，`nepac` 同目录下会自动生成 `install.sh`（以及头文件和 `libnepa.a`）。直接运行它即可安装到系统：
 
 ```bash
 # 源码编译后——脚本就在二进制旁边
 cd target/release        # 或 target/debug（如果你跑的是 cargo build）
-./install.sh             # 默认安装到 /opt/nopa
+./install.sh             # 默认安装到 /opt/nepa
 ./install.sh /usr/local  # 可选：换成其他前缀
 ```
 
 脚本会安装：
 
-- **二进制** → `<prefix>/bin/nopac`
-- **静态库** → `<prefix>/lib/libnopa.a`
+- **二进制** → `<prefix>/bin/nepac`
+- **静态库** → `<prefix>/lib/libnepa.a`
 - **头文件** → `<prefix>/include/`
-- **系统头文件** → `/usr/local/include/{Foundation,nopa}/`（需写权限；无权限时自动跳过，可用 sudo 重试，或传第二个参数指定目录，如 `./install.sh /opt/nopa ~/include`）
+- **系统头文件** → `/usr/local/include/{Foundation,nepa}/`（需写权限；无权限时自动跳过，可用 sudo 重试，或传第二个参数指定目录，如 `./install.sh /opt/nepa ~/include`）
 
 安装脚本会自动检测系统语言（中文 / English）。
 
-或者下载预编译的 Release 压缩包（`nopa-<platform>.tar.gz` 或 `.zip`），解压后运行里面的 `install.sh`：
+或者下载预编译的 Release 压缩包（`nepa-<platform>.tar.gz` 或 `.zip`），解压后运行里面的 `install.sh`：
 
 ```bash
-tar xzf nopa-x86_64-unknown-linux-musl.tar.gz
-cd nopa-x86_64-unknown-linux-musl
+tar xzf nepa-x86_64-unknown-linux-musl.tar.gz
+cd nepa-x86_64-unknown-linux-musl
 ./install.sh
 ```
 
-> **提示：** 把 `nopac` 加入 PATH 并装好系统头文件后，`<nopa/runtime.h>` 和 `<Foundation/...>` 会自动被找到，无需手动加 `-I include`。
+> **提示：** 把 `nepac` 加入 PATH 并装好系统头文件后，`<nepa/runtime.h>` 和 `<Foundation/...>` 会自动被找到，无需手动加 `-I include`。
 
-### 编译一个 Nopa 程序
+### 编译一个 Nepa 程序
 
 ```bash
 # 只输出 C 代码（自动推导 .np → .c）
-nopac -rewrite-nopa hello.np
-nopac hello.np -rewrite-nopa               # flag 放哪都行
-nopac -rewrite-nopa hello.np -o out.c      # 也可以显式指定路径
-# （双横线 --rewrite-nopa 形式同样接受）
+nepac -rewrite-nepa hello.np
+nepac hello.np -rewrite-nepa               # flag 放哪都行
+nepac -rewrite-nepa hello.np -o out.c      # 也可以显式指定路径
+# （双横线 --rewrite-nepa 形式同样接受）
 
 # 单独用 Clang 编译转译后 C 代码（两种方式）：
 #   1) 直接编译运行时源码
-clang -I include -o hello hello.c include/nopa/runtime.c
-#   2) 链接编译好的 libnopa.a（位于 nopac 二进制同目录）
-clang -I include -o hello hello.c -Ltarget/release -lnopa
+clang -I include -o hello hello.c include/nepa/runtime.c
+#   2) 链接编译好的 libnepa.a（位于 nepac 二进制同目录）
+clang -I include -o hello hello.c -Ltarget/release -lnepa
 
 # 编译到可执行文件
-nopac hello.np -o hello_bin                # 转译 + 编译 + 链接
+nepac hello.np -o hello_bin                # 转译 + 编译 + 链接
 
 # 多 TU：额外位置参数作为附加编译单元一起编译链接；.o/.a 原样链接
-nopac main.np lib.np -I include -o app     # 两条编译单元一条命令（无需手动 clang）
-nopac main.np lib.o libfoo.a -o app        # nopa 源码与预编译目标混用
+nepac main.np lib.np -I include -o app     # 两条编译单元一条命令（无需手动 clang）
+nepac main.np lib.o libfoo.a -o app        # nepa 源码与预编译目标混用
 
 # 预编译 Foundation 库：构建一次，处处链接
-./tools/build-foundation-lib.sh                            # → target/foundation/libnopafoundation.a
-nopac app.np -I include -L target/foundation -lnopafoundation -o app   # 显式链接
-nopac app.np -o app                                        # 或：库可找到时自动链接（纯声明客户端）
+./tools/build-foundation-lib.sh                            # → target/foundation/libnepafoundation.a
+nepac app.np -I include -L target/foundation -lnepafoundation -o app   # 显式链接
+nepac app.np -o app                                        # 或：库可找到时自动链接（纯声明客户端）
 
 # 编译 + 运行
-nopac run hello.np
-nopac run hello.np -o hello_bin            # 运行后保留二进制
-nopac run hello.np                          # 运行后自动清理临时文件
+nepac run hello.np
+nepac run hello.np -o hello_bin            # 运行后保留二进制
+nepac run hello.np                          # 运行后自动清理临时文件
 
 # 显示编译警告
-nopac -v run hello.np
+nepac -v run hello.np
 
-# [!] 错误：不用 -rewrite-nopa 却输出 .c
-nopac hello.np -o hello.c   → Error: use -rewrite-nopa to output C code
+# [!] 错误：不用 -rewrite-nepa 却输出 .c
+nepac hello.np -o hello.c   → Error: use -rewrite-nepa to output C code
 
 # [!] 错误：没有指定任何输出方式
-nopac hello.np              → Error: specify -o or -rewrite-nopa
+nepac hello.np              → Error: specify -o or -rewrite-nepa
 ```
 
 ### Foundation：两种使用模式
@@ -158,7 +158,7 @@ Foundation 支持两种模式，都完整可用；**真实工程推荐预编译�
 
 **self-contained / unity 模式**——实现经 `#import` 内联，无需任何库。适合单文件、快速试验和兼容旧构建方式：
 
-```nopa
+```nepa
 // hello.np
 #import <Foundation/Foundation.np>   // 声明 + 实现全部内联
 
@@ -169,12 +169,12 @@ int main() {
 ```
 
 ```bash
-nopac run hello.np
+nepac run hello.np
 ```
 
 **预编译 Foundation / multi-TU 模式（推荐）**——实现存进一次构建的静态库；你的 TU 只编译自己的代码：
 
-```nopa
+```nepa
 // app.np
 #import <Foundation/Foundation.nh>   // 纯声明——不内联任何东西
 
@@ -185,41 +185,41 @@ int main() {
 ```
 
 ```bash
-./tools/build-foundation-lib.sh   # 一次 → target/foundation/libnopafoundation.a
-nopac app.np -o app               # 库被自动找到并链接
+./tools/build-foundation-lib.sh   # 一次 → target/foundation/libnepafoundation.a
+nepac app.np -o app               # 库被自动找到并链接
 ```
 
 底层区别：self-contained 模式下内联实现不是其 TU 的主文件，类元数据是弱符号（每个 TU 重复一份再合并）；库模式下每个 Foundation `.np` 作为独立 TU 编译，其 `@implementation` 持有元数据并发射为强符号——归档里只存一份。owner/strong/weak 完整规则见 `doc/architecture.md`。
 
 ### Shell 补全（Tab 自动补全）
 
-`nopac` 自带用 [clap_complete](https://crates.io/crates/clap_complete) 生成的 **zsh / bash / fish** 补全脚本。随时可用以下命令重新生成：
+`nepac` 自带用 [clap_complete](https://crates.io/crates/clap_complete) 生成的 **zsh / bash / fish** 补全脚本。随时可用以下命令重新生成：
 
 ```bash
-nopac -gen-completions zsh > _nopac
-nopac -gen-completions bash > nopac.bash
-nopac -gen-completions fish > nopac.fish
+nepac -gen-completions zsh > _nepac
+nepac -gen-completions bash > nepac.bash
+nepac -gen-completions fish > nepac.fish
 ```
 
-`install.sh` 也会把脚本装进安装包（`share/nopac/completions/`）。
+`install.sh` 也会把脚本装进安装包（`share/nepac/completions/`）。
 
 **zsh** —— 把目录加进 `fpath`（必须在 `compinit` 之前）：
 
 ```zsh
-fpath=(/opt/nopa/share/nopac/completions $fpath)
+fpath=(/opt/nepa/share/nepac/completions $fpath)
 autoload -U compinit && compinit
 ```
 
 **bash**：
 
 ```bash
-source /opt/nopa/share/nopac/completions/nopac.bash
+source /opt/nepa/share/nepac/completions/nepac.bash
 ```
 
 **fish**：
 
 ```fish
-source /opt/nopa/share/nopac/completions/nopac.fish
+source /opt/nepa/share/nepac/completions/nepac.fish
 ```
 
 装完新版本后清一下 zsh 缓存：`rm -f ~/.zcompdump*`，再开新终端。
@@ -240,7 +240,7 @@ cargo test --workspace
 
 ### 类系统
 
-```nopa
+```nepa
 @interface Animal : NPObject {
 @public
     NPString *_name;
@@ -266,7 +266,7 @@ cargo test --workspace
 
 ### 协议
 
-```nopa
+```nepa
 @protocol Drawable
 - (void)draw;
 - (BOOL)isVisible;
@@ -278,7 +278,7 @@ cargo test --workspace
 
 ### 属性
 
-```nopa
+```nepa
 @interface Person : NPObject
 @property NPString *name;
 @property int age;
@@ -288,7 +288,7 @@ cargo test --workspace
 
 ### 类别（Category）
 
-```nopa
+```nepa
 @interface Person (Printing)
 - (void)printGreeting;
 @end
@@ -302,7 +302,7 @@ cargo test --workspace
 
 ### Block
 
-```nopa
+```nepa
 int (^square)(int) = ^int(int x) {
     return x * x;
 };
@@ -315,7 +315,7 @@ void (^logAndCall)(NPString *, void (^)(void)) = ^void(NPString *msg, void (^nex
 
 ### @autoreleasepool
 
-```nopa
+```nepa
 @autoreleasepool {
     NPString *temp = [NPString stringWithUTF8String:"hello"];
     // temp 在 pool pop 时自动 release
@@ -324,13 +324,13 @@ void (^logAndCall)(NPString *, void (^)(void)) = ^void(NPString *msg, void (^nex
 
 ### @selector
 
-```nopa
+```nepa
 SEL sel = @selector(doSomething:);
 ```
 
 ### C 完全兼容
 
-```nopa
+```nepa
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -341,9 +341,9 @@ SEL sel = @selector(doSomething:);
 
 ### C 属性（__attribute__）
 
-Nopa 支持 `__attribute__((...))` 透传。你可以在全局声明和 struct 字段上直接写 C 的 `__attribute__`，编译器会把它们原样保留到生成的 C 代码中。
+Nepa 支持 `__attribute__((...))` 透传。你可以在全局声明和 struct 字段上直接写 C 的 `__attribute__`，编译器会把它们原样保留到生成的 C 代码中。
 
-```nopa
+```nepa
 __attribute__((packed))
 struct Point {
     int x;
@@ -366,12 +366,12 @@ int my_log(const char *fmt, ...);
 
 ### C 桥接（`-emit-bridge-header`）
 
-Nopa 转译为 C 后，C 代码可以直接调用 Nopa 对象方法。但消息派发需要写 vtable 下标和 SEL 常量，代码冗长且易错。`-emit-bridge-header` 选项为每个方法生成一个 `static inline` 包装函数，让 C 代码像调用普通 C 函数一样调用 Nopa 对象。
+Nepa 转译为 C 后，C 代码可以直接调用 Nepa 对象方法。但消息派发需要写 vtable 下标和 SEL 常量，代码冗长且易错。`-emit-bridge-header` 选项为每个方法生成一个 `static inline` 包装函数，让 C 代码像调用普通 C 函数一样调用 Nepa 对象。
 
-**用法**：先转译 Nopa 库成 C，同时生成桥接头：
+**用法**：先转译 Nepa 库成 C，同时生成桥接头：
 
 ```bash
-nopac -rewrite-nopa lib.np -o lib.c -emit-bridge-header lib.h
+nepac -rewrite-nepa lib.np -o lib.c -emit-bridge-header lib.h
 ```
 
 然后 C 代码包含桥接头，直接调用：
@@ -380,93 +380,93 @@ nopac -rewrite-nopa lib.np -o lib.c -emit-bridge-header lib.h
 #include "lib.h"
 
 int main(void) {
-    nopa_metaInit();  // 元数据回填——见下方说明
+    nepa_metaInit();  // 元数据回填——见下方说明
 
-    // 类方法：nopa_<类名>_<方法名>(参数...)
-    NPString *s = nopa_NPString_stringWithUTF8String_("Hello");
+    // 类方法：nepa_<类名>_<方法名>(参数...)
+    NPString *s = nepa_NPString_stringWithUTF8String_("Hello");
 
-    // 实例方法：nopa_<类名>_<方法名>(self, 参数...)
-    size_t len = nopa_NPString_length(s);
-    const char *cstr = nopa_NPString_UTF8String(s);
+    // 实例方法：nepa_<类名>_<方法名>(self, 参数...)
+    size_t len = nepa_NPString_length(s);
+    const char *cstr = nepa_NPString_UTF8String(s);
 
-    // 嵌套消息发送（等价于 Nopa 的 [[s UTF8String] ...]）
-    const char *nested = nopa_NPString_UTF8String(
-        nopa_NPString_stringWithUTF8String_("nested")
+    // 嵌套消息发送（等价于 Nepa 的 [[s UTF8String] ...]）
+    const char *nested = nepa_NPString_UTF8String(
+        nepa_NPString_stringWithUTF8String_("nested")
     );
 
-    // 多参数消息发送（等价于 Nopa 的 [arr replaceObjectAtIndex:0 withObject:obj]）
-    NPArray *arr = nopa_NPArray_arrayWithObject_(s);
-    nopa_NPArray_replaceObjectAtIndex_withObject_(arr, 0, s);
+    // 多参数消息发送（等价于 Nepa 的 [arr replaceObjectAtIndex:0 withObject:obj]）
+    NPArray *arr = nepa_NPArray_arrayWithObject_(s);
+    nepa_NPArray_replaceObjectAtIndex_withObject_(arr, 0, s);
 
     // 多参数带命名空间：selector 的每个 : 对应函数名里的一个 _
-    // [obj foo:arg1 bar:arg2] → nopa_<类>_foo_bar_(obj, arg1, arg2)
+    // [obj foo:arg1 bar:arg2] → nepa_<类>_foo_bar_(obj, arg1, arg2)
     // [m replaceCharactersInRange:rng withString:str]
-    // → nopa_NPMutableString_replaceCharactersInRange_withString_(m, rng, str)
+    // → nepa_NPMutableString_replaceCharactersInRange_withString_(m, rng, str)
 }
 ```
 
 编译时链接 `lib.c` 和 `runtime.c`：
 
 ```bash
-clang caller.c lib.c include/nopa/runtime.c -I include -o app
+clang caller.c lib.c include/nepa/runtime.c -I include -o app
 ```
 
-⚠️ 桥接头使用了 `sel_registerName` 在运行时解析 selector，因此**不需要**依赖 codegen 生成的 `static const` SEL 常量（这些常量跨文件不可见）。类元数据本身由每个主文件持有 `@implementation` 的 TU 在**加载期静态初始化**——所有 `nopac` 工作流皆是如此。`nopa_metaInit()` 保留在示例中作为无害的幂等回填；只有当构建通过 `#import "*.np"` 获取实现时（单 TU 伞形构建，无任何 TU 持有元数据）才**真正必需**。
+⚠️ 桥接头使用了 `sel_registerName` 在运行时解析 selector，因此**不需要**依赖 codegen 生成的 `static const` SEL 常量（这些常量跨文件不可见）。类元数据本身由每个主文件持有 `@implementation` 的 TU 在**加载期静态初始化**——所有 `nepac` 工作流皆是如此。`nepa_metaInit()` 保留在示例中作为无害的幂等回填；只有当构建通过 `#import "*.np"` 获取实现时（单 TU 伞形构建，无任何 TU 持有元数据）才**真正必需**。
 
 #### 从 C 管理内存
 
-Nopa 的 **ARC 是编译期概念，只分析 `.np` 源码**——C 代码调用桥接函数时，返回值不会自动 retain/release。需要手动管理，遵循 ObjC 的内存管理命名约定：
+Nepa 的 **ARC 是编译期概念，只分析 `.np` 源码**——C 代码调用桥接函数时，返回值不会自动 retain/release。需要手动管理，遵循 ObjC 的内存管理命名约定：
 
 | 方法家族                               | 调用者拥有？         | C 端怎么做                                 |
 | ---------------------------------- | -------------- | -------------------------------------- |
-| `alloc`、`new`、`copy`、`mutableCopy` | ✅ +1           | 用完必须 `nopa_release(obj)`               |
+| `alloc`、`new`、`copy`、`mutableCopy` | ✅ +1           | 用完必须 `nepa_release(obj)`               |
 | `init`                             | ❌ 消耗 alloc     | 不需要操作                                  |
-| 其他（如 `stringWithUTF8String:`）      | ❌ autoreleased | 不需要操作；若需跨 pool 存活，先 `nopa_retain(obj)` |
+| 其他（如 `stringWithUTF8String:`）      | ❌ autoreleased | 不需要操作；若需跨 pool 存活，先 `nepa_retain(obj)` |
 
 ```c
 #include "lib.h"
 
 int main(void) {
-    nopa_metaInit();
-    nopa_autoreleasepool_t *pool = nopa_autoreleasepoolPush();
+    nepa_metaInit();
+    nepa_autoreleasepool_t *pool = nepa_autoreleasepoolPush();
 
     // 便利构造器返回 autoreleased 对象，在当前 pool 内使用即可
-    NPString *s = nopa_NPString_stringWithUTF8String_("hello");
-    printf("%s\n", nopa_NPString_UTF8String(s));
+    NPString *s = nepa_NPString_stringWithUTF8String_("hello");
+    printf("%s\n", nepa_NPString_UTF8String(s));
 
     // 如需跨 pool 存活：先 retain，用完 release
-    NPString *t = nopa_NPString_stringWithUTF8String_("world");
-    nopa_retain(t);
-    nopa_autoreleasepoolPop(pool);      // t 存活（retain 过）
-    printf("%s\n", nopa_NPString_UTF8String(t));
-    nopa_release(t);
+    NPString *t = nepa_NPString_stringWithUTF8String_("world");
+    nepa_retain(t);
+    nepa_autoreleasepoolPop(pool);      // t 存活（retain 过）
+    printf("%s\n", nepa_NPString_UTF8String(t));
+    nepa_release(t);
 
     // alloc/copy 家族返回 +1 → 必须 release
-    NPString *copy = nopa_NPString_copy(s);
-    nopa_release(copy);
+    NPString *copy = nepa_NPString_copy(s);
+    nepa_release(copy);
 }
 ```
 
-`nopa_retain`、`nopa_release`、`nopa_autorelease`、`nopa_autoreleasepoolPush`/`nopa_autoreleasepoolPop` 声明在 `<nopa/runtime.h>` 中，对任何 Nopa 对象都可用。这就是 MRC（手动引用计数）模型——从 C 侧看，Nopa 对象就是按"我拥有/不拥有"约定管理的裸指针。
+`nepa_retain`、`nepa_release`、`nepa_autorelease`、`nepa_autoreleasepoolPush`/`nepa_autoreleasepoolPop` 声明在 `<nepa/runtime.h>` 中，对任何 Nepa 对象都可用。这就是 MRC（手动引用计数）模型——从 C 侧看，Nepa 对象就是按"我拥有/不拥有"约定管理的裸指针。
 
 ### 新特性
 
-Nopa 在 Objective-C 语法基础上，加入了一些 ObjC 本身没有的语言特性。
+Nepa 在 Objective-C 语法基础上，加入了一些 ObjC 本身没有的语言特性。
 
 **近期亮点：**
 
-- **谓词 / KVC（`NPPredicate`）** — 格式串解析器与求值引擎**全在 Foundation 库的 C 里**（`age > 18 AND name BEGINSWITH[c] 'A'`、`ANY tags LIKE '*dev*'`），底层是编译期发射的 KVC 访问表（`NOPA_KVC_$_X`，owner TU 出强表），并带宿主过滤 API（`filteredArrayUsingPredicate:` / `indexOfObjectMatchingPredicate:` / `filterUsingPredicate:`；`nil` 谓词 = 恒等不过滤）。编译器从不解析格式串 —— 见 `doc/architecture.md` §12。
+- **谓词 / KVC（`NPPredicate`）** — 格式串解析器与求值引擎**全在 Foundation 库的 C 里**（`age > 18 AND name BEGINSWITH[c] 'A'`、`ANY tags LIKE '*dev*'`），底层是编译期发射的 KVC 访问表（`NEPA_KVC_$_X`，owner TU 出强表），并带宿主过滤 API（`filteredArrayUsingPredicate:` / `indexOfObjectMatchingPredicate:` / `filterUsingPredicate:`；`nil` 谓词 = 恒等不过滤）。编译器从不解析格式串 —— 见 `doc/architecture.md` §12。
 - **集合（`NPSet` / `NPMutableSet` / `NPOrderedSet`）** — Foundation 库里的哈希桶集合容器（元素唯一，`containsObject:` / `anyObject` / `setWithObjects:count:`），`NPOrderedSet` 额外保持插入顺序；全部容器方法走静态 vtable 派发，跨 TU 安全。
-- **原生裸机支持（`-ffreestanding`）** — 编译为自包含 C，无 libc、无 Foundation、无 TLS；`@try/@catch` 走默认的 `-eh checked` 后端（纯旗标 + 守卫，**完全不用 `setjmp/longjmp`**，这正是裸机可用的前提；`-eh legacy` 才回退到 `__builtin_setjmp/longjmp`），零样板的 `runtime_freestanding.c` 提供 bump allocator、`NOPA_CLASS_$_nopa_root`、异常状态和 `memcpy`。
+- **原生裸机支持（`-ffreestanding`）** — 编译为自包含 C，无 libc、无 Foundation、无 TLS；`@try/@catch` 走默认的 `-eh checked` 后端（纯旗标 + 守卫，**完全不用 `setjmp/longjmp`**，这正是裸机可用的前提；`-eh legacy` 才回退到 `__builtin_setjmp/longjmp`），零样板的 `runtime_freestanding.c` 提供 bump allocator、`NEPA_CLASS_$_nepa_root`、异常状态和 `memcpy`。
 - **C 超集** — `@protocol` + 一致性检查、`@property` + `@synthesize`、`instancetype`、`@public` ivar、点语法、struct + 函数指针、内联汇编、C 风格类型转换。
-- **类型化 `@catch`** — 每个 catch 块现在检查 `isa == &NOPA_CLASS_$_Class`，只有匹配的类才进入该处理器；多个 catch 正确隔离。
+- **类型化 `@catch`** — 每个 catch 块现在检查 `isa == &NEPA_CLASS_$_Class`，只有匹配的类才进入该处理器；多个 catch 正确隔离。
 - **ARC 修复** — 作用域栈模型不再在嵌套作用域结束时释放父作用域变量；`for` 初始化对象提升修复了泄漏和非法 `for` 头。
-- **`@noarc` 块** — 块级 MRC：在 ARC 模式下，`@noarc { }` 块内允许手动 `retain`/`release`/`dealloc`/`autorelease`；是 `-fno-nopa-arc` 和 clang `-fno-objc-arc` 的块级等价物。
+- **`@noarc` 块** — 块级 MRC：在 ARC 模式下，`@noarc { }` 块内允许手动 `retain`/`release`/`dealloc`/`autorelease`；是 `-fno-nepa-arc` 和 clang `-fno-objc-arc` 的块级等价物。
 - **`__attribute__` 透传 + `-backend`** — 完整支持 C 的 `__attribute__((...))` 和所有 `__` 前缀的 C 预定义标识符（`__FILE__`、`__LINE__`、`__builtin_*`、`__extension__`、`__typeof__`、`__alignof__` 等）；`-backend` 选项控制哪些编译器专属属性允许使用。
 
 ### for-in 遍历
 
-```nopa
+```nepa
 for (NPString *s in arr) {
     printf("%s\n", [s UTF8String]);
 }
@@ -486,7 +486,7 @@ class 'Circle' does not implement required method 'draw' from protocol 'Drawable
 
 复用 C 的 `&` 运算符同时要求多个协议——零新语法：
 
-```nopa
+```nepa
 // ① 交集类型：接收者必须同时实现两个协议
 void render(id<Drawable & Serializable> item);
 
@@ -501,7 +501,7 @@ void render(id<Drawable & Serializable> item);
 
 根类现在实现了 ObjC 官方拼写的类型分发三件套，不需要任何新语言结构就能写惯用的多路分发：
 
-```nopa
+```nepa
 for (id item in items) {
     if ([item isKindOfClass:[Dog class]]) {
         [(Dog *)item bark];
@@ -515,9 +515,9 @@ for (id item in items) {
 
 ### struct `==` / `!=` 值比较
 
-C 直接拒绝 struct 的 `a == b`；Nopa 复用现有运算符，desugar 为生成的逐字段比较函数：
+C 直接拒绝 struct 的 `a == b`；Nepa 复用现有运算符，desugar 为生成的逐字段比较函数：
 
-```nopa
+```nepa
 struct Point a = {1, 2};
 struct Point b = {1, 2};
 
@@ -531,7 +531,7 @@ p == &a               // 指针比较语义不变
 
 方法体里含 `@await` 即为 async，与 C++20 用 `co_await` 判定协程的风格一致。会挂起的方法返回类型必须标 `NPAsync<T>`（checker 强制，见下文专节——parser 把它解包，vtable 布局不变）：
 
-```nopa
+```nepa
 @interface Fetcher : NPObject
 - (NPAsync<int>)compute:(int)n;   // 会挂起，产出 int
 - (NPAsync<void>)runAll;          // async void = 入口方法
@@ -561,13 +561,13 @@ int main() {
 - **链式传染**——方法体里出现 `@await` 它自己就是 async；非 void 的 async 方法只能在 async 上下文中 await 调用（同步调用编译期报错）。
 - **`@await` 降级为状态机**——方法体在挂起点被拆进 `switch(task->state)` 驱动的堆上 `NPTask`；活过挂起点的局部变量提升进每方法一个的 frame 结构体。
 - **`@try` 跨越 `@await`** 会被拒绝（`jmp_buf` 无法活过挂起点）；`@noarc` 跨 await 合法；break/continue 跨 await 变成状态跳转。
-- 协作式单线程调度器（`nopa_run_all`）与 I/O 集成是下一个里程碑。
+- 协作式单线程调度器（`nepa_run_all`）与 I/O 集成是下一个里程碑。
 
 ### `switch` 模式匹配（`case` 模式）
 
 `case` 标签可以写**模式**，不只是整型常量。类型分发的内核仍是方法链——模式 desugar 成 `isKindOfClass:` / `isEqual:` / 比较——但你写成声明式的样子：
 
-```nopa
+```nepa
 // 对象模式可以在同一个 switch 里自由混用：
 switch (subject) {
     case NPString *s:                          // 类型绑定 → isKindOfClass:
@@ -607,7 +607,7 @@ switch (n) {
 
 | 模式 | 降级为 |
 |------|--------|
-| `T *name` | `nopa_isKindOfClass(subject, &NOPA_CLASS_$_T)`；臂内 `name` 已绑定为 `(T *)subject` |
+| `T *name` | `nepa_isKindOfClass(subject, &NEPA_CLASS_$_T)`；臂内 `name` 已绑定为 `(T *)subject` |
 | `> 10` / `< 10` / `>= 0` / `<= 9` | `subject > 10`（subject 填进悬空的操作数位） |
 | `> 0 && < 100` | `subject > 0 && subject < 100` |
 | `@"lit"` / `@42` / `@YES` / `@'c'` / `@(expr)` | `[subject isEqual:<字面量>]`——值语义，`@"lit"` 能匹配**另一个**内容相同的 NPString |
@@ -629,7 +629,7 @@ M1 限制，全部**报错而非静默编译错**：
 
 ### 装箱字面量（`@(expr)` / `@YES` / `@NO` / `@'c'`）
 
-```nopa
+```nepa
 NPNumber *a = @123;          // int
 NPNumber *b = @1.5;          // double
 NPNumber *c = @YES;          // BOOL → 1
@@ -647,7 +647,7 @@ illegal type 'NPString *' in a boxed expression — '@(...)' accepts arithmetic 
 
 ### 字典字面量（`@{ key: value }`）
 
-```nopa
+```nepa
 NPDictionary *d = @{ @"a": @1, @"b": @2, @"c": @3 };
 NPLog(@"%d", [[d objectForKey:@"b"] intValue]);   // 2
 printf("%lu\n", (unsigned long)[d count]);        // 3
@@ -668,9 +668,9 @@ illegal type 'int' in a dictionary literal — keys and values must be Objective
 
 ### 异常语义（`-eh checked` —— 默认后端）
 
-Nopa 的异常是**不用栈展开的 ObjC 异常语义**。`@try`/`@catch`/`@finally`/`@throw` 的行为与 clang `-fobjc-arc-exceptions` 模式完全一致——差分测试套件（`tests/eh_diff/run_eh_diff.sh`）把每个用例同时跑在 nopac 与真 clang/ObjC 下、逐行 diff stderr，锁定这一保证（7/7 通过）。
+Nepa 的异常是**不用栈展开的 ObjC 异常语义**。`@try`/`@catch`/`@finally`/`@throw` 的行为与 clang `-fobjc-arc-exceptions` 模式完全一致——差分测试套件（`tests/eh_diff/run_eh_diff.sh`）把每个用例同时跑在 nepac 与真 clang/ObjC 下、逐行 diff stderr，锁定这一保证（7/7 通过）。
 
-```nopa
+```nepa
 @interface Boom : NPObject
 - (void)fire;
 @end
@@ -707,7 +707,7 @@ int main() {
 - **未捕获异常 abort** —— 输出 ObjC 措辞 `*** Terminating app due to uncaught exception of class 'NPString'`，退出码 1。
 - **C 调用方不会错过异常** —— 桥接头 wrapper 检查错误旗标并 abort，而不是静默返回零值。
 
-**`-eh checked` 已是默认后端**——直接 `nopac run` 就用它。`-eh legacy`（别名 `-eh sjlj`）切回旧的零开销 setjmp 后端，是一条完整的回退路径；该后端有经典限制：跨函数抛出会跳过中间帧的清理（见下方已知限制）。
+**`-eh checked` 已是默认后端**——直接 `nepac run` 就用它。`-eh legacy`（别名 `-eh sjlj`）切回旧的零开销 setjmp 后端，是一条完整的回退路径；该后端有经典限制：跨函数抛出会跳过中间帧的清理（见下方已知限制）。
 
 ### `@throws` —— 声明式异常
 
@@ -720,7 +720,7 @@ int main() {
 | 形态 | `@throw expr;` | `@throws(T *)` 或裸 `@throws` |
 | 进生成的 C 吗 | 进（setjmp/旗标机制） | **永不** —— 无代码、不占 vtable 槽位 |
 
-```nopa
+```nepa
 @interface Repo : NPObject
 - (NPString *)fetch:(const char *)url @throws(NPError *);   // 会抛 NPError *
 - (int)parse:(const char *)s @throws;                       // 会抛，类型不注明
@@ -737,7 +737,7 @@ int main() {
 @end
 ```
 
-苹果在**这个槽位**（声明 `;` 前的尾置元数据）已经用宏占了十几年：`NS_DESIGNATED_INITIALIZER`、`NS_REQUIRES_NIL_TERMINATION`、`API_AVAILABLE(...)`。Nopa 把同一槽位扶正为一等语法，并让 checker 直接对账。
+苹果在**这个槽位**（声明 `;` 前的尾置元数据）已经用宏占了十几年：`NS_DESIGNATED_INITIALIZER`、`NS_REQUIRES_NIL_TERMINATION`、`API_AVAILABLE(...)`。Nepa 把同一槽位扶正为一等语法，并让 checker 直接对账。
 
 **checker 强制什么**
 
@@ -750,7 +750,7 @@ int main() {
 
 被**同一体内** `@try` 捕获的 `@throw` 不算逃逸，因此 `main`、以及自己就地兜住的 helper 都不需要标注：
 
-```nopa
+```nepa
 static void bad(int n) {                        // error：逃逸出 'bad'
     if (n < 0) {
         @throw [[AppError alloc] init];
@@ -776,30 +776,30 @@ static void guarded(int n) {                    // 通过 —— 就地捕获
 
 类型判定刻意保守：`@"..."` 字面量、裸 C 字符串、Cast 目标类型、已知类型的变量会被判定；**消息发送不判**（只有 selector 的注册表无从得知其类），因此它对任意声明类型都放行。标注纯编译期——增删 `@throws` 不改变生成的 C、程序输出与 ARC 行为。两个关键词互相写错位置本身也是 error：体内写 `@throws`、声明上写 `@throw(...)`，各会收到一条指明正确关键词的诊断。
 
-#### 隐式根类（nopa_root）
+#### 隐式根类（nepa_root）
 
-Nopa 现在支持用户自定义根类。你不再需要强制继承 `NPObject`——不写父类的 `@interface` 会自动获得编译器注入的隐式根类 `nopa_root`，同时保持 `id` 类型的统一性和静态派发能力。
+Nepa 现在支持用户自定义根类。你不再需要强制继承 `NPObject`——不写父类的 `@interface` 会自动获得编译器注入的隐式根类 `nepa_root`，同时保持 `id` 类型的统一性和静态派发能力。
 
 **之前：**
 
-```nopa
+```nepa
 @interface Animal : NPObject   // 必须继承 NPObject
 ```
 
 **之后：**
 
-```nopa
+```nepa
 @interface Animal              // 不写父类 → 隐式根类
 @interface Animal : NPObject   // 显式继承 NPObject 仍然合法
 ```
 
-两者都合法，且 `id` 可以指向任何 Nopa 对象。
+两者都合法，且 `id` 可以指向任何 Nepa 对象。
 
 #### 核心机制
 
-当用户不写父类时，编译器自动注入 `nopa_root`：
+当用户不写父类时，编译器自动注入 `nepa_root`：
 
-```nopa
+```nepa
 // 用户代码：
 @interface Animal {
     int age;
@@ -808,7 +808,7 @@ Nopa 现在支持用户自定义根类。你不再需要强制继承 `NPObject`�
 @end
 
 // 编译器视为：
-@interface Animal : nopa_root {
+@interface Animal : nepa_root {
     int age;
 }
 - (void)speak;
@@ -819,17 +819,17 @@ Nopa 现在支持用户自定义根类。你不再需要强制继承 `NPObject`�
 
 ```c
 // 编译器内置结构
-struct nopa_object_header {
-    struct nopa_vtable *vtable;
+struct nepa_object_header {
+    struct nepa_vtable *vtable;
 };
 
-struct nopa_root {
-    struct nopa_object_header header;
+struct nepa_root {
+    struct nepa_object_header header;
 };
 
 // Animal 的 struct
 struct Animal {
-    struct nopa_root __super;  // 包含 header
+    struct nepa_root __super;  // 包含 header
     int age;
 };
 ```
@@ -837,25 +837,25 @@ struct Animal {
 #### id 的新定义
 
 ```c
-typedef struct nopa_root *nopa_id_t;
+typedef struct nepa_root *nepa_id_t;
 ```
 
-`id` 不再绑定任何具体类，只要求对象以 `nopa_root` 开头：
+`id` 不再绑定任何具体类，只要求对象以 `nepa_root` 开头：
 
-```nopa
+```nepa
 Animal *a = [[Animal alloc] init];
-id obj = a;                    // ✅ 合法，Animal 继承自 nopa_root
+id obj = a;                    // ✅ 合法，Animal 继承自 nepa_root
 [obj speak];                   // 静态派发：obj->header.vtable[...]
 ```
 
-#### NPObject vs nopa_root
+#### NPObject vs nepa_root
 
 | 写法                          | 含义                       | 适用场景            |
 | --------------------------- | ------------------------ | --------------- |
-| `@interface Xxx`            | 隐式继承 `nopa_root`，最轻量     | 自定义内存布局、内核、嵌入式  |
+| `@interface Xxx`            | 隐式继承 `nepa_root`，最轻量     | 自定义内存布局、内核、嵌入式  |
 | `@interface Xxx : NPObject` | 显式继承，获得 retain/release 等 | 用户态应用、需要完整运行时支持 |
 
-```nopa
+```nepa
 // 自定义根类：轻量，无引用计数
 @interface KernelTask {
     int pid;
@@ -872,24 +872,24 @@ id obj = a;                    // ✅ 合法，Animal 继承自 nopa_root
 
 #### 裸机 / Freestanding 支持（`-ffreestanding`）
 
-Nopa 可以编译为**无 libc、无 Foundation、无 TLS** 的自包含 C，直接用于内核、MCU、嵌入式裸机开发。
+Nepa 可以编译为**无 libc、无 Foundation、无 TLS** 的自包含 C，直接用于内核、MCU、嵌入式裸机开发。
 
 ```bash
-nopac -rewrite-nopa -ffreestanding kernel.np   # 生成自包含 C
+nepac -rewrite-nepa -ffreestanding kernel.np   # 生成自包含 C
 ```
 
 `-ffreestanding` 模式下转译出的 C：
 
-- 不 `#include <string.h>`，改 `#include <nopa/runtime.h>`（freestanding 分支）
+- 不 `#include <string.h>`，改 `#include <nepa/runtime.h>`（freestanding 分支）
 - `@try/@catch/@finally` 走默认 `-eh checked` 后端：纯旗标 + 守卫，零 `setjmp/longjmp`、零 `jmp_buf`（`-eh legacy` 才用 `__builtin_setjmp/longjmp` + 普通全局而非 `__thread`）
 - 类型（`SEL`/`NPClass`/`NPObject`/`id`）自含
 - **不捆绑 Clang Blocks 运行时** —— block 字面量引用 `__NSConcreteStackBlock`/`_Block_copy`/`_Block_release`；真裸机上要么链接一个 Blocks runtime 移植，要么用 `-backend portable`/`-backend gcc`（block 展开为普通 C 函数，无 ABI 符号）
 
-用户只需提供：`nopa_nopa_root_class`、异常全局（如用 `@try`）、`memcpy`（如用 `@try`）、freestanding 头（`stdint.h`/`stddef.h`/`stdbool.h`）。
+用户只需提供：`nepa_nepa_root_class`、异常全局（如用 `@try`）、`memcpy`（如用 `@try`）、freestanding 头（`stdint.h`/`stddef.h`/`stdbool.h`）。
 
-**裸机分配器 + `[[Class alloc] init]`**（`include/nopa/runtime_freestanding.c`）：
+**裸机分配器 + `[[Class alloc] init]`**（`include/nepa/runtime_freestanding.c`）：
 
-```nopa
+```nepa
 @interface HeapCounter {
     int total;
 }
@@ -898,7 +898,7 @@ nopac -rewrite-nopa -ffreestanding kernel.np   # 生成自包含 C
 - (int) add:(int)x;
 @end
 @implementation HeapCounter
-+ (id) alloc  { return nopa_alloc(self); }   // bump allocator
++ (id) alloc  { return nepa_alloc(self); }   // bump allocator
 - (id) init   { return self; }
 - (int) add:(int)x { total += x; return total; }
 @end
@@ -915,25 +915,25 @@ void demo(void) {
 - 类方法 / 实例方法消息派发
 - `@try/@catch/@finally`
 - `@selector`、内联 asm、C 类型转换
-- `[[Class alloc] init]` 裸机堆分配 + ARC 自动 `nopa_release`
+- `[[Class alloc] init]` 裸机堆分配 + ARC 自动 `nepa_release`
 
 运行示例（soma-kernel 在 qemu 下）：
 
 ```
-[nopa] class method [SomaCore::Calculator compute:21] = 43
-[nopa] instance methods on C-created obj: add:7 -> 7, add:35 -> 42, value = 42
-[nopa] @try/@catch demo:
+[nepa] class method [SomaCore::Calculator compute:21] = 43
+[nepa] instance methods on C-created obj: add:7 -> 7, add:35 -> 42, value = 42
+[nepa] @try/@catch demo:
        try body, throwing...
        caught [e errorCode] = 42
        finally always runs
        after-try continues
-[nopa] alloc+init (bump allocator):
+[nepa] alloc+init (bump allocator):
        [c add:10]=10 [c add:20]=30 [c value]=30
 ```
 
 #### 方法派发
 
-所有 Nopa 对象通过统一的 VTable 机制静态派发：
+所有 Nepa 对象通过统一的 VTable 机制静态派发：
 
 ```c
 // [obj doSomething:arg]
@@ -951,8 +951,8 @@ obj->header.vtable[INDEX_doSomething](obj, arg);
    已实现：
 
 - [x] 隐式根类注入（语义分析阶段）
-- [x] `nopa_root` 和 `nopa_object_header` 的 C 代码生成
-- [x] `id` → `nopa_id_t` 的类型映射
+- [x] `nepa_root` 和 `nepa_object_header` 的 C 代码生成
+- [x] `id` → `nepa_id_t` 的类型映射
 - [x] 统一 VTable 索引分配
 - [x] 根类/子类 struct 生成
 - [x] 单元测试覆盖
@@ -961,7 +961,7 @@ obj->header.vtable[INDEX_doSomething](obj, arg);
 
 `@namespace` 用于组织类、函数、常量等代码实体，避免全局命名冲突。这是 ObjC 没有的特性——在传统 ObjC 中需要用前缀（如 `NS`、`UI`）来模拟。
 
-```nopa
+```nepa
 @namespace Game
     @interface Player : NPObject {
         int health;
@@ -989,13 +989,13 @@ obj->header.vtable[INDEX_doSomething](obj, arg);
 
 **编码规则**：命名空间通过 `::` 分隔，转译为 C 时使用 `__` 编码。
 
-| Nopa 符号                   | 转译后的 C 符号                    |
+| Nepa 符号                   | 转译后的 C 符号                    |
 | ------------------------- | ---------------------------- |
 | `Game::Player`            | `Game__Player`               |
 | `Game::Entities::Enemy`   | `Game__Entities__Enemy`      |
 | 方法 `-[Game::Player init]` | `Game__Player_init`          |
-| VTable                    | `NOPA_VTABLE_$_Game__Player` |
-| 类元数据                      | `NOPA_CLASS_$_Game__Player`  |
+| VTable                    | `NEPA_VTABLE_$_Game__Player` |
+| 类元数据                      | `NEPA_CLASS_$_Game__Player`  |
 
 **特性**：
 
@@ -1012,7 +1012,7 @@ obj->header.vtable[INDEX_doSomething](obj, arg);
 
 **形式一：导入完整限定名**
 
-```nopa
+```nepa
 @using Game::Player;
 Game::Player *p = [[Game::Player alloc] init];
 // 可以直接用 Player 代替 Game::Player
@@ -1021,7 +1021,7 @@ Player *p = [[Player alloc] init];
 
 **形式二：导入并指定别名**
 
-```nopa
+```nepa
 @using GP = Game::Player;
 // 用 GP 作为 Game::Player 的别名
 GP *p = [[GP alloc] init];
@@ -1029,7 +1029,7 @@ GP *p = [[GP alloc] init];
 
 **形式三：导入整个命名空间**
 
-```nopa
+```nepa
 @using namespace Game;
 // Game 命名空间下的所有类可以直接用短名访问
 Player *p = [[Player alloc] init];
@@ -1046,13 +1046,13 @@ Enemy *e = [[Enemy alloc] init];
 
 在 ARC 模式下，checker 禁止手动内存管理：
 
-```nopa
+```nepa
 [obj release]; // 错误：explicit 'release' not allowed in ARC mode
 ```
 
-`@noarc { }` 划定一个可以手动管理内存的块——它是 `-fno-nopa-arc`（以及 clang 的 `-fno-objc-arc`）的块级等价物：
+`@noarc { }` 划定一个可以手动管理内存的块——它是 `-fno-nepa-arc`（以及 clang 的 `-fno-objc-arc`）的块级等价物：
 
-```nopa
+```nepa
 @noarc {
     [obj retain];
     [obj release];
@@ -1065,7 +1065,7 @@ Enemy *e = [[Enemy alloc] init];
 - **块级作用域** — 只有 `@noarc { }` 内的语句豁免。块外仍使用静态 ARC，块外手动 `retain`/`release`/`dealloc`/`autorelease` 是编译错误。
 - **不注入 ARC** — ARC 分析器完全跳过 `@noarc` 块，不为其中使用的对象插入任何 retain/release。
 - **运行时方法豁免** — `retain`/`release`/`dealloc`/`autorelease` 自身的实现无需 `@noarc` 即可调用这些方法。
-- **全程序等价物** — `-fno-nopa-arc` 把整个程序切到 MRC；`@noarc` 对单个块做同样的事。
+- **全程序等价物** — `-fno-nepa-arc` 把整个程序切到 MRC；`@noarc` 对单个块做同样的事。
 - **Foundation** — NPString/NPMutableString 的便捷构造器（`+stringWithUTF8String:`、`+stringWithString:`）把刻意为之的 `autorelease` 包在 `@noarc { }` 里。
 
 ---
@@ -1075,8 +1075,8 @@ Enemy *e = [[Enemy alloc] init];
 `-trace-refcount` 在 **ARC 注入之后**对 AST 跑一个静态引用计数模拟器，按时间顺序打印每个存活对象的计数追踪，然后直接退出（不生成代码、不编译）。它是调试辅助工具，用来验证每个对象恰好被 release 一次（无泄漏、无二次释放）。
 
 ```bash
-nopac -trace-refcount app.np                              # 彩色追踪
-nopac -trace-refcount -trace-no-color -trace-max-iters 2 app.np
+nepac -trace-refcount app.np                              # 彩色追踪
+nepac -trace-refcount -trace-no-color -trace-max-iters 2 app.np
 ```
 
 选项：
@@ -1091,7 +1091,7 @@ nopac -trace-refcount -trace-no-color -trace-max-iters 2 app.np
 
 Go 风格的延迟清理：`@defer { ... }` 把自己的 body 注册到**最内层复合语句块**上，body 在该块的**每一处出口**执行——块尾自然出口、任意深度的 `return`、跳出该块的 `break`/`continue`、同函数 `@throw`——最内层优先（LIFO）。
 
-```nopa
+```nepa
 - (void)work {
     FILE *f = fopen("cfg.txt", "r");
     @defer { fclose(f); }            // 下面每处出口都会执行
@@ -1117,7 +1117,7 @@ M1 限制（编译期强制）：`@defer` 必须直接位于块内；defer 体�
 
 `@await` M1/M2 有个软肋：头文件里看不出方法会挂起。`NPAsync<T>` 把 async-ness 扶正为**返回类型位可见的标记**——parser 把它解包为 `T`，纯编译期元数据：生成 C 中 `NPAsync` 出现 **0 次**，vtable 布局、跨 TU 链接、桥接头全部不受影响。
 
-```nopa
+```nepa
 @interface Fetcher : NPObject
 - (NPAsync<int>)compute:(int)n;   // 会挂起，完成后给 int
 + (NPAsync<void>)runAll;          // 入口方法
@@ -1149,7 +1149,7 @@ Golden：`tests/golden/37_async_marker/`；负例在 `tests/negative/async_marke
 | `recv[i]` | `[recv objectAtIndex:i]` | 接收者的类声明了 `objectAtIndex:` |
 | `recv[i] = v` | `[recv setObject:v atIndex:i]` | 类还声明了 `setObject:atIndex:` |
 
-```nopa
+```nepa
 NPArray *a = @[ @"x", @"y", @"z" ];
 NPLog(@"%@", a[0]);            // → [a objectAtIndex:0]
 NPMutableArray *m = [NPMutableArray array];
@@ -1165,7 +1165,7 @@ m[0] = @"hello";               // → [m setObject:@"hello" atIndex:0] —— �
 
 泛型容器**真单态化并做类型检查**。`NPArray<NPString *>` 与 `NPDictionary<NPString *, NPNumber *>` 会生成真正的特化 C（struct、vtable、类元数据、类型已代入的方法副本），checker 再把元素类型代入方法签名——所以元素类型是被强制的，不是被擦除的：
 
-```nopa
+```nepa
 NPMutableArray<NPString *> *m = [NPMutableArray array];
 [m addObject:@"a"];
 NPString *s = [m objectAtIndex:0];      // NPString *，不是 id
@@ -1191,7 +1191,7 @@ container's element type is unchecked; add an explicit cast if the contents are 
 
 类型参数接受类级约束——ObjC 拼写（`T : id<Summable>`）、裸协议名（`T : Summable`）、类指针（`T : NSObject *`）三种都接受；存储与诊断统一用裸名：
 
-```nopa
+```nepa
 @protocol Greetable
 - (NPString *)greeting;
 @end
@@ -1212,12 +1212,12 @@ container's element type is unchecked; add an explicit cast if the contents are 
 
 checker 在**显式特化的实例化点**（`Box<Dog *> *b = ...;`）强制约束：违约实报 error（一次报齐所有违约）。逃逸通道——`id`、`instancetype`、嵌套类型参数槽、forward 声明壳、无法解析的 bound 名——静默放行（漏报优于误报，与 checker 全局哲学一致）。裸拼写（`Box *`）永不触发：擦除兼容，今天的代码照常编译。bound 是纯编译期元数据——**零 codegen**，golden 输出逐字节不变；`-fno-checker` 关闭检查。不支持方法级约束（`where U : P`）。Golden：`tests/golden/46_generic_bounds/`。
 
-### Nopa 语法宏（双轨 `#define`）
+### Nepa 语法宏（双轨 `#define`）
 
-含 **nopa 语法**（`[recv msg]`、`@` 字面量、`^{}` block）的 `#define` 宏体此前原样透传给 C 编译器——直接语法错误。nopac 现在自行解析并在源级展开。纯 C 宏体照旧透传、由 C 编译器展开，行为零变化。
+含 **nepa 语法**（`[recv msg]`、`@` 字面量、`^{}` block）的 `#define` 宏体此前原样透传给 C 编译器——直接语法错误。nepac 现在自行解析并在源级展开。纯 C 宏体照旧透传、由 C 编译器展开，行为零变化。
 
-```nopa
-#define TAG(o)      [o tag]                    // nopa 轨：nopac 展开
+```nepa
+#define TAG(o)      [o tag]                    // nepa 轨：nepac 展开
 #define BUMP(o, n)  [o addTo:n times:1]
 #define LOG(x)      NPLog(@"tag=%d", x)        // 宏体含 @literal
 #define TWICE(x)    ((x) + (x))                // C 轨：clang 展开
@@ -1227,7 +1227,7 @@ BUMP(w, 3);
 LOG(TAG(w));
 ```
 
-展开语义遵循 ISO C §6.10.3（`crates/cpp` 独立实现，逐行对照 `clang -E` 交叉验证）：实参先完整展开再代入（`#`/`##` 操作数用 raw 文本）、`#param` 字符串化、`a ## b` 粘贴、`__VA_ARGS__` 逗号拼接、自递归冻结（蓝漆规则）、函数式宏裸名不展开、`\` 续行拼逻辑行。条件指令（`#if`/`#ifdef`/`#ifndef`/`#elif`/`#else`/`#endif`）也由 nopac 求值——`defined(X)` 操作数豁免展开、跳过的分组不定义宏、畸形条件指令报错而非静默吞文件。
+展开语义遵循 ISO C §6.10.3（`crates/cpp` 独立实现，逐行对照 `clang -E` 交叉验证）：实参先完整展开再代入（`#`/`##` 操作数用 raw 文本）、`#param` 字符串化、`a ## b` 粘贴、`__VA_ARGS__` 逗号拼接、自递归冻结（蓝漆规则）、函数式宏裸名不展开、`\` 续行拼逻辑行。条件指令（`#if`/`#ifdef`/`#ifndef`/`#elif`/`#else`/`#endif`）也由 nepac 求值——`defined(X)` 操作数豁免展开、跳过的分组不定义宏、畸形条件指令报错而非静默吞文件。
 
 限制（报清晰错误，不静默）：宏调用必须单行闭合（跨行用 `\` 续行）；宏体内不得出现 `_Pragma`。Golden：`tests/golden/38_macros/`。
 
@@ -1235,7 +1235,7 @@ LOG(TAG(w));
 
 C99 指定初始化器的六种形态全部可用，包括 ObjC 的 C 子集从来不需要的那些：
 
-```nopa
+```nepa
 struct Point { int x; int y; };
 struct Point p1 = { .x = 1, .y = 2 };      // 1. 完整指定
 struct Point p2 = { .y = 5 };               // 2. 部分指定——未指定字段零填充
@@ -1255,7 +1255,7 @@ struct Outer o = { .in.a = 3, .tag = 9 }; // 6. 嵌套成员路径
 
 `float _Complex` / `double _Complex` 的声明、typedef、形参全程原样透传，虚数后缀字面量（`2.0i`、`1e3j`）按 **raw 文本**发射——此前虚部被静默丢弃（`2.0i` → `2.0f`）。
 
-```nopa
+```nepa
 #include <complex.h>
 typedef float _Complex cfloat;
 
@@ -1265,7 +1265,7 @@ cfloat f = 1.5;
 printf("A=%.1f+%.1fi\n", creal(z), cimag(z));
 ```
 
-已知限制：nopa checker 无复数类型推导（复数宽度窄化不告警，语义由生成的 C 交 C 编译器保证）。Golden：`tests/golden/39_complex/`。
+已知限制：nepa checker 无复数类型推导（复数宽度窄化不告警，语义由生成的 C 交 C 编译器保证）。Golden：`tests/golden/39_complex/`。
 
 ---
 
@@ -1274,7 +1274,7 @@ printf("A=%.1f+%.1fi\n", creal(z), cimag(z));
 ### 命令行选项
 
 ```bash
-nopac [options] <input.np>
+nepac [options] <input.np>
 
 模式:
   (无)              默认：转译 + 编译到二进制（需要 -o）
@@ -1286,9 +1286,9 @@ nopac [options] <input.np>
   -L <dir>          添加库搜索路径
   -v, --verbose     显示详细输出（包括 Clang 编译警告）
   --version         显示版本号
-  --rewrite-nopa    只输出 C 代码（不编译）
-  -fnopa-arc        启用 ARC（默认）
-  -fno-nopa-arc     禁用 ARC（手动 MRC 模式）
+  --rewrite-nepa    只输出 C 代码（不编译）
+  -fnepa-arc        启用 ARC（默认）
+  -fno-nepa-arc     禁用 ARC（手动 MRC 模式）
   -fno-checker      跳过类型检查
   -eh <mode>        异常后端：checked（默认）或 legacy（别名 sjlj）
   -ffreestanding    裸机/freestanding 输出（无 libc、无 TLS）
@@ -1296,7 +1296,7 @@ nopac [options] <input.np>
   -arch <target>    构建目标架构（如 -arch x86_64）
   -asm <file.s>     链接汇编文件（可重复）
   -gen-completions <shell>  生成 shell 补全脚本（zsh|bash|fish）
-  -emit-bridge-header <file.h>  生成 C 桥接头，用于从 C 代码调用 Nopa 对象
+  -emit-bridge-header <file.h>  生成 C 桥接头，用于从 C 代码调用 Nepa 对象
 
 引用计数追踪（调试辅助）:
   -trace-refcount              按源代码顺序打印每个存活对象的静态引用计数追踪
@@ -1322,14 +1322,14 @@ cargo test --workspace
 不必在每个 TU 里内联 Foundation（`#import <Foundation/Foundation.np>`，自包含伞头），可以一次构建成静态库、各项目链接——单文件编译更快，实现只存一份：
 
 ```bash
-./tools/build-foundation-lib.sh            # → target/foundation/libnopafoundation.a
+./tools/build-foundation-lib.sh            # → target/foundation/libnepafoundation.a
 ```
 
 脚本把每个 Foundation `.np` 作为**独立编译单元**转译（生成的 wrapper 前置完整声明面、再内联实现文本）、编译、归档。由于每个 `@implementation` 都落在其 TU 的主文件里，R2 ownership 自动把该类的元数据发射为 STRONG 符号——脚本 nm 校验全部九个，任何弱符号都会响亮失败。`-fstrong-metadata` 已不存在：ownership 由构造保证。
 
 客户端随后只导入声明头：
 
-```nopa
+```nepa
 #import <Foundation/Foundation.nh>    // 纯声明——不内联任何实现
 
 int main() {
@@ -1340,22 +1340,22 @@ int main() {
 ```
 
 ```bash
-nopac app.np -I include -L target/foundation -lnopafoundation -o app   # 显式链接
+nepac app.np -I include -L target/foundation -lnepafoundation -o app   # 显式链接
 
-# ……或者让 nopac 自己找到并链接库：
-nopac app.np -o app
+# ……或者让 nepac 自己找到并链接库：
+nepac app.np -o app
 ```
 
 要点：
 
 - **无需记任何旗标**——主文件持有 `@implementation` 自动为强；纯声明客户端保持弱，这正是正确的（库的真表在链接中胜出）。
-- **自动链接**——nopac 找得到 `libnopafoundation.a`（二进制旁、`target/foundation`、`/opt/nopa/lib`、`/usr/local/lib/nopa` 或你的 `-L` 目录）就自动链。只对**纯声明客户端**生效：内联了 Foundation 实现（`Foundation.np`——直接或经导入的 `.nh` 传递）的 TU 会跳过，自包含程序与多 TU 构建永远见不到库的强 vtable。`-ffreestanding`、shared 模式、显式 `-lnopafoundation` 都会抑制自动链接。
-- **`nopa_metaInit()`** 只对通过 `#import "*.np"` 获取实现的伞形构建（单 TU 构建、无任何 TU 持有元数据）**真正必需**。用预编译库——以及所有常规 `nopac` 工作流——元数据在加载期静态初始化，该调用是幂等空操作。
+- **自动链接**——nepac 找得到 `libnepafoundation.a`（二进制旁、`target/foundation`、`/opt/nepa/lib`、`/usr/local/lib/nepa` 或你的 `-L` 目录）就自动链。只对**纯声明客户端**生效：内联了 Foundation 实现（`Foundation.np`——直接或经导入的 `.nh` 传递）的 TU 会跳过，自包含程序与多 TU 构建永远见不到库的强 vtable。`-ffreestanding`、shared 模式、显式 `-lnepafoundation` 都会抑制自动链接。
+- **`nepa_metaInit()`** 只对通过 `#import "*.np"` 获取实现的伞形构建（单 TU 构建、无任何 TU 持有元数据）**真正必需**。用预编译库——以及所有常规 `nepac` 工作流——元数据在加载期静态初始化，该调用是幂等空操作。
 - 客户端重实现库类，对归档而言是标准 C 覆盖语义（库成员未被引用就保持休眠）——但未实现方法的槽位是 NULL，所以派发到的方法必须全部自己实现。
 
 ### Hello World
 
-```nopa
+```nepa
 #include <stdio.h>
 #import <Foundation/Foundation.np>
 
@@ -1365,7 +1365,7 @@ nopac app.np -o app
 
 @implementation Greeter
 - (void)greet {
-    printf("Hello, Nopa!\n");
+    printf("Hello, Nepa!\n");
 }
 @end
 
@@ -1380,7 +1380,7 @@ int main() {
 
 ### 多态
 
-```nopa
+```nepa
 @interface Animal : NPObject
 - (void)speak;
 @end
@@ -1415,7 +1415,7 @@ int main() {
 
 ### Block + ARC
 
-```nopa
+```nepa
 typedef void (^EventHandler)(int code, NPString *msg);
 
 @interface Engine : NPObject
@@ -1436,9 +1436,9 @@ int main() {
 
 ### 静态泛型（Generics）
 
-Nopa 通过**编译期单态化（monomorphization）**实现泛型——每个 `DataPack<QuantumToken *>` 都会生成独立的 C 结构体 `DataPack_QuantumToken_ptr`，类型参数被具体类型替换。没有类型擦除，没有装箱，没有运行时开销。
+Nepa 通过**编译期单态化（monomorphization）**实现泛型——每个 `DataPack<QuantumToken *>` 都会生成独立的 C 结构体 `DataPack_QuantumToken_ptr`，类型参数被具体类型替换。没有类型擦除，没有装箱，没有运行时开销。
 
-```nopa
+```nepa
 @interface DataPack<T> : NPObject {
     @public
     int _count;
@@ -1459,7 +1459,7 @@ Nopa 通过**编译期单态化（monomorphization）**实现泛型——每个 
         _count--;
         T item = _storage[_count];
         _storage[_count] = 0;
-        return nopa_autorelease(item);
+        return nepa_autorelease(item);
     }
     return 0;
 }
@@ -1499,11 +1499,11 @@ ObjC 的运行时很强大，但我不想依赖它。把所有决策放在编译
 
 ### 2. 生成人能读的 C
 
-Nopa 的"后端"是**人类可读的 C99**，不是 LLVM IR。这意味着：
+Nepa 的"后端"是**人类可读的 C99**，不是 LLVM IR。这意味着：
 
 - 可以用 Clang/LLDB 原生工具调试
 - 生成的 C 可以审查、修改、嵌入到其他项目
-- 没有 LLVM 后端绑定——Clang 能跑的地方 Nopa 就能跑
+- 没有 LLVM 后端绑定——Clang 能跑的地方 Nepa 就能跑
 
 ### 3. 渐进式
 
@@ -1514,7 +1514,7 @@ Nopa 的"后端"是**人类可读的 C99**，不是 LLVM IR。这意味着：
 - ✅ 静态 ARC
 - ✅ @selector / VTable 多态
 - ✅ 异常处理（`@try`/`@catch`/`@finally`/`@throw`）——**默认后端是 `-eh checked`**（旗标 + 守卫降级，unwind-safe ARC：跨函数抛出会释放每一帧的 owned 局部；不用 `setjmp/longjmp`，故裸机同样可用）
-  - `-eh legacy`（别名 `-eh sjlj`）切回旧的 `setjmp`/`longjmp` 后端。⚠️ 它的已知限制：跨函数抛出时**跨越作用域仍存活的对象会泄漏**（`longjmp` 跳过作用域末尾的 `nopa_release`）。该限制**不适用于默认后端**。
+  - `-eh legacy`（别名 `-eh sjlj`）切回旧的 `setjmp`/`longjmp` 后端。⚠️ 它的已知限制：跨函数抛出时**跨越作用域仍存活的对象会泄漏**（`longjmp` 跳过作用域末尾的 `nepa_release`）。该限制**不适用于默认后端**。
 - ⏳ Foundation 标准库
 - ⏳ 编译器自举
 
@@ -1601,9 +1601,9 @@ Nopa 的"后端"是**人类可读的 C99**，不是 LLVM IR。这意味着：
 
 还不能。但它是 **真实可用** 的 —— 它能编译、能运行，并且从一开始就是为成长而设计的。如果你觉得它的语法很对味，想给它贡献一下，那么非常欢迎。
 
-### Nopa 能做什么？
+### Nepa 能做什么？
 
-写小游戏、写工具、写玩具。项目里的贪吃蛇、Flappy Bird、太空射击、井字棋都是 Nopa 写的，跑在终端里。
+写小游戏、写工具、写玩具。项目里的贪吃蛇、Flappy Bird、太空射击、井字棋都是 Nepa 写的，跑在终端里。
 
 ### 和 ObjC 比少了什么？
 

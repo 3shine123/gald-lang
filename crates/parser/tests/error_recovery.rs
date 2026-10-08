@@ -8,7 +8,7 @@
 //! token in place and lets the recovery loops in `parse_translation_unit` /
 //! `parse_compound_statement` resync.
 
-use nopa_parser::Parser;
+use nepa_parser::Parser;
 
 /// Every missing `;` must produce exactly one error, at the right line.
 #[test]

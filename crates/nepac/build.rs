@@ -45,12 +45,12 @@ fn main() {
         .unwrap_or_else(|_| "0.0.0".to_string())
         .trim()
         .to_string();
-    println!("cargo:rustc-env=NOPA_VERSION={}", version);
+    println!("cargo:rustc-env=NEPA_VERSION={}", version);
 
-    let src = if std::path::Path::new("../../include/nopa/runtime.c").exists() {
-        "../../include/nopa/runtime.c"
+    let src = if std::path::Path::new("../../include/nepa/runtime.c").exists() {
+        "../../include/nepa/runtime.c"
     } else {
-        "../include/nopa/runtime.c"
+        "../include/nepa/runtime.c"
     };
     println!("cargo:rerun-if-changed={}", src);
 
@@ -58,10 +58,10 @@ fn main() {
         .file(src)
         .include("../../include")
         .include("../../include/Foundation")
-        .compile("nopa");
+        .compile("nepa");
 
-    // Copy libnopa.a to the architecture-specific output directory (same as nopac binary).
-    let built = std::path::Path::new(&std::env::var("OUT_DIR").unwrap()).join("libnopa.a");
+    // Copy libnepa.a to the architecture-specific output directory (same as nepac binary).
+    let built = std::path::Path::new(&std::env::var("OUT_DIR").unwrap()).join("libnepa.a");
     if !built.exists() {
         return;
     }
@@ -75,9 +75,9 @@ fn main() {
         std::path::Path::new("../../target").join(&target).join(&profile)
     };
     let _ = std::fs::create_dir_all(&target_dir);
-    let _ = std::fs::copy(&built, target_dir.join("libnopa.a"));
+    let _ = std::fs::copy(&built, target_dir.join("libnepa.a"));
 
-    // 拷贝 install.sh + install.ps1 + 头文件到构建输出目录（与 nopac 同层，方便本地安装）
+    // 拷贝 install.sh + install.ps1 + 头文件到构建输出目录（与 nepac 同层，方便本地安装）
     let install_src = if std::path::Path::new("../../install.sh").exists() {
         PathBuf::from("../../install.sh")
     } else {
@@ -120,7 +120,7 @@ fn main() {
     if completions_src.is_dir() {
         emit_rerun_for_dir(&completions_src);
     }
-    println!("cargo:rerun-if-changed=../../include/nopa/runtime.h");
-    println!("cargo:rerun-if-changed=../../include/nopa/runtime_freestanding.c");
-    println!("cargo:rerun-if-changed=../../completions/_nopac");
+    println!("cargo:rerun-if-changed=../../include/nepa/runtime.h");
+    println!("cargo:rerun-if-changed=../../include/nepa/runtime_freestanding.c");
+    println!("cargo:rerun-if-changed=../../completions/_nepac");
 }

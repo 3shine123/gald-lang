@@ -1,8 +1,8 @@
 [package]
-name = "nopa-preprocessor"
+name = "nepa-preprocessor"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-nopa-cst = { path = "../cst" }
-nopa-cpp = { path = "../cpp" }
+nepa-cst = { path = "../cst" }
+nepa-cpp = { path = "../cpp" }

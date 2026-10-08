@@ -1,4 +1,4 @@
-use nopa_cst::{CstParam, CstType, Nullability, TagKind, TypePrim};
+use nepa_cst::{CstParam, CstType, Nullability, TagKind, TypePrim};
 
 // ─── Type node ───────────────────────────────────────────────────────────────
 
@@ -333,6 +333,12 @@ pub struct AstDecl {
          properties: Vec<AstDecl>,
          impl_vars: Vec<AstDecl>,
          is_implementation: bool,
+         /// True for a category (`@implementation Dog (Tricks)`). A category
+         /// implementation must NOT claim class ownership (R2): its TU emits
+         /// only the method definitions, never the strong class metadata —
+         /// otherwise linking owner + category TUs fails with duplicate
+         /// symbols (probes/xcat P0). See doc/categories_protocol_plan.md D1.
+         is_category: bool,
      },
      Method {
          method_sym: Option<String>,
@@ -412,6 +418,16 @@ pub struct AstDecl {
     Namespace(Vec<AstDecl>),
     ForwardClass {
         names: Vec<String>,
+    },
+    /// A `@protocol P <Parents>` declaration. Carries what the codegen needs
+    /// to emit the static `NPProtocol` metadata (D5.2,
+    /// doc/categories_protocol_plan.md): parent names, required/optional
+    /// selector names in declaration order. Compile-time only — methods keep
+    /// no param types here (the runtime query compares selector names).
+    Protocol {
+        parents: Vec<String>,
+        required_methods: Vec<String>,
+        optional_methods: Vec<String>,
     },
     Asm {
         is_volatile: bool,

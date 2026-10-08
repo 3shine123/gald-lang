@@ -1,10 +1,11 @@
 # Categories 与协议继承跨 TU 支持规划
 
-> 状态：设计定稿，**未实施**（本文档只做调研与规划，不改任何代码）。
+> 状态：**阶段一、二、三已实施并实证**（2026-10-07）。见文末 §8「实施记录」；
+> §1–§7 保留为设计档案，其中部分假设已被实测修正（以 §8 为准）。
 > 起因：`doc/architecture.md` 已知限制——「categories / 协议继承的跨 TU 场景
 > 支持有限」（`ROADMAP.md` 语言缺口两条）。本规划回答两个问题：ObjC 是怎么
-> 做的；在 nopa「ObjC 语义 + 静态实现 + 无 msgSend」的铁律下，最合理的对应
-> 方案是什么。结论先行：**ObjC 用运行期合并类别，nopa 没有运行时，就让链接
+> 做的；在 nepa「ObjC 语义 + 静态实现 + 无 msgSend」的铁律下，最合理的对应
+> 方案是什么。结论先行：**ObjC 用运行期合并类别，nepa 没有运行时，就让链接
 > 器当运行时——类别方法槽用弱符号，链接期完成 ObjC 在 `attachCategories`
 > 里做的事**。
 
@@ -37,7 +38,7 @@
 - 类别**不能加 ivar**（struct 布局编译期已定）；类别里的 @property 只是个
   声明，getter/setter 要自己写（class extension `@interface Dog ()` 才能加
   ivar，它在编译期合并进主类，不走运行期类别通道）。
-- 全部机制依赖 `objc_msgSend` 按名查找——nopa 没有这一层。
+- 全部机制依赖 `objc_msgSend` 按名查找——nepa 没有这一层。
 
 ### 2.2 协议：容器式继承 + 双层一致性
 
@@ -102,7 +103,7 @@ extern void Dog_bark(Dog *self) __attribute__((weak));   /* 弱 extern */
 ### D4 —— 同名冲突：静态模型直接非法，比 ObjC 更早失败
 
 - 类别方法与主类方法同名：同 TU → binder/codegen 层直接报错（ObjC 是静默
-  覆盖 + 顺序依赖坑，nopa 没有运行期查找顺序，无法复刻其语义，复刻半吊子
+  覆盖 + 顺序依赖坑，nepa 没有运行期查找顺序，无法复刻其语义，复刻半吊子
   不如禁止）；跨 TU → 强符号 duplicate symbol，链接期天然报错，与 R2
   「双 @implementation 撞链接失败」同一哲学。
 - 两个类别同名方法：同上，链接期 duplicate，明确报错。
@@ -166,3 +167,86 @@ extern void Dog_bark(Dog *self) __attribute__((weak));   /* 弱 extern */
 | 无 msgSend、静态派发 | 链接期弱符号吸收 = 静态模型的「运行期合并」等价物 | 不违背 |
 | C 超集铁律 | `__attribute__((weak))` 是标准 GNU 扩展，clang/zig cc 皆支持 | 不违背 |
 | ObjC 语义对齐 | ivar 禁令、extension 合并、required/optional 与 ObjC 一致；唯一偏离是同名方法从「静默覆盖」改为「编译期/链接期报错」——静态模型无法复刻查找顺序语义，显式拒绝优于错误复刻（§2.3 共性结论） | 有意偏离，已记录 |
+
+## 7. 实施修订（2026-10-07 评审后定案）
+
+P0/P1 探针已完成，实测结论修正了本方案的两处假设：
+
+- **P0 实测**：类别 TU 参与链接时 `NEPA_VTABLE_$_Dog` / `NEPA_CLASS_$_Dog` /
+  `NEPA_GETCLASS_$_Dog` duplicate symbol——类别 `@implementation Dog (Tricks)`
+  目前被 codegen 当作类的 owner 强发元数据。**实现前提：类别实现 TU 不得
+  认领类所有权**（`owned_classes` 排除 category impl），否则 D1 无从谈起。
+- **P1 实测（macOS arm64 clang）**：默认 ld **拒绝**未定义弱 extern（链接期
+  报错，非 NULL）；`-undefined dynamic_lookup` 下取址可靠为 NULL。因此弱
+  符号主案**必须由 nepac 驱动在链接时注入 `-Wl,-U,_<sym>` 或等效 flag**，
+  或者退到备胎强 extern。链接器行为是平台差异点，不能当稳定语义。
+- **P1 矩阵扩展（评审采纳）**：补 Linux clang / GCC / ELF、静态库归档、
+  链接顺序交换、多类别、类别缺席七种组合；若结果依赖链接顺序，弃弱符号
+  主案改备胎。
+- **槽位规则钉死（评审采纳，P0 已部分证实）**：槽位由共享 `.nh` 声明集
+  决定，类别**实现**在场与否不改变布局（三 TU `__sig` 同值已证）；实现时
+  以 `tests/multi_tu/14` 两个用例（在场/缺席 `__sig` 与槽值断言）固化。
+- **selector 检查分级（评审采纳，独立于本方案立项）**：用户源内静态
+  receiver 未声明 selector → error；Foundation 伞头误解析 → warning（待
+  修掉 15 处 receiver 误解析后自然归零）；`id` receiver → 放行。此为
+  checker 独立工作项，不阻塞类别实施。
+- **泛型返回 ABI 验证（评审采纳，独立工作项）**：`+ (NPArray<T> *)make`
+  需补多实例化 / 跨 TU / 函数指针 / ARC 返回 / 类+实例并存五组探针。
+- **protocol_count 只是必要条件（评审采纳）**：D5.2 实施时须同时验证协议
+  身份跨 TU 唯一、父链闭包完整、多级继承递归可查、与编译期检查结论一致、
+  类别添加协议时 metadata 合并正确——五项缺一即不算完成。
+
+## 8. 实施记录（2026-10-07，阶段一/二/三已落地）
+
+### 类别跨 TU（D1 备胎定案为最终形态）
+
+- **AST**：`AstDeclData::Class` 新增 `is_category`（elaborator 从 CST
+  `category_name` 透传）。
+- **所有权**：`collect_owned_classes` 排除 category impl——类别 TU 只发
+  方法定义，不发强元数据（修掉 P0 实测的 duplicate symbol）。
+- **槽引用**：owner TU 对类别引入的方法引用 `Owner_method` 强 extern；
+  类别 TU 的定义带 weak（与普通方法合并惯例一致）。类别缺席 = 链接期
+  undefined symbol，全平台响亮，无需驱动 flag。弱 extern 主案被 P1 证伪
+  （macOS ld 拒绝未定义弱符号）后弃用。
+- **实现坑（实测）**：类别方法标记最初做成 method_names 的并行数组，但
+  method_names 在构建后被父类方法合并打乱（实测 2 项构建、11 项发射），
+  索引并行静默错位——改为按名字集合 `category_method_names` 贯穿到发射点。
+- **测试**：`tests/multi_tu/14_category_present`（PASS：类别在场全链路）、
+  `15_category_absent`（EXPECT_FAIL：缺席链接期报错）；multi_tu 15/15。
+
+### checker 类别规则（D3/D4）
+
+`check_category_rules`（挂 check 单元级，error 级）：D4 同类 selector
+双实现（主实现+类别、类别+类别）报错——P2 实测旧行为是静默覆盖；D3 类别
+非 static 实例 ivar 报错（static 文件级全局保持合法，既有先例）。P4 实测
+跨 TU 类别 ivar 本就在编译期被拦（undeclared identifier），D3 补的是
+同 TU 场景的友好诊断。
+
+### 协议元数据（D5.2）
+
+- 管线打通：`AstDeclData::Protocol` 新变体（elaborator 原来直接丢弃
+  `ProtocolData`）；`ClassInfo`/`CgClassMeta`/`CgUnit` 加 protocols 数据。
+- 发射：`NEPA_PROTO_$_<P>` 静态 NPProtocol 实例（parents 递归、
+  required/optional 分表）+ `NEPA_PROTOS_$_<Class>` 每类指针数组 +
+  NPClass 的 `.protocols/.protocol_count` 静态填充与 metaInit 回填双路。
+- 运行时：`nepa_class_conformsToProtocol(cls, proto)`（runtime.c）沿
+  父类链 + 协议父链递归判定；`[x conformsToProtocol:@protocol(P)]` 在
+  codegen 特判改写为该查询（receiver 取 `->isa`）。
+- 实测修复的坑：① 协议父链里写类名（`@protocol P <NPObject>`，ObjC 合法
+  拼写）会生成未定义 `NEPA_PROTO_$_NPObject`——发射前过滤类名；② 泛型
+  参数名混进 conformance 列表（`NEPA_PROTO_$_T`）——按 type_params 过滤；
+  ③ metaInit 复合字面量里的 inline `NPProtocol*[]` 在栈上，返回后悬垂
+  （conforms 查询 segfault）——改发命名静态数组；④ 命名空间 FQN 截断
+  （log_analyzer 的 `LogTool` 残名）——三处发射统一走 `known_protocols`
+  过滤，未声明协议的条目丢弃（漏报优于误报）。
+- 验证：conforms 探针（子协议↔父协议正向、无关类否定）全对；回归
+  cargo test 53 全过、test_all 350/360（与基线一致）、multi_tu 15/15。
+- golden：harness 只比对 `.out`，全部协议相关 golden 输出不变；07 的
+  `conformance.c` 是改名前陈旧物（不被比对），已顺手重生成。
+- 未做：协议身份跨 TU 唯一性、类别给类追加协议的 metadata 合并（§7 第
+  五项验证）——现状类别携带协议极少见，留待有真实需求再补。
+
+### 遗留清单更新
+
+ROADMAP「Categories across TUs」「Protocol inheritance across TUs」
+「conformsToProtocol: runtime」三条已闭环（待勾选）。

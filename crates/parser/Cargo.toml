@@ -1,10 +1,10 @@
 [package]
-name = "nopa-parser"
+name = "nepa-parser"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-nopa-lexer = { path = "../lexer" }
-nopa-cst = { path = "../cst" }
+nepa-lexer = { path = "../lexer" }
+nepa-cst = { path = "../cst" }
 [dev-dependencies]
-nopa-preprocessor = { path = "../preprocessor" }
+nepa-preprocessor = { path = "../preprocessor" }

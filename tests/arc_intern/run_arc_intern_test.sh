@@ -14,27 +14,27 @@ set -euo pipefail
 root="$(cd "$(dirname "$0")/../.." && pwd)"
 cd "$root"
 
-nopac="${NOPAC:-}"
-if [[ -z "$nopac" ]]; then
-    for cand in target/debug/nopac target/release/nopac; do
-        if [[ -x "$cand" ]]; then nopac="$cand"; break; fi
+nepac="${NEPAC:-}"
+if [[ -z "$nepac" ]]; then
+    for cand in target/debug/nepac target/release/nepac; do
+        if [[ -x "$cand" ]]; then nepac="$cand"; break; fi
     done
 fi
-if [[ -z "$nopac" || ! -x "$nopac" ]]; then
-    echo "error: nopac not found (run 'cargo build', or set NOPAC=/path/to/nopac)" >&2
+if [[ -z "$nepac" || ! -x "$nepac" ]]; then
+    echo "error: nepac not found (run 'cargo build', or set NEPAC=/path/to/nepac)" >&2
     exit 2
 fi
 
-work="$(mktemp -d "${TMPDIR:-/tmp}/nopa_arc_intern.XXXXXX")"
+work="$(mktemp -d "${TMPDIR:-/tmp}/nepa_arc_intern.XXXXXX")"
 trap 'rm -rf "$work"' EXIT
 
 src="tests/arc_intern/arc_intern_uaf.np"
 bin="$work/repro"
 log="$work/asan.log"
 
-# Force the sanitizer through nopac's C-compiler override.
-NOPA_CC="${NOPA_CC:-clang -fsanitize=address -g -O0}" \
-    "$nopac" "$src" -I include -o "$bin" > "$work/build.log" 2>&1 || {
+# Force the sanitizer through nepac's C-compiler override.
+NEPA_CC="${NEPA_CC:-clang -fsanitize=address -g -O0}" \
+    "$nepac" "$src" -I include -o "$bin" > "$work/build.log" 2>&1 || {
         echo "FAIL: build failed"; sed 's/^/  /' "$work/build.log" | tail -20; exit 1;
     }
 

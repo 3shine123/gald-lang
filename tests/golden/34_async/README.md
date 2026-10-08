@@ -7,7 +7,7 @@
 | `async_test.np` | 编译通过，stdout 见 `.out`（async void 入口 + 跨调用链双 await，`result=18`） |
 
 ```bash
-./target/debug/nopac run tests/golden/34_async/async_test.np
+./target/debug/nepac run tests/golden/34_async/async_test.np
 ```
 
 ## 已定设计（用户拍板，2026-09）
@@ -23,23 +23,23 @@
 
 ```c
 /* int r = await n;  → */ 
-NPTask * __nopa_task = (NPTask *)(nopa_task_create(0, self, 0));
-int r = (nopa_task_resume(__nopa_task), n);
-nopa_task_join(__nopa_task);
+NPTask * __nepa_task = (NPTask *)(nepa_task_create(0, self, 0));
+int r = (nepa_task_resume(__nepa_task), n);
+nepa_task_join(__nepa_task);
 ```
 
-- `await e` → `(nopa_task_resume(task), e)`：Comma 求值，先推进状态机（M1 entry=NULL，resume 即完成返回 1——纯 API 契约钩子），后取 e 的值。
-- 方法体首尾包 `nopa_task_create` / `nopa_task_join`（真实 task 生命周期：calloc 分配、join 后释放）。
-- **检查层**（`nopa_async::check_unit`，desugar 前跑原始 AST）：
+- `await e` → `(nepa_task_resume(task), e)`：Comma 求值，先推进状态机（M1 entry=NULL，resume 即完成返回 1——纯 API 契约钩子），后取 e 的值。
+- 方法体首尾包 `nepa_task_create` / `nepa_task_join`（真实 task 生命周期：calloc 分配、join 后释放）。
+- **检查层**（`nepa_async::check_unit`，desugar 前跑原始 AST）：
   - `@try` 跨 await → error（try/catch/finally 任一含 await 即报）
   - 同步上下文（非 async 方法 + **顶层函数含 main**）调非 void async → error + 提示
-- runtime（`include/nopa/runtime.{h,c}`）：`NPTask{state,finished,entry,self_obj,frame,result,parent}` + create/resume/finish/join 四个 API（host 用 calloc/free；freestanding 用户提供分配器后可用）。
+- runtime（`include/nepa/runtime.{h,c}`）：`NPTask{state,finished,entry,self_obj,frame,result,parent}` + create/resume/finish/join 四个 API（host 用 calloc/free；freestanding 用户提供分配器后可用）。
 
 ## 里程碑路线
 
 - **M1（本目录）**：task 驱动 + await 钩子 + 检查层，行为=同步执行，API 契约就位
 - **M2**：真状态机——`@await` 拆段进 `switch(t->state)`、活过挂起点的局部提升进 frame（仿 @try 的 TRY_LIFT 提升先例）、break/continue → 状态跳转、ARC 在任务退出汇合点统一结算、bridge header wrapper
-- **M3**：调度器 `nopa_run_all` + 任务图（`parent` 字段已预留）/ I/O
+- **M3**：调度器 `nepa_run_all` + 任务图（`parent` 字段已预留）/ I/O
 
 ## 负例（tests/negative/ 见 async_sync_call.np）
 

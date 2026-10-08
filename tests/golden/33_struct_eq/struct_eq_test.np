@@ -2,7 +2,7 @@
 #import <Foundation/Foundation.np>
 
 // struct ==/!= value comparison (route map item #2):
-// both operands the same value-struct type → field-wise nopa_struct_eq_<tag>.
+// both operands the same value-struct type → field-wise nepa_struct_eq_<tag>.
 // Pointers keep C address-comparison semantics; array fields compare via memcmp.
 
 struct Inner { int a; float b; };

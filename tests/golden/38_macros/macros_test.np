@@ -1,14 +1,14 @@
-// golden/36_macros — nopa-syntax macro expansion (dual-track preprocessor)
+// golden/36_macros — nepa-syntax macro expansion (dual-track preprocessor)
 //
-// Track 1 (nopa): macro bodies containing nopa syntax ([recv msg], @throw,
-// ^{...}) are parsed by nopac and expanded at the source level before
+// Track 1 (nepa): macro bodies containing nepa syntax ([recv msg], @throw,
+// ^{...}) are parsed by nepac and expanded at the source level before
 // lexing — the definition never reaches the C prelude.
 // Track 2 (C): plain C bodies pass through verbatim and are expanded by the
 // C compiler as before.
 #import <Foundation/Foundation.np>
 #include <stdio.h>
 
-// ── nopa-track macros (expanded by nopac) ──
+// ── nepa-track macros (expanded by nepac) ──
 #define TAG(o)          [o tag]
 #define BUMP(o, n)      [o addTo:n times:1]
 #define SAFE_TAG(o)     ((o) ? TAG(o) : -1)     // macro inside macro argument
@@ -26,25 +26,25 @@
 - (int) addTo:(int)v times:(int)k;
 @end
 @implementation Widget
-+ (id) alloc { return nopa_alloc(self); }
++ (id) alloc { return nepa_alloc(self); }
 - (id) init   { return self; }
 - (int) tag   { return uid; }
 - (int) addTo:(int)v times:(int)k { uid += v * k; return uid; }
 @end
 
 int main() {
-    nopa_meta_init();
+    nepa_meta_init();
     Widget *w = [[Widget alloc] init];
     [w addTo:7 times:0];
 
-    // nopa-track: object-like / function-like sends
+    // nepa-track: object-like / function-like sends
     printf("%d\n", TAG(w));            // 0  (uid: addTo:7 times:0 adds 7*0)
     printf("%d\n", BUMP(w, 3));        // 3  (uid += 3*1)
-    // nopa-track macro inside a macro argument (arg expanded first)
+    // nepa-track macro inside a macro argument (arg expanded first)
     printf("%d\n", TWICE(TAG(w)));     // 6  (arg expanded first)
     // nested: SAFE_TAG's body references TAG
     printf("%d\n", SAFE_TAG(w));       // 3  (nested body refs TAG)
-    // nopa-track: body with an @ literal
+    // nepa-track: body with an @ literal
     LOG(42);                           // tag=42
     // C-track: paste + stringify + plain arithmetic
     printf("%d\n", CAT(1, 2));         // 12

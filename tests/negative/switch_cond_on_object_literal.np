@@ -1,8 +1,8 @@
 #import <Foundation/Foundation.np>
 
 // Negative: an object-literal subject with a dangling-comparison arm and no
-// object arm. `__auto_type __nopa_sw = @7;` still yields a *pointer*, so
-// `__nopa_sw > 100` is an always-true pointer compare — the arm is taken for
+// object arm. `__auto_type __nepa_sw = @7;` still yields a *pointer*, so
+// `__nepa_sw > 100` is an always-true pointer compare — the arm is taken for
 // every value. Expected: exit=1 with
 //   "switch subject is an object but a dangling comparison 'case' arm"
 //

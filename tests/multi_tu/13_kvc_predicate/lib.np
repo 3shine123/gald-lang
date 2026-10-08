@@ -2,7 +2,7 @@
 #include <stdio.h>
 
 /* library TU: owns Widget's @implementation, so it emits the strong metadata
-   and the NOPA_KVC_$_Widget accessor table the client dispatches through. */
+   and the NEPA_KVC_$_Widget accessor table the client dispatches through. */
 @implementation Widget
 - (Widget *)initWithSize:(int)size label:(const char *)label {
     self = [super init];

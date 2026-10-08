@@ -14,12 +14,12 @@ innermost-first (LIFO).
 | outer defer fires once | `break` does NOT fire defers registered outside the loop (no double-fire) |
 | nested blocks | inner block end vs outer block end ordering |
 | defer before throw | same-function `@throw` fires the defer before `@catch` runs |
-| ARC order | defer runs BEFORE the ARC-injected scope-end `nopa_release` (object still alive: `dealloc` prints last) |
+| ARC order | defer runs BEFORE the ARC-injected scope-end `nepa_release` (object still alive: `dealloc` prints last) |
 | block literal scope | a block literal is its own function — fresh defer scope inside |
 
 ## Implementation
 
-- Pass: `crates/defer` (`nopa_defer::desugar_unit`), pipeline **Step 3.9** —
+- Pass: `crates/defer` (`nepa_defer::desugar_unit`), pipeline **Step 3.9** —
   after `-eh checked` desugar (its throws are already plain returns, so they
   splice with zero special-casing) and BEFORE ARC (so ARC's release injection
   lands after the user's defer statements).
@@ -35,5 +35,5 @@ innermost-first (LIFO).
 ## Snapshot
 
 `defer_test.out` is the default (ARC) run; output is deterministic and
-byte-identical under `-eh checked`. Under `-fno-nopa-arc` only the `tracker
+byte-identical under `-eh checked`. Under `-fno-nepa-arc` only the `tracker
 dealloc` line disappears (MRC never releases — no dealloc), by design.

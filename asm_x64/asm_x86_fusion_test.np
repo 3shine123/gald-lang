@@ -1,7 +1,7 @@
 // asm_x86_fusion_test.np
 // x86_64 汇编融合压测（在 arm64 Mac 上通过 Rosetta 执行）：
 //   外部 .s 汇编 + 内联汇编 + 类/协议/Block/异常/struct/cast/fn指针/@selector/ARC
-// 构建：nopac -arch x86_64 run -asm asm_x86_ext.s asm_x86_fusion_test.np
+// 构建：nepac -arch x86_64 run -asm asm_x86_ext.s asm_x86_fusion_test.np
 
 #include <stdio.h>
 #include <string.h>
@@ -89,7 +89,7 @@ typedef struct {
 int main(int argc, const char* argv[])
 {
     @autoreleasepool {
-        printf("=== x86_64 (Rosetta) 内联+外部 asm x Nopa 高级特性 ===\n");
+        printf("=== x86_64 (Rosetta) 内联+外部 asm x Nepa 高级特性 ===\n");
 
         X86_NS* n = [[X86_NS alloc] initWithTag:"x64-fusion"];
 

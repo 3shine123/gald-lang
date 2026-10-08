@@ -5,7 +5,7 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 
-NOPAC="${NOPAC:-../target/debug/nopac}"
+NEPAC="${NEPAC:-../target/debug/nepac}"
 
 echo "==> transpile + compile as x86_64 + run (Rosetta)"
-"$NOPAC" -arch x86_64 run -asm asm_x86_ext.s asm_x86_fusion_test.np
+"$NEPAC" -arch x86_64 run -asm asm_x86_ext.s asm_x86_fusion_test.np

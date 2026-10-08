@@ -1,5 +1,5 @@
-#include "nopa/cfg.h"
-#include "nopa/ast.h"
+#include "nepa/cfg.h"
+#include "nepa/ast.h"
 #include <stdio.h>
 #include <stdlib.h>
 

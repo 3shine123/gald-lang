@@ -4,7 +4,7 @@
 // that list was rejected: `(sigset_t)v` and `(pthread_attr_t *)p` both failed to
 // parse, although clang/ObjC accepts them.
 //
-// nopac now recovers the type names from the C preprocessor itself (the same
+// nepac now recovers the type names from the C preprocessor itself (the same
 // authority C resolves `(X *)p` versus `x * y` with), so casts to real header
 // typedefs work exactly as they do in C. Neither name below is in the builtin
 // list — the test only passes because the table is authoritative.

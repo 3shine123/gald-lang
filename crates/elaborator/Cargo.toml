@@ -1,10 +1,10 @@
 [package]
-name = "nopa-elaborator"
+name = "nepa-elaborator"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-nopa-cst = { path = "../cst" }
-nopa-ast = { path = "../ast" }
-nopa-symbol = { path = "../symbol" }
-nopa-binder = { path = "../binder" }
+nepa-cst = { path = "../cst" }
+nepa-ast = { path = "../ast" }
+nepa-symbol = { path = "../symbol" }
+nepa-binder = { path = "../binder" }

@@ -1,7 +1,7 @@
-# Nopa → C 代码生成规范（CodeGen Spec）
+# Nepa → C 代码生成规范（CodeGen Spec）
 
 > 版本：2026-08-08  
-> 适用范围：`nopac` 编译器后端（`crates/codegen/src/codegen.rs`）
+> 适用范围：`nepac` 编译器后端（`crates/codegen/src/codegen.rs`）
 
 ---
 
@@ -14,7 +14,7 @@
    | 后端 | Block 字面量 | `__attribute__` | `__weak` cleanups | 编译目标 |
    |---|---|---|---|---|
    | `clang`（默认） | `^` 语法透传 | 全透传 | `__attribute__((cleanup))` | clang 编译器 |
-   | `gcc` | nopac 展开为 struct+函数 | 全透传 | `__attribute__((cleanup))` | gcc 编译器 |
+   | `gcc` | nepac 展开为 struct+函数 | 全透传 | `__attribute__((cleanup))` | gcc 编译器 |
    | `portable` | 展开（同 gcc，gcc∩clang 交集内） | 仅 Common 集 | 退化为 `__unsafe_unretained` | gcc 与 clang 都能编译的 C |
 
 3. **所有后端的行为必须一致**。无论是 clang 的 `^block` 透传还是 gcc/portable 的 struct 展开，Block 的语义（捕获、调用、`__block` 变量）完全相同。
@@ -28,7 +28,7 @@
 ### 2.1 命名空间
 
 - 跨命名空间的类型名使用**双下划线（`__`）** 连接 namespace 段：`Engine__Math__Vector2D`。
-- 宏、常量、临时符号使用 **`__nopa_` 前缀**。
+- 宏、常量、临时符号使用 **`__nepa_` 前缀**。
 
 ### 2.2 方法名
 
@@ -38,9 +38,9 @@
 
 ### 2.3 临时符号
 
-- Block 展开函数：`__nopa_block_invoke_N`（N 为全局递增 ID）。
-- Block 展开结构体：`__nopa_block_layout_N`。
-- `__block` 变量结构体：`__nopa_byref_varName`。
+- Block 展开函数：`__nepa_block_invoke_N`（N 为全局递增 ID）。
+- Block 展开结构体：`__nepa_block_layout_N`。
+- `__block` 变量结构体：`__nepa_byref_varName`。
 
 ---
 
@@ -48,7 +48,7 @@
 
 ### 3.1 基础类型映射
 
-| Nopa 类型 | C 类型 |
+| Nepa 类型 | C 类型 |
 |-----------|--------|
 | `int` | `int` |
 | `float` | `float` |
@@ -63,14 +63,14 @@
 ### 3.2 对象指针
 
 - 所有对象类型生成 `ClassName *`，不省略 `struct` 关键字（除非 typedef 后）。
-- 类元数据访问使用 `nopa_ClassName_class` 全局变量。
+- 类元数据访问使用 `nepa_ClassName_class` 全局变量。
 
 ### 3.3 函数指针与 Block 类型
 
 | 源码 | `--backend=clang` | `--backend=gcc` / `--backend=portable` |
    |---|---|---|
-   | `int (^)(int)` | `int (^)(int)` | `int (*)(struct __nopa_block_layout_N *, int)` |
-   | `void (^)(NPString *)` | `void (^)(NPString *)` | `void (*)(struct __nopa_block_layout_N *, NPString *)` |
+   | `int (^)(int)` | `int (^)(int)` | `int (*)(struct __nepa_block_layout_N *, int)` |
+   | `void (^)(NPString *)` | `void (^)(NPString *)` | `void (*)(struct __nepa_block_layout_N *, NPString *)` |
 
 ---
 
@@ -102,9 +102,9 @@ typedef struct NPClass {
     const char *name;
     struct NPClass *superclass;
     size_t instance_size;
-    struct nopa_vtable *vtable;
-    struct nopa_meta_vtable *meta_vtable;
-    struct nopa_vtable *meta_vtable_inst;
+    struct nepa_vtable *vtable;
+    struct nepa_meta_vtable *meta_vtable;
+    struct nepa_vtable *meta_vtable_inst;
     void (*dealloc)(NPObject *, SEL);
 } NPClass;
 ```
@@ -118,14 +118,14 @@ typedef struct NPClass {
 所有类的实例方法共享同一个函数指针枚举：
 
 ```c
-enum nopa_vtable_index {
-    nopa_sel_release = 0,
-    nopa_sel_retain = 1,
-    nopa_sel_init = 2,
-    nopa_sel_dealloc = 3,
+enum nepa_vtable_index {
+    nepa_sel_release = 0,
+    nepa_sel_retain = 1,
+    nepa_sel_init = 2,
+    nepa_sel_dealloc = 3,
     // ... 全局排序
 };
-struct nopa_vtable {
+struct nepa_vtable {
     void (*methods[N])();
 };
 ```
@@ -134,7 +134,7 @@ struct nopa_vtable {
 
 ```c
 // [obj method:arg]
-((RT(*)(id, SEL, int))((struct nopa_vtable *)obj->isa->vtable)->methods[INDEX])
+((RT(*)(id, SEL, int))((struct nepa_vtable *)obj->isa->vtable)->methods[INDEX])
     (obj, _cmd, arg)
 ```
 
@@ -142,7 +142,7 @@ struct nopa_vtable {
 
 ```c
 // [ClassName method:arg]
-((RT(*)(NPClass *, SEL, int))((struct nopa_vtable *)meta_vtable_inst->methods[INDEX]))
+((RT(*)(NPClass *, SEL, int))((struct nepa_vtable *)meta_vtable_inst->methods[INDEX]))
     (meta_vtable_inst, _cmd, arg)
 ```
 
@@ -154,7 +154,7 @@ struct nopa_vtable {
 
 ```c
 // [super init]
-struct nopa_vtable *super_vt = ((struct NPClass *)((NPObject *)self)->isa)->superclass->vtable;
+struct nepa_vtable *super_vt = ((struct NPClass *)((NPObject *)self)->isa)->superclass->vtable;
 ((RT(*)(id, SEL))super_vt->methods[INDEX])(self, _cmd);
 ```
 
@@ -211,23 +211,23 @@ Block 字面量直接透传为 `^return_type(params) { body }`，由 clang 的 `
 }
 ```
 
-`__block` 变量生成 `struct __nopa_byref_varName` 结构体：
+`__block` 变量生成 `struct __nepa_byref_varName` 结构体：
 
 ```c
-struct __nopa_byref_counter {
+struct __nepa_byref_counter {
     void *__isa;
-    struct __nopa_byref_counter *__forwarding;
+    struct __nepa_byref_counter *__forwarding;
     int __flags;
     int __value;
 };
-struct __nopa_byref_counter counter = {
+struct __nepa_byref_counter counter = {
     .__forwarding = &counter,
     .__flags = 0,
     .__value = 0,
 };
 ```
 
-### 8.2 `--backend=gcc` / `--backend=portable` 模式（nopac 展开）
+### 8.2 `--backend=gcc` / `--backend=portable` 模式（nepac 展开）
 
 Block 字面量**必须**展开为静态函数 + 栈上结构体，展开形式只采用 struct、函数指针、静态函数等 gcc∩clang 交集内的构造。展开后的语义必须与 clang 的 `-fblocks` 完全一致，包括：
 
@@ -242,20 +242,20 @@ Block 字面量展开为三部分：
 ```
 源代码:  ^int(int x) { return x * 2; }
          ↓
-展开 1:  static int __nopa_block_invoke_N(struct __nopa_block_layout_N *cself, int x);
-展开 2:  struct __nopa_block_layout_N { void *isa; int flags; void *reserved; int (*invoke)(...); /* captures */ };
-展开 3:  使用处初始化 struct __nopa_block_layout_N 并调用 invoke
+展开 1:  static int __nepa_block_invoke_N(struct __nepa_block_layout_N *cself, int x);
+展开 2:  struct __nepa_block_layout_N { void *isa; int flags; void *reserved; int (*invoke)(...); /* captures */ };
+展开 3:  使用处初始化 struct __nepa_block_layout_N 并调用 invoke
 ```
 
 #### 8.2.2 展开结构体
 
 ```c
 // Block 结构体定义（每个 Block 字面量一个）
-struct __nopa_block_layout_N {
+struct __nepa_block_layout_N {
     void *isa;                                             // &_NSConcreteStackBlock
     int flags;                                             // BLOCK_HAS_COPY_DISPOSE (1<<25) 等
     int reserved;                                          // 0
-    int (*invoke)(struct __nopa_block_layout_N *cself,     // 函数指针
+    int (*invoke)(struct __nepa_block_layout_N *cself,     // 函数指针
                   /* 参数列表 */);
     /* 捕获的 __block 变量指针，按声明顺序排列 */
 };
@@ -264,12 +264,12 @@ struct __nopa_block_layout_N {
 #### 8.2.3 Invoke 函数
 
 ```c
-static int __nopa_block_invoke_N(
-    struct __nopa_block_layout_N *cself,
+static int __nepa_block_invoke_N(
+    struct __nepa_block_layout_N *cself,
     int x)
 {
     // 通过 cself 访问捕获的 __block 变量
-    // cself->counter 指向 struct __nopa_byref_counter
+    // cself->counter 指向 struct __nepa_byref_counter
     // 通过 __forwarding 间接访问: cself->counter->__forwarding->__value
     return (x * 2);
 }
@@ -279,32 +279,32 @@ static int __nopa_block_invoke_N(
 
 ```c
 // 使用处的代码
-struct __nopa_block_layout_N __nopa_blk_N = {
+struct __nepa_block_layout_N __nepa_blk_N = {
     .isa = &_NSConcreteStackBlock,
     .flags = 0,
     .reserved = 0,
-    .invoke = __nopa_block_invoke_N,
+    .invoke = __nepa_block_invoke_N,
     /* 捕获的 __block 变量指针赋值 */
 };
 // 调用: blk(x)
-((int (*)(struct __nopa_block_layout_N *, int))__nopa_blk_N.invoke)(&__nopa_blk_N, x);
+((int (*)(struct __nepa_block_layout_N *, int))__nepa_blk_N.invoke)(&__nepa_blk_N, x);
 ```
 
 #### 8.2.5 `__block` 变量展开
 
-`__block` 变量必须展开为 `struct __nopa_byref_name`，与 clang 模式的布局保持一致：
+`__block` 变量必须展开为 `struct __nepa_byref_name`，与 clang 模式的布局保持一致：
 
 ```c
 // __block int counter = 0;
-struct __nopa_byref_counter {
+struct __nepa_byref_counter {
     void *__isa;
-    struct __nopa_byref_counter *__forwarding;
+    struct __nepa_byref_counter *__forwarding;
     int __flags;
     int __value;
 };
 // 初始化
-struct __nopa_byref_counter __nopa_byref_counter = {
-    .__forwarding = &__nopa_byref_counter,
+struct __nepa_byref_counter __nepa_byref_counter = {
+    .__forwarding = &__nepa_byref_counter,
     .__flags = 0,
     .__value = 0,
 };
@@ -317,25 +317,25 @@ Block 展开的 invoke 函数通过 `cself->counter` 访问该结构体，并通
 展开结构体中，捕获的 `__block` 变量存储为**指向 byref 结构体的指针**：
 
 ```c
-struct __nopa_block_layout_N {
+struct __nepa_block_layout_N {
     void *isa;
     int flags;
     int reserved;
-    int (*invoke)(struct __nopa_block_layout_N *, int, int);
-    struct __nopa_byref_counter *counter;  // 捕获的 __block 变量
-    struct __nopa_byref_other *other;      // 捕获的 __block 变量
+    int (*invoke)(struct __nepa_block_layout_N *, int, int);
+    struct __nepa_byref_counter *counter;  // 捕获的 __block 变量
+    struct __nepa_byref_other *other;      // 捕获的 __block 变量
 };
 ```
 
 构造时赋值：
 
 ```c
-struct __nopa_block_layout_N __nopa_blk_N = {
+struct __nepa_block_layout_N __nepa_blk_N = {
     .isa = &_NSConcreteStackBlock,
     .flags = 0,
-    .invoke = __nopa_block_invoke_N,
-    .counter = &__nopa_byref_counter,
-    .other = &__nopa_byref_other,
+    .invoke = __nepa_block_invoke_N,
+    .counter = &__nepa_byref_counter,
+    .other = &__nepa_byref_other,
 };
 ```
 
@@ -358,35 +358,35 @@ Block 字面量**与 gcc 后端共用同一套 struct+invoke 展开**（见 §8.
 
 ## 10. 内存管理相关生成
 
-### 10.1 MRC 模式（`-fno-nopa-arc`）
+### 10.1 MRC 模式（`-fno-nepa-arc`）
 
 - 用户手动写 `retain` / `release` / `autorelease`，代码生成器**原样转译**为对应的 C 函数调用。
 
 ### 10.2 ARC 模式（默认）
 
-- 编译器在 AST/CFG 层分析所有权，**自动插入** `nopa_retain()` / `nopa_release()`。
-- 生成的 C 代码中**不应出现**用户手写的 `retain` / `release`（除非在 `-fno-nopa-arc` 模式）。
+- 编译器在 AST/CFG 层分析所有权，**自动插入** `nepa_retain()` / `nepa_release()`。
+- 生成的 C 代码中**不应出现**用户手写的 `retain` / `release`（除非在 `-fno-nepa-arc` 模式）。
 - `dealloc` 方法中 `[super dealloc]` 必须保留，且生成为父类 vtable 的 `dealloc` 调用。
 
 ### 10.3 `dealloc` 调用链
 
-- `nopa_release` 在 `retain_count` 到达 0 时，**必须**先通过 `obj->isa->dealloc` 调用 `dealloc`，再 `free(obj)`。
+- `nepa_release` 在 `retain_count` 到达 0 时，**必须**先通过 `obj->isa->dealloc` 调用 `dealloc`，再 `free(obj)`。
 - `dealloc` 方法体中 `[super dealloc]` 必须保留，生成为父类 vtable 的 `dealloc` 调用。
-- `dealloc` 调用期间**不再**走 `nopa_release` 路径，避免死循环/双重释放。
-- `NPClass` 结构体新增 `void (*dealloc)(NPObject *, SEL)` 字段，由 `nopa_meta_init()` 填充。
+- `dealloc` 调用期间**不再**走 `nepa_release` 路径，避免死循环/双重释放。
+- `NPClass` 结构体新增 `void (*dealloc)(NPObject *, SEL)` 字段，由 `nepa_meta_init()` 填充。
 
 ### 10.4 Autorelease Pool 实现约束
 
-- `nopa_autoreleasepool_push()` / `pop()` 必须管理一个对象数组栈。
-- `nopa_autorelease(obj)` 将 `obj` 加入当前栈顶 pool。
-- `pop()` 时遍历 pool 内所有对象，逐个调用 `nopa_release()`。
+- `nepa_autoreleasepool_push()` / `pop()` 必须管理一个对象数组栈。
+- `nepa_autorelease(obj)` 将 `obj` 加入当前栈顶 pool。
+- `pop()` 时遍历 pool 内所有对象，逐个调用 `nepa_release()`。
 - 裸机模式下不使用 `__thread`，使用普通全局变量（单核假设）。
 
 ### 10.5 `__weak` 变量（按 backend 区别）
 
 | 模式 | 行为 |
 |---|---|
-| `--backend=clang` | `__attribute__((cleanup(nopa_weak_auto_cleanup)))` + `nopa_weak_register` |
+| `--backend=clang` | `__attribute__((cleanup(nepa_weak_auto_cleanup)))` + `nepa_weak_register` |
 | `--backend=gcc` | 同上（`__attribute__((cleanup))` 在 GCC 中也支持） |
 | `--backend=portable` | 退化为 `__unsafe_unretained`（无 zeroing 语义），不生成任何清理代码 |
 
@@ -404,7 +404,7 @@ Block 字面量**与 gcc 后端共用同一套 struct+invoke 展开**（见 §8.
 | 6 | 为每个类生成独立的 vtable struct | 破坏 Uniform VTable 设计 |
 | 7 | `@selector` 直接输出 hash 值作为无符号整数 | `SEL` 是结构体，不是 `unsigned` |
 | 8 | 在 `@try` body 中生成空块或 `/* stub */` | 异常处理必须实际生效 |
-| 9 | `nopa_release` 直接 `free(obj)` 而不调用 `dealloc` | 导致 ivar 内存泄漏 |
+| 9 | `nepa_release` 直接 `free(obj)` 而不调用 `dealloc` | 导致 ivar 内存泄漏 |
 | 10 | `@autoreleasepool` 生成空壳 push/pop 而不管理对象 | 对象永不释放 |
 | 11 | `.nh` 头文件中包含 `@implementation` | 多重导入导致链接期符号重复定义 |
 | 12 | `--backend=portable` 模式下发出 `^` Block 字面量 | `^` 是 clang 专属语法（`-fblocks`），portable 必须展开为 struct 形式 |

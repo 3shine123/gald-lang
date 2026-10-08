@@ -3,7 +3,7 @@
 // async/await (route map item #4, milestone 1):
 // - a method whose body contains `@await` is async (no annotation needed)
 // - `@await e` marks a suspension point; M1 evaluates it through the task
-//   machinery (`nopa_task_create` / `nopa_task_resume` / `nopa_task_join`)
+//   machinery (`nepa_task_create` / `nepa_task_resume` / `nepa_task_join`)
 // - async methods with a return value may only be called from async contexts
 //   (compile-time rejected otherwise); async void methods are the entries.
 

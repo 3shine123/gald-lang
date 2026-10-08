@@ -9,6 +9,6 @@ int main() {
     printf("token=%s\n", [tok UTF8String]);
     printf("total=%d\n", [v total]);
     printf("helper=%d\n", VaultHelper());
-    nopa_release(v);
+    nepa_release(v);
     return 0;
 }

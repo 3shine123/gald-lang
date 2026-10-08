@@ -4,7 +4,7 @@
    defined in the lib TU under a namespace must still be reachable from the
    client TU that only ever saw the short qualified name.
 
-   Note: ivars are declared on the @interface (Nopa's convention — the
+   Note: ivars are declared on the @interface (Nepa's convention — the
    @implementation body is for methods, not for a second ivar list). */
 @namespace Geo
     @interface Point : NPObject {

@@ -3,7 +3,7 @@
 #
 # WHY THIS EXISTS
 # ---------------
-# ARC injects `nopa_release` for owned locals at every exit point. **Order
+# ARC injects `nepa_release` for owned locals at every exit point. **Order
 # matters**: the exit expression (`return` / `@throw`) must be FULLY evaluated
 # before any local it uses is released — otherwise the release is a
 # use-after-free. Conversely a local used only by the exit expression must
@@ -17,30 +17,30 @@
 #   MRC: ARC injects nothing (manual memory management), so only exit 0 is
 #        asserted — dealloc output is not expected.
 #
-# Usage: ./run_arc_order.sh            NOPAC=target/debug/nopac ./run_arc_order.sh
+# Usage: ./run_arc_order.sh            NEPAC=target/debug/nepac ./run_arc_order.sh
 set -u
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 cd "$ROOT"
 
-NOPAC="${NOPAC:-}"
-if [[ -z "$NOPAC" ]]; then
-    for c in target/release/nopac target/debug/nopac; do
-        if [[ -x "$c" ]]; then NOPAC="$c"; break; fi
+NEPAC="${NEPAC:-}"
+if [[ -z "$NEPAC" ]]; then
+    for c in target/release/nepac target/debug/nepac; do
+        if [[ -x "$c" ]]; then NEPAC="$c"; break; fi
     done
 fi
-if [[ ! -x "${NOPAC:-}" ]]; then
-    echo "error: nopac not found (build it, or set NOPAC=)" >&2
+if [[ ! -x "${NEPAC:-}" ]]; then
+    echo "error: nepac not found (build it, or set NEPAC=)" >&2
     exit 2
 fi
-# Absolute paths pass through unchanged: an unconditional "$PWD/$NOPAC"
-# would turn an absolute NOPAC into "$PWD/$PWD/target/.../nopac".
-case "$NOPAC" in
+# Absolute paths pass through unchanged: an unconditional "$PWD/$NEPAC"
+# would turn an absolute NEPAC into "$PWD/$PWD/target/.../nepac".
+case "$NEPAC" in
     /*) ;;
-    *) NOPAC="$PWD/$NOPAC" ;;
+    *) NEPAC="$PWD/$NEPAC" ;;
 esac
 
-WORK="${TMPDIR:-/tmp}/nopa_arc_order.$$"
+WORK="${TMPDIR:-/tmp}/nepa_arc_order.$$"
 mkdir -p "$WORK"
 trap 'rm -rf "$WORK"' EXIT
 
@@ -51,9 +51,9 @@ mode_flags() {
         arc-default) printf '' ;;
         arc-checked) printf -- '-eh checked' ;;
         arc-legacy)  printf -- '-eh legacy' ;;
-        mrc-default) printf -- '-fno-nopa-arc' ;;
-        mrc-checked) printf -- '-fno-nopa-arc -eh checked' ;;
-        mrc-legacy)  printf -- '-fno-nopa-arc -eh legacy' ;;
+        mrc-default) printf -- '-fno-nepa-arc' ;;
+        mrc-checked) printf -- '-fno-nepa-arc -eh checked' ;;
+        mrc-legacy)  printf -- '-fno-nepa-arc -eh legacy' ;;
     esac
 }
 
@@ -62,7 +62,7 @@ norm() {
 }
 
 echo "=== ARC evaluation-order suite ==="
-echo "nopac: $NOPAC"
+echo "nepac: $NEPAC"
 echo
 printf '%-30s %-12s %s\n' "case" "mode" "result"
 printf -- '--------------------------------------------------------------------------\n'
@@ -79,7 +79,7 @@ for np in "$SCRIPT_DIR"/[0-9][0-9]_*.np; do
         # NPLog writes to stderr (runtime.c), so merge the streams: for these
         # cases the program's observable output *is* the stderr transcript.
         log="$WORK/$name.$m.log"
-        "$NOPAC" run -o "$WORK/$name.$m.bin" ${ff[@]+"${ff[@]}"} "$np" >"$log" 2>&1
+        "$NEPAC" run -o "$WORK/$name.$m.bin" ${ff[@]+"${ff[@]}"} "$np" >"$log" 2>&1
         rc=$?
         ok=1
         note=""

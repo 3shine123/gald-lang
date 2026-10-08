@@ -1,0 +1,11 @@
+// g2 — 跨 TU：实例化只出现在类方法发送的 receiver 处（非变量声明）。
+// lib.np 的方法体不提及任何实例化 —— 03_generic/lib.np 注明扫描器只走
+// 语句/变量声明，若类方法 receiver 处的 `Factory<NPString *>` 不触发
+// lib TU 特化发射，client 的 NEPA_VTABLE_$_Factory_NPString_ptr 就指向
+// 从未生成的实现（链接期 NULL 或运行期错 ABI）。
+#import <Foundation/Foundation.nh>
+
+@interface Factory<T> : NPObject
++ (T)make;
+- (T)produce;
+@end

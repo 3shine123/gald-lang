@@ -3,21 +3,21 @@
 # Run: make run
 # Debug memory corruption: make asan && ./ncurses_demo_asan
 
-NOPAC = ../../target/debug/nopac
+NEPAC = ../../target/debug/nepac
 NCURSES ?= /opt/homebrew/opt/ncurses
 SAN = -fsanitize=address
 
 all: ncurses_demo
 
 ncurses_demo.c: ncurses_demo.np
-	$(NOPAC) -rewrite-nopa ncurses_demo.np -o ncurses_demo.c -fno-nopa-arc
+	$(NEPAC) -rewrite-nepa ncurses_demo.np -o ncurses_demo.c -fno-nepa-arc
 
 ncurses_demo: ncurses_demo.c
 	clang -std=c99 -fblocks \
 		-I ../../include -I ../../include/Foundation -I ../../include/Terminal \
 		-I $(NCURSES)/include \
 		ncurses_demo.c \
-		../../include/nopa/runtime.c \
+		../../include/nepa/runtime.c \
 		../../include/Terminal/ncurses_mouse.c \
 		$(NCURSES)/lib/libncurses.dylib \
 		-Wl,-rpath,$(NCURSES)/lib \
@@ -28,7 +28,7 @@ asan: ncurses_demo.c
 		-I ../../include -I ../../include/Foundation -I ../../include/Terminal \
 		-I $(NCURSES)/include \
 		ncurses_demo.c \
-		../../include/nopa/runtime.c \
+		../../include/nepa/runtime.c \
 		../../include/Terminal/ncurses_mouse.c \
 		$(NCURSES)/lib/libncurses.dylib \
 		-Wl,-rpath,$(NCURSES)/lib \

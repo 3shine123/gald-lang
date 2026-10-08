@@ -7,7 +7,7 @@
 //      `is_weak` lookup always resolved to false.
 // Exit code 0 = slot cleared correctly, 1 = dangling pointer (the bug).
 //
-// The probe is an ARC test: under MRC (-fno-nopa-arc) nothing releases `t`, so
+// The probe is an ARC test: under MRC (-fno-nepa-arc) nothing releases `t`, so
 // the slot legitimately stays non-NULL and the exit code is 1. Weak clearing
 // presupposes the referent actually dies. Under ARC this source used to return
 // 1 for the *wrong* reason (the slot was never registered at all).

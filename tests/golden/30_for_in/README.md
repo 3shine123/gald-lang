@@ -9,7 +9,7 @@
 `.out` 是程序 stdout 快照。`test_all.py` 只校验退出码（不比对 `.out`），输出有变化时需同步更新快照。
 
 ```bash
-./target/debug/nopac run tests/golden/30_for_in/for_in_test.np
+./target/debug/nepac run tests/golden/30_for_in/for_in_test.np
 ```
 
 ## 语法
@@ -30,9 +30,9 @@ for (NPString *s in arr) {
 for-in 在 **parser 阶段**就展开成普通 C for 循环：
 
 ```c
-{ T *__nopa_fi = <coll>;            /* 借用别名：只求值一次，ARC 不参与 */
-  for (size_t __nopa_fi_i = 0; __nopa_fi_i < [__nopa_fi count]; __nopa_fi_i++) {
-      T x = [__nopa_fi objectAtIndex:__nopa_fi_i];
+{ T *__nepa_fi = <coll>;            /* 借用别名：只求值一次，ARC 不参与 */
+  for (size_t __nepa_fi_i = 0; __nepa_fi_i < [__nepa_fi count]; __nepa_fi_i++) {
+      T x = [__nepa_fi objectAtIndex:__nepa_fi_i];
       ...body...
   } }
 ```
@@ -41,7 +41,7 @@ for-in 在 **parser 阶段**就展开成普通 C for 循环：
 
 - nil 安全：`[nil count] == 0`，集合为 nil 时循环体不执行
 - 元素借用语义：循环变量是元素别名，不 retain / release，ARC 无需注入
-- 集合只求值一次（`__nopa_fi` 暂存），即使表达式有副作用也安全
+- 集合只求值一次（`__nepa_fi` 暂存），即使表达式有副作用也安全
 
 这也是仓库的一贯做法：先例有 `@42` → `[NPNumber numberWithInt:]`、`arrayWithObjects:` → `@[...]`。原则是**每个新特性都走 desugar，不引入新 IR 机制**。
 

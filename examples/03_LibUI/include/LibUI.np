@@ -8,16 +8,16 @@
 @using Cocoa = Cocoa::App;
 
 /* ─────────────────────────────────────────────────────────────────────────
- * LibUI.np — pure-Nopa wrapper over libui-ng.
+ * LibUI.np — pure-Nepa wrapper over libui-ng.
  *
- * Nopa is a C superset: the libui C API is declared below (types reduced to
+ * Nepa is a C superset: the libui C API is declared below (types reduced to
  * `void *`), and this file turns it into plain ObjC-style classes. Every
  * piece of C glue lives *here*, never at a call site:
  *
  *   • the raw `struct uiControl *` ivar lives on the Control base class
  *     and is private to this file;
  *   • libui's `void (*)(control, void *)` callbacks are adapted by
- *     file-local C trampolines that re-fire a heap-copied Nopa block;
+ *     file-local C trampolines that re-fire a heap-copied Nepa block;
  *   • callers just write `[btn onClicked:^{ ... }]` — AppKit style.
  *
  * No .c bridge file, no struct casts, no callback context structs.
@@ -107,7 +107,7 @@ extern void uiUninit(void);
 extern void *_Block_copy(const void *src);
 
 /* ── libui is libui: callbacks arrive as void (*)(control, void *). ──
- * Generic trampolines re-fire a copied Nopa block of the right shape. */
+ * Generic trampolines re-fire a copied Nepa block of the right shape. */
 
 static void nk_fire_void(void *w, void *data) {
     (void)w;

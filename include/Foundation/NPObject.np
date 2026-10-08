@@ -1,23 +1,23 @@
 #import "NPObject.nh"
 
-@implementation nopa_root
+@implementation nepa_root
 - (id)init {
-    return nopa_init(self);
+    return nepa_init(self);
 }
 - (void)dealloc {
     return;
 }
 - (void)release {
-    nopa_release(self);
+    nepa_release(self);
 }
 - (id)retain {
-    return nopa_retain(self);
+    return nepa_retain(self);
 }
 - (BOOL)isKindOf:(Class)cls {
-    return nopa_isKindOf(self, cls);
+    return nepa_isKindOf(self, cls);
 }
 - (BOOL)isKindOfClass:(Class)cls {
-    return nopa_isKindOfClass(self, cls);
+    return nepa_isKindOfClass(self, cls);
 }
 - (BOOL)isEqual:(id)object {
     /* Default: identity (pointer equality), matching NSObject. */
@@ -30,23 +30,23 @@
 
 @implementation NPObject
 + (id)alloc {
-    return nopa_alloc(self);
+    return nepa_alloc(self);
 }
 + (id)new {
-    id obj = nopa_alloc(self);
-    return nopa_init(obj);
+    id obj = nepa_alloc(self);
+    return nepa_init(obj);
 }
 - (id)init {
-    return nopa_init(self);
+    return nepa_init(self);
 }
 - (void)dealloc {
     return;
 }
 - (void)release {
-    nopa_release(self);
+    nepa_release(self);
 }
 - (id)retain {
-    return nopa_retain(self);
+    return nepa_retain(self);
 }
 - (id)description {
     return nil;

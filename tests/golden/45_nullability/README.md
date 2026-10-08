@@ -1,6 +1,6 @@
 # golden/45 — Nullability（`nullable` / `nonnull` / `NP_ASSUME_NONNULL`）
 
-**特性**：ObjC 2015 年最大的语言演进在 Nopa 落地。三态标注 + 区域默认 + 分支内流敏感窄化，**纯编译期、零运行时成本**（codegen 从不读 `nulls` 字段 —— 与 ObjC 的 `NS_ASSUME_NONNULL` 同构）。
+**特性**：ObjC 2015 年最大的语言演进在 Nepa 落地。三态标注 + 区域默认 + 分支内流敏感窄化，**纯编译期、零运行时成本**（codegen 从不读 `nulls` 字段 —— 与 ObjC 的 `NS_ASSUME_NONNULL` 同构）。
 
 ## 语法：两种拼写都支持
 
@@ -43,9 +43,9 @@ NP_ASSUME_NONNULL_END
 
 ### 3. `NP_ASSUME_NONNULL_*` 是**真语法，不是宏**
 
-ObjC 那两个标记是宏（内部 `_Pragma("clang assume_nonnull begin")`），**nopac 明确拒绝宏体内的 `_Pragma`**（`crates/cpp` —— 源级展开器没有调用点位置可放）。所以标记只能在 nopac 侧实现。
+ObjC 那两个标记是宏（内部 `_Pragma("clang assume_nonnull begin")`），**nepac 明确拒绝宏体内的 `_Pragma`**（`crates/cpp` —— 源级展开器没有调用点位置可放）。所以标记只能在 nepac 侧实现。
 
-**规划时的一个错误更正**：原写"原样透传给 clang 让它生效"是错的 —— nopac 自己应用默认值，裸标识符到 C 侧会让 clang 报未声明。正确做法是**改写成 clang pragma**（`_Pragma("clang assume_nonnull begin")`，走既有 `RawLine` 通道），两侧同时生效。
+**规划时的一个错误更正**：原写"原样透传给 clang 让它生效"是错的 —— nepac 自己应用默认值，裸标识符到 C 侧会让 clang 报未声明。正确做法是**改写成 clang pragma**（`_Pragma("clang assume_nonnull begin")`，走既有 `RawLine` 通道），两侧同时生效。
 
 ### 4. 区域**按文件作用域**（实测修掉的真 bug）
 
@@ -86,9 +86,9 @@ if (s != nil) { ... }                  // 显式 != nil（nil/NULL/0/NO 都算�
 
 ## ARC 交互（豁免名单已落地）
 
-`nopa_release`（runtime.c:222）/ `nopa_retain`（:214）/ `nopa_autorelease`（:246）的 C 契约都是 nil 安全（`if (!obj) return;` / `return NULL;`）。checker 的 `NIL_SAFE_RUNTIME_FNS` 白名单把这一契约**显式化**：这三个函数的调用不做 nullable→nonnull 传递检查。
+`nepa_release`（runtime.c:222）/ `nepa_retain`（:214）/ `nepa_autorelease`（:246）的 C 契约都是 nil 安全（`if (!obj) return;` / `return NULL;`）。checker 的 `NIL_SAFE_RUNTIME_FNS` 白名单把这一契约**显式化**：这三个函数的调用不做 nullable→nonnull 传递检查。
 
-危害探针实证过为何必须豁免：若一个 nopa 可见声明把 `nopa_release` 标成 `nonnull`，每个含 nullable 局部的 ARC 程序都会编译失败——ARC 注入的 scope-end release 传的值本就可能为 nil，这正是文档化的调用约定（release-before-nil 也是正常 MRC 惯用法）。豁免按**函数名**生效，同时覆盖 ARC 注入与手写调用。
+危害探针实证过为何必须豁免：若一个 nepa 可见声明把 `nepa_release` 标成 `nonnull`，每个含 nullable 局部的 ARC 程序都会编译失败——ARC 注入的 scope-end release 传的值本就可能为 nil，这正是文档化的调用约定（release-before-nil 也是正常 MRC 惯用法）。豁免按**函数名**生效，同时覆盖 ARC 注入与手写调用。
 
 ## M2 补齐（原 M1 限制，已解决）
 

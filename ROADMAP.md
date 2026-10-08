@@ -6,10 +6,20 @@
 
 ## Language / compiler gaps
 
-- [ ] **Debug information** — nopac does not emit DWARF; debugging generated C is the only option today.
-- [ ] **Generic class-method return instantiation** — type arguments on class methods (`+ (NPArray<T>)...`) are not substituted; monomorphization covers instance-side signatures and declared types.
-- [ ] **Categories across TUs** — category method dispatch works single-TU; cross-TU category layout is limited. Design finalized (weak-symbol vtable slots), not implemented — see `doc/categories_protocol_plan.md`.
-- [ ] **Protocol inheritance across TUs** — same caveat; protocol conformance checking is per-TU. Same plan, phase 3 (`doc/categories_protocol_plan.md`).
+- [ ] **Debug information** — nepac does not emit DWARF; debugging generated C is the only option today.
+- [x] **Generic class-method return instantiation (single TU)** — `[Box<NPString *> defaultValue]`
+  substitutes T in the checker's result type and in the specialized vtable fn-ptr casts;
+  ARC ownership on the returned T is correct (no extra release at the call site).
+  Evidence: `probes/genret/` g1 (multi-instantiation), g3 (function pointers), g4 (ARC).
+- [ ] **Generic class-method return across TUs** — a client-TU send `[Factory<NPString *> make]`
+  does not link when the lib TU never mentions the instantiation (undefined
+  `Factory_NPString_ptr_make`); when the lib TU mentions it only via a plain variable
+  declaration, its specialized vtable shape diverges from the client's and the startup
+  `__sig` check aborts loudly (R3 doing its job — no silent misdispatch). See
+  `probes/genret/g2/`. Mixed class/instance sends on a class name are checker-rejected
+  by design, non-generic classes included (`g5c` control).
+- [x] **Categories across TUs** — implemented (weak-definition/strong-extern vtable slots, ownership excluded for category impls); see `doc/categories_protocol_plan.md` §8 and `tests/multi_tu/14`/`15`.
+- [x] **Protocol inheritance across TUs** — implemented: static `NPProtocol` metadata + `conformsToProtocol:` runtime query (`doc/categories_protocol_plan.md` §8).
 - [ ] **Pattern switch M2** — mixing plain constant arms with pattern arms in one `switch` (currently rejected with a clear error); exhaustiveness analysis.
 
 ## Foundation library gaps
@@ -20,7 +30,7 @@
   notes in `NPSet.nh`).
 - [x] **`NPPredicate`** (the `NSPredicate` model) — shipped: a runtime
   format-string parser + evaluation engine (`NPPredicate.np`), compile-time KVC
-  accessor tables (`NOPA_KVC_$_X`, see `doc/architecture.md` §12) and the host
+  accessor tables (`NEPA_KVC_$_X`, see `doc/architecture.md` §12) and the host
   filtering API (`filteredArrayUsingPredicate:` /
   `indexOfObjectMatchingPredicate:` / `filterUsingPredicate:`; a `nil`
   predicate is the identity). Covered by `tests/predicate_filter_test.np` and
@@ -29,7 +39,7 @@
 - [ ] **Variadic convenience constructors** — only `arrayWithObjects:count:`-style signatures exist; the variadic `initWithObjects:..., nil` form is not declared. Related known quirk: `[NPMutableArray arrayWithObjects:...]` desugars to the immutable array path.
 - [ ] **`NSAssert`** macro is absent.
 - [ ] **Object subscripting on dictionaries** — `d[@"k"]` is deliberately not wired (`objectForKeyedSubscript:` undeclared); the checker's subscript rewrite only knows `objectAtIndex:`.
-- [ ] **`conformsToProtocol:` runtime** — class metadata carries a `protocol_count` field but codegen does not populate it; the runtime protocol query is unimplemented.
+- [x] **`conformsToProtocol:` runtime** — class metadata now carries a populated protocol table and the runtime query walks class + protocol parent chains (`doc/categories_protocol_plan.md` §8).
 
 ## EH known limitations (accepted, not scheduled)
 
@@ -42,4 +52,4 @@
 
 ## Tooling
 
-- [ ] **Windows native validation** — `nopac.exe` builds and cross-compiles, but runtime behavior on real Windows is untested (zig cc backend, `__thread` semantics).
+- [ ] **Windows native validation** — `nepac.exe` builds and cross-compiles, but runtime behavior on real Windows is untested (zig cc backend, `__thread` semantics).

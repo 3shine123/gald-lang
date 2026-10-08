@@ -11,7 +11,7 @@
     @implementation Person
 
     - (void)speak {
-        printf("Hello, Nopa world!\n");
+        printf("Hello, Nepa world!\n");
     }
 
     @end

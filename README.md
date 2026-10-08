@@ -1,13 +1,13 @@
 [-> 中文](CHINESE.md)
 
 <div align="center">
-<img src="doc/assets/Nopa_avatar.svg" alt="Nopa_avatar" width="210">
+<img src="doc/assets/Nepa_avatar.svg" alt="Nepa_avatar" width="210">
 
-# The Nopa Programming Language
+# The Nepa Programming Language
 
 [**View Project Examples**](#project-examples)
 
-[Overview](#overview) · [Why Nopa?](#why-nopa) · [Project Examples](#project-examples) · [Quick Start](#quick-start) · [Language Features](#language-features) · [New Features](#new-features) · [Compilation & CLI](#compilation--cli) · [Code Examples](#code-examples) · [Design Principles](#design-principles) · [Roadmap](#roadmap) · [FAQ](#faq)
+[Overview](#overview) · [Why Nepa?](#why-nepa) · [Project Examples](#project-examples) · [Quick Start](#quick-start) · [Language Features](#language-features) · [New Features](#new-features) · [Compilation & CLI](#compilation--cli) · [Code Examples](#code-examples) · [Design Principles](#design-principles) · [Roadmap](#roadmap) · [FAQ](#faq)
 
 </div>
 
@@ -25,15 +25,15 @@
 
 ## **Overview**
 
-Nopa is a **purely static** Objective-C dialect (C superset language). Nopa source is transpiled to C99, then compiled to native machine code by Clang. No runtime message forwarding, no GC pauses, no JIT warm-up — all method dispatch, memory management, and polymorphism are resolved at compile time. It currently works — there are games and tools running in it. If you find it interesting, feel free to give it a try.
+Nepa is a **purely static** Objective-C dialect (C superset language). Nepa source is transpiled to C99, then compiled to native machine code by Clang. No runtime message forwarding, no GC pauses, no JIT warm-up — all method dispatch, memory management, and polymorphism are resolved at compile time. It currently works — there are games and tools running in it. If you find it interesting, feel free to give it a try.
 
 I don't intend to replace ObjC or Swift. I just miss ObjC's syntax and wanted to let it live again in a statically compiled world. ☺️
 
 ---
 
-## Why Nopa?
+## Why Nepa?
 
-I simply like ObjC's message send syntax `[obj message]`. ObjC's runtime (`objc_msgSend`) is heavy, and I wanted to write ObjC-like code that compiles straight to C — so Nopa was born: ObjC syntax compiled statically, no runtime dependency, generating clean C.
+I simply like ObjC's message send syntax `[obj message]`. ObjC's runtime (`objc_msgSend`) is heavy, and I wanted to write ObjC-like code that compiles straight to C — so Nepa was born: ObjC syntax compiled statically, no runtime dependency, generating clean C.
 
 This is not a production-ready language. It's a toy, exploring the question: "what happens if you transpile ObjC into plain static C?"
 
@@ -59,10 +59,10 @@ This is not a production-ready language. It's a toy, exploring the question: "wh
 
 | Project               | Description                                                                              | Run                            |
 | --------------------- | ---------------------------------------------------------------------------------------- | ------------------------------ |
-| **`04_soma-kernel/`** | Tiny 32‑bit i386 OS kernel (NASM + C + Nopa), bare‑metal `-ffreestanding` mode                | `./run.sh` or `./run.sh --gui` |
-| **`03_LibUI/`**       | GUI app via [libui-ng](https://github.com/libui-ng/libui-ng), all callbacks in pure Nopa | `./run_libui.sh`               |
+| **`04_soma-kernel/`** | Tiny 32‑bit i386 OS kernel (NASM + C + Nepa), bare‑metal `-ffreestanding` mode                | `./run.sh` or `./run.sh --gui` |
+| **`03_LibUI/`**       | GUI app via [libui-ng](https://github.com/libui-ng/libui-ng), all callbacks in pure Nepa | `./run_libui.sh`               |
 | **`02_ncurses/`**     | Terminal demos (`ncurses_demo`, `sysmon`) using `Terminal::Ncurses`                      | `make run`                     |
-| **`01_JSONEditor/`**  | Multi‑file JSON editor with split‑screen terminal preview                                | `nopac run json_editor.np`     |
+| **`01_JSONEditor/`**  | Multi‑file JSON editor with split‑screen terminal preview                                | `nepac run json_editor.np`     |
 
 ---
 
@@ -77,81 +77,81 @@ This is not a production-ready language. It's a toy, exploring the question: "wh
 ### Build
 
 ```bash
-git clone https://github.com/3shine123/nopa-lang.git
-cd nopa-lang
+git clone https://github.com/3shine123/nepa-lang.git
+cd nepa-lang
 cargo build --release
 ```
 
 ### Install
 
-The build automatically drops an `install.sh` (plus headers and `libnopa.a`) next to the `nopac` binary. Install it to your system with:
+The build automatically drops an `install.sh` (plus headers and `libnepa.a`) next to the `nepac` binary. Install it to your system with:
 
 ```bash
 # After building from source — the script lives next to the binary
 cd target/release        # or target/debug if you ran a plain `cargo build`
-./install.sh             # installs to /opt/nopa by default
+./install.sh             # installs to /opt/nepa by default
 ./install.sh /usr/local  # optional: pick a different prefix
 ```
 
 This installs:
 
-- **binary** → `<prefix>/bin/nopac`
-- **static lib** → `<prefix>/lib/libnopa.a`
+- **binary** → `<prefix>/bin/nepac`
+- **static lib** → `<prefix>/lib/libnepa.a`
 - **headers** → `<prefix>/include/`
-- **system headers** → `/usr/local/include/{Foundation,nopa}/` (needs write permission; skip with `sudo` or pass a second arg like `./install.sh /opt/nopa ~/include`)
+- **system headers** → `/usr/local/include/{Foundation,nepa}/` (needs write permission; skip with `sudo` or pass a second arg like `./install.sh /opt/nepa ~/include`)
 
 The installer auto-detects your language (中文 / English).
 
-Alternatively, download a prebuilt release archive (`nopa-<platform>.tar.gz` or `.zip`) from the releases page, extract it, and run the `install.sh` inside:
+Alternatively, download a prebuilt release archive (`nepa-<platform>.tar.gz` or `.zip`) from the releases page, extract it, and run the `install.sh` inside:
 
 ```bash
-tar xzf nopa-x86_64-unknown-linux-musl.tar.gz
-cd nopa-x86_64-unknown-linux-musl
+tar xzf nepa-x86_64-unknown-linux-musl.tar.gz
+cd nepa-x86_64-unknown-linux-musl
 ./install.sh
 ```
 
-> **Tip:** with `nopac` on your PATH and system headers installed, `<nopa/runtime.h>` and `<Foundation/...>` resolve automatically — no `-I include` needed.
+> **Tip:** with `nepac` on your PATH and system headers installed, `<nepa/runtime.h>` and `<Foundation/...>` resolve automatically — no `-I include` needed.
 
-### Compile a Nopa Program
+### Compile a Nepa Program
 
 ```bash
 # Just output C code (auto-derives .np → .c)
-nopac -rewrite-nopa hello.np
-nopac hello.np -rewrite-nopa               # flag works anywhere
-nopac -rewrite-nopa hello.np -o out.c      # explicit path also works
-# (--rewrite-nopa double-dash form also accepted)
+nepac -rewrite-nepa hello.np
+nepac hello.np -rewrite-nepa               # flag works anywhere
+nepac -rewrite-nepa hello.np -o out.c      # explicit path also works
+# (--rewrite-nepa double-dash form also accepted)
 
 # Compile the transpiled C alone with Clang — two ways:
 #   1) compile the runtime source directly
-clang -I include -o hello hello.c include/nopa/runtime.c
-#   2) link the prebuilt libnopa.a (lives next to the nopac binary)
-clang -I include -o hello hello.c -Ltarget/release -lnopa
+clang -I include -o hello hello.c include/nepa/runtime.c
+#   2) link the prebuilt libnepa.a (lives next to the nepac binary)
+clang -I include -o hello hello.c -Ltarget/release -lnepa
 
 # Compile to executable
-nopac hello.np -o hello_bin                # transpile + compile + link
+nepac hello.np -o hello_bin                # transpile + compile + link
 
 # Multi-TU: extra positional inputs are compiled and linked in; .o/.a as-is
-nopac main.np lib.np -I include -o app     # two TUs, one command (no manual clang)
-nopac main.np lib.o libfoo.a -o app        # mix nopa sources with prebuilt objects
+nepac main.np lib.np -I include -o app     # two TUs, one command (no manual clang)
+nepac main.np lib.o libfoo.a -o app        # mix nepa sources with prebuilt objects
 
 # Precompiled Foundation library: build once, link in every project
-./tools/build-foundation-lib.sh                            # → target/foundation/libnopafoundation.a
-nopac app.np -I include -L target/foundation -lnopafoundation -o app   # explicit
-nopac app.np -o app                                        # or: auto-linked when findable (decl-only clients)
+./tools/build-foundation-lib.sh                            # → target/foundation/libnepafoundation.a
+nepac app.np -I include -L target/foundation -lnepafoundation -o app   # explicit
+nepac app.np -o app                                        # or: auto-linked when findable (decl-only clients)
 
 # Compile + run
-nopac run hello.np
-nopac run hello.np -o hello_bin            # keep binary after run
-nopac run hello.np                          # auto-clean temp binary
+nepac run hello.np
+nepac run hello.np -o hello_bin            # keep binary after run
+nepac run hello.np                          # auto-clean temp binary
 
 # Show compilation warnings
-nopac -v run hello.np
+nepac -v run hello.np
 
-# [!] Error: .c output without -rewrite-nopa
-nopac hello.np -o hello.c   → Error: use -rewrite-nopa to output C code
+# [!] Error: .c output without -rewrite-nepa
+nepac hello.np -o hello.c   → Error: use -rewrite-nepa to output C code
 
 # [!] Error: no output method specified
-nopac hello.np              → Error: specify -o or -rewrite-nopa
+nepac hello.np              → Error: specify -o or -rewrite-nepa
 ```
 
 ### Foundation: Two Usage Modes
@@ -160,7 +160,7 @@ Foundation supports two modes. Both are fully supported; **for real projects we 
 
 **Self-contained / unity mode** — implementations are inlined via `#import`; no library needed. Good for single files, quick experiments, and legacy builds:
 
-```nopa
+```nepa
 // hello.np
 #import <Foundation/Foundation.np>   // declarations + implementations, all inlined
 
@@ -171,12 +171,12 @@ int main() {
 ```
 
 ```bash
-nopac run hello.np
+nepac run hello.np
 ```
 
 **Precompiled Foundation / multi-TU mode (recommended)** — the implementation lives in a static library built once; your TU only compiles your own code:
 
-```nopa
+```nepa
 // app.np
 #import <Foundation/Foundation.nh>   // declarations only — nothing inlined
 
@@ -187,42 +187,42 @@ int main() {
 ```
 
 ```bash
-./tools/build-foundation-lib.sh   # once → target/foundation/libnopafoundation.a
-nopac app.np -o app               # the library is found and linked automatically
+./tools/build-foundation-lib.sh   # once → target/foundation/libnepafoundation.a
+nepac app.np -o app               # the library is found and linked automatically
 ```
 
 Under the hood: in self-contained mode the inlined implementations are not their TU's main file, so their class metadata is weak (duplicated per TU and merged). In library mode each Foundation `.np` is compiled as its own TU, so its `@implementation` owns the metadata and emits it strong — one copy in the archive. Full owner/strong/weak rules: `doc/architecture.md`.
 
 ### Shell Completion (Tab autocomplete)
 
-`nopac` ships with generated completion scripts for **zsh**, **bash** and **fish**, built with
+`nepac` ships with generated completion scripts for **zsh**, **bash** and **fish**, built with
 [clap_complete](https://crates.io/crates/clap_complete). Regenerate them any time with:
 
 ```bash
-nopac -gen-completions zsh > _nopac
-nopac -gen-completions bash > nopac.bash
-nopac -gen-completions fish > nopac.fish
+nepac -gen-completions zsh > _nepac
+nepac -gen-completions bash > nepac.bash
+nepac -gen-completions fish > nepac.fish
 ```
 
-The scripts are also copied into the install bundle (`share/nopac/completions/`) by `install.sh`.
+The scripts are also copied into the install bundle (`share/nepac/completions/`) by `install.sh`.
 
 **zsh** — add the directory to `fpath` before `compinit` runs:
 
 ```zsh
-fpath=(/opt/nopa/share/nopac/completions $fpath)
+fpath=(/opt/nepa/share/nepac/completions $fpath)
 autoload -U compinit && compinit
 ```
 
 **bash**:
 
 ```bash
-source /opt/nopa/share/nopac/completions/nopac.bash
+source /opt/nepa/share/nepac/completions/nepac.bash
 ```
 
 **fish**:
 
 ```fish
-source /opt/nopa/share/nopac/completions/nopac.fish
+source /opt/nepa/share/nepac/completions/nepac.fish
 ```
 
 After installing a new version, clear the zsh cache with `rm -f ~/.zcompdump*` and open a new terminal.
@@ -243,7 +243,7 @@ cargo test --workspace
 
 ### Class System
 
-```nopa
+```nepa
 @interface Animal : NPObject {
 @public
     NPString *_name;
@@ -269,7 +269,7 @@ cargo test --workspace
 
 ### Protocol
 
-```nopa
+```nepa
 @protocol Drawable
 - (void)draw;
 - (BOOL)isVisible;
@@ -281,7 +281,7 @@ cargo test --workspace
 
 ### Properties
 
-```nopa
+```nepa
 @interface Person : NPObject
 @property NPString *name;
 @property int age;
@@ -291,7 +291,7 @@ cargo test --workspace
 
 ### Category
 
-```nopa
+```nepa
 @interface Person (Printing)
 - (void)printGreeting;
 @end
@@ -305,7 +305,7 @@ cargo test --workspace
 
 ### Block
 
-```nopa
+```nepa
 int (^square)(int) = ^int(int x) {
     return x * x;
 };
@@ -318,7 +318,7 @@ void (^logAndCall)(NPString *, void (^)(void)) = ^void(NPString *msg, void (^nex
 
 ### @autoreleasepool
 
-```nopa
+```nepa
 @autoreleasepool {
     NPString *temp = [NPString stringWithUTF8String:"hello"];
     // temp is released when the pool pops
@@ -327,13 +327,13 @@ void (^logAndCall)(NPString *, void (^)(void)) = ^void(NPString *msg, void (^nex
 
 ### @selector
 
-```nopa
+```nepa
 SEL sel = @selector(doSomething:);
 ```
 
 ### Full C Compatibility
 
-```nopa
+```nepa
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -344,9 +344,9 @@ SEL sel = @selector(doSomething:);
 
 ### C Attributes (__attribute__)
 
-Nopa supports `__attribute__((...))` pass-through. You can write C `__attribute__` on global declarations and struct fields, and the compiler preserves them verbatim in the generated C output.
+Nepa supports `__attribute__((...))` pass-through. You can write C `__attribute__` on global declarations and struct fields, and the compiler preserves them verbatim in the generated C output.
 
-```nopa
+```nepa
 __attribute__((packed))
 struct Point {
     int x;
@@ -369,11 +369,11 @@ Unknown attributes (not in the table) produce a warning and pass through — nev
 
 ### Memory Management
 
-Nopa uses **compile-time static ARC**. The compiler determines each object reference's lifetime through CFG dataflow analysis and inserts retain/release calls automatically. No manual `retain`/`release`/`autorelease` needed.
+Nepa uses **compile-time static ARC**. The compiler determines each object reference's lifetime through CFG dataflow analysis and inserts retain/release calls automatically. No manual `retain`/`release`/`autorelease` needed.
 
-In MRC mode (`-fno-nopa-arc`):
+In MRC mode (`-fno-nepa-arc`):
 
-```nopa
+```nepa
 NPObject *obj = [[NPObject alloc] init];
 // ... use obj ...
 [obj release]; // MRC manual release
@@ -381,12 +381,12 @@ NPObject *obj = [[NPObject alloc] init];
 
 ### C Bridge (`-emit-bridge-header`)
 
-Nopa transpiles to C, but calling Nopa object methods from C normally requires verbose vtable-index and SEL-constant boilerplate. `-emit-bridge-header` generates a header with `static inline` wrappers for every method, so C code can call Nopa objects like ordinary C functions.
+Nepa transpiles to C, but calling Nepa object methods from C normally requires verbose vtable-index and SEL-constant boilerplate. `-emit-bridge-header` generates a header with `static inline` wrappers for every method, so C code can call Nepa objects like ordinary C functions.
 
-**Usage**: transpile a Nopa library to C, then generate the bridge header:
+**Usage**: transpile a Nepa library to C, then generate the bridge header:
 
 ```bash
-nopac -rewrite-nopa lib.np -o lib.c -emit-bridge-header lib.h
+nepac -rewrite-nepa lib.np -o lib.c -emit-bridge-header lib.h
 ```
 
 Then include the bridge header from C:
@@ -395,97 +395,97 @@ Then include the bridge header from C:
 #include "lib.h"
 
 int main(void) {
-    nopa_metaInit();  // metadata back-fill — see the note below
+    nepa_metaInit();  // metadata back-fill — see the note below
 
-    // Class method: nopa_<Class>_<method>(params...)
-    NPString *s = nopa_NPString_stringWithUTF8String_("Hello");
+    // Class method: nepa_<Class>_<method>(params...)
+    NPString *s = nepa_NPString_stringWithUTF8String_("Hello");
 
-    // Instance method: nopa_<Class>_<method>(self, params...)
-    size_t len = nopa_NPString_length(s);
-    const char *cstr = nopa_NPString_UTF8String(s);
+    // Instance method: nepa_<Class>_<method>(self, params...)
+    size_t len = nepa_NPString_length(s);
+    const char *cstr = nepa_NPString_UTF8String(s);
 
-    // Nested message send (like Nopa's [[s UTF8String] ...])
-    const char *nested = nopa_NPString_UTF8String(
-        nopa_NPString_stringWithUTF8String_("nested")
+    // Nested message send (like Nepa's [[s UTF8String] ...])
+    const char *nested = nepa_NPString_UTF8String(
+        nepa_NPString_stringWithUTF8String_("nested")
     );
 
-    // Multi-argument message send (like Nopa's [arr replaceObjectAtIndex:0 withObject:obj])
-    NPArray *arr = nopa_NPArray_arrayWithObject_(s);
-    nopa_NPArray_replaceObjectAtIndex_withObject_(arr, 0, s);
+    // Multi-argument message send (like Nepa's [arr replaceObjectAtIndex:0 withObject:obj])
+    NPArray *arr = nepa_NPArray_arrayWithObject_(s);
+    nepa_NPArray_replaceObjectAtIndex_withObject_(arr, 0, s);
 
     // Each colon in the selector becomes an underscore in the function name:
-    //   [obj foo:arg1 bar:arg2] → nopa_<Class>_foo_bar_(obj, arg1, arg2)
+    //   [obj foo:arg1 bar:arg2] → nepa_<Class>_foo_bar_(obj, arg1, arg2)
     //   [m replaceCharactersInRange:rng withString:str]
-    //   → nopa_NPMutableString_replaceCharactersInRange_withString_(m, rng, str)
+    //   → nepa_NPMutableString_replaceCharactersInRange_withString_(m, rng, str)
 }
 ```
 
 Link against the transpiled `.c` and `runtime.c`:
 
 ```bash
-clang caller.c lib.c include/nopa/runtime.c -I include -o app
+clang caller.c lib.c include/nepa/runtime.c -I include -o app
 ```
 
-⚠️ The bridge header uses `sel_registerName` to resolve selectors at runtime, so it does **not** depend on the codegen-generated `static const` SEL constants (which are file-local and invisible across translation units). Class metadata itself is **statically initialized at load time** by every TU whose main file holds the `@implementation` — which is all `nopac` workflows. `nopa_metaInit()` stays in the examples as a harmless idempotent back-fill; it is only *required* when a build reaches implementations through `#import "*.np"` (single-TU umbrella builds), where no TU owns the metadata.
+⚠️ The bridge header uses `sel_registerName` to resolve selectors at runtime, so it does **not** depend on the codegen-generated `static const` SEL constants (which are file-local and invisible across translation units). Class metadata itself is **statically initialized at load time** by every TU whose main file holds the `@implementation` — which is all `nepac` workflows. `nepa_metaInit()` stays in the examples as a harmless idempotent back-fill; it is only *required* when a build reaches implementations through `#import "*.np"` (single-TU umbrella builds), where no TU owns the metadata.
 
 #### Memory Management from C
 
-Nopa's **ARC is compile-time and applies only to `.np` source** — it never sees calls coming from C. When C code calls bridge functions, objects are **not** automatically retained or released. Manage them manually, following the ObjC memory-management naming convention:
+Nepa's **ARC is compile-time and applies only to `.np` source** — it never sees calls coming from C. When C code calls bridge functions, objects are **not** automatically retained or released. Manage them manually, following the ObjC memory-management naming convention:
 
 | Method family                                  | Caller owns?       | What C code must do                                                             |
 | ---------------------------------------------- | ------------------ | ------------------------------------------------------------------------------- |
-| `alloc`, `new`, `copy`, `mutableCopy`          | ✅ +1               | Must call `nopa_release(obj)` when done                                         |
+| `alloc`, `new`, `copy`, `mutableCopy`          | ✅ +1               | Must call `nepa_release(obj)` when done                                         |
 | `init`                                         | ❌ consumes `alloc` | Nothing                                                                         |
-| everything else (e.g. `stringWithUTF8String:`) | ❌ autoreleased     | Nothing, but `nopa_retain(obj)` if it must outlive the current autorelease pool |
+| everything else (e.g. `stringWithUTF8String:`) | ❌ autoreleased     | Nothing, but `nepa_retain(obj)` if it must outlive the current autorelease pool |
 
 ```c
 #include "lib.h"
 
 int main(void) {
-    nopa_metaInit();
-    nopa_autoreleasepool_t *pool = nopa_autoreleasepoolPush();
+    nepa_metaInit();
+    nepa_autoreleasepool_t *pool = nepa_autoreleasepoolPush();
 
     // +1 (returns autoreleased convenience object); use within this pool only
-    NPString *s = nopa_NPString_stringWithUTF8String_("hello");
-    printf("%s\n", nopa_NPString_UTF8String(s));
+    NPString *s = nepa_NPString_stringWithUTF8String_("hello");
+    printf("%s\n", nepa_NPString_UTF8String(s));
 
     // If it must outlive the pool: retain now, release later
-    NPString *t = nopa_NPString_stringWithUTF8String_("world");
-    nopa_retain(t);
-    nopa_autoreleasepoolPop(pool);      // t survives (was retained)
-    printf("%s\n", nopa_NPString_UTF8String(t));
-    nopa_release(t);
+    NPString *t = nepa_NPString_stringWithUTF8String_("world");
+    nepa_retain(t);
+    nepa_autoreleasepoolPop(pool);      // t survives (was retained)
+    printf("%s\n", nepa_NPString_UTF8String(t));
+    nepa_release(t);
 
     // alloc-family returns +1 → must release
-    NPString *u = nopa_NPString_alloc(nopa_NPString_stringWithUTF8String_("x") /* placeholder */);
-    // (real usage: nopa_NPString_copy(s) returns +1, release it)
-    NPString *copy = nopa_NPString_copy(s);
-    nopa_release(copy);
+    NPString *u = nepa_NPString_alloc(nepa_NPString_stringWithUTF8String_("x") /* placeholder */);
+    // (real usage: nepa_NPString_copy(s) returns +1, release it)
+    NPString *copy = nepa_NPString_copy(s);
+    nepa_release(copy);
 }
 ```
 
-`nopa_retain`, `nopa_release`, `nopa_autorelease`, `nopa_autoreleasepoolPush`/`nopa_autoreleasepoolPop` are declared in `<nopa/runtime.h>` and work on any Nopa object. This is exactly the manual-retain-count (MRC) model — from the C side you can think of Nopa objects as raw pointers you own or don't own by convention.
+`nepa_retain`, `nepa_release`, `nepa_autorelease`, `nepa_autoreleasepoolPush`/`nepa_autoreleasepoolPop` are declared in `<nepa/runtime.h>` and work on any Nepa object. This is exactly the manual-retain-count (MRC) model — from the C side you can think of Nepa objects as raw pointers you own or don't own by convention.
 
 ---
 
 ## New Features
 
-Nopa adds features on top of Objective-C syntax that ObjC itself doesn't have.
+Nepa adds features on top of Objective-C syntax that ObjC itself doesn't have.
 
 **Recent highlights:**
 
-- **Predicates / KVC (`NPPredicate`)** — a runtime format-string parser + evaluation engine living entirely in the Foundation library (`age > 18 AND name BEGINSWITH[c] 'A'`, `ANY tags LIKE '*dev*'`), backed by compile-time KVC accessor tables (`NOPA_KVC_$_X`, strong in the owner TU) and a host filtering API (`filteredArrayUsingPredicate:` / `indexOfObjectMatchingPredicate:` / `filterUsingPredicate:`; a `nil` predicate is the identity). The compiler never parses the format string — see `doc/architecture.md` §12.
+- **Predicates / KVC (`NPPredicate`)** — a runtime format-string parser + evaluation engine living entirely in the Foundation library (`age > 18 AND name BEGINSWITH[c] 'A'`, `ANY tags LIKE '*dev*'`), backed by compile-time KVC accessor tables (`NEPA_KVC_$_X`, strong in the owner TU) and a host filtering API (`filteredArrayUsingPredicate:` / `indexOfObjectMatchingPredicate:` / `filterUsingPredicate:`; a `nil` predicate is the identity). The compiler never parses the format string — see `doc/architecture.md` §12.
 - **Sets (`NPSet` / `NPMutableSet` / `NPOrderedSet`)** — hash-bucket set containers in the Foundation library (unique elements, `containsObject:` / `anyObject` / `setWithObjects:count:`), with `NPOrderedSet` preserving insertion order; all container methods dispatch through the static vtable, so they are safe across TUs.
-- **Native bare-metal support (`-ffreestanding`)** — compiles to self-contained C with no libc, no Foundation, no TLS; `@try/@catch` uses `__builtin_setjmp/longjmp`, and a zero-boilerplate `runtime_freestanding.c` provides the bump allocator, `NOPA_CLASS_$_nopa_root`, exception state, and `memcpy`.
+- **Native bare-metal support (`-ffreestanding`)** — compiles to self-contained C with no libc, no Foundation, no TLS; `@try/@catch` uses `__builtin_setjmp/longjmp`, and a zero-boilerplate `runtime_freestanding.c` provides the bump allocator, `NEPA_CLASS_$_nepa_root`, exception state, and `memcpy`.
 - **C superset** — `@protocol` + conformance, `@property` + `@synthesize`, `instancetype`, `@public` ivars, dot syntax, structs + function pointers, inline asm, C-style casts.
-- **Typed `@catch`** — catch arms match via `__nopa_eh_isa` (isKindOf: superclass-chain semantics, like ObjC): a parent-class arm catches subclass instances, and the first matching arm consumes the exception so later arms never double-catch.
+- **Typed `@catch`** — catch arms match via `__nepa_eh_isa` (isKindOf: superclass-chain semantics, like ObjC): a parent-class arm catches subclass instances, and the first matching arm consumes the exception so later arms never double-catch.
 - **ARC fixes** — scope-stack model no longer releases parent-scope variables at nested scope end; `for`-init object hoisting stops leaks and invalid `for` headers.
-- **`@noarc` block** — block-level MRC: in ARC mode, manual `retain`/`release`/`dealloc`/`autorelease` inside `@noarc { }` is allowed; the block-level analogue of `-fno-nopa-arc` and clang's `-fno-objc-arc`.
+- **`@noarc` block** — block-level MRC: in ARC mode, manual `retain`/`release`/`dealloc`/`autorelease` inside `@noarc { }` is allowed; the block-level analogue of `-fno-nepa-arc` and clang's `-fno-objc-arc`.
 - **`__attribute__` pass-through + `-backend`** — full support for C `__attribute__((...))` and all `__`-prefixed C predefined identifiers (`__FILE__`, `__LINE__`, `__builtin_*`, `__extension__`, `__typeof__`, `__alignof__`, ...); the `-backend` flag controls which compiler-specific attributes are allowed.
 
 ### for-in Enumeration
 
-```nopa
+```nepa
 for (NPString *s in arr) {
     printf("%s\n", [s UTF8String]);
 }
@@ -505,7 +505,7 @@ class 'Circle' does not implement required method 'draw' from protocol 'Drawable
 
 Reuse C's `&` operator to require several protocols at once — no new syntax:
 
-```nopa
+```nepa
 // ① Intersection type: the receiver must implement both
 void render(id<Drawable & Serializable> item);
 
@@ -520,7 +520,7 @@ Protocol types stay compile-time constraint labels only — vtable slots are una
 
 The official ObjC spellings are now implemented on the root class, enabling idiomatic multi-way dispatch without any new language construct:
 
-```nopa
+```nepa
 for (id item in items) {
     if ([item isKindOfClass:[Dog class]]) {
         [(Dog *)item bark];
@@ -534,9 +534,9 @@ for (id item in items) {
 
 ### Struct `==` / `!=` Value Comparison
 
-C rejects `a == b` on structs outright; Nopa reuses the existing operators and desugars to a generated field-by-field compare function:
+C rejects `a == b` on structs outright; Nepa reuses the existing operators and desugars to a generated field-by-field compare function:
 
-```nopa
+```nepa
 struct Point a = {1, 2};
 struct Point b = {1, 2};
 
@@ -550,7 +550,7 @@ p == &a               // pointer comparison semantics unchanged
 
 A method whose body contains `@await` is async — mirroring C++20's `co_await`-based coroutines. Return types of suspending methods must be marked `NPAsync<T>` (checker-enforced, see below — the parser unwraps it, so vtable layout is unchanged):
 
-```nopa
+```nepa
 @interface Fetcher : NPObject
 - (NPAsync<int>)compute:(int)n;   // suspends, yields an int
 - (NPAsync<void>)runAll;          // async void = the entry method
@@ -580,13 +580,13 @@ Design rules:
 - **Infection is chain-based** — a method calling `@await` becomes async itself; async methods with a return value may only be awaited from async contexts (compile-time rejected otherwise).
 - **`@await` lowers to a state machine** — the body is split at suspension points into a `switch(task->state)` driver over a heap `NPTask`; locals that survive a suspension are lifted into a per-method frame struct.
 - **`@try` spanning an `@await`** is rejected (a `jmp_buf` cannot survive a suspension point); `@noarc` across awaits is allowed; break/continue across awaits become state jumps.
-- A cooperative single-thread scheduler (`nopa_run_all`) and I/O integration are planned as the next milestone.
+- A cooperative single-thread scheduler (`nepa_run_all`) and I/O integration are planned as the next milestone.
 
 ### Switch Pattern Matching (`case` patterns)
 
 `case` labels accept **patterns**, not just integer constants. Type dispatch stays a method chain in spirit — the patterns desugar to `isKindOfClass:` / `isEqual:` / comparisons — but you write them declaratively:
 
-```nopa
+```nepa
 // Object patterns mix freely in one switch:
 switch (subject) {
     case NPString *s:                      // type binding → isKindOfClass:
@@ -626,7 +626,7 @@ switch (n) {
 
 | pattern | lowers to |
 |---------|-----------|
-| `T *name` | `nopa_isKindOfClass(subject, &NOPA_CLASS_$_T)`; inside the arm, `name` is already bound to `(T *)subject` |
+| `T *name` | `nepa_isKindOfClass(subject, &NEPA_CLASS_$_T)`; inside the arm, `name` is already bound to `(T *)subject` |
 | `> 10`, `< 10`, `>= 0`, `<= 9` | `subject > 10` (the subject is spliced into the dangling operand) |
 | `> 0 && < 100` | `subject > 0 && subject < 100` |
 | `@"lit"`, `@42`, `@YES`, `@'c'`, `@(expr)` | `[subject isEqual:<literal>]` — value semantics, so `@"lit"` matches a *different* NPString with the same contents |
@@ -648,7 +648,7 @@ Implementation: the parser classifies each label and flattens the whole switch i
 
 ### Boxed Literals (`@(expr)` / `@YES` / `@NO` / `@'c'`)
 
-```nopa
+```nepa
 NPNumber *a = @123;          // int
 NPNumber *b = @1.5;          // double
 NPNumber *c = @YES;          // BOOL → 1
@@ -666,7 +666,7 @@ illegal type 'NPString *' in a boxed expression — '@(...)' accepts arithmetic 
 
 ### Dictionary Literals (`@{ key: value }`)
 
-```nopa
+```nepa
 NPDictionary *d = @{ @"a": @1, @"b": @2, @"c": @3 };
 NPLog(@"%d", [[d objectForKey:@"b"] intValue]);   // 2
 printf("%lu\n", (unsigned long)[d count]);        // 3
@@ -687,9 +687,9 @@ illegal type 'int' in a dictionary literal — keys and values must be Objective
 
 ### Exception Semantics (`-eh checked` — the default backend)
 
-Nopa's exceptions are **ObjC exceptions by value, without unwinding**. `@try`/`@catch`/`@finally`/`@throw` behave exactly like clang's `-fobjc-arc-exceptions` mode — and a differential test suite (`tests/eh_diff/run_eh_diff.sh`) locks this in by running each case under both nopac and real clang/ObjC, then diffing stderr line by line (7/7 cases pass).
+Nepa's exceptions are **ObjC exceptions by value, without unwinding**. `@try`/`@catch`/`@finally`/`@throw` behave exactly like clang's `-fobjc-arc-exceptions` mode — and a differential test suite (`tests/eh_diff/run_eh_diff.sh`) locks this in by running each case under both nepac and real clang/ObjC, then diffing stderr line by line (7/7 cases pass).
 
-```nopa
+```nepa
 @interface Boom : NPObject
 - (void)fire;
 @end
@@ -726,7 +726,7 @@ The semantics you get:
 - **Uncaught exceptions abort** with ObjC's wording: `*** Terminating app due to uncaught exception of class 'NPString'`, exit code 1.
 - **C callers can't miss an exception** — bridge-header wrappers check the error flag and abort rather than silently returning a zero value.
 
-**`-eh checked` is the default backend** — a plain `nopac run` compiles with it. `-eh legacy` (alias `-eh sjlj`) selects the old zero-overhead setjmp backend and remains a complete rollback; that backend has the classic limitation: a cross-frame throw skips intermediate frames' cleanup (documented below).
+**`-eh checked` is the default backend** — a plain `nepac run` compiles with it. `-eh legacy` (alias `-eh sjlj`) selects the old zero-overhead setjmp backend and remains a complete rollback; that backend has the classic limitation: a cross-frame throw skips intermediate frames' cleanup (documented below).
 
 ### `@throws` — Declared Exceptions
 
@@ -739,7 +739,7 @@ The semantics you get:
 | Shape | `@throw expr;` | `@throws(T *)` or bare `@throws` |
 | In generated C | yes (the setjmp/flag machinery) | **never** — no code, no vtable slot |
 
-```nopa
+```nepa
 @interface Repo : NPObject
 - (NPString *)fetch:(const char *)url @throws(NPError *);   // throws NPError *
 - (int)parse:(const char *)s @throws;                       // throws; type unstated
@@ -756,7 +756,7 @@ The semantics you get:
 @end
 ```
 
-Apple has occupied exactly this slot — trailing metadata before the `;` — with macros for over a decade (`NS_DESIGNATED_INITIALIZER`, `NS_REQUIRES_NIL_TERMINATION`, `API_AVAILABLE(...)`). Nopa promotes the slot to first-class syntax and lets the checker reconcile it.
+Apple has occupied exactly this slot — trailing metadata before the `;` — with macros for over a decade (`NS_DESIGNATED_INITIALIZER`, `NS_REQUIRES_NIL_TERMINATION`, `API_AVAILABLE(...)`). Nepa promotes the slot to first-class syntax and lets the checker reconcile it.
 
 **What the checker enforces**
 
@@ -769,7 +769,7 @@ Apple has occupied exactly this slot — trailing metadata before the `;` — wi
 
 A `@throw` caught by a `@try` **in the same body** is never an escape, so `main` and locally-guarded helpers need no annotation:
 
-```nopa
+```nepa
 static void bad(int n) {                        // error: escapes 'bad'
     if (n < 0) {
         @throw [[AppError alloc] init];
@@ -795,30 +795,30 @@ static void guarded(int n) {                    // fine — caught locally
 
 The type check is deliberately conservative: `@"..."` literals, bare C strings, casts, and variables of known type are judged; a message send is not (its class is not knowable from a selector-only registry), so it satisfies any declared type. Annotations are compile-time only — adding or removing `@throws` never changes generated C, program output, or ARC behaviour. Misusing the pair is itself an error: `@throws` inside a body, or `@throw(...)` on a declaration, each gets a diagnostic naming the other keyword.
 
-### Implicit Root Class (`nopa_root`)
+### Implicit Root Class (`nepa_root`)
 
-Nopa now supports user-defined root classes. You no longer need to inherit from `NPObject` — an `@interface` without a superclass automatically gets a compiler-injected implicit root class `nopa_root`, while keeping `id` type uniformity and static dispatch.
+Nepa now supports user-defined root classes. You no longer need to inherit from `NPObject` — an `@interface` without a superclass automatically gets a compiler-injected implicit root class `nepa_root`, while keeping `id` type uniformity and static dispatch.
 
 **Before:**
 
-```nopa
+```nepa
 @interface Animal : NPObject   // had to inherit NPObject
 ```
 
 **After:**
 
-```nopa
+```nepa
 @interface Animal              // no superclass → implicit root class
 @interface Animal : NPObject   // explicit NPObject still works
 ```
 
-Both are valid, and `id` can point to any Nopa object.
+Both are valid, and `id` can point to any Nepa object.
 
 #### How It Works
 
-When no superclass is specified, the compiler injects `nopa_root`:
+When no superclass is specified, the compiler injects `nepa_root`:
 
-```nopa
+```nepa
 // User code:
 @interface Animal {
     int age;
@@ -827,7 +827,7 @@ When no superclass is specified, the compiler injects `nopa_root`:
 @end
 
 // Compiler treats as:
-@interface Animal : nopa_root {
+@interface Animal : nepa_root {
     int age;
 }
 - (void)speak;
@@ -838,17 +838,17 @@ Generated C code:
 
 ```c
 // Built-in structures
-struct nopa_object_header {
-    struct nopa_vtable *vtable;
+struct nepa_object_header {
+    struct nepa_vtable *vtable;
 };
 
-struct nopa_root {
-    struct nopa_object_header header;
+struct nepa_root {
+    struct nepa_object_header header;
 };
 
 // Animal's struct
 struct Animal {
-    struct nopa_root __super;  // contains header
+    struct nepa_root __super;  // contains header
     int age;
 };
 ```
@@ -856,20 +856,20 @@ struct Animal {
 #### `id` Type
 
 ```c
-typedef struct nopa_root *nopa_id_t;
+typedef struct nepa_root *nepa_id_t;
 ```
 
-`id` is no longer tied to `NPObject` — it only requires the object to start with `nopa_root`. This means:
+`id` is no longer tied to `NPObject` — it only requires the object to start with `nepa_root`. This means:
 
-```nopa
+```nepa
 Animal *a = [[Animal alloc] init];
-id obj = a;                    // valid: Animal inherits from nopa_root
+id obj = a;                    // valid: Animal inherits from nepa_root
 [obj speak];                   // static dispatch: obj->header.vtable[...]
 ```
 
 #### Explicit Inheritance Still Works
 
-```nopa
+```nepa
 @interface Dog : Animal {
     NPString *breed;
 }
@@ -880,19 +880,19 @@ Generated C:
 
 ```c
 struct Dog {
-    struct Animal __super;     // contains nopa_root → header
+    struct Animal __super;     // contains nepa_root → header
     struct NPString *breed;
 };
 ```
 
-#### `NPObject` vs `nopa_root`
+#### `NPObject` vs `nepa_root`
 
 | Declaration                 | Means                             | Use Case                        |
 | --------------------------- | --------------------------------- | ------------------------------- |
-| `@interface Xxx`            | Implicit `nopa_root`, lightweight | Custom layout, kernel, embedded |
+| `@interface Xxx`            | Implicit `nepa_root`, lightweight | Custom layout, kernel, embedded |
 | `@interface Xxx : NPObject` | Explicit NPObject, full runtime   | User apps, ARC, retain/release  |
 
-```nopa
+```nepa
 // Lightweight root class, no refcounting overhead
 @interface KernelTask {
     int pid;
@@ -909,24 +909,24 @@ struct Dog {
 
 #### Bare-Metal / Freestanding Support (`-ffreestanding`)
 
-Nopa can compile to **self-contained C with no libc, no Foundation, no TLS**, for kernels, MCUs, and bare-metal embedded development.
+Nepa can compile to **self-contained C with no libc, no Foundation, no TLS**, for kernels, MCUs, and bare-metal embedded development.
 
 ```bash
-nopac -rewrite-nopa -ffreestanding kernel.np   # emits self-contained C
+nepac -rewrite-nepa -ffreestanding kernel.np   # emits self-contained C
 ```
 
 In `-ffreestanding` mode the transpiled C:
 
-- does **not** `#include <string.h>`; instead `#include <nopa/runtime.h>` (freestanding branch)
+- does **not** `#include <string.h>`; instead `#include <nepa/runtime.h>` (freestanding branch)
 - implements `@try/@catch/@finally` with the default `-eh checked` backend — plain flag + guard control flow, **no `setjmp`/`longjmp` and no `jmp_buf` at all**, which is what makes the bare-metal target work. (`-eh legacy` falls back to `__builtin_setjmp/longjmp`, with plain non-`__thread` exception globals.)
 - is self-contained for `SEL`/`NPClass`/`NPObject`/`id`
 - does **not** bundle the Clang Blocks runtime — block literals reference `__NSConcreteStackBlock`/`_Block_copy`/`_Block_release`; on real bare metal, either link a Blocks runtime port or use `-backend portable`/`-backend gcc` (blocks lower to plain C functions, no ABI symbols)
 
-The user only provides: `NOPA_CLASS_$_nopa_root`, the exception globals (if using `@try`), `memcpy` (if using `@try`), and freestanding headers (`stdint.h`/`stddef.h`/`stdbool.h`).
+The user only provides: `NEPA_CLASS_$_nepa_root`, the exception globals (if using `@try`), `memcpy` (if using `@try`), and freestanding headers (`stdint.h`/`stddef.h`/`stdbool.h`).
 
-**Bare-metal allocator + `[[Class alloc] init]`** (`include/nopa/runtime_freestanding.c`):
+**Bare-metal allocator + `[[Class alloc] init]`** (`include/nepa/runtime_freestanding.c`):
 
-```nopa
+```nepa
 @interface HeapCounter {
     int total;
 }
@@ -935,7 +935,7 @@ The user only provides: `NOPA_CLASS_$_nopa_root`, the exception globals (if usin
 - (int) add:(int)x;
 @end
 @implementation HeapCounter
-+ (id) alloc  { return nopa_alloc(self); }   // bump allocator
++ (id) alloc  { return nepa_alloc(self); }   // bump allocator
 - (id) init   { return self; }
 - (int) add:(int)x { total += x; return total; }
 @end
@@ -952,25 +952,25 @@ Features verified bare-metal (`examples/04_soma-kernel/` i386 protected-mode ker
 - Class / instance method messaging
 - `@try/@catch/@finally`
 - `@selector`, inline asm, C-style casts
-- `[[Class alloc] init]` heap allocation + ARC auto-`nopa_release`
+- `[[Class alloc] init]` heap allocation + ARC auto-`nepa_release`
 
 Sample output (soma-kernel under qemu):
 
 ```
-[nopa] class method [SomaCore::Calculator compute:21] = 43
-[nopa] instance methods on C-created obj: add:7 -> 7, add:35 -> 42, value = 42
-[nopa] @try/@catch demo:
+[nepa] class method [SomaCore::Calculator compute:21] = 43
+[nepa] instance methods on C-created obj: add:7 -> 7, add:35 -> 42, value = 42
+[nepa] @try/@catch demo:
        try body, throwing...
        caught [e errorCode] = 42
        finally always runs
        after-try continues
-[nopa] alloc+init (bump allocator):
+[nepa] alloc+init (bump allocator):
        [c add:10]=10 [c add:20]=30 [c value]=30
 ```
 
 #### Method Dispatch
 
-All Nopa objects dispatch through a unified VTable mechanism:
+All Nepa objects dispatch through a unified VTable mechanism:
 
 ```c
 // [obj doSomething:arg]
@@ -984,21 +984,21 @@ The compiler assigns a fixed global index to each selector. All classes place th
 The object header is minimal:
 
 ```c
-struct nopa_object_header {
-    struct nopa_vtable *vtable;
+struct nepa_object_header {
+    struct nepa_vtable *vtable;
     // no retain count, no flags
 };
 ```
 
-Reference counting is managed by compile-time static ARC analysis, not stored in the object. `nopa_id_t` is a plain C pointer (8 bytes on 64-bit), zero ABI overhead for passing, assigning, and array storage.
+Reference counting is managed by compile-time static ARC analysis, not stored in the object. `nepa_id_t` is a plain C pointer (8 bytes on 64-bit), zero ABI overhead for passing, assigning, and array storage.
 
 #### Status
 
    Implemented:
 
 - [x] Implicit root class injection (semantic analysis)
-- [x] `nopa_root` and `nopa_object_header` C code generation
-- [x] `id` → `nopa_id_t` type mapping
+- [x] `nepa_root` and `nepa_object_header` C code generation
+- [x] `id` → `nepa_id_t` type mapping
 - [x] Unified VTable index allocation
 - [x] Root/subclass struct generation
 - [x] Unit test coverage
@@ -1007,7 +1007,7 @@ Reference counting is managed by compile-time static ARC analysis, not stored in
 
 `@namespace` organizes classes, functions, and constants, avoiding global name collisions. This is a feature ObjC lacks — traditional ObjC relies on prefix conventions (e.g., `NS`, `UI`) to simulate namespacing.
 
-```nopa
+```nepa
 @namespace Game
     @interface Player : NPObject {
         int health;
@@ -1035,13 +1035,13 @@ Reference counting is managed by compile-time static ARC analysis, not stored in
 
 **Encoding rules**: `::` separators are encoded as `__` in C symbols.
 
-| Nopa Symbol                   | Transpiled C Symbol          |
+| Nepa Symbol                   | Transpiled C Symbol          |
 | ----------------------------- | ---------------------------- |
 | `Game::Player`                | `Game__Player`               |
 | `Game::Entities::Enemy`       | `Game__Entities__Enemy`      |
 | Method `-[Game::Player init]` | `Game__Player_init`          |
-| VTable                        | `NOPA_VTABLE_$_Game__Player` |
-| Class metadata                | `NOPA_CLASS_$_Game__Player`  |
+| VTable                        | `NEPA_VTABLE_$_Game__Player` |
+| Class metadata                | `NEPA_CLASS_$_Game__Player`  |
 
 **Features**:
 
@@ -1058,7 +1058,7 @@ Reference counting is managed by compile-time static ARC analysis, not stored in
 
 **Form 1: Import a fully qualified name**
 
-```nopa
+```nepa
 @using Game::Player;
 Game::Player *p = [[Game::Player alloc] init];
 // After @using, the short name Player can be used instead
@@ -1067,7 +1067,7 @@ Player *p = [[Player alloc] init];
 
 **Form 2: Import with an alias**
 
-```nopa
+```nepa
 @using GP = Game::Player;
 // GP is an alias for Game::Player
 GP *p = [[GP alloc] init];
@@ -1075,7 +1075,7 @@ GP *p = [[GP alloc] init];
 
 **Form 3: Import an entire namespace**
 
-```nopa
+```nepa
 @using namespace Game;
 // All classes under Game can be accessed by short name
 Player *p = [[Player alloc] init];
@@ -1092,13 +1092,13 @@ Enemy *e = [[Enemy alloc] init];
 
 In ARC mode, the checker forbids manual memory management:
 
-```nopa
+```nepa
 [obj release]; // error: explicit 'release' not allowed in ARC mode
 ```
 
-`@noarc { }` scopes a block where you manage memory manually — the block-level analogue of `-fno-nopa-arc` (and clang's `-fno-objc-arc`):
+`@noarc { }` scopes a block where you manage memory manually — the block-level analogue of `-fno-nepa-arc` (and clang's `-fno-objc-arc`):
 
-```nopa
+```nepa
 @noarc {
     [obj retain];
     [obj release];
@@ -1111,7 +1111,7 @@ Key points:
 - **Block-level scope** — only statements inside `@noarc { }` are exempt. Everything outside still uses static ARC, and manual `retain`/`release`/`dealloc`/`autorelease` outside the block is a compile error.
 - **No ARC injection** — the ARC analyzer skips `@noarc` blocks entirely, inserting no retain/release for objects used there.
 - **Runtime-method exemption** — the implementations of `retain`/`release`/`dealloc`/`autorelease` themselves may call these methods without `@noarc`.
-- **Whole-program analogue** — `-fno-nopa-arc` switches the whole program to MRC; `@noarc` does the same for a single block.
+- **Whole-program analogue** — `-fno-nepa-arc` switches the whole program to MRC; `@noarc` does the same for a single block.
 - **Foundation** — the NPString/NPMutableString convenience constructors (`+stringWithUTF8String:`, `+stringWithString:`) wrap their deliberate `autorelease` in `@noarc { }`.
 
 ---
@@ -1121,8 +1121,8 @@ Key points:
 `-trace-refcount` runs a static reference-count simulator over the AST **after** ARC injection, printing a chronological, color-coded trace of every retained object's count, then exits without codegen or compilation. It is a debug aid for verifying that each object is released exactly once (no leaks, no double-releases).
 
 ```bash
-nopac -trace-refcount app.np                          # color trace
-nopac -trace-refcount -trace-no-color -trace-max-iters 2 app.np
+nepac -trace-refcount app.np                          # color trace
+nepac -trace-refcount -trace-no-color -trace-max-iters 2 app.np
 ```
 
 Options:
@@ -1137,7 +1137,7 @@ Options:
 
 Go-style deferred cleanup: `@defer { ... }` registers its body with the innermost enclosing block, and the body runs at **every exit** of that block — the natural end, a `return` at any depth, a `break`/`continue` that jumps out of it, and a same-function `@throw` — innermost first (LIFO).
 
-```nopa
+```nepa
 - (void)work {
     FILE *f = fopen("cfg.txt", "r");
     @defer { fclose(f); }            // runs at every exit below
@@ -1163,7 +1163,7 @@ Implementation: pure desugar (`crates/defer`, pipeline step 3.9 — after the `-
 
 `@await` M1/M2 left one soft spot: a header cannot tell you whether a method suspends. `NPAsync<T>` promotes async-ness to a **return-type marker** that is visible in the declaration — the parser unwraps it to `T`, so it is pure compile-time metadata: `NPAsync` appears **zero times** in the generated C, and vtable layout, cross-TU linking, and the bridge header are untouched.
 
-```nopa
+```nepa
 @interface Fetcher : NPObject
 - (NPAsync<int>)compute:(int)n;   // suspends, yields an int
 + (NPAsync<void>)runAll;          // entry point
@@ -1195,7 +1195,7 @@ Golden: `tests/golden/37_async_marker/`; negatives under `tests/negative/async_m
 | `recv[i]` | `[recv objectAtIndex:i]` | receiver's class declares `objectAtIndex:` |
 | `recv[i] = v` | `[recv setObject:v atIndex:i]` | class also declares `setObject:atIndex:` |
 
-```nopa
+```nepa
 NPArray *a = @[ @"x", @"y", @"z" ];
 NPLog(@"%@", a[0]);            // → [a objectAtIndex:0]
 NPMutableArray *m = [NPMutableArray array];
@@ -1211,7 +1211,7 @@ Dictionary subscripting (`d[@"k"]`) is deliberately **not** part of this rewrite
 
 Generic containers **monomorphize and are type-checked**. `NPArray<NPString *>` and `NPDictionary<NPString *, NPNumber *>` generate real specialized C (struct, vtable, class metadata, method copies with substituted types), and the checker substitutes the element types into method signatures — so the element type is enforced, not erased:
 
-```nopa
+```nepa
 NPMutableArray<NPString *> *m = [NPMutableArray array];
 [m addObject:@"a"];
 NPString *s = [m objectAtIndex:0];      // NPString *, not id
@@ -1237,7 +1237,7 @@ Note the cost: specialization is compile-time code, not free type safety. The sa
 
 Type parameters accept class-level constraints — ObjC spelling (`T : id<Summable>`), bare protocol name (`T : Summable`), or a class pointer (`T : NSObject *`); all are stored and diagnosed as the bare name:
 
-```nopa
+```nepa
 @protocol Greetable
 - (NPString *)greeting;
 @end
@@ -1259,12 +1259,12 @@ Type parameters accept class-level constraints — ObjC spelling (`T : id<Summab
 
 The checker enforces bounds at **explicit specialization points** (`Box<Dog *> *b = ...;`): a violating argument is an error (all violations reported at once). Escape channels — `id`, `instancetype`, nested type-param slots, forward-declared shells, unresolvable bound names — pass silently (a missed report beats a false one, same philosophy as the rest of the checker). Bare spellings (`Box *`) never trigger: erasure compatibility, today's code keeps compiling. Bounds are pure compile-time metadata — **zero codegen**, golden output byte-identical; `-fno-checker` turns the check off. Method-level constraints (`where U : P`) are not supported. Golden: `tests/golden/46_generic_bounds/`.
 
-### Nopa-Syntax Macros (dual-track `#define`)
+### Nepa-Syntax Macros (dual-track `#define`)
 
-`#define` bodies containing **nopa syntax** (`[recv msg]`, `@`-literals, `^{}` blocks) used to be passed through verbatim to the C compiler — a syntax error. nopac now parses and expands them at the source level. Plain-C macro bodies pass through unchanged and are expanded by the C compiler as before; behavior is identical there.
+`#define` bodies containing **nepa syntax** (`[recv msg]`, `@`-literals, `^{}` blocks) used to be passed through verbatim to the C compiler — a syntax error. nepac now parses and expands them at the source level. Plain-C macro bodies pass through unchanged and are expanded by the C compiler as before; behavior is identical there.
 
-```nopa
-#define TAG(o)      [o tag]                    // nopa track: expanded by nopac
+```nepa
+#define TAG(o)      [o tag]                    // nepa track: expanded by nepac
 #define BUMP(o, n)  [o addTo:n times:1]
 #define LOG(x)      NPLog(@"tag=%d", x)        // body contains an @literal
 #define TWICE(x)    ((x) + (x))                // C track: expanded by clang
@@ -1274,7 +1274,7 @@ BUMP(w, 3);
 LOG(TAG(w));
 ```
 
-Expansion rules follow ISO C §6.10.3 (implemented independently in `crates/cpp`, cross-checked line-by-line against `clang -E`): arguments are fully expanded before substitution (`#`/`##` operands use raw text), `#param` stringifies, `a ## b` pastes, `__VA_ARGS__` joins with commas, self-recursive macros freeze (blue-paint), a function-like macro's bare name outside a call does not expand, and `\` continuations join logical lines. Conditional directives (`#if`/`#ifdef`/`#ifndef`/`#elif`/`#else`/`#endif`) are evaluated by nopac too — `defined(X)` operands are exempt from expansion, skipped groups don't define macros, and malformed conditionals error instead of silently swallowing the file.
+Expansion rules follow ISO C §6.10.3 (implemented independently in `crates/cpp`, cross-checked line-by-line against `clang -E`): arguments are fully expanded before substitution (`#`/`##` operands use raw text), `#param` stringifies, `a ## b` pastes, `__VA_ARGS__` joins with commas, self-recursive macros freeze (blue-paint), a function-like macro's bare name outside a call does not expand, and `\` continuations join logical lines. Conditional directives (`#if`/`#ifdef`/`#ifndef`/`#elif`/`#else`/`#endif`) are evaluated by nepac too — `defined(X)` operands are exempt from expansion, skipped groups don't define macros, and malformed conditionals error instead of silently swallowing the file.
 
 Limits (clear errors, not silent): a macro invocation must close on one line (use `\` to continue), and macro bodies may not contain `_Pragma`. Golden: `tests/golden/38_macros/`.
 
@@ -1282,7 +1282,7 @@ Limits (clear errors, not silent): a macro invocation must close on one line (us
 
 All six C99 designated-initializer forms work, including the ones ObjC's C subset never needed:
 
-```nopa
+```nepa
 struct Point { int x; int y; };
 struct Point p1 = { .x = 1, .y = 2 };      // 1. full designated
 struct Point p2 = { .y = 5 };               // 2. partial — omitted fields zero-filled
@@ -1302,7 +1302,7 @@ Positional entries continue from the last designated field (form 3 puts `7` in `
 
 `float _Complex` / `double _Complex` declarations, typedefs, and parameters pass through untouched, and imaginary literals (`2.0i`, `1e3j`) are emitted **raw** — the imaginary part used to be silently dropped (`2.0i` → `2.0f`).
 
-```nopa
+```nepa
 #include <complex.h>
 typedef float _Complex cfloat;
 
@@ -1312,7 +1312,7 @@ cfloat f = 1.5;
 printf("A=%.1f+%.1fi\n", creal(z), cimag(z));
 ```
 
-Known limit: the nopa checker has no complex type inference (narrowing between complex widths isn't warned; semantics are enforced by the C compiler). Golden: `tests/golden/39_complex/`.
+Known limit: the nepa checker has no complex type inference (narrowing between complex widths isn't warned; semantics are enforced by the C compiler). Golden: `tests/golden/39_complex/`.
 
 ---
 
@@ -1321,7 +1321,7 @@ Known limit: the nopa checker has no complex type inference (narrowing between c
 ### Command-Line Options
 
 ```bash
-nopac [options] <input.np>
+nepac [options] <input.np>
 
 Modes:
   (none)            Default: transpile + compile to binary (requires -o)
@@ -1333,9 +1333,9 @@ Options:
   -L <dir>          Add library search path
   -v, --verbose     Show verbose output (including Clang warnings)
   -V, --version     Show version number
-  -rewrite-nopa     Output C code only (no compilation)
-  -fnopa-arc        Enable ARC (default)
-  -fno-nopa-arc     Disable ARC (manual MRC mode)
+  -rewrite-nepa     Output C code only (no compilation)
+  -fnepa-arc        Enable ARC (default)
+  -fno-nepa-arc     Disable ARC (manual MRC mode)
   -fno-checker      Skip type checking
   -eh <mode>        Exception backend: checked (default) or legacy (alias sjlj)
   -ffreestanding    Bare-metal/freestanding output (no libc, no TLS)
@@ -1343,7 +1343,7 @@ Options:
   -arch <target>    Build for target architecture (e.g. -arch x86_64)
   -asm <file.s>     Link a real assembly file (repeatable)
   -gen-completions <shell>  Generate shell completion script (zsh|bash|fish)
-  -emit-bridge-header <file.h>  Generate a C bridge header for calling Nopa from C
+  -emit-bridge-header <file.h>  Generate a C bridge header for calling Nepa from C
 
 Refcount trace (debug aid):
   -trace-refcount                Print a static reference-count trace of each retained object, in source order
@@ -1369,14 +1369,14 @@ cargo test --workspace
 Instead of inlining Foundation into every TU (`#import <Foundation/Foundation.np>`, the self-contained umbrella), build it once as a static library and link every project against it — faster per-file compiles, one copy of the implementation:
 
 ```bash
-./tools/build-foundation-lib.sh            # → target/foundation/libnopafoundation.a
+./tools/build-foundation-lib.sh            # → target/foundation/libnepafoundation.a
 ```
 
 The script transpiles each Foundation `.np` as its **own translation unit** (a generated wrapper prepends the full declaration surface, then inlines the implementation text), compiles, and archives. Because each `@implementation` lands in its TU's main file, R2 ownership automatically emits that class's metadata as STRONG symbols — the script nm-verifies all nine and fails loudly if any come out weak. No `-fstrong-metadata` exists any more: ownership is derived by construction.
 
 Clients then import only the declaration header:
 
-```nopa
+```nepa
 #import <Foundation/Foundation.nh>    // declarations only — no implementations inlined
 
 int main() {
@@ -1387,22 +1387,22 @@ int main() {
 ```
 
 ```bash
-nopac app.np -I include -L target/foundation -lnopafoundation -o app   # explicit
+nepac app.np -I include -L target/foundation -lnepafoundation -o app   # explicit
 
-# … or let nopac find and link the library itself:
-nopac app.np -o app
+# … or let nepac find and link the library itself:
+nepac app.np -o app
 ```
 
 Notes:
 
 - **No flags to remember** — a main file holding `@implementation` is strong automatically; declaration-only clients stay weak, which is correct (the library's tables win the link).
-- **Auto-link** — nopac links `libnopafoundation.a` automatically when it can find one (next to the binary, `target/foundation`, `/opt/nopa/lib`, `/usr/local/lib/nopa`, or your `-L` dirs). It only fires for **declaration-only clients**: a TU that inlines Foundation implementations (`Foundation.np`, directly or through an imported `.nh`) is skipped, so self-contained programs and multi-TU builds never see the library's strong vtables. `-ffreestanding`, shared mode, and an explicit `-lnopafoundation` all suppress the auto link.
-- **`nopa_metaInit()`** is only *required* for umbrella builds that reach implementations through `#import "*.np"` (single-TU builds where no TU owns the metadata). With the precompiled library — and with every normal `nopac` workflow — metadata is statically initialized at load time and the call is an idempotent no-op.
+- **Auto-link** — nepac links `libnepafoundation.a` automatically when it can find one (next to the binary, `target/foundation`, `/opt/nepa/lib`, `/usr/local/lib/nepa`, or your `-L` dirs). It only fires for **declaration-only clients**: a TU that inlines Foundation implementations (`Foundation.np`, directly or through an imported `.nh`) is skipped, so self-contained programs and multi-TU builds never see the library's strong vtables. `-ffreestanding`, shared mode, and an explicit `-lnepafoundation` all suppress the auto link.
+- **`nepa_metaInit()`** is only *required* for umbrella builds that reach implementations through `#import "*.np"` (single-TU builds where no TU owns the metadata). With the precompiled library — and with every normal `nepac` workflow — metadata is statically initialized at load time and the call is an idempotent no-op.
 - Re-implementing a library class in a client is standard C override semantics against the archive (the library's member stays dormant unless referenced) — but slots for methods you do not implement stay NULL, so implement everything you dispatch.
 
 ### Hello World
 
-```nopa
+```nepa
 #include <stdio.h>
 #import <Foundation/Foundation.np>
 
@@ -1412,7 +1412,7 @@ Notes:
 
 @implementation Greeter
 - (void)greet {
-    printf("Hello, Nopa!\n");
+    printf("Hello, Nepa!\n");
 }
 @end
 
@@ -1427,7 +1427,7 @@ int main() {
 
 ### Polymorphism
 
-```nopa
+```nepa
 @interface Animal : NPObject
 - (void)speak;
 @end
@@ -1462,7 +1462,7 @@ int main() {
 
 ### Block + ARC
 
-```nopa
+```nepa
 typedef void (^EventHandler)(int code, NPString *msg);
 
 @interface Engine : NPObject
@@ -1483,9 +1483,9 @@ int main() {
 
 ### Static Generics
 
-Nopa compiles generics at compile time via **monomorphization** — each `DataPack<QuantumToken *>` becomes a standalone C struct `DataPack_QuantumToken_ptr` with concrete type substitutions. No type erasure, no boxing, no runtime overhead.
+Nepa compiles generics at compile time via **monomorphization** — each `DataPack<QuantumToken *>` becomes a standalone C struct `DataPack_QuantumToken_ptr` with concrete type substitutions. No type erasure, no boxing, no runtime overhead.
 
-```nopa
+```nepa
 @interface DataPack<T> : NPObject {
     @public
     int _count;
@@ -1506,7 +1506,7 @@ Nopa compiles generics at compile time via **monomorphization** — each `DataPa
         _count--;
         T item = _storage[_count];
         _storage[_count] = 0;
-        return nopa_autorelease(item);
+        return nepa_autorelease(item);
     }
     return 0;
 }
@@ -1546,11 +1546,11 @@ ObjC's runtime is powerful, but I don't want to depend on it. Make all decisions
 
 ### 2. Generate Human-Readable C
 
-Nopa's "backend" is **human-readable C99**, not LLVM IR. This means:
+Nepa's "backend" is **human-readable C99**, not LLVM IR. This means:
 
 - Debug with standard Clang/LLDB tools
 - Generated C can be reviewed, modified, embedded in other projects
-- No LLVM backend lock-in — wherever Clang runs, Nopa runs
+- No LLVM backend lock-in — wherever Clang runs, Nepa runs
 
 ### 3. Incremental
 
@@ -1562,7 +1562,7 @@ Start from a class system, add things gradually:
 - ✅ @selector / VTable polymorphism
 - ✅ @namespace
 - ✅ Exception handling (`@try`/`@catch`/`@finally`/`@throw`) — **default backend is `-eh checked`** (flag + guard lowering, unwind-safe ARC: a cross-function throw releases every frame's owned locals; no `setjmp`/`longjmp`, so it works on bare metal)
-  - `-eh legacy` (alias `-eh sjlj`) selects the old `setjmp`/`longjmp` backend. ⚠️ Its documented limit (verified with ASan): an object owned by an **intermediate frame** leaks on a **cross-function throw** — `longjmp` skips its scope-end `nopa_release`. That limit does not apply to the default backend.
+  - `-eh legacy` (alias `-eh sjlj`) selects the old `setjmp`/`longjmp` backend. ⚠️ Its documented limit (verified with ASan): an object owned by an **intermediate frame** leaks on a **cross-function throw** — `longjmp` skips its scope-end `nepa_release`. That limit does not apply to the default backend.
 - ⏳ Foundation standard library
 - ⏳ Compiler self-hosting
 
@@ -1649,9 +1649,9 @@ Generated C should be as clear as handwritten C:
 
 Not yet. But it is **real** - it compiles, it runs, and it is designed with growth in mind. If you find syntax appealing and want to contributem, you are welcome.
 
-### What can Nopa do?
+### What can Nepa do?
 
-Write small games, tools, toys. The snake game, Flappy Bird, space shooter, tic-tac-toe in this repo are all written in Nopa, running in the terminal.
+Write small games, tools, toys. The snake game, Flappy Bird, space shooter, tic-tac-toe in this repo are all written in Nepa, running in the terminal.
 
 ### What's missing compared to ObjC?
 

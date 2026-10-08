@@ -9,7 +9,7 @@
 - (void)dealloc {
     for (size_t i = 0; i < _count; i++) {
         if (_items[i]) {
-            nopa_release(_items[i]);
+            nepa_release(_items[i]);
         }
     }
     free(_items);
@@ -26,13 +26,13 @@
         arr->_items = (NPObject **)malloc(n * sizeof(NPObject *));
         if (arr->_items) {
             for (size_t i = 0; i < n; i++) {
-                arr->_items[i] = objs[i] ? nopa_retain(objs[i]) : NULL;
+                arr->_items[i] = objs[i] ? nepa_retain(objs[i]) : NULL;
             }
             arr->_count = n;
             arr->_capacity = n;
         }
     }
-    return nopa_autorelease(arr);
+    return nepa_autorelease(arr);
 }
 
 + (id)arrayWithObject:(T)obj {
@@ -115,7 +115,7 @@
 // `-copy` honors the ObjC convention: the caller owns the result (+1).
 // Returns an immutable NPArray even when invoked on a mutable subclass.
 - (id)copy {
-    return nopa_retain([NPArray arrayWithObjects:_items count:_count]);
+    return nepa_retain([NPArray arrayWithObjects:_items count:_count]);
 }
 
 - (NPString *)description {

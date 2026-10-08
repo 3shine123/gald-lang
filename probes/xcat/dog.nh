@@ -1,0 +1,7 @@
+@interface Dog : NPObject
+- (instancetype)init;
+@end
+
+@interface Dog (Tricks)
+- (int)trickCount;
+@end

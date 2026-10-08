@@ -1,12 +1,12 @@
 [package]
-name = "nopa-codegen"
+name = "nepa-codegen"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-nopa-cst = { path = "../cst" }
-nopa-ast = { path = "../ast" }
-nopa-symbol = { path = "../symbol" }
-nopa-elaborator = { path = "../elaborator" }
+nepa-cst = { path = "../cst" }
+nepa-ast = { path = "../ast" }
+nepa-symbol = { path = "../symbol" }
+nepa-elaborator = { path = "../elaborator" }
 attrs = { path = "../attrs" }
-nopa-ownership = { path = "../ownership" }
+nepa-ownership = { path = "../ownership" }

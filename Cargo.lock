@@ -121,190 +121,190 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a6cb138bb79a146c1bd460005623e142ef0181e3d0219cb493e02f7d08a35695"
 
 [[package]]
-name = "nopa-arc"
+name = "nepa-arc"
 version = "0.1.0"
 dependencies = [
- "nopa-ast",
- "nopa-cfg",
- "nopa-cst",
- "nopa-ownership",
+ "nepa-ast",
+ "nepa-cfg",
+ "nepa-cst",
+ "nepa-ownership",
 ]
 
 [[package]]
-name = "nopa-ast"
+name = "nepa-ast"
 version = "0.1.0"
 dependencies = [
- "nopa-cst",
+ "nepa-cst",
 ]
 
 [[package]]
-name = "nopa-async"
+name = "nepa-async"
 version = "0.1.0"
 dependencies = [
- "nopa-ast",
- "nopa-cst",
+ "nepa-ast",
+ "nepa-cst",
 ]
 
 [[package]]
-name = "nopa-binder"
+name = "nepa-binder"
 version = "0.1.0"
 dependencies = [
- "nopa-ast",
- "nopa-cst",
- "nopa-lexer",
- "nopa-parser",
- "nopa-symbol",
+ "nepa-ast",
+ "nepa-cst",
+ "nepa-lexer",
+ "nepa-parser",
+ "nepa-symbol",
 ]
 
 [[package]]
-name = "nopa-cfg"
+name = "nepa-cfg"
 version = "0.1.0"
 dependencies = [
- "nopa-ast",
+ "nepa-ast",
 ]
 
 [[package]]
-name = "nopa-checker"
+name = "nepa-checker"
 version = "0.1.0"
 dependencies = [
- "nopa-ast",
- "nopa-cst",
- "nopa-symbol",
+ "nepa-ast",
+ "nepa-cst",
+ "nepa-symbol",
 ]
 
 [[package]]
-name = "nopa-codegen"
+name = "nepa-codegen"
 version = "0.1.0"
 dependencies = [
  "attrs",
- "nopa-ast",
- "nopa-cst",
- "nopa-elaborator",
- "nopa-ownership",
- "nopa-symbol",
+ "nepa-ast",
+ "nepa-cst",
+ "nepa-elaborator",
+ "nepa-ownership",
+ "nepa-symbol",
 ]
 
 [[package]]
-name = "nopa-cpp"
+name = "nepa-cpp"
 version = "0.1.0"
 
 [[package]]
-name = "nopa-cst"
+name = "nepa-cst"
 version = "0.1.0"
 
 [[package]]
-name = "nopa-cst-visit"
+name = "nepa-cst-visit"
 version = "0.1.0"
 dependencies = [
- "nopa-cst",
+ "nepa-cst",
 ]
 
 [[package]]
-name = "nopa-defer"
+name = "nepa-defer"
 version = "0.1.0"
 dependencies = [
- "nopa-ast",
- "nopa-cst",
+ "nepa-ast",
+ "nepa-cst",
 ]
 
 [[package]]
-name = "nopa-eh"
+name = "nepa-eh"
 version = "0.1.0"
 dependencies = [
- "nopa-ast",
- "nopa-cst",
+ "nepa-ast",
+ "nepa-cst",
 ]
 
 [[package]]
-name = "nopa-elaborator"
+name = "nepa-elaborator"
 version = "0.1.0"
 dependencies = [
- "nopa-ast",
- "nopa-binder",
- "nopa-cst",
- "nopa-symbol",
+ "nepa-ast",
+ "nepa-binder",
+ "nepa-cst",
+ "nepa-symbol",
 ]
 
 [[package]]
-name = "nopa-layout"
+name = "nepa-layout"
 version = "0.1.0"
 
 [[package]]
-name = "nopa-lexer"
+name = "nepa-lexer"
 version = "0.1.0"
 
 [[package]]
-name = "nopa-ownership"
+name = "nepa-ownership"
 version = "0.1.0"
 dependencies = [
- "nopa-ast",
+ "nepa-ast",
 ]
 
 [[package]]
-name = "nopa-parser"
+name = "nepa-parser"
 version = "0.1.0"
 dependencies = [
- "nopa-cst",
- "nopa-lexer",
- "nopa-preprocessor",
+ "nepa-cst",
+ "nepa-lexer",
+ "nepa-preprocessor",
 ]
 
 [[package]]
-name = "nopa-pattern"
+name = "nepa-pattern"
 version = "0.1.0"
 dependencies = [
- "nopa-ast",
- "nopa-cst",
+ "nepa-ast",
+ "nepa-cst",
 ]
 
 [[package]]
-name = "nopa-preprocessor"
+name = "nepa-preprocessor"
 version = "0.1.0"
 dependencies = [
- "nopa-cpp",
- "nopa-cst",
+ "nepa-cpp",
+ "nepa-cst",
 ]
 
 [[package]]
-name = "nopa-symbol"
+name = "nepa-symbol"
 version = "0.1.0"
 dependencies = [
- "nopa-cst",
+ "nepa-cst",
 ]
 
 [[package]]
-name = "nopa-trace"
+name = "nepa-trace"
 version = "0.1.0"
 dependencies = [
- "nopa-ast",
- "nopa-cst",
- "nopa-ownership",
+ "nepa-ast",
+ "nepa-cst",
+ "nepa-ownership",
 ]
 
 [[package]]
-name = "nopac"
+name = "nepac"
 version = "0.1.0"
 dependencies = [
  "attrs",
  "cc",
  "clap",
  "clap_complete",
- "nopa-arc",
- "nopa-ast",
- "nopa-async",
- "nopa-binder",
- "nopa-cfg",
- "nopa-checker",
- "nopa-codegen",
- "nopa-cst",
- "nopa-defer",
- "nopa-eh",
- "nopa-elaborator",
- "nopa-parser",
- "nopa-pattern",
- "nopa-preprocessor",
- "nopa-symbol",
- "nopa-trace",
+ "nepa-arc",
+ "nepa-ast",
+ "nepa-async",
+ "nepa-binder",
+ "nepa-cfg",
+ "nepa-checker",
+ "nepa-codegen",
+ "nepa-cst",
+ "nepa-defer",
+ "nepa-eh",
+ "nepa-elaborator",
+ "nepa-parser",
+ "nepa-pattern",
+ "nepa-preprocessor",
+ "nepa-symbol",
+ "nepa-trace",
 ]
 
 [[package]]

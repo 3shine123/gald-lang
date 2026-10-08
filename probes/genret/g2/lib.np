@@ -1,0 +1,7 @@
+#import "model.nh"
+
+// 注意：方法体刻意不提及任何 `Factory<...>` 实例化 —— 这是探针的核心。
+@implementation Factory
++ (T)make { return nil; }
+- (T)produce { return nil; }
+@end

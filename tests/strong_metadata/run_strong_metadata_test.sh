@@ -33,18 +33,18 @@ set -uo pipefail
 root="$(cd "$(dirname "$0")/../.." && pwd)"
 cd "$root"
 
-nopac="${NOPAC:-}"
-if [[ -z "$nopac" ]]; then
-    for cand in target/debug/nopac target/release/nopac; do
-        if [[ -x "$cand" ]]; then nopac="$cand"; break; fi
+nepac="${NEPAC:-}"
+if [[ -z "$nepac" ]]; then
+    for cand in target/debug/nepac target/release/nepac; do
+        if [[ -x "$cand" ]]; then nepac="$cand"; break; fi
     done
 fi
-if [[ -z "$nopac" || ! -x "$nopac" ]]; then
-    echo "error: nopac not found (run 'cargo build', or set NOPAC=/path/to/nopac)" >&2
+if [[ -z "$nepac" || ! -x "$nepac" ]]; then
+    echo "error: nepac not found (run 'cargo build', or set NEPAC=/path/to/nepac)" >&2
     exit 2
 fi
 
-work="$(mktemp -d "${TMPDIR:-/tmp}/nopa_strong_meta.XXXXXX")"
+work="$(mktemp -d "${TMPDIR:-/tmp}/nepa_strong_meta.XXXXXX")"
 trap 'rm -rf "$work"' EXIT
 
 pass=0; fail=0
@@ -66,7 +66,7 @@ int main() {
 EOF
 
 # ── 1. library metadata is strong (check 1 lives inside the build script) ──
-if NOPAC="$nopac" ./tools/build-foundation-lib.sh "$lib" > "$work/lib.log" 2>&1; then
+if NEPAC="$nepac" ./tools/build-foundation-lib.sh "$lib" > "$work/lib.log" 2>&1; then
     ok "1. library built with strong metadata (nm verified by the build script)"
 else
     bad "1. library build / strong-metadata verification"
@@ -74,7 +74,7 @@ else
 fi
 
 # ── 2. weak client + strong library: link and run ──
-if "$nopac" "$client" -I include -L "$lib" -lnopafoundation -o "$work/app" > "$work/app.log" 2>&1; then
+if "$nepac" "$client" -I include -L "$lib" -lnepafoundation -o "$work/app" > "$work/app.log" 2>&1; then
     out="$("$work/app" 2>&1)"; rc=$?
     if [[ $rc -eq 0 && "$out" == *"len=5 s=hello"* ]]; then
         ok "2. declaration-only client links against the strong library and runs"
@@ -97,11 +97,11 @@ EOF
 # Flag AFTER the input hits the option loop → "Unknown argument"; flag BEFORE
 # the input falls into the positional-input slot → "cannot read" — both orders
 # must fail loudly, and the post-input one must name the flag.
-if "$nopac" "$work/flag_probe.np" -fstrong-metadata -I include -o "$work/app_dup" > "$work/dup.log" 2>&1; then
+if "$nepac" "$work/flag_probe.np" -fstrong-metadata -I include -o "$work/app_dup" > "$work/dup.log" 2>&1; then
     bad "3. -fstrong-metadata was accepted — the deleted flag still parses"
 else
     if grep -q "Unknown argument: -fstrong-metadata" "$work/dup.log" \
-            && ! "$nopac" -fstrong-metadata "$work/flag_probe.np" -I include -o "$work/app_dup2" > "$work/dup2.log" 2>&1; then
+            && ! "$nepac" -fstrong-metadata "$work/flag_probe.np" -I include -o "$work/app_dup2" > "$work/dup2.log" 2>&1; then
         ok "3. deleted -fstrong-metadata is rejected loudly (Unknown argument; both arg orders fail)"
     else
         bad "3. old flag failed, but not with the expected diagnostics"
@@ -133,10 +133,10 @@ cat > "$work/driver.np" <<'EOF'
 #import "model.nh"
 int main() { Widget *w = 0; if (w) { [w show]; } return 0; }
 EOF
-if "$nopac" -rewrite-nopa "$work/lib_a.np" -I "$work" -I include -o "$work/a.c" > "$work/a.log" 2>&1 \
-   && "$nopac" -rewrite-nopa "$work/lib_b.np" -I "$work" -I include -o "$work/b.c" > "$work/b.log" 2>&1 \
-   && "$nopac" -rewrite-nopa "$work/driver.np" -I "$work" -I include -o "$work/driver.c" >> "$work/a.log" 2>&1; then
-    if clang -std=c99 -w "$work/a.c" "$work/b.c" "$work/driver.c" include/nopa/runtime.c \
+if "$nepac" -rewrite-nepa "$work/lib_a.np" -I "$work" -I include -o "$work/a.c" > "$work/a.log" 2>&1 \
+   && "$nepac" -rewrite-nepa "$work/lib_b.np" -I "$work" -I include -o "$work/b.c" > "$work/b.log" 2>&1 \
+   && "$nepac" -rewrite-nepa "$work/driver.np" -I "$work" -I include -o "$work/driver.c" >> "$work/a.log" 2>&1; then
+    if clang -std=c99 -w "$work/a.c" "$work/b.c" "$work/driver.c" include/nepa/runtime.c \
             -I include -o "$work/dup_impl" > "$work/dup_impl.log" 2>&1; then
         bad "4. two TUs owning the same class linked without error (R2 regression)"
     elif grep -q "duplicate symbol" "$work/dup_impl.log"; then
@@ -210,15 +210,15 @@ cat > "$work/own.np" <<'EOF'
 @end
 EOF
 gh_ok=1 gm_ok=1
-"$nopac" -rewrite-nopa "$work/own.nh" -I include -o "$work/owngh.c" > "$work/owngh.log" 2>&1 \
+"$nepac" -rewrite-nepa "$work/own.nh" -I include -o "$work/owngh.c" > "$work/owngh.log" 2>&1 \
     && clang -c -w "$work/owngh.c" -o "$work/owngh.o" -I include || gh_ok=0
-"$nopac" -rewrite-nopa "$work/own.np" -I "$work" -I include -o "$work/owngm.c" > "$work/owngm.log" 2>&1 \
+"$nepac" -rewrite-nepa "$work/own.np" -I "$work" -I include -o "$work/owngm.c" > "$work/owngm.log" 2>&1 \
     && clang -c -w "$work/owngm.c" -o "$work/owngm.o" -I include || gm_ok=0
 if [[ $gh_ok -eq 1 && $gm_ok -eq 1 ]]; then
-    check_strong "$work/owngh.o" "_NOPA_VTABLE_\$_OwnGh" "5a. standalone .nh with @implementation auto-strong (no flag)"
-    check_strong "$work/owngh.o" "_NOPA_META_VTABLE_\$_OwnGh_inst" "5b. ... and its meta vtable too"
-    check_strong "$work/owngm.o" "_NOPA_VTABLE_\$_OwnGm" "5c. standalone .np with @implementation auto-strong (no flag)"
-    check_strong "$work/owngm.o" "_NOPA_META_VTABLE_\$_OwnGm_inst" "5d. ... and its meta vtable too"
+    check_strong "$work/owngh.o" "_NEPA_VTABLE_\$_OwnGh" "5a. standalone .nh with @implementation auto-strong (no flag)"
+    check_strong "$work/owngh.o" "_NEPA_META_VTABLE_\$_OwnGh_inst" "5b. ... and its meta vtable too"
+    check_strong "$work/owngm.o" "_NEPA_VTABLE_\$_OwnGm" "5c. standalone .np with @implementation auto-strong (no flag)"
+    check_strong "$work/owngm.o" "_NEPA_META_VTABLE_\$_OwnGm_inst" "5d. ... and its meta vtable too"
 else
     bad "5. could not transpile/compile the standalone-TU probes"
     sed 's/^/      /' "$work/owngh.log" "$work/owngm.log" | tail -12
@@ -233,22 +233,22 @@ cat > "$work/client_decl.nh" <<'EOF'
 - (int)ping;
 @end
 EOF
-if "$nopac" -rewrite-nopa "$work/client_decl.nh" -I include -o "$work/client_decl.c" > "$work/cd.log" 2>&1 \
+if "$nepac" -rewrite-nepa "$work/client_decl.nh" -I include -o "$work/client_decl.c" > "$work/cd.log" 2>&1 \
         && clang -c -w "$work/client_decl.c" -o "$work/client_decl.o" -I include; then
-    check_weak "$work/client_decl.o" "_NOPA_VTABLE_\$_ClientGadget" "6. declaration-only .nh stub stays weak (no flag)"
+    check_weak "$work/client_decl.o" "_NEPA_VTABLE_\$_ClientGadget" "6. declaration-only .nh stub stays weak (no flag)"
 else
     bad "6. could not transpile/compile the declaration-only probe"
     sed 's/^/      /' "$work/cd.log" | tail -12
 fi
 
 # ── 7. §9 STRUCT DEDUP: a main file owning the root classes compiles clean ──
-# Section 4 emits guarded fallbacks for nopa_root/NPObject; the class-layout
+# Section 4 emits guarded fallbacks for nepa_root/NPObject; the class-layout
 # section used to re-emit the same bodies unguarded in the same file — a hard
 # C redefinition error. The dedup records Section 4's bodies, so each root
 # struct is defined exactly once and the Foundation root TU compiles alone.
 dedup_ok=1
-if "$nopac" -rewrite-nopa include/Foundation/NPObject.np -I include -o "$work/npo.c" > "$work/npo.log" 2>&1; then
-    root_defs=$(grep -c 'struct nopa_root {' "$work/npo.c")
+if "$nepac" -rewrite-nepa include/Foundation/NPObject.np -I include -o "$work/npo.c" > "$work/npo.log" 2>&1; then
+    root_defs=$(grep -c 'struct nepa_root {' "$work/npo.c")
     obj_defs=$(grep -c 'struct NPObject {' "$work/npo.c")
     if [[ "$root_defs" == "1" && "$obj_defs" == "1" ]] \
             && clang -c -w "$work/npo.c" -o "$work/npo.o" -I include 2>>"$work/npo.log"; then

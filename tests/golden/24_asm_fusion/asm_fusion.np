@@ -1,5 +1,5 @@
 // asm_fusion_test.np
-// 极致汇编融合压测：内联 asm + 外部 .s + Nopa 高级特性
+// 极致汇编融合压测：内联 asm + 外部 .s + Nepa 高级特性
 // 融合：命名空间 / 类继承 / VTable 多态 / 协议 / 属性@ynthesize / Block闭包(__block捕获)
 //      / @autoreleasepool+ARC / @try@catch@finally / struct+强制cast / 函数指针 / @selector / __weak
 // 外部汇编: asm_crc32, asm_rotl32, asm_clz32, asm_bitrev32 (见 asm_fusion_test.s)
@@ -131,7 +131,7 @@ int main(int argc, const char* argv[])
 {
     @autoreleasepool {
         printf("====================================================================\n");
-        printf(">>>    nopac「内联 asm + 外部 .s + Nopa 高级特性」极致融合压测    <<<\n");
+        printf(">>>    nepac「内联 asm + 外部 .s + Nepa 高级特性」极致融合压测    <<<\n");
         printf("====================================================================\n\n");
 
         // --------------------------------------------------
@@ -245,7 +245,7 @@ int main(int argc, const char* argv[])
         [hasher release];
 
         printf("\n====================================================================\n");
-        printf(">>>   完美！内联 asm 与真实汇编在 Nopa 高级特性中无缝融合！   <<<\n");
+        printf(">>>   完美！内联 asm 与真实汇编在 Nepa 高级特性中无缝融合！   <<<\n");
         printf("====================================================================\n");
     }
     return 0;
