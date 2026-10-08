@@ -3,7 +3,7 @@ use std::fs;
 use nepa_parser::parser::Parser;
 use nepa_binder::Binder;
 use nepa_elaborator::Elaborator;
-use nepa_codegen::{emit_unit_with_headers, emit_bridge_header};
+use nepa_codegen::{emit_unit_with_headers, emit_unit_with_headers_mapped, emit_bridge_header};
 use nepa_preprocessor::Preprocessor;
 use nepa_symbol::SymbolTable;
 use nepa_ast::ast::*;
@@ -48,6 +48,10 @@ pub struct Pipeline {
     /// `--slots <manifest>`: append-only vtable slot manifest for stable
     /// cross-TU layout (None = historical sorted layout).
     pub slots_manifest: Option<String>,
+    /// Specializations requested by sibling TUs in a multi-input build.
+    /// Spelling is `Class<Arg, ...>`; codegen turns each into a real
+    /// monomorphized class in every TU that has the generic implementation.
+    pub forced_generic_instantiations: Vec<String>,
     /// C compiler + leading args used for the link step (e.g. `["zig", "cc"]`).
     /// Also used by the C type-name probe; empty means "unknown", which skips
     /// the probe.
@@ -61,6 +65,10 @@ pub struct Pipeline {
     /// rejected again, and `x * y;` on two variables is misread as a
     /// declaration. Useful when no C compiler is available at transpile time.
     pub no_ctype_probe: bool,
+    /// `-line-directives` (DEFAULT ON): emit `#line <src> "<file>"` in the
+    /// generated C (plan 阶段 2), so clang diagnostics point back at the
+    /// `.np`/`.nh`. `-fno-line-directives` turns it off.
+    pub line_directives: bool,
 }
 
 impl Pipeline {
@@ -83,9 +91,11 @@ impl Pipeline {
             no_comments: false,
             eh_checked: DEFAULT_EH_CHECKED,
             slots_manifest: None,
+            forced_generic_instantiations: Vec::new(),
             c_cc: Vec::new(),
             c_arch: None,
             no_ctype_probe: false,
+            line_directives: true,
         }
     }
 
@@ -415,6 +425,7 @@ impl Pipeline {
         let owned_classes = collect_owned_classes(&ast, filename, &pre.source_map);
         let mut cg = nepa_codegen::ast_to_cg_unit_with_slots_ext(
             &ast, self.backend, slots.as_deref(), Some(&public_methods),
+            Some(&self.forced_generic_instantiations),
         );
         // KVC gate: emit accessor tables only when this TU can see the
         // NPPredicate declaration (a transitive nepa #import — the same
@@ -428,7 +439,12 @@ impl Pipeline {
         cg.struct_eq_tags = struct_eq_tags;
         cg.no_arc = self.no_arc;
         cg.owned_classes = owned_classes;
-        let c_code = emit_unit_with_headers(&cg, &pre.c_headers, &self.search_dirs, self.no_libc, self.backend, !self.no_comments, self.eh_checked);
+        // 阶段 2: `-line-directives` emits `#line` at user-statement positions
+        // (mapped through the preprocessor's SourceMap) so clang diagnostics
+        // point back at the .np/.nh. Off by default; -rewrite-nepa output
+        // follows the same flag (a reviewer can inspect the directives).
+        let line_sm = if self.line_directives { Some(&pre.source_map) } else { None };
+        let c_code = emit_unit_with_headers_mapped(&cg, &pre.c_headers, &self.search_dirs, self.no_libc, self.backend, !self.no_comments, self.eh_checked, line_sm);
 
         // Step 6.4: Write back the slots manifest (append-only): the compiled
         // assignment (previously-assigned slots kept + new methods appended)
@@ -686,5 +702,4 @@ mod eh_default_tests {
         assert!(!p.eh_checked, "-eh legacy must produce the sjlj backend");
     }
 }
-
 

@@ -3,6 +3,45 @@ use std::fs;
 use std::io::Write;
 use std::path::Path;
 use std::process::{Command, Stdio};
+
+/// Collect concrete generic spellings from source text for a multi-TU build.
+/// This is deliberately conservative: only angle-bracket forms whose argument
+/// list is not a single declaration parameter are forwarded. The parser/codegen
+/// remains authoritative when turning a spelling into an AstType.
+fn scan_generic_instantiations(source: &str) -> Vec<String> {
+    let bytes = source.as_bytes();
+    let mut out = Vec::new();
+    let mut i = 0;
+    while i < bytes.len() {
+        if bytes[i] != b'<' { i += 1; continue; }
+        let mut b = i;
+        while b > 0 && (bytes[b - 1].is_ascii_alphanumeric() || bytes[b - 1] == b'_' || bytes[b - 1] == b':') { b -= 1; }
+        if b == i { i += 1; continue; }
+        let mut depth = 1usize;
+        let mut j = i + 1;
+        while j < bytes.len() && depth > 0 {
+            if bytes[j] == b'<' { depth += 1; }
+            else if bytes[j] == b'>' { depth -= 1; }
+            j += 1;
+        }
+        if depth == 0 {
+            let spelling = &source[b..j];
+            let args = &source[i + 1..j - 1];
+            let base_name = &source[b..i];
+            let arg_trim = args.trim();
+            let looks_like_param = !arg_trim.is_empty()
+                && arg_trim.chars().next().map_or(false, |c| c.is_ascii_uppercase())
+                && arg_trim.chars().all(|c| c.is_ascii_alphanumeric() || c == '_');
+            let concrete = base_name.chars().next().map_or(false, |c| c.is_ascii_uppercase())
+                && !looks_like_param
+                && (args.contains('*') || args.contains("::")
+                    || args.chars().any(|c| c.is_ascii_lowercase()));
+            if concrete && !out.iter().any(|s| s == spelling) { out.push(spelling.to_string()); }
+            i = j;
+        } else { break; }
+    }
+    out
+}
 use clap::{Command as ClapCommand, Arg};
 use clap_complete::{Shell, generate};
 use nepac::pipeline::{Pipeline, DEFAULT_EH_CHECKED};
@@ -324,7 +363,7 @@ fn foundation_impl_scan(
     false
 }
 
-fn compile_to_binary(cc: &[String], c_code: &str, bin_path: &str, include_dirs: &[String], lib_dirs: &[String], libs: &[String], asm_files: &[String], extra_c_files: &[String], extra_objects: &[String], frameworks: &[String], arch: Option<&str>, verbose: bool, no_libc: bool, nostdinc: bool, shared: bool, foundation_impl_inlined: bool) {
+fn compile_to_binary(cc: &[String], c_code: &str, bin_path: &str, include_dirs: &[String], lib_dirs: &[String], libs: &[String], asm_files: &[String], extra_c_files: &[String], extra_objects: &[String], frameworks: &[String], arch: Option<&str>, verbose: bool, no_libc: bool, nostdinc: bool, shared: bool, foundation_impl_inlined: bool, debug_symbols: bool) {
     // Compiler may be multi-word (e.g. `zig cc`): program + leading args.
     let program = cc.first().map(|s| s.as_str()).unwrap_or("clang");
     let cc_extra: Vec<String> = cc.get(1..).unwrap_or(&[]).to_vec();
@@ -380,6 +419,14 @@ fn compile_to_binary(cc: &[String], c_code: &str, bin_path: &str, include_dirs: 
     if let Some(a) = arch {
         clang_args.push("-arch".to_string());
         clang_args.push(a.to_string());
+    }
+    // Debug symbols (plan 阶段 3): `-g -O0` so DWARF (via the `#line`
+    // directives when enabled) points back at the .np/.nh. Kept separate from
+    // any future user-facing -O: -g never implies an optimization level on
+    // its own; this preset couples them for the debug workflow.
+    if debug_symbols {
+        clang_args.push("-g".to_string());
+        clang_args.push("-O0".to_string());
     }
     // Additional translation units (multi-input mode): plain file inputs on
     // the driver line — the C compiler compiles each TU and links everything
@@ -753,6 +800,12 @@ fn main() {
         println!();
         println!("Runtime Options:");
         println!("  -fnepa-arc                           Enable ARC (default)");
+        println!("  -g                                   Emit debug symbols (-g -O0 to the C");
+        println!("                                     compiler); with -line-directives, LLDB/");
+        println!("                                     GDB show .np/.nh file and line numbers");
+        println!("  -line-directives                     Emit #line <file> in generated C so");
+        println!("                                     clang diagnostics point back at");
+        println!("                                     the .np/.nh source (default: on)");
         println!("  -fno-nepa-arc                        Disable ARC (MRC)");
         println!("  -ffreestanding                       Bare-metal/freestanding output");
         println!("                                     (no libc headers, no TLS, no bundled");
@@ -807,6 +860,7 @@ fn main() {
     let mut no_arc = false;
     let mut no_checker = false;  // ARC mode by default
     let mut no_libc = false;     // bare-metal / freestanding mode
+    let mut debug_symbols = false; // -g: emit DWARF via -g -O0 (plan 阶段 3)
     let mut nostdinc = false;    // strip system include paths (orthogonal flag)
     let mut no_comments = false; // readability comments in generated C (on by default)
     let mut shared = false;      // dynamic library output (-shared/-dynamiclib)
@@ -823,6 +877,8 @@ fn main() {
     // legacy` / `-eh sjlj` select the old setjmp/longjmp backend for rollback.
     let mut eh_checked = DEFAULT_EH_CHECKED;
     let mut slots_manifest: Option<String> = None; // --slots <file> (stable cross-TU vtable layout)
+    // Internal multi-TU transport for true-generic specialization demands.
+    let mut forced_generic_instantiations: Vec<String> = Vec::new();
 
     // Check for "run" subcommand: look for `run` that is not preceded by a flag
     // (i.e. not `-o run` or `-I run`)
@@ -852,6 +908,8 @@ fn main() {
                 no_checker = true;
             } else if nj == "-ffreestanding" {
                 no_libc = true;
+            } else if nj == "-g" {
+                debug_symbols = true;
             } else if nj == "-nostdinc" {
                 nostdinc = true;
             } else if nj == "-no-comments" {
@@ -894,6 +952,13 @@ fn main() {
                     eprintln!("error: --slots expects a manifest file path");
                     std::process::exit(1);
                 }
+            } else if nj == "--generic-instantiation" {
+                if let Some(v) = inline_val.map(|s| s.to_string()).or_else(|| if j + 1 < pos { Some(args[j + 1].clone()) } else { None }) {
+                    forced_generic_instantiations.push(v);
+                } else {
+                    eprintln!("error: --generic-instantiation expects Class<Args>");
+                    std::process::exit(1);
+                }
             }
         }
     }
@@ -914,6 +979,9 @@ fn main() {
             i += 1;
         } else if normalized == "-ffreestanding" {
             no_libc = true;
+            i += 1;
+        } else if normalized == "-g" {
+            debug_symbols = true;
             i += 1;
         } else if normalized == "-nostdinc" {
             nostdinc = true;
@@ -969,6 +1037,19 @@ fn main() {
                     std::process::exit(1);
                 }
             }
+        } else if normalized == "--generic-instantiation" {
+            let (val, adv) = if let Some(iv) = inline_val {
+                (Some(iv.to_string()), 1)
+            } else if i + 1 < args.len() {
+                (Some(args[i + 1].clone()), 2)
+            } else { (None, 1) };
+            match val {
+                Some(v) => { forced_generic_instantiations.push(v); i += adv; }
+                None => {
+                    eprintln!("error: --generic-instantiation expects Class<Args>");
+                    std::process::exit(1);
+                }
+            }
         } else if normalized == "-arch" && i + 1 < args.len() {
             arch = Some(args[i + 1].clone());
             i += 2;
@@ -1003,6 +1084,14 @@ fn main() {
         } else if normalized == "-l" && i + 1 < args.len() {
             libs.push(args[i + 1].clone());
             i += 2;
+        } else if normalized == "-line-directives" || normalized == "--line-directives" {
+            // Must be matched BEFORE the joined `-l…` branch below — the flag
+            // starts with `-l`, and `-lgmp`-style parsing would turn it into
+            // `link library "ine-directives"`. The flag value itself is read
+            // after this loop (pipeline.line_directives).
+            i += 1;
+        } else if normalized == "-fno-line-directives" || normalized == "--fno-line-directives" {
+            i += 1;
         } else if normalized.starts_with("-l") && normalized.len() > 2
             && normalized[2..].chars().next().map_or(false, |c| c.is_ascii_alphanumeric())
         {
@@ -1074,6 +1163,21 @@ fn main() {
         }
     };
 
+    // In a multi-TU build, specialization demand is a property of the whole
+    // link unit. Forward every concrete `Box<T>` spelling seen in any source
+    // to every transpilation pass; a TU emits it only when it also contains the
+    // generic implementation body.
+    if !extra_inputs.is_empty() {
+        let mut all = forced_generic_instantiations;
+        all.extend(scan_generic_instantiations(&source));
+        for tu in &extra_inputs {
+            if let Ok(s) = fs::read_to_string(tu) { all.extend(scan_generic_instantiations(&s)); }
+        }
+        all.sort();
+        all.dedup();
+        forced_generic_instantiations = all;
+    }
+
     let self_dir = resolve_bundle_root();
     let include_root = self_dir.join("include");
     let foundation_include = self_dir.join("include").join("Foundation");
@@ -1097,6 +1201,7 @@ fn main() {
     pipeline.trace_color = !trace_no_color;
     pipeline.eh_checked = eh_checked;
     pipeline.slots_manifest = slots_manifest.clone();
+    pipeline.forced_generic_instantiations = forced_generic_instantiations.clone();
     if let Some(ref b) = backend {
         match attrs::Backend::parse(b) {
             Some(be) => pipeline.backend = be,
@@ -1118,6 +1223,10 @@ fn main() {
     // compiler is spawned, no header is read). The parser then falls back to
     // the builtin type list and its shape heuristics.
     pipeline.no_ctype_probe = std::env::var_os("NEPA_NO_CTYPE_PROBE").is_some();
+    // `-line-directives` (plan 阶段 2, DEFAULT ON): emit `#line` in the
+    // generated C so clang diagnostics point back at the .np/.nh.
+    // `-fno-line-directives` turns it off.
+    pipeline.line_directives = !args.iter().any(|a| a == "-fno-line-directives" || a == "--fno-line-directives");
 
     let c_code = match pipeline.transpile(&source, &input_path) {
         Ok(code) => code,
@@ -1164,6 +1273,10 @@ fn main() {
             if let Some(slots) = &slots_manifest {
                 cmd.push("--slots".into());
                 cmd.push(slots.clone());
+            }
+            for inst in &forced_generic_instantiations {
+                cmd.push("--generic-instantiation".into());
+                cmd.push(inst.clone());
             }
             if let Some(b) = &backend {
                 cmd.push("-backend".into());
@@ -1233,7 +1346,7 @@ fn main() {
                 p.to_string_lossy().to_string()
             });
 
-            compile_to_binary(&cc, &c_code, &bin_path, &include_dirs, &lib_dirs, &libs, &asm_files, &extra_c_files, &extra_objects, &frameworks, arch.as_deref(), verbose, no_libc, nostdinc, false, foundation_impl_inlined);
+            compile_to_binary(&cc, &c_code, &bin_path, &include_dirs, &lib_dirs, &libs, &asm_files, &extra_c_files, &extra_objects, &frameworks, arch.as_deref(), verbose, no_libc, nostdinc, false, foundation_impl_inlined, debug_symbols);
 
             for t in &extra_c_files {
                 let _ = fs::remove_file(t);
@@ -1261,7 +1374,7 @@ fn main() {
                 || bin_path.ends_with(".so")
                 || bin_path.ends_with(".dll");
 
-            compile_to_binary(&cc, &c_code, &bin_path, &include_dirs, &lib_dirs, &libs, &asm_files, &extra_c_files, &extra_objects, &frameworks, arch.as_deref(), verbose, no_libc, nostdinc, shared, foundation_impl_inlined);
+            compile_to_binary(&cc, &c_code, &bin_path, &include_dirs, &lib_dirs, &libs, &asm_files, &extra_c_files, &extra_objects, &frameworks, arch.as_deref(), verbose, no_libc, nostdinc, shared, foundation_impl_inlined, debug_symbols);
 
             for t in &extra_c_files {
                 let _ = fs::remove_file(t);

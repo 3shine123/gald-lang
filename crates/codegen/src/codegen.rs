@@ -1,10 +1,100 @@
 use std::fmt::Write;
+use std::cell::RefCell;
 use std::sync::atomic::{AtomicU8, AtomicUsize, Ordering};
 use std::sync::{Mutex, OnceLock};
 use std::collections::HashMap;
 use nepa_ast::*;
 use nepa_cst::{TypePrim, CstParam};
+use nepa_cst::source_map::SourceMap;
 use attrs::Backend;
+
+/// `#line` emission context (plan 阶段 2): when enabled, `emit_stmt` emits a
+/// `#line <src> "<file>"` directive whenever the statement's mapped source
+/// position (via the preprocessor's SourceMap) differs from the last one
+/// emitted, so clang diagnostics point back at the `.np`/`.nh` the user
+/// wrote. Regions with no single source line (generated metadata, macro
+/// expansion past the invocation site) map to the virtual file
+/// `<nepa-generated>`; every function body entry resets to it first so user
+/// positions never leak into generated code below.
+struct LineCtx {
+    sm: SourceMap,
+    cur_file: String,
+    cur_line: u32,
+}
+
+thread_local! {
+    static LINE_CTX: RefCell<Option<LineCtx>> = const { RefCell::new(None) };
+    /// Suppresses directive emission inside C constructs that cannot tolerate
+    /// an intervening line (for/while headers, else-branches): the next
+    /// statement on its own line re-establishes the position.
+    static LINE_SUPPRESS: RefCell<bool> = const { RefCell::new(false) };
+}
+
+fn escape_line_path(p: &str) -> String {
+    p.replace('\\', "\\\\").replace('"', "\\\"")
+}
+
+const SYNTHETIC_FILE: &str = "<nepa-generated>";
+
+/// Emit a `#line` directive (at column 0) if the statement's source position
+/// differs from the last emitted one. No-op when line directives are off.
+fn maybe_emit_line(flat_line: usize, out: &mut String) {
+    if LINE_SUPPRESS.with(|s| *s.borrow()) {
+        return;
+    }
+    LINE_CTX.with(|c| {
+        let mut c = c.borrow_mut();
+        let Some(ctx) = c.as_mut() else { return };
+        let (file, line) = ctx.sm.locate(flat_line);
+        let (target_file, target_line) = if file.is_empty() {
+            (SYNTHETIC_FILE.to_string(), 1)
+        } else {
+            (file, line)
+        };
+        if target_file == ctx.cur_file && target_line == ctx.cur_line {
+            return;
+        }
+        // The directive must sit at the start of its own line. Mid-line calls
+        // (for-init, else-branch, inline bodies) must SKIP — forcing a newline
+        // there would split the surrounding C statement (observed: `for (#line 21`
+        // → clang syntax error). The position is picked up by the next
+        // statement emitted after a newline instead.
+        if !out.is_empty() && !out.ends_with('\n') {
+            return;
+        }
+        let _ = write!(out, "#line {} \"{}\"\n", target_line, escape_line_path(&target_file));
+        ctx.cur_file = target_file;
+        ctx.cur_line = target_line;
+    });
+}
+
+/// Run `f` with `#line` directive emission suppressed (for/while headers,
+/// else-branches — constructs where an intervening line would be invalid C).
+fn with_line_suppressed<R>(f: impl FnOnce() -> R) -> R {
+    let prev = LINE_SUPPRESS.with(|s| std::mem::replace(&mut *s.borrow_mut(), true));
+    let r = f();
+    LINE_SUPPRESS.with(|s| *s.borrow_mut() = prev);
+    r
+}
+
+/// Reset the `#line` state to the synthetic virtual file. Called at every
+/// function-body entry so generated code between user bodies is never
+/// misattributed to the previous user file.
+fn reset_line_synthetic(out: &mut String) {
+    LINE_CTX.with(|c| {
+        let mut c = c.borrow_mut();
+        let Some(ctx) = c.as_mut() else { return };
+        if ctx.cur_file == SYNTHETIC_FILE && ctx.cur_line == 1 {
+            return;
+        }
+        if !out.is_empty() && !out.ends_with('\n') {
+            out.push('\n');
+        }
+        let _ = write!(out, "#line 1 \"{}\"\n", SYNTHETIC_FILE);
+        ctx.cur_file = SYNTHETIC_FILE.to_string();
+        ctx.cur_line = 1;
+    });
+}
 
 // ─── Temp variable counter ─────────────────────────────────────────────────
 static TEMP_VAR_COUNTER: AtomicUsize = AtomicUsize::new(0);
@@ -467,6 +557,9 @@ pub struct CgClassMeta {
     /// vtable emission, so any index-parallel array goes stale in between
     /// (seen live: built with 2 names, emitted with 11).
     pub category_method_names: std::collections::HashSet<String>,
+    /// This TU contains a category implementation for the class. Used to
+    /// publish category-only protocol conformances across TUs.
+    pub has_category_impl: bool,
     pub vtable_indices: Vec<i32>,
     pub ivar_types: Vec<String>,
     pub ivar_names: Vec<String>,
@@ -1116,6 +1209,7 @@ struct ClassInfo {
     /// method_names gets appended out of order (inherited/global methods
     /// merge later), so index-parallel tracking silently misaligns.
     category_method_names: std::collections::HashSet<String>,
+    has_category_impl: bool,
     /// Protocol names this class conforms to, resolved to FQN by the
     /// elaborator. Emitted into the class's static protocol table (D5.2,
     /// doc/categories_protocol_plan.md §7): `protocol_count` stops being
@@ -3918,7 +4012,7 @@ pub fn ast_to_cg_unit(ast: &AstUnit, backend: Backend) -> CgUnit {
 }
 
 pub fn ast_to_cg_unit_with_slots(ast: &AstUnit, backend: Backend, slots_manifest: Option<&[String]>) -> CgUnit {
-    ast_to_cg_unit_with_slots_ext(ast, backend, slots_manifest, None)
+    ast_to_cg_unit_with_slots_ext(ast, backend, slots_manifest, None, None)
 }
 
 /// Like [`ast_to_cg_unit_with_slots`], but also told which instance-method
@@ -3937,6 +4031,7 @@ pub fn ast_to_cg_unit_with_slots_ext(
     backend: Backend,
     slots_manifest: Option<&[String]>,
     public_methods: Option<&std::collections::HashSet<String>>,
+    forced_generic_instantiations: Option<&[String]>,
 ) -> CgUnit {
     CURRENT_BACKEND.store(backend as u8, Ordering::Relaxed);
     *block_vars() = Some(std::collections::HashSet::new());
@@ -4101,6 +4196,7 @@ pub fn ast_to_cg_unit_with_slots_ext(
             method_variadic: Vec::new(),
             method_owners: Vec::new(),
             category_method_names: std::collections::HashSet::new(),
+            has_category_impl: false,
             protocols: Vec::new(),
             ivar_types: Vec::new(),
             ivar_names: Vec::new(),
@@ -4159,6 +4255,7 @@ pub fn ast_to_cg_unit_with_slots_ext(
             method_variadic: Vec::new(),
             method_owners: Vec::new(),
             category_method_names: std::collections::HashSet::new(),
+            has_category_impl: false,
             protocols: Vec::new(),
             ivar_types: Vec::new(),
             ivar_names: Vec::new(),
@@ -4182,6 +4279,11 @@ pub fn ast_to_cg_unit_with_slots_ext(
             if *is_implementation {
                 if let Some(info) = class_infos.get_mut(&flat) {
                     info.has_impl_decl = true;
+                }
+            }
+            if let AstDeclData::Class { is_category: true, .. } = &d.data {
+                if *is_implementation {
+                    if let Some(info) = class_infos.get_mut(&flat) { info.has_category_impl = true; }
                 }
             }
             let mut ivar_types = Vec::new();
@@ -5025,6 +5127,17 @@ pub fn ast_to_cg_unit_with_slots_ext(
         // methods, namespaces) — covers namespace-qualified instantiations.
         collect_from_decl(d, &mut generic_instantiations);
     }
+    // Multi-TU driver supplied these uses from sibling translation units.
+    // The implementation TU must still contain the generic class body; this
+    // only makes the use-site demand visible while preserving true
+    // monomorphisation and one stable mangled symbol per specialization.
+    if let Some(forced) = forced_generic_instantiations {
+        for spelling in forced {
+            if let Some((base, args)) = parse_generic_type_string(spelling) {
+                generic_instantiations.push((base, args));
+            }
+        }
+    }
     // Deduplicate instantiations by (base, rendered args).
     generic_instantiations.dedup_by(|a, b| {
         a.0 == b.0 && a.1.iter().map(ast_type_to_c_str).collect::<String>() == b.1.iter().map(ast_type_to_c_str).collect::<String>()
@@ -5198,6 +5311,7 @@ method_names: info.method_names,
             method_variadic: info.method_variadic,
             method_owners: info.method_owners,
             category_method_names: info.category_method_names,
+            has_category_impl: info.has_category_impl,
             vtable_indices: Vec::new(),
             ivar_types: info.ivar_types,
             ivar_names: info.ivar_names,
@@ -6323,6 +6437,7 @@ fn emit_stmt_inline(s: &CgStmt, out: &mut String) {
 }
 
 pub fn emit_stmt(s: &CgStmt, out: &mut String, indent: usize) {
+    maybe_emit_line(s.line, out);
     let ind = "    ".repeat(indent);
     match &s.data {
         CgStmtData::Expr(e) => {
@@ -6384,17 +6499,20 @@ pub fn emit_stmt(s: &CgStmt, out: &mut String, indent: usize) {
                 if let Some(i) = init {
                     emit_stmt(i, out, indent);
                 }
-                out.push_str(&ind);
-                out.push_str("for (; ");
-                if let Some(c) = cond { emit_expr(c, out); }
-                out.push_str("; ");
-                if let Some(i) = incr { emit_expr(i, out); }
-                out.push_str(") ");
+                with_line_suppressed(|| {
+                    out.push_str(&ind);
+                    out.push_str("for (; ");
+                    if let Some(c) = cond { emit_expr(c, out); }
+                    out.push_str("; ");
+                    if let Some(i) = incr { emit_expr(i, out); }
+                    out.push_str(") ");
+                });
                 emit_body_inline(body, out, indent);
             } else {
                 out.push_str(&ind);
                 out.push_str("for (");
                 if let Some(i) = init {
+                    with_line_suppressed(|| {
                     // A for-header declaration list must stay ONE comma
                     // expression. `for (size_t p = lo, q = hi - 1; ...)` is
                     // legal C and the type may be repeated per declarator, so
@@ -6439,6 +6557,7 @@ pub fn emit_stmt(s: &CgStmt, out: &mut String, indent: usize) {
                         out.push_str(tmp.trim_end_matches('\n').trim_end());
                     }
                     out.push(' ');
+                    });
                 }
                 else { out.push_str("; "); }
                 if let Some(c) = cond { emit_expr(c, out); }
@@ -6706,6 +6825,13 @@ fn emit_attrs_prefix(attrs: &[String], out: &mut String) {
 }
 
 pub fn emit_decl(d: &CgDecl, out: &mut String) {
+    // Function bodies re-emit their statements via emit_stmt (which carries
+    // the source mapping); everything else is generated structure. Reset to
+    // the synthetic file first so a function body's first #line is always
+    // emitted (never inherits a stale position from the previous decl).
+    if matches!(d.data, CgDeclData::Function { body: Some(_), .. }) {
+        reset_line_synthetic(out);
+    }
     match &d.data {
         CgDeclData::RawLine(text) => {
             // Raw pass-through line (e.g. `#pragma mark - Foo`): emit it
@@ -6939,8 +7065,38 @@ fn normalize_t_sentinels_text(c: &str) -> String {
     out
 }
 
+/// Installs/uninstalls the thread-local `#line` context for one unit
+/// emission (RAII so nested or repeated emissions cannot leak state).
+struct LineCtxGuard;
+impl LineCtxGuard {
+    fn install(sm: Option<&SourceMap>) -> Option<Self> {
+        let sm = sm?;
+        LINE_CTX.with(|c| {
+            *c.borrow_mut() = Some(LineCtx {
+                sm: sm.clone(),
+                cur_file: String::new(),
+                cur_line: 0,
+            });
+        });
+        Some(LineCtxGuard)
+    }
+}
+impl Drop for LineCtxGuard {
+    fn drop(&mut self) {
+        LINE_CTX.with(|c| *c.borrow_mut() = None);
+    }
+}
+
 pub fn emit_unit_with_headers(unit: &CgUnit, c_headers: &[String], search_dirs: &[String], freestanding: bool, backend: Backend, comments: bool, eh_checked: bool) -> String {
+    emit_unit_with_headers_mapped(unit, c_headers, search_dirs, freestanding, backend, comments, eh_checked, None)
+}
+
+/// Same as [`emit_unit_with_headers`], with optional `#line` emission
+/// (plan 阶段 2): passing `Some(source_map)` makes every statement's mapped
+/// source position a `#line` directive in the generated C.
+pub fn emit_unit_with_headers_mapped(unit: &CgUnit, c_headers: &[String], search_dirs: &[String], freestanding: bool, backend: Backend, comments: bool, eh_checked: bool, source_map: Option<&SourceMap>) -> String {
     CURRENT_BACKEND.store(backend as u8, Ordering::Relaxed);
+    let _line_guard = LineCtxGuard::install(source_map);
     // Metadata linkage: the default is `weak`, so the
     // many per-TU copies of a class's vtable / meta-vtable / getClass coalesce
     // to one. Ownership (rule R2 — `CgUnit::owned_classes`) decides which
@@ -7729,7 +7885,7 @@ pub fn emit_unit_with_headers(unit: &CgUnit, c_headers: &[String], search_dirs: 
         let class_names: std::collections::HashSet<String> = unit.classes.iter().map(|c| c.class_name.clone()).collect();
         let parents: Vec<&String> = parents.iter().filter(|p| !class_names.contains(*p)).collect();
         let pflat = name_flat(pname);
-        let _ = write!(out, "__attribute__((used)) static struct NPProtocol NEPA_PROTO_$_{} = {{
+        let _ = write!(out, "__attribute__((used, weak)) struct NPProtocol NEPA_PROTO_$_{} = {{
 ", pflat);
         let _ = write!(out, "    .name = \"{}\",
 ", pname);
@@ -7800,6 +7956,19 @@ pub fn emit_unit_with_headers(unit: &CgUnit, c_headers: &[String], search_dirs: 
             let _ = write!(out, "&NEPA_PROTO_$_{}", proto_short(p));
         }
         out.push_str("};\n");
+    }
+    // A category implementation may introduce protocol conformances in a
+    // different TU from the class owner. Publish those additions after static
+    // metadata initialization; the runtime merges them idempotently into the
+    // owner's NPClass table. Declaration-only clients do not register anything.
+    for cm in &unit.classes {
+        if !cm.has_category_impl || unit.owned_classes.contains(&cm.class_name) { continue; }
+        let known = known_protocols(cm);
+        if known.is_empty() { continue; }
+        let flat = name_flat(&cm.class_name);
+        let _ = write!(out, "__attribute__((constructor)) static void __nepa_category_protocols_$_{}(void) {{\n", flat);
+        let _ = write!(out, "    nepa_register_category_protocols(&{}, NEPA_PROTOS_$_{}, {});\n", meta_symbol("CLASS_", &flat), flat, known.len());
+        out.push_str("}\n\n");
     }
     for cm in &unit.classes {
         let flat = name_flat(&cm.class_name);
@@ -8306,6 +8475,7 @@ mod vtable_sig_tests {
                 method_variadic: vec![false],
                 method_owners: vec!["Probe".to_string()],
                 category_method_names: std::collections::HashSet::new(),
+                has_category_impl: false,
                 vtable_indices: vec![2],
                 ivar_types: Vec::new(),
                 ivar_names: Vec::new(),

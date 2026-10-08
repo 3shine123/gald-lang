@@ -2,7 +2,7 @@ use std::collections::{HashMap, HashSet};
 use std::fs;
 use std::path::Path;
 
-use nepa_cst::SourceMap;
+use nepa_cst::{SourceMap, SourceRegistry};
 
 use nepa_cpp::{self as cpp, MacroDef};
 
@@ -143,7 +143,13 @@ fn resolve_source(
     nepa_macros: &mut HashMap<String, MacroDef>,
     cond_stack: &mut Vec<CondFrame>,
     line_map: &mut Vec<(String, u32)>,
+    registry: &mut SourceRegistry,
 ) -> Result<(), String> {
+    // Register this file with its real text (line-start table for byte-offset
+    // mapping, plan 阶段 1). Dedup by path.
+    if registry.id_of(file_path).is_none() {
+        registry.add(file_path, content);
+    }
     // Conditional depth this file starts at: an `#import` splices a file into
     // the middle of the including file's stream, so only the conditionals the
     // file itself opens may be closed by it.
@@ -306,7 +312,7 @@ fn resolve_source(
                 if !search.contains(&dir) {
                     search.insert(0, dir.clone());
                 }
-                resolve_imports(&name, &search, resolved, nepa_out, c_out, defined, nepa_macros, cond_stack, line_map)?;
+                resolve_imports(&name, &search, resolved, nepa_out, c_out, defined, nepa_macros, cond_stack, line_map, registry)?;
             } else {
                 poison_top_guard(cond_stack, c_out);
                 // #include → collect for C output (verbatim)
@@ -793,6 +799,7 @@ fn resolve_imports(
     nepa_macros: &mut HashMap<String, MacroDef>,
     cond_stack: &mut Vec<CondFrame>,
     line_map: &mut Vec<(String, u32)>,
+    registry: &mut SourceRegistry,
 ) -> Result<(), String> {
     // Try to find the file
     let content = try_open(name, search_dirs)
@@ -810,7 +817,7 @@ fn resolve_imports(
     }
     resolved.insert(full_path.clone());
 
-    resolve_source(&content, &full_path, search_dirs, resolved, nepa_out, c_out, defined, nepa_macros, cond_stack, line_map)
+    resolve_source(&content, &full_path, search_dirs, resolved, nepa_out, c_out, defined, nepa_macros, cond_stack, line_map, registry)
 }
 
 impl Preprocessor {
@@ -841,8 +848,11 @@ impl Preprocessor {
         // came from. Lets parser/binder/checker errors point at real source
         // positions instead of the flattened inlined buffer.
         let mut line_map: Vec<(String, u32)> = Vec::new();
+        // Per-file registry (plan 阶段 1): real line-start tables, indexed by
+        // SourceId; the region-based SourceMap is built from it below.
+        let mut registry = SourceRegistry::new();
 
-        resolve_source(content, file_path, search_dirs, &mut resolved, &mut nepa_out, &mut c_out, &mut defined, &mut nepa_macros, &mut cond_stack, &mut line_map)?;
+        resolve_source(content, file_path, search_dirs, &mut resolved, &mut nepa_out, &mut c_out, &mut defined, &mut nepa_macros, &mut cond_stack, &mut line_map, &mut registry)?;
 
         // Expand nepa-syntax macros across the whole resolved stream
         // (ISO 9899 §6.10.3 replacement, implemented in nepa-cpp).
@@ -867,7 +877,7 @@ impl Preprocessor {
         Ok(Preprocessor {
             resolved_nepa: nepa_out,
             c_headers: c_out,
-            source_map: SourceMap::new(line_map),
+            source_map: SourceMap::from_line_table(line_map, &mut registry),
         })
     }
 }
