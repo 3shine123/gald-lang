@@ -33,9 +33,9 @@ I don't intend to replace ObjC or Swift. I just miss ObjC's syntax and wanted to
 
 ## Why Ovel?
 
-I simply like ObjC's message send syntax `[obj message]`. ObjC's runtime (`objc_msgSend`) is heavy, and I wanted to write ObjC-like code that compiles straight to C — so Ovel was born: ObjC syntax compiled statically, no runtime dependency, generating clean C.
+I like ObjC's message send syntax `[obj message]`, but ObjC's runtime (`objc_msgSend`) is heavy. Ovel keeps the syntax and compiles it statically to plain C.
 
-This is not a production-ready language. It's a toy, exploring the question: "what happens if you transpile ObjC into plain static C?"
+Ovel is a young language and not yet production-ready. The question it explores: "what happens if you transpile ObjC into plain static C?"
 
 ### What it does
 
@@ -45,7 +45,7 @@ This is not a production-ready language. It's a toy, exploring the question: "wh
 
 ### Design Goals
 
-- **Fun**: that's the most important one
+- **C-compatible**: a strict C superset — legal C is legal Ovel
 - **Readable**: generated C is meant to be read by humans
 - **Lightweight**: just one small static runtime
 
@@ -1694,11 +1694,11 @@ Generated C should be as clear as handwritten C:
 
 ### **Is it production-ready?**
 
-Not yet. But it is **real** - it compiles, it runs, and it is designed with growth in mind. If you find syntax appealing and want to contributem, you are welcome.
+Not yet. But it is **real** - it compiles, it runs, and it is designed with growth in mind. If you find syntax appealing and want to contribute, you are welcome.
 
 ### What can Ovel do?
 
-Write small games, tools, toys. The snake game, Flappy Bird, space shooter, tic-tac-toe in this repo are all written in Ovel, running in the terminal.
+Write small games and tools. The snake game, Flappy Bird, space shooter, tic-tac-toe in this repo are all written in Ovel, running in the terminal.
 
 ### What's missing compared to ObjC?
 
