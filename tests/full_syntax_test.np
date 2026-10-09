@@ -799,21 +799,21 @@ static void fs_take_fn(nonnull NPString *s) { printf("5.4 fn %s\n", [s UTF8Strin
 }
 @end
 
-// @await / NPAsync<T>：标记是签名一部分（头文件可见）；入口 = async void 方法
+// @await / async NPTask<T>：async 修饰符是签名一部分（头文件可见）；入口 = async void 方法
 // 被同步上下文调用 → 自动 blocking wrapper（体内泵调度器），main 照常调用
 @interface FsFetcher : NPObject
-- (NPAsync<int>)compute:(int)n;                          // 标记 + 体内 @await
-- (int)helper:(int)n;                                    // 纯同步（无标记无 await）
-+ (NPAsync<void>)runAll;                                 // 入口（类方法 async void）
+- (async NPTask<int>)compute:(int)n;                     // async 修饰符 + 体内 @await
+- (int)helper:(int)n;                                    // 纯同步（无修饰符无 await）
++ (async NPTask<void>)runAll;                            // 入口（类方法 async void）
 @end
 
 @implementation FsFetcher
 - (int)helper:(int)n { return n + 1; }
-- (NPAsync<int>)compute:(int)n {
+- (async NPTask<int>)compute:(int)n {
     int a = @await [self helper:n];                      // 挂起点（同步调用立即恢复）
     return a * 2;
 }
-+ (NPAsync<void>)runAll {
++ (async NPTask<void>)runAll {
     FsFetcher *f = [[FsFetcher alloc] init];
     int x = @await [f compute:20];                       // 跨方法 await 链
     printf("5.7 async %d\n", x);

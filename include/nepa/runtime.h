@@ -249,6 +249,11 @@ typedef int (*nepa_task_entry_fn)(NPTask *task);
 struct NPTask {
     int state;                          /* current state-machine state */
     int finished;                       /* 0 = running/suspended, 1 = done */
+    int queued;                         /* 1 = linked in the ready queue
+                                           (scheduling layer; distinct from
+                                           `state` — legacy create uses
+                                           state=1 for the entry's first
+                                           segment) */
     nepa_task_entry_fn entry;           /* state machine body */
     NPObject *self_obj;                 /* receiver the method runs on */
     void *frame;                        /* lifted locals (per-method struct) */
@@ -264,11 +269,55 @@ NPTask *nepa_task_create(nepa_task_entry_fn entry, NPObject *self_obj, size_t fr
 int nepa_task_resume(NPTask *task);
 
 /* Pump the task to completion (cooperative single-thread scheduling) and
- * free it. Returns the task's result slot value. */
+ * free it. Returns the task's result slot value. Legacy M1/M2 API — the
+ * NPTask design (doc/async_nptask_plan.md) supersedes it with
+ * start/await/mark_ready + nepa_sched_run; removed with the stage-D desugar
+ * switch. */
 void *nepa_task_join(NPTask *task);
 
 /* Mark the task finished (called by the state machine's final state). */
 void nepa_task_finish(NPTask *task);
+
+// ─── NPTask scheduling layer (doc/async_nptask_plan.md, stage C) ────────────
+/* Lazy tasks + a cooperative ready queue. Mechanism only: scheduling POLICY
+ * (when to pump, threading, priorities) belongs to the caller / a future
+ * runtime library. Zero libc dependencies — identical shape in
+ * runtime_freestanding.c, fully usable on bare metal. */
+
+/* Allocator injection (C++ promise_type custom operator new precedent):
+ * defaults to malloc/free on the host and nepa_malloc/nepa_free in
+ * freestanding. NULL arguments fall back to the defaults. Must be called
+ * before the first task is created. */
+typedef void *(*nepa_task_alloc_fn)(size_t);
+typedef void (*nepa_task_free_fn)(void *);
+void nepa_task_set_allocator(nepa_task_alloc_fn alloc, nepa_task_free_fn free_fn);
+
+/* READY → enqueue. Idempotent: starting a started/finished task is a no-op. */
+int nepa_task_start(NPTask *task);
+
+/* Suspend the caller until `task` finishes; returns its (cached) result.
+ * Auto-starts a not-yet-started task. Safe to call repeatedly — the result
+ * is cached in the task state (promise/future-box semantics). A task
+ * awaiting itself is fatal. When the caller is not itself a task (top-level
+ * synchronous context), this pumps the queue until the task completes
+ * (blocking-join shape). */
+void *nepa_task_await(NPTask *task);
+
+/* Event-source hook: re-enqueue a suspended task (interrupt / DMA callback /
+ * I/O completion on the host). No-op for tasks that are finished or already
+ * queued. */
+void nepa_task_mark_ready(NPTask *task);
+
+/* Pump: run every ready task until it suspends or finishes, until the queue
+ * drains, then return. The bare-metal drive pattern is a main loop of
+ * `nepa_sched_run()` + a WFI / event wait — the pump is never invoked
+ * implicitly in freestanding mode. */
+void nepa_sched_run(void);
+
+/* The task currently executing inside nepa_sched_run (NULL at top level).
+ * Used by nepa_task_await for self-await detection and by stage-D desugar
+ * for in-task suspension. */
+NPTask *nepa_task_current(void);
 
 // ─── Internal API (for runtime implementation) ───────────────────────────────────
 

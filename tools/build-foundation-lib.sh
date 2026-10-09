@@ -93,7 +93,10 @@ for gm in include/Foundation/*.np; do
     # Skip the self-contained umbrella (Foundation.np): it is not a class —
     # it has no vtable to verify, and archiving it would re-inline every
     # implementation into the library, defeating the per-TU build.
-    [[ "$name" == "Foundation" ]] && continue
+    # Skip NPTask.np for the same reason: `NPTask<T>` is the runtime task
+    # HANDLE (route A), not a class — no implementation, no vtable
+    # (doc/async_nptask_plan.md §Foundation 壳层).
+    [[ "$name" == "Foundation" || "$name" == "NPTask" ]] && continue
     wrap="$tus/$name.np"
     { echo '#import <Foundation/Foundation.nh>'; cat "$gm"; } > "$wrap"
     c="$outdir/$name.c"
@@ -115,7 +118,7 @@ echo "[3/4] verify per-TU owned metadata is strong (nm)"
 # shipping a landmine.
 for gm in include/Foundation/*.np; do
     name="$(basename "$gm" .np)"
-    [[ "$name" == "Foundation" ]] && continue   # umbrella has no vtable (see [1/4])
+    [[ "$name" == "Foundation" || "$name" == "NPTask" ]] && continue   # no vtable to verify (see [1/4])
     check_strong "$outdir/$name.o" "$name"
 done
 

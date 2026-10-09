@@ -1,0 +1,13 @@
+// NPTask negative: `async` modifier requires return type NPTask<T>
+// (doc/async_nptask_plan.md, stage A). `async int` must be rejected —
+// 'async' is a method modifier, not a type qualifier.
+
+@interface A : NPObject
+- (async int)f;
+@end
+
+@implementation A
+- (async int)f { return 1; }
+@end
+
+int main() { return 0; }

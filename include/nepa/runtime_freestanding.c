@@ -188,14 +188,30 @@ void nepa_eh_uncaught(void) {
 // with nepa_malloc/nepa_free instead of calloc/free. No new overhead: a task
 // costs one struct + its frame, same as hosted.
 
+/* Allocator injection: NULL = nepa_malloc/nepa_free defaults (bump
+ * allocator); nepa_task_set_allocator swaps in a static pool on bare metal. */
+static nepa_task_alloc_fn task_alloc = NULL;
+static nepa_task_free_fn  task_free_fn = NULL;
+
+static void ensure_default_allocator(void) {
+    if (!task_alloc) task_alloc = nepa_malloc;
+    if (!task_free_fn) task_free_fn = nepa_free;
+}
+
+void nepa_task_set_allocator(nepa_task_alloc_fn alloc, nepa_task_free_fn free_fn) {
+    task_alloc = alloc;
+    task_free_fn = free_fn;
+}
+
 NPTask *nepa_task_create(nepa_task_entry_fn entry, NPObject *self_obj, size_t frame_size) {
-    NPTask *t = (NPTask *)nepa_malloc(sizeof(NPTask));
+    ensure_default_allocator();
+    NPTask *t = (NPTask *)task_alloc(sizeof(NPTask));
     if (!t) return NULL;
     t->state = 1;   /* state 1 = the entry's first case; 0 means "not started" */
     t->finished = 0;
     t->entry = entry;
     t->self_obj = self_obj;
-    t->frame = frame_size ? nepa_malloc(frame_size) : NULL;
+    t->frame = frame_size ? task_alloc(frame_size) : NULL;
     t->result = NULL;
     t->parent = NULL;
     return t;
@@ -227,6 +243,72 @@ void *nepa_task_join(NPTask *task) {
     nepa_free(task->frame);
     nepa_free(task);
     return result;
+}
+
+// ─── NPTask scheduling layer (doc/async_nptask_plan.md, stage C) ────────────
+// Same shape as the hosted runtime.c. Zero libc dependencies: the allocator
+// injection above defaults to nepa_malloc/nepa_free (bump allocator), so the
+// pump works on bare metal — the main loop owns it:
+// `while (1) { nepa_sched_run(); __WFI(); }`
+
+enum { TASK_READY = 0, TASK_QUEUED = 1, TASK_DONE = 2 };
+
+static NPTask *sched_head = NULL;
+static NPTask *sched_tail = NULL;
+static NPTask *sched_current = NULL;
+
+NPTask *nepa_task_current(void) { return sched_current; }
+
+static void sched_enqueue(NPTask *t) {
+    t->parent = NULL;          /* `parent` reused as the queue link */
+    if (sched_tail) sched_tail->parent = t;
+    else sched_head = t;
+    sched_tail = t;
+    t->queued = 1;
+}
+
+int nepa_task_start(NPTask *task) {
+    if (!task || task->finished) return task != NULL;
+    if (task->queued) return 1;                 /* idempotent */
+    sched_enqueue(task);
+    return 1;
+}
+
+void nepa_task_mark_ready(NPTask *task) {
+    (void)nepa_task_start(task);
+}
+
+void nepa_sched_run(void) {
+    while (sched_head) {
+        NPTask *t = sched_head;
+        sched_head = t->parent;
+        if (!sched_head) sched_tail = NULL;
+        t->queued = 0;
+        if (t->finished) continue;
+        sched_current = t;
+        (void)nepa_task_resume(t);
+        sched_current = NULL;
+        /* finished tasks are dropped (frame/task freed by stage-D desugar at
+         * the join point; legacy join still owns its own lifetime) */
+    }
+}
+
+void *nepa_task_await(NPTask *task) {
+    if (!task) return NULL;
+    if (task == sched_current) {
+        /* self-await cycle: fatal (single thread, no one to make progress) */
+        nepa_console_write("fatal: task awaits itself\n", 0);
+        __builtin_trap();
+    }
+    (void)nepa_task_start(task);
+    /* Blocking drive, top-level or in-task alike (M2 synchronous-drive
+     * model): an in-task await on an independent nested task drives it
+     * inline; direct self-await is checked above. */
+    while (!task->finished) {
+        if (sched_head) { nepa_sched_run(); continue; }
+        (void)nepa_task_resume(task);
+    }
+    return task->result;
 }
 
 // ─── Weak reference side table (fixed-size, no allocation) ──────────────────

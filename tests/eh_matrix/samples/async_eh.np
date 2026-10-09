@@ -19,17 +19,17 @@
 @end
 
 @interface EhFetcher : NPObject
-- (int)compute:(int)n;
-- (void)runAll;
+- (async NPTask<int>)compute:(int)n;
+- (async NPTask<void>)runAll;
 @end
 
 @implementation EhFetcher
-- (int)compute:(int)n {
+- (async NPTask<int>)compute:(int)n {
     int raw = @await n;              // suspension point
     return raw * 2;
 }
 
-- (void)runAll {
+- (async NPTask<void>)runAll {
     int x = @await [self compute:21];   // 42
     @try {                               // does not span the @await above
         EhBoom *b = [[EhBoom alloc] init];

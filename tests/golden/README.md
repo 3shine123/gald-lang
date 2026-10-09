@@ -36,10 +36,10 @@
 31_proto_conformance/ 协议一致性检查 + 协议组合 P & Q
 32_foundation_dispatch/ isKindOfClass: / respondsToSelector: / isEqual:
 33_struct_eq/       struct == / != 值比较
-34_async/           @await 状态机（里程碑 1+2）
+34_async/           @await 状态机（里程碑 1+2；语句位裸调用=入口，hosted 就地驱动）
 35_variadic_method/ 真 variadic 方法（va_list）
 36_defer/           @defer 作用域退出执行
-37_async_marker/    NPAsync<T> 声明式 async 标记
+37_async_modifier/  async 返回类型前修饰符 + 语句位入口驱动（async NPTask<T>）
 38_macros/          nepa 语法宏展开（双轨 #define）
 39_complex/         C99 _Complex 透传
 40_nparray_generic/ NPArray<T> / NPDictionary<K,V> 真单态化 + 元素类型检查

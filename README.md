@@ -548,39 +548,41 @@ p == &a               // pointer comparison semantics unchanged
 
 ### async/await (`@await`)
 
-A method whose body contains `@await` is async — mirroring C++20's `co_await`-based coroutines. Return types of suspending methods must be marked `NPAsync<T>` (checker-enforced, see below — the parser unwraps it, so vtable layout is unchanged):
+A method whose body contains `@await` is async — mirroring C++20's `co_await`-based coroutines. The `async` modifier sits **before the return type** and is part of the signature (visible in the `.nh`), so callers can see a method suspends without reading its body:
 
 ```nepa
 @interface Fetcher : NPObject
-- (NPAsync<int>)compute:(int)n;   // suspends, yields an int
-- (NPAsync<void>)runAll;          // async void = the entry method
+- (async NPTask<int>)compute:(int)n;   // suspends, yields an int
+- (async NPTask<void>)runAll;          // async void = the entry method
 @end
 
 @implementation Fetcher
-- (NPAsync<int>)compute:(int)n {
+- (async NPTask<int>)compute:(int)n {
     int raw = @await n;               // suspension point
-    return raw * 2;
+    return raw * 2;                   // the body returns T, not a task
 }
 
-- (NPAsync<void>)runAll {
-    int x = @await [self compute:21]; // awaiting a call infects this method too
+- (async NPTask<void>)runAll {
+    int x = @await [self compute:21]; // awaiting a call unwraps to T
     NPLog(@"result=%d", x);
 }
 @end
 
 int main() {
     Fetcher *f = [[Fetcher alloc] init];
-    [f runAll];                       // async void entry: callable from sync context
+    NPTask<void> *t = [f runAll];     // form A: lazy — created, not executed
+    [t start];                        // statement position: driven to completion here
     return 0;
 }
 ```
 
 Design rules:
 
-- **Infection is chain-based** — a method calling `@await` becomes async itself; async methods with a return value may only be awaited from async contexts (compile-time rejected otherwise).
+- **`async` is a signature-level modifier on the return type** — `(async NPTask<T>)`. `NPTask<T>` is a real type: a bare `- (NPTask<int>)load` is an *ordinary synchronous* method that merely returns a task object, while `async NPTask<T>` suspends — the two are statically distinguishable.
+- **Infection is chain-based** — a method calling `@await` becomes async itself; a suspending method *must* declare the modifier (checker-enforced, see below). Task handles are first-class values: a bare async call *creates* the task (`NPTask<T> *`); `[task start]` and `@await t` drive it, and awaiting the same task twice is legal (the result is cached). Writing the call — or `[t start]` — at **statement position** is the async entry: hosted code drives it to completion right there (lowered to `nepa_task_await`), freestanding code never drives and leaves the pump to your `main`; there is deliberately no pump at `main`'s exit (ARC releases the receiver first).
 - **`@await` lowers to a state machine** — the body is split at suspension points into a `switch(task->state)` driver over a heap `NPTask`; locals that survive a suspension are lifted into a per-method frame struct.
 - **`@try` spanning an `@await`** is rejected (a `jmp_buf` cannot survive a suspension point); `@noarc` across awaits is allowed; break/continue across awaits become state jumps.
-- A cooperative single-thread scheduler (`nepa_run_all`) and I/O integration are planned as the next milestone.
+- A cooperative single-thread scheduler (`nepa_sched_run`) and I/O integration are planned as the next milestone.
 
 ### Switch Pattern Matching (`case` patterns)
 
@@ -1159,15 +1161,16 @@ M1 limits (compile-time enforced): `@defer` must sit directly inside a block; th
 
 Implementation: pure desugar (`crates/defer`, pipeline step 3.9 — after the `-eh checked` rewrite, before ARC). Codegen, checker, and the runtime see ordinary statements — zero changes downstream. Golden: `tests/golden/36_defer/`.
 
-### `NPAsync<T>` — Declared Async Marker
+### `async NPTask<T>` — Async Method Modifier
 
-`@await` M1/M2 left one soft spot: a header cannot tell you whether a method suspends. `NPAsync<T>` promotes async-ness to a **return-type marker** that is visible in the declaration — the parser unwraps it to `T`, so it is pure compile-time metadata: `NPAsync` appears **zero times** in the generated C, and vtable layout, cross-TU linking, and the bridge header are untouched.
+`@await` alone left one soft spot: a header cannot tell you whether a method suspends. The `async` modifier promotes async-ness to a **signature-level flag**: it sits before the return type (`(async NPTask<T>)`), so it is visible in the `.nh` while `NPTask<T>` stays a real type (the emitted C returns `NPTask *`). A bare `(NPTask<T>)` means the opposite — a synchronous method that merely returns a task object.
 
 ```nepa
 @interface Fetcher : NPObject
-- (NPAsync<int>)compute:(int)n;   // suspends, yields an int
-+ (NPAsync<void>)runAll;          // entry point
-- (int)plain:(int)n;              // unmarked = promises never to suspend
+- (async NPTask<int>)compute:(int)n;   // suspends, yields an int
++ (async NPTask<void>)runAll;          // entry point
+- (NPTask<int>)loadCached;             // bare NPTask<T> = ordinary sync method
+- (int)plain:(int)n;                   // unmarked = promises never to suspend
 @end
 ```
 
@@ -1175,16 +1178,18 @@ The body's awaits decide the truth, and the checker reconciles both directions:
 
 | declaration | body | verdict |
 |-------------|------|---------|
-| `NPAsync<T>` | has `@await` | ✅ |
-| `NPAsync<T>` | no `@await` | **error** — `'compute:' is marked 'NPAsync<T>' but its body never suspends — remove the marker or add an '@await'` |
-| bare `T` | has `@await` | **warning** — `'compute:' contains '@await' but its return type is not marked 'NPAsync<T>' — mark it so callers can see it suspends` (`-Werror` escalates) |
-| bare `T` | no `@await` | ✅ |
+| `async NPTask<T>` | has `@await` | ✅ |
+| `async NPTask<T>` | no `@await` | **error** — `'compute:' is declared 'async' but its body never suspends — drop the modifier or add an '@await'` |
+| unmarked | has `@await` | **error** — `'compute:' contains '@await' but is not declared 'async NPTask<T>' — a suspending method must declare the async modifier` |
+| unmarked | no `@await` | ✅ |
 
-- The marker is part of the signature: `@interface` and `@implementation` must agree — `'NPAsync' marker mismatch on 'compute:': the @interface and @implementation disagree` is an error. Header-only `@interface` methods are exempt (cross-TU safety).
-- Value positions are rejected — variables, parameters, ivars, properties: `'NPAsync<T>' is a declaration marker, not a value type (variable) — '@await' the async call instead`.
-- `NPAsync` is a reserved class name.
+- The modifier is part of the signature: `@interface` and `@implementation` must agree — `'async' modifier mismatch on 'compute:': the @interface and @implementation disagree — the modifier is part of the method signature`. Header-only `@interface` methods are exempt (cross-TU safety).
+- `async` must modify an `NPTask<T>` return type and nothing else — `'async' requires return type 'NPTask<T>' — 'async' is a method modifier, not a type qualifier` (exactly one type argument).
+- Task handles are first-class values: `NPTask<T> *` is legal in variables, parameters and ivars (the opposite of the old `NPAsync` marker) — `@await t` is the only way to read the result.
+- `NPTask` is a reserved class name; `async` is now a keyword.
+- **Entry is statement position** — `[f runAll];` (return value discarded) and a statement-position `[t start];` are the async entry: hosted code drives them to completion right there (lowered to `nepa_task_await`), bare-metal code only enqueues and expects the user's own pump. There is deliberately no pump at `main`'s exit — ARC's scope-end release lands later.
 
-Golden: `tests/golden/37_async_marker/`; negatives under `tests/negative/async_marker_*.np`.
+Golden: `tests/golden/37_async_modifier/`; negatives under `tests/negative/async_nptask_*.np`.
 
 ### Object Subscripting (`a[0]` on NPArray)
 

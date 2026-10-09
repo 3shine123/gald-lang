@@ -30,3 +30,4 @@
 #import "NPPredicate.nh"
 #import "NPNumber.nh"
 #import "NPError.nh"
+#import "NPTask.nh"

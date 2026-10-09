@@ -981,6 +981,13 @@ fn cst_type_to_c_str(ct: &nepa_cst::CstType) -> String {
         },
         TypePrim::Named => {
             if let Some(ref name) = ct.name {
+                // NPTask<T> is the task HANDLE, not a monomorphized class:
+                // render as NPTask * (doc/async_nptask_plan.md, stage D) —
+                // there is no NPTask_int typedef; the handle type is uniform.
+                if name == "NPTask" && !ct.type_args.is_empty() {
+                    s.push_str("NPTask *");
+                    return s;
+                }
                 let flat = if ct.type_args.is_empty() {
                     name_flat(name)
                 } else {
@@ -1116,6 +1123,13 @@ pub fn ast_type_to_c_str(t: &AstType) -> String {
                 // the erased flat base name — legal C in both; the clone's
                 // signature substitution rewrites return/param strings
                 // separately (param_pairs replace on the whole type string).
+                // NPTask<T> → the task HANDLE `NPTask *` (uniform C type; no
+                // per-instantiation typedef exists). Same rule as the CST
+                // path (doc/async_nptask_plan.md, stage D).
+                if type_name == "NPTask" && !t.type_args.is_empty() {
+                    s.push_str("NPTask *");
+                    return s;
+                }
                 let contains_param_arg = t.type_args.iter()
                     .any(|a| a.prim == TypePrim::Param
                         || a.subtype.as_ref().map(|s| s.prim == TypePrim::Param).unwrap_or(false));

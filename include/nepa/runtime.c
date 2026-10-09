@@ -376,14 +376,31 @@ NPObject *nepa_autorelease(NPObject *obj) {
 // created it (milestone 1). `parent` exists for milestone 2 (task graphs
 // where a suspended task resumes its awaiter).
 
+/* Allocator injection: NULL = malloc/free defaults (nepa_task_set_allocator
+ * swaps in a static pool on bare metal). Read through function pointers so
+ * the switch can happen before the first task is created. */
+static nepa_task_alloc_fn task_alloc = NULL;   /* set lazily to malloc */
+static nepa_task_free_fn  task_free_fn = NULL; /* set lazily to free */
+
+static void ensure_default_allocator(void) {
+    if (!task_alloc) task_alloc = malloc;
+    if (!task_free_fn) task_free_fn = free;
+}
+
+void nepa_task_set_allocator(nepa_task_alloc_fn alloc, nepa_task_free_fn free_fn) {
+    task_alloc = alloc;
+    task_free_fn = free_fn;
+}
+
 NPTask *nepa_task_create(nepa_task_entry_fn entry, NPObject *self_obj, size_t frame_size) {
-    NPTask *t = (NPTask *)calloc(1, sizeof(NPTask));
+    ensure_default_allocator();
+    NPTask *t = (NPTask *)task_alloc(sizeof(NPTask));
     if (!t) return NULL;
     t->state = 1;   /* state 1 = the entry's first case; 0 means "not started" */
     t->finished = 0;
     t->entry = entry;
     t->self_obj = self_obj;
-    t->frame = frame_size ? calloc(1, frame_size) : NULL;
+    t->frame = frame_size ? task_alloc(frame_size) : NULL;
     t->result = NULL;
     t->parent = NULL;
     return t;
@@ -414,6 +431,73 @@ void *nepa_task_join(NPTask *task) {
     if (task->frame) free(task->frame);
     free(task);
     return result;
+}
+
+// ─── NPTask scheduling layer (doc/async_nptask_plan.md, stage C) ────────────
+// Lazy tasks + a cooperative ready queue. Mechanism only — the pump is never
+// invoked implicitly here; hosted entry wrappers (stage D) call
+// nepa_sched_run explicitly, bare-metal main loops own their own pump.
+
+/* READY → RUNNING → SUSPENDED → … → DONE, as a tiny explicit queue. */
+enum { TASK_READY = 0, TASK_QUEUED = 1, TASK_DONE = 2 };
+
+static NPTask *sched_head = NULL;
+static NPTask *sched_tail = NULL;
+static NPTask *sched_current = NULL;
+
+NPTask *nepa_task_current(void) { return sched_current; }
+
+static void sched_enqueue(NPTask *t) {
+    t->parent = NULL;          /* reuse `parent` as the queue link */
+    if (sched_tail) sched_tail->parent = t;
+    else sched_head = t;
+    sched_tail = t;
+    t->queued = 1;
+}
+
+int nepa_task_start(NPTask *task) {
+    if (!task || task->finished) return task != NULL;
+    if (task->queued) return 1;                 /* idempotent */
+    sched_enqueue(task);
+    return 1;
+}
+
+void nepa_task_mark_ready(NPTask *task) {
+    (void)nepa_task_start(task);
+}
+
+void nepa_sched_run(void) {
+    while (sched_head) {
+        NPTask *t = sched_head;
+        sched_head = t->parent;
+        if (!sched_head) sched_tail = NULL;
+        t->queued = 0;
+        if (t->finished) continue;
+        sched_current = t;
+        (void)nepa_task_resume(t);
+        sched_current = NULL;
+        /* finished tasks are dropped (frame/task freed by stage-D desugar at
+         * the join point; legacy join still owns its own lifetime) */
+    }
+}
+
+void *nepa_task_await(NPTask *task) {
+    if (!task) return NULL;
+    if (task == sched_current) {
+        /* self-await cycle: fatal by design (no thread to make progress) */
+        fprintf(stderr, "fatal: task awaits itself\n");
+        abort();
+    }
+    (void)nepa_task_start(task);
+    /* Blocking drive, top-level or in-task alike (M2 synchronous-drive
+     * model): cooperative single-thread — an in-task await on an independent
+     * nested task can drive it to completion inline; only a cycle deadlocks,
+     * and direct self-await is checked above. */
+    while (!task->finished) {
+        if (sched_head) { nepa_sched_run(); continue; }
+        (void)nepa_task_resume(task);
+    }
+    return task->result;
 }
 
 // ─── Logging ─────────────────────────────────────────────────────────────────

@@ -1,0 +1,12 @@
+// NPTask negative: 'async NPTask' requires exactly one type argument
+// (doc/async_nptask_plan.md, stage A).
+
+@interface A : NPObject
+- (async NPTask<int, int>)f;
+@end
+
+@implementation A
+- (async NPTask<int, int>)f { return 0; }
+@end
+
+int main() { return 0; }

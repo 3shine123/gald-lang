@@ -169,9 +169,9 @@ static unsigned loopsum(int n) {
     - (int)  weight;
     - (void) setWeight:(int)w;
     - (int)  addTo:(int)v times:(int)k;           // multi-part instance method
-    - (NPAsync<int>) sumAsync:(int)v;             // async declaration marker (erased in C)
-    + (NPAsync<void>) awaitMake;                  // async entries: @await lives here,
-    + (NPAsync<void>) awaitSum:(Metal::Widget *)ww;   // never in main (canonical pattern)
+    - (async NPTask<int>) sumAsync:(int)v;             // async modifier (part of the signature)
+    + (async NPTask<void>) awaitMake;                  // async entries: @await lives here,
+    + (async NPTask<void>) awaitSum:(Metal::Widget *)ww;   // never in main (canonical pattern)
     - (id)   retain;
     - (void) release;
     - (id)   autorelease;
@@ -192,17 +192,17 @@ static unsigned loopsum(int n) {
     - (int)  weight  { return weight; }
     - (void) setWeight:(int)w { weight = w; }
     - (int)  addTo:(int)v times:(int)k { return v + k * uid; }
-    - (NPAsync<int>) sumAsync:(int)v {
+    - (async NPTask<int>) sumAsync:(int)v {
         int r = @await [self addTo:v times:2];    // 5 + 2*7 = 19 (v=5, uid=7)
         return r + v;                             // 24
     }
-    + (NPAsync<void>) awaitMake {
+    + (async NPTask<void>) awaitMake {
         int awaited = @await [Metal::Widget make:10 plus:3];
         kputs("[R5] @await make:plus:=");
         kputdec(awaited);
         kputs("\n");
     }
-    + (NPAsync<void>) awaitSum:(Metal::Widget *)ww {
+    + (async NPTask<void>) awaitSum:(Metal::Widget *)ww {
         int av = @await [ww sumAsync:5];
         kputs("[R8] async marker sum=");
         kputdec(av);
@@ -395,8 +395,8 @@ static const char *mode_name2(enum Mode m) {
     switch (m) {
         case MODE_OFF:   return "off2";
         case MODE_TURBO: return "turbo2";
+        default:         return "?2";
     }
-    return "?2";
 }
 
 // ── @synchronized: cleanup unlock covers the early return; an immediate
@@ -715,7 +715,7 @@ skip_hit:
         kputs("\n");
     }
 
-    // NPAsync<T> declaration marker (erased in C) + @await chain
+    // async NPTask<T> signature modifier + @await chain
     [Metal::Widget awaitSum:w];
 
     // __weak ASSIGN re-registration + zeroing when the object dies

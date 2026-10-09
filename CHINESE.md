@@ -529,39 +529,41 @@ p == &a               // 指针比较语义不变
 
 ### async/await（`@await`）
 
-方法体里含 `@await` 即为 async，与 C++20 用 `co_await` 判定协程的风格一致。会挂起的方法返回类型必须标 `NPAsync<T>`（checker 强制，见下文专节——parser 把它解包，vtable 布局不变）：
+方法体里含 `@await` 即为 async，与 C++20 用 `co_await` 判定协程的风格一致。`async` 修饰符写在**返回类型之前**，是签名的一部分（`.nh` 里可见），调用方不必读方法体就知道它会挂起：
 
 ```nepa
 @interface Fetcher : NPObject
-- (NPAsync<int>)compute:(int)n;   // 会挂起，产出 int
-- (NPAsync<void>)runAll;          // async void = 入口方法
+- (async NPTask<int>)compute:(int)n;   // 会挂起，产出 int
+- (async NPTask<void>)runAll;          // async void = 入口方法
 @end
 
 @implementation Fetcher
-- (NPAsync<int>)compute:(int)n {
+- (async NPTask<int>)compute:(int)n {
     int raw = @await n;               // 挂起点
-    return raw * 2;
+    return raw * 2;                   // 方法体直接返回 T，不返回任务
 }
 
-- (NPAsync<void>)runAll {
-    int x = @await [self compute:21]; // await 一个调用会把本方法也传染成 async
+- (async NPTask<void>)runAll {
+    int x = @await [self compute:21]; // await 调用会解包成 T
     NPLog(@"result=%d", x);
 }
 @end
 
 int main() {
     Fetcher *f = [[Fetcher alloc] init];
-    [f runAll];                       // async void 入口：可从同步上下文调用
+    NPTask<void> *t = [f runAll];     // 形态 A：lazy——只创建，不执行
+    [t start];                        // 语句位=入口：就地驱动到完成
     return 0;
 }
 ```
 
 设计规则：
 
-- **链式传染**——方法体里出现 `@await` 它自己就是 async；非 void 的 async 方法只能在 async 上下文中 await 调用（同步调用编译期报错）。
+- **`async` 是返回类型前的签名级修饰符**——`(async NPTask<T>)`。`NPTask<T>` 是真类型：裸 `- (NPTask<int>)load` 是**普通同步方法**，只返回一个任务对象；`async NPTask<T>` 才会挂起——两者静态可区分。
+- **链式传染**——方法体里出现 `@await` 它自己就是 async；会挂起的方法**必须**声明修饰符（checker 强制，见下文专节）。任务句柄是一等值：裸调用 async 方法只*创建*任务（`NPTask<T> *`），由 `[task start]` / `@await t` 驱动；同一任务可多次 `@await`（结果缓存）。**语句位**的裸调用（`[f run];`）与语句位 `[t start];` 就是 async 入口：hosted 下在调用点就地驱动到完成（降为 `nepa_task_await`），`-ffreestanding` 永不驱动、泵留给裸机 `main`；`main` 退出处刻意不兜底泵（ARC 先释放接收者）。
 - **`@await` 降级为状态机**——方法体在挂起点被拆进 `switch(task->state)` 驱动的堆上 `NPTask`；活过挂起点的局部变量提升进每方法一个的 frame 结构体。
 - **`@try` 跨越 `@await`** 会被拒绝（`jmp_buf` 无法活过挂起点）；`@noarc` 跨 await 合法；break/continue 跨 await 变成状态跳转。
-- 协作式单线程调度器（`nepa_run_all`）与 I/O 集成是下一个里程碑。
+- 协作式单线程调度器（`nepa_sched_run`）与 I/O 集成是下一个里程碑。
 
 ### `switch` 模式匹配（`case` 模式）
 
@@ -1113,15 +1115,16 @@ M1 限制（编译期强制）：`@defer` 必须直接位于块内；defer 体�
 
 实现：纯 desugar（`crates/defer`，pipeline Step 3.9——`-eh checked` 改写之后、ARC 之前）。codegen/checker/运行时看到的都是普通语句——下游零改动。Golden：`tests/golden/36_defer/`。
 
-### `NPAsync<T>` —— 声明式 async 标记
+### `async NPTask<T>` —— async 方法修饰符
 
-`@await` M1/M2 有个软肋：头文件里看不出方法会挂起。`NPAsync<T>` 把 async-ness 扶正为**返回类型位可见的标记**——parser 把它解包为 `T`，纯编译期元数据：生成 C 中 `NPAsync` 出现 **0 次**，vtable 布局、跨 TU 链接、桥接头全部不受影响。
+`@await` 单用有个软肋：头文件里看不出方法会挂起。`async` 修饰符把 async-ness 扶正为**签名级标记**：写在返回类型之前（`(async NPTask<T>)`），`.nh` 里可见，而 `NPTask<T>` 仍是真类型（生成 C 返回 `NPTask *`）。裸 `(NPTask<T>)` 则相反——只是返回任务对象的同步方法。
 
 ```nepa
 @interface Fetcher : NPObject
-- (NPAsync<int>)compute:(int)n;   // 会挂起，完成后给 int
-+ (NPAsync<void>)runAll;          // 入口方法
-- (int)plain:(int)n;              // 不标 = 承诺不挂起
+- (async NPTask<int>)compute:(int)n;   // 会挂起，完成后给 int
++ (async NPTask<void>)runAll;          // 入口方法
+- (NPTask<int>)loadCached;             // 裸 NPTask<T> = 普通同步方法
+- (int)plain:(int)n;                   // 不标 = 承诺不挂起
 @end
 ```
 
@@ -1129,16 +1132,18 @@ M1 限制（编译期强制）：`@defer` 必须直接位于块内；defer 体�
 
 | 声明 | 体内 | 判定 |
 |------|------|------|
-| `NPAsync<T>` | 有 `@await` | ✅ |
-| `NPAsync<T>` | 无 `@await` | **error** —— `'compute:' is marked 'NPAsync<T>' but its body never suspends — remove the marker or add an '@await'` |
-| 裸 `T` | 有 `@await` | **warning** —— `'compute:' contains '@await' but its return type is not marked 'NPAsync<T>' — mark it so callers can see it suspends`（`-Werror` 升级拦截） |
-| 裸 `T` | 无 `@await` | ✅ |
+| `async NPTask<T>` | 有 `@await` | ✅ |
+| `async NPTask<T>` | 无 `@await` | **error** —— `'compute:' is declared 'async' but its body never suspends — drop the modifier or add an '@await'` |
+| 不标 | 有 `@await` | **error** —— `'compute:' contains '@await' but is not declared 'async NPTask<T>' — a suspending method must declare the async modifier` |
+| 不标 | 无 `@await` | ✅ |
 
-- 标记是签名的一部分：`@interface` 与 `@implementation` 必须一致——`'NPAsync' marker mismatch on 'compute:': the @interface and @implementation disagree` 报 error。仅头文件声明的 `@interface` 方法豁免（跨 TU 安全）。
-- 值位一律拒绝——变量/参数/ivar/属性：`'NPAsync<T>' is a declaration marker, not a value type (variable) — '@await' the async call instead`。
-- `NPAsync` 是保留类名。
+- 修饰符是签名的一部分：`@interface` 与 `@implementation` 必须一致——`'async' modifier mismatch on 'compute:': the @interface and @implementation disagree — the modifier is part of the method signature` 报 error。仅头文件声明的 `@interface` 方法豁免（跨 TU 安全）。
+- `async` 只修饰 `NPTask<T>` 返回类型，别的一律拒绝——`'async' requires return type 'NPTask<T>' — 'async' is a method modifier, not a type qualifier`（且必须恰一个类型参数）。
+- 任务句柄是一等值：`NPTask<T> *` 可作变量/参数/ivar（与旧 `NPAsync` 相反）——`@await t` 是唯一取值通道。
+- `NPTask` 是保留类名；`async` 已成关键字。
+- **入口 = 语句位**：`[f runAll];`（丢弃返回值）与语句位 `[t start];` 就是 async 入口——hosted 下就地驱动到完成（降为 `nepa_task_await`）；裸机只入队、等用户主循环。`main` 退出处不做兜底泵：ARC 的 scope-end release 比它更晚。
 
-Golden：`tests/golden/37_async_marker/`；负例在 `tests/negative/async_marker_*.np`。
+Golden：`tests/golden/37_async_modifier/`；负例在 `tests/negative/async_nptask_*.np`。
 
 ### 对象下标订阅（容器对象的 `a[0]`）
 

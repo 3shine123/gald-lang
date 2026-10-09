@@ -37,3 +37,5 @@
 #import "NPNumber.np"
 #import "NPError.nh"
 #import "NPError.np"
+#import "NPTask.nh"
+#import "NPTask.np"

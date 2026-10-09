@@ -7,7 +7,7 @@
  * Expected (exit != 0):
  *
  *     Type checking failed:
- *     [checker] tests/negative/null_to_nonnull.np:29:16: nullable value passed
+ *     [checker] tests/negative/null_to_nonnull.np:32:16: nullable value passed
  *     to nonnull parameter 'NPString' — the callee may assume it is non-nil;
  *     guard with 'if (x)' or pass a non-null value
  *

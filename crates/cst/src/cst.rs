@@ -432,8 +432,9 @@ pub enum CstDeclData {
         /// Trailing `@throws` / `@throws(T)` annotation (declaration position).
         /// `None` = not annotated. Compile-time only — never emitted to C.
         throws: Option<Box<CstType>>,
-        /// `NPAsync<T>` return-type marker: the parser unwraps it to `T` and
-        /// sets this flag (pure compile-time metadata, never emitted to C).
+        /// `async` return-type modifier (doc/async_nptask_plan.md). Always
+        /// false for plain C functions — the modifier is method syntax;
+        /// kept on the node for uniformity.
         async_marker: bool,
     },
     Variable {
@@ -505,7 +506,7 @@ pub enum CstDeclData {
         /// before `;` or `{`). `None` = not annotated. Compile-time only —
         /// never emitted to C. Distinct from the `@throw` statement.
         throws: Option<Box<CstType>>,
-        /// `NPAsync<T>` return-type marker (see Function).
+        /// `async` return-type modifier (see Function / doc/async_nptask_plan.md).
         async_marker: bool,
     },
     Namespace(Vec<CstDecl>),

@@ -352,7 +352,8 @@ pub struct AstDecl {
          /// `@throws` ("declared to throw, type unstated"). Compile-time only
          /// (checker reconciles it against `@throw` stmts) — never emitted to C.
          throws: Option<Box<AstType>>,
-         /// `NPAsync<T>` return-type marker (see Function).
+         /// `async` return-type modifier (doc/async_nptask_plan.md): set when
+         /// the declaration is spelled `async NPTask<T>`.
          async_marker: bool,
      },
  Ivar {
@@ -384,9 +385,10 @@ pub struct AstDecl {
         /// `@throws` ("declared to throw, type unstated"). Compile-time only —
         /// never emitted to C.
         throws: Option<Box<AstType>>,
-        /// `NPAsync<T>` return-type marker: parser unwrapped it to `T` and set
-        /// this flag. Compile-time metadata only — the emitted C signature is
-        /// just `T` (the async M2 driver already returns `T`).
+        /// `async` return-type modifier: the signature keeps the real
+        /// `NPTask<T>` type and this flag marks it suspending. Compile-time
+        /// metadata only — the emitted C signature is just `T` (the async M2
+        /// driver already returns `T`).
         async_marker: bool,
     },
     Variable {

@@ -18,8 +18,12 @@
 //!
 //! This module currently provides:
 //!   1. async classification (body contains `await` — chain infection),
-//!   2. diagnostics: calling a non-void async method from a sync context,
-//!   3. `@try` spanning an await rejection.
+//!   2. `@try` spanning an await rejection.
+//!
+//! Note (doc/async_nptask_plan.md): bare async calls from sync contexts are
+//! LEGAL — form A (lazy task creation, handle is a first-class value). The
+//! old M1 sync-context call check was removed when `NPTask<T>` handles
+//! became real values; `[task start]` / `@await` drive them afterwards.
 
 use nepa_ast::{AstDecl, AstDeclData, AstExpr, AstExprData, AstExprKind, AstStmt, AstStmtData};
 
@@ -126,8 +130,9 @@ pub fn method_is_async(m: &AstDecl) -> bool {
 /// before desugar runs; any error aborts compilation).
 pub struct AsyncDiagnostics {
     pub errors: Vec<String>,
-    /// Recoverable mismatches — mostly the `NPAsync<T>` marker reconciliation
-    /// (await-without-marker). Purple pipeline warnings; `-Werror` escalates.
+    /// Recoverable issues (currently unused: async-modifier reconciliation
+    /// reports errors in both directions). Purple pipeline warnings; `-Werror`
+    /// escalates.
     pub warnings: Vec<String>,
 }
 
@@ -140,8 +145,8 @@ pub struct AsyncDiagnostics {
 pub fn check_unit(unit: &nepa_ast::AstUnit) -> AsyncDiagnostics {
     let mut diags = AsyncDiagnostics { errors: Vec::new(), warnings: Vec::new() };
 
-    // ── NPAsync<T> marker reconciliation (AGENTS.md `NPAsync<T>` section) ──
-    // The marker is a return-type-position flag; the body's awaits decide the
+    // ── async-modifier reconciliation (doc/async_nptask_plan.md, stage B) ──
+    // The modifier is a signature-level flag; the body's awaits decide the
     // truth. Only implementations (methods WITH a body) reconcile against the
     // body — header-only `@interface` methods have no body to contradict
     // them (cross-TU safety, same rule as the proto-conformance check).
@@ -171,7 +176,7 @@ pub fn check_unit(unit: &nepa_ast::AstUnit) -> AsyncDiagnostics {
                     if let Some(&iface_marked) = iface_markers.get(&key) {
                         if iface_marked != marker {
                             diags.errors.push(format!(
-                                "{}:{}: 'NPAsync' marker mismatch on '{}': the @interface and @implementation disagree — the marker is part of the method signature",
+                                "{}:{}: 'async' modifier mismatch on '{}': the @interface and @implementation disagree — the modifier is part of the method signature",
                                 m.line, m.col, sym));
                         }
                     }
@@ -182,53 +187,29 @@ pub fn check_unit(unit: &nepa_ast::AstUnit) -> AsyncDiagnostics {
                     }
                 }
             }
-            AstDeclData::Function { async_marker, body: Some(b), .. } => {
-                let has_await = stmt_contains_await(b);
-                let sym = decl.name.clone().unwrap_or_else(|| "<function>".to_string());
-                reconcile_marker(*async_marker, has_await, &sym, decl.line, decl.col, &mut diags);
-            }
+            // Top-level functions (main included): `@await` here is the
+            // BLOCKING-join entry form (doc/async_nptask_plan.md — sync
+            // context awaits pump/drive the task inline). Legal without the
+            // modifier; only class methods reconcile.
             _ => {}
         }
     }
 
-    // Collect async method symbols + their return-voidness for call checks.
-    let mut async_methods: Vec<(String, bool)> = Vec::new(); // (owner_sel, returns_void)
-    for decl in &unit.decls {
-        if let AstDeclData::Class { methods, .. } = &decl.data {
-            for m in methods {
-                if let (AstDeclData::Method { return_type, .. }, Some(sym)) = (&m.data, &m.name) {
-                    let rt_void = return_type.as_ref().map_or(true, |t| {
-                        t.prim == nepa_cst::TypePrim::Void && !t.is_pointer
-                    });
-                    if method_is_async(m) {
-                        async_methods.push((sym.clone(), rt_void));
-                    }
-                }
-            }
-        }
-    }
-
     // Walk every method body AND top-level function body (main included):
-    // @try/await check + sync-context call check.
+    // @try/await check. (The M1 sync-context call check is gone — a bare
+    // async call from sync code is the legal lazy form A.)
     for decl in &unit.decls {
         match &decl.data {
             AstDeclData::Class { methods, .. } => {
                 for m in methods {
                     if let (AstDeclData::Method { body: Some(b), .. }, Some(sym)) = (&m.data, &m.name) {
-                        let is_async = method_is_async(m);
                         check_stmt_for_try_await(b, sym, &mut diags);
-                        if !is_async {
-                            check_sync_calls_async(b, sym, &async_methods, &mut diags);
-                        }
                     }
                 }
             }
             AstDeclData::Function { body: Some(b), .. } => {
-                // Top-level functions (including main) are always synchronous
-                // contexts — a C function cannot await.
                 let sym = decl.name.clone().unwrap_or_else(|| "<function>".to_string());
                 check_stmt_for_try_await(b, &sym, &mut diags);
-                check_sync_calls_async(b, &sym, &async_methods, &mut diags);
             }
             _ => {}
         }
@@ -236,12 +217,14 @@ pub fn check_unit(unit: &nepa_ast::AstUnit) -> AsyncDiagnostics {
     diags
 }
 
-/// NPAsync<T> reconciliation table (AGENTS.md `NPAsync<T>` section):
+/// Reconcile the `async` return-type modifier against the body's awaits
+/// (doc/async_nptask_plan.md, stage B). The modifier is part of the
+/// signature, so a lying signature is an error in BOTH directions:
 ///   marked + await     → ok
-///   marked, no await   → error — the marker must not lie (same philosophy as
-///                        bare `@throws` requiring a real throw)
-///   await, unmarked    → warning — the "don't forget to mark" nudge
-///                        (`-Werror` escalates)
+///   marked, no await   → error — the modifier must not lie (same philosophy
+///                        as bare `@throws` requiring a real throw)
+///   await, unmarked    → error — the signature is lying: a suspending method
+///                        MUST be declared `async NPTask<T>`
 ///   unmarked, no await → ok
 fn reconcile_marker(
     marked: bool,
@@ -253,11 +236,11 @@ fn reconcile_marker(
 ) {
     if marked && !has_await {
         diags.errors.push(format!(
-            "{}:{}: '{}' is marked 'NPAsync<T>' but its body never suspends — remove the marker or add an '@await'",
+            "{}:{}: '{}' is declared 'async' but its body never suspends — drop the modifier or add an '@await'",
             line, col, sym));
     } else if !marked && has_await {
-        diags.warnings.push(format!(
-            "{}:{}: '{}' contains '@await' but its return type is not marked 'NPAsync<T>' — mark it so callers can see it suspends",
+        diags.errors.push(format!(
+            "{}:{}: '{}' contains '@await' but is not declared 'async NPTask<T>' — a suspending method must declare the async modifier",
             line, col, sym));
     }
 }
@@ -298,80 +281,6 @@ fn check_stmt_for_try_await(s: &AstStmt, owner: &str, diags: &mut AsyncDiagnosti
             check_stmt_for_try_await(body, owner, diags);
         }
         AstStmtData::Default(body) => check_stmt_for_try_await(body, owner, diags),
-        _ => {}
-    }
-}
-
-/// In a synchronous (non-async) method, reject calls to non-void async
-/// methods: the state-machine rewrite gives them a signature the caller
-/// cannot consume, and silently blocking is forbidden by design.
-fn check_sync_calls_async(
-    s: &AstStmt,
-    owner: &str,
-    async_methods: &[(String, bool)],
-    diags: &mut AsyncDiagnostics,
-) {
-    match &s.data {
-        AstStmtData::Expr(e) => check_expr_sync_calls(e, owner, async_methods, diags),
-        AstStmtData::Compound(stmts) => {
-            for st in stmts { check_sync_calls_async(st, owner, async_methods, diags); }
-        }
-        AstStmtData::If { cond, then, else_ } => {
-            check_expr_sync_calls(cond, owner, async_methods, diags);
-            check_sync_calls_async(then, owner, async_methods, diags);
-            if let Some(e) = else_ { check_sync_calls_async(e, owner, async_methods, diags); }
-        }
-        AstStmtData::While { cond, body } | AstStmtData::Do { body, cond } => {
-            check_expr_sync_calls(cond, owner, async_methods, diags);
-            check_sync_calls_async(body, owner, async_methods, diags);
-        }
-        AstStmtData::For { init, cond, incr, body } => {
-            if let Some(i) = init { check_sync_calls_async(i, owner, async_methods, diags); }
-            if let Some(c) = cond { check_expr_sync_calls(c, owner, async_methods, diags); }
-            if let Some(u) = incr { check_expr_sync_calls(u, owner, async_methods, diags); }
-            check_sync_calls_async(body, owner, async_methods, diags);
-        }
-        AstStmtData::Return(Some(e)) => check_expr_sync_calls(e, owner, async_methods, diags),
-        _ => {}
-    }
-}
-
-fn check_expr_sync_calls(
-    e: &AstExpr,
-    owner: &str,
-    async_methods: &[(String, bool)],
-    diags: &mut AsyncDiagnostics,
-) {
-    match &e.data {
-        AstExprData::Await(inner) => check_expr_sync_calls(inner, owner, async_methods, diags),
-        AstExprData::MsgSend { receiver, args, selector, .. } => {
-            check_expr_sync_calls(receiver, owner, async_methods, diags);
-            for a in args { check_expr_sync_calls(a, owner, async_methods, diags); }
-            let sel_clean = selector.trim_end_matches(':');
-            for (sym, returns_void) in async_methods {
-                let sym_clean = sym.trim_end_matches(':');
-                if sym_clean == sel_clean && !*returns_void {
-                    diags.errors.push(format!(
-                        "{}: cannot call suspending method '{}' from non-async \
-                         context — async methods with a return value must be \
-                         awaited from another async method; wrap the call in \
-                         an async void entry method",
-                        owner, selector
-                    ));
-                }
-            }
-        }
-        AstExprData::Assign { target, value } => {
-            check_expr_sync_calls(target, owner, async_methods, diags);
-            check_expr_sync_calls(value, owner, async_methods, diags);
-        }
-        AstExprData::Binary { left, right, .. } => {
-            check_expr_sync_calls(left, owner, async_methods, diags);
-            check_expr_sync_calls(right, owner, async_methods, diags);
-        }
-        AstExprData::Unary { operand, .. } | AstExprData::Cast { expr: operand, .. } => {
-            check_expr_sync_calls(operand, owner, async_methods, diags);
-        }
         _ => {}
     }
 }
@@ -442,30 +351,23 @@ pub fn desugar_method_body(body: &mut AstStmt) {
         match &mut e.data {
             AstExprData::Await(inner) => {
                 lower_awaits_expr(inner);
-                // `await e` → `nepa_task_resume(task), (e)`
-                // Comma: first the hook (advances the task state machine),
-                // then the awaited expression's value is the result. (M1: entry is
-                // NULL so resume finishes the task immediately and returns 1 — a
-                // pure sequencing hook establishing the API contract for M2.)
-                let hook = AstExpr {
-                    kind: AstExprKind::FuncCall, expr_type: None, line, col,
-                    data: AstExprData::FuncCall {
-                        func: None,
-                        name: "nepa_task_resume".to_string(),
-                        callee: None,
-                        args: vec![AstExpr {
-                            kind: AstExprKind::VarRef, expr_type: None, line, col,
-                            data: AstExprData::VarRef { sym: None, name: "__nepa_task".to_string() },
-                        }],
-                    },
-                };
+                // NPTask design (doc/async_nptask_plan.md, stage D):
+                // `@await e` → `nepa_task_await(e)` — the awaited expression
+                // is an async call (lazy task creation) or an NPTask handle;
+                // the runtime auto-starts and blocks/suspends, caching the
+                // result (multi-await safe).
                 let taken = std::mem::replace(&mut **inner, AstExpr {
                     kind: AstExprKind::Int, expr_type: None, line, col,
                     data: AstExprData::Int(0),
                 });
                 *e = AstExpr {
-                    kind: AstExprKind::Comma, expr_type: None, line, col,
-                    data: AstExprData::Comma(vec![hook, taken]),
+                    kind: AstExprKind::FuncCall, expr_type: None, line, col,
+                    data: AstExprData::FuncCall {
+                        func: None,
+                        name: "nepa_task_await".to_string(),
+                        callee: None,
+                        args: vec![taken],
+                    },
                 };
             }
             AstExprData::MsgSend { receiver, args, .. } => {
@@ -583,6 +485,134 @@ pub fn desugar_unit(unit: &mut nepa_ast::AstUnit) {
             }
         }
     }
+    // `[task start]` appears in CALLER bodies too (e.g. main), which the
+    // async-method pass above never visits — rewrite it unit-wide. (M1 path:
+    // empty context — the checker-annotated expr_type decides. Not hosted:
+    // M1 has no entry drive, so a start stays an enqueue.)
+    let mut ctx = AsyncCtx::default();
+    for decl in &mut unit.decls {
+        lower_task_starts_decl(decl, &mut ctx, false);
+    }
+}
+
+/// `[task start]` on an NPTask handle → `nepa_task_start(task)`. The handle
+/// is a runtime struct, not an NPObject — a vtable message send would be
+/// undefined (doc/async_nptask_plan.md, stage D).
+fn is_task_start_send(e: &AstExpr) -> bool {
+    if let AstExprData::MsgSend { receiver, args, .. } = &e.data {
+        if args.is_empty() {
+            if let Some(t) = &receiver.expr_type {
+                if t.is_pointer && t.name.as_deref().map_or(false, |n| n == "NPTask" || n.starts_with("NPTask<")) {
+                    return true;
+                }
+            }
+        }
+    }
+    false
+}
+
+/// `drive` = this expression sits at STATEMENT position of a hosted unit: a
+/// `[t start]` there becomes a blocking drive (`nepa_task_await`) instead of a
+/// bare enqueue. The doc's entry idiom (`NPTask *t = [f run]; [t start];`)
+/// must run while the receiver is still ARC-alive — an end-of-main pump cannot
+/// guarantee that (ARC's scope-end release lands first: SIGSEGV, lldb-verified
+/// on golden 37). Freestanding passes `drive = false` (enqueue only).
+fn lower_task_starts_expr(e: &mut AstExpr, ctx: &AsyncCtx, drive: bool) {
+    if is_task_start_send(e) || {
+        // `[t start]` with t a known task var (desugar precedes the checker,
+        // so expr_type is unannotated — decide from the collected context).
+        matches!(&e.data, AstExprData::MsgSend { receiver, .. }
+            if matches!(&receiver.data, AstExprData::VarRef { name, .. }
+                if ctx.task_vars.contains(name)))
+    } {
+        let line = e.line;
+        let col = e.col;
+        let taken = std::mem::replace(e, int_expr(0, line, col));
+        let AstExprData::MsgSend { receiver, .. } = taken.data else { unreachable!() };
+        let start_fn = if drive { "nepa_task_await" } else { "nepa_task_start" };
+        *e = AstExpr {
+            kind: AstExprKind::FuncCall, expr_type: None, line, col,
+            data: AstExprData::FuncCall {
+                func: None, name: start_fn.to_string(), callee: None,
+                args: vec![*receiver],
+            },
+        };
+        return;
+    }
+    match &mut e.data {
+        AstExprData::MsgSend { receiver, args, .. } => {
+            lower_task_starts_expr(receiver, ctx, false);
+            for a in args.iter_mut() { lower_task_starts_expr(a, ctx, false); }
+        }
+        AstExprData::FuncCall { callee, args, .. } => {
+            if let Some(c) = callee { lower_task_starts_expr(c, ctx, false); }
+            for a in args.iter_mut() { lower_task_starts_expr(a, ctx, false); }
+        }
+        AstExprData::Unary { operand, .. } => lower_task_starts_expr(operand, ctx, false),
+        AstExprData::Binary { left, right, .. } => {
+            lower_task_starts_expr(left, ctx, false);
+            lower_task_starts_expr(right, ctx, false);
+        }
+        AstExprData::Assign { target, value } => {
+            lower_task_starts_expr(target, ctx, false);
+            lower_task_starts_expr(value, ctx, false);
+        }
+        AstExprData::Comma(parts) => { for p in parts.iter_mut() { lower_task_starts_expr(p, ctx, false); } }
+        AstExprData::Paren(inner) | AstExprData::Cast { expr: inner, .. } => lower_task_starts_expr(inner, ctx, false),
+        _ => {}
+    }
+}
+
+fn lower_task_starts_stmt(s: &mut AstStmt, ctx: &mut AsyncCtx, hosted: bool) {
+    match &mut s.data {
+        AstStmtData::Expr(e) => lower_task_starts_expr(e, ctx, hosted),
+        AstStmtData::Return(Some(e)) => lower_task_starts_expr(e, ctx, false),
+        AstStmtData::If { cond, then, else_ } => {
+            lower_task_starts_expr(cond, ctx, false);
+            lower_task_starts_stmt(then, ctx, hosted);
+            if let Some(e) = else_ { lower_task_starts_stmt(e, ctx, hosted); }
+        }
+        AstStmtData::While { cond, body } | AstStmtData::Do { body, cond } => {
+            lower_task_starts_expr(cond, ctx, false);
+            lower_task_starts_stmt(body, ctx, hosted);
+        }
+        AstStmtData::For { init, cond, incr, body } => {
+            if let Some(i) = init { lower_task_starts_stmt(i, ctx, hosted); }
+            if let Some(c) = cond { lower_task_starts_expr(c, ctx, false); }
+            if let Some(u) = incr { lower_task_starts_expr(u, ctx, false); }
+            lower_task_starts_stmt(body, ctx, hosted);
+        }
+        AstStmtData::Compound(stmts) => { for st in stmts.iter_mut() { lower_task_starts_stmt(st, ctx, hosted); } }
+        AstStmtData::Decl(d) => lower_task_starts_decl(d, ctx, hosted),
+        _ => {}
+    }
+}
+
+fn lower_task_starts_decl(d: &mut AstDecl, ctx: &mut AsyncCtx, hosted: bool) {
+    match &mut d.data {
+        AstDeclData::Variable { var_type, init, next, .. } => {
+            // Collect task-handle variables unit-wide: any variable whose
+            // declared type is NPTask* (source order — later `[t start]`
+            // sends in any body, main included, can then match).
+            if let Some(vt) = var_type.as_deref() {
+                if vt.is_pointer && vt.name.as_deref().map_or(false, |n| n == "NPTask" || n.starts_with("NPTask<")) {
+                    if let Some(n) = &d.name { ctx.task_vars.insert(n.clone()); }
+                }
+            }
+            // A variable initialiser is not statement position: keep enqueue.
+            if let Some(i) = init { lower_task_starts_expr(i, ctx, false); }
+            if let Some(n) = next { lower_task_starts_decl(n, ctx, hosted); }
+        }
+        AstDeclData::Function { body: Some(b), .. } => lower_task_starts_stmt(b, ctx, hosted),
+        AstDeclData::Class { methods, .. } => {
+            for m in methods.iter_mut() {
+                if let AstDeclData::Method { body: Some(b), .. } = &mut m.data {
+                    lower_task_starts_stmt(b, ctx, hosted);
+                }
+            }
+        }
+        _ => {}
+    }
 }
 
 // ─── Milestone 2: real state machine (frame + entry fn + driver) ────────────
@@ -612,12 +642,13 @@ fn sanitize_symbol(sym: &str) -> String {
 /// (each awaited expression evaluates synchronously inside its state), so
 /// observable behavior matches M1 — but the frame carries the params/locals
 /// and the entry is externally drivable (M3's scheduler can call resume).
-pub fn desugar_method_m2(
+fn desugar_method_m2(
     method_symbol: &str,
     params: &[(String, AstType)],
     body: &mut AstStmt,
     top_decls: &mut Vec<AstDecl>,
     return_type: Option<&AstType>,
+    async_ctx: &mut AsyncCtx,
 ) {
     // 1. Frame carries ONLY the params in M2: the synchronous-drive model
     // never suspends between a local's declaration and its last use, so
@@ -680,16 +711,18 @@ pub fn desugar_method_m2(
     // the state machine has one state per suspension point (all running
     // synchronously in M2's drive model).
     let mut state_counter: i32 = 1;
-    lower_awaits_m2(body, &entry_name, &mut state_counter);
+    let mut ctx = std::mem::take(async_ctx);
+    lower_awaits_m2(body, &entry_name, &mut state_counter, &mut ctx);
+    *async_ctx = ctx;
     // Final state number (the completion state).
     let final_state = state_counter;
 
     // 4. Entry function:
-    //   static int nepa_async_state_<M>(NPTask *t) {
-    //     struct <M>_frame *f = (struct <M>_frame *)t->frame;  // M3 uses f
-    //     switch (t->state) {
+    //   static int nepa_async_state_<M>(NPTask *__nepa_task) {
+    //     struct <M>_frame *__nepa_f = (struct <M>_frame *)__nepa_task->frame;
+    //     switch (__nepa_task->state) {
     //       case 1: ...body with lowered awaits...
-    //       case <final>: t->state = -1; return 1;
+    //       case <final>: __nepa_task->state = -1; return 1;
     //     }
     //     return 1;
     //   }
@@ -709,8 +742,9 @@ pub fn desugar_method_m2(
     let _ = (body_kind, body_line, body_col);
 
     // Build the switch: case 1 = body; case final = finish.
-    // The entry can only see the task: rewrite param references to `f->param`
-    // (f = the frame) and `self` to `t->self_obj`, then rewrite returns to
+    // The entry can only see the task: rewrite param references to
+    // `__nepa_f->param` (the frame) and `self` to `__nepa_task->self_obj`,
+    // then rewrite returns to
     // the completion protocol (result/state/return 1).
     let mut case_body_stmts = body_stmts;
     // Only params are rewritten to `__nepa_f->param` (the frame carries them
@@ -723,7 +757,7 @@ pub fn desugar_method_m2(
         rewrite_entry_refs_stmt(stmt, &params_only);
     }
     rewrite_returns_to_result(&mut case_body_stmts);
-    // struct <FT> *f = (struct <FT> *)t->frame;   (first statement of case 1)
+    // struct <FT> *__nepa_f = (struct <FT> *)__nepa_task->frame;  (case 1 head)
     let f_decl = AstStmt {
         kind: AstStmtKind::Decl, line: body.line, col: body.col,
         data: AstStmtData::Decl(AstDecl {
@@ -752,7 +786,7 @@ pub fn desugar_method_m2(
                             t.subtype = Some(Box::new(st));
                             t
                         },
-                        expr: Box::new(member_expr("t", "frame", body.line, body.col)),
+                        expr: Box::new(member_expr("__nepa_task", "frame", body.line, body.col)),
                     },
                 })),
                 is_static: false, is_extern: false, is_const: false,
@@ -762,13 +796,13 @@ pub fn desugar_method_m2(
         }),
     };
     case_body_stmts.insert(0, f_decl);
-    // Append: t->state = -1; return 1;
+    // Append: __nepa_task->state = -1; return 1;
     case_body_stmts.push(AstStmt {
         kind: AstStmtKind::Expr, line: body.line, col: body.col,
         data: AstStmtData::Expr(AstExpr {
             kind: AstExprKind::Assign, expr_type: None, line: body.line, col: body.col,
             data: AstExprData::Assign {
-                target: Box::new(member_expr("t", "state", body.line, body.col)),
+                target: Box::new(member_expr("__nepa_task", "state", body.line, body.col)),
                 value: Box::new(int_expr(-1, body.line, body.col)),
             },
         }),
@@ -800,7 +834,7 @@ pub fn desugar_method_m2(
                         data: AstStmtData::Expr(AstExpr {
                             kind: AstExprKind::Assign, expr_type: None, line: body.line, col: body.col,
                             data: AstExprData::Assign {
-                                target: Box::new(member_expr("t", "state", body.line, body.col)),
+                                target: Box::new(member_expr("__nepa_task", "state", body.line, body.col)),
                                 value: Box::new(int_expr(-1, body.line, body.col)),
                             },
                         }),
@@ -816,7 +850,7 @@ pub fn desugar_method_m2(
     let switch_stmt = AstStmt {
         kind: AstStmtKind::Switch, line: body.line, col: body.col,
         data: AstStmtData::Switch {
-            expr: Box::new(member_expr("t", "state", body.line, body.col)),
+            expr: Box::new(member_expr("__nepa_task", "state", body.line, body.col)),
             body: Box::new(AstStmt {
                 kind: AstStmtKind::Compound, line: body.line, col: body.col,
                 data: AstStmtData::Compound(vec![case1, case_final]),
@@ -824,8 +858,11 @@ pub fn desugar_method_m2(
         },
     };
 
-    // Entry params: (NPTask *t)
-    let entry_param = cst_param("NPTask", "t");
+    // Entry params: (NPTask *__nepa_task). The name is deliberately RESERVED:
+    // a bare `t` collides with a same-named user local in the rewritten body —
+    // `NPTask<int> *t = [self cached]; @await t;` expanded `t->self_obj`
+    // against the *uninitialised* new local (SIGSEGV at 0x18, lldb-confirmed).
+    let entry_param = cst_param("NPTask", "__nepa_task");
     let entry_decl = AstDecl {
         kind: AstDeclKind::Function,
         name: Some(entry_name.clone()),
@@ -848,7 +885,7 @@ pub fn desugar_method_m2(
                         data: AstStmtData::Expr(AstExpr {
                             kind: AstExprKind::Assign, expr_type: None, line: body.line, col: body.col,
                             data: AstExprData::Assign {
-                                target: Box::new(member_expr("t", "state", body.line, body.col)),
+                                target: Box::new(member_expr("__nepa_task", "state", body.line, body.col)),
                                 value: Box::new(int_expr(-1, body.line, body.col)),
                             },
                         }),
@@ -867,10 +904,10 @@ pub fn desugar_method_m2(
     };
     top_decls.push(entry_decl);
 
-    // 5. Rewrite the method body: create + join + return cast result.
-    //    NPTask *t = nepa_task_create(nepa_async_state_<M>, self, sizeof(struct <M>_frame));
-    //    join → nepa_task_join(t) discards; result read needs join to return it:
-    //    use (return_type)(long)nepa_task_join(t) for non-void, else plain join.
+    // NPTask design (doc/async_nptask_plan.md, stage D): the driver is LAZY —
+    // create the task, fill the frame params, and return the handle. No join:
+    // execution starts at [task start] / @await. The method's C return type is
+    // NPTask * (codegen renders NPTask<T> as NPTask *).
     let create_call = AstExpr {
         kind: AstExprKind::FuncCall, expr_type: None, line: body.line, col: body.col,
         data: AstExprData::FuncCall {
@@ -993,37 +1030,15 @@ pub fn desugar_method_m2(
             }),
         });
     }
-    // Original body statements follow the pre, then post + return.
-    let orig_stmt2 = std::mem::replace(body, AstStmt {
-        kind: AstStmtKind::Compound, line: body.line, col: body.col,
-        data: AstStmtData::Compound(Vec::new()),
-    });
-    let orig_stmts = match orig_stmt2.data {
-        AstStmtData::Compound(inner) => inner,
-        other => vec![AstStmt { kind: orig_stmt2.kind, line: orig_stmt2.line, col: orig_stmt2.col, data: other }],
-    };
-
-    // Rewrite `return e` in the original statements: result → task->result.
-    let mut rewritten = orig_stmts;
-    rewrite_returns_to_result(&mut rewritten);
-
+    // Lazy driver: no join — the body is just create + param fill + return
+    // the handle. (The old eager driver's join/return-cast is gone; results
+    // are read via nepa_task_await.)
+    let _ = is_void;
     let mut out = pre;
-    out.extend(rewritten);
-    out.extend(post);
-    if !is_void {
-        // return (T)__nepa_r;
-        let rt = return_type.cloned().unwrap_or_else(|| AstType::new(TypePrim::Int));
-        out.push(AstStmt {
-            kind: AstStmtKind::Return, line: body.line, col: body.col,
-            data: AstStmtData::Return(Some(Box::new(AstExpr {
-                kind: AstExprKind::Cast, expr_type: None, line: body.line, col: body.col,
-                data: AstExprData::Cast {
-                    target_type: rt.clone(),
-                    expr: Box::new(ident_expr("__nepa_r", body.line, body.col)),
-                },
-            }))),
-        });
-    }
+    out.push(AstStmt {
+        kind: AstStmtKind::Return, line: body.line, col: body.col,
+        data: AstStmtData::Return(Some(Box::new(ident_expr("__nepa_task", body.line, body.col)))),
+    });
     *body = AstStmt { kind: AstStmtKind::Compound, line: body.line, col: body.col, data: AstStmtData::Compound(out) };
 }
 
@@ -1033,98 +1048,175 @@ pub fn desugar_method_m2(
 /// `(t->state = N, (e))` where N is the next state number. In M2's drive
 /// model the state write is bookkeeping only (the body completes within one
 /// resume); states still exist so M3 can insert real suspension points.
-fn lower_awaits_m2(s: &mut AstStmt, entry: &str, state: &mut i32) {
+/// Desugar context: which selectors are async methods (colon-stripped) and
+/// which local variables are known to hold task handles (populated during the
+/// walk, in source order). Desugar runs BEFORE the checker, so expr_type is
+/// not annotated — all "does this yield a task?" decisions come from here.
+#[derive(Default)]
+struct AsyncCtx {
+    async_sels: std::collections::HashSet<String>,
+    task_vars: std::collections::HashSet<String>,
+}
+
+/// Does this expression evaluate to an NPTask handle? (async call whose
+/// selector is a known async method, or a variable recorded as a task handle)
+fn expr_yields_task(e: &AstExpr, ctx: &AsyncCtx) -> bool {
+    match &e.data {
+        AstExprData::VarRef { name, .. } => ctx.task_vars.contains(name),
+        AstExprData::MsgSend { selector, .. } => {
+            ctx.async_sels.contains(&selector.replace(':', ""))
+        }
+        AstExprData::Paren(inner) | AstExprData::Cast { expr: inner, .. } => {
+            expr_yields_task(inner, ctx)
+        }
+        _ => false,
+    }
+}
+
+fn lower_awaits_m2(s: &mut AstStmt, entry: &str, state: &mut i32, ctx: &mut AsyncCtx) {
     match &mut s.data {
-        AstStmtData::Expr(e) => lower_awaits_m2_expr(e, state),
-        AstStmtData::Compound(stmts) => { for st in stmts { lower_awaits_m2(st, entry, state); } }
+        AstStmtData::Expr(e) => lower_awaits_m2_expr(e, state, ctx),
+        AstStmtData::Compound(stmts) => { for st in stmts { lower_awaits_m2(st, entry, state, ctx); } }
         AstStmtData::If { cond, then, else_ } => {
-            lower_awaits_m2_expr(cond, state);
-            lower_awaits_m2(then, entry, state);
-            if let Some(e) = else_ { lower_awaits_m2(e, entry, state); }
+            lower_awaits_m2_expr(cond, state, ctx);
+            lower_awaits_m2(then, entry, state, ctx);
+            if let Some(e) = else_ { lower_awaits_m2(e, entry, state, ctx); }
         }
         AstStmtData::While { cond, body } | AstStmtData::Do { body, cond } => {
-            lower_awaits_m2_expr(cond, state);
-            lower_awaits_m2(body, entry, state);
+            lower_awaits_m2_expr(cond, state, ctx);
+            lower_awaits_m2(body, entry, state, ctx);
         }
         AstStmtData::For { init, cond, incr, body } => {
-            if let Some(i) = init { lower_awaits_m2(i, entry, state); }
-            if let Some(c) = cond { lower_awaits_m2_expr(c, state); }
-            if let Some(u) = incr { lower_awaits_m2_expr(u, state); }
-            lower_awaits_m2(body, entry, state);
+            if let Some(i) = init { lower_awaits_m2(i, entry, state, ctx); }
+            if let Some(c) = cond { lower_awaits_m2_expr(c, state, ctx); }
+            if let Some(u) = incr { lower_awaits_m2_expr(u, state, ctx); }
+            lower_awaits_m2(body, entry, state, ctx);
         }
-        AstStmtData::Return(Some(e)) => lower_awaits_m2_expr(e, state),
-        AstStmtData::Decl(d) => lower_awaits_m2_decl(d, state),
+        AstStmtData::Return(Some(e)) => lower_awaits_m2_expr(e, state, ctx),
+        AstStmtData::Decl(d) => lower_awaits_m2_decl(d, state, ctx),
         _ => {}
     }
     let _ = entry;
 }
 
-fn lower_awaits_m2_decl(d: &mut AstDecl, state: &mut i32) {
-    if let AstDeclData::Variable { init, next, .. } = &mut d.data {
-        if let Some(i) = init { lower_awaits_m2_expr(i, state); }
-        if let Some(n) = next { lower_awaits_m2_decl(n, state); }
+fn lower_awaits_m2_decl(d: &mut AstDecl, state: &mut i32, ctx: &mut AsyncCtx) {
+    if let AstDeclData::Variable { var_type, init, next, .. } = &mut d.data {
+        // A variable DECLARED as an NPTask handle is a task var for the rest of
+        // the walk regardless of its initializer: a sync method may hand back a
+        // task object (`NPTask<int> *t = [self loadCachedValue];`), and the
+        // design allows `@await` on any `NPTask<T> *` expression — a variable,
+        // ivar or return value — not only on the result of an async call
+        // (doc/async_nptask_plan.md §调用点语义). The initializer-shape probe
+        // below cannot see this: its selector is not an async method.
+        if let Some(vt) = var_type.as_deref() {
+            if vt.is_pointer
+                && vt.name.as_deref().map_or(false, |n| n == "NPTask" || n.starts_with("NPTask<"))
+            {
+                if let Some(n) = &d.name { ctx.task_vars.insert(n.clone()); }
+            }
+        }
+        if let Some(i) = init {
+            lower_awaits_m2_expr(i, state, ctx);
+            // A variable initialized from a task-yielding expression becomes
+            // a task handle for the rest of the walk (source order).
+            if expr_yields_task(i, ctx) {
+                if let Some(n) = &d.name { ctx.task_vars.insert(n.clone()); }
+            }
+        }
+        if let Some(n) = next { lower_awaits_m2_decl(n, state, ctx); }
     }
 }
 
-fn lower_awaits_m2_expr(e: &mut AstExpr, state: &mut i32) {
+fn lower_awaits_m2_expr(e: &mut AstExpr, state: &mut i32, ctx: &mut AsyncCtx) {
     let line = e.line;
     let col = e.col;
     match &mut e.data {
         AstExprData::Await(inner) => {
-            lower_awaits_m2_expr(inner, state);
+            lower_awaits_m2_expr(inner, state, ctx);
             *state += 1;
             let n = *state;
-            // (t->state = N, e)
+            // (t->state = N, (long)nepa_task_await(e))
+            // NPTask design (stage D): async calls are LAZY — the awaited
+            // expression evaluates to an NPTask handle, and the await must
+            // drive it (nepa_task_await blocks/drives inline, caches the
+            // result) instead of synchronously evaluating the handle.
             let state_assign = AstExpr {
                 kind: AstExprKind::Assign, expr_type: None, line, col,
                 data: AstExprData::Assign {
-                    target: Box::new(member_expr("t", "state", line, col)),
+                    target: Box::new(member_expr("__nepa_task", "state", line, col)),
                     value: Box::new(int_expr(n as i64, line, col)),
                 },
             };
             let taken = std::mem::replace(&mut **inner, int_expr(0, line, col));
+            // Only wrap when the awaited expression yields a task handle.
+            // NOTE: desugar runs BEFORE the checker, so expr_type is not
+            // annotated yet — decide from the AST shape: a message send whose
+            // selector names an async method, or a variable known to hold a
+            // task handle (both collected unit-wide in desugar_unit_m2).
+            let yields_task = expr_yields_task(&taken, ctx);
+            if !yields_task {
+                *e = AstExpr {
+                    kind: AstExprKind::Comma, expr_type: None, line, col,
+                    data: AstExprData::Comma(vec![state_assign, taken]),
+                };
+                return;
+            }
+            let await_call = AstExpr {
+                kind: AstExprKind::FuncCall, expr_type: None, line, col,
+                data: AstExprData::FuncCall {
+                    func: None, name: "nepa_task_await".to_string(), callee: None,
+                    args: vec![taken],
+                },
+            };
+            let cast = AstExpr {
+                kind: AstExprKind::Cast, expr_type: None, line, col,
+                data: AstExprData::Cast {
+                    target_type: AstType::new(TypePrim::Long),
+                    expr: Box::new(await_call),
+                },
+            };
             *e = AstExpr {
                 kind: AstExprKind::Comma, expr_type: None, line, col,
-                data: AstExprData::Comma(vec![state_assign, taken]),
+                data: AstExprData::Comma(vec![state_assign, cast]),
             };
         }
         AstExprData::MsgSend { receiver, args, .. } => {
-            lower_awaits_m2_expr(receiver, state);
-            for a in args.iter_mut() { lower_awaits_m2_expr(a, state); }
+            lower_awaits_m2_expr(receiver, state, ctx);
+            for a in args.iter_mut() { lower_awaits_m2_expr(a, state, ctx); }
         }
         AstExprData::FuncCall { callee, args, .. } => {
-            if let Some(c) = callee { lower_awaits_m2_expr(c, state); }
-            for a in args.iter_mut() { lower_awaits_m2_expr(a, state); }
+            if let Some(c) = callee { lower_awaits_m2_expr(c, state, ctx); }
+            for a in args.iter_mut() { lower_awaits_m2_expr(a, state, ctx); }
         }
-        AstExprData::Unary { operand, .. } => lower_awaits_m2_expr(operand, state),
+        AstExprData::Unary { operand, .. } => lower_awaits_m2_expr(operand, state, ctx),
         AstExprData::Binary { left, right, .. } => {
-            lower_awaits_m2_expr(left, state);
-            lower_awaits_m2_expr(right, state);
+            lower_awaits_m2_expr(left, state, ctx);
+            lower_awaits_m2_expr(right, state, ctx);
         }
         AstExprData::Assign { target, value } => {
-            lower_awaits_m2_expr(target, state);
-            lower_awaits_m2_expr(value, state);
+            lower_awaits_m2_expr(target, state, ctx);
+            lower_awaits_m2_expr(value, state, ctx);
         }
-        AstExprData::Cast { expr, .. } => lower_awaits_m2_expr(expr, state),
+        AstExprData::Cast { expr, .. } => lower_awaits_m2_expr(expr, state, ctx),
         AstExprData::Ternary { cond, then, else_ } => {
-            lower_awaits_m2_expr(cond, state);
-            lower_awaits_m2_expr(then, state);
-            lower_awaits_m2_expr(else_, state);
+            lower_awaits_m2_expr(cond, state, ctx);
+            lower_awaits_m2_expr(then, state, ctx);
+            lower_awaits_m2_expr(else_, state, ctx);
         }
-        AstExprData::Comma(exprs) => { for x in exprs.iter_mut() { lower_awaits_m2_expr(x, state); } }
+        AstExprData::Comma(exprs) => { for x in exprs.iter_mut() { lower_awaits_m2_expr(x, state, ctx); } }
         AstExprData::Subscript { object, key } => {
-            lower_awaits_m2_expr(object, state);
-            lower_awaits_m2_expr(key, state);
+            lower_awaits_m2_expr(object, state, ctx);
+            lower_awaits_m2_expr(key, state, ctx);
         }
         AstExprData::InitList(items) | AstExprData::ArrayLit(items) => {
-            for x in items.iter_mut() { lower_awaits_m2_expr(x, state); }
+            for x in items.iter_mut() { lower_awaits_m2_expr(x, state, ctx); }
         }
         _ => {}
     }
 }
 
 /// Rewrite references inside the entry body: params → `__nepa_f->param`,
-/// `self` → `t->self_obj`. The entry only receives the task, so all
+/// `self` → `__nepa_task->self_obj`. The entry only receives the task, so all
 /// param/self access must go through the frame / task.
 fn rewrite_entry_refs_stmt(s: &mut AstStmt, params: &[(String, AstType)]) {
     match &mut s.data {
@@ -1166,8 +1258,8 @@ fn rewrite_entry_refs_expr(e: &mut AstExpr, params: &[(String, AstType)]) {
     match &mut e.data {
         AstExprData::VarRef { name, .. } => {
             if name == "self" {
-                // t->self_obj
-                *e = member_expr("t", "self_obj", line, col);
+                // __nepa_task->self_obj
+                *e = member_expr("__nepa_task", "self_obj", line, col);
             } else if params.iter().any(|(n, _)| n == name) {
                 // __nepa_f->param
                 *e = member_expr("__nepa_f", name, line, col);
@@ -1233,7 +1325,7 @@ fn rewrite_returns_stmt(s: &mut AstStmt) {
                     data: AstStmtData::Expr(AstExpr {
                         kind: AstExprKind::Assign, expr_type: None, line, col,
                         data: AstExprData::Assign {
-                            target: Box::new(member_expr("t", "result", line, col)),
+                            target: Box::new(member_expr("__nepa_task", "result", line, col)),
                             value: Box::new(AstExpr {
                                 kind: AstExprKind::Cast, expr_type: None, line, col,
                                 data: AstExprData::Cast {
@@ -1256,7 +1348,7 @@ fn rewrite_returns_stmt(s: &mut AstStmt) {
                 data: AstStmtData::Expr(AstExpr {
                     kind: AstExprKind::Assign, expr_type: None, line, col,
                     data: AstExprData::Assign {
-                        target: Box::new(member_expr("t", "state", line, col)),
+                        target: Box::new(member_expr("__nepa_task", "state", line, col)),
                         value: Box::new(int_expr(-1, line, col)),
                     },
                 }),
@@ -1365,7 +1457,23 @@ fn cst_param(type_name: &str, name: &str) -> nepa_cst::CstParam {
 }
 
 /// Apply the M2 desugar over the whole unit.
-pub fn desugar_unit_m2(unit: &mut nepa_ast::AstUnit) {
+pub fn desugar_unit_m2(unit: &mut nepa_ast::AstUnit, hosted: bool) {
+    // Pre-collect async method selectors (colon-stripped) so await lowering
+    // can tell task-yielding calls from sync ones (expr_type is not
+    // annotated yet — desugar runs before the checker).
+    let mut async_sels: std::collections::HashSet<String> = std::collections::HashSet::new();
+    for decl in unit.decls.iter() {
+        if let AstDeclData::Class { methods, .. } = &decl.data {
+            for m in methods {
+                if method_is_async(m) {
+                    if let Some(sel) = &m.name {
+                        async_sels.insert(sel.replace(':', ""));
+                    }
+                }
+            }
+        }
+    }
+    let mut ctx = AsyncCtx { async_sels, task_vars: std::collections::HashSet::new() };
     let mut top_decls: Vec<AstDecl> = Vec::new();
     for decl in unit.decls.iter_mut() {
         if let AstDeclData::Class { methods, .. } = &mut decl.data {
@@ -1384,7 +1492,7 @@ pub fn desugar_unit_m2(unit: &mut nepa_ast::AstUnit) {
                     }
                     let sym = m.name.clone().unwrap_or_default();
                     let rt = return_type.as_deref().cloned();
-                    desugar_method_m2(&sym, &plist, b, &mut top_decls, rt.as_ref());
+                    desugar_method_m2(&sym, &plist, b, &mut top_decls, rt.as_ref(), &mut ctx);
                 }
             }
         }
@@ -1394,4 +1502,134 @@ pub fn desugar_unit_m2(unit: &mut nepa_ast::AstUnit) {
     let mut new_decls = top_decls;
     new_decls.extend(unit.decls.drain(..));
     unit.decls = new_decls;
+    // `[task start]` appears in CALLER bodies too (e.g. main), outside async
+    // methods — rewrite it unit-wide (doc/async_nptask_plan.md, stage D).
+    // Likewise `@await e` in NON-async bodies (main / plain functions): the
+    // blocking-join entry form lowers to nepa_task_await(e) here; async
+    // method bodies were already rewritten above.
+    for decl in &mut unit.decls {
+        lower_task_starts_decl(decl, &mut ctx, hosted);
+        lower_toplevel_awaits_decl(decl, &ctx, hosted);
+    }
+}
+
+/// `@await e` in a non-async (synchronous) body → `nepa_task_await(e)` —
+/// the blocking-join entry form. Must NOT touch async method bodies (their
+/// awaits were already lowered with state-machine bookkeeping above; the
+/// double rewrite would corrupt the Comma chains).
+fn lower_toplevel_awaits_expr(e: &mut AstExpr) {
+    if let AstExprData::Await(inner) = &mut e.data {
+        let line = e.line;
+        let col = e.col;
+        let taken = std::mem::replace(&mut **inner, int_expr(0, line, col));
+        // (long)nepa_task_await(e) — the runtime returns void * (the cached
+        // result slot); a scalar result flows through the long cast like the
+        // legacy eager driver did. Object/pointer results keep their bits.
+        let await_call = AstExpr {
+            kind: AstExprKind::FuncCall, expr_type: None, line, col,
+            data: AstExprData::FuncCall {
+                func: None, name: "nepa_task_await".to_string(), callee: None,
+                args: vec![taken],
+            },
+        };
+        *e = AstExpr {
+            kind: AstExprKind::Cast, expr_type: None, line, col,
+            data: AstExprData::Cast {
+                target_type: AstType::new(TypePrim::Long),
+                expr: Box::new(await_call),
+            },
+        };
+        return;
+    }
+    match &mut e.data {
+        AstExprData::MsgSend { receiver, args, .. } => {
+            lower_toplevel_awaits_expr(receiver);
+            for a in args.iter_mut() { lower_toplevel_awaits_expr(a); }
+        }
+        AstExprData::FuncCall { callee, args, .. } => {
+            if let Some(c) = callee { lower_toplevel_awaits_expr(c); }
+            for a in args.iter_mut() { lower_toplevel_awaits_expr(a); }
+        }
+        AstExprData::Unary { operand, .. } => lower_toplevel_awaits_expr(operand),
+        AstExprData::Binary { left, right, .. } => {
+            lower_toplevel_awaits_expr(left);
+            lower_toplevel_awaits_expr(right);
+        }
+        AstExprData::Assign { target, value } => {
+            lower_toplevel_awaits_expr(target);
+            lower_toplevel_awaits_expr(value);
+        }
+        AstExprData::Comma(parts) => { for p in parts.iter_mut() { lower_toplevel_awaits_expr(p); } }
+        AstExprData::Paren(inner) | AstExprData::Cast { expr: inner, .. } => lower_toplevel_awaits_expr(inner),
+        _ => {}
+    }
+}
+
+fn lower_toplevel_awaits_stmt(s: &mut AstStmt, ctx: &AsyncCtx, hosted: bool) {
+    match &mut s.data {
+        AstStmtData::Expr(e) => {
+            lower_toplevel_awaits_expr(e);
+            if hosted { drive_entry_call(e, ctx); }
+        }
+        AstStmtData::Return(Some(e)) => lower_toplevel_awaits_expr(e),
+        AstStmtData::If { cond, then, else_ } => {
+            lower_toplevel_awaits_expr(cond);
+            lower_toplevel_awaits_stmt(then, ctx, hosted);
+            if let Some(e) = else_ { lower_toplevel_awaits_stmt(e, ctx, hosted); }
+        }
+        AstStmtData::While { cond, body } | AstStmtData::Do { body, cond } => {
+            lower_toplevel_awaits_expr(cond);
+            lower_toplevel_awaits_stmt(body, ctx, hosted);
+        }
+        AstStmtData::For { init, cond, incr, body } => {
+            if let Some(i) = init { lower_toplevel_awaits_stmt(i, ctx, hosted); }
+            if let Some(c) = cond { lower_toplevel_awaits_expr(c); }
+            if let Some(u) = incr { lower_toplevel_awaits_expr(u); }
+            lower_toplevel_awaits_stmt(body, ctx, hosted);
+        }
+        AstStmtData::Compound(stmts) => { for st in stmts.iter_mut() { lower_toplevel_awaits_stmt(st, ctx, hosted); } }
+        AstStmtData::Decl(d) => lower_toplevel_awaits_decl(d, ctx, hosted),
+        _ => {}
+    }
+}
+
+/// Hosted drive at the statement position (doc/async_nptask_plan.md §静态分析 3).
+/// A bare call to an async method at STATEMENT position (its result discarded)
+/// is the async chain's "spawn and forget" entry — lower it to
+/// `nepa_task_await(call)`. `nepa_task_await` starts an unstarted task and
+/// blocks until it drains (runtime.c), so `[f runAll];` runs to completion
+/// without an explicit pump.
+///
+/// A CAPTURED call stays lazy (form A, §调用点语义): `NPTask<T> *t = [f runX];`
+/// yields a first-class handle the caller may `@await` or `[t start]` (the
+/// latter also drives when written as a hosted statement).
+/// Freestanding (`hosted == false`) never auto-drives — bare-metal `main` owns
+/// its own pump loop (doc/async_nptask_plan.md §runtime).
+fn drive_entry_call(e: &mut AstExpr, ctx: &AsyncCtx) {
+    if !expr_yields_task(e, ctx) { return; }
+    let line = e.line;
+    let col = e.col;
+    let taken = std::mem::replace(e, int_expr(0, line, col));
+    *e = call_expr("nepa_task_await", vec![taken], line, col);
+}
+
+fn lower_toplevel_awaits_decl(d: &mut AstDecl, ctx: &AsyncCtx, hosted: bool) {
+    match &mut d.data {
+        AstDeclData::Variable { init, next, .. } => {
+            if let Some(i) = init { lower_toplevel_awaits_expr(i); }
+            if let Some(n) = next { lower_toplevel_awaits_decl(n, ctx, hosted); }
+        }
+        AstDeclData::Function { body: Some(b), .. } => lower_toplevel_awaits_stmt(b, ctx, hosted),
+        AstDeclData::Class { methods, .. } => {
+            for m in methods.iter_mut() {
+                // Skip async methods: their awaits are state-machine
+                // bookkeeping now; a second rewrite would nest await calls.
+                let async_m = method_is_async(m);
+                if let AstDeclData::Method { body: Some(b), .. } = &mut m.data {
+                    if !async_m { lower_toplevel_awaits_stmt(b, ctx, hosted); }
+                }
+            }
+        }
+        _ => {}
+    }
 }

@@ -146,9 +146,9 @@ int Metal__Widget_heart(NPObject * self, SEL _cmd);
 int Metal__Widget_weight(NPObject * self, SEL _cmd);
 void Metal__Widget_setWeight_(NPObject * self, SEL _cmd, int w);
 int Metal__Widget_addTo_times_(NPObject * self, SEL _cmd, int v, int k);
-int Metal__Widget_sumAsync_(NPObject * self, SEL _cmd, int v);
-void Metal__Widget_awaitMake(NPClass * self, SEL _cmd);
-void Metal__Widget_awaitSum_(NPClass * self, SEL _cmd, Metal__Widget * ww);
+NPTask * Metal__Widget_sumAsync_(NPObject * self, SEL _cmd, int v);
+NPTask * Metal__Widget_awaitMake(NPClass * self, SEL _cmd);
+NPTask * Metal__Widget_awaitSum_(NPClass * self, SEL _cmd, Metal__Widget * ww);
 NPObject * Metal__Widget_retain(NPObject * self, SEL _cmd);
 void Metal__Widget_release(NPObject * self, SEL _cmd);
 NPObject * Metal__Widget_autorelease(NPObject * self, SEL _cmd);
@@ -177,9 +177,9 @@ NPObject * Dog_alloc(NPClass * self, SEL _cmd);
 NPObject * Dog_init(NPObject * self, SEL _cmd);
 int Dog_speak(NPObject * self, SEL _cmd);
 void Dog_setLeash_(NPObject * self, SEL _cmd, int l);
-int nepa_async_state_sumAsync_(NPTask * t);
-int nepa_async_state_awaitMake(NPTask * t);
-int nepa_async_state_awaitSum_(NPTask * t);
+int nepa_async_state_sumAsync_(NPTask * __nepa_task);
+int nepa_async_state_awaitMake(NPTask * __nepa_task);
+int nepa_async_state_awaitSum_(NPTask * __nepa_task);
 void kputs(const char * s);
 void kputdec(int v);
 void kputhex(unsigned v);
@@ -223,7 +223,7 @@ NPClass * NEPA_GETCLASS_$_Metal__SubErr(NPClass * self, SEL _cmd);
 NPClass * NEPA_GETCLASS_$_Metal__TurboWidget(NPClass * self, SEL _cmd);
 NPClass * NEPA_GETCLASS_$_Dog(NPClass * self, SEL _cmd);
 
-/* vtable layout signature: 9b6d5cb88d6b546c (methods: 26) */
+/* vtable layout signature: cbf29ce484222325 (shared methods: 0) */
 __attribute__((weak)) void nepa_verify_vtable_sig(unsigned long long winner, unsigned long long mine, const char *method_list) {
     if (winner != mine) {
         (void)winner; (void)mine; (void)method_list;
@@ -255,7 +255,7 @@ struct nepa_vtable {
     void (*setWeight_)(NPObject *, SEL, int);
     void (*set_)(NPObject *, SEL, NPObject *);
     int (*speak)(NPObject *, SEL);
-    int (*sumAsync_)(NPObject *, SEL, int);
+    NPTask * (*sumAsync_)(NPObject *, SEL, int);
     int (*tag)(NPObject *, SEL);
     NPObject * (*value)(NPObject *, SEL);
     int (*weight)(NPObject *, SEL);
@@ -293,8 +293,8 @@ struct NEPA_META_VTABLE_$_Metal__OtherErr {
 struct NEPA_META_VTABLE_$_Metal__Widget {
     int (*make_plus_)(NPClass *, SEL, int, int);
     NPObject * (*alloc)(NPClass *, SEL);
-    void (*awaitMake)(NPClass *, SEL);
-    void (*awaitSum_)(NPClass *, SEL, Metal__Widget *);
+    NPTask * (*awaitMake)(NPClass *, SEL);
+    NPTask * (*awaitSum_)(NPClass *, SEL, Metal__Widget *);
     NPClass * (*class)(NPClass *, SEL);
 };
 struct NEPA_META_VTABLE_$_Metal__SubErr {
@@ -304,8 +304,8 @@ struct NEPA_META_VTABLE_$_Metal__SubErr {
 struct NEPA_META_VTABLE_$_Metal__TurboWidget {
     int (*make_plus_)(NPClass *, SEL, int, int);
     NPObject * (*alloc)(NPClass *, SEL);
-    void (*awaitMake)(NPClass *, SEL);
-    void (*awaitSum_)(NPClass *, SEL, Metal__Widget *);
+    NPTask * (*awaitMake)(NPClass *, SEL);
+    NPTask * (*awaitSum_)(NPClass *, SEL, Metal__Widget *);
     NPClass * (*class)(NPClass *, SEL);
 };
 struct NEPA_META_VTABLE_$_Dog {
@@ -414,8 +414,8 @@ void nepa_metaInit(void);
 
 /* --------- Section 10 · Vtable & metadata instances ---------- */
 /* VTable instance: Animal */
-__attribute__((weak)) struct nepa_vtable NEPA_VTABLE_$_Animal = {
-    .__sig = 0x9b6d5cb88d6b546cULL,
+struct nepa_vtable NEPA_VTABLE_$_Animal = {
+    .__sig = 0xcbf29ce484222325ULL,
     .addTo_times_ = NULL,
     .add_ = NULL,
     .autorelease = NULL,
@@ -445,8 +445,8 @@ __attribute__((weak)) struct nepa_vtable NEPA_VTABLE_$_Animal = {
 };
 
 /* VTable instance: Box */
-__attribute__((weak)) struct nepa_vtable NEPA_VTABLE_$_Box = {
-    .__sig = 0x9b6d5cb88d6b546cULL,
+struct nepa_vtable NEPA_VTABLE_$_Box = {
+    .__sig = 0xcbf29ce484222325ULL,
     .addTo_times_ = NULL,
     .add_ = NULL,
     .autorelease = NULL,
@@ -477,7 +477,7 @@ __attribute__((weak)) struct nepa_vtable NEPA_VTABLE_$_Box = {
 
 /* VTable instance: Box<int *> */
 __attribute__((weak)) struct nepa_vtable NEPA_VTABLE_$_Box_int_ptr = {
-    .__sig = 0x9b6d5cb88d6b546cULL,
+    .__sig = 0xcbf29ce484222325ULL,
     .addTo_times_ = NULL,
     .add_ = NULL,
     .autorelease = NULL,
@@ -507,8 +507,8 @@ __attribute__((weak)) struct nepa_vtable NEPA_VTABLE_$_Box_int_ptr = {
 };
 
 /* VTable instance: Metal::Array */
-__attribute__((weak)) struct nepa_vtable NEPA_VTABLE_$_Metal__Array = {
-    .__sig = 0x9b6d5cb88d6b546cULL,
+struct nepa_vtable NEPA_VTABLE_$_Metal__Array = {
+    .__sig = 0xcbf29ce484222325ULL,
     .addTo_times_ = NULL,
     .add_ = (void (*)(NPObject *, SEL, NPObject *))Metal__Array_add_,
     .autorelease = NULL,
@@ -538,8 +538,8 @@ __attribute__((weak)) struct nepa_vtable NEPA_VTABLE_$_Metal__Array = {
 };
 
 /* VTable instance: Metal::Err */
-__attribute__((weak)) struct nepa_vtable NEPA_VTABLE_$_Metal__Err = {
-    .__sig = 0x9b6d5cb88d6b546cULL,
+struct nepa_vtable NEPA_VTABLE_$_Metal__Err = {
+    .__sig = 0xcbf29ce484222325ULL,
     .addTo_times_ = NULL,
     .add_ = NULL,
     .autorelease = NULL,
@@ -569,8 +569,8 @@ __attribute__((weak)) struct nepa_vtable NEPA_VTABLE_$_Metal__Err = {
 };
 
 /* VTable instance: Metal::OtherErr */
-__attribute__((weak)) struct nepa_vtable NEPA_VTABLE_$_Metal__OtherErr = {
-    .__sig = 0x9b6d5cb88d6b546cULL,
+struct nepa_vtable NEPA_VTABLE_$_Metal__OtherErr = {
+    .__sig = 0xcbf29ce484222325ULL,
     .addTo_times_ = NULL,
     .add_ = NULL,
     .autorelease = NULL,
@@ -600,8 +600,8 @@ __attribute__((weak)) struct nepa_vtable NEPA_VTABLE_$_Metal__OtherErr = {
 };
 
 /* VTable instance: Metal::Widget */
-__attribute__((weak)) struct nepa_vtable NEPA_VTABLE_$_Metal__Widget = {
-    .__sig = 0x9b6d5cb88d6b546cULL,
+struct nepa_vtable NEPA_VTABLE_$_Metal__Widget = {
+    .__sig = 0xcbf29ce484222325ULL,
     .addTo_times_ = (int (*)(NPObject *, SEL, int, int))Metal__Widget_addTo_times_,
     .add_ = NULL,
     .autorelease = (NPObject * (*)(NPObject *, SEL))Metal__Widget_autorelease,
@@ -624,15 +624,15 @@ __attribute__((weak)) struct nepa_vtable NEPA_VTABLE_$_Metal__Widget = {
     .setWeight_ = (void (*)(NPObject *, SEL, int))Metal__Widget_setWeight_,
     .set_ = NULL,
     .speak = NULL,
-    .sumAsync_ = (int (*)(NPObject *, SEL, int))Metal__Widget_sumAsync_,
+    .sumAsync_ = (NPTask * (*)(NPObject *, SEL, int))Metal__Widget_sumAsync_,
     .tag = (int (*)(NPObject *, SEL))Metal__Widget_tag,
     .value = NULL,
     .weight = (int (*)(NPObject *, SEL))Metal__Widget_weight,
 };
 
 /* VTable instance: Metal::SubErr */
-__attribute__((weak)) struct nepa_vtable NEPA_VTABLE_$_Metal__SubErr = {
-    .__sig = 0x9b6d5cb88d6b546cULL,
+struct nepa_vtable NEPA_VTABLE_$_Metal__SubErr = {
+    .__sig = 0xcbf29ce484222325ULL,
     .addTo_times_ = NULL,
     .add_ = NULL,
     .autorelease = NULL,
@@ -662,8 +662,8 @@ __attribute__((weak)) struct nepa_vtable NEPA_VTABLE_$_Metal__SubErr = {
 };
 
 /* VTable instance: Metal::TurboWidget */
-__attribute__((weak)) struct nepa_vtable NEPA_VTABLE_$_Metal__TurboWidget = {
-    .__sig = 0x9b6d5cb88d6b546cULL,
+struct nepa_vtable NEPA_VTABLE_$_Metal__TurboWidget = {
+    .__sig = 0xcbf29ce484222325ULL,
     .addTo_times_ = (int (*)(NPObject *, SEL, int, int))Metal__Widget_addTo_times_,
     .add_ = NULL,
     .autorelease = (NPObject * (*)(NPObject *, SEL))Metal__Widget_autorelease,
@@ -686,15 +686,15 @@ __attribute__((weak)) struct nepa_vtable NEPA_VTABLE_$_Metal__TurboWidget = {
     .setWeight_ = (void (*)(NPObject *, SEL, int))Metal__Widget_setWeight_,
     .set_ = NULL,
     .speak = NULL,
-    .sumAsync_ = (int (*)(NPObject *, SEL, int))Metal__Widget_sumAsync_,
+    .sumAsync_ = (NPTask * (*)(NPObject *, SEL, int))Metal__Widget_sumAsync_,
     .tag = (int (*)(NPObject *, SEL))Metal__TurboWidget_tag,
     .value = NULL,
     .weight = (int (*)(NPObject *, SEL))Metal__Widget_weight,
 };
 
 /* VTable instance: Dog */
-__attribute__((weak)) struct nepa_vtable NEPA_VTABLE_$_Dog = {
-    .__sig = 0x9b6d5cb88d6b546cULL,
+struct nepa_vtable NEPA_VTABLE_$_Dog = {
+    .__sig = 0xcbf29ce484222325ULL,
     .addTo_times_ = NULL,
     .add_ = NULL,
     .autorelease = NULL,
@@ -724,13 +724,13 @@ __attribute__((weak)) struct nepa_vtable NEPA_VTABLE_$_Dog = {
 };
 
 /* Meta vtable instance: Animal */
-__attribute__((weak)) struct NEPA_META_VTABLE_$_Animal NEPA_META_VTABLE_$_Animal_inst = {
+struct NEPA_META_VTABLE_$_Animal NEPA_META_VTABLE_$_Animal_inst = {
     .alloc = Animal_alloc,
     .class = NEPA_GETCLASS_$_Animal,
 };
 
 /* Meta vtable instance: Box */
-__attribute__((weak)) struct NEPA_META_VTABLE_$_Box NEPA_META_VTABLE_$_Box_inst = {
+struct NEPA_META_VTABLE_$_Box NEPA_META_VTABLE_$_Box_inst = {
     .alloc = Box_alloc,
     .class = NEPA_GETCLASS_$_Box,
 };
@@ -742,25 +742,25 @@ __attribute__((weak)) struct NEPA_META_VTABLE_$_Box_int_ptr NEPA_META_VTABLE_$_B
 };
 
 /* Meta vtable instance: Metal::Array */
-__attribute__((weak)) struct NEPA_META_VTABLE_$_Metal__Array NEPA_META_VTABLE_$_Metal__Array_inst = {
+struct NEPA_META_VTABLE_$_Metal__Array NEPA_META_VTABLE_$_Metal__Array_inst = {
     .alloc = Metal__Array_alloc,
     .class = NEPA_GETCLASS_$_Metal__Array,
 };
 
 /* Meta vtable instance: Metal::Err */
-__attribute__((weak)) struct NEPA_META_VTABLE_$_Metal__Err NEPA_META_VTABLE_$_Metal__Err_inst = {
+struct NEPA_META_VTABLE_$_Metal__Err NEPA_META_VTABLE_$_Metal__Err_inst = {
     .alloc = Metal__Err_alloc,
     .class = NEPA_GETCLASS_$_Metal__Err,
 };
 
 /* Meta vtable instance: Metal::OtherErr */
-__attribute__((weak)) struct NEPA_META_VTABLE_$_Metal__OtherErr NEPA_META_VTABLE_$_Metal__OtherErr_inst = {
+struct NEPA_META_VTABLE_$_Metal__OtherErr NEPA_META_VTABLE_$_Metal__OtherErr_inst = {
     .alloc = Metal__OtherErr_alloc,
     .class = NEPA_GETCLASS_$_Metal__OtherErr,
 };
 
 /* Meta vtable instance: Metal::Widget */
-__attribute__((weak)) struct NEPA_META_VTABLE_$_Metal__Widget NEPA_META_VTABLE_$_Metal__Widget_inst = {
+struct NEPA_META_VTABLE_$_Metal__Widget NEPA_META_VTABLE_$_Metal__Widget_inst = {
     .make_plus_ = Metal__Widget_make_plus_,
     .alloc = Metal__Widget_alloc,
     .awaitMake = Metal__Widget_awaitMake,
@@ -769,13 +769,13 @@ __attribute__((weak)) struct NEPA_META_VTABLE_$_Metal__Widget NEPA_META_VTABLE_$
 };
 
 /* Meta vtable instance: Metal::SubErr */
-__attribute__((weak)) struct NEPA_META_VTABLE_$_Metal__SubErr NEPA_META_VTABLE_$_Metal__SubErr_inst = {
+struct NEPA_META_VTABLE_$_Metal__SubErr NEPA_META_VTABLE_$_Metal__SubErr_inst = {
     .alloc = Metal__SubErr_alloc,
     .class = NEPA_GETCLASS_$_Metal__SubErr,
 };
 
 /* Meta vtable instance: Metal::TurboWidget */
-__attribute__((weak)) struct NEPA_META_VTABLE_$_Metal__TurboWidget NEPA_META_VTABLE_$_Metal__TurboWidget_inst = {
+struct NEPA_META_VTABLE_$_Metal__TurboWidget NEPA_META_VTABLE_$_Metal__TurboWidget_inst = {
     .make_plus_ = Metal__Widget_make_plus_,
     .alloc = Metal__TurboWidget_alloc,
     .awaitMake = Metal__Widget_awaitMake,
@@ -784,19 +784,19 @@ __attribute__((weak)) struct NEPA_META_VTABLE_$_Metal__TurboWidget NEPA_META_VTA
 };
 
 /* Meta vtable instance: Dog */
-__attribute__((weak)) struct NEPA_META_VTABLE_$_Dog NEPA_META_VTABLE_$_Dog_inst = {
+struct NEPA_META_VTABLE_$_Dog NEPA_META_VTABLE_$_Dog_inst = {
     .alloc = Dog_alloc,
     .class = NEPA_GETCLASS_$_Dog,
 };
 
 /* +getClass for Animal */
-__attribute__((weak)) NPClass * NEPA_GETCLASS_$_Animal(NPClass * self, SEL _cmd) {
+NPClass * NEPA_GETCLASS_$_Animal(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
 /* +getClass for Box */
-__attribute__((weak)) NPClass * NEPA_GETCLASS_$_Box(NPClass * self, SEL _cmd) {
+NPClass * NEPA_GETCLASS_$_Box(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
@@ -808,70 +808,182 @@ __attribute__((weak)) NPClass * NEPA_GETCLASS_$_Box_int_ptr(NPClass * self, SEL 
 }
 
 /* +getClass for Metal::Array */
-__attribute__((weak)) NPClass * NEPA_GETCLASS_$_Metal__Array(NPClass * self, SEL _cmd) {
+NPClass * NEPA_GETCLASS_$_Metal__Array(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
 /* +getClass for Metal::Err */
-__attribute__((weak)) NPClass * NEPA_GETCLASS_$_Metal__Err(NPClass * self, SEL _cmd) {
+NPClass * NEPA_GETCLASS_$_Metal__Err(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
 /* +getClass for Metal::OtherErr */
-__attribute__((weak)) NPClass * NEPA_GETCLASS_$_Metal__OtherErr(NPClass * self, SEL _cmd) {
+NPClass * NEPA_GETCLASS_$_Metal__OtherErr(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
 /* +getClass for Metal::Widget */
-__attribute__((weak)) NPClass * NEPA_GETCLASS_$_Metal__Widget(NPClass * self, SEL _cmd) {
+NPClass * NEPA_GETCLASS_$_Metal__Widget(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
 /* +getClass for Metal::SubErr */
-__attribute__((weak)) NPClass * NEPA_GETCLASS_$_Metal__SubErr(NPClass * self, SEL _cmd) {
+NPClass * NEPA_GETCLASS_$_Metal__SubErr(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
 /* +getClass for Metal::TurboWidget */
-__attribute__((weak)) NPClass * NEPA_GETCLASS_$_Metal__TurboWidget(NPClass * self, SEL _cmd) {
+NPClass * NEPA_GETCLASS_$_Metal__TurboWidget(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
 /* +getClass for Dog */
-__attribute__((weak)) NPClass * NEPA_GETCLASS_$_Dog(NPClass * self, SEL _cmd) {
+NPClass * NEPA_GETCLASS_$_Dog(NPClass * self, SEL _cmd) {
     (void)_cmd;
     return self;
 }
 
 /* -------- Section 11 · Class metadata initialization --------- */
-NPClass NEPA_CLASS_$_Animal;
-NPClass NEPA_CLASS_$_Box;
+__attribute__((used, weak)) struct NPProtocol NEPA_PROTO_$_Tagged = {
+    .name = "Tagged",
+    .parents = NULL,
+    .parent_count = 0,
+    .required_methods = NULL,
+    .required_count = 0,
+    .optional_methods = (NPProtocolMethod[]){{ .name = "tag", .encoding = "" }, { .name = "bonus", .encoding = "" }},
+    .optional_count = 2,
+};
+
+__attribute__((used, weak)) struct NPProtocol NEPA_PROTO_$_Alive = {
+    .name = "Alive",
+    .parents = NULL,
+    .parent_count = 0,
+    .required_methods = (NPProtocolMethod[]){{ .name = "heart", .encoding = "" }},
+    .required_count = 1,
+    .optional_methods = NULL,
+    .optional_count = 0,
+};
+
+__attribute__((used, weak)) struct NPProtocol NEPA_PROTO_$_LiveTag = {
+    .name = "LiveTag",
+    .parents = (struct NPProtocol *[]){&NEPA_PROTO_$_Tagged, &NEPA_PROTO_$_Alive},
+    .parent_count = 2,
+    .required_methods = NULL,
+    .required_count = 0,
+    .optional_methods = NULL,
+    .optional_count = 0,
+};
+
+__attribute__((used)) static struct NPProtocol *NEPA_PROTOS_$_Metal__Widget[] = {&NEPA_PROTO_$_LiveTag};
+NPClass NEPA_CLASS_$_Animal = {
+        .name = "Animal",
+        .superclass = &NEPA_CLASS_$_nepa_root,
+        .instance_size = sizeof(struct Animal),
+        .vtable = &NEPA_VTABLE_$_Animal,
+        .class_vtable = &NEPA_META_VTABLE_$_Animal_inst,
+        .protocols = NULL,
+        .protocol_count = 0,
+        .dealloc = NULL,
+    };
+NPClass NEPA_CLASS_$_Box = {
+        .name = "Box",
+        .superclass = &NEPA_CLASS_$_nepa_root,
+        .instance_size = sizeof(struct Box),
+        .vtable = &NEPA_VTABLE_$_Box,
+        .class_vtable = &NEPA_META_VTABLE_$_Box_inst,
+        .protocols = NULL,
+        .protocol_count = 0,
+        .dealloc = NULL,
+    };
 NPClass NEPA_CLASS_$_Box_int_ptr;
-NPClass NEPA_CLASS_$_Metal__Array;
-NPClass NEPA_CLASS_$_Metal__Err;
-NPClass NEPA_CLASS_$_Metal__OtherErr;
-NPClass NEPA_CLASS_$_Metal__Widget;
-NPClass NEPA_CLASS_$_Metal__SubErr;
-NPClass NEPA_CLASS_$_Metal__TurboWidget;
-NPClass NEPA_CLASS_$_Dog;
+NPClass NEPA_CLASS_$_Metal__Array = {
+        .name = "Metal::Array",
+        .superclass = &NEPA_CLASS_$_nepa_root,
+        .instance_size = sizeof(struct Metal__Array),
+        .vtable = &NEPA_VTABLE_$_Metal__Array,
+        .class_vtable = &NEPA_META_VTABLE_$_Metal__Array_inst,
+        .protocols = NULL,
+        .protocol_count = 0,
+        .dealloc = NULL,
+    };
+NPClass NEPA_CLASS_$_Metal__Err = {
+        .name = "Metal::Err",
+        .superclass = &NEPA_CLASS_$_nepa_root,
+        .instance_size = sizeof(struct Metal__Err),
+        .vtable = &NEPA_VTABLE_$_Metal__Err,
+        .class_vtable = &NEPA_META_VTABLE_$_Metal__Err_inst,
+        .protocols = NULL,
+        .protocol_count = 0,
+        .dealloc = NULL,
+    };
+NPClass NEPA_CLASS_$_Metal__OtherErr = {
+        .name = "Metal::OtherErr",
+        .superclass = &NEPA_CLASS_$_nepa_root,
+        .instance_size = sizeof(struct Metal__OtherErr),
+        .vtable = &NEPA_VTABLE_$_Metal__OtherErr,
+        .class_vtable = &NEPA_META_VTABLE_$_Metal__OtherErr_inst,
+        .protocols = NULL,
+        .protocol_count = 0,
+        .dealloc = NULL,
+    };
+NPClass NEPA_CLASS_$_Metal__Widget = {
+        .name = "Metal::Widget",
+        .superclass = &NEPA_CLASS_$_nepa_root,
+        .instance_size = sizeof(struct Metal__Widget),
+        .vtable = &NEPA_VTABLE_$_Metal__Widget,
+        .class_vtable = &NEPA_META_VTABLE_$_Metal__Widget_inst,
+        .protocols = NEPA_PROTOS_$_Metal__Widget,
+        .protocol_count = 1,
+        .dealloc = (void (*)(NPObject *, SEL))Metal__Widget_dealloc,
+    };
+NPClass NEPA_CLASS_$_Metal__SubErr = {
+        .name = "Metal::SubErr",
+        .superclass = &NEPA_CLASS_$_Metal__Err,
+        .instance_size = sizeof(struct Metal__SubErr),
+        .vtable = &NEPA_VTABLE_$_Metal__SubErr,
+        .class_vtable = &NEPA_META_VTABLE_$_Metal__SubErr_inst,
+        .protocols = NULL,
+        .protocol_count = 0,
+        .dealloc = NULL,
+    };
+NPClass NEPA_CLASS_$_Metal__TurboWidget = {
+        .name = "Metal::TurboWidget",
+        .superclass = &NEPA_CLASS_$_Metal__Widget,
+        .instance_size = sizeof(struct Metal__TurboWidget),
+        .vtable = &NEPA_VTABLE_$_Metal__TurboWidget,
+        .class_vtable = &NEPA_META_VTABLE_$_Metal__TurboWidget_inst,
+        .protocols = NULL,
+        .protocol_count = 0,
+        .dealloc = (void (*)(NPObject *, SEL))Metal__Widget_dealloc,
+    };
+NPClass NEPA_CLASS_$_Dog = {
+        .name = "Dog",
+        .superclass = &NEPA_CLASS_$_Animal,
+        .instance_size = sizeof(struct Dog),
+        .vtable = &NEPA_VTABLE_$_Dog,
+        .class_vtable = &NEPA_META_VTABLE_$_Dog_inst,
+        .protocols = NULL,
+        .protocol_count = 0,
+        .dealloc = NULL,
+    };
 
 __attribute__((constructor)) static void __nepa_vtable_layout_check(void) {
-    nepa_verify_vtable_sig((&NEPA_VTABLE_$_Animal)->__sig, 0x9b6d5cb88d6b546cULL, "addTo_times_ add_ autorelease boost count dealloc errorCode heart init initWithUid_weight_ isEqual_ isKindOfClass_ objectAtIndex_ release retain setBoost_ setCode_ setLeash_ setVoice_ setWeight_ set_ speak sumAsync_ tag value weight | class Animal | tu baremetal_test.np");
-    nepa_verify_vtable_sig((&NEPA_VTABLE_$_Box)->__sig, 0x9b6d5cb88d6b546cULL, "addTo_times_ add_ autorelease boost count dealloc errorCode heart init initWithUid_weight_ isEqual_ isKindOfClass_ objectAtIndex_ release retain setBoost_ setCode_ setLeash_ setVoice_ setWeight_ set_ speak sumAsync_ tag value weight | class Box | tu baremetal_test.np");
-    nepa_verify_vtable_sig((&NEPA_VTABLE_$_Box_int_ptr)->__sig, 0x9b6d5cb88d6b546cULL, "addTo_times_ add_ autorelease boost count dealloc errorCode heart init initWithUid_weight_ isEqual_ isKindOfClass_ objectAtIndex_ release retain setBoost_ setCode_ setLeash_ setVoice_ setWeight_ set_ speak sumAsync_ tag value weight | class Box<int *> | tu baremetal_test.np");
-    nepa_verify_vtable_sig((&NEPA_VTABLE_$_Metal__Array)->__sig, 0x9b6d5cb88d6b546cULL, "addTo_times_ add_ autorelease boost count dealloc errorCode heart init initWithUid_weight_ isEqual_ isKindOfClass_ objectAtIndex_ release retain setBoost_ setCode_ setLeash_ setVoice_ setWeight_ set_ speak sumAsync_ tag value weight | class Metal::Array | tu baremetal_test.np");
-    nepa_verify_vtable_sig((&NEPA_VTABLE_$_Metal__Err)->__sig, 0x9b6d5cb88d6b546cULL, "addTo_times_ add_ autorelease boost count dealloc errorCode heart init initWithUid_weight_ isEqual_ isKindOfClass_ objectAtIndex_ release retain setBoost_ setCode_ setLeash_ setVoice_ setWeight_ set_ speak sumAsync_ tag value weight | class Metal::Err | tu baremetal_test.np");
-    nepa_verify_vtable_sig((&NEPA_VTABLE_$_Metal__OtherErr)->__sig, 0x9b6d5cb88d6b546cULL, "addTo_times_ add_ autorelease boost count dealloc errorCode heart init initWithUid_weight_ isEqual_ isKindOfClass_ objectAtIndex_ release retain setBoost_ setCode_ setLeash_ setVoice_ setWeight_ set_ speak sumAsync_ tag value weight | class Metal::OtherErr | tu baremetal_test.np");
-    nepa_verify_vtable_sig((&NEPA_VTABLE_$_Metal__Widget)->__sig, 0x9b6d5cb88d6b546cULL, "addTo_times_ add_ autorelease boost count dealloc errorCode heart init initWithUid_weight_ isEqual_ isKindOfClass_ objectAtIndex_ release retain setBoost_ setCode_ setLeash_ setVoice_ setWeight_ set_ speak sumAsync_ tag value weight | class Metal::Widget | tu baremetal_test.np");
-    nepa_verify_vtable_sig((&NEPA_VTABLE_$_Metal__SubErr)->__sig, 0x9b6d5cb88d6b546cULL, "addTo_times_ add_ autorelease boost count dealloc errorCode heart init initWithUid_weight_ isEqual_ isKindOfClass_ objectAtIndex_ release retain setBoost_ setCode_ setLeash_ setVoice_ setWeight_ set_ speak sumAsync_ tag value weight | class Metal::SubErr | tu baremetal_test.np");
-    nepa_verify_vtable_sig((&NEPA_VTABLE_$_Metal__TurboWidget)->__sig, 0x9b6d5cb88d6b546cULL, "addTo_times_ add_ autorelease boost count dealloc errorCode heart init initWithUid_weight_ isEqual_ isKindOfClass_ objectAtIndex_ release retain setBoost_ setCode_ setLeash_ setVoice_ setWeight_ set_ speak sumAsync_ tag value weight | class Metal::TurboWidget | tu baremetal_test.np");
-    nepa_verify_vtable_sig((&NEPA_VTABLE_$_Dog)->__sig, 0x9b6d5cb88d6b546cULL, "addTo_times_ add_ autorelease boost count dealloc errorCode heart init initWithUid_weight_ isEqual_ isKindOfClass_ objectAtIndex_ release retain setBoost_ setCode_ setLeash_ setVoice_ setWeight_ set_ speak sumAsync_ tag value weight | class Dog | tu baremetal_test.np");
+    nepa_verify_vtable_sig((&NEPA_VTABLE_$_Animal)->__sig, 0xcbf29ce484222325ULL, "addTo_times_ add_ autorelease boost count dealloc errorCode heart init initWithUid_weight_ isEqual_ isKindOfClass_ objectAtIndex_ release retain setBoost_ setCode_ setLeash_ setVoice_ setWeight_ set_ speak sumAsync_ tag value weight | class Animal | tu baremetal_test.np");
+    nepa_verify_vtable_sig((&NEPA_VTABLE_$_Box)->__sig, 0xcbf29ce484222325ULL, "addTo_times_ add_ autorelease boost count dealloc errorCode heart init initWithUid_weight_ isEqual_ isKindOfClass_ objectAtIndex_ release retain setBoost_ setCode_ setLeash_ setVoice_ setWeight_ set_ speak sumAsync_ tag value weight | class Box | tu baremetal_test.np");
+    nepa_verify_vtable_sig((&NEPA_VTABLE_$_Box_int_ptr)->__sig, 0xcbf29ce484222325ULL, "addTo_times_ add_ autorelease boost count dealloc errorCode heart init initWithUid_weight_ isEqual_ isKindOfClass_ objectAtIndex_ release retain setBoost_ setCode_ setLeash_ setVoice_ setWeight_ set_ speak sumAsync_ tag value weight | class Box<int *> | tu baremetal_test.np");
+    nepa_verify_vtable_sig((&NEPA_VTABLE_$_Metal__Array)->__sig, 0xcbf29ce484222325ULL, "addTo_times_ add_ autorelease boost count dealloc errorCode heart init initWithUid_weight_ isEqual_ isKindOfClass_ objectAtIndex_ release retain setBoost_ setCode_ setLeash_ setVoice_ setWeight_ set_ speak sumAsync_ tag value weight | class Metal::Array | tu baremetal_test.np");
+    nepa_verify_vtable_sig((&NEPA_VTABLE_$_Metal__Err)->__sig, 0xcbf29ce484222325ULL, "addTo_times_ add_ autorelease boost count dealloc errorCode heart init initWithUid_weight_ isEqual_ isKindOfClass_ objectAtIndex_ release retain setBoost_ setCode_ setLeash_ setVoice_ setWeight_ set_ speak sumAsync_ tag value weight | class Metal::Err | tu baremetal_test.np");
+    nepa_verify_vtable_sig((&NEPA_VTABLE_$_Metal__OtherErr)->__sig, 0xcbf29ce484222325ULL, "addTo_times_ add_ autorelease boost count dealloc errorCode heart init initWithUid_weight_ isEqual_ isKindOfClass_ objectAtIndex_ release retain setBoost_ setCode_ setLeash_ setVoice_ setWeight_ set_ speak sumAsync_ tag value weight | class Metal::OtherErr | tu baremetal_test.np");
+    nepa_verify_vtable_sig((&NEPA_VTABLE_$_Metal__Widget)->__sig, 0xcbf29ce484222325ULL, "addTo_times_ add_ autorelease boost count dealloc errorCode heart init initWithUid_weight_ isEqual_ isKindOfClass_ objectAtIndex_ release retain setBoost_ setCode_ setLeash_ setVoice_ setWeight_ set_ speak sumAsync_ tag value weight | class Metal::Widget | tu baremetal_test.np");
+    nepa_verify_vtable_sig((&NEPA_VTABLE_$_Metal__SubErr)->__sig, 0xcbf29ce484222325ULL, "addTo_times_ add_ autorelease boost count dealloc errorCode heart init initWithUid_weight_ isEqual_ isKindOfClass_ objectAtIndex_ release retain setBoost_ setCode_ setLeash_ setVoice_ setWeight_ set_ speak sumAsync_ tag value weight | class Metal::SubErr | tu baremetal_test.np");
+    nepa_verify_vtable_sig((&NEPA_VTABLE_$_Metal__TurboWidget)->__sig, 0xcbf29ce484222325ULL, "addTo_times_ add_ autorelease boost count dealloc errorCode heart init initWithUid_weight_ isEqual_ isKindOfClass_ objectAtIndex_ release retain setBoost_ setCode_ setLeash_ setVoice_ setWeight_ set_ speak sumAsync_ tag value weight | class Metal::TurboWidget | tu baremetal_test.np");
+    nepa_verify_vtable_sig((&NEPA_VTABLE_$_Dog)->__sig, 0xcbf29ce484222325ULL, "addTo_times_ add_ autorelease boost count dealloc errorCode heart init initWithUid_weight_ isEqual_ isKindOfClass_ objectAtIndex_ release retain setBoost_ setCode_ setLeash_ setVoice_ setWeight_ set_ speak sumAsync_ tag value weight | class Dog | tu baremetal_test.np");
 }
 
 __attribute__((weak)) void nepa_metaInit(void) {
@@ -881,6 +993,7 @@ __attribute__((weak)) void nepa_metaInit(void) {
         .instance_size = sizeof(struct Animal),
         .vtable = &NEPA_VTABLE_$_Animal,
         .class_vtable = &NEPA_META_VTABLE_$_Animal_inst,
+        .protocols = NULL,
         .protocol_count = 0,
         .dealloc = NULL,
     };
@@ -890,6 +1003,7 @@ __attribute__((weak)) void nepa_metaInit(void) {
         .instance_size = sizeof(struct Box),
         .vtable = &NEPA_VTABLE_$_Box,
         .class_vtable = &NEPA_META_VTABLE_$_Box_inst,
+        .protocols = NULL,
         .protocol_count = 0,
         .dealloc = NULL,
     };
@@ -899,6 +1013,7 @@ __attribute__((weak)) void nepa_metaInit(void) {
         .instance_size = sizeof(struct Box_int_ptr),
         .vtable = &NEPA_VTABLE_$_Box_int_ptr,
         .class_vtable = &NEPA_META_VTABLE_$_Box_int_ptr_inst,
+        .protocols = NULL,
         .protocol_count = 0,
         .dealloc = NULL,
     };
@@ -908,6 +1023,7 @@ __attribute__((weak)) void nepa_metaInit(void) {
         .instance_size = sizeof(struct Metal__Array),
         .vtable = &NEPA_VTABLE_$_Metal__Array,
         .class_vtable = &NEPA_META_VTABLE_$_Metal__Array_inst,
+        .protocols = NULL,
         .protocol_count = 0,
         .dealloc = NULL,
     };
@@ -917,6 +1033,7 @@ __attribute__((weak)) void nepa_metaInit(void) {
         .instance_size = sizeof(struct Metal__Err),
         .vtable = &NEPA_VTABLE_$_Metal__Err,
         .class_vtable = &NEPA_META_VTABLE_$_Metal__Err_inst,
+        .protocols = NULL,
         .protocol_count = 0,
         .dealloc = NULL,
     };
@@ -926,6 +1043,7 @@ __attribute__((weak)) void nepa_metaInit(void) {
         .instance_size = sizeof(struct Metal__OtherErr),
         .vtable = &NEPA_VTABLE_$_Metal__OtherErr,
         .class_vtable = &NEPA_META_VTABLE_$_Metal__OtherErr_inst,
+        .protocols = NULL,
         .protocol_count = 0,
         .dealloc = NULL,
     };
@@ -935,7 +1053,8 @@ __attribute__((weak)) void nepa_metaInit(void) {
         .instance_size = sizeof(struct Metal__Widget),
         .vtable = &NEPA_VTABLE_$_Metal__Widget,
         .class_vtable = &NEPA_META_VTABLE_$_Metal__Widget_inst,
-        .protocol_count = 0,
+        .protocols = NEPA_PROTOS_$_Metal__Widget,
+        .protocol_count = 1,
         .dealloc = (void (*)(NPObject *, SEL))Metal__Widget_dealloc,
     };
     NEPA_CLASS_$_Metal__SubErr = (NPClass){
@@ -944,6 +1063,7 @@ __attribute__((weak)) void nepa_metaInit(void) {
         .instance_size = sizeof(struct Metal__SubErr),
         .vtable = &NEPA_VTABLE_$_Metal__SubErr,
         .class_vtable = &NEPA_META_VTABLE_$_Metal__SubErr_inst,
+        .protocols = NULL,
         .protocol_count = 0,
         .dealloc = NULL,
     };
@@ -953,6 +1073,7 @@ __attribute__((weak)) void nepa_metaInit(void) {
         .instance_size = sizeof(struct Metal__TurboWidget),
         .vtable = &NEPA_VTABLE_$_Metal__TurboWidget,
         .class_vtable = &NEPA_META_VTABLE_$_Metal__TurboWidget_inst,
+        .protocols = NULL,
         .protocol_count = 0,
         .dealloc = (void (*)(NPObject *, SEL))Metal__Widget_dealloc,
     };
@@ -962,6 +1083,7 @@ __attribute__((weak)) void nepa_metaInit(void) {
         .instance_size = sizeof(struct Dog),
         .vtable = &NEPA_VTABLE_$_Dog,
         .class_vtable = &NEPA_META_VTABLE_$_Dog_inst,
+        .protocols = NULL,
         .protocol_count = 0,
         .dealloc = NULL,
     };
@@ -972,195 +1094,267 @@ __attribute__((weak)) void nepa_meta_init(void) { nepa_metaInit(); }
 /* --------------- Section 12 · Runtime support ---------------- */
 /* --------------- Section 13 · Function bodies ---------------- */
 /* +[Err alloc] */
+#line 1 "<nepa-generated>"
 __attribute__((weak)) NPObject * Metal__Err_alloc(NPClass * self, SEL _cmd) {
+#line 128 "baremetal_test.np"
     return nepa_alloc(self);
 }
 
 /* -[Err init] */
+#line 1 "<nepa-generated>"
 __attribute__((weak)) NPObject * Metal__Err_init(NPObject * self, SEL _cmd) {
+#line 129 "baremetal_test.np"
     return self;
 }
 
 /* -[Err tag] */
+#line 1 "<nepa-generated>"
 __attribute__((weak)) int Metal__Err_tag(NPObject * self, SEL _cmd) {
+#line 130 "baremetal_test.np"
     return 100;
 }
 
 /* -[Err heart] */
+#line 1 "<nepa-generated>"
 __attribute__((weak)) int Metal__Err_heart(NPObject * self, SEL _cmd) {
+#line 131 "baremetal_test.np"
     return 1;
 }
 
 /* -[Err errorCode] */
+#line 1 "<nepa-generated>"
 __attribute__((weak)) int Metal__Err_errorCode(NPObject * self, SEL _cmd) {
+#line 132 "baremetal_test.np"
     return ((struct Metal__Err *)self)->code;
 }
 
 /* -[Err setCode:] */
+#line 1 "<nepa-generated>"
 __attribute__((weak)) void Metal__Err_setCode_(NPObject * self, SEL _cmd, int c) {
+#line 133 "baremetal_test.np"
     ((struct Metal__Err *)self)->code = c;
 }
 
 /* +[OtherErr alloc] */
+#line 1 "<nepa-generated>"
 __attribute__((weak)) NPObject * Metal__OtherErr_alloc(NPClass * self, SEL _cmd) {
+#line 142 "baremetal_test.np"
     return nepa_alloc(self);
 }
 
 /* -[OtherErr init] */
+#line 1 "<nepa-generated>"
 __attribute__((weak)) NPObject * Metal__OtherErr_init(NPObject * self, SEL _cmd) {
+#line 143 "baremetal_test.np"
     return self;
 }
 
 /* -[OtherErr errorCode] */
+#line 1 "<nepa-generated>"
 __attribute__((weak)) int Metal__OtherErr_errorCode(NPObject * self, SEL _cmd) {
+#line 144 "baremetal_test.np"
     return ((struct Metal__OtherErr *)self)->code;
 }
 
 /* +[SubErr alloc] */
+#line 1 "<nepa-generated>"
 __attribute__((weak)) NPObject * Metal__SubErr_alloc(NPClass * self, SEL _cmd) {
+#line 154 "baremetal_test.np"
     return nepa_alloc(self);
 }
 
 /* -[SubErr init] */
+#line 1 "<nepa-generated>"
 __attribute__((weak)) NPObject * Metal__SubErr_init(NPObject * self, SEL _cmd) {
+#line 155 "baremetal_test.np"
     return self;
 }
 
 /* +[Widget make:plus:] */
+#line 1 "<nepa-generated>"
 __attribute__((weak)) int Metal__Widget_make_plus_(NPClass * self, SEL _cmd, int b, int delta) {
+#line 184 "baremetal_test.np"
     return ((b * 2) + delta);
 }
 
 /* +[Widget alloc] */
+#line 1 "<nepa-generated>"
 __attribute__((weak)) NPObject * Metal__Widget_alloc(NPClass * self, SEL _cmd) {
+#line 187 "baremetal_test.np"
     return nepa_alloc(self);
 }
 
 /* -[Widget init] */
+#line 1 "<nepa-generated>"
 __attribute__((weak)) NPObject * Metal__Widget_init(NPObject * self, SEL _cmd) {
+#line 188 "baremetal_test.np"
     return self;
 }
 
 /* -[Widget initWithUid:weight:] */
+#line 1 "<nepa-generated>"
 __attribute__((weak)) NPObject * Metal__Widget_initWithUid_weight_(NPObject * self, SEL _cmd, int u, int w) {
+#line 189 "baremetal_test.np"
     ((struct Metal__Widget *)self)->uid = u;
     ((struct Metal__Widget *)self)->weight = w;
     return self;
 }
 
 /* -[Widget tag] */
+#line 1 "<nepa-generated>"
 __attribute__((weak)) int Metal__Widget_tag(NPObject * self, SEL _cmd) {
+#line 190 "baremetal_test.np"
     return ((struct Metal__Widget *)self)->uid;
 }
 
 /* -[Widget heart] */
+#line 1 "<nepa-generated>"
 __attribute__((weak)) int Metal__Widget_heart(NPObject * self, SEL _cmd) {
+#line 191 "baremetal_test.np"
     return (((struct Metal__Widget *)self)->weight > 0) ? 1 : 0;
 }
 
 /* -[Widget weight] */
+#line 1 "<nepa-generated>"
 __attribute__((weak)) int Metal__Widget_weight(NPObject * self, SEL _cmd) {
+#line 192 "baremetal_test.np"
     return ((struct Metal__Widget *)self)->weight;
 }
 
 /* -[Widget setWeight:] */
+#line 1 "<nepa-generated>"
 __attribute__((weak)) void Metal__Widget_setWeight_(NPObject * self, SEL _cmd, int w) {
+#line 193 "baremetal_test.np"
     ((struct Metal__Widget *)self)->weight = w;
 }
 
 /* -[Widget addTo:times:] */
+#line 1 "<nepa-generated>"
 __attribute__((weak)) int Metal__Widget_addTo_times_(NPObject * self, SEL _cmd, int v, int k) {
+#line 194 "baremetal_test.np"
     return (v + (k * ((struct Metal__Widget *)self)->uid));
 }
 
 /* -[Widget sumAsync:] */
-__attribute__((weak)) int Metal__Widget_sumAsync_(NPObject * self, SEL _cmd, int v) {
+#line 1 "<nepa-generated>"
+__attribute__((weak)) NPTask * Metal__Widget_sumAsync_(NPObject * self, SEL _cmd, int v) {
+#line 198 "baremetal_test.np"
     NPTask * __nepa_task = (NPTask *)(nepa_task_create(nepa_async_state_sumAsync_, self, sizeof(struct sumAsync__frame)));
     ((struct sumAsync__frame *)__nepa_task->frame)->v = v;
-    long __nepa_r = (long)nepa_task_join(__nepa_task);
-    return (int)__nepa_r;
+    return __nepa_task;
 }
 
 /* +[Widget awaitMake] */
-__attribute__((weak)) void Metal__Widget_awaitMake(NPClass * self, SEL _cmd) {
+#line 1 "<nepa-generated>"
+__attribute__((weak)) NPTask * Metal__Widget_awaitMake(NPClass * self, SEL _cmd) {
+#line 204 "baremetal_test.np"
     NPTask * __nepa_task = (NPTask *)(nepa_task_create(nepa_async_state_awaitMake, self, sizeof(struct awaitMake_frame)));
-    nepa_task_join(__nepa_task);
+    return __nepa_task;
 }
 
 /* +[Widget awaitSum:] */
-__attribute__((weak)) void Metal__Widget_awaitSum_(NPClass * self, SEL _cmd, Metal__Widget * ww) {
+#line 1 "<nepa-generated>"
+__attribute__((weak)) NPTask * Metal__Widget_awaitSum_(NPClass * self, SEL _cmd, Metal__Widget * ww) {
+#line 210 "baremetal_test.np"
     NPTask * __nepa_task = (NPTask *)(nepa_task_create(nepa_async_state_awaitSum_, self, sizeof(struct awaitSum__frame)));
     ((struct awaitSum__frame *)__nepa_task->frame)->ww = ww;
-    nepa_task_join(__nepa_task);
+    return __nepa_task;
 }
 
 /* -[Widget retain] */
+#line 1 "<nepa-generated>"
 __attribute__((weak)) NPObject * Metal__Widget_retain(NPObject * self, SEL _cmd) {
+#line 211 "baremetal_test.np"
     nepa_retain(self);
     return self;
 }
 
 /* -[Widget release] */
+#line 1 "<nepa-generated>"
 __attribute__((weak)) void Metal__Widget_release(NPObject * self, SEL _cmd) {
+#line 212 "baremetal_test.np"
     nepa_release(self);
 }
 
 /* -[Widget autorelease] */
+#line 1 "<nepa-generated>"
 __attribute__((weak)) NPObject * Metal__Widget_autorelease(NPObject * self, SEL _cmd) {
+#line 213 "baremetal_test.np"
     return nepa_autorelease(self);
 }
 
 /* -[Widget dealloc] */
+#line 1 "<nepa-generated>"
 __attribute__((weak)) void Metal__Widget_dealloc(NPObject * self, SEL _cmd) {
 }
 
 /* -[Widget isKindOfClass:] */
 __attribute__((weak)) _Bool Metal__Widget_isKindOfClass_(NPObject * self, SEL _cmd, NPClass * cls) {
+#line 215 "baremetal_test.np"
     return nepa_isKindOfClass(self, cls);
 }
 
 /* -[Widget isEqual:] */
+#line 1 "<nepa-generated>"
 __attribute__((weak)) _Bool Metal__Widget_isEqual_(NPObject * self, SEL _cmd, NPObject * object) {
+#line 216 "baremetal_test.np"
     return (self == object);
 }
 
 /* +[TurboWidget init] */
+#line 1 "<nepa-generated>"
 __attribute__((weak)) NPObject * Metal__TurboWidget_alloc(NPClass * self, SEL _cmd) {
+#line 230 "baremetal_test.np"
     return nepa_alloc(self);
 }
 
 /* -[TurboWidget tag] */
+#line 1 "<nepa-generated>"
 __attribute__((weak)) NPObject * Metal__TurboWidget_init(NPObject * self, SEL _cmd) {
+#line 231 "baremetal_test.np"
     return self;
 }
 
 /* -[TurboWidget setBoost:] */
+#line 1 "<nepa-generated>"
 __attribute__((weak)) int Metal__TurboWidget_tag(NPObject * self, SEL _cmd) {
-    return ((&NEPA_VTABLE_$_Metal__Widget)->tag(self, __nepa_sel_tag) + ((struct Metal__TurboWidget *)self)->boost);
+#line 232 "baremetal_test.np"
+    __auto_type __nepa_eh_tmp_0 = (&NEPA_VTABLE_$_Metal__Widget)->tag(self, __nepa_sel_tag);
+    return (__nepa_eh_tmp_0 + ((struct Metal__TurboWidget *)self)->boost);
 }
 
 /* -[TurboWidget boost] */
+#line 1 "<nepa-generated>"
 __attribute__((weak)) int Metal__TurboWidget_boost(NPObject * self, SEL _cmd) {
+#line 233 "baremetal_test.np"
     return ((struct Metal__TurboWidget *)self)->boost;
 }
 
 /* -[TurboWidget setBoost_] */
+#line 1 "<nepa-generated>"
 __attribute__((weak)) void Metal__TurboWidget_setBoost_(NPObject * self, SEL _cmd, int b) {
+#line 234 "baremetal_test.np"
     ((struct Metal__TurboWidget *)self)->boost = b;
 }
 
 /* +[Array alloc] */
+#line 1 "<nepa-generated>"
 __attribute__((weak)) NPObject * Metal__Array_alloc(NPClass * self, SEL _cmd) {
+#line 249 "baremetal_test.np"
     return nepa_alloc(self);
 }
 
 /* -[Array init] */
+#line 1 "<nepa-generated>"
 __attribute__((weak)) NPObject * Metal__Array_init(NPObject * self, SEL _cmd) {
+#line 250 "baremetal_test.np"
     return self;
 }
 
 /* -[Array add:] */
+#line 1 "<nepa-generated>"
 __attribute__((weak)) void Metal__Array_add_(NPObject * self, SEL _cmd, NPObject * obj) {
+#line 251 "baremetal_test.np"
     if ((((struct Metal__Array *)self)->_n < 8)) {
         ((struct Metal__Array *)self)->_items[((struct Metal__Array *)self)->_n] = obj;
         (((struct Metal__Array *)self)->_n)++;
@@ -1168,140 +1362,188 @@ __attribute__((weak)) void Metal__Array_add_(NPObject * self, SEL _cmd, NPObject
 }
 
 /* -[Array count] */
+#line 1 "<nepa-generated>"
 __attribute__((weak)) unsigned Metal__Array_count(NPObject * self, SEL _cmd) {
+#line 252 "baremetal_test.np"
     return (unsigned)((struct Metal__Array *)self)->_n;
 }
 
 /* -[Array objectAtIndex:] */
+#line 1 "<nepa-generated>"
 __attribute__((weak)) NPObject * Metal__Array_objectAtIndex_(NPObject * self, SEL _cmd, unsigned i) {
+#line 253 "baremetal_test.np"
     return ((struct Metal__Array *)self)->_items[i];
 }
 
 /* +[Box alloc] */
+#line 1 "<nepa-generated>"
 __attribute__((weak)) NPObject * Box_alloc(NPClass * self, SEL _cmd) {
+#line 272 "baremetal_test.np"
     return nepa_alloc(self);
 }
 
 /* -[Box init] */
+#line 1 "<nepa-generated>"
 __attribute__((weak)) NPObject * Box_init(NPObject * self, SEL _cmd) {
+#line 273 "baremetal_test.np"
     return self;
 }
 
 /* -[Box set:] */
+#line 1 "<nepa-generated>"
 __attribute__((weak)) void Box_set_(NPObject * self, SEL _cmd, NPObject * v) {
+#line 274 "baremetal_test.np"
     ((struct Box *)self)->_v = v;
 }
 
 /* -[Box value] */
+#line 1 "<nepa-generated>"
 __attribute__((weak)) NPObject * Box_value(NPObject * self, SEL _cmd) {
+#line 275 "baremetal_test.np"
     return ((struct Box *)self)->_v;
 }
 
 /* +[Animal alloc] */
+#line 1 "<nepa-generated>"
 __attribute__((weak)) NPObject * Animal_alloc(NPClass * self, SEL _cmd) {
+#line 288 "baremetal_test.np"
     return nepa_alloc(self);
 }
 
 /* -[Animal init] */
+#line 1 "<nepa-generated>"
 __attribute__((weak)) NPObject * Animal_init(NPObject * self, SEL _cmd) {
+#line 289 "baremetal_test.np"
     return self;
 }
 
 /* -[Animal speak] */
+#line 1 "<nepa-generated>"
 __attribute__((weak)) int Animal_speak(NPObject * self, SEL _cmd) {
+#line 290 "baremetal_test.np"
     return ((struct Animal *)self)->voice;
 }
 
 /* -[Animal setVoice:] */
+#line 1 "<nepa-generated>"
 __attribute__((weak)) void Animal_setVoice_(NPObject * self, SEL _cmd, int v) {
+#line 291 "baremetal_test.np"
     ((struct Animal *)self)->voice = v;
 }
 
 /* +[Dog alloc] */
+#line 1 "<nepa-generated>"
 __attribute__((weak)) NPObject * Dog_alloc(NPClass * self, SEL _cmd) {
+#line 303 "baremetal_test.np"
     return nepa_alloc(self);
 }
 
 /* -[Dog init] */
+#line 1 "<nepa-generated>"
 __attribute__((weak)) NPObject * Dog_init(NPObject * self, SEL _cmd) {
+#line 304 "baremetal_test.np"
     return self;
 }
 
 /* -[Dog speak] */
+#line 1 "<nepa-generated>"
 __attribute__((weak)) int Dog_speak(NPObject * self, SEL _cmd) {
-    return ((&NEPA_VTABLE_$_Animal)->speak(self, __nepa_sel_speak) + ((struct Dog *)self)->leash);
+#line 305 "baremetal_test.np"
+    __auto_type __nepa_eh_tmp_1 = (&NEPA_VTABLE_$_Animal)->speak(self, __nepa_sel_speak);
+    return (__nepa_eh_tmp_1 + ((struct Dog *)self)->leash);
 }
 
 /* -[Dog setLeash_] */
+#line 1 "<nepa-generated>"
 __attribute__((weak)) void Dog_setLeash_(NPObject * self, SEL _cmd, int l) {
+#line 306 "baremetal_test.np"
     ((struct Dog *)self)->leash = l;
 }
 
-__attribute__((weak)) int nepa_async_state_sumAsync_(NPTask * t) {
-    switch (t->state) {
+#line 1 "<nepa-generated>"
+__attribute__((weak)) int nepa_async_state_sumAsync_(NPTask * __nepa_task) {
+#line 198 "baremetal_test.np"
+    switch (__nepa_task->state) {
         case 1:
             {
-                struct sumAsync__frame * __nepa_f = (struct sumAsync__frame *)t->frame;
-                int r = (t->state = 2, ({ NPObject *__nepa_tmp_4 = ((NPObject *)(t->self_obj)); __nepa_tmp_4 ? ((int (*)(NPObject *, SEL, int, int))((struct nepa_vtable *)__nepa_tmp_4->isa->vtable)->addTo_times_)(__nepa_tmp_4, __nepa_sel_addTo_times_, __nepa_f->v, 2) : (int){0}; }));
+                struct sumAsync__frame * __nepa_f = (struct sumAsync__frame *)__nepa_task->frame;
+#line 196 "baremetal_test.np"
+                int r = (__nepa_task->state = 2, ({ NPObject *__nepa_tmp_4 = ((NPObject *)(__nepa_task->self_obj)); __nepa_tmp_4 ? ((int (*)(NPObject *, SEL, int, int))((struct nepa_vtable *)__nepa_tmp_4->isa->vtable)->addTo_times_)(__nepa_tmp_4, __nepa_sel_addTo_times_, __nepa_f->v, 2) : (int){0}; }));
+#line 197 "baremetal_test.np"
                 {
-                    t->result = (void *)(unsigned)(r + __nepa_f->v);
-                    t->state = -1;
+                    __nepa_task->result = (void *)(unsigned)(r + __nepa_f->v);
+                    __nepa_task->state = -1;
                     return 1;
                 }
-                t->state = -1;
+#line 198 "baremetal_test.np"
+                __nepa_task->state = -1;
                 return 1;
             }
         case 2:
             {
-                t->state = -1;
+                __nepa_task->state = -1;
                 return 1;
             }
     }
-    t->state = -1;
+    __nepa_task->state = -1;
     return 1;
 }
 
-__attribute__((weak)) int nepa_async_state_awaitMake(NPTask * t) {
-    switch (t->state) {
+#line 1 "<nepa-generated>"
+__attribute__((weak)) int nepa_async_state_awaitMake(NPTask * __nepa_task) {
+#line 204 "baremetal_test.np"
+    switch (__nepa_task->state) {
         case 1:
             {
-                struct awaitMake_frame * __nepa_f = (struct awaitMake_frame *)t->frame;
-                int awaited = (t->state = 2, Metal__Widget_make_plus_(&NEPA_CLASS_$_Metal__Widget, __nepa_sel_make_plus_, 10, 3));
+                struct awaitMake_frame * __nepa_f = (struct awaitMake_frame *)__nepa_task->frame;
+#line 200 "baremetal_test.np"
+                int awaited = (__nepa_task->state = 2, Metal__Widget_make_plus_(&NEPA_CLASS_$_Metal__Widget, __nepa_sel_make_plus_, 10, 3));
+#line 201 "baremetal_test.np"
                 kputs("[R5] @await make:plus:=");
+#line 202 "baremetal_test.np"
                 kputdec(awaited);
+#line 203 "baremetal_test.np"
                 kputs("\n");
-                t->state = -1;
+#line 204 "baremetal_test.np"
+                __nepa_task->state = -1;
                 return 1;
             }
         case 2:
             {
-                t->state = -1;
+                __nepa_task->state = -1;
                 return 1;
             }
     }
-    t->state = -1;
+    __nepa_task->state = -1;
     return 1;
 }
 
-__attribute__((weak)) int nepa_async_state_awaitSum_(NPTask * t) {
-    switch (t->state) {
+#line 1 "<nepa-generated>"
+__attribute__((weak)) int nepa_async_state_awaitSum_(NPTask * __nepa_task) {
+#line 210 "baremetal_test.np"
+    switch (__nepa_task->state) {
         case 1:
             {
-                struct awaitSum__frame * __nepa_f = (struct awaitSum__frame *)t->frame;
-                int av = (t->state = 2, ({ NPObject *__nepa_tmp_5 = ((NPObject *)(__nepa_f->ww)); __nepa_tmp_5 ? ((int (*)(NPObject *, SEL, int))((struct nepa_vtable *)__nepa_tmp_5->isa->vtable)->sumAsync_)(__nepa_tmp_5, __nepa_sel_sumAsync_, 5) : (int){0}; }));
+                struct awaitSum__frame * __nepa_f = (struct awaitSum__frame *)__nepa_task->frame;
+#line 206 "baremetal_test.np"
+                int av = (__nepa_task->state = 2, (long)nepa_task_await(({ NPObject *__nepa_tmp_5 = ((NPObject *)(__nepa_f->ww)); __nepa_tmp_5 ? ((NPTask * (*)(NPObject *, SEL, int))((struct nepa_vtable *)__nepa_tmp_5->isa->vtable)->sumAsync_)(__nepa_tmp_5, __nepa_sel_sumAsync_, 5) : 0; })));
+#line 207 "baremetal_test.np"
                 kputs("[R8] async marker sum=");
+#line 208 "baremetal_test.np"
                 kputdec(av);
+#line 209 "baremetal_test.np"
                 kputs("\n");
-                t->state = -1;
+#line 210 "baremetal_test.np"
+                __nepa_task->state = -1;
                 return 1;
             }
         case 2:
             {
-                t->state = -1;
+                __nepa_task->state = -1;
                 return 1;
             }
     }
-    t->state = -1;
+    __nepa_task->state = -1;
     return 1;
 }
 
@@ -1317,196 +1559,304 @@ int asm_add3(int a, int b, int c);
 
 unsigned asm_rotr32(unsigned v, unsigned r);
 
+#line 1 "<nepa-generated>"
 __attribute__((weak)) int bump(void ) {
+#line 39 "baremetal_test.np"
     return ++g_hits;
 }
 
+#line 1 "<nepa-generated>"
 __attribute__((weak)) void check_struct_eq(void ) {
+#line 45 "baremetal_test.np"
     struct Point p1;
     p1.x = 1;
     p1.y = 2;
+#line 46 "baremetal_test.np"
     struct Point p2;
     p2.x = 1;
     p2.y = 2;
+#line 47 "baremetal_test.np"
     struct Point * pp = &p1;
+#line 49 "baremetal_test.np"
     if (nepa_struct_eq_Point(p1, p2)) {
+#line 48 "baremetal_test.np"
         kputs("[C3] Point ==  OK\n");
     }
     else {
+#line 49 "baremetal_test.np"
         kputs("[C3] Point ==  FAIL\n");
     }
+#line 51 "baremetal_test.np"
     if ((pp == &p1)) {
+#line 50 "baremetal_test.np"
         kputs("[C4] ptr == &obj OK (pointer semantics kept)\n");
     }
     else {
+#line 51 "baremetal_test.np"
         kputs("[C4] ptr == FAIL\n");
     }
+#line 53 "baremetal_test.np"
     struct Ops a;
     a.num = 1;
     a.fn = &asm_square;
     a.at.x = 7;
     a.at.y = 8;
+#line 54 "baremetal_test.np"
     struct Ops b;
     b.num = 1;
     b.fn = &asm_square;
     b.at.x = 7;
     b.at.y = 8;
+#line 55 "baremetal_test.np"
     struct Ops c;
     c.num = 2;
     c.fn = &asm_square;
     c.at.x = 7;
     c.at.y = 8;
+#line 57 "baremetal_test.np"
     if (nepa_struct_eq_Ops(a, b)) {
+#line 56 "baremetal_test.np"
         kputs("[C1] struct Ops ==  OK\n");
     }
     else {
+#line 57 "baremetal_test.np"
         kputs("[C1] struct Ops ==  FAIL\n");
     }
+#line 59 "baremetal_test.np"
     if ((nepa_struct_eq_Ops(a, c) == 0)) {
+#line 58 "baremetal_test.np"
         kputs("[C2] struct Ops !=  OK\n");
     }
     else {
+#line 59 "baremetal_test.np"
         kputs("[C2] struct Ops !=  FAIL\n");
     }
+#line 63 "baremetal_test.np"
     struct Ops d;
     d.num = 0;
     d.fn = &asm_square;
     d.at.x = 0;
     d.at.y = 0;
+#line 65 "baremetal_test.np"
     if ((d.fn(9) == 81)) {
+#line 64 "baremetal_test.np"
         kputs("[C8] member fn-ptr call OK\n");
     }
     else {
+#line 65 "baremetal_test.np"
         kputs("[C8] member fn-ptr call FAIL\n");
+    }
+#line 1 "<nepa-generated>"
+    if ((__nepa_eh_flag == 1)) {
+        return;
     }
 }
 
 __attribute__((weak)) char * mode_name(int m) {
+#line 76 "baremetal_test.np"
     switch (m) {
+#line 73 "baremetal_test.np"
         case MODE_OFF:
             return "off";
+#line 74 "baremetal_test.np"
         case MODE_ON:
             return "on";
+#line 75 "baremetal_test.np"
         case MODE_TURBO:
             return "turbo";
     }
+#line 77 "baremetal_test.np"
     return "?";
 }
 
+#line 1 "<nepa-generated>"
 __attribute__((weak)) unsigned loopsum(int n) {
+#line 82 "baremetal_test.np"
     unsigned acc = 0;
+#line 83 "baremetal_test.np"
     for (int i = 0;  (i < n); (i)++) {
         (acc += (unsigned)i);
     }
+#line 84 "baremetal_test.np"
     int j = n;
+#line 85 "baremetal_test.np"
     while ((j > 0)) {
         (acc += 1);
         (j)--;
     }
+#line 86 "baremetal_test.np"
     do {
         (acc += 2);
     }
     while (0);
+#line 87 "baremetal_test.np"
     unsigned mask = 4042322160;
+#line 88 "baremetal_test.np"
     (mask |= 65535);
     (mask &= 4294902015);
     (mask ^= 4278255360);
+#line 89 "baremetal_test.np"
     (mask <<= 2);
     (mask >>= 1);
+#line 90 "baremetal_test.np"
     (acc ^= mask);
+#line 91 "baremetal_test.np"
     acc = (acc > 1000) ? (acc - 1000) : acc;
+#line 92 "baremetal_test.np"
     char buf[3] = "AB";
+#line 93 "baremetal_test.np"
     unsigned char * p = (const unsigned char *)buf;
+#line 94 "baremetal_test.np"
     unsigned char first = *p;
+#line 95 "baremetal_test.np"
     unsigned char next = ((*p))++;
+#line 96 "baremetal_test.np"
     (acc += ((unsigned)first + (unsigned)next));
+#line 97 "baremetal_test.np"
     return acc;
 }
 
 
+#line 1 "<nepa-generated>"
 __attribute__((weak)) int poke_tag(Metal__Widget * w) {
+#line 310 "baremetal_test.np"
     return ({ NPObject *__nepa_tmp_6 = ((NPObject *)(w)); __nepa_tmp_6 ? ((int (*)(NPObject *, SEL))((struct nepa_vtable *)__nepa_tmp_6->isa->vtable)->tag)(__nepa_tmp_6, __nepa_sel_tag) : (int){0}; });
 }
 
+#line 1 "<nepa-generated>"
 __attribute__((weak)) int poke_id_proto(NPObject * t) {
+#line 311 "baremetal_test.np"
     return ({ NPObject *__nepa_tmp_7 = ((NPObject *)(t)); __nepa_tmp_7 ? ((int (*)(NPObject *, SEL))((struct nepa_vtable *)__nepa_tmp_7->isa->vtable)->tag)(__nepa_tmp_7, __nepa_sel_tag) : (int){0}; });
 }
 
+#line 1 "<nepa-generated>"
 __attribute__((weak)) void rethrow_err(Metal__Err * e) {
+#line 316 "baremetal_test.np"
     {
-        __nepa_exception_value = e;
-        longjmp(__nepa_exception_buf, 1);
+        NPObject * __nepa_eh_thrown_2 = (NPObject *)e;
+#line 1 "<nepa-generated>"
+        __nepa_eh_val = __nepa_eh_thrown_2;
+        nepa_retain(__nepa_eh_val);
+        nepa_autorelease(__nepa_eh_val);
+        __nepa_eh_flag = 1;
+    }
+    if ((__nepa_eh_flag == 1)) {
+        return;
     }
 }
 
 __attribute__((weak)) void bare_rethrow_err(Metal__Err * e) {
+#line 320 "baremetal_test.np"
     {
-        __nepa_exception_value = e;
-        longjmp(__nepa_exception_buf, 1);
+        NPObject * __nepa_eh_thrown_3 = (NPObject *)e;
+#line 1 "<nepa-generated>"
+        __nepa_eh_val = __nepa_eh_thrown_3;
+        nepa_retain(__nepa_eh_val);
+        nepa_autorelease(__nepa_eh_val);
+        __nepa_eh_flag = 1;
+    }
+    if ((__nepa_eh_flag == 1)) {
+        return;
     }
 }
 
 __attribute__((weak)) int local_catch(int n, Metal__Err * e) {
+#line 332 "baremetal_test.np"
     {
-        jmp_buf __nepa_saved;
-        memcpy(__nepa_saved, __nepa_exception_buf, sizeof(jmp_buf));
-        volatile int __nepa_state = 0;
-        if ((setjmp(__nepa_exception_buf) != 0))         __nepa_state = 1;
-        if ((__nepa_state == 0)) {
+        int __nepa_eh_saved_4 = __nepa_eh_flag;
+#line 1 "<nepa-generated>"
+        __nepa_eh_flag = 0;
+#line 332 "baremetal_test.np"
+        int __nepa_eh_done_4 = 0;
+#line 330 "baremetal_test.np"
+        {
+#line 328 "baremetal_test.np"
             if ((n < 0)) {
+#line 327 "baremetal_test.np"
                 {
-                    __nepa_exception_value = e;
-                    longjmp(__nepa_exception_buf, 1);
+                    NPObject * __nepa_eh_thrown_5 = (NPObject *)e;
+#line 1 "<nepa-generated>"
+                    __nepa_eh_val = __nepa_eh_thrown_5;
+                    nepa_retain(__nepa_eh_val);
+                    nepa_autorelease(__nepa_eh_val);
+                    __nepa_eh_flag = 1;
                 }
             }
-            return (n * 3);
-        }
-        memcpy(__nepa_exception_buf, __nepa_saved, sizeof(jmp_buf));
-        if ((__nepa_state == 1))         if (__nepa_eh_isa((NPObject *)__nepa_exception_value, &NEPA_CLASS_$_Metal__Err)) {
-            __nepa_state = 2;
-            Metal__Err * caught;
-            (void)caught;
-            {
-                return -1;
+            if ((__nepa_eh_flag == 0)) {
+                {
+#line 329 "baremetal_test.np"
+                    return (n * 3);
+                }
             }
         }
-        memcpy(__nepa_exception_buf, __nepa_saved, sizeof(jmp_buf));
-        if ((__nepa_state == 1))         longjmp(__nepa_exception_buf, 1);
+#line 332 "baremetal_test.np"
+        if (((__nepa_eh_flag == 1) && (__nepa_eh_done_4 == 0))) {
+            if (__nepa_eh_isa((NPObject *)__nepa_eh_val, &NEPA_CLASS_$_Metal__Err)) {
+#line 1 "<nepa-generated>"
+                __nepa_eh_done_4 = 1;
+                __nepa_eh_flag = 0;
+#line 332 "baremetal_test.np"
+                Metal__Err * caught;
+                {
+#line 331 "baremetal_test.np"
+                    return -1;
+                }
+            }
+        }
+#line 1 "<nepa-generated>"
+        __nepa_eh_flag = (__nepa_eh_saved_4 || __nepa_eh_flag);
+    }
+    if ((__nepa_eh_flag == 1)) {
+        return 0;
     }
 }
 
 __attribute__((weak)) void defer_order(void ) {
+#line 337 "baremetal_test.np"
     kputs("[D1] enter\n");
+#line 340 "baremetal_test.np"
     kputs("[D1] body end\n");
+#line 339 "baremetal_test.np"
     {
         kputs("[D1] defer B (registered second)\n");
     }
+#line 338 "baremetal_test.np"
     {
         kputs("[D1] defer A (registered first)\n");
     }
 }
 
+#line 1 "<nepa-generated>"
 __attribute__((weak)) int defer_return(int n) {
+#line 345 "baremetal_test.np"
     if ((n > 0)) {
         {
+#line 344 "baremetal_test.np"
             {
                 kputs("[D2] defer ran on return\n");
             }
+#line 345 "baremetal_test.np"
             return n;
         }
     }
+#line 346 "baremetal_test.np"
     {
+#line 344 "baremetal_test.np"
         {
             kputs("[D2] defer ran on return\n");
         }
+#line 346 "baremetal_test.np"
         return -n;
     }
+#line 344 "baremetal_test.np"
     {
         kputs("[D2] defer ran on return\n");
     }
 }
 
+#line 1 "<nepa-generated>"
 __attribute__((weak)) void pattern_scalar(int pv) {
+#line 364 "baremetal_test.np"
     {
         __auto_type __nepa_sw = pv;
         if ((__nepa_sw > 100)) {
@@ -1519,36 +1869,47 @@ __attribute__((weak)) void pattern_scalar(int pv) {
             goto __nepa_case_0_2;
         }
         goto __nepa_case_0_d;
+#line 353 "baremetal_test.np"
         {
 __nepa_case_0_0:
             {
                 kputs("[P1] big\n");
+#line 354 "baremetal_test.np"
                 goto __nepa_sw0_end;
             }
         }
+#line 356 "baremetal_test.np"
         {
 __nepa_case_0_1:
             {
                 kputs("[P1] mid (when) OK\n");
+#line 357 "baremetal_test.np"
                 goto __nepa_sw0_end;
             }
         }
+#line 359 "baremetal_test.np"
         {
 __nepa_case_0_2:
             {
                 kputs("[P1] small\n");
+#line 360 "baremetal_test.np"
                 goto __nepa_sw0_end;
             }
         }
+#line 364 "baremetal_test.np"
         {
 __nepa_case_0_d:
+#line 362 "baremetal_test.np"
             {
                 kputs("[P1] default\n");
+#line 363 "baremetal_test.np"
                 goto __nepa_sw0_end;
             }
         }
+#line 364 "baremetal_test.np"
         {
 __nepa_sw0_end:
+#line 1 "<nepa-generated>"
             {
             }
         }
@@ -1556,10 +1917,14 @@ __nepa_sw0_end:
 }
 
 __attribute__((weak)) void pattern_obj(NPObject * obj) {
+#line 384 "baremetal_test.np"
     {
         NPObject * __nepa_sw = (NPObject *)obj;
+#line 372 "baremetal_test.np"
         Dog * d = (Dog *)(NPObject *)__nepa_sw;
+#line 377 "baremetal_test.np"
         Animal * a = (Animal *)(NPObject *)__nepa_sw;
+#line 384 "baremetal_test.np"
         if (nepa_isKindOfClass((NPObject *)__nepa_sw, &NEPA_CLASS_$_Dog)) {
             goto __nepa_case_1_0;
         }
@@ -1567,33 +1932,46 @@ __attribute__((weak)) void pattern_obj(NPObject * obj) {
             goto __nepa_case_1_1;
         }
         goto __nepa_case_1_d;
+#line 372 "baremetal_test.np"
         {
 __nepa_case_1_0:
             {
                 kputs("[P2] dog arm speak=");
+#line 373 "baremetal_test.np"
                 kputdec(({ NPObject *__nepa_tmp_8 = ((NPObject *)(d)); __nepa_tmp_8 ? ((int (*)(NPObject *, SEL))((struct nepa_vtable *)__nepa_tmp_8->isa->vtable)->speak)(__nepa_tmp_8, __nepa_sel_speak) : (int){0}; }));
+#line 374 "baremetal_test.np"
                 kputs("\n");
+#line 375 "baremetal_test.np"
                 goto __nepa_sw1_end;
             }
         }
+#line 377 "baremetal_test.np"
         {
 __nepa_case_1_1:
             {
                 kputs("[P2] animal arm speak=");
+#line 378 "baremetal_test.np"
                 kputdec(({ NPObject *__nepa_tmp_9 = ((NPObject *)(a)); __nepa_tmp_9 ? ((int (*)(NPObject *, SEL))((struct nepa_vtable *)__nepa_tmp_9->isa->vtable)->speak)(__nepa_tmp_9, __nepa_sel_speak) : (int){0}; }));
+#line 379 "baremetal_test.np"
                 kputs("\n");
+#line 380 "baremetal_test.np"
                 goto __nepa_sw1_end;
             }
         }
+#line 384 "baremetal_test.np"
         {
 __nepa_case_1_d:
+#line 382 "baremetal_test.np"
             {
                 kputs("[P2] obj default\n");
+#line 383 "baremetal_test.np"
                 goto __nepa_sw1_end;
             }
         }
+#line 384 "baremetal_test.np"
         {
 __nepa_sw1_end:
+#line 1 "<nepa-generated>"
             {
             }
         }
@@ -1601,429 +1979,820 @@ __nepa_sw1_end:
 }
 
 __attribute__((weak)) int nn_sum(const int * a, const int * b) {
+#line 390 "baremetal_test.np"
     return (*a + (b ? *b : 0));
 }
 
+#line 1 "<nepa-generated>"
 __attribute__((weak)) char * mode_name2(enum Mode m) {
+#line 399 "baremetal_test.np"
     switch (m) {
+#line 396 "baremetal_test.np"
         case MODE_OFF:
             return "off2";
+#line 397 "baremetal_test.np"
         case MODE_TURBO:
             return "turbo2";
+#line 398 "baremetal_test.np"
+        default:
+            return "?2";
     }
-    return "?2";
 }
 
+#line 1 "<nepa-generated>"
 __attribute__((weak)) int sync_early(Metal__Widget * w) {
+#line 407 "baremetal_test.np"
     {
         __attribute__((cleanup(nepa_syncAutoCleanup)))         long __nepa_sync_0 = nepa_syncLock((void *)w);
+#line 406 "baremetal_test.np"
         return 7;
     }
 }
 
+#line 1 "<nepa-generated>"
 __attribute__((weak)) int main(void) {
     nepa_metaInit();
+#line 412 "baremetal_test.np"
     kputs("=== baremetal stress ===\n");
+#line 415 "baremetal_test.np"
     check_struct_eq();
-    kputs("[C5] mode(TURBO)=");
-    kputs(mode_name(MODE_TURBO));
-    kputs("\n");
-    kputs("[C6] loopsum(10)=");
-    kputdec((int)loopsum(10));
-    kputs("\n");
-    kputs("[N1] +make:plus: = ");
-    kputdec(Metal__Widget_make_plus_(&NEPA_CLASS_$_Metal__Widget, __nepa_sel_make_plus_, 20, 1));
-    kputs("\n");
-    NPObject *__nepa_tmp_10 = (Metal__Widget_alloc(&NEPA_CLASS_$_Metal__Widget, __nepa_sel_alloc));
-    Metal__Widget * w = (Metal__Widget *)(__nepa_tmp_10 ? ((struct nepa_vtable *)__nepa_tmp_10->isa->vtable)->initWithUid_weight_(__nepa_tmp_10, __nepa_sel_initWithUid_weight_, 7, 30) : 0);
-    kputs("[N2] tag=");
-    kputdec(({ NPObject *__nepa_tmp_11 = ((NPObject *)(w)); __nepa_tmp_11 ? ((int (*)(NPObject *, SEL))((struct nepa_vtable *)__nepa_tmp_11->isa->vtable)->tag)(__nepa_tmp_11, __nepa_sel_tag) : (int){0}; }));
-    kputs(" weight=");
-    kputdec(({ NPObject *__nepa_tmp_12 = ((NPObject *)(w)); __nepa_tmp_12 ? ((int (*)(NPObject *, SEL))((struct nepa_vtable *)__nepa_tmp_12->isa->vtable)->weight)(__nepa_tmp_12, __nepa_sel_weight) : (int){0}; }));
-    kputs(" addTo:10 times:3=");
-    kputdec(({ NPObject *__nepa_tmp_13 = ((NPObject *)(w)); __nepa_tmp_13 ? ((int (*)(NPObject *, SEL, int, int))((struct nepa_vtable *)__nepa_tmp_13->isa->vtable)->addTo_times_)(__nepa_tmp_13, __nepa_sel_addTo_times_, 10, 3) : (int){0}; }));
-    kputs("\n");
-    ({ NPObject *__nepa_tmp_14 = ((NPObject *)(w)); __nepa_tmp_14 ? ((void (*)(NPObject *, SEL, int))((struct nepa_vtable *)__nepa_tmp_14->isa->vtable)->setWeight_)(__nepa_tmp_14, __nepa_sel_setWeight_, 99) : 0; });
-    kputs("[N3] setWeight→");
-    kputdec(({ NPObject *__nepa_tmp_15 = ((NPObject *)(w)); __nepa_tmp_15 ? ((int (*)(NPObject *, SEL))((struct nepa_vtable *)__nepa_tmp_15->isa->vtable)->weight)(__nepa_tmp_15, __nepa_sel_weight) : (int){0}; }));
-    kputs(" uid(arrow public)=");
-    kputdec(w->uid);
-    kputs("\n");
-    NPObject *__nepa_tmp_16 = (Metal__TurboWidget_alloc(&NEPA_CLASS_$_Metal__TurboWidget, __nepa_sel_alloc));
-    Metal__TurboWidget * tw = (Metal__TurboWidget *)(__nepa_tmp_16 ? ((struct nepa_vtable *)__nepa_tmp_16->isa->vtable)->init(__nepa_tmp_16, __nepa_sel_init) : 0);
-    ({ NPObject *__nepa_tmp_17 = ((NPObject *)(tw)); __nepa_tmp_17 ? ((void (*)(NPObject *, SEL, int))((struct nepa_vtable *)__nepa_tmp_17->isa->vtable)->setBoost_)(__nepa_tmp_17, __nepa_sel_setBoost_, 1000) : 0; });
-    ({ NPObject *__nepa_tmp_18 = ((NPObject *)(tw)); __nepa_tmp_18 ? ((void (*)(NPObject *, SEL, int))((struct nepa_vtable *)__nepa_tmp_18->isa->vtable)->setWeight_)(__nepa_tmp_18, __nepa_sel_setWeight_, 5) : 0; });
-    kputs("[N4] TurboWidget tag(super+boost)=");
-    kputdec(({ NPObject *__nepa_tmp_19 = ((NPObject *)(tw)); __nepa_tmp_19 ? ((int (*)(NPObject *, SEL))((struct nepa_vtable *)__nepa_tmp_19->isa->vtable)->tag)(__nepa_tmp_19, __nepa_sel_tag) : (int){0}; }));
-    kputs("\n");
-    kputs("[N5] poke id<Tagged>=");
-    kputdec(poke_id_proto(w));
-    kputs("\n");
-    NPObject *__nepa_tmp_20 = (Metal__Array_alloc(&NEPA_CLASS_$_Metal__Array, __nepa_sel_alloc));
-    Metal__Array * arr = (Metal__Array *)(__nepa_tmp_20 ? ((struct nepa_vtable *)__nepa_tmp_20->isa->vtable)->init(__nepa_tmp_20, __nepa_sel_init) : 0);
-    ({ NPObject *__nepa_tmp_21 = ((NPObject *)(arr)); __nepa_tmp_21 ? ((void (*)(NPObject *, SEL, NPObject *))((struct nepa_vtable *)__nepa_tmp_21->isa->vtable)->add_)(__nepa_tmp_21, __nepa_sel_add_, (NPObject *)(w)) : 0; });
-    ({ NPObject *__nepa_tmp_22 = ((NPObject *)(arr)); __nepa_tmp_22 ? ((void (*)(NPObject *, SEL, NPObject *))((struct nepa_vtable *)__nepa_tmp_22->isa->vtable)->add_)(__nepa_tmp_22, __nepa_sel_add_, (NPObject *)(tw)) : 0; });
-    kputs("[N6] for-in custom:");
-    {
-        NPObject * __nepa_fi = (NPObject *)(arr);
-        for (unsigned long __nepa_fi_i = 0;  (__nepa_fi_i < ({ NPObject *__nepa_tmp_23 = ((NPObject *)(__nepa_fi)); __nepa_tmp_23 ? ((unsigned (*)(NPObject *, SEL))((struct nepa_vtable *)__nepa_tmp_23->isa->vtable)->count)(__nepa_tmp_23, __nepa_sel_count) : (unsigned){0}; })); (__nepa_fi_i)++) {
-            NPObject * x = ({ NPObject *__nepa_tmp_24 = ((NPObject *)(__nepa_fi)); __nepa_tmp_24 ? ((NPObject * (*)(NPObject *, SEL, unsigned))((struct nepa_vtable *)__nepa_tmp_24->isa->vtable)->objectAtIndex_)(__nepa_tmp_24, __nepa_sel_objectAtIndex_, __nepa_fi_i) : 0; });
-            kputdec(({ NPObject *__nepa_tmp_25 = ((NPObject *)(x)); __nepa_tmp_25 ? ((int (*)(NPObject *, SEL))((struct nepa_vtable *)__nepa_tmp_25->isa->vtable)->tag)(__nepa_tmp_25, __nepa_sel_tag) : (int){0}; }));
-            kputs(" ");
-        }
-    }
-    kputs("\n");
-    NPObject *__nepa_tmp_26 = (Metal__Err_alloc(&NEPA_CLASS_$_Metal__Err, __nepa_sel_alloc));
-    Metal__Err * e = (Metal__Err *)(__nepa_tmp_26 ? ((struct nepa_vtable *)__nepa_tmp_26->isa->vtable)->init(__nepa_tmp_26, __nepa_sel_init) : 0);
-    ({ NPObject *__nepa_tmp_27 = ((NPObject *)(e)); __nepa_tmp_27 ? ((void (*)(NPObject *, SEL, int))((struct nepa_vtable *)__nepa_tmp_27->isa->vtable)->setCode_)(__nepa_tmp_27, __nepa_sel_setCode_, 42) : 0; });
-    {
-        jmp_buf __nepa_saved;
-        memcpy(__nepa_saved, __nepa_exception_buf, sizeof(jmp_buf));
-        volatile int __nepa_state = 0;
-        if ((setjmp(__nepa_exception_buf) != 0))         __nepa_state = 1;
-        if ((__nepa_state == 0)) {
-            bump();
+#line 1 "<nepa-generated>"
+    if ((__nepa_eh_flag == 0)) {
+        {
+#line 416 "baremetal_test.np"
+            kputs("[C5] mode(TURBO)=");
+            kputs(mode_name(MODE_TURBO));
+            kputs("\n");
+#line 417 "baremetal_test.np"
+            kputs("[C6] loopsum(10)=");
+#line 418 "baremetal_test.np"
+            kputdec((int)loopsum(10));
+#line 419 "baremetal_test.np"
+            kputs("\n");
+#line 422 "baremetal_test.np"
+            kputs("[N1] +make:plus: = ");
+#line 423 "baremetal_test.np"
+            __auto_type __nepa_eh_tmp_6 = Metal__Widget_make_plus_(&NEPA_CLASS_$_Metal__Widget, __nepa_sel_make_plus_, 20, 1);
+            kputdec(__nepa_eh_tmp_6);
+#line 424 "baremetal_test.np"
+            kputs("\n");
+#line 427 "baremetal_test.np"
+            NPObject *__nepa_tmp_10 = (Metal__Widget_alloc(&NEPA_CLASS_$_Metal__Widget, __nepa_sel_alloc));
+            Metal__Widget * w = (Metal__Widget *)(__nepa_tmp_10 ? ((struct nepa_vtable *)__nepa_tmp_10->isa->vtable)->initWithUid_weight_(__nepa_tmp_10, __nepa_sel_initWithUid_weight_, 7, 30) : 0);
+#line 428 "baremetal_test.np"
+            kputs("[N2] tag=");
+            __auto_type __nepa_eh_tmp_7 = ({ NPObject *__nepa_tmp_11 = ((NPObject *)(w)); __nepa_tmp_11 ? ((int (*)(NPObject *, SEL))((struct nepa_vtable *)__nepa_tmp_11->isa->vtable)->tag)(__nepa_tmp_11, __nepa_sel_tag) : (int){0}; });
+            kputdec(__nepa_eh_tmp_7);
+#line 429 "baremetal_test.np"
+            kputs(" weight=");
+            __auto_type __nepa_eh_tmp_8 = ({ NPObject *__nepa_tmp_12 = ((NPObject *)(w)); __nepa_tmp_12 ? ((int (*)(NPObject *, SEL))((struct nepa_vtable *)__nepa_tmp_12->isa->vtable)->weight)(__nepa_tmp_12, __nepa_sel_weight) : (int){0}; });
+            kputdec(__nepa_eh_tmp_8);
+#line 430 "baremetal_test.np"
+            kputs(" addTo:10 times:3=");
+            __auto_type __nepa_eh_tmp_9 = ({ NPObject *__nepa_tmp_13 = ((NPObject *)(w)); __nepa_tmp_13 ? ((int (*)(NPObject *, SEL, int, int))((struct nepa_vtable *)__nepa_tmp_13->isa->vtable)->addTo_times_)(__nepa_tmp_13, __nepa_sel_addTo_times_, 10, 3) : (int){0}; });
+            kputdec(__nepa_eh_tmp_9);
+#line 431 "baremetal_test.np"
+            kputs("\n");
+#line 432 "baremetal_test.np"
+            ({ NPObject *__nepa_tmp_14 = ((NPObject *)(w)); __nepa_tmp_14 ? ((void (*)(NPObject *, SEL, int))((struct nepa_vtable *)__nepa_tmp_14->isa->vtable)->setWeight_)(__nepa_tmp_14, __nepa_sel_setWeight_, 99) : 0; });
+#line 433 "baremetal_test.np"
+            kputs("[N3] setWeight→");
+            __auto_type __nepa_eh_tmp_10 = ({ NPObject *__nepa_tmp_15 = ((NPObject *)(w)); __nepa_tmp_15 ? ((int (*)(NPObject *, SEL))((struct nepa_vtable *)__nepa_tmp_15->isa->vtable)->weight)(__nepa_tmp_15, __nepa_sel_weight) : (int){0}; });
+            kputdec(__nepa_eh_tmp_10);
+#line 434 "baremetal_test.np"
+            kputs(" uid(arrow public)=");
+            kputdec(w->uid);
+#line 435 "baremetal_test.np"
+            kputs("\n");
+#line 438 "baremetal_test.np"
+            NPObject *__nepa_tmp_16 = (Metal__TurboWidget_alloc(&NEPA_CLASS_$_Metal__TurboWidget, __nepa_sel_alloc));
+            Metal__TurboWidget * tw = (Metal__TurboWidget *)(__nepa_tmp_16 ? ((struct nepa_vtable *)__nepa_tmp_16->isa->vtable)->init(__nepa_tmp_16, __nepa_sel_init) : 0);
+#line 439 "baremetal_test.np"
+            ({ NPObject *__nepa_tmp_17 = ((NPObject *)(tw)); __nepa_tmp_17 ? ((void (*)(NPObject *, SEL, int))((struct nepa_vtable *)__nepa_tmp_17->isa->vtable)->setBoost_)(__nepa_tmp_17, __nepa_sel_setBoost_, 1000) : 0; });
+#line 440 "baremetal_test.np"
+            ({ NPObject *__nepa_tmp_18 = ((NPObject *)(tw)); __nepa_tmp_18 ? ((void (*)(NPObject *, SEL, int))((struct nepa_vtable *)__nepa_tmp_18->isa->vtable)->setWeight_)(__nepa_tmp_18, __nepa_sel_setWeight_, 5) : 0; });
+#line 441 "baremetal_test.np"
+            kputs("[N4] TurboWidget tag(super+boost)=");
+#line 442 "baremetal_test.np"
+            __auto_type __nepa_eh_tmp_11 = ({ NPObject *__nepa_tmp_19 = ((NPObject *)(tw)); __nepa_tmp_19 ? ((int (*)(NPObject *, SEL))((struct nepa_vtable *)__nepa_tmp_19->isa->vtable)->tag)(__nepa_tmp_19, __nepa_sel_tag) : (int){0}; });
+            kputdec(__nepa_eh_tmp_11);
+#line 443 "baremetal_test.np"
+            kputs("\n");
+#line 446 "baremetal_test.np"
+            kputs("[N5] poke id<Tagged>=");
+            kputdec(poke_id_proto(w));
+#line 447 "baremetal_test.np"
+            kputs("\n");
+#line 450 "baremetal_test.np"
+            NPObject *__nepa_tmp_20 = (Metal__Array_alloc(&NEPA_CLASS_$_Metal__Array, __nepa_sel_alloc));
+            Metal__Array * arr = (Metal__Array *)(__nepa_tmp_20 ? ((struct nepa_vtable *)__nepa_tmp_20->isa->vtable)->init(__nepa_tmp_20, __nepa_sel_init) : 0);
+#line 451 "baremetal_test.np"
+            ({ NPObject *__nepa_tmp_21 = ((NPObject *)(arr)); __nepa_tmp_21 ? ((void (*)(NPObject *, SEL, NPObject *))((struct nepa_vtable *)__nepa_tmp_21->isa->vtable)->add_)(__nepa_tmp_21, __nepa_sel_add_, (NPObject *)(w)) : 0; });
+#line 452 "baremetal_test.np"
+            ({ NPObject *__nepa_tmp_22 = ((NPObject *)(arr)); __nepa_tmp_22 ? ((void (*)(NPObject *, SEL, NPObject *))((struct nepa_vtable *)__nepa_tmp_22->isa->vtable)->add_)(__nepa_tmp_22, __nepa_sel_add_, (NPObject *)(tw)) : 0; });
+#line 453 "baremetal_test.np"
+            kputs("[N6] for-in custom:");
+#line 454 "baremetal_test.np"
+            {
+                NPObject * __nepa_fi = (NPObject *)(arr);
+                for (unsigned long __nepa_fi_i = 0;  (__nepa_fi_i < ({ NPObject *__nepa_tmp_23 = ((NPObject *)(__nepa_fi)); __nepa_tmp_23 ? ((unsigned (*)(NPObject *, SEL))((struct nepa_vtable *)__nepa_tmp_23->isa->vtable)->count)(__nepa_tmp_23, __nepa_sel_count) : (unsigned){0}; })); (__nepa_fi_i)++) {
+                    NPObject * x = ({ NPObject *__nepa_tmp_24 = ((NPObject *)(__nepa_fi)); __nepa_tmp_24 ? ((NPObject * (*)(NPObject *, SEL, unsigned))((struct nepa_vtable *)__nepa_tmp_24->isa->vtable)->objectAtIndex_)(__nepa_tmp_24, __nepa_sel_objectAtIndex_, __nepa_fi_i) : 0; });
+#line 455 "baremetal_test.np"
+                    __auto_type __nepa_eh_tmp_12 = ({ NPObject *__nepa_tmp_25 = ((NPObject *)(x)); __nepa_tmp_25 ? ((int (*)(NPObject *, SEL))((struct nepa_vtable *)__nepa_tmp_25->isa->vtable)->tag)(__nepa_tmp_25, __nepa_sel_tag) : (int){0}; });
+                    kputdec(__nepa_eh_tmp_12);
+#line 456 "baremetal_test.np"
+                    kputs(" ");
+                }
+            }
+#line 458 "baremetal_test.np"
+            kputs("\n");
+#line 461 "baremetal_test.np"
+            NPObject *__nepa_tmp_26 = (Metal__Err_alloc(&NEPA_CLASS_$_Metal__Err, __nepa_sel_alloc));
+            Metal__Err * e = (Metal__Err *)(__nepa_tmp_26 ? ((struct nepa_vtable *)__nepa_tmp_26->isa->vtable)->init(__nepa_tmp_26, __nepa_sel_init) : 0);
+#line 462 "baremetal_test.np"
+            ({ NPObject *__nepa_tmp_27 = ((NPObject *)(e)); __nepa_tmp_27 ? ((void (*)(NPObject *, SEL, int))((struct nepa_vtable *)__nepa_tmp_27->isa->vtable)->setCode_)(__nepa_tmp_27, __nepa_sel_setCode_, 42) : 0; });
+#line 478 "baremetal_test.np"
+            {
+                int __nepa_eh_saved_13 = __nepa_eh_flag;
+#line 1 "<nepa-generated>"
+                __nepa_eh_flag = 0;
+#line 478 "baremetal_test.np"
+                int __nepa_eh_done_13 = 0;
+#line 467 "baremetal_test.np"
+                {
+#line 464 "baremetal_test.np"
+                    bump();
+#line 465 "baremetal_test.np"
+                    {
+                        NPObject * __nepa_eh_thrown_14 = (NPObject *)e;
+#line 1 "<nepa-generated>"
+                        __nepa_eh_val = __nepa_eh_thrown_14;
+                        nepa_retain(__nepa_eh_val);
+                        nepa_autorelease(__nepa_eh_val);
+                        __nepa_eh_flag = 1;
+                    }
+                    if ((__nepa_eh_flag == 0)) {
+                        {
+#line 466 "baremetal_test.np"
+                            kputs("[N7] unreachable\n");
+                        }
+                    }
+                }
+#line 478 "baremetal_test.np"
+                if (((__nepa_eh_flag == 1) && (__nepa_eh_done_13 == 0))) {
+                    if (__nepa_eh_isa((NPObject *)__nepa_eh_val, &NEPA_CLASS_$_Metal__Err)) {
+#line 1 "<nepa-generated>"
+                        __nepa_eh_done_13 = 1;
+                        __nepa_eh_flag = 0;
+#line 478 "baremetal_test.np"
+                        Metal__Err * err = (Metal__Err *)__nepa_eh_val;
+#line 472 "baremetal_test.np"
+                        {
+#line 469 "baremetal_test.np"
+                            kputs("[N7] caught Err code=");
+#line 470 "baremetal_test.np"
+                            __auto_type __nepa_eh_tmp_15 = ({ NPObject *__nepa_tmp_28 = ((NPObject *)(err)); __nepa_tmp_28 ? ((int (*)(NPObject *, SEL))((struct nepa_vtable *)__nepa_tmp_28->isa->vtable)->errorCode)(__nepa_tmp_28, __nepa_sel_errorCode) : (int){0}; });
+                            kputdec(__nepa_eh_tmp_15);
+#line 471 "baremetal_test.np"
+                            kputs("\n");
+                        }
+                    }
+                }
+#line 478 "baremetal_test.np"
+                if (((__nepa_eh_flag == 1) && (__nepa_eh_done_13 == 0))) {
+                    if (__nepa_eh_isa((NPObject *)__nepa_eh_val, &NEPA_CLASS_$_Metal__OtherErr)) {
+#line 1 "<nepa-generated>"
+                        __nepa_eh_done_13 = 1;
+                        __nepa_eh_flag = 0;
+#line 478 "baremetal_test.np"
+                        Metal__OtherErr * oe;
+#line 475 "baremetal_test.np"
+                        {
+#line 474 "baremetal_test.np"
+                            kputs("[N7] wrong handler!\n");
+                        }
+                    }
+                }
+#line 478 "baremetal_test.np"
+                {
+                    int __nepa_eh_saved_16 = __nepa_eh_flag;
+#line 1 "<nepa-generated>"
+                    __nepa_eh_flag = 0;
+#line 478 "baremetal_test.np"
+                    {
+#line 477 "baremetal_test.np"
+                        kputs("[N7] finally ran\n");
+                    }
+#line 1 "<nepa-generated>"
+                    __nepa_eh_flag = (__nepa_eh_saved_16 || __nepa_eh_flag);
+                }
+                __nepa_eh_flag = (__nepa_eh_saved_13 || __nepa_eh_flag);
+            }
+            if ((__nepa_eh_flag == 0)) {
+                {
+#line 481 "baremetal_test.np"
+                    kputs("[N7b] @throws local=");
+#line 482 "baremetal_test.np"
+                    kputdec(local_catch(7, e));
+#line 1 "<nepa-generated>"
+                    if ((__nepa_eh_flag == 0)) {
+                        {
+#line 483 "baremetal_test.np"
+                            kputs("/");
+#line 484 "baremetal_test.np"
+                            kputdec(local_catch(-7, e));
+#line 1 "<nepa-generated>"
+                            if ((__nepa_eh_flag == 0)) {
+                                {
+#line 485 "baremetal_test.np"
+                                    kputs(" (expect 21/-1)\n");
+#line 494 "baremetal_test.np"
+                                    {
+                                        int __nepa_eh_saved_17 = __nepa_eh_flag;
+#line 1 "<nepa-generated>"
+                                        __nepa_eh_flag = 0;
+#line 494 "baremetal_test.np"
+                                        int __nepa_eh_done_17 = 0;
+#line 489 "baremetal_test.np"
+                                        {
+#line 487 "baremetal_test.np"
+                                            rethrow_err(e);
+#line 1 "<nepa-generated>"
+                                            if ((__nepa_eh_flag == 0)) {
+                                                {
+#line 488 "baremetal_test.np"
+                                                    kputs("[N7b] unreachable\n");
+                                                }
+                                            }
+                                        }
+#line 494 "baremetal_test.np"
+                                        if (((__nepa_eh_flag == 1) && (__nepa_eh_done_17 == 0))) {
+                                            if (__nepa_eh_isa((NPObject *)__nepa_eh_val, &NEPA_CLASS_$_Metal__Err)) {
+#line 1 "<nepa-generated>"
+                                                __nepa_eh_done_17 = 1;
+                                                __nepa_eh_flag = 0;
+#line 494 "baremetal_test.np"
+                                                Metal__Err * err2 = (Metal__Err *)__nepa_eh_val;
+                                                {
+#line 491 "baremetal_test.np"
+                                                    kputs("[N7b] typed rethrow caught code=");
+#line 492 "baremetal_test.np"
+                                                    __auto_type __nepa_eh_tmp_18 = ({ NPObject *__nepa_tmp_29 = ((NPObject *)(err2)); __nepa_tmp_29 ? ((int (*)(NPObject *, SEL))((struct nepa_vtable *)__nepa_tmp_29->isa->vtable)->errorCode)(__nepa_tmp_29, __nepa_sel_errorCode) : (int){0}; });
+                                                    kputdec(__nepa_eh_tmp_18);
+#line 493 "baremetal_test.np"
+                                                    kputs("\n");
+                                                }
+                                            }
+                                        }
+#line 1 "<nepa-generated>"
+                                        __nepa_eh_flag = (__nepa_eh_saved_17 || __nepa_eh_flag);
+                                    }
+                                    if ((__nepa_eh_flag == 0)) {
+                                        {
+#line 500 "baremetal_test.np"
+                                            {
+                                                int __nepa_eh_saved_19 = __nepa_eh_flag;
+#line 1 "<nepa-generated>"
+                                                __nepa_eh_flag = 0;
+#line 500 "baremetal_test.np"
+                                                int __nepa_eh_done_19 = 0;
+#line 497 "baremetal_test.np"
+                                                {
+#line 496 "baremetal_test.np"
+                                                    bare_rethrow_err(e);
+                                                }
+#line 500 "baremetal_test.np"
+                                                if (((__nepa_eh_flag == 1) && (__nepa_eh_done_19 == 0))) {
+                                                    if (__nepa_eh_isa((NPObject *)__nepa_eh_val, &NEPA_CLASS_$_Metal__Err)) {
+#line 1 "<nepa-generated>"
+                                                        __nepa_eh_done_19 = 1;
+                                                        __nepa_eh_flag = 0;
+#line 500 "baremetal_test.np"
+                                                        Metal__Err * err3;
+                                                        {
+#line 499 "baremetal_test.np"
+                                                            kputs("[N7b] bare rethrow caught\n");
+                                                        }
+                                                    }
+                                                }
+#line 1 "<nepa-generated>"
+                                                __nepa_eh_flag = (__nepa_eh_saved_19 || __nepa_eh_flag);
+                                            }
+                                            if ((__nepa_eh_flag == 0)) {
+                                                {
+#line 503 "baremetal_test.np"
+                                                    SEL s = __nepa_sel_setWeight_;
+#line 504 "baremetal_test.np"
+                                                    kputs("[N8] @selector built, tag via send=");
+#line 505 "baremetal_test.np"
+                                                    __auto_type __nepa_eh_tmp_20 = ({ NPObject *__nepa_tmp_30 = ((NPObject *)(w)); __nepa_tmp_30 ? ((int (*)(NPObject *, SEL))((struct nepa_vtable *)__nepa_tmp_30->isa->vtable)->tag)(__nepa_tmp_30, __nepa_sel_tag) : (int){0}; });
+                                                    kputdec(__nepa_eh_tmp_20);
+#line 506 "baremetal_test.np"
+                                                    kputs(" (sel non-null: ");
+#line 507 "baremetal_test.np"
+                                                    kputdec((s.name != 0) ? 1 : 0);
+#line 508 "baremetal_test.np"
+                                                    kputs(")\n");
+#line 511 "baremetal_test.np"
+                                                    struct __nepa_byref_base {
+                                                        void *__isa;
+                                                        struct __nepa_byref_base *__forwarding;
+                                                        int __flags;
+                                                        int __value;
+                                                    };
+                                                    struct __nepa_byref_base base = {
+                                                        .__forwarding = &base,
+                                                        .__flags = 0,
+                                                        .__value = 100,
+                                                    };
+#line 512 "baremetal_test.np"
+                                                    IntBin mix = ^int(int a, int b) { base.__forwarding->__value = (base.__forwarding->__value + a); return ((a * b) + base.__forwarding->__value); };
+#line 516 "baremetal_test.np"
+                                                    kputs("[N9] block(2,3)=");
+#line 517 "baremetal_test.np"
+                                                    kputdec(mix(2, 3));
+#line 1 "<nepa-generated>"
+                                                    if ((__nepa_eh_flag == 0)) {
+                                                        {
+#line 518 "baremetal_test.np"
+                                                            kputs(" base after=");
+#line 519 "baremetal_test.np"
+                                                            kputdec(base.__forwarding->__value);
+#line 520 "baremetal_test.np"
+                                                            kputs("\n");
+#line 523 "baremetal_test.np"
+                                                            int stored = 555;
+#line 524 "baremetal_test.np"
+                                                            NPObject *__nepa_tmp_31 = (Box_int_ptr_alloc(&NEPA_CLASS_$_Box_int_ptr, __nepa_sel_alloc));
+                                                            Box * box = (Box *)(__nepa_tmp_31 ? ((struct nepa_vtable *)__nepa_tmp_31->isa->vtable)->init(__nepa_tmp_31, __nepa_sel_init) : 0);
+#line 525 "baremetal_test.np"
+                                                            ({ NPObject *__nepa_tmp_32 = ((NPObject *)(box)); __nepa_tmp_32 ? ((void (*)(NPObject *, SEL, NPObject *))((struct nepa_vtable *)__nepa_tmp_32->isa->vtable)->set_)(__nepa_tmp_32, __nepa_sel_set_, &stored) : 0; });
+#line 526 "baremetal_test.np"
+                                                            kputs("[N10] box value=");
+#line 527 "baremetal_test.np"
+                                                            __auto_type __nepa_eh_tmp_21 = ({ NPObject *__nepa_tmp_33 = ((NPObject *)(box)); __nepa_tmp_33 ? ((NPObject * (*)(NPObject *, SEL))((struct nepa_vtable *)__nepa_tmp_33->isa->vtable)->value)(__nepa_tmp_33, __nepa_sel_value) : (NPObject *){0}; });
+                                                            kputdec(*(int *)__nepa_eh_tmp_21);
+#line 528 "baremetal_test.np"
+                                                            kputs("\n");
+#line 531 "baremetal_test.np"
+                                                            unsigned in1 = 21;
+    unsigned out1 = 0;
+    unsigned out2 = 0;
+#line 532 "baremetal_test.np"
+                                                            __asm__ __volatile__ ("mul %w0, %w1, %w1" : "=r"(out1) : "r"(in1) : );
+#line 533 "baremetal_test.np"
+                                                            __asm__ __volatile__ ("add %w[result], %w[a], %w[b]" : [result] "=r"(out2) : [a] "r"(in1), [b] "r"(in1) : );
+#line 536 "baremetal_test.np"
+                                                            kputs("[A1] inline mul=");
+                                                            kputdec((int)out1);
+#line 537 "baremetal_test.np"
+                                                            kputs(" named add=");
+                                                            kputdec((int)out2);
+#line 538 "baremetal_test.np"
+                                                            kputs("\n");
+#line 540 "baremetal_test.np"
+                                                            unsigned rv = asm_rotr32(4026531855, 4);
+#line 541 "baremetal_test.np"
+                                                            kputs("[A2] ext asm rotr(0xF000000F,4)=");
+#line 542 "baremetal_test.np"
+                                                            kputhex(rv);
+#line 543 "baremetal_test.np"
+                                                            kputs("\n");
+#line 545 "baremetal_test.np"
+                                                            int goto_val = 5;
+#line 546 "baremetal_test.np"
+                                                            __asm__ goto ("cmp %w0, #5; b.eq %l1" :  : "r"(goto_val) : "cc" : asm_hit);
+#line 547 "baremetal_test.np"
+                                                            kputs("[A3] asm goto: not taken\n");
+#line 1 "<nepa-generated>"
+                                                            nepa_release(box);
+#line 548 "baremetal_test.np"
+                                                            goto skip_hit;
+#line 549 "baremetal_test.np"
+asm_hit:
+#line 550 "baremetal_test.np"
+                                                            kputs("[A3] asm goto: TAKEN (wrong branch!)\n");
+#line 1 "<nepa-generated>"
+                                                            nepa_release(box);
+#line 551 "baremetal_test.np"
+                                                            goto skip_hit;
+#line 553 "baremetal_test.np"
+skip_hit:
+#line 554 "baremetal_test.np"
+                                                            kputs("[A3] asm goto done\n");
+#line 557 "baremetal_test.np"
+                                                            IntFn f1 = &asm_square;
+#line 558 "baremetal_test.np"
+                                                            kputs("[A4] fnptr asm_square(9)=");
+#line 559 "baremetal_test.np"
+                                                            kputdec(f1(9));
+#line 1 "<nepa-generated>"
+                                                            if ((__nepa_eh_flag == 0)) {
+                                                                {
+#line 560 "baremetal_test.np"
+                                                                    kputs(" add3(1,2,3)=");
+#line 561 "baremetal_test.np"
+                                                                    kputdec(asm_add3(1, 2, 3));
+#line 562 "baremetal_test.np"
+                                                                    kputs("\n");
+#line 567 "baremetal_test.np"
+                                                                    {
+                                                                        __attribute__((cleanup(nepa_syncAutoCleanup)))                                                                         long __nepa_sync_2 = nepa_syncLock((void *)w);
+#line 566 "baremetal_test.np"
+                                                                        __auto_type __nepa_eh_tmp_22 = ({ NPObject *__nepa_tmp_34 = ((NPObject *)(w)); __nepa_tmp_34 ? ((int (*)(NPObject *, SEL))((struct nepa_vtable *)__nepa_tmp_34->isa->vtable)->weight)(__nepa_tmp_34, __nepa_sel_weight) : (int){0}; });
+                                                                        ({ NPObject *__nepa_tmp_35 = ((NPObject *)(w)); __nepa_tmp_35 ? ((void (*)(NPObject *, SEL, int))((struct nepa_vtable *)__nepa_tmp_35->isa->vtable)->setWeight_)(__nepa_tmp_35, __nepa_sel_setWeight_, (__nepa_eh_tmp_22 + 1)) : 0; });
+                                                                    }
+#line 568 "baremetal_test.np"
+                                                                    kputs("[M1] synchronized weight=");
+#line 569 "baremetal_test.np"
+                                                                    __auto_type __nepa_eh_tmp_23 = ({ NPObject *__nepa_tmp_36 = ((NPObject *)(w)); __nepa_tmp_36 ? ((int (*)(NPObject *, SEL))((struct nepa_vtable *)__nepa_tmp_36->isa->vtable)->weight)(__nepa_tmp_36, __nepa_sel_weight) : (int){0}; });
+                                                                    kputdec(__nepa_eh_tmp_23);
+#line 570 "baremetal_test.np"
+                                                                    kputs("\n");
+#line 578 "baremetal_test.np"
+                                                                    {
+#line 573 "baremetal_test.np"
+                                                                        NPObject *__nepa_tmp_37 = (Metal__Widget_alloc(&NEPA_CLASS_$_Metal__Widget, __nepa_sel_alloc));
+                                                                        Metal__Widget * m = (Metal__Widget *)(__nepa_tmp_37 ? ((struct nepa_vtable *)__nepa_tmp_37->isa->vtable)->init(__nepa_tmp_37, __nepa_sel_init) : 0);
+#line 574 "baremetal_test.np"
+                                                                        ({ NPObject *__nepa_tmp_38 = ((NPObject *)(m)); __nepa_tmp_38 ? ((NPObject * (*)(NPObject *, SEL))((struct nepa_vtable *)__nepa_tmp_38->isa->vtable)->retain)(__nepa_tmp_38, __nepa_sel_retain) : 0; });
+#line 575 "baremetal_test.np"
+                                                                        kputs("[M2] noarc manual rc=");
+                                                                        kputdec((((int)m->uid * 0) + 1));
+                                                                        kputs(" (alive)\n");
+#line 576 "baremetal_test.np"
+                                                                        ({ NPObject *__nepa_tmp_39 = ((NPObject *)(m)); __nepa_tmp_39 ? ((void (*)(NPObject *, SEL))((struct nepa_vtable *)__nepa_tmp_39->isa->vtable)->release)(__nepa_tmp_39, __nepa_sel_release) : 0; });
+#line 577 "baremetal_test.np"
+                                                                        ({ NPObject *__nepa_tmp_40 = ((NPObject *)(m)); __nepa_tmp_40 ? ((void (*)(NPObject *, SEL))((struct nepa_vtable *)__nepa_tmp_40->isa->vtable)->release)(__nepa_tmp_40, __nepa_sel_release) : 0; });
+                                                                    }
+#line 579 "baremetal_test.np"
+                                                                    kputs("[M2] noarc survived\n");
+#line 590 "baremetal_test.np"
+                                                                    {
+#line 1 "<nepa-generated>"
+                                                                        nepa_autoreleasepool_t * __nepa_pool = nepa_autoreleasepoolPush();
+#line 589 "baremetal_test.np"
+                                                                        {
+#line 586 "baremetal_test.np"
+                                                                            NPObject *__nepa_tmp_41 = (Metal__Widget_alloc(&NEPA_CLASS_$_Metal__Widget, __nepa_sel_alloc));
+                                                                            Metal__Widget * tmp = (Metal__Widget *)(__nepa_tmp_41 ? ((struct nepa_vtable *)__nepa_tmp_41->isa->vtable)->init(__nepa_tmp_41, __nepa_sel_init) : 0);
+#line 587 "baremetal_test.np"
+                                                                            ({ NPObject *__nepa_tmp_42 = ((NPObject *)(tmp)); __nepa_tmp_42 ? ((NPObject * (*)(NPObject *, SEL))((struct nepa_vtable *)__nepa_tmp_42->isa->vtable)->autorelease)(__nepa_tmp_42, __nepa_sel_autorelease) : 0; });
+#line 588 "baremetal_test.np"
+                                                                            kputs("[M3] autoreleased obj in pool\n");
+                                                                        }
+#line 1 "<nepa-generated>"
+                                                                        nepa_autoreleasepoolPop(__nepa_pool);
+                                                                    }
+#line 591 "baremetal_test.np"
+                                                                    kputs("[M3] pool popped\n");
+#line 594 "baremetal_test.np"
+                                                                    Metal__Ghost * ghost = (Metal__Ghost *)0;
+#line 595 "baremetal_test.np"
+                                                                    int dead = ({ NPObject *__nepa_tmp_43 = ((NPObject *)(ghost)); __nepa_tmp_43 ? ((int (*)(NPObject *, SEL))((struct nepa_vtable *)__nepa_tmp_43->isa->vtable)->tag)(__nepa_tmp_43, __nepa_sel_tag) : (int){0}; });
+#line 596 "baremetal_test.np"
+                                                                    kputs("[N8b] msg to nil →");
+                                                                    kputdec(dead);
+                                                                    kputs("\n");
+#line 598 "baremetal_test.np"
+                                                                    kputs("[N8c] w resp tag=");
+#line 599 "baremetal_test.np"
+                                                                    __auto_type __nepa_eh_tmp_24 = nepa_resp_tag(w);
+                                                                    kputdec(__nepa_eh_tmp_24 ? 1 : 0);
+#line 600 "baremetal_test.np"
+                                                                    kputs(" w resp missing=");
+#line 601 "baremetal_test.np"
+                                                                    __auto_type __nepa_eh_tmp_25 = 0;
+                                                                    kputdec(__nepa_eh_tmp_25 ? 1 : 0);
+#line 602 "baremetal_test.np"
+                                                                    kputs(" nil resp=");
+#line 603 "baremetal_test.np"
+                                                                    __auto_type __nepa_eh_tmp_26 = nepa_resp_tag(ghost);
+                                                                    kputdec(__nepa_eh_tmp_26 ? 1 : 0);
+#line 604 "baremetal_test.np"
+                                                                    kputs("\n");
+#line 607 "baremetal_test.np"
+                                                                    __typeof__(in1) t2 = (in1 * 2);
+#line 608 "baremetal_test.np"
+                                                                    int biased = __builtin_expect((t2 > 40), 1);
+#line 1 "<nepa-generated>"
+                                                                    if ((__nepa_eh_flag == 0)) {
+                                                                        {
+#line 609 "baremetal_test.np"
+                                                                            kputs("[C7] typeof+expect=");
+#line 610 "baremetal_test.np"
+                                                                            kputdec((int)t2);
+#line 611 "baremetal_test.np"
+                                                                            kputs("/");
+#line 612 "baremetal_test.np"
+                                                                            kputdec(biased);
+#line 613 "baremetal_test.np"
+                                                                            kputs(" sizeof(struct Ops)=");
+#line 614 "baremetal_test.np"
+                                                                            kputdec((int)sizeof(struct Ops));
+#line 615 "baremetal_test.np"
+                                                                            kputs(" bump()=");
+#line 616 "baremetal_test.np"
+                                                                            kputdec(bump());
+#line 617 "baremetal_test.np"
+                                                                            kputs("\n");
+#line 620 "baremetal_test.np"
+                                                                            kputs("[N11] poke_tag(w)=");
+#line 621 "baremetal_test.np"
+                                                                            kputdec(poke_tag(w));
+#line 622 "baremetal_test.np"
+                                                                            kputs("\n");
+#line 628 "baremetal_test.np"
+                                                                            __auto_type __nepa_eh_tmp_27 = &NEPA_CLASS_$_Metal__Widget;
+                                                                            __auto_type __nepa_eh_tmp_28 = ({ NPObject *__nepa_tmp_44 = ((NPObject *)(w)); __nepa_tmp_44 ? ((_Bool (*)(NPObject *, SEL, NPClass *))((struct nepa_vtable *)__nepa_tmp_44->isa->vtable)->isKindOfClass_)(__nepa_tmp_44, __nepa_sel_isKindOfClass_, (NPClass *)(__nepa_eh_tmp_27)) : (_Bool){0}; });
+                                                                            if (__nepa_eh_tmp_28) {
+#line 626 "baremetal_test.np"
+                                                                                kputs("[R1] isKindOfClass OK\n");
+                                                                            }
+                                                                            else {
+#line 628 "baremetal_test.np"
+                                                                                kputs("[R1] isKindOfClass FAIL\n");
+                                                                            }
+#line 632 "baremetal_test.np"
+                                                                            __auto_type __nepa_eh_tmp_29 = &NEPA_CLASS_$_Metal__TurboWidget;
+                                                                            __auto_type __nepa_eh_tmp_30 = ({ NPObject *__nepa_tmp_45 = ((NPObject *)(w)); __nepa_tmp_45 ? ((_Bool (*)(NPObject *, SEL, NPClass *))((struct nepa_vtable *)__nepa_tmp_45->isa->vtable)->isKindOfClass_)(__nepa_tmp_45, __nepa_sel_isKindOfClass_, (NPClass *)(__nepa_eh_tmp_29)) : (_Bool){0}; });
+                                                                            if (__nepa_eh_tmp_30) {
+#line 630 "baremetal_test.np"
+                                                                                kputs("[R2] isKindOfClass(sub) FAIL\n");
+                                                                            }
+                                                                            else {
+#line 632 "baremetal_test.np"
+                                                                                kputs("[R2] isKindOfClass(sub) correctly NO\n");
+                                                                            }
+#line 634 "baremetal_test.np"
+                                                                            __auto_type __nepa_eh_tmp_31 = ({ NPObject *__nepa_tmp_46 = ((NPObject *)(w)); __nepa_tmp_46 ? ((_Bool (*)(NPObject *, SEL, NPObject *))((struct nepa_vtable *)__nepa_tmp_46->isa->vtable)->isEqual_)(__nepa_tmp_46, __nepa_sel_isEqual_, (NPObject *)(w)) : (_Bool){0}; });
+                                                                            if (__nepa_eh_tmp_31) {
+#line 633 "baremetal_test.np"
+                                                                                kputs("[R3] isEqual self OK\n");
+                                                                            }
+                                                                            else {
+#line 634 "baremetal_test.np"
+                                                                                kputs("[R3] isEqual FAIL\n");
+                                                                            }
+#line 636 "baremetal_test.np"
+                                                                            __block Metal__Widget * __attribute__((cleanup(nepa_weakAutoCleanup))) wweak = w;
+                                                                            nepa_weakRegister((NPObject **)&wweak, (NPObject *)w);
+#line 638 "baremetal_test.np"
+                                                                            if (wweak) {
+#line 637 "baremetal_test.np"
+                                                                                kputs("[R4] __weak alias OK\n");
+                                                                            }
+                                                                            else {
+#line 638 "baremetal_test.np"
+                                                                                kputs("[R4] __weak FAIL\n");
+                                                                            }
+#line 640 "baremetal_test.np"
+                                                                            Metal__Widget_awaitMake(&NEPA_CLASS_$_Metal__Widget, __nepa_sel_awaitMake);
+#line 646 "baremetal_test.np"
+                                                                            defer_order();
+#line 647 "baremetal_test.np"
+                                                                            kputs("[D3] defer_return(5)=");
+#line 648 "baremetal_test.np"
+                                                                            kputdec(defer_return(5));
+#line 649 "baremetal_test.np"
+                                                                            kputs("\n");
+#line 652 "baremetal_test.np"
+                                                                            int nn_a = 40;
+    int nn_b = 2;
+#line 653 "baremetal_test.np"
+                                                                            kputs("[C9] nn_sum(40,2)=");
+#line 654 "baremetal_test.np"
+                                                                            kputdec(nn_sum(&nn_a, &nn_b));
+#line 655 "baremetal_test.np"
+                                                                            kputs(" nn_sum(40,0)=");
+#line 656 "baremetal_test.np"
+                                                                            kputdec(nn_sum(&nn_a, 0));
+#line 657 "baremetal_test.np"
+                                                                            int nullable = 5;
+#line 658 "baremetal_test.np"
+                                                                            kputs(" int nullable=");
+#line 659 "baremetal_test.np"
+                                                                            kputdec(nullable);
+#line 660 "baremetal_test.np"
+                                                                            kputs("\n");
+#line 663 "baremetal_test.np"
+                                                                            kputs("[C10] mode_name2(TURBO)=");
+#line 664 "baremetal_test.np"
+                                                                            kputs(mode_name2(MODE_TURBO));
+#line 665 "baremetal_test.np"
+                                                                            int in = 6;
+#line 666 "baremetal_test.np"
+                                                                            kputs(" in*7=");
+#line 667 "baremetal_test.np"
+                                                                            kputdec((in * 7));
+#line 668 "baremetal_test.np"
+                                                                            kputs("\n");
+#line 671 "baremetal_test.np"
+                                                                            int bm_arr[8];
+#line 672 "baremetal_test.np"
+                                                                            bm_arr[0] = 3;
+#line 673 "baremetal_test.np"
+                                                                            kputs("[C11] bm_arr[0]=");
+#line 674 "baremetal_test.np"
+                                                                            kputdec(bm_arr[0]);
+#line 675 "baremetal_test.np"
+                                                                            kputs(" (the BM_TAG #define line must be absent from the generated C)\n");
+#line 678 "baremetal_test.np"
+                                                                            pattern_scalar(42);
+#line 679 "baremetal_test.np"
+                                                                            pattern_scalar(7);
+#line 680 "baremetal_test.np"
+                                                                            pattern_scalar(999);
+#line 683 "baremetal_test.np"
+                                                                            NPObject *__nepa_tmp_47 = (Animal_alloc(&NEPA_CLASS_$_Animal, __nepa_sel_alloc));
+                                                                            Animal * pet = (Animal *)(__nepa_tmp_47 ? ((struct nepa_vtable *)__nepa_tmp_47->isa->vtable)->init(__nepa_tmp_47, __nepa_sel_init) : 0);
+#line 684 "baremetal_test.np"
+                                                                            ({ NPObject *__nepa_tmp_48 = ((NPObject *)(pet)); __nepa_tmp_48 ? ((void (*)(NPObject *, SEL, int))((struct nepa_vtable *)__nepa_tmp_48->isa->vtable)->setVoice_)(__nepa_tmp_48, __nepa_sel_setVoice_, 5) : 0; });
+#line 685 "baremetal_test.np"
+                                                                            NPObject *__nepa_tmp_49 = (Dog_alloc(&NEPA_CLASS_$_Dog, __nepa_sel_alloc));
+                                                                            Dog * rex = (Dog *)(__nepa_tmp_49 ? ((struct nepa_vtable *)__nepa_tmp_49->isa->vtable)->init(__nepa_tmp_49, __nepa_sel_init) : 0);
+#line 686 "baremetal_test.np"
+                                                                            ({ NPObject *__nepa_tmp_50 = ((NPObject *)(rex)); __nepa_tmp_50 ? ((void (*)(NPObject *, SEL, int))((struct nepa_vtable *)__nepa_tmp_50->isa->vtable)->setVoice_)(__nepa_tmp_50, __nepa_sel_setVoice_, 11) : 0; });
+#line 687 "baremetal_test.np"
+                                                                            pattern_obj(rex);
+#line 688 "baremetal_test.np"
+                                                                            pattern_obj(pet);
+#line 689 "baremetal_test.np"
+                                                                            pattern_obj(w);
+#line 692 "baremetal_test.np"
+                                                                            kputs("[N12] for-in typed:");
+#line 693 "baremetal_test.np"
+                                                                            {
+                                                                                NPObject * __nepa_fi = (NPObject *)(arr);
+                                                                                for (unsigned long __nepa_fi_i = 0;  (__nepa_fi_i < ({ NPObject *__nepa_tmp_51 = ((NPObject *)(__nepa_fi)); __nepa_tmp_51 ? ((unsigned (*)(NPObject *, SEL))((struct nepa_vtable *)__nepa_tmp_51->isa->vtable)->count)(__nepa_tmp_51, __nepa_sel_count) : (unsigned){0}; })); (__nepa_fi_i)++) {
+                                                                                    Metal__Widget * item = (Metal__Widget *)(({ NPObject *__nepa_tmp_52 = ((NPObject *)(__nepa_fi)); __nepa_tmp_52 ? ((NPObject * (*)(NPObject *, SEL, unsigned))((struct nepa_vtable *)__nepa_tmp_52->isa->vtable)->objectAtIndex_)(__nepa_tmp_52, __nepa_sel_objectAtIndex_, __nepa_fi_i) : 0; }));
+#line 694 "baremetal_test.np"
+                                                                                    __auto_type __nepa_eh_tmp_32 = ({ NPObject *__nepa_tmp_53 = ((NPObject *)(item)); __nepa_tmp_53 ? ((int (*)(NPObject *, SEL))((struct nepa_vtable *)__nepa_tmp_53->isa->vtable)->tag)(__nepa_tmp_53, __nepa_sel_tag) : (int){0}; });
+                                                                                    kputdec(__nepa_eh_tmp_32);
+#line 695 "baremetal_test.np"
+                                                                                    kputs(" ");
+                                                                                }
+                                                                            }
+#line 697 "baremetal_test.np"
+                                                                            kputs("\n");
+#line 700 "baremetal_test.np"
+                                                                            kputs("[M4] sync early=");
+#line 701 "baremetal_test.np"
+                                                                            kputdec(sync_early(w));
+#line 702 "baremetal_test.np"
+                                                                            kputdec(sync_early(w));
+#line 703 "baremetal_test.np"
+                                                                            kputs(" (relock survived)\n");
+#line 706 "baremetal_test.np"
+                                                                            NPObject *__nepa_tmp_54 = (Metal__SubErr_alloc(&NEPA_CLASS_$_Metal__SubErr, __nepa_sel_alloc));
+                                                                            Metal__SubErr * se = (Metal__SubErr *)(__nepa_tmp_54 ? ((struct nepa_vtable *)__nepa_tmp_54->isa->vtable)->init(__nepa_tmp_54, __nepa_sel_init) : 0);
+#line 707 "baremetal_test.np"
+                                                                            ({ NPObject *__nepa_tmp_55 = ((NPObject *)(se)); __nepa_tmp_55 ? ((void (*)(NPObject *, SEL, int))((struct nepa_vtable *)__nepa_tmp_55->isa->vtable)->setCode_)(__nepa_tmp_55, __nepa_sel_setCode_, 99) : 0; });
+#line 716 "baremetal_test.np"
+                                                                            {
+                                                                                int __nepa_eh_saved_33 = __nepa_eh_flag;
+#line 1 "<nepa-generated>"
+                                                                                __nepa_eh_flag = 0;
+#line 716 "baremetal_test.np"
+                                                                                int __nepa_eh_done_33 = 0;
+#line 711 "baremetal_test.np"
+                                                                                {
+#line 709 "baremetal_test.np"
+                                                                                    {
+                                                                                        NPObject * __nepa_eh_thrown_34 = (NPObject *)se;
+#line 1 "<nepa-generated>"
+                                                                                        __nepa_eh_val = __nepa_eh_thrown_34;
+                                                                                        nepa_retain(__nepa_eh_val);
+                                                                                        nepa_autorelease(__nepa_eh_val);
+                                                                                        __nepa_eh_flag = 1;
+                                                                                    }
+                                                                                    if ((__nepa_eh_flag == 0)) {
+                                                                                        {
+#line 710 "baremetal_test.np"
+                                                                                            kputs("[N13] unreachable\n");
+                                                                                        }
+                                                                                    }
+                                                                                }
+#line 716 "baremetal_test.np"
+                                                                                if (((__nepa_eh_flag == 1) && (__nepa_eh_done_33 == 0))) {
+                                                                                    if (__nepa_eh_isa((NPObject *)__nepa_eh_val, &NEPA_CLASS_$_Metal__Err)) {
+#line 1 "<nepa-generated>"
+                                                                                        __nepa_eh_done_33 = 1;
+                                                                                        __nepa_eh_flag = 0;
+#line 716 "baremetal_test.np"
+                                                                                        Metal__Err * err4 = (Metal__Err *)__nepa_eh_val;
+                                                                                        {
+#line 713 "baremetal_test.np"
+                                                                                            kputs("[N13] parent catch code=");
+#line 714 "baremetal_test.np"
+                                                                                            __auto_type __nepa_eh_tmp_35 = ({ NPObject *__nepa_tmp_56 = ((NPObject *)(err4)); __nepa_tmp_56 ? ((int (*)(NPObject *, SEL))((struct nepa_vtable *)__nepa_tmp_56->isa->vtable)->errorCode)(__nepa_tmp_56, __nepa_sel_errorCode) : (int){0}; });
+                                                                                            kputdec(__nepa_eh_tmp_35);
+#line 715 "baremetal_test.np"
+                                                                                            kputs("\n");
+                                                                                        }
+                                                                                    }
+                                                                                }
+#line 1 "<nepa-generated>"
+                                                                                __nepa_eh_flag = (__nepa_eh_saved_33 || __nepa_eh_flag);
+                                                                            }
+                                                                            if ((__nepa_eh_flag == 0)) {
+                                                                                {
+#line 719 "baremetal_test.np"
+                                                                                    Metal__Widget_awaitSum_(&NEPA_CLASS_$_Metal__Widget, __nepa_sel_awaitSum_, w);
+#line 731 "baremetal_test.np"
+                                                                                    {
+#line 723 "baremetal_test.np"
+                                                                                        NPObject *__nepa_tmp_57 = (Metal__Widget_alloc(&NEPA_CLASS_$_Metal__Widget, __nepa_sel_alloc));
+                                                                                        Metal__Widget * src = (Metal__Widget *)(__nepa_tmp_57 ? ((struct nepa_vtable *)__nepa_tmp_57->isa->vtable)->init(__nepa_tmp_57, __nepa_sel_init) : 0);
+#line 724 "baremetal_test.np"
+                                                                                        __block Metal__Widget * __attribute__((cleanup(nepa_weakAutoCleanup))) wz;
+#line 725 "baremetal_test.np"
+                                                                                        {
+                                                                                            __auto_type __nepa_weak_val_3 = src;
+                                                                                            nepa_weakUnregister((NPObject **)&wz);
+                                                                                            wz = __nepa_weak_val_3;
+                                                                                            nepa_weakRegister((NPObject **)&wz, (NPObject *)__nepa_weak_val_3);
+                                                                                        }
+#line 727 "baremetal_test.np"
+                                                                                        if (wz)                                                                                         kputs("[R6] weak assign alias OK\n");
+                                                                                        else                                                                                         kputs("[R6] weak assign FAIL\n");
+#line 728 "baremetal_test.np"
+                                                                                        ({ NPObject *__nepa_tmp_58 = ((NPObject *)(src)); __nepa_tmp_58 ? ((void (*)(NPObject *, SEL))((struct nepa_vtable *)__nepa_tmp_58->isa->vtable)->release)(__nepa_tmp_58, __nepa_sel_release) : 0; });
+#line 730 "baremetal_test.np"
+                                                                                        if (!wz)                                                                                         kputs("[R7] weak zeroed OK\n");
+                                                                                        else                                                                                         kputs("[R7] weak zero FAIL\n");
+                                                                                    }
+#line 733 "baremetal_test.np"
+                                                                                    kputs("=== baremetal stress done ===\n");
+#line 1 "<nepa-generated>"
+                                                                                    nepa_release(se);
+                                                                                    nepa_release(rex);
+                                                                                    nepa_release(pet);
+                                                                                    nepa_release(box);
+                                                                                    nepa_release(e);
+                                                                                    nepa_release(arr);
+                                                                                    nepa_release(tw);
+                                                                                    nepa_release(w);
+#line 734 "baremetal_test.np"
+                                                                                    return 0;
+                                                                                }
+                                                                            }
+#line 1 "<nepa-generated>"
+                                                                            nepa_release(se);
+                                                                            nepa_release(rex);
+                                                                            nepa_release(pet);
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                            nepa_release(box);
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            nepa_release(e);
             nepa_release(arr);
             nepa_release(tw);
             nepa_release(w);
-            {
-                __nepa_exception_value = e;
-                longjmp(__nepa_exception_buf, 1);
-            }
-            kputs("[N7] unreachable\n");
-        }
-        memcpy(__nepa_exception_buf, __nepa_saved, sizeof(jmp_buf));
-        if ((__nepa_state == 1))         if (__nepa_eh_isa((NPObject *)__nepa_exception_value, &NEPA_CLASS_$_Metal__Err)) {
-            __nepa_state = 2;
-            Metal__Err * err = (Metal__Err *)__nepa_exception_value;
-            {
-                kputs("[N7] caught Err code=");
-                kputdec(({ NPObject *__nepa_tmp_28 = ((NPObject *)(err)); __nepa_tmp_28 ? ((int (*)(NPObject *, SEL))((struct nepa_vtable *)__nepa_tmp_28->isa->vtable)->errorCode)(__nepa_tmp_28, __nepa_sel_errorCode) : (int){0}; }));
-                kputs("\n");
-            }
-        }
-        if ((__nepa_state == 1))         if (__nepa_eh_isa((NPObject *)__nepa_exception_value, &NEPA_CLASS_$_Metal__OtherErr)) {
-            __nepa_state = 2;
-            Metal__OtherErr * oe;
-            (void)oe;
-            {
-                kputs("[N7] wrong handler!\n");
-            }
-        }
-        memcpy(__nepa_exception_buf, __nepa_saved, sizeof(jmp_buf));
-        {
-            kputs("[N7] finally ran\n");
-        }
-        if ((__nepa_state == 1))         longjmp(__nepa_exception_buf, 1);
-    }
-    kputs("[N7b] @throws local=");
-    kputdec(local_catch(7, e));
-    kputs("/");
-    kputdec(local_catch(-7, e));
-    kputs(" (expect 21/-1)\n");
-    {
-        jmp_buf __nepa_saved;
-        memcpy(__nepa_saved, __nepa_exception_buf, sizeof(jmp_buf));
-        volatile int __nepa_state = 0;
-        if ((setjmp(__nepa_exception_buf) != 0))         __nepa_state = 1;
-        if ((__nepa_state == 0)) {
-            rethrow_err(e);
-            kputs("[N7b] unreachable\n");
-        }
-        memcpy(__nepa_exception_buf, __nepa_saved, sizeof(jmp_buf));
-        if ((__nepa_state == 1))         if (__nepa_eh_isa((NPObject *)__nepa_exception_value, &NEPA_CLASS_$_Metal__Err)) {
-            __nepa_state = 2;
-            Metal__Err * err2 = (Metal__Err *)__nepa_exception_value;
-            {
-                kputs("[N7b] typed rethrow caught code=");
-                kputdec(({ NPObject *__nepa_tmp_29 = ((NPObject *)(err2)); __nepa_tmp_29 ? ((int (*)(NPObject *, SEL))((struct nepa_vtable *)__nepa_tmp_29->isa->vtable)->errorCode)(__nepa_tmp_29, __nepa_sel_errorCode) : (int){0}; }));
-                kputs("\n");
-            }
-        }
-        memcpy(__nepa_exception_buf, __nepa_saved, sizeof(jmp_buf));
-        if ((__nepa_state == 1))         longjmp(__nepa_exception_buf, 1);
-    }
-    {
-        jmp_buf __nepa_saved;
-        memcpy(__nepa_saved, __nepa_exception_buf, sizeof(jmp_buf));
-        volatile int __nepa_state = 0;
-        if ((setjmp(__nepa_exception_buf) != 0))         __nepa_state = 1;
-        if ((__nepa_state == 0)) {
-            bare_rethrow_err(e);
-        }
-        memcpy(__nepa_exception_buf, __nepa_saved, sizeof(jmp_buf));
-        if ((__nepa_state == 1))         if (__nepa_eh_isa((NPObject *)__nepa_exception_value, &NEPA_CLASS_$_Metal__Err)) {
-            __nepa_state = 2;
-            Metal__Err * err3;
-            (void)err3;
-            {
-                kputs("[N7b] bare rethrow caught\n");
-            }
-        }
-        memcpy(__nepa_exception_buf, __nepa_saved, sizeof(jmp_buf));
-        if ((__nepa_state == 1))         longjmp(__nepa_exception_buf, 1);
-    }
-    SEL s = __nepa_sel_setWeight_;
-    kputs("[N8] @selector built, tag via send=");
-    kputdec(({ NPObject *__nepa_tmp_30 = ((NPObject *)(w)); __nepa_tmp_30 ? ((int (*)(NPObject *, SEL))((struct nepa_vtable *)__nepa_tmp_30->isa->vtable)->tag)(__nepa_tmp_30, __nepa_sel_tag) : (int){0}; }));
-    kputs(" (sel non-null: ");
-    kputdec((s.name != 0) ? 1 : 0);
-    kputs(")\n");
-    struct __nepa_byref_base {
-        void *__isa;
-        struct __nepa_byref_base *__forwarding;
-        int __flags;
-        int __value;
-    };
-    struct __nepa_byref_base base = {
-        .__forwarding = &base,
-        .__flags = 0,
-        .__value = 100,
-    };
-    IntBin mix = ^int(int a, int b) { base.__forwarding->__value = (base.__forwarding->__value + a); return ((a * b) + base.__forwarding->__value); };
-    kputs("[N9] block(2,3)=");
-    kputdec(mix(2, 3));
-    kputs(" base after=");
-    kputdec(base.__forwarding->__value);
-    kputs("\n");
-    int stored = 555;
-    NPObject *__nepa_tmp_31 = (Animal_alloc(&NEPA_CLASS_$_Box_int_ptr, __nepa_sel_alloc));
-    Box * box = (Box *)(__nepa_tmp_31 ? ((struct nepa_vtable *)__nepa_tmp_31->isa->vtable)->init(__nepa_tmp_31, __nepa_sel_init) : 0);
-    ({ NPObject *__nepa_tmp_32 = ((NPObject *)(box)); __nepa_tmp_32 ? ((void (*)(NPObject *, SEL, NPObject *))((struct nepa_vtable *)__nepa_tmp_32->isa->vtable)->set_)(__nepa_tmp_32, __nepa_sel_set_, &stored) : 0; });
-    kputs("[N10] box value=");
-    kputdec(*(int *)({ NPObject *__nepa_tmp_33 = ((NPObject *)(box)); __nepa_tmp_33 ? ((NPObject * (*)(NPObject *, SEL))((struct nepa_vtable *)__nepa_tmp_33->isa->vtable)->value)(__nepa_tmp_33, __nepa_sel_value) : (NPObject *){0}; }));
-    kputs("\n");
-    unsigned in1 = 21;
-    unsigned out1 = 0;
-    unsigned out2 = 0;
-    __asm__ __volatile__ ("mul %w0, %w1, %w1" : "=r"(out1) : "r"(in1) : );
-    __asm__ __volatile__ ("add %w[result], %w[a], %w[b]" : [result] "=r"(out2) : [a] "r"(in1), [b] "r"(in1) : );
-    kputs("[A1] inline mul=");
-    kputdec((int)out1);
-    kputs(" named add=");
-    kputdec((int)out2);
-    kputs("\n");
-    unsigned rv = asm_rotr32(4026531855, 4);
-    kputs("[A2] ext asm rotr(0xF000000F,4)=");
-    kputhex(rv);
-    kputs("\n");
-    int goto_val = 5;
-    __asm__ goto ("cmp %w0, #5; b.eq %l1" :  : "r"(goto_val) : "cc" : asm_hit);
-    kputs("[A3] asm goto: not taken\n");
-    goto skip_hit;
-asm_hit:
-    kputs("[A3] asm goto: TAKEN (wrong branch!)\n");
-    goto skip_hit;
-skip_hit:
-    kputs("[A3] asm goto done\n");
-    IntFn f1 = &asm_square;
-    kputs("[A4] fnptr asm_square(9)=");
-    kputdec(f1(9));
-    kputs(" add3(1,2,3)=");
-    kputdec(asm_add3(1, 2, 3));
-    kputs("\n");
-    {
-        __attribute__((cleanup(nepa_syncAutoCleanup)))         long __nepa_sync_2 = nepa_syncLock((void *)w);
-        ({ NPObject *__nepa_tmp_34 = ((NPObject *)(w)); __nepa_tmp_34 ? ((void (*)(NPObject *, SEL, int))((struct nepa_vtable *)__nepa_tmp_34->isa->vtable)->setWeight_)(__nepa_tmp_34, __nepa_sel_setWeight_, (({ NPObject *__nepa_tmp_35 = ((NPObject *)(w)); __nepa_tmp_35 ? ((int (*)(NPObject *, SEL))((struct nepa_vtable *)__nepa_tmp_35->isa->vtable)->weight)(__nepa_tmp_35, __nepa_sel_weight) : (int){0}; }) + 1)) : 0; });
-    }
-    kputs("[M1] synchronized weight=");
-    kputdec(({ NPObject *__nepa_tmp_36 = ((NPObject *)(w)); __nepa_tmp_36 ? ((int (*)(NPObject *, SEL))((struct nepa_vtable *)__nepa_tmp_36->isa->vtable)->weight)(__nepa_tmp_36, __nepa_sel_weight) : (int){0}; }));
-    kputs("\n");
-    {
-        NPObject *__nepa_tmp_37 = (Metal__Widget_alloc(&NEPA_CLASS_$_Metal__Widget, __nepa_sel_alloc));
-        Metal__Widget * m = (Metal__Widget *)(__nepa_tmp_37 ? ((struct nepa_vtable *)__nepa_tmp_37->isa->vtable)->init(__nepa_tmp_37, __nepa_sel_init) : 0);
-        ({ NPObject *__nepa_tmp_38 = ((NPObject *)(m)); __nepa_tmp_38 ? ((NPObject * (*)(NPObject *, SEL))((struct nepa_vtable *)__nepa_tmp_38->isa->vtable)->retain)(__nepa_tmp_38, __nepa_sel_retain) : 0; });
-        kputs("[M2] noarc manual rc=");
-        kputdec((((int)m->uid * 0) + 1));
-        kputs(" (alive)\n");
-        ({ NPObject *__nepa_tmp_39 = ((NPObject *)(m)); __nepa_tmp_39 ? ((void (*)(NPObject *, SEL))((struct nepa_vtable *)__nepa_tmp_39->isa->vtable)->release)(__nepa_tmp_39, __nepa_sel_release) : 0; });
-        ({ NPObject *__nepa_tmp_40 = ((NPObject *)(m)); __nepa_tmp_40 ? ((void (*)(NPObject *, SEL))((struct nepa_vtable *)__nepa_tmp_40->isa->vtable)->release)(__nepa_tmp_40, __nepa_sel_release) : 0; });
-    }
-    kputs("[M2] noarc survived\n");
-    {
-        nepa_autoreleasepool_t * __nepa_pool = nepa_autoreleasepoolPush();
-        {
-            NPObject *__nepa_tmp_41 = (Metal__Widget_alloc(&NEPA_CLASS_$_Metal__Widget, __nepa_sel_alloc));
-            Metal__Widget * tmp = (Metal__Widget *)(__nepa_tmp_41 ? ((struct nepa_vtable *)__nepa_tmp_41->isa->vtable)->init(__nepa_tmp_41, __nepa_sel_init) : 0);
-            ({ NPObject *__nepa_tmp_42 = ((NPObject *)(tmp)); __nepa_tmp_42 ? ((NPObject * (*)(NPObject *, SEL))((struct nepa_vtable *)__nepa_tmp_42->isa->vtable)->autorelease)(__nepa_tmp_42, __nepa_sel_autorelease) : 0; });
-            kputs("[M3] autoreleased obj in pool\n");
-        }
-        nepa_autoreleasepoolPop(__nepa_pool);
-    }
-    kputs("[M3] pool popped\n");
-    Metal__Ghost * ghost = (Metal__Ghost *)0;
-    int dead = ({ NPObject *__nepa_tmp_43 = ((NPObject *)(ghost)); __nepa_tmp_43 ? ((int (*)(NPObject *, SEL))((struct nepa_vtable *)__nepa_tmp_43->isa->vtable)->tag)(__nepa_tmp_43, __nepa_sel_tag) : (int){0}; });
-    kputs("[N8b] msg to nil →");
-    kputdec(dead);
-    kputs("\n");
-    kputs("[N8c] w resp tag=");
-    kputdec(nepa_resp_tag(w) ? 1 : 0);
-    kputs(" w resp missing=");
-    kputdec(0 ? 1 : 0);
-    kputs(" nil resp=");
-    kputdec(nepa_resp_tag(ghost) ? 1 : 0);
-    kputs("\n");
-    __typeof__(in1) t2 = (in1 * 2);
-    int biased = __builtin_expect((t2 > 40), 1);
-    kputs("[C7] typeof+expect=");
-    kputdec((int)t2);
-    kputs("/");
-    kputdec(biased);
-    kputs(" sizeof(struct Ops)=");
-    kputdec((int)sizeof(struct Ops));
-    kputs(" bump()=");
-    kputdec(bump());
-    kputs("\n");
-    kputs("[N11] poke_tag(w)=");
-    kputdec(poke_tag(w));
-    kputs("\n");
-    if (({ NPObject *__nepa_tmp_44 = ((NPObject *)(w)); __nepa_tmp_44 ? ((_Bool (*)(NPObject *, SEL, NPClass *))((struct nepa_vtable *)__nepa_tmp_44->isa->vtable)->isKindOfClass_)(__nepa_tmp_44, __nepa_sel_isKindOfClass_, (NPClass *)(&NEPA_CLASS_$_Metal__Widget)) : (_Bool){0}; })) {
-        kputs("[R1] isKindOfClass OK\n");
-    }
-    else {
-        kputs("[R1] isKindOfClass FAIL\n");
-    }
-    if (({ NPObject *__nepa_tmp_45 = ((NPObject *)(w)); __nepa_tmp_45 ? ((_Bool (*)(NPObject *, SEL, NPClass *))((struct nepa_vtable *)__nepa_tmp_45->isa->vtable)->isKindOfClass_)(__nepa_tmp_45, __nepa_sel_isKindOfClass_, (NPClass *)(&NEPA_CLASS_$_Metal__TurboWidget)) : (_Bool){0}; })) {
-        kputs("[R2] isKindOfClass(sub) FAIL\n");
-    }
-    else {
-        kputs("[R2] isKindOfClass(sub) correctly NO\n");
-    }
-    if (({ NPObject *__nepa_tmp_46 = ((NPObject *)(w)); __nepa_tmp_46 ? ((_Bool (*)(NPObject *, SEL, NPObject *))((struct nepa_vtable *)__nepa_tmp_46->isa->vtable)->isEqual_)(__nepa_tmp_46, __nepa_sel_isEqual_, (NPObject *)(w)) : (_Bool){0}; })) {
-        kputs("[R3] isEqual self OK\n");
-    }
-    else {
-        kputs("[R3] isEqual FAIL\n");
-    }
-    __block Metal__Widget * __attribute__((cleanup(nepa_weakAutoCleanup))) wweak = w;
-    nepa_weakRegister((NPObject **)&wweak, (NPObject *)w);
-    if (wweak) {
-        kputs("[R4] __weak alias OK\n");
-    }
-    else {
-        kputs("[R4] __weak FAIL\n");
-    }
-    Metal__Widget_awaitMake(&NEPA_CLASS_$_Metal__Widget, __nepa_sel_awaitMake);
-    defer_order();
-    kputs("[D3] defer_return(5)=");
-    kputdec(defer_return(5));
-    kputs("\n");
-    int nn_a = 40;
-    int nn_b = 2;
-    kputs("[C9] nn_sum(40,2)=");
-    kputdec(nn_sum(&nn_a, &nn_b));
-    kputs(" nn_sum(40,0)=");
-    kputdec(nn_sum(&nn_a, 0));
-    int nullable = 5;
-    kputs(" int nullable=");
-    kputdec(nullable);
-    kputs("\n");
-    kputs("[C10] mode_name2(TURBO)=");
-    kputs(mode_name2(MODE_TURBO));
-    int in = 6;
-    kputs(" in*7=");
-    kputdec((in * 7));
-    kputs("\n");
-    int bm_arr[8];
-    bm_arr[0] = 3;
-    kputs("[C11] bm_arr[0]=");
-    kputdec(bm_arr[0]);
-    kputs(" (the BM_TAG #define line must be absent from the generated C)\n");
-    pattern_scalar(42);
-    pattern_scalar(7);
-    pattern_scalar(999);
-    NPObject *__nepa_tmp_47 = (Animal_alloc(&NEPA_CLASS_$_Animal, __nepa_sel_alloc));
-    Animal * pet = (Animal *)(__nepa_tmp_47 ? ((struct nepa_vtable *)__nepa_tmp_47->isa->vtable)->init(__nepa_tmp_47, __nepa_sel_init) : 0);
-    ({ NPObject *__nepa_tmp_48 = ((NPObject *)(pet)); __nepa_tmp_48 ? ((void (*)(NPObject *, SEL, int))((struct nepa_vtable *)__nepa_tmp_48->isa->vtable)->setVoice_)(__nepa_tmp_48, __nepa_sel_setVoice_, 5) : 0; });
-    NPObject *__nepa_tmp_49 = (Dog_alloc(&NEPA_CLASS_$_Dog, __nepa_sel_alloc));
-    Dog * rex = (Dog *)(__nepa_tmp_49 ? ((struct nepa_vtable *)__nepa_tmp_49->isa->vtable)->init(__nepa_tmp_49, __nepa_sel_init) : 0);
-    ({ NPObject *__nepa_tmp_50 = ((NPObject *)(rex)); __nepa_tmp_50 ? ((void (*)(NPObject *, SEL, int))((struct nepa_vtable *)__nepa_tmp_50->isa->vtable)->setVoice_)(__nepa_tmp_50, __nepa_sel_setVoice_, 11) : 0; });
-    pattern_obj(rex);
-    pattern_obj(pet);
-    pattern_obj(w);
-    kputs("[N12] for-in typed:");
-    {
-        NPObject * __nepa_fi = (NPObject *)(arr);
-        for (unsigned long __nepa_fi_i = 0;  (__nepa_fi_i < ({ NPObject *__nepa_tmp_51 = ((NPObject *)(__nepa_fi)); __nepa_tmp_51 ? ((unsigned (*)(NPObject *, SEL))((struct nepa_vtable *)__nepa_tmp_51->isa->vtable)->count)(__nepa_tmp_51, __nepa_sel_count) : (unsigned){0}; })); (__nepa_fi_i)++) {
-            Metal__Widget * item = (Metal__Widget *)(({ NPObject *__nepa_tmp_52 = ((NPObject *)(__nepa_fi)); __nepa_tmp_52 ? ((NPObject * (*)(NPObject *, SEL, unsigned))((struct nepa_vtable *)__nepa_tmp_52->isa->vtable)->objectAtIndex_)(__nepa_tmp_52, __nepa_sel_objectAtIndex_, __nepa_fi_i) : 0; }));
-            kputdec(({ NPObject *__nepa_tmp_53 = ((NPObject *)(item)); __nepa_tmp_53 ? ((int (*)(NPObject *, SEL))((struct nepa_vtable *)__nepa_tmp_53->isa->vtable)->tag)(__nepa_tmp_53, __nepa_sel_tag) : (int){0}; }));
-            kputs(" ");
         }
     }
-    kputs("\n");
-    kputs("[M4] sync early=");
-    kputdec(sync_early(w));
-    kputdec(sync_early(w));
-    kputs(" (relock survived)\n");
-    NPObject *__nepa_tmp_54 = (Metal__SubErr_alloc(&NEPA_CLASS_$_Metal__SubErr, __nepa_sel_alloc));
-    Metal__SubErr * se = (Metal__SubErr *)(__nepa_tmp_54 ? ((struct nepa_vtable *)__nepa_tmp_54->isa->vtable)->init(__nepa_tmp_54, __nepa_sel_init) : 0);
-    ({ NPObject *__nepa_tmp_55 = ((NPObject *)(se)); __nepa_tmp_55 ? ((void (*)(NPObject *, SEL, int))((struct nepa_vtable *)__nepa_tmp_55->isa->vtable)->setCode_)(__nepa_tmp_55, __nepa_sel_setCode_, 99) : 0; });
-    {
-        jmp_buf __nepa_saved;
-        memcpy(__nepa_saved, __nepa_exception_buf, sizeof(jmp_buf));
-        volatile int __nepa_state = 0;
-        if ((setjmp(__nepa_exception_buf) != 0))         __nepa_state = 1;
-        if ((__nepa_state == 0)) {
-            nepa_release(rex);
-            nepa_release(pet);
-            nepa_release(box);
-            {
-                __nepa_exception_value = se;
-                longjmp(__nepa_exception_buf, 1);
-            }
-            kputs("[N13] unreachable\n");
-        }
-        memcpy(__nepa_exception_buf, __nepa_saved, sizeof(jmp_buf));
-        if ((__nepa_state == 1))         if (__nepa_eh_isa((NPObject *)__nepa_exception_value, &NEPA_CLASS_$_Metal__Err)) {
-            __nepa_state = 2;
-            Metal__Err * err4 = (Metal__Err *)__nepa_exception_value;
-            {
-                kputs("[N13] parent catch code=");
-                kputdec(({ NPObject *__nepa_tmp_56 = ((NPObject *)(err4)); __nepa_tmp_56 ? ((int (*)(NPObject *, SEL))((struct nepa_vtable *)__nepa_tmp_56->isa->vtable)->errorCode)(__nepa_tmp_56, __nepa_sel_errorCode) : (int){0}; }));
-                kputs("\n");
-            }
-        }
-        memcpy(__nepa_exception_buf, __nepa_saved, sizeof(jmp_buf));
-        if ((__nepa_state == 1))         longjmp(__nepa_exception_buf, 1);
+    if ((__nepa_eh_flag == 1)) {
+        nepa_eh_uncaught();
     }
-    Metal__Widget_awaitSum_(&NEPA_CLASS_$_Metal__Widget, __nepa_sel_awaitSum_, w);
-    {
-        NPObject *__nepa_tmp_57 = (Metal__Widget_alloc(&NEPA_CLASS_$_Metal__Widget, __nepa_sel_alloc));
-        Metal__Widget * src = (Metal__Widget *)(__nepa_tmp_57 ? ((struct nepa_vtable *)__nepa_tmp_57->isa->vtable)->init(__nepa_tmp_57, __nepa_sel_init) : 0);
-        __block Metal__Widget * __attribute__((cleanup(nepa_weakAutoCleanup))) wz;
-        {
-            __auto_type __nepa_weak_val_3 = src;
-            nepa_weakUnregister((NPObject **)&wz);
-            wz = __nepa_weak_val_3;
-            nepa_weakRegister((NPObject **)&wz, (NPObject *)__nepa_weak_val_3);
-        }
-        if (wz)         kputs("[R6] weak assign alias OK\n");
-        else         kputs("[R6] weak assign FAIL\n");
-        ({ NPObject *__nepa_tmp_58 = ((NPObject *)(src)); __nepa_tmp_58 ? ((void (*)(NPObject *, SEL))((struct nepa_vtable *)__nepa_tmp_58->isa->vtable)->release)(__nepa_tmp_58, __nepa_sel_release) : 0; });
-        if (!wz)         kputs("[R7] weak zeroed OK\n");
-        else         kputs("[R7] weak zero FAIL\n");
-    }
-    kputs("=== baremetal stress done ===\n");
-    return 0;
 }
 
 /* +[Box<int *> alloc] */
 __attribute__((weak)) NPObject * Box_int_ptr_alloc(NPClass * self, SEL _cmd) {
+#line 272 "baremetal_test.np"
     return nepa_alloc(self);
 }
 
 /* -[Box<int *> init] */
+#line 1 "<nepa-generated>"
 __attribute__((weak)) NPObject * Box_int_ptr_init(NPObject * self, SEL _cmd) {
+#line 273 "baremetal_test.np"
     return self;
 }
 
 /* -[Box<int *> set:] */
+#line 1 "<nepa-generated>"
 __attribute__((weak)) void Box_int_ptr_set_(NPObject * self, SEL _cmd, int * v) {
+#line 274 "baremetal_test.np"
     ((struct Box_int_ptr *)self)->_v = v;
 }
 
 /* -[Box<int *> value] */
+#line 1 "<nepa-generated>"
 __attribute__((weak)) int * Box_int_ptr_value(NPObject * self, SEL _cmd) {
+#line 275 "baremetal_test.np"
     return ((struct Box_int_ptr *)self)->_v;
 }
 
