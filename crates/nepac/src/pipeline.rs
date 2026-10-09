@@ -1,5 +1,6 @@
 use std::path::Path;
 use std::fs;
+use std::io::IsTerminal;
 use nepa_parser::parser::Parser;
 use nepa_binder::Binder;
 use nepa_elaborator::Elaborator;
@@ -202,13 +203,11 @@ impl Pipeline {
         // an open region marks every pointer in every imported header nonnull.
         parser.set_source_map(pre.source_map.clone());
         let mut cst = parser.parse_translation_unit()
-            .ok_or_else(|| format!("Parse failed:\n{}", prefix_lines("[parser]",
-                &translate_lines(parser.last_error(), &pre.source_map))))?;
+            .ok_or_else(|| format!("Parse failed:\n{}", render_checker_diags(parser.diagnostics(), &pre.source_map)))?;
         cst.filename = filename.to_string();
 
         if parser.has_error() {
-            return Err(format!("Parse failed:\n{}", prefix_lines("[parser]",
-                &translate_lines(parser.last_error(), &pre.source_map))));
+            return Err(format!("Parse failed:\n{}", render_checker_diags(parser.diagnostics(), &pre.source_map)));
         }
 
         // Step 2: Bind names
@@ -216,7 +215,7 @@ impl Pipeline {
         let symtab = SymbolTable::new();
         let mut binder = Binder::new(symtab);
         if binder.bind(&mut cst) != 0 {
-            return Err(format!("Binding failed:\n{}", prefix_lines("[binder]",
+            return Err(format!("Binding failed:\n{}", render_stage_string_diags(
                 &translate_lines(binder.last_error(), &pre.source_map))));
         }
 
@@ -240,7 +239,7 @@ impl Pipeline {
             let eh_diags = nepa_eh::check_unit(&ast);
             if !eh_diags.errors.is_empty() {
                 self.has_error = true;
-                self.error_msg = format!("EH check failed:\n{}", prefix_lines("[eh]", &translate_lines(&eh_diags.errors.join("\n"), &pre.source_map)));
+                self.error_msg = format!("EH check failed:\n{}", render_stage_string_diags(&translate_lines(&eh_diags.errors.join("\n"), &pre.source_map)));
                 return Err(self.error_msg.clone());
             }
             nepa_eh::desugar_unit(&mut ast);
@@ -255,7 +254,7 @@ impl Pipeline {
             let defer_diags = nepa_defer::desugar_unit(&mut ast);
             if !defer_diags.errors.is_empty() {
                 self.has_error = true;
-                self.error_msg = format!("Defer check failed:\n{}", prefix_lines("[defer]", &translate_lines(&defer_diags.errors.join("\n"), &pre.source_map)));
+                self.error_msg = format!("Defer check failed:\n{}", render_stage_string_diags(&translate_lines(&defer_diags.errors.join("\n"), &pre.source_map)));
                 return Err(self.error_msg.clone());
             }
         }
@@ -367,8 +366,9 @@ impl Pipeline {
             self.error_msg = format!("Async check failed:\n{}", prefix_lines("[async]", &translate_lines(&async_diags.errors.join("\n"), &pre.source_map)));
             return Err(self.error_msg.clone());
         }
-        // Recoverable async warnings (e.g. `@await` without an `NPAsync<T>`
-        // marker) — printed purple like ARC warnings; `-Werror` escalates.
+        // Recoverable async warnings (reconcile issues are error-level now;
+        // the channel stays for future async lints) — printed purple like ARC
+        // warnings; `-Werror` escalates.
         // Lines are inline-buffer positions: translate via SourceMap.
         if !async_diags.warnings.is_empty() {
             if self.werror {
@@ -381,7 +381,10 @@ impl Pipeline {
                 eprintln!("\x1b[1;35m[async] warning:\x1b[0m {}", translate_lines(w, &pre.source_map));
             }
         }
-        nepa_async::desugar_unit_m2(&mut ast);
+        // `hosted` gates the entry auto-pump (doc/async_nptask_plan.md
+        // §静态分析 3): a hosted chain drives itself, bare metal pumps from
+        // its own main loop.
+        nepa_async::desugar_unit_m2(&mut ast, !self.no_libc);
 
         // Step 5: Check types (skipped when -fno-checker is set)
         if self.verbose { eprintln!("[nepac] checking types..."); }
@@ -395,13 +398,13 @@ impl Pipeline {
             // statements it is meant to reconcile.
             checker.eh_checked = self.eh_checked;
             if checker.check(&mut ast) != 0 {
-                return Err(format!("Type checking failed:\n{}", prefix_lines("[checker]", checker.last_error())));
+                return Err(format!("Type checking failed:\n{}", render_checker_diags(&checker.errors_as_diagnostics(), &pre.source_map)));
             }
             // Print warnings (non-fatal diagnostics, like C/ObjC `-W...`).
             // With `-Werror`, suppress the purple warning and promote to a red error.
             if self.werror && !checker.warnings().is_empty() {
                 return Err(format!("Type checking failed (-Werror):\n{}",
-                    prefix_lines("[checker]", &checker.warnings().join("\n"))));
+                    render_checker_diags(&checker.warnings_as_diagnostics(), &pre.source_map)));
             }
             for w in checker.warnings() {
                 eprintln!("\x1b[1;35m[checker] warning:\x1b[0m {}", w);
@@ -550,6 +553,41 @@ fn prefix_lines(stage: &str, msg: &str) -> String {
         })
         .collect::<Vec<_>>()
         .join("\n")
+}
+
+/// Render checker diagnostics clang-style (source line + `~~~~^~~~~`
+/// annotation) when the source text is available on disk; diagnostics whose
+/// file cannot be read fall back to the plain `file:line:col:` line.
+fn render_checker_diags(
+    diags: &[nepa_cst::diagnostic::Diagnostic],
+    sm: &nepa_cst::source_map::SourceMap,
+) -> String {
+    use nepa_cst::diagnostic::render_annotated_colored;
+    let _ = sm; // line/col are already remapped by the checker at record time
+    let color = std::io::stderr().is_terminal();
+    render_annotated_colored(diags, &|file| fs::read_to_string(file).ok(), color)
+}
+
+/// Render the string-form diagnostics emitted by parser/binder/elaborator
+/// (`LINE:COL: msg` lines, already remapped to the original file by
+/// `translate_lines`). Each parseable line becomes a structured `Diagnostic`
+/// so it gets the same annotated rendering as checker errors; lines that do
+/// not fit the shape (bare messages) are passed through as position-less
+/// diagnostics.
+fn render_stage_string_diags(msg: &str) -> String {
+    use nepa_cst::diagnostic::{Diagnostic, render_annotated_colored};
+    let diags: Vec<Diagnostic> = msg.lines().map(|l| {
+        // Shapes: `file:LINE:COL: msg`, `LINE:COL: msg`
+        let parsed = l.splitn(4, ':').collect::<Vec<_>>();
+        if let [f, ln, col, rest] = parsed[..] {
+            if let (Ok(ln), Ok(col)) = (ln.trim().parse::<usize>(), col.trim().parse::<usize>()) {
+                return Diagnostic::error(f, ln, col, rest.trim_start());
+            }
+        }
+        Diagnostic::error(String::new(), 0, 0, l)
+    }).collect();
+    let color = std::io::stderr().is_terminal();
+    render_annotated_colored(&diags, &|file| fs::read_to_string(file).ok(), color)
 }
 
 /// Rewrites `LINE:COL: message` occurrences in a diagnostic string so the

@@ -9,6 +9,10 @@ pub struct Parser<'a> {
     has_error: bool,
     error_count: usize,
     err_msg: String,
+    /// Structured diagnostics with token-width spans. `error()` records here
+    /// alongside the legacy flat string; the pipeline renders these instead of
+    /// re-parsing `err_msg`.
+    diagnostics: Vec<Diagnostic>,
     panic_mode: bool,
     type_names: Vec<String>,
     /// True when `type_names` is known to be *complete* — i.e. it came from the
@@ -58,6 +62,7 @@ impl<'a> Parser<'a> {
             has_error: false,
             error_count: 0,
             err_msg: String::new(),
+            diagnostics: Vec::new(),
             panic_mode: false,
             type_names: vec![
                 // Built-in C types (from old C parser's register_builtin_types)
@@ -79,15 +84,15 @@ impl<'a> Parser<'a> {
                 "key_t".into(), "fsblkcnt_t".into(), "fsfilcnt_t".into(), "blkcnt_t".into(),
                 "blksize_t".into(), "dev_t".into(), "id_t".into(), "ino_t".into(),
                 "nlink_t".into(), "uid_t".into(), "gid_t".into(),
-                // `NPAsync<T>` — reserved return-type marker (not a real class).
-                // Registered so `NPAsync<int>` parses as a type with type args;
-                // parse_function_decl_or_definition / parse_method unwrap it to
-                // `T` + an async_marker flag. See AGENTS.md `NPAsync<T>` section.
-                "NPAsync".into(),
+                // `NPTask<T>` — real task-handle class (doc/async_nptask_plan.md).
+                // Registered so `NPTask<int>` parses type args; the `async`
+                // modifier in front of it is a contextual keyword handled at
+                // the return-type position (at_async_modifier).
+                "NPTask".into(),
             ],
             type_table_complete: false,
             type_params: Vec::new(),
-            generic_class_names: vec!["NPAsync".into()],
+            generic_class_names: vec!["NPTask".into()],
             annotating: false,
             nonnull_region: false,
             region_file: None,
@@ -99,6 +104,9 @@ impl<'a> Parser<'a> {
     /// region can be scoped to the file that opened it.
     pub fn set_source_map(&mut self, sm: nepa_cst::SourceMap) {
         self.source_map = Some(sm);
+        // The first token was read before the map arrived; catch it up so the
+        // first diagnostic of a file is not the one that drifts.
+        Self::remap_token_col(&self.source_map, &mut self.current);
     }
 
     /// The file the given inlined-buffer line came from, or `""` when unknown.
@@ -166,7 +174,23 @@ impl<'a> Parser<'a> {
     }
 
     fn advance(&mut self) {
-        self.previous = std::mem::replace(&mut self.current, self.lexer.next_token());
+        let mut next = self.lexer.next_token();
+        Self::remap_token_col(&self.source_map, &mut next);
+        self.previous = std::mem::replace(&mut self.current, next);
+    }
+
+    /// Translate a token's column from the expanded buffer back to the source.
+    ///
+    /// Macro expansion moves the text that follows it along the line, and the
+    /// bytes it produced have no column in the source at all — so the lexer's
+    /// column is a column in the *expanded* buffer, and reporting it lands next
+    /// to, or past the end of, the line the author actually wrote. Rows need no
+    /// work here: the map's line half attributes the line, and the checker
+    /// translates it when it renders a diagnostic.
+    fn remap_token_col(sm: &Option<nepa_cst::SourceMap>, token: &mut Token) {
+        if let Some(sm) = sm {
+            token.column = sm.adjust_col(token.line, token.column as u32).0 as usize;
+        }
     }
 
     fn match_token(&mut self, kind: TokenKind) -> bool {
@@ -250,11 +274,36 @@ impl<'a> Parser<'a> {
         self.panic_mode = true;
         self.has_error = true;
         self.error_count += 1;
-        let entry = format!("{}:{}: {}", self.previous.line, self.previous.column, msg);
+        let line = self.previous.line;
+        let col = self.previous.column;
+        // Span width from the offending token itself: end_col is exclusive,
+        // so `nil` at column 14 (length 3) annotates as ^~~.
+        let end_col = col + self.previous.length.max(1);
+        let (file, real_line) = self.file_of_line_mapped(line);
+        let entry = format!("{}:{}: {}", line, col, msg);
         if self.err_msg.is_empty() {
             self.err_msg = entry;
         } else {
             self.err_msg = format!("{}\n{}", self.err_msg, entry);
+        }
+        self.diagnostics.push(
+            Diagnostic::error(file, real_line, col, msg).with_end_col(end_col)
+        );
+    }
+
+    /// Resolves a line to (file, source line) via the SourceMap; falls back
+    /// to the raw line when no map is set (single-file parse).
+    fn file_of_line_mapped(&self, line: usize) -> (String, usize) {
+        match &self.source_map {
+            Some(sm) if !sm.is_empty() => {
+                let (file, real_line) = sm.locate(line);
+                if !file.is_empty() {
+                    (file, real_line as usize)
+                } else {
+                    (String::new(), line)
+                }
+            }
+            _ => (String::new(), line),
         }
     }
 
@@ -2752,29 +2801,35 @@ else if self.match_keyword(KeywordKind::Typeof) {
         }
         // Jump statements
         if self.match_keyword(KeywordKind::Return) {
+            // Capture the keyword's own position NOW: parsing the expression
+            // and consuming ';' advance `previous`, and diagnostics for this
+            // statement must point at `return`, not the trailing ';'.
+            let (kw_line, kw_col) = (self.previous.line, self.previous.column);
             let expr = if !self.check(TokenKind::Semicolon) && !self.check(TokenKind::RBrace) {
                 self.parse_expression()
             } else { None };
             self.consume(TokenKind::Semicolon, "expected ';' after return");
             return Some(CstStmt {
                 kind: CstStmtKind::Return,
-                line: self.previous.line, column: self.previous.column,
+                line: kw_line, column: kw_col,
                 data: CstStmtData::Return(expr.map(Box::new)),
             });
         }
         if self.match_keyword(KeywordKind::Break) {
+            let (kw_line, kw_col) = (self.previous.line, self.previous.column);
             self.consume(TokenKind::Semicolon, "expected ';' after break");
             return Some(CstStmt {
                 kind: CstStmtKind::Break,
-                line: self.previous.line, column: self.previous.column,
+                line: kw_line, column: kw_col,
                 data: CstStmtData::Return(None),
             });
         }
         if self.match_keyword(KeywordKind::Continue) {
+            let (kw_line, kw_col) = (self.previous.line, self.previous.column);
             self.consume(TokenKind::Semicolon, "expected ';' after continue");
             return Some(CstStmt {
                 kind: CstStmtKind::Continue,
-                line: self.previous.line, column: self.previous.column,
+                line: kw_line, column: kw_col,
                 data: CstStmtData::Return(None),
             });
         }
@@ -3520,26 +3575,43 @@ else if self.match_keyword(KeywordKind::Typeof) {
         Some(name)
     }
 
-    /// `NPAsync<T>` return-type marker (AGENTS.md `NPAsync<T>` section):
-    /// unwrap the marker type to its single type argument and report the
-    /// marker flag. Misuses (zero / multiple type args) error out and keep
-    /// the raw type so parsing can continue.
-    fn unwrap_async_marker(&mut self, rt: CstType) -> (CstType, bool) {
-        if rt.name.as_deref() != Some("NPAsync") {
-            return (rt, false);
+    /// Contextual `async` return-type modifier (doc/async_nptask_plan.md):
+    /// the identifier `async` immediately followed by `NPTask`. Lookahead is a
+    /// raw-source scan (same style as `peek_colon_colon`), so a user typedef
+    /// named `async` keeps working everywhere else — C superset iron law.
+    fn at_async_modifier(&self) -> bool {
+        if self.current.kind != TokenKind::Identifier || self.current_text() != "async" {
+            return false;
+        }
+        let mut i = self.current.start + self.current.length;
+        let bytes = self.source.as_bytes();
+        while i < bytes.len() && (bytes[i] as char).is_whitespace() {
+            i += 1;
+        }
+        if !self.source[i..].starts_with("NPTask") {
+            return false;
+        }
+        self.source[i + "NPTask".len()..]
+            .chars()
+            .next()
+            .map_or(true, |c| !(c.is_alphanumeric() || c == '_'))
+    }
+
+    /// After a consumed `async` modifier, the return type must be `NPTask<T>`
+    /// with exactly one type argument. The type is kept as-is — a real type
+    /// in the signature, nothing is unwrapped.
+    fn require_nptask_async(&mut self, rt: CstType) -> CstType {
+        if rt.name.as_deref() != Some("NPTask") {
+            self.error("'async' requires return type 'NPTask<T>' — 'async' is a method modifier, not a type qualifier");
+            return rt;
         }
         if rt.type_args.len() != 1 {
-            self.error("'NPAsync' marker requires exactly one type argument: 'NPAsync<T>' — it is a return-type marker, not a value type");
-            return (rt, false);
+            self.error("'async NPTask' requires exactly one type argument: 'async NPTask<T>'");
         }
-        let inner = rt.type_args.into_iter().next().unwrap();
-        (inner, true)
+        rt
     }
 
     fn parse_function_decl_or_definition(&mut self, return_type: CstType, name: String, prefix_attrs: Vec<String>) -> Option<CstDecl> {
-        // `NPAsync<T>` marker → unwrap to `T` + flag (compile-time metadata;
-        // the emitted C signature is just `T`).
-        let (return_type, async_marker) = self.unwrap_async_marker(return_type);
         let mut params = Vec::new();
         let mut has_variadic = false;
 
@@ -3639,7 +3711,9 @@ else if self.match_keyword(KeywordKind::Typeof) {
                 has_variadic,
                 body,
                 throws,
-                async_marker,
+                // plain C functions are never async (the `async` modifier is
+                // method/selector syntax only)
+                async_marker: false,
             },
                     attributes: trailing_attrs,
 })
@@ -5228,20 +5302,32 @@ if self.current.kind == TokenKind::Identifier {
         else if self.match_token(TokenKind::Minus) { false }
         else { return None; };
 
-        // Parse return type: (type) or plain type
+        // Parse return type: (type) or plain type. Inside the parens, a bare
+        // `async` identifier followed by `NPTask` is the async return-type
+        // modifier (doc/async_nptask_plan.md), not part of the type.
+        let mut async_modifier = false;
         let return_type = if self.match_token(TokenKind::LParen) {
+            async_modifier = self.at_async_modifier();
+            if async_modifier {
+                self.advance();
+            }
             let rt = self.parse_type_annotated();
             self.consume(TokenKind::RParen, "expected ')' after method return type");
-            rt
+            if async_modifier {
+                match rt {
+                    Some(t) => Some(self.require_nptask_async(t)),
+                    None => {
+                        self.error("'async' requires return type 'NPTask<T>'");
+                        None
+                    }
+                }
+            } else {
+                rt
+            }
         } else {
             self.parse_type_annotated()
         };
-        // `NPAsync<T>` marker → unwrap to `T` + flag (interface/impl/protocol
-        // declarations all flow through here).
-        let (return_type, async_marker) = match return_type {
-            Some(rt) => { let (u, m) = self.unwrap_async_marker(rt); (Some(u), m) }
-            None => (None, false),
-        };
+        let async_marker = async_modifier;
 
         // Parse method selector and params
         let mut params: Option<Box<CstParam>> = None;
@@ -5684,6 +5770,11 @@ if self.current.kind == TokenKind::Identifier {
 
     pub fn last_error(&self) -> &str {
         &self.err_msg
+    }
+
+    /// Structured diagnostics with token-width spans, for annotated rendering.
+    pub fn diagnostics(&self) -> &[Diagnostic] {
+        &self.diagnostics
     }
 }
 

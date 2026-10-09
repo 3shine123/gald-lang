@@ -4,7 +4,7 @@
 // and a comment saying who will use it.
 #![deny(dead_code)]
 use nepa_ast::ast::*;
-use nepa_cst::{Nullability, TagKind, TypePrim, CstParam};
+use nepa_cst::{Diagnostic, Nullability, Severity, TagKind, TypePrim, CstParam};
 use nepa_symbol::*;
 use std::collections::HashMap;
 
@@ -37,9 +37,15 @@ pub struct Checker {
     pub current_method_is_class: bool,
     pub has_error: bool,
     pub error_count: i32,
+    /// Structured diagnostics (errors and warnings alike), the single source
+    /// of truth the pipeline renders. Kept alongside the legacy string fields
+    /// until every consumer reads from here.
+    pub diagnostics: Vec<Diagnostic>,
+    /// Legacy flat text of all errors, newline-joined — still consumed by
+    /// `last_error()`; rendered from `diagnostics` on write.
     pub error_msg: String,
-    /// Non-fatal diagnostics (warnings). Collected like errors but do NOT set
-    /// `has_error` — the pipeline decides whether to promote them via `-Werror`.
+    /// Legacy warning strings, kept for existing consumers; rendered from
+    /// `diagnostics` on write.
     pub warnings: Vec<String>,
     pub scope_vars: Vec<Vec<(String, AstType)>>,
     /// Flow-sensitive narrowing: names proven non-null inside the current
@@ -151,6 +157,7 @@ impl Checker {
             current_method_is_class: false,
             has_error: false,
             error_count: 0,
+            diagnostics: Vec::new(),
             error_msg: String::new(),
             warnings: Vec::new(),
             scope_vars: Vec::new(),
@@ -186,34 +193,77 @@ impl Checker {
         &self.error_msg
     }
 
+    /// Warning subset of [`Self::diagnostics`], for `-Werror` rendering.
+    pub fn warnings_as_diagnostics(&self) -> Vec<Diagnostic> {
+        self.diagnostics
+            .iter()
+            .filter(|d| d.severity == Severity::Warning)
+            .cloned()
+            .collect()
+    }
+
+    /// Error subset of [`Self::diagnostics`], for the fatal-failure render.
+    pub fn errors_as_diagnostics(&self) -> Vec<Diagnostic> {
+        self.diagnostics
+            .iter()
+            .filter(|d| d.severity == Severity::Error)
+            .cloned()
+            .collect()
+    }
+
     fn check_error(&mut self, line: usize, col: usize, msg: &str) {
-        self.has_error = true;
-        self.error_count += 1;
-        let entry = self.format_diag(line, col, msg);
-        if self.error_msg.is_empty() {
-            self.error_msg = entry;
-        } else {
-            self.error_msg = format!("{}\n{}", self.error_msg, entry);
-        }
+        self.record(Severity::Error, line, col, None, msg);
+    }
+
+    /// Span-aware entry point: `end_col` is the exclusive end of the
+    /// annotated range on the same line (`None` = single caret). Call sites
+    /// graduate to this one as spans are threaded through (span-widening work).
+    #[allow(dead_code)]
+    fn check_error_span(&mut self, line: usize, col: usize, end_col: Option<usize>, msg: &str) {
+        self.record(Severity::Error, line, col, end_col, msg);
     }
 
     fn check_warning(&mut self, line: usize, col: usize, msg: &str) {
-        let entry = self.format_diag(line, col, msg);
-        self.warnings.push(entry);
+        self.record(Severity::Warning, line, col, None, msg);
     }
 
-    /// Renders `file:line:col: msg`, translating the flattened inline-buffer
-    /// line back to the original (file, line) via the SourceMap when available.
-    fn format_diag(&self, line: usize, col: usize, msg: &str) -> String {
+    /// The single recording path. Resolves (file, line) through the SourceMap
+    /// and stores a structured `Diagnostic`; the legacy flat strings are kept
+    /// in sync for `last_error()`/`warnings` consumers.
+    fn record(&mut self, severity: Severity, line: usize, col: usize, end_col: Option<usize>, msg: &str) {
+        let (file, real_line) = self.resolve_line(line);
+        let mut d = match severity {
+            Severity::Error => Diagnostic::error(file, real_line, col, msg),
+            Severity::Warning => Diagnostic::warning(file, real_line, col, msg),
+            Severity::Note => Diagnostic::note(file, real_line, col, msg),
+        };
+        d.end_col = end_col;
+        self.diagnostics.push(d.clone());
+        if severity == Severity::Error {
+            self.has_error = true;
+            self.error_count += 1;
+            if self.error_msg.is_empty() {
+                self.error_msg = d.to_plain();
+            } else {
+                self.error_msg = format!("{}\n{}", self.error_msg, d.to_plain());
+            }
+        } else if severity == Severity::Warning {
+            self.warnings.push(d.to_plain());
+        }
+    }
+
+    /// Resolves a flattened inline-buffer line to (file, source line) via the
+    /// SourceMap; falls back to the raw line when no map is set.
+    fn resolve_line(&self, line: usize) -> (String, usize) {
         if let Some(ref sm) = self.source_map {
             if !sm.is_empty() {
                 let (file, real_line) = sm.locate(line);
                 if !file.is_empty() {
-                    return format!("{}:{}:{}: {}", file, real_line, col, msg);
+                    return (file, real_line as usize);
                 }
             }
         }
-        format!("{}:{}: {}", line, col, msg)
+        (String::new(), line)
     }
 
     /// Does this diagnostic's line come from a Foundation source file
@@ -1344,21 +1394,6 @@ impl Checker {
     /// a usability trap — the reader reasonably expects element type checking.
     /// The user-declared generic containers (e.g. `Box<T>`) are exempt because
     /// those DO monomorphize.
-    /// `NPAsync<T>` is a return-type-position marker only (AGENTS.md
-    /// `NPAsync<T>` section): the parser unwraps it in method/function return
-    /// types, so the checker never sees it there. Anywhere else it cannot do
-    /// anything sensible — a "value" of type NPAsync does not exist (calling
-    /// code `@await`s and gets `T` directly). Reject with the design's
-    /// diagnostic.
-    fn reject_npasync_type(&mut self, t: &AstType, line: usize, col: usize, ctx: &str) {
-        let is_marker = t.name.as_deref() == Some("NPAsync")
-            || t.class_ref.as_deref() == Some("NPAsync");
-        if is_marker {
-            self.check_error(line, col,
-                &format!("'NPAsync<T>' is a declaration marker, not a value type ({}) — '@await' the async call instead", ctx));
-        }
-    }
-
     fn warn_if_erased_generics(&mut self, t: &AstType, line: usize, col: usize) {
         if t.type_args.is_empty() { return; }
         // Defensive: a `<...>` block routes to EITHER a protocol list OR type
@@ -2572,7 +2607,24 @@ AstExprData::Subscript { object, key, .. } => {
             // awaited value's type). Whether the enclosing method may suspend
             // is decided by the async analysis pass, not here.
             AstExprData::Await(inner) => {
-                self.check_expr(&mut *inner.clone())
+                let inner_ty = self.check_expr(&mut *inner.clone());
+                // @await unwraps the task box: `@await` on `NPTask<T> *`
+                // yields `T` (doc/async_nptask_plan.md). Await on a non-task
+                // expression keeps the expression's own type (async-call
+                // sugar: the call's return type IS the NPTask handle... so
+                // through-sugar awaits also land here and unwrap).
+                if let Some(t) = &inner_ty {
+                    if t.is_pointer && t.name.as_deref() == Some("NPTask") {
+                        if let Some(arg) = t.type_args.first() {
+                            // `int`-style args unwrap to the value type; the
+                            // arg's own pointer-ness is preserved by the clone.
+                            return Some(arg.clone());
+                        }
+                        // NPTask<void> / bare NPTask: await yields void.
+                        return Some(AstType::new(TypePrim::Void));
+                    }
+                }
+                inner_ty
             }
             // `@(expr)` — the factory call is chosen from the operand's static
             // type by `maybe_rewrite_boxed_expr`, which `check_expr` runs right
@@ -2856,19 +2908,12 @@ AstExprData::Subscript { object, key, .. } => {
         }
     }
 
-    fn add_params_to_scope(&mut self, params: &Option<Box<CstParam>>, line: usize, col: usize) {
+    fn add_params_to_scope(&mut self, params: &Option<Box<CstParam>>) {
         if self.scope_vars.is_empty() {
             self.scope_vars.push(Vec::new());
         }
         let mut p = params.as_ref().map(|b| &**b);
         while let Some(param) = p {
-            // `NPAsync<T>` is a return-type marker only — a parameter can
-            // never be "async" (CstParam carries no position, so report at
-            // the enclosing declaration).
-            if param.par_type.as_ref().map_or(false, |ct| ct.name.as_deref() == Some("NPAsync")) {
-                self.check_error(line, col,
-                    "'NPAsync<T>' is a declaration marker, not a value type (parameter) — '@await' the async call instead");
-            }
             if let Some(ref name) = param.name {
                 if let Some(scope) = self.scope_vars.last_mut() {
                     if !scope.iter().any(|(n, _)| n == name) {
@@ -2896,7 +2941,7 @@ AstExprData::Subscript { object, key, .. } => {
                     // Fresh frame for this function's params, popped right
                     // after the body: nothing leaks into the next declaration.
                     self.scope_vars.push(Vec::new());
-                    self.add_params_to_scope(params, d.line, d.col);
+                    self.add_params_to_scope(params);
                     self.check_stmt(b);
                     self.scope_vars.pop();
                     self.reconcile_throws(d.name.as_deref(), d.line, d.col);
@@ -2913,7 +2958,6 @@ AstExprData::Subscript { object, key, .. } => {
                 // erased (no monomorphization, no element type checking).
                 if let Some(ref t) = head_type {
                     self.warn_if_erased_generics(t, d.line, d.col);
-                    self.reject_npasync_type(t, d.line, d.col, "variable");
                     self.check_generic_bounds_instantiation(t, d.line, d.col);
                 }
                 if let Some(ref name) = d.name {
@@ -3003,37 +3047,14 @@ AstExprData::Subscript { object, key, .. } => {
                                 }
                             }
                         }
-                        if let Some(vt_t) = vt.as_deref() {
-                            self.reject_npasync_type(vt_t, nd.line, nd.col, "variable");
-                        }
                         if let Some(ref mut i) = ni { self.check_expr(i); }
                         tail = nn.as_deref_mut();
                     }
                     cur = tail;
                 }
             }
-            AstDeclData::Class { methods, ivars, properties, .. } => {
+            AstDeclData::Class { methods, .. } => {
                 let old = self.current_class.clone();
-                // Reserved marker name: a class named `NPAsync` would collide
-                // with the return-type marker the parser unwraps.
-                if d.name.as_deref() == Some("NPAsync") {
-                    self.check_error(d.line, d.col,
-                        "'NPAsync' is reserved for the async return-type marker — pick a different class name");
-                }
-                for iv in ivars.iter() {
-                    if let AstDeclData::Ivar { ref ivar_type, .. } = iv.data {
-                        if let Some(ref it) = ivar_type {
-                            self.reject_npasync_type(it, iv.line, iv.col, "ivar");
-                        }
-                    }
-                }
-                for pr in properties.iter() {
-                    if let AstDeclData::Property { ref prop_type, .. } = pr.data {
-                        if let Some(ref t) = prop_type {
-                            self.reject_npasync_type(t, pr.line, pr.col, "property");
-                        }
-                    }
-                }
                 self.current_class = d.name.clone();
                 for m in methods { self.check_decl(m); }
                 self.current_class = old;
@@ -3054,7 +3075,7 @@ AstExprData::Subscript { object, key, .. } => {
                     // (`other` in NPString vs NPMutableArray) must resolve
                     // its OWN declared type, not the first declarer's.
                     self.scope_vars.push(Vec::new());
-                    self.add_params_to_scope(params, d.line, d.col);
+                    self.add_params_to_scope(params);
                     if params.is_some() {
                         let mut p = params.as_ref().map(|b| &**b);
                         while let Some(param) = p {
