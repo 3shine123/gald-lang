@@ -4,5 +4,6 @@
 // and a comment saying who will use it.
 #![deny(dead_code)]
 pub mod codegen;
+pub mod source_map_extract;
 
 pub use codegen::*;

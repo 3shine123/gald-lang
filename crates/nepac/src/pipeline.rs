@@ -69,6 +69,14 @@ pub struct Pipeline {
     /// generated C (plan 阶段 2), so clang diagnostics point back at the
     /// `.np`/`.nh`. `-fno-line-directives` turns it off.
     pub line_directives: bool,
+    /// `-np-map` (plan 阶段 4): extract a versioned sidecar source map from
+    /// the FINAL generated C. The map is stashed in [`Pipeline::last_source_map`]
+    /// for the CLI driver, which decides where (and whether) it lands on disk.
+    pub np_map: bool,
+    /// Sidecar map extracted during the last [`Pipeline::transpile`] call
+    /// (only when [`Pipeline::np_map`] is set). `generated.path` is left
+    /// empty here — the CLI driver fills in the real `.c` output location.
+    pub last_source_map: Option<nepa_cst::source_map_file::SourceMapFile>,
 }
 
 impl Pipeline {
@@ -96,6 +104,8 @@ impl Pipeline {
             c_arch: None,
             no_ctype_probe: false,
             line_directives: true,
+            np_map: false,
+            last_source_map: None,
         }
     }
 
@@ -445,6 +455,21 @@ impl Pipeline {
         // follows the same flag (a reviewer can inspect the directives).
         let line_sm = if self.line_directives { Some(&pre.source_map) } else { None };
         let c_code = emit_unit_with_headers_mapped(&cg, &pre.c_headers, &self.search_dirs, self.no_libc, self.backend, !self.no_comments, self.eh_checked, line_sm);
+
+        // 阶段 4: `-np-map` extracts the sidecar source map from the FINAL
+        // generated text — after every emission-time buffer surgery — so all
+        // offsets are byte-exact against what reaches disk. The `#line` stream
+        // is the shared ground truth of the C preprocessor and the extractor.
+        if self.np_map {
+            let src_pairs = vec![(filename.to_string(), source.to_string())];
+            let opts = nepa_codegen::source_map_extract::ExtractOptions {
+                // The CLI driver knows the real `.c` output path and fills it in.
+                generated_path: String::new(),
+                primary_source: filename.to_string(),
+                source_contents: &src_pairs,
+            };
+            self.last_source_map = Some(nepa_codegen::source_map_extract::extract_source_map(&c_code, &opts));
+        }
 
         // Step 6.4: Write back the slots manifest (append-only): the compiled
         // assignment (previously-assigned slots kept + new methods appended)

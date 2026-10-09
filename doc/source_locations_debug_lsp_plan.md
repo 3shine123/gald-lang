@@ -1,6 +1,6 @@
 # Nepa 源码位置、调试信息与 LSP 基础设施规划
 
-> 状态：规划中，尚未实现。本文把编译诊断、生成 C 的源位置、调试信息和未来 LSP 所需的位置信息统一规划；当前实现事实以 `doc/architecture.md` 为准。
+> 状态：**阶段 1–4 已实施**（`#line` 发射、`-g` 调试构建、`-np-map` sidecar 均已落地，见各阶段标注）；阶段 5–6 仍为规划。本文把编译诊断、生成 C 的源位置、调试信息和未来 LSP 所需的位置信息统一规划；当前实现事实以 `doc/architecture.md` 为准。
 
 ## 目标
 
@@ -23,8 +23,8 @@ LSP 不必等待 native debugger：它可直接消费 parser/CST/AST 和同一 `
 - CST、AST 的表达式、语句和声明主要保存预处理后 buffer 的 `line` / `col`，没有统一的文件 ID、结束位置或字节 offset。
 - `crates/cst/src/source_map.rs` 以逐行表把预处理展开行映射到 `(文件, 行)`；列位置不映射，导入来源也没有稳定 source ID。
 - Parser、binder、EH、defer、async、checker 等诊断已通过 pipeline 的 `translate_lines` 映射部分行号。
-- codegen 输出 C 时没有按 Nepa 节点切换 `#line`；CLI 把生成 C 通过 stdin 交给 Clang，clang 诊断容易指向 stdin/生成代码位置。
-- nepac 没有稳定的 debug build 选项来启用 Clang `-g` / `-O0`；架构文档当前记录“不生成 DWARF”。
+- codegen 已按 Nepa 节点边界发射 `#line`（阶段 2，默认开，`-fno-line-directives` 关闭）；CLI 把生成 C 通过 stdin 交给 Clang，clang 诊断指向 `.np`/`.nh` 源位置。
+- nepac 已有 `-g` 调试构建选项（传 `-g -O0` 给 C 编译器）；`-np-map` 可输出版本化 sidecar source map。
 - AST 降级会生成 ARC、EH、async、defer、pattern 等代码；单纯 `#line` 不能表达一条 Nepa 语句拆成多条 C 语句、变量位置或状态机映射。
 
 ## 设计原则
@@ -56,16 +56,20 @@ LSP 不必等待 native debugger：它可直接消费 parser/CST/AST 和同一 `
 
 验收：由 Nepa 生成的 C 编译错误和启用的 Clang warning 指向原始 Nepa 文件/行；用户可通过 `-rewrite-nepa` 检查生成 C 与 `#line` 边界。测试主文件、导入 `.np`、`.nh` 和 synthetic 代码。
 
-### 阶段 3：调试构建选项与 Clang DWARF
+### 阶段 3：调试构建选项与 Clang DWARF —— ✅ 已实施
 
-- nepac 提供明确的 debug 配置（建议 `-g`；debug preset 默认 `-g -O0`），并把参数一致地传给主 TU、额外 TU 和 C 编译器。
-- 保留用户显式优化设置的优先级；debug symbols 与优化级别分开控制，不能把 `-g` 永久等同于 `-O0`。
-- 确认当前 `-w` 行为不会在 debug/诊断工作流中吞掉用户希望看到的警告；是否调整 warning policy 单独决策。
-- 检查 `#line` 生成的 DWARF 在 LLDB 和 GDB 中显示 `.np` 文件名/行号。首版聚焦语句级停靠，不承诺所有局部变量都可见。
+- nepac 提供 `-g`：向 C 编译器传 `-g -O0`，一致地作用于主 TU、额外 TU（multi-TU 子进程转译）和 runtime.c。
+- `-g` 与优化级别分开传递（`-g` 不隐含用户 `-O`）；debug preset 固定 `-g -O0`。
+- `#line` + `-g` 下 LLDB 已验证显示 `.np` 文件名/行号；首版聚焦语句级停靠。
+- 回归：`cargo test --workspace` 与 `./test_all.sh` 全绿，golden 输出不变。
 
-### 阶段 4：稳定 source map 文件格式
+### 阶段 4：稳定 source map 文件格式 —— ✅ 已实施
 
-- 为需要调试/IDE 集成的构建提供 sidecar 输出（建议 `.np.map`，可显式开关），版本化 JSON 格式。
+- `-np-map` 在 `.np` 源旁落盘 `<input>.np.map`，版本化 JSON（`SOURCE_MAP_VERSION = 1`，schema 见 `crates/cst/src/source_map_file.rs`）。
+- 内容：`version` / `generator` / `primary_source` / `generated`（path + FNV-1a 内容哈希）/ `sources`（含各源文件内容哈希）/ `mappings`（生成 C 字节区间 + 行列 → 源行，`kind` 区分 source/synthetic，含 `synthetic` 标志）。
+- 接线：`main.rs`（`-np-map` 解析、落盘）→ `pipeline.np_map` → transpile 提取 → `pipeline.last_source_map` 回取。
+- `generated.path` 语义：`-rewrite-nepa` 记录真实 `.c` 路径；compile/run 模式 C 经 stdin 进编译器，记 `"<stdin>"`，由内容哈希锚定实际构建的 C 字节。
+- 已知边界：sidecar 只覆盖主 TU——multi-TU 模式下额外 TU 的生成 C 是链接后即删的临时文件，`-np-map` 有意不转发给它们。
 - 因为 TU 可能内联多个源文件，schema 使用 `sources[]`，而不是单一 `source` 字段。
 - 每个 mapping 至少包含生成 C 起止 offset/行列、Nepa 源文件 ID 与 span、节点/生成种类、synthetic 标记及可选 origin span。
 - 映射应描述 C 的实际字节范围，并提供 source content hash 或 build identity，防止 IDE 拿旧 map 对新 C。

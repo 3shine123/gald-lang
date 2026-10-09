@@ -5,5 +5,7 @@
 #![deny(dead_code)]
 pub mod cst;
 pub mod source_map;
+pub mod source_map_file;
 pub use cst::*;
 pub use source_map::*;
+pub use source_map_file::*;

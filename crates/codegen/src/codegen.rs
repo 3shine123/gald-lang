@@ -34,7 +34,7 @@ fn escape_line_path(p: &str) -> String {
     p.replace('\\', "\\\\").replace('"', "\\\"")
 }
 
-const SYNTHETIC_FILE: &str = "<nepa-generated>";
+pub(crate) const SYNTHETIC_FILE: &str = "<nepa-generated>";
 
 /// Emit a `#line` directive (at column 0) if the statement's source position
 /// differs from the last emitted one. No-op when line directives are off.

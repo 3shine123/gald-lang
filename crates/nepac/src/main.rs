@@ -809,6 +809,9 @@ fn main() {
         println!("  -fno-line-directives                 Disable #line emission: clang");
         println!("                                     diagnostics then report <stdin>");
         println!("                                     instead of .np/.nh locations");
+        println!("  -np-map                              Emit a versioned .np.map sidecar next");
+        println!("                                     to the .np source, mapping generated");
+        println!("                                     C lines back to .np/.nh sources");
         println!("  -fno-nepa-arc                        Disable ARC (MRC)");
         println!("  -ffreestanding                       Bare-metal/freestanding output");
         println!("                                     (no libc headers, no TLS, no bundled");
@@ -866,6 +869,7 @@ fn main() {
     let mut debug_symbols = false; // -g: emit DWARF via -g -O0 (plan 阶段 3)
     let mut nostdinc = false;    // strip system include paths (orthogonal flag)
     let mut no_comments = false; // readability comments in generated C (on by default)
+    let mut np_map = false;      // -np-map: emit a .np.map sidecar source map
     let mut shared = false;      // dynamic library output (-shared/-dynamiclib)
     let mut werror = false;
     let mut verbose = false;
@@ -1095,6 +1099,10 @@ fn main() {
             i += 1;
         } else if normalized == "-fno-line-directives" || normalized == "--fno-line-directives" {
             i += 1;
+        } else if normalized == "-np-map" || normalized == "--np-map" {
+            // Plan 阶段 4: emit the versioned sidecar source map.
+            np_map = true;
+            i += 1;
         } else if normalized.starts_with("-l") && normalized.len() > 2
             && normalized[2..].chars().next().map_or(false, |c| c.is_ascii_alphanumeric())
         {
@@ -1230,6 +1238,9 @@ fn main() {
     // generated C so clang diagnostics point back at the .np/.nh.
     // `-fno-line-directives` turns it off.
     pipeline.line_directives = !args.iter().any(|a| a == "-fno-line-directives" || a == "--fno-line-directives");
+    // `-np-map` (plan 阶段 4): the pipeline extracts the sidecar from the final
+    // generated C; the CLI decides where (and whether) it lands on disk.
+    pipeline.np_map = np_map;
 
     let c_code = match pipeline.transpile(&source, &input_path) {
         Ok(code) => code,
@@ -1314,6 +1325,44 @@ fn main() {
     // input and every extra TU — a mixed binary must not auto-link either.
     let foundation_impl_inlined = tu_imports_foundation_impl(&input_path)
         || extra_inputs.iter().any(|t| tu_imports_foundation_impl(t));
+
+    // Plan 阶段 4: write the versioned sidecar source map (.np.map) next to
+    // the .np source. The generated C's location differs per mode:
+    // -rewrite-nepa writes a real .c; compile/run pipe the C to the compiler
+    // through stdin (recorded as "<stdin>" — the content hash still ties the
+    // map to the exact C bytes that were built).
+    if np_map {
+        if let Some(mut map) = pipeline.last_source_map.take() {
+            map.generated.path = if mode == "rewrite" {
+                output.clone().unwrap_or_else(|| {
+                    if input_path.ends_with(".np") {
+                        input_path[..input_path.len() - 3].to_string() + ".c"
+                    } else {
+                        input_path.clone() + ".c"
+                    }
+                })
+            } else {
+                "<stdin>".to_string()
+            };
+            let sidecar_path = format!("{}.map", input_path);
+            if let Some(parent) = Path::new(&sidecar_path).parent() {
+                if !parent.as_os_str().is_empty() {
+                    let _ = fs::create_dir_all(parent);
+                }
+            }
+            match fs::write(&sidecar_path, map.to_json()) {
+                Ok(_) => {
+                    if verbose {
+                        eprintln!("[nepac] wrote source map {}", sidecar_path);
+                    }
+                }
+                Err(e) => {
+                    eprintln!("\x1b[1;31merror:\x1b[0m cannot write {}: {}", sidecar_path, e);
+                    std::process::exit(1);
+                }
+            }
+        }
+    }
 
     match mode {
         "rewrite" => {
