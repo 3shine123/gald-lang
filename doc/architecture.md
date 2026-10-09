@@ -1,4 +1,4 @@
-# Nepa 当前架构
+# Ovic 当前架构
 
 > 本文是当前架构的**唯一事实来源**，面向新贡献者。
 > 历史决策与迁移过程见：`doc/stable_slots_plan.md`（stable slots / multi-TU 迁移史）、`doc/arc_intern_uaf.md`（ARC intern UAF 修复记录）。
@@ -6,17 +6,17 @@
 
 ## 1. 编译流程
 
-Nepa 是 Objective-C 风格语法转译到 C99 的静态语言。`nepac` 的流水线（Rust，`crates/`）：
+Ovic 是 Objective-C 风格语法转译到 C99 的静态语言。`ovicc` 的流水线（Rust，`crates/`）：
 
 ```text
-.np/.nh 源文件
+.ov/.oh 源文件
   → 预处理（#import 内联、C 轨道分离）
   → lexer / parser → CST
   → elaborator（@interface/impl 匹配、协议合并）
   → binder（符号表、selector 注册、协议方法传播）
   → 各降级 pass（eh desugar → defer splice → pattern-switch → ARC 注入 → checker）
   → codegen → C99
-  → C 编译器（clang/gcc）→ .o → 链接 libnepa.a (+ libnepafoundation.a)
+  → C 编译器（clang/gcc）→ .o → 链接 libovic.a (+ libovicfoundation.a)
 ```
 
 要点：
@@ -24,25 +24,25 @@ Nepa 是 Objective-C 风格语法转译到 C99 的静态语言。`nepac` 的流�
 - **无运行时消息派发**——没有 `objc_msgSend`，全部方法是静态 vtable 派发，选择子在编译期解析为槽位索引。
 - checker 默认开启（协议一致性、类型兼容、格式串检查等）；`-fno-checker` 可关。
 - EH 默认后端 `checked`（见 §9）。
-- 链接期自动带上 `libnepa.a`（运行时）与 `libnepafoundation.a`（若找到，见 §7）。
+- 链接期自动带上 `libovic.a`（运行时）与 `libovicfoundation.a`（若找到，见 §7）。
 
-## 2. `.nh` / `.np` 语义
+## 2. `.oh` / `.ov` 语义
 
 | 扩展名 | 角色 | 说明 |
 |---|---|---|
-| `.nh` | Nepa 头文件 | 声明：`@interface`、`@protocol`、typedef、struct。只经 `#import` 内联，从不直接编译。 |
-| `.np` | Nepa 实现文件 | 定义：`@implementation`、函数、`int main`。两种用法：① **独立 translation unit 编译**（multi-TU 模式）；② 在 self-contained 模式下被 `#import` **内联**进主文件。 |
+| `.oh` | Ovic 头文件 | 声明：`@interface`、`@protocol`、typedef、struct。只经 `#import` 内联，从不直接编译。 |
+| `.ov` | Ovic 实现文件 | 定义：`@implementation`、函数、`int main`。两种用法：① **独立 translation unit 编译**（multi-TU 模式）；② 在 self-contained 模式下被 `#import` **内联**进主文件。 |
 
-`#import` 只对 `.nh`/`.np` 做 nepa 内联；`#include` 的 `.h`/`.c` 原样透传给 C 编译器。nepac 总是定义 `__NEPA__` 宏，供需要同时被纯 C 编译器使用的头文件做 `#ifdef` 分支。
+`#import` 只对 `.oh`/`.ov` 做 ovic 内联；`#include` 的 `.h`/`.c` 原样透传给 C 编译器。ovicc 总是定义 `__OVIC__` 宏，供需要同时被纯 C 编译器使用的头文件做 `#ifdef` 分支。
 
-`.nh` 头文件在 multi-TU 模式下**必须保留完整 struct 布局**（ivar 区）——因为 Nepa 是 C 超集，`@public` ivar 直访、struct 字段访问、成员函数指针调用都是合法用户代码，客户端 TU 需要完整布局，不能把 opaque struct 当默认规则。
+`.oh` 头文件在 multi-TU 模式下**必须保留完整 struct 布局**（ivar 区）——因为 Ovic 是 C 超集，`@public` ivar 直访、struct 字段访问、成员函数指针调用都是合法用户代码，客户端 TU 需要完整布局，不能把 opaque struct 当默认规则。
 
 ## 3. self-contained 与 multi-TU 的区别
 
 ### self-contained / unity mode
 
-```nepa
-#import <Foundation/Foundation.np>   // 自包含伞头：声明 + 实现全部内联
+```ovic
+#import <Foundation/Foundation.ov>   // 自包含伞头：声明 + 实现全部内联
 ```
 
 - Foundation 的实现被 `#import` 内联进你的 TU，**无需任何库**。
@@ -51,26 +51,26 @@ Nepa 是 Objective-C 风格语法转译到 C99 的静态语言。`nepac` 的流�
 
 ### precompiled Foundation / multi-TU mode（推荐工程模式）
 
-```nepa
-#import <Foundation/Foundation.nh>   // 纯声明伞头：零实现内联
+```ovic
+#import <Foundation/Foundation.oh>   // 纯声明伞头：零实现内联
 ```
 
 ```bash
-./tools/build-foundation-lib.sh                    # 构建一次 → libnepafoundation.a
-nepac app.np -o app                                # nepac 自动找到并链接库
+./tools/build-foundation-lib.sh                    # 构建一次 → libovicfoundation.a
+ovicc app.ov -o app                                # ovicc 自动找到并链接库
 # 或显式：
-nepac app.np -I include -L target/foundation -lnepafoundation -o app
+ovicc app.ov -I include -L target/foundation -lovicafoundation -o app
 ```
 
 - Foundation 只在库里存一份；你的 TU 只生成自己的代码 + 弱占位元数据。
-- 多个 TU 时用多输入：`nepac main.np lib.np -o app`（`.o`/`.a` 也可直接作输入）。
-- auto-link 规则：仅**纯声明客户端**自动链库；TU 内联了 Foundation 实现（`Foundation.np`，直接或经导入的 `.nh` 传递）时跳过，避免库的强 vtable 赢得弱合并而触发 `__sig` 中止。
+- 多个 TU 时用多输入：`ovicc main.ov lib.ov -o app`（`.o`/`.a` 也可直接作输入）。
+- auto-link 规则：仅**纯声明客户端**自动链库；TU 内联了 Foundation 实现（`Foundation.ov`，直接或经导入的 `.oh` 传递）时跳过，避免库的强 vtable 赢得弱合并而触发 `__sig` 中止。
 
 ## 4. owner / strong / weak metadata 规则（R2）
 
 「owner」= **该类的 `@implementation` 位于本 TU 的 main 文件**（不是经 `#import` 带进来的）。
 
-| TU 角色 | 生成的类元数据（vtable / meta vtable / `NEPA_CLASS_$_X` / getClass） |
+| TU 角色 | 生成的类元数据（vtable / meta vtable / `OVIC_CLASS_$_X` / getClass） |
 |---|---|
 | owner TU | **强符号**（真实表） |
 | 纯声明客户端 / 内联方 | **弱桩**（槽位保留，未实现的方法槽为 NULL） |
@@ -83,39 +83,39 @@ nepac app.np -I include -L target/foundation -lnepafoundation -o app
 
 ## 5. vtable 公共段、私有段与 `__sig`（R1/R3，已完成）
 
-每个类一个 uniform `struct nepa_vtable`（函数指针数组），布局分两段：
+每个类一个 uniform `struct ovic_vtable`（函数指针数组），布局分两段：
 
 ```text
-[公共段] 该类在 #import 展开后（即共享 .nh）声明的方法，字母序
+[公共段] 该类在 #import 展开后（即共享 .oh）声明的方法，字母序
 [私有段] 仅在本 TU main 文件出现的方法，字母序，追加在尾部
 ```
 
 - **R1**（字段顺序）：公共段内任意方法的槽位偏移在所有 TU 中一致；私有段只影响自己 TU 的尾部。
-- **私有方法**只能在 owner TU 内派发（跨 TU 没有槽位）——把要跨 TU 调的方法写进共享 `.nh`。
-- **R3**（`__sig` 校验）：启动期签名校验只覆盖**公共段**（本 TU 见到的声明集），允许尾部私有段差异。签名不一致（例如某 TU 的 `.nh` 过期）会大声 abort 并打印双方方法集，而不是静默读错槽位。类别新增协议通过 category TU 的幂等注册合并进 owner 的 `NPClass`；类别方法声明仍必须出现在共享 `.nh`。
+- **私有方法**只能在 owner TU 内派发（跨 TU 没有槽位）——把要跨 TU 调的方法写进共享 `.oh`。
+- **R3**（`__sig` 校验）：启动期签名校验只覆盖**公共段**（本 TU 见到的声明集），允许尾部私有段差异。签名不一致（例如某 TU 的 `.oh` 过期）会大声 abort 并打印双方方法集，而不是静默读错槽位。类别新增协议通过 category TU 的幂等注册合并进 owner 的 `NPClass`；类别方法声明仍必须出现在共享 `.oh`。
 - **R2**（实例归属）见 §4。三条均已落地并由 `tests/multi_tu/`（13 用例）守护。
 
 ## 6. class metadata：静态初始化
 
 - owner TU 通过**静态 `NPClass` 定义初始化**类元数据（编译期常量，`__data` 段），不依赖运行期构造调用。
-- `nepa_metaInit` 保留为**兼容路径的幂等回填**：仅 self-contained 单 TU 构建（`#import "*.np"` 伞形内联）中，弱合并后真正被执行的那份会补齐静态初始化没覆盖的部分。正常 owner / multi-TU 路径**不依赖**它。
+- `ovic_metaInit` 保留为**兼容路径的幂等回填**：仅 self-contained 单 TU 构建（`#import "*.ov"` 伞形内联）中，弱合并后真正被执行的那份会补齐静态初始化没覆盖的部分。正常 owner / multi-TU 路径**不依赖**它。
 
 ## 7. Foundation 构建方式
 
 预编译库由 `tools/build-foundation-lib.sh` 以**逐 TU wrapper** 方式构建：
 
-1. 对每个 Foundation 类实现（`NPObject.np` … `NPError.np`），脚本生成一个 wrapper TU = `#import <Foundation/Foundation.nh>`（声明面）+ 该 `.np` 全文（实现）；
-2. 逐个转译、C 编译成 `.o`——每个 wrapper 的 main 文件就是该 `.np` 本身，所以 R2 判定每个类都是 owner，元数据为**强符号**；
-3. `ar` 归档为 `libnepafoundation.a`，`nm` 校验强符号（9/9）。
+1. 对每个 Foundation 类实现（`NPObject.ov` … `NPError.ov`），脚本生成一个 wrapper TU = `#import <Foundation/Foundation.oh>`（声明面）+ 该 `.ov` 全文（实现）；
+2. 逐个转译、C 编译成 `.o`——每个 wrapper 的 main 文件就是该 `.ov` 本身，所以 R2 判定每个类都是 owner，元数据为**强符号**；
+3. `ar` 归档为 `libovicfoundation.a`，`nm` 校验强符号（9/9）。
 
-细节：伞头 `Foundation.np` 不是类，被构建脚本显式跳过（归档它会重复内联全部实现）；库经 nepac auto-link 自动链接（查找顺序：二进制旁 → `target/foundation` → `/opt/nepa/lib` → `/usr/local/lib/nepa` → 用户 `-L`），仅对纯声明客户端生效；`-ffreestanding`、shared 模式、显式 `-lnepafoundation` 均抑制自动链接。
+细节：伞头 `Foundation.ov` 不是类，被构建脚本显式跳过（归档它会重复内联全部实现）；库经 ovicc auto-link 自动链接（查找顺序：二进制旁 → `target/foundation` → `/opt/ovic/lib` → `/usr/local/lib/ovic` → 用户 `-L`），仅对纯声明客户端生效；`-ffreestanding`、shared 模式、显式 `-lovicafoundation` 均抑制自动链接。
 
 ## 8. 泛型：单态化为主，裸拼写擦除兼容
 
 - **主模型是编译期单态化**：`Box<T>` / `NPArray<T>` / `NPDictionary<K,V>` 等泛型类按使用点实例化（专属结构体、方法副本、vtable/元数据，`T` 以 `TypePrim::Param` 哨兵按参数名替换）；checker 把接收者的 `type_args` 代入方法签名做元素类型检查。
 - **裸容器拼写保留擦除兼容行为**：不带实参的 `NPArray`（无 `<...>`）按 `id` 擦除处理，行为与历史版本一致、零迁移；裸 → 特化赋值会发 warning（`-Werror` 可升级），特化 → 裸静默。
 - `@[...]` 字面量全元素同型时推断为 `NPArray<X>`，混合回退裸 `NPArray`。
-- **协议约束（`T : Proto`）**：类级 bound，编译期强制。接受 ObjC 拼写 `T : id<Summable>`（剥 `id<>` 按裸协议名存储）、裸名 `T : Summable`、类指针 bound `T : NSObject *`。checker 在**显式特化的实例化点**（变量声明）验证实参：违约报 error（一次报齐）；逃逸通道——`id`/`instancetype`/嵌套类型参数槽/未解析类（forward 壳）/无法解析的 bound 名——一律放行（漏报优于误报）。继承规则：子类必须重申父类 bound（显式拼写，`.nh` 读者看到全部约束）、不得弱化（重申的 bound 须相等或更具体：协议在父 bound 继承链上 / 类是父 bound 子类）；实例化沿类链检查可证明位置的祖先 bound。裸拼写（无 type_args）永不触发（擦除兼容）；`-fno-checker` 关闭；**bound 不进 codegen，golden 输出逐字节不变**。不支持方法级约束。设计定稿见 `doc/generic_bounds_plan.md`。
+- **协议约束（`T : Proto`）**：类级 bound，编译期强制。接受 ObjC 拼写 `T : id<Summable>`（剥 `id<>` 按裸协议名存储）、裸名 `T : Summable`、类指针 bound `T : NSObject *`。checker 在**显式特化的实例化点**（变量声明）验证实参：违约报 error（一次报齐）；逃逸通道——`id`/`instancetype`/嵌套类型参数槽/未解析类（forward 壳）/无法解析的 bound 名——一律放行（漏报优于误报）。继承规则：子类必须重申父类 bound（显式拼写，`.oh` 读者看到全部约束）、不得弱化（重申的 bound 须相等或更具体：协议在父 bound 继承链上 / 类是父 bound 子类）；实例化沿类链检查可证明位置的祖先 bound。裸拼写（无 type_args）永不触发（擦除兼容）；`-fno-checker` 关闭；**bound 不进 codegen，golden 输出逐字节不变**。不支持方法级约束。设计定稿见 `doc/generic_bounds_plan.md`。
 
 ## 9. 异常处理：checked 默认，legacy 回退
 
@@ -128,7 +128,7 @@ nepac app.np -I include -L target/foundation -lnepafoundation -o app
 
 - **legacy EH 跨帧泄漏**：见 §9；需要跨帧异常安全用默认 checked。
 - **裸泛型只有 warning**：裸容器拼写是擦除兼容行为（无元素类型检查），真正的元素检查需要显式 type args。
-- 类别追加协议要求类别方法声明位于共享 `.nh`；类别 TU 通过启动期注册补入 owner metadata（详见 `tests/multi_tu/16_category_protocol`）。
+- 类别追加协议要求类别方法声明位于共享 `.oh`；类别 TU 通过启动期注册补入 owner metadata（详见 `tests/multi_tu/16_category_protocol`）。
 - **泛型类方法返回类型的实例化**不完整（`ROADMAP.md`）。
 - **无 debug info**（不生成 DWARF）。
 
@@ -137,56 +137,56 @@ nepac app.np -I include -L target/foundation -lnepafoundation -o app
 ## 11. 推荐命令示例
 
 ```bash
-# 构建 nepac（Rust，debug 二进制在 target/debug/nepac）
+# 构建 ovicc（Rust，debug 二进制在 target/debug/ovicc）
 cargo build --release
 
 # 单测 + 全量集成测试（test_all.sh 是 test_all.py 的并行包装）
 cargo test --workspace
 ./test_all.sh -j4
 
-# 看 nepac 生成的 C（排查第一步）
-nepac -rewrite-nepa app.np -o app.c
+# 看 ovicc 生成的 C（排查第一步）
+ovicc -rewrite-ovic app.ov -o app.c
 
 # self-contained 模式（单文件、快速试验）
-nepac run hello.np
+ovicc run hello.ov
 
-# multi-TU（多个 nepa 源 + .o/.a 混合输入）
-nepac main.np lib.np -o app
+# multi-TU（多个 ovic 源 + .o/.a 混合输入）
+ovicc main.ov lib.ov -o app
 
 # 预编译 Foundation 库（推荐工程模式）
 ./tools/build-foundation-lib.sh      # 构建一次
-nepac app.np -o app                  # 纯声明客户端：auto-link
+ovicc app.ov -o app                  # 纯声明客户端：auto-link
 
 # 其他常用
-nepac -trace-refcount app.np         # 引用计数静态追踪
-nepac app.np -emit-bridge-header app.h -o app.c   # C 桥接头
-nepac -ffreestanding kernel.np       # 裸机（自备运行时）
+ovicc -trace-refcount app.ov         # 引用计数静态追踪
+ovicc app.ov -emit-bridge-header app.h -o app.c   # C 桥接头
+ovicc -ffreestanding kernel.ov       # 裸机（自备运行时）
 ```
 
 ## 12. KVC 与 NPPredicate（谓词 / 过滤）
 
-谓词引擎**全部在 Foundation 库的 C 里**（`NPPredicate.np`）；nepac 从不解析格式串，它只负责发射键值访问表。
+谓词引擎**全部在 Foundation 库的 C 里**（`NPPredicate.ov`）；ovicc 从不解析格式串，它只负责发射键值访问表。
 
-### KVC 访问表（`NEPA_KVC_$_X`）
+### KVC 访问表（`OVIC_KVC_$_X`）
 
-- **门控**：TU 的展开导入集中出现 `NPPredicate` 时才发射（`#import <Foundation/NPPredicate.nh>`，或经 `NPArray.nh` / `NPSet.nh` 传递性带入）。
+- **门控**：TU 的展开导入集中出现 `NPPredicate` 时才发射（`#import <Foundation/NPPredicate.oh>`，或经 `NPArray.oh` / `NPSet.oh` 传递性带入）。
 - **归属**：表随类元数据走 —— owner TU 发**强**表（写进静态 `NPClass` 的 `.kvc_entries`），纯声明客户端发弱桩，链接期强表胜出；与 §4 的 R2 是同一套合并规则（`tests/multi_tu/13_kvc_predicate` 守护）。
 - **条目 = 零参实例 getter**（ObjC getter 约定）：排除运行时/基础设施方法（`init`/`copy`/`retain`/`release`/`class`/`description`/`isEqual:`/`hash`/`self` …），私有方法只在 owner TU 中出现。
 - **包装分类**（按声明返回类型；判据先看指针拼写）：
   - 内建标量 → 走 `NPNumber` 装箱的包装 getter；
   - `id`/`instancetype`/指向非内建类型的指针 → 对象路径（直接返回 `id`）；
   - **按值 struct/union（如 `NPRange`）与指向内建类型的指针（`int *`/`char *`/`void *`）不发表条目** —— 前者 `(id)` 转换非法，后者会把指针当整数装箱（`-Wint-conversion`）；这类键保持未注册，查键按"未命中"处理。
-- **查键**：`nepa_kvc_value(receiver, "key")` 按点号分段走链，任一段未命中即返回 `NULL`。`-valueForKey:` 对未命中**大声 abort**；谓词求值路径把未命中当 `nil`（比较为假、`= nil` 为真）——不会静默误命中。
-- self-contained 伞头构建中 `nepa_metaInit` **幂等回填** `.kvc_entries`（§6）；owner / multi-TU 路径不依赖它。
+- **查键**：`ovic_kvc_value(receiver, "key")` 按点号分段走链，任一段未命中即返回 `NULL`。`-valueForKey:` 对未命中**大声 abort**；谓词求值路径把未命中当 `nil`（比较为假、`= nil` 为真）——不会静默误命中。
+- self-contained 伞头构建中 `ovic_metaInit` **幂等回填** `.kvc_entries`（§6）；owner / multi-TU 路径不依赖它。
 
 ### NPPredicate DSL
 
-格式串**运行时**解析，支持：比较 `= == != <> < > <= >=`；连接 `AND && OR || NOT !`；字符串 `BEGINSWITH ENDSWITH CONTAINS LIKE MATCHES`（`[c]` 忽略大小写、`[d]` 接受并忽略）；`IN {...}` 与 `BETWEEN {a, b}`（聚合字面量同时接受数字与引号字符串）；量词 `ANY` / `ALL` / `NONE <数组键>`，其中**元素是隐式主语**（`ANY tags = 'dev'`、`ANY tags LIKE '*dev*'`）。`%@` 占位符在解析前替换，`predicateFormat` 回读的是替换后的串。完整语法与语义以 `include/Foundation/NPPredicate.nh` 为准。
+格式串**运行时**解析，支持：比较 `= == != <> < > <= >=`；连接 `AND && OR || NOT !`；字符串 `BEGINSWITH ENDSWITH CONTAINS LIKE MATCHES`（`[c]` 忽略大小写、`[d]` 接受并忽略）；`IN {...}` 与 `BETWEEN {a, b}`（聚合字面量同时接受数字与引号字符串）；量词 `ANY` / `ALL` / `NONE <数组键>`，其中**元素是隐式主语**（`ANY tags = 'dev'`、`ANY tags LIKE '*dev*'`）。`%@` 占位符在解析前替换，`predicateFormat` 回读的是替换后的串。完整语法与语义以 `include/Foundation/NPPredicate.oh` 为准。
 
 ### 宿主过滤 API
 
-`NPArray -filteredArrayUsingPredicate:` / `-indexOfObjectMatchingPredicate:`、`NPMutableArray -filterUsingPredicate:`、`NPSet -filteredArrayUsingPredicate:`（Set 子类经 `NPSet.nh` 公共段继承该槽位）；`nil` 谓词 = 恒等（不过滤）。这些方法落在**公共段**，新库因此带新的 `__sig`：升级后需重建 `libnepafoundation.a` 并重编客户端；不新增 ivar、不改存储布局。
+`NPArray -filteredArrayUsingPredicate:` / `-indexOfObjectMatchingPredicate:`、`NPMutableArray -filterUsingPredicate:`、`NPSet -filteredArrayUsingPredicate:`（Set 子类经 `NPSet.oh` 公共段继承该槽位）；`nil` 谓词 = 恒等（不过滤）。这些方法落在**公共段**，新库因此带新的 `__sig`：升级后需重建 `libovicfoundation.a` 并重编客户端；不新增 ivar、不改存储布局。
 
 ### 回归
 
-`tests/predicate_filter_test.np`（自检 38 项：DSL / 占位符 / 量词 / KVC 类链与未命中 / 宿主 API）+ `tests/multi_tu/13_kvc_predicate`（跨 TU 强弱表合并）+ `tests/nil_messaging_test.np`（按值 struct 返回不得发表条目）。
+`tests/predicate_filter_test.ov`（自检 38 项：DSL / 占位符 / 量词 / KVC 类链与未命中 / 宿主 API）+ `tests/multi_tu/13_kvc_predicate`（跨 TU 强弱表合并）+ `tests/nil_messaging_test.ov`（按值 struct 返回不得发表条目）。

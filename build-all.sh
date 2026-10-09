@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# build-all.sh — 一键交叉编译 nepac 到 8 个目标平台
+# build-all.sh — 一键交叉编译 ovicc 到 8 个目标平台
 # 依赖：zig 0.14+（brew install zig），
 #       rustup 管理的 Rust，
 #       Windows 目标另需 cargo-zigbuild（cargo install cargo-zigbuild）
@@ -80,7 +80,7 @@ for _arch in x86_64 i386; do
     for _lib in devstat procstat kvm memstat util rt execinfo; do
         _stub="$_dir/stub_$_lib.c"
         if [ ! -f "$_stub" ]; then
-            echo "void nepa_stub_${_lib}(void) {}" > "$_stub"
+            echo "void ovic_stub_${_lib}(void) {}" > "$_stub"
             _ztarget="${_arch}-freebsd-none"
             [ "$_arch" = "i386" ] && _ztarget="x86-freebsd-none"
             zig cc -target "$_ztarget" -shared -fPIC -o "$_dir/lib$_lib.so" "$_stub" 2>/dev/null
@@ -134,7 +134,7 @@ for t in "${TARGETS[@]}"; do
         aarch64-apple-darwin) out="target/release" ;;   # 宿主目标
         *) out="target/$t/release" ;;
     esac
-    # 全量头文件（libFire、nepa runtime 等）打包到 release 目录
+    # 全量头文件（libFire、ovic runtime 等）打包到 release 目录
     mkdir -p "$out/include"
     cp -r include/. "$out/include/"
     # 拷贝 install.sh
@@ -152,9 +152,9 @@ echo ""
 echo "========== Build artifacts =========="
 for t in "${TARGETS[@]}"; do
     case "$t" in
-        aarch64-apple-darwin)  bin="target/release/nepac" ;;  # 宿主目标
-        x86_64-pc-windows-gnu) bin="target/$t/release/nepac.exe" ;;
-        *) bin="target/$t/release/nepac" ;;
+        aarch64-apple-darwin)  bin="target/release/ovicc" ;;  # 宿主目标
+        x86_64-pc-windows-gnu) bin="target/$t/release/ovicc.exe" ;;
+        *) bin="target/$t/release/ovicc" ;;
     esac
     [ -f "$bin" ] && echo "$(ls -lh "$bin" | awk '{print $5}')  $bin" && file "$bin" | sed 's/.*: //' && echo ""
 done
@@ -165,21 +165,21 @@ for t in "${TARGETS[@]}"; do
         aarch64-apple-darwin) out="target/release" ;;
         *) out="target/$t/release" ;;
     esac
-    [ -f "$out/install.sh" ] && echo "  $out/  ($(du -sh "$out" | awk '{print $1}')) — 运行 ./install.sh 安装到 /opt/nepa"
+    [ -f "$out/install.sh" ] && echo "  $out/  ($(du -sh "$out" | awk '{print $1}')) — 运行 ./install.sh 安装到 /opt/ovic"
 done
 
 # ── 打包成压缩包（放到 target/ 根目录） ──
 pack_name() {
     case "$1" in
-        aarch64-apple-darwin)       echo "nepa-aarch64-apple-darwin" ;;
-        x86_64-apple-darwin)        echo "nepa-x86_64-apple-darwin" ;;
-        x86_64-unknown-linux-musl)  echo "nepa-x86_64-unknown-linux-musl" ;;
-        aarch64-unknown-linux-musl) echo "nepa-aarch64-unknown-linux-musl" ;;
-        x86_64-unknown-freebsd)     echo "nepa-x86_64-unknown-freebsd" ;;
-        i686-unknown-freebsd)       echo "nepa-i686-unknown-freebsd" ;;
-        x86_64-unknown-netbsd)      echo "nepa-x86_64-unknown-netbsd" ;;
-        x86_64-pc-windows-gnu)      echo "nepa-x86_64-pc-windows-gnu" ;;
-        *) echo "nepa-$1" ;;
+        aarch64-apple-darwin)       echo "ovic-aarch64-apple-darwin" ;;
+        x86_64-apple-darwin)        echo "ovic-x86_64-apple-darwin" ;;
+        x86_64-unknown-linux-musl)  echo "ovic-x86_64-unknown-linux-musl" ;;
+        aarch64-unknown-linux-musl) echo "ovic-aarch64-unknown-linux-musl" ;;
+        x86_64-unknown-freebsd)     echo "ovic-x86_64-unknown-freebsd" ;;
+        i686-unknown-freebsd)       echo "ovic-i686-unknown-freebsd" ;;
+        x86_64-unknown-netbsd)      echo "ovic-x86_64-unknown-netbsd" ;;
+        x86_64-pc-windows-gnu)      echo "ovic-x86_64-pc-windows-gnu" ;;
+        *) echo "ovic-$1" ;;
     esac
 }
 
@@ -198,14 +198,14 @@ for t in "${TARGETS[@]}"; do
     mkdir -p "$staging"
     # 只打包必要内容：二进制 + install.sh + 静态库 + 头文件 + 补全脚本
     if [ "$is_win" = 1 ]; then
-        cp "$out/nepac.exe" "$staging/nepac.exe"
+        cp "$out/ovicc.exe" "$staging/ovicc.exe"
     else
-        cp "$out/nepac" "$staging/nepac"
+        cp "$out/ovicc" "$staging/ovicc"
     fi
     cp "$out/install.sh" "$staging/"
     chmod +x "$staging/install.sh"
     cp "$out/install.ps1" "$staging/"
-    [ -f "$out/libnepa.a" ] && cp "$out/libnepa.a" "$staging/"
+    [ -f "$out/libovic.a" ] && cp "$out/libovic.a" "$staging/"
     cp -r "$out/include" "$staging/include"
     [ -d "$out/completions" ] && cp -r "$out/completions" "$staging/completions"
     find "$staging" -name ".DS_Store" -delete

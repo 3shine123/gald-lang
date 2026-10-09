@@ -1,0 +1,36 @@
+// test: NPObject basic lifecycle
+#include <stdio.h>
+#import <Foundation/Foundation.ov>
+
+@interface Counter : NPObject {
+    @public
+    int count;
+}
+- (id)init;
+- (int)increment;
+@end
+
+@implementation Counter
+- (id)init {
+    self = [super init];
+    if (self) count = 0;
+    return self;
+}
+- (int)increment {
+    count++;
+    return count;
+}
+@end
+
+int main() {
+    @autoreleasepool {
+        Counter *c = [[Counter alloc] init];
+        printf("init: %d\n", c->count);
+        int v1 = [c increment];
+        int v2 = [c increment];
+        printf("after 2 increments: %d\n", v2);
+        [c release];
+    }
+    printf("NPObject lifecycle OK\n");
+    return 0;
+}

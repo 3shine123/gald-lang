@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # install.sh — 本平台安装脚本（由 build-all.sh 自动复制到每个平台的 target/<triple>/release/ 下）
 # 用法：./install.sh [PREFIX] [SYSTEM_INC]
-#   默认目录：Linux/Darwin → /opt/nepa ；系统头文件 → /usr/local/include
+#   默认目录：Linux/Darwin → /opt/ovic ；系统头文件 → /usr/local/include
 # 检测系统语言，中文环境显示中文，其他环境显示英语
 set -euo pipefail
 
@@ -16,19 +16,19 @@ else
 fi
 
 # ── 二进制名 ──
-BIN="nepac"
+BIN="ovicc"
 
 # ── 默认安装前缀 ──
-PREFIX="${1:-/opt/nepa}"
+PREFIX="${1:-/opt/ovic}"
 SYSTEM_INC="${2:-/usr/local/include}"
 
 # ── 文案 ──
 if [ "$I18N" = "zh" ]; then
-    MSG_TITLE="Nepa 安装包"
+    MSG_TITLE="Ovic 安装包"
     MSG_INSTALL_DIR="安装目录"
     MSG_LIB="静态库"
     MSG_INC="头文件"
-    MSG_SYS_INC="系统头文件（Foundation / nepa runtime）"
+    MSG_SYS_INC="系统头文件（Foundation / ovic runtime）"
     MSG_SYS_INC_SKIP="无写入权限，跳过系统头文件安装（可用 sudo 重试）"
     MSG_DONE="安装完成"
     MSG_PATH="如需在 PATH 使用"
@@ -41,11 +41,11 @@ if [ "$I18N" = "zh" ]; then
     MSG_AUTOCOMP="自动安装 Shell 补全"
     MSG_COMP_SKIP="跳过补全安装"
 else
-    MSG_TITLE="Nepa Installer"
+    MSG_TITLE="Ovic Installer"
     MSG_INSTALL_DIR="Install directory"
     MSG_LIB="library"
     MSG_INC="headers"
-    MSG_SYS_INC="System headers (Foundation / nepa runtime)"
+    MSG_SYS_INC="System headers (Foundation / ovic runtime)"
     MSG_SYS_INC_SKIP="no write permission, skipped (retry with sudo)"
     MSG_DONE="Installation complete"
     MSG_PATH="To use from PATH, run"
@@ -67,24 +67,24 @@ echo ""
 install -d "$PREFIX/bin" "$PREFIX/lib" "$PREFIX/include"
 
 # 二进制
-install -m 755 "$BUNDLE/$BIN" "$PREFIX/bin/nepac"
+install -m 755 "$BUNDLE/$BIN" "$PREFIX/bin/ovicc"
 
 # 静态库
-if [ -f "$BUNDLE/libnepa.a" ]; then
-    install -m 644 "$BUNDLE/libnepa.a" "$PREFIX/lib/libnepa.a"
-    echo "    ${MSG_LIB}:  $PREFIX/lib/libnepa.a"
+if [ -f "$BUNDLE/libovic.a" ]; then
+    install -m 644 "$BUNDLE/libovic.a" "$PREFIX/lib/libovic.a"
+    echo "    ${MSG_LIB}:  $PREFIX/lib/libovic.a"
 fi
 
 # 头文件（libVec<...>、runtime.h 等）
 cp -r "$BUNDLE/include/." "$PREFIX/include/"
 echo "    ${MSG_INC}:   $PREFIX/include/"
 
-# 系统头文件：Foundation + nepa runtime → 系统 include 目录
-if [ -d "$BUNDLE/include/Foundation" ] && [ -d "$BUNDLE/include/nepa" ]; then
-    if mkdir -p "$SYSTEM_INC/Foundation" "$SYSTEM_INC/nepa" 2>/dev/null; then
+# 系统头文件：Foundation + ovic runtime → 系统 include 目录
+if [ -d "$BUNDLE/include/Foundation" ] && [ -d "$BUNDLE/include/ovic" ]; then
+    if mkdir -p "$SYSTEM_INC/Foundation" "$SYSTEM_INC/ovic" 2>/dev/null; then
         cp -r "$BUNDLE/include/Foundation/." "$SYSTEM_INC/Foundation/"
-        cp -r "$BUNDLE/include/nepa/." "$SYSTEM_INC/nepa/"
-        echo "    ${MSG_SYS_INC}: $SYSTEM_INC/{Foundation,nepa}/"
+        cp -r "$BUNDLE/include/ovic/." "$SYSTEM_INC/ovic/"
+        echo "    ${MSG_SYS_INC}: $SYSTEM_INC/{Foundation,ovic}/"
     else
         echo "    ${MSG_SYS_INC}: ${MSG_SYS_INC_SKIP}"
     fi
@@ -92,20 +92,20 @@ fi
 
 echo ""
 echo "========== ${MSG_DONE} =========="
-echo "  binary:  $PREFIX/bin/nepac"
+echo "  binary:  $PREFIX/bin/ovicc"
 echo "  headers: $PREFIX/include/"
-echo "  system:  $SYSTEM_INC/{Foundation,nepa}/"
+echo "  system:  $SYSTEM_INC/{Foundation,ovic}/"
 
-# ── Shell 补全：复制到 $PREFIX/share/nepac/completions/ ──
+# ── Shell 补全：复制到 $PREFIX/share/ovicc/completions/ ──
 if [ -d "$BUNDLE/completions" ]; then
-    install -d "$PREFIX/share/nepac/completions"
-    cp -r "$BUNDLE/completions/." "$PREFIX/share/nepac/completions/"
-    echo "  ${MSG_COMP}: $PREFIX/share/nepac/completions/"
+    install -d "$PREFIX/share/ovicc/completions"
+    cp -r "$BUNDLE/completions/." "$PREFIX/share/ovicc/completions/"
+    echo "  ${MSG_COMP}: $PREFIX/share/ovicc/completions/"
 fi
 
 # ── 自动把补全脚本装进当前用户的 shell 并注册 ──
-if [ -d "$PREFIX/share/nepac/completions" ]; then
-    COMP_DIR="$PREFIX/share/nepac/completions"
+if [ -d "$PREFIX/share/ovicc/completions" ]; then
+    COMP_DIR="$PREFIX/share/ovicc/completions"
     printf "\n==> %s\n" "$MSG_AUTOCOMP"
     if [ "$I18N" = "zh" ]; then
         printf "  是否自动安装补全到你的 shell？[Y/n] "
@@ -120,40 +120,40 @@ if [ -d "$PREFIX/share/nepac/completions" ]; then
         if command -v zsh >/dev/null 2>&1; then
             ZCOMP="$HOME/.zsh/completions"
             mkdir -p "$ZCOMP"
-            cp -f "$COMP_DIR/_nepac" "$ZCOMP/_nepac"
+            cp -f "$COMP_DIR/_ovicc" "$ZCOMP/_ovicc"
             # 在 ~/.zshrc 里注册 fpath（若未注册）
             if [ -f "$HOME/.zshrc" ]; then
                 LINE="fpath=($ZCOMP \$fpath)"
                 if ! grep -qF "$ZCOMP" "$HOME/.zshrc"; then
                     {
                         echo ""
-                        echo "# nepac completion (install.sh auto-added)"
+                        echo "# ovicc completion (install.sh auto-added)"
                         echo "$LINE"
                     } >> "$HOME/.zshrc"
                 fi
             fi
-            echo "  zsh: $ZCOMP/_nepac  (restart zsh or run: source ~/.zshrc)"
+            echo "  zsh: $ZCOMP/_ovicc  (restart zsh or run: source ~/.zshrc)"
         fi
 
         # fish
         if command -v fish >/dev/null 2>&1; then
             FDIR="$HOME/.config/fish/completions.d"
             mkdir -p "$FDIR"
-            cp -f "$COMP_DIR/nepac.fish" "$FDIR/nepac.fish"
-            echo "  fish: $FDIR/nepac.fish"
+            cp -f "$COMP_DIR/ovicc.fish" "$FDIR/ovicc.fish"
+            echo "  fish: $FDIR/ovicc.fish"
         fi
 
         # bash
         if [ -n "${BASH_VERSION:-}" ] || command -v bash >/dev/null 2>&1; then
             BCOMP="$HOME/.bash_completion"
             mkdir -p "$BCOMP"
-            cp -f "$COMP_DIR/nepac.bash" "$BCOMP/nepac.bash"
+            cp -f "$COMP_DIR/ovicc.bash" "$BCOMP/ovicc.bash"
             if [ -f "$HOME/.bashrc" ]; then
-                if ! grep -qF "nepac.bash" "$HOME/.bashrc"; then
-                    echo "source \"$BCOMP/nepac.bash\"" >> "$HOME/.bashrc"
+                if ! grep -qF "ovicc.bash" "$HOME/.bashrc"; then
+                    echo "source \"$BCOMP/ovicc.bash\"" >> "$HOME/.bashrc"
                 fi
             fi
-            echo "  bash: $BCOMP/nepac.bash"
+            echo "  bash: $BCOMP/ovicc.bash"
         fi
         ;;
     *) echo "  ${MSG_COMP_SKIP}" ;;

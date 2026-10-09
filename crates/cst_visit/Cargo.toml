@@ -1,7 +1,7 @@
 [package]
-name = "nepa-cst-visit"
+name = "ovic-cst-visit"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-nepa-cst = { path = "../cst" }
+ovic-cst = { path = "../cst" }

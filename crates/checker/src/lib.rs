@@ -3,9 +3,9 @@
 // than rot unnoticed. Mark intentional exceptions with #[allow(dead_code)]
 // and a comment saying who will use it.
 #![deny(dead_code)]
-use nepa_ast::ast::*;
-use nepa_cst::{Diagnostic, Nullability, Severity, TagKind, TypePrim, CstParam};
-use nepa_symbol::*;
+use ovic_ast::ast::*;
+use ovic_cst::{Diagnostic, Nullability, Severity, TagKind, TypePrim, CstParam};
+use ovic_symbol::*;
 use std::collections::HashMap;
 
 /// What kind of value a printf-style conversion consumes. Module-level so
@@ -26,7 +26,7 @@ enum FormatArgKind {
     Ptr,
 }
 
-/// Type checker for Nepa programs.
+/// Type checker for Ovic programs.
 /// Validates types and reports type errors.
 pub struct Checker {
     pub symtab: Option<SymbolTable>,
@@ -61,10 +61,10 @@ pub struct Checker {
     pub method_params: HashMap<String, Vec<Option<AstType>>>,
     /// Class name → (selector → param types). Receiver-class-aware signature
     /// lookup: two classes may declare the same selector with different param
-    /// types (tt.np's `objectForKey:(const char *)` vs NPDictionary's
+    /// types (tt.ov's `objectForKey:(const char *)` vs NPDictionary's
     /// `objectForKey:(K)key`); the global selector-keyed `method_params` is
     /// last-writer-wins and clobbers one of them, turning a valid send into a
-    /// false positive (probe: NPError.np `[_userInfo objectForKey:@"…"]`).
+    /// false positive (probe: NPError.ov `[_userInfo objectForKey:@"…"]`).
     /// The MsgSend arm consults this table first and only falls back to the
     /// global one when the receiver's class is unknown.
     pub method_params_by_class: HashMap<String, HashMap<String, Vec<Option<AstType>>>>,
@@ -80,7 +80,7 @@ pub struct Checker {
     /// type, not erased `id`.
     pub method_returns: HashMap<String, Option<AstType>>,
     /// Translates flattened inline-buffer lines back to (file, source line).
-    pub source_map: Option<nepa_cst::source_map::SourceMap>,
+    pub source_map: Option<ovic_cst::source_map::SourceMap>,
     /// Function name → param types (from AST function declarations).
     pub function_params: HashMap<String, Vec<Option<AstType>>>,
     /// Selector → is_class_method (from AST declarations), used to reject
@@ -99,7 +99,7 @@ pub struct Checker {
     /// Names declared as locals/params inside the current method body. Used to
     /// detect when a local `self` shadows the implicit class-method self.
     pub shadowed_locals: Vec<String>,
-    /// Struct tags whose `==`/`!=` were rewritten to `nepa_struct_eq_<tag>`
+    /// Struct tags whose `==`/`!=` were rewritten to `ovic_struct_eq_<tag>`
     /// calls during checking. The pipeline passes this to codegen, which
     /// emits the per-struct comparison functions on demand (values-struct
     /// equality is a generated function because C forbids `a == b` on
@@ -267,7 +267,7 @@ impl Checker {
     }
 
     /// Does this diagnostic's line come from a Foundation source file
-    /// (include/Foundation/*.np)? The selector-visibility check stays
+    /// (include/Foundation/*.ov)? The selector-visibility check stays
     /// silent there — umbrella inlining plus our own sources made every
     /// report from that path noise.
     fn is_foundation_source(&self, line: usize) -> bool {
@@ -438,7 +438,7 @@ impl Checker {
     /// Does EVERY declaration of `selector` agree on a plain C string
     /// (`char *` pointer) parameter at position `idx`? False when any
     /// declaration disagrees or has no such param — the conservative
-    /// direction: mixed declarations (tt.np's `objectForKey:(const char *)`
+    /// direction: mixed declarations (tt.ov's `objectForKey:(const char *)`
     /// vs NPDictionary's `objectForKey:(K)key`) must not turn a valid send
     /// into a false positive, same discipline as `method_kinds`.
     fn selector_param_all_cstr(&self, selector: &str, idx: usize) -> bool {
@@ -875,18 +875,18 @@ impl Checker {
     ];
 
     /// Runtime primitives whose C contract is nil-safe (`if (!obj) return;` /
-    /// `return NULL;` — verified in runtime.c: `nepa_release` :222,
-    /// `nepa_retain` :214, `nepa_autorelease` :246). A nullable argument to
+    /// `return NULL;` — verified in runtime.c: `ovic_release` :222,
+    /// `ovic_retain` :214, `ovic_autorelease` :246). A nullable argument to
     /// these is the documented calling convention, not a bug: ARC's scope-end
     /// injection releases locals the analyzer cannot prove non-nil, and
-    /// release-before-nil is a normal MRC idiom. A nepa-visible `nonnull`
+    /// release-before-nil is a normal MRC idiom. A ovic-visible `nonnull`
     /// declaration of one is a lie, and the nullability transfer check refuses
     /// to enforce it (enforcing it would make every ARC program with a
     /// nullable local fail to compile).
     const NIL_SAFE_RUNTIME_FNS: &[&str] = &[
-        "nepa_release",
-        "nepa_retain",
-        "nepa_autorelease",
+        "ovic_release",
+        "ovic_retain",
+        "ovic_autorelease",
     ];
 
     /// Extract printf-style conversion characters from a format-string literal,
@@ -1119,7 +1119,7 @@ impl Checker {
                 }
                 // @property synthesizes a getter `prop` and a setter
                 // `setProp:` — register them so the selector-visibility check
-                // doesn't reject legal property sends (tt.np's `node.nextNode`
+                // doesn't reject legal property sends (tt.ov's `node.nextNode`
                 // / `setNextNode:`). No ivar-existence guard here: `@synthesize
                 // prop = _ivar` puts `_ivar` in the AST's ivar list, but the
                 // accessors exist regardless (codegen emits them for
@@ -1188,7 +1188,7 @@ impl Checker {
         }
     }
 
-    fn cst_type_to_ast_type(ct: &nepa_cst::CstType) -> AstType {
+    fn cst_type_to_ast_type(ct: &ovic_cst::CstType) -> AstType {
         AstType::from_cst_type(ct)
     }
 
@@ -1387,7 +1387,7 @@ impl Checker {
     }
 
     /// Warn when a type carries type arguments but names a class that declares
-    /// no type parameters. Nepa's monomorphization is driven by *declaration*,
+    /// no type parameters. Ovic's monomorphization is driven by *declaration*,
     /// so `NPArray<NPString *> *` parses and type-checks but never
     /// monomorphizes: the generated C contains no `NPArray_NPString` at all
     /// and `objectAtIndex:` still returns `NPObject *`. That silent erasure is
@@ -1630,7 +1630,7 @@ impl Checker {
     /// static type. The parser cannot make this choice (it has no types) and the
     /// C99 backend has no `_Generic`, so it is made here, where `expr_type` is
     /// known. Non-arithmetic operands are rejected instead of silently boxed:
-    /// ObjC would box an `NSString *`, but Nepa has no string boxing, and
+    /// ObjC would box an `NSString *`, but Ovic has no string boxing, and
     /// handing back a number where an object was meant hides the mistake.
     fn maybe_rewrite_boxed_expr(&mut self, e: &mut AstExpr) -> Option<AstType> {
         let inner_ty = {
@@ -1749,7 +1749,7 @@ impl Checker {
     /// Rewrite `recv[i] = v` into `[recv setObject:v atIndex:i]` when the
     /// receiver is a mutable object. The read rewrite alone would emit
     /// `recv[i] = v` verbatim, which C rejects ("assigning to 'NPMutableArray'
-    /// from incompatible type"). Nepa containers spell this
+    /// from incompatible type"). Ovic containers spell this
     /// `setObject:atIndex:`, so reuse that; the receiver must declare it,
     /// otherwise an immutable `NPArray` keeps the loud C error.
     fn maybe_rewrite_object_assign(&mut self, e: &mut AstExpr) -> Option<AstType> {
@@ -1795,7 +1795,7 @@ impl Checker {
     /// A value struct type: `struct Tag` (or a typedef alias of one) used
     /// directly, NOT through a pointer. Pointers keep C's address-comparison
     /// semantics. Returns the TAG name (not the alias), because that is what
-    /// the emitted `nepa_struct_eq_<Tag>` function is keyed on.
+    /// the emitted `ovic_struct_eq_<Tag>` function is keyed on.
     /// True if the type is a C99 complex (`float _Complex` etc.).
     fn is_complex_type(t: &AstType) -> bool {
         t.is_complex
@@ -1829,7 +1829,7 @@ impl Checker {
 
     /// Rewrite `a == b` / `a != b` when both sides are the SAME value struct
     /// type into a call to the generated field-wise comparison function
-    /// `nepa_struct_eq_<Tag>(a, b)` (`!=` becomes `(eq(a, b) == 0)`). C
+    /// `ovic_struct_eq_<Tag>(a, b)` (`!=` becomes `(eq(a, b) == 0)`). C
     /// rejects `a == b` on structs outright ("invalid operands"), so without
     /// this rewrite every struct comparison is a hard clang error. The tags
     /// used are recorded in `struct_eq_tags`; codegen emits one comparison
@@ -1857,7 +1857,7 @@ impl Checker {
         let tag = ltag;
         let line = e.line;
         let col = e.col;
-        let fn_name = format!("nepa_struct_eq_{}", tag);
+        let fn_name = format!("ovic_struct_eq_{}", tag);
         if !self.struct_eq_tags.contains(&tag) {
             self.struct_eq_tags.push(tag.clone());
         }
@@ -1883,10 +1883,10 @@ impl Checker {
         };
         let boxed = Box::new(call);
         e.data = if is_eq {
-            // `a == b` → `nepa_struct_eq_X(a, b)`
+            // `a == b` → `ovic_struct_eq_X(a, b)`
             boxed.data
         } else {
-            // `a != b` → `(nepa_struct_eq_X(a, b) == 0)`
+            // `a != b` → `(ovic_struct_eq_X(a, b) == 0)`
             AstExprData::Binary {
                 op: 12,
                 left: boxed,
@@ -1931,7 +1931,7 @@ impl Checker {
             AstExprData::Bool(_) => Some(AstType::new(TypePrim::Bool)),
             AstExprData::VarRef { name, .. } => {
                 // Real declarations win first: the -eh desugar declares its
-                // `__nepa_eh_tmp_N` hoist temporaries in scope_vars (their
+                // `__ovic_eh_tmp_N` hoist temporaries in scope_vars (their
                 // `__auto_type` init derives the true type). The `__` builtin
                 // fallback below must not shadow them — it made the generic
                 // argument check see `int` for an `NPMutableString *` temp
@@ -1949,7 +1949,7 @@ impl Checker {
                     return Some(AstType::new(TypePrim::Int));
                 }
                 // Desugar-internal linker-level reference, e.g. the typed-catch
-                // isa test's `&NEPA_CLASS_$_Foo` emitted by the -eh checked
+                // isa test's `&OVIC_CLASS_$_Foo` emitted by the -eh checked
                 // pass. Not expressible as a C identifier, so there is no
                 // binding to resolve — same allowance as the `__` prefix above.
                 if name.starts_with('&') {
@@ -1971,7 +1971,7 @@ impl Checker {
                     }
                 }
                 // A function name used as a value (function pointer, e.g. the
-                // async state-machine entry passed to nepa_task_create).
+                // async state-machine entry passed to ovic_task_create).
                 if self.function_params.contains_key(name) {
                     return Some(AstType::new(TypePrim::Int));
                 }
@@ -2002,7 +2002,7 @@ impl Checker {
                 }
                 // Receiver kind vs method kind: a class singleton receives only
                 // `+` class methods, an instance only `-` instance methods.  In
-                // ObjC these are runtime "unrecognized selector" crashes; Nepa
+                // ObjC these are runtime "unrecognized selector" crashes; Ovic
                 // (static) rejects them at compile time.
                 if let Some(kinds) = self.method_kinds.get(selector) {
                     // Enforce only when every declaration of this selector
@@ -2032,7 +2032,7 @@ impl Checker {
                 // `respondsToSelector:` is a compiler pseudo-method implemented
                 // as a NULL-slot check on the uniform vtable, so the selector must
                 // be a compile-time-known literal. It is lowered to a reference to
-                // a `struct nepa_vtable` member, which only exists for a name that
+                // a `struct ovic_vtable` member, which only exists for a name that
                 // appears in this TU — a runtime `SEL` variable has no member to
                 // name. Reject it here so it never reaches codegen (which would
                 // fall through to the arrow-access path and emit bad C).
@@ -2048,7 +2048,7 @@ impl Checker {
                 // type is expected — only @"..." (AtString) is valid.
                 // Receiver-class-aware signature lookup: the global
                 // selector-keyed table is last-writer-wins, and two classes may
-                // declare the same selector with different param types (tt.np's
+                // declare the same selector with different param types (tt.ov's
                 // `objectForKey:(const char *)` clobbered NPDictionary's
                 // `objectForKey:(K)key`), turning valid sends into false
                 // positives. Prefer the receiver's own class chain; fall back
@@ -2082,7 +2082,7 @@ impl Checker {
                             // 2. a selector declared by ANY class in this TU has a
                             //    slot in the uniform vtable — cross-class guarded
                             //    sends ([o respondsToSelector:…]; [o speak]) are
-                            //    established nepa idiom (foundation_dispatch,
+                            //    established ovic idiom (foundation_dispatch,
                             //    vfs_event_bus) and were allowed at baseline.
                             if !self.is_foundation_source(e.line)
                                 && !Self::is_vtable_exempt_selector(selector)
@@ -2183,7 +2183,7 @@ impl Checker {
                         // `+ (T)fetch` return stays raw `T` — object-kind
                         // returns erase to `id` (the ROADMAP generic
                         // class-method return gap; probe:
-                        // tests/probe_generic_classmethod_ret.np).
+                        // tests/probe_generic_classmethod_ret.ov).
                         self.lookup_scope_var_type(name)
                             .or_else(|| Self::parse_generic_receiver_name(name))
                             .or_else(|| receiver.expr_type.as_ref().map(|t| (**t).clone()))
@@ -2342,7 +2342,7 @@ impl Checker {
                         // documented way to call them. A `nonnull` declaration
                         // of one is a lie the checker refuses to enforce;
                         // otherwise every ARC-injected scope-end
-                        // `nepa_release` of a nullable local (or a manual
+                        // `ovic_release` of a nullable local (or a manual
                         // release-before-nil idiom) would read as a
                         // nullable→nonnull violation. Covers both the ARC
                         // injection and hand-written calls.
@@ -2461,7 +2461,7 @@ AstExprData::Subscript { object, key, .. } => {
                 // and the type-directed rewrites (`@(expr)` boxing, object
                 // subscripts) only fire from `check_expr`. Skipping them left
                 // `@[ @(i + 1) ]` emitting a bare `(i + 1)` int in an object
-                // array literal — type-correct nepa, garbage at runtime.
+                // array literal — type-correct ovic, garbage at runtime.
                 for item in items.iter_mut() {
                     self.check_expr(item);
                 }
@@ -2519,7 +2519,7 @@ AstExprData::Subscript { object, key, .. } => {
                 // so nested `@(expr)` boxing and object subscripts fire, and so
                 // a bare scalar entry is caught here rather than leaked into
                 // the generated C as a non-object argument to
-                // `nepa_dictionary_create` (which would compile and then
+                // `ovic_dictionary_create` (which would compile and then
                 // misbehave at runtime). ObjC rejects these too: "collection
                 // element of type 'int' is not an Objective-C object".
                 for entry in keys.iter_mut().chain(values.iter_mut()) {
@@ -2754,7 +2754,7 @@ AstExprData::Subscript { object, key, .. } => {
             AstStmtData::Synchronized { lock, body } => {
                 self.check_expr(&mut *lock);
                 // M1 known limitation: a @throw inside the block longjmps past
-                // the scope, so the generated cleanup(nepa_syncAutoCleanup)
+                // the scope, so the generated cleanup(ovic_syncAutoCleanup)
                 // never runs and the lock stays held. sjlj semantics cannot
                 // fix this (same class as the documented cross-function-throw
                 // release-skipping limitation) — warn instead of staying
@@ -2966,8 +2966,8 @@ AstExprData::Subscript { object, key, .. } => {
                     // desugar-declared and stay legal). A user re-declaration
                     // would collide with the runtime global at link time.
                     if matches!(name.as_str(),
-                        "__nepa_eh_flag" | "__nepa_eh_val" | "__nepa_eh_isa"
-                        | "__nepa_exception_value" | "__nepa_exception_buf")
+                        "__ovic_eh_flag" | "__ovic_eh_val" | "__ovic_eh_isa"
+                        | "__ovic_exception_value" | "__ovic_exception_buf")
                     {
                         self.check_error(d.line, d.col, &format!(
                             "'{}' is reserved for the exception runtime (-eh); use a different name",
@@ -2983,7 +2983,7 @@ AstExprData::Subscript { object, key, .. } => {
                 if let Some(ref mut i) = init {
                     let init_ty = self.check_expr(i);
                     // `__auto_type` (eh desugar's hoisted expression temp,
-                    // `__nepa_eh_tmp_N`): GNU semantics — infer the declared
+                    // `__ovic_eh_tmp_N`): GNU semantics — infer the declared
                     // type from the initializer. An init the checker cannot
                     // type falls back to `id` (universal object), never the
                     // scalar-ish marker; mismatch checks are superseded.
@@ -3436,7 +3436,7 @@ AstExprData::Subscript { object, key, .. } => {
     }
 
     /// §5.1/§5.2: a subclass of a bounded generic must re-declare every
-    /// inherited bound (explicit spelling — `.nh` readers see the whole
+    /// inherited bound (explicit spelling — `.oh` readers see the whole
     /// constraint, same philosophy as full ivar layouts in shared headers)
     /// and must not weaken it (the re-declared bound must be equal or a
     /// sub-protocol/subclass of the inherited one). Unit-level pass, same
@@ -3554,7 +3554,7 @@ mod tests {
     }
 
     /// Regression (referendum #3, gap 2): the -eh desugar hoists call-bearing
-    /// subexpressions into `__auto_type __nepa_eh_tmp_N` declarations. Looking
+    /// subexpressions into `__auto_type __ovic_eh_tmp_N` declarations. Looking
     /// those names up must return the type the initializer produced — the
     /// `__`-prefix builtin fallback (`__FILE__`/`__LINE__` → int) used to run
     /// FIRST and shadow the real binding, so the generic-argument check read
@@ -3565,10 +3565,10 @@ mod tests {
         let mut npstring_ptr = AstType::new(TypePrim::Named);
         npstring_ptr.name = Some("NPString".into());
         npstring_ptr.is_pointer = true;
-        c.scope_vars.push(vec![("__nepa_eh_tmp_0".to_string(), npstring_ptr)]);
+        c.scope_vars.push(vec![("__ovic_eh_tmp_0".to_string(), npstring_ptr)]);
         let mut e = AstExpr {
             kind: AstExprKind::VarRef, expr_type: None, line: 1, col: 1,
-            data: AstExprData::VarRef { sym: None, name: "__nepa_eh_tmp_0".into() },
+            data: AstExprData::VarRef { sym: None, name: "__ovic_eh_tmp_0".into() },
         };
         let got = c.check_expr(&mut e).expect("hoisted temp must have a type");
         assert_eq!(got.name.as_deref(), Some("NPString"),

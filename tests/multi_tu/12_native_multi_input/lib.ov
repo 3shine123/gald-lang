@@ -1,0 +1,15 @@
+#import "model.oh"
+#import <Foundation/Foundation.ov>
+#include <stdio.h>
+
+/* lib TU: defines the class and a helper the client can call. */
+@implementation Greeter : NPObject
+- (const char *)greeting:(const char *)who {
+    static char buf[128];
+    snprintf(buf, sizeof(buf), "hello, %s", who);
+    return buf;
+}
+- (int)count { return 41; }
+@end
+
+int GreeterHelper(int x) { return x + 1; }

@@ -4,8 +4,8 @@
 
 两个 TU 分工完全合法：
 
-* `lib.np` 实现 `Widget`，外加一个**头文件没声明**的私有方法 `privateHelper`；
-* `main.np` 只通过 `model.nh` 的声明调用 `Widget`，另外定义自己的类 `App`。
+* `lib.ov` 实现 `Widget`，外加一个**头文件没声明**的私有方法 `privateHelper`；
+* `main.ov` 只通过 `model.oh` 的声明调用 `Widget`，另外定义自己的类 `App`。
 
 R1/R2/R3 合力下的预期行为：
 

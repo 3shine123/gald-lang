@@ -1,0 +1,38 @@
+#import <Foundation/Foundation.ov>
+
+// async/await (NPTask design, doc/async_nptask_plan.md):
+// - `(async NPTask<T>)` marks a suspending method; the signature tells the truth
+// - `@await e` marks a suspension point; it lowers to `ovic_task_await`
+//   (lazy tasks: auto-start if not started, result cached — multi-await safe)
+// - a bare async call from sync code is legal (form A: lazy task creation,
+//   the handle is a first-class value); at STATEMENT position it is the entry
+//   form — hosted code drives it to completion right there
+
+@interface Fetcher : NPObject
+- (async NPTask<int>)compute:(int)n;
+- (async NPTask<int>)twice:(int)n;
+- (async NPTask<void>)runAll;
+@end
+
+@implementation Fetcher
+- (async NPTask<int>)compute:(int)n {
+    int raw = @await n;          // suspension point
+    return raw * 2;
+}
+- (async NPTask<int>)twice:(int)n {
+    int a = @await [self compute:n];   // await across a call chain
+    int b = @await [self compute:a];   // ...and twice in one body
+    return a + b;
+}
+// async void: the entry method — driven at its statement-position call
+- (async NPTask<void>)runAll {
+    int x = @await [self twice:3];
+    NPLog(@"result=%d", x);      // 3 -> 6 -> 12 => a+b = 18
+}
+@end
+
+int main() {
+    Fetcher *f = [[Fetcher alloc] init];
+    [f runAll];                  // statement position = entry: run to completion
+    return 0;
+}

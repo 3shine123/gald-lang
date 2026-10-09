@@ -1,7 +1,7 @@
-// lang-test/diamond_base.nh
+// lang-test/diamond_base.oh
 // 菱形继承与多重协议的前置声明文件
 
-#import <Foundation/Foundation.np>
+#import <Foundation/Foundation.ov>
 
 // 1. 菱形继承协议网
 @protocol NPBaseProtocol <NPObject>

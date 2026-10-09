@@ -1,14 +1,14 @@
 # 泛型协议约束（`T : Proto`）规划
 
-> 状态：设计定稿，未实现。探针（`probes/probe_generic_bound*.np`）证实现状：
+> 状态：设计定稿，未实现。探针（`probes/probe_generic_bound*.ov`）证实现状：
 > parser 在 `T :` 处报 `expected '>' after type params`——bound 语法完全不存在。
 > 本规划对齐 ObjC lightweight generics（clang 3.7，有语法无强制）并升级为
-> **编译期强制**——nepa 单态化的实例化点是天然检查点，ObjC 做不到的这里做得到。
+> **编译期强制**——ovic 单态化的实例化点是天然检查点，ObjC 做不到的这里做得到。
 
 ## 1. 语法
 
-```nepa
-// bound = 协议名（裸用，不加 id<> —— nepa 协议类型本就是编译期标签）
+```ovic
+// bound = 协议名（裸用，不加 id<> —— ovic 协议类型本就是编译期标签）
 @interface Box<T : Greetable> : NPObject {
     T _value;
 }
@@ -25,7 +25,7 @@
 决策记录：
 
 - **接受 ObjC 拼写 `T : id<Summable>`，剥掉 `id<>` 后按裸协议名存储**。
-  设计原则：ObjC 程序员写 nepa 必须零词典成本——nepa 的生存策略是「ObjC
+  设计原则：ObjC 程序员写 ovic 必须零词典成本——ovic 的生存策略是「ObjC
   语义 + 静态实现」，拼写偏离 ObjC 等于给迁移者加税。同时**也接受裸协议名
   `T : Summable`**（更简洁的本地习惯拼写）；两种拼法等价，存储与诊断统一
   用裸名。类指针 bound（`T : NSObject *`）同样接受，验证规则见 §3。
@@ -49,7 +49,7 @@
 
 唯一需要触发的位置是**显式特化的实例化点**：
 
-```nepa
+```ovic
 Box<NPString *> *b = ...;    // 检查：NPString 声明了 <Greetable>？
 Box<id> *e = ...;            // 放行（逃逸通道，见下）
 Box *bare = ...;             // 裸拼写：无 type_args，不触发（擦除兼容）
@@ -82,8 +82,8 @@ error: 'NPNumber' does not conform to protocol 'Greetable' required by
 ## 5. 继承与传播规则
 
 1. **子类必须重申 bound**：`MutableBox<T> : Box<T>` 且父类有 bound 时，
-   子类声明若不写 bound 报 error（不隐式继承——显式拼写让 `.nh` 读者一眼
-   看到约束，这正是 `.nh` 必须保留完整布局的同一哲学：客户端要看到全部事实）。
+   子类声明若不写 bound 报 error（不隐式继承——显式拼写让 `.oh` 读者一眼
+   看到约束，这正是 `.oh` 必须保留完整布局的同一哲学：客户端要看到全部事实）。
 2. **子类 bound 不得弱于父类**：`MutableBox<T : Specific>` : `Box<T : General>`
    要求 Specific 在 General 的协议继承链上，否则 error。
 3. **实例化时沿类链收集全部 bound 一并检查**（父类约束对子类特化同样生效），
@@ -91,9 +91,9 @@ error: 'NPNumber' does not conform to protocol 'Greetable' required by
 
 ## 6. 跨 TU 约束
 
-bound 信息活在 `.nh`（共享声明面）里，与协议声明同轨——纯声明客户端 import
-`.nh` 即拿到完整 bound 表，检查在客户端 TU 本地完成，**不依赖链接期、不碰
-vtable 布局（R1/R3 零影响）、不产生新符号（R2 零影响）**。`.nh` 过期（客户端
+bound 信息活在 `.oh`（共享声明面）里，与协议声明同轨——纯声明客户端 import
+`.oh` 即拿到完整 bound 表，检查在客户端 TU 本地完成，**不依赖链接期、不碰
+vtable 布局（R1/R3 零影响）、不产生新符号（R2 零影响）**。`.oh` 过期（客户端
 看到旧版无 bound 的头）的后果是检查静默放行——与所有 checker 功能的降级
 方向一致（漏报优于误报）。
 

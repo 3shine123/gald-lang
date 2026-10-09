@@ -1,8 +1,8 @@
 #ifndef NPDICTIONARY_NH
 #define NPDICTIONARY_NH
 
-#import <Foundation/NPObject.nh>
-#import <Foundation/NPArray.nh>
+#import <Foundation/NPObject.oh>
+#import <Foundation/NPArray.oh>
 
 // Immutable key→value map — the object behind the `@{ k: v, ... }` literal.
 //

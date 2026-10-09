@@ -1,4 +1,4 @@
-#import <Foundation/Foundation.np>
+#import <Foundation/Foundation.ov>
 
 /* Protocol conformance across TUs: the lib TU defines a class conforming to a
    protocol, the client declares a variable of the protocol-typed shape and

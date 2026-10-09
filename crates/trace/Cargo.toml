@@ -1,9 +1,9 @@
 [package]
-name = "nepa-trace"
+name = "ovic-trace"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-nepa-ast = { path = "../ast" }
-nepa-ownership = { path = "../ownership" }
-nepa-cst = { path = "../cst" }
+ovic-ast = { path = "../ast" }
+ovic-ownership = { path = "../ownership" }
+ovic-cst = { path = "../cst" }

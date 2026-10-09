@@ -4,7 +4,7 @@
 // and a comment saying who will use it.
 #![deny(dead_code)]
 //! Attribute capability matrix used to gate which `__attribute__((...))`
-//! spellings nepac allows, driven by the `--backend` option.
+//! spellings ovicc allows, driven by the `--backend` option.
 //!
 //! Classification rules (see `table.rs` for the data source):
 //!   - `portable` (default): only `AttrClass::Common`

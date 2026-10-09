@@ -9,8 +9,8 @@
 
 ## Symptom
 
-`tests/full_syntax_test.np` ran fine most of the time but intermittently died
-with **no stdout at all** and a signal exit — `nepac run` reported exit 1
+`tests/full_syntax_test.ov` ran fine most of the time but intermittently died
+with **no stdout at all** and a signal exit — `ovicc run` reported exit 1
 because `.code()` is `None` for a signal; the raw binary exited 139. It looked
 like a startup crash.
 
@@ -20,34 +20,34 @@ far enough to print, and the real defect surfaced.
 
 ## Root cause
 
-`nepa_stringFromCstr` interns `@"..."` literals into a static table. Before the
+`ovic_stringFromCstr` interns `@"..."` literals into a static table. Before the
 fix it **aliased** the object's initial `+1` instead of taking a reference of
 its own, despite the comment claiming *"The table owns its +1 forever"*:
 
 ```c
-NPObject *obj = nepa_alloc(&NEPA_CLASS_$_NPString);   /* refcount 1 */
+NPObject *obj = ovic_alloc(&OVIC_CLASS_$_NPString);   /* refcount 1 */
 ...
-if (nepa_intern_count < 256) {
-    nepa_intern_table[nepa_intern_count].cstr = str->_cstr;
-    nepa_intern_table[nepa_intern_count].obj  = obj;   /* <-- no retain */
-    nepa_intern_count++;
+if (ovic_intern_count < 256) {
+    ovic_intern_table[ovic_intern_count].cstr = str->_cstr;
+    ovic_intern_table[ovic_intern_count].obj  = obj;   /* <-- no retain */
+    ovic_intern_count++;
 }
 ```
 
 Now consider a **direct ivar assignment** of a literal:
 
-```nepa
-sp->_tag = @"t";          /* emitted: sp->_tag = nepa_stringFromCstr("t"); */
+```ovic
+sp->_tag = @"t";          /* emitted: sp->_tag = ovic_stringFromCstr("t"); */
 ```
 
 ARC does **not** retain here (the RHS is treated as borrowed/`+0`), but the
 synthesised ARC dealloc **does** release every owned object ivar:
 
 ```c
-static void FsSprite__nepa_arc_dealloc(NPObject *self, SEL _cmd) {
+static void FsSprite__ovic_arc_dealloc(NPObject *self, SEL _cmd) {
     NPObject_dealloc(self, _cmd);
-    nepa_release(((struct FsSprite *)self)->_tag);     /* 1 -> 0 */
-    nepa_release(((struct FsSprite *)self)->_label);
+    ovic_release(((struct FsSprite *)self)->_tag);     /* 1 -> 0 */
+    ovic_release(((struct FsSprite *)self)->_label);
 }
 ```
 
@@ -56,8 +56,8 @@ So the release consumed the *intern table's* reference, `NPString_dealloc` freed
 interning lookup walked that table and `strcmp()`d freed memory:
 
 ```c
-for (int i = 0; i < nepa_intern_count; i++)
-    if (nepa_intern_table[i].cstr == cstr || strcmp(nepa_intern_table[i].cstr, cstr) == 0)
+for (int i = 0; i < ovic_intern_count; i++)
+    if (ovic_intern_table[i].cstr == cstr || strcmp(ovic_intern_table[i].cstr, cstr) == 0)
 ```
 
 A second, broader reading: the same imbalance would over-release *any* `+0`
@@ -70,38 +70,38 @@ the ivar is the sole reference, which is why they were where it detonated.
 ```text
 ==ERROR: AddressSanitizer: heap-use-after-free ... READ of size 2
     #0 strcmp
-    #1 nepa_stringFromCstr
+    #1 ovic_stringFromCstr
     #2 main
 freed by:
     #1 NPString_dealloc
-    #2 nepa_release
-    #3 Holder__nepa_arc_dealloc
-    #4 nepa_release
+    #2 ovic_release
+    #3 Holder__ovic_arc_dealloc
+    #4 ovic_release
     #5 main
 previously allocated by:
-    #1 nepa_stringFromCstr
+    #1 ovic_stringFromCstr
     #2 main
-SUMMARY: AddressSanitizer: heap-use-after-free in nepa_stringFromCstr
+SUMMARY: AddressSanitizer: heap-use-after-free in ovic_stringFromCstr
 ```
 
-`tests/full_syntax_test.np` showed the identical stack with `sec2_objects` /
+`tests/full_syntax_test.ov` showed the identical stack with `sec2_objects` /
 `sec3_expressions` in place of `main`.
 
 ## Fix
 
-`crates/codegen/src/codegen.rs`, the hosted branch of `nepa_stringFromCstr`,
+`crates/codegen/src/codegen.rs`, the hosted branch of `ovic_stringFromCstr`,
 immediately before the table store:
 
 ```c
-nepa_retain(obj);   /* the table owns its +1 forever */
+ovic_retain(obj);   /* the table owns its +1 forever */
 ```
 
 ## Verification
 
-* `tests/full_syntax_test.np` under ASan (`NEPA_CC="clang -fsanitize=address -g -O0"`):
+* `tests/full_syntax_test.ov` under ASan (`OVIC_CC="clang -fsanitize=address -g -O0"`):
   runs to `ALL SECTIONS DONE`, exit 0, **zero** AddressSanitizer reports
   (previously: heap-use-after-free, exit 134).
-* `nepac run tests/full_syntax_test.np -asm tests/full_syntax_test.s -I tests`:
+* `ovicc run tests/full_syntax_test.ov -asm tests/full_syntax_test.s -I tests`:
   exit 0 with all 86 lines (previously exit 1 and zero output).
 * `test_all` ARC→MRC `SUSPECT` count: **1 → 0**.
 * `tests/arc_intern/run_arc_intern_test.sh` asserts the defect stays away.

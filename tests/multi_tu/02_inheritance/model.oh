@@ -1,4 +1,4 @@
-#import <Foundation/Foundation.np>
+#import <Foundation/Foundation.ov>
 
 /* Inheritance across TUs: the client allocates the subclass but only knows it
    through the base pointer, so dispatch must resolve through the subclass

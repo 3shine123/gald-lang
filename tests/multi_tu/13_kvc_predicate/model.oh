@@ -1,11 +1,11 @@
-#import <Foundation/Foundation.np>
+#import <Foundation/Foundation.ov>
 
 /* Declarations shared by both TUs — the ONLY channel between them.
-   main.np never sees lib.np; it only sees these signatures.
+   main.ov never sees lib.ov; it only sees these signatures.
 
    The predicate engine resolves keys through the compile-time KVC tables, so
-   every key a client may name has to be declared here. lib.np holds the
-   @implementation (owner TU: strong metadata + KVC table); main.np is a
+   every key a client may name has to be declared here. lib.ov holds the
+   @implementation (owner TU: strong metadata + KVC table); main.ov is a
    declaration-only client whose weak metadata must merge with the owner's or
    the key lookups silently resolve to nothing. */
 @interface Widget : NPObject {

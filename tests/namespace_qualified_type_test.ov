@@ -1,0 +1,231 @@
+// lang-test/namespace_qualified_type_test.ov
+// Ovic 语言限定类型声明 (- (Xxx::Yyy::Zzz *)) 语法与词法极限压测
+// 🛡️ 绝对安全声明：全过程纯内存/CPU逻辑运算，零磁盘写操作，无系统级破坏性指令。
+
+#include <stdio.h>
+#include <stdlib.h>
+#import <Foundation/Foundation.ov>
+
+// ============================================================================
+// 1. 深层多级命名空间定义
+// ============================================================================
+@namespace Extreme::Engine::Graphics
+
+    @interface TextureHandle : NPObject {
+        @public
+        int _textureId;
+        int _width;
+        int _height;
+    }
+    @property int textureId;
+    @property int width;
+
+    - (id)initWithId:(int)tId width:(int)w height:(int)h;
+    - (TextureHandle*)applyFilter;
+    - (int)getNativeHandle;
+    @end
+
+    @implementation TextureHandle
+    @synthesize textureId = _textureId;
+    @synthesize width = _width;
+
+    - (id)initWithId:(int)tId width:(int)w height:(int)h {
+        self = [super init];
+        if (self) {
+            _textureId = tId;
+            _width = w;
+            _height = h;
+        }
+        return self;
+    }
+
+    - (TextureHandle*)applyFilter {
+        printf("[TextureHandle] 纹理 (ID=%d) 应用图像滤镜。\n", _textureId);
+        return self;
+    }
+
+    - (int)getNativeHandle {
+        return _textureId * 1000 + _width;
+    }
+
+    - (void)dealloc {
+        printf("[TextureHandle] 纹理句柄 (ID=%d) 物理释放。\n", _textureId);
+        [super dealloc];
+    }
+    @end
+@endnamespace
+
+
+// ============================================================================
+// 2. 多级命名空间下的泛型容器
+// ============================================================================
+@namespace Extreme::Container
+
+    @interface List<T> : NPObject {
+        @public
+        T _element;
+    }
+    - (void)add:(T)item;
+    - (T)extractFirst;
+    @end
+
+    @implementation List<T>
+    - (void)add:(T)item {
+        if (_element) [_element release];
+        _element = [item retain];
+    }
+
+    - (T)extractFirst {
+        return _element;
+    }
+
+    - (void)dealloc {
+        printf("[List<T>] 泛型列表容器销毁。\n");
+        if (_element) [_element release];
+        [super dealloc];
+    }
+    @end
+@endnamespace
+
+
+// ============================================================================
+// 3. 核心压测类：方法声明与实现中密集使用 - (Xxx::Yyy::Zzz *) 语法
+// ============================================================================
+@namespace Extreme::Engine
+
+    @interface RenderPipeline : NPObject {
+        @public
+        Extreme::Engine::Graphics::TextureHandle* _activeTexture;
+    }
+
+    // 🌟 压测点 1：返回类型带多级命名空间限定 - (Xxx::Yyy::Zzz *)
+    - (Extreme::Engine::Graphics::TextureHandle *)createDefaultTexture;
+
+    // 🌟 压测点 2：参数类型带命名空间限定，且方法选择器包含多段单冒号
+    // 考察 Parser 区分双冒号 :: (命名空间) 与单冒号 : (选择器) 的精度！
+    - (BOOL)bindTexture:(Extreme::Engine::Graphics::TextureHandle *)texture
+            withChannel:(int)channel
+            andPipeline:(Extreme::Engine::RenderPipeline *)pipeline;
+
+    // 🌟 压测点 3：返回类型为带命名空间限定的泛型容器 - (Xxx::Yyy::List<A::B::C *> *)
+    - (Extreme::Container::List<Extreme::Engine::Graphics::TextureHandle *> *)createTextureListWithWidth:(int)w;
+
+    @end
+
+
+    @implementation RenderPipeline
+
+    - (id)init {
+        self = [super init];
+        if (self) {
+            _activeTexture = nil;
+        }
+        return self;
+    }
+
+    // 实现 1：- (Xxx::Yyy::Zzz *) 返回类型解析
+    - (Extreme::Engine::Graphics::TextureHandle *)createDefaultTexture {
+        Extreme::Engine::Graphics::TextureHandle* tex = 
+            [[Extreme::Engine::Graphics::TextureHandle alloc] initWithId:888 width:1920 height:1080];
+        return [tex autorelease];
+    }
+
+    // 实现 2：多段带 :: 命名空间的参数解析
+    - (BOOL)bindTexture:(Extreme::Engine::Graphics::TextureHandle *)texture
+            withChannel:(int)channel
+            andPipeline:(Extreme::Engine::RenderPipeline *)pipeline {
+        
+        if (texture && pipeline) {
+            if (_activeTexture) [_activeTexture release];
+            _activeTexture = [texture retain];
+            printf("[RenderPipeline] 成功绑定纹理 (ID=%d) 到通道 [%d]！\n", 
+                   [texture textureId], channel);
+            return YES;
+        }
+        return NO;
+    }
+
+    // 实现 3：带命名空间限定的泛型返回类型解析
+    - (Extreme::Container::List<Extreme::Engine::Graphics::TextureHandle *> *)createTextureListWithWidth:(int)w {
+        
+        Extreme::Engine::Graphics::TextureHandle* tex = 
+            [[Extreme::Engine::Graphics::TextureHandle alloc] initWithId:999 width:w height:720];
+
+        Extreme::Container::List<Extreme::Engine::Graphics::TextureHandle *>* list = 
+            [[Extreme::Container::List<Extreme::Engine::Graphics::TextureHandle *> alloc] init];
+
+        [list add:tex];
+        [tex release]; // 容器已 retain，本地安全 release
+
+        return [list autorelease];
+    }
+
+    - (void)dealloc {
+        printf("[RenderPipeline] 渲染管线解构。\n");
+        if (_activeTexture) [_activeTexture release];
+        [super dealloc];
+    }
+
+    @end
+@endnamespace
+
+
+// ============================================================================
+// 4. 主程序：测试语法在变量、调用、强转中的表现
+// ============================================================================
+int main(int argc, const char* argv[])
+{
+    @autoreleasepool {
+        printf("=================================================================\n");
+        printf(">>> ovicc 限定类型声明 (- (Xxx::Yyy::Zzz *)) 专项语法压测 <<<\n");
+        printf("=================================================================\n\n");
+
+        // ----------------------------------------------------
+        // 压测 1：直接使用带多级命名空间类型的变量声明与初始化
+        printf("--- 1. 测试命名空间限定类型变量声明与实例化 ---\n");
+        
+        Extreme::Engine::RenderPipeline* pipeline = [[Extreme::Engine::RenderPipeline alloc] init];
+        
+        // 调用返回 - (Extreme::Engine::Graphics::TextureHandle *) 的方法
+        Extreme::Engine::Graphics::TextureHandle* tex1 = [pipeline createDefaultTexture];
+        printf("[返回值校验] 抓取到纹理 ID: %d | 宽度: %d px\n", [tex1 textureId], [tex1 width]);
+
+        // ----------------------------------------------------
+        // 压测 2：多段选择器与 :: 混用的方法调用
+        printf("\n--- 2. 测试 :: 与选择器单冒号 : 混用的多参方法调用 ---\n");
+        
+        int channelCode = 5;
+        BOOL bindSuccess = [pipeline bindTexture:tex1
+                                     withChannel:(channelCode * 2)
+                                     andPipeline:pipeline];
+        printf("[多参方法调用断言] 绑定状态: %s\n", bindSuccess ? "SUCCESS" : "FAILED");
+
+        // ----------------------------------------------------
+        // 压测 3：带命名空间的泛型返回类型 + 链式嵌套消息调用
+        printf("\n--- 3. 压测项：命名空间泛型返回类型 + 5 级链式消息传递 ---\n");
+
+        // 链式表达求值：
+        // [[[[pipeline createTextureListWithWidth:2560] extractFirst] applyFilter] getNativeHandle]
+        int nativeHandle = [[[[pipeline createTextureListWithWidth:2560] extractFirst] applyFilter] getNativeHandle];
+
+        printf("[深层链式调用断言] 句柄计算结果: %d (预期: 999 * 1000 + 2560 = 1001560)\n", nativeHandle);
+
+        // ----------------------------------------------------
+        // 压测 4：显式类型转换中的 (Xxx::Yyy::Zzz *) 解析
+        printf("\n--- 4. 压测项：显式类型转换中的 (Xxx::Yyy::Zzz *) 解析 ---\n");
+
+        NPObject* rawObj = tex1;
+        Extreme::Engine::Graphics::TextureHandle* castedTex = (Extreme::Engine::Graphics::TextureHandle*)rawObj;
+        printf("[类型转换校验] 转换后纹理 ID: %d\n", [castedTex textureId]);
+
+        // ----------------------------------------------------
+        // 5. 内存安全清理
+        printf("\n--- 5. 内存安全清理 ---\n");
+        [pipeline release];
+
+        printf("\n=================================================================\n");
+        printf(">>> 完美！- (Xxx::Yyy::Zzz *) 命名空间限定类型语法测试通过！ <<<\n");
+        printf("=================================================================\n");
+    }
+    return 0;
+}

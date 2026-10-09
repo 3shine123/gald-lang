@@ -1,0 +1,34 @@
+// Probe: enum switch exhaustiveness. A switch over a known enum without
+// `default:` must cover every member; a missing one is an error naming it.
+
+#import <Foundation/Foundation.oh>
+
+enum Color { Red, Green, Blue };
+
+typedef enum { Up, Down } Direction;
+
+int classify(enum Color c) {
+    switch (c) {
+        case Red:   return 1;
+        case Green: return 2;
+        // Blue missing, no default — must error naming 'Blue'.
+    }
+    return 0;
+}
+
+int classify_alias(Direction d) {
+    switch (d) {
+        case Up: return 1;
+        // Down missing — must error via the typedef alias path.
+    }
+    return 0;
+}
+
+int main() {
+    // Covered + default: fine.
+    switch (Red) {
+        case Red: break;
+        default: break;
+    }
+    return 0;
+}

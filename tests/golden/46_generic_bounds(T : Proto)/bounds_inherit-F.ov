@@ -1,0 +1,41 @@
+// -F sample (deliberate failure — documentation, not a suite test):
+// inheritance rules for generic bounds. Two violations, both reported:
+//   1) MissingBox does not re-declare the bound inherited from Box
+//   2) LoudBox re-declares 'Loud', which is unrelated to (weaker than)
+//      the inherited bound 'Greetable'
+
+#import <Foundation/Foundation.oh>
+
+@protocol Greetable
+- (NPString *)greeting;
+@end
+
+@protocol Loud
+- (NPString *)shout;
+@end
+
+@interface Box<T : Greetable> : NPObject {
+    T _value;
+}
+@end
+
+@implementation Box
+@end
+
+// Violation 1: parent has a bound, subclass does not re-declare it.
+@interface MissingBox<T> : Box<T>
+@end
+
+@implementation MissingBox
+@end
+
+// Violation 2: re-declared bound is unrelated — weaker than the inherited one.
+@interface LoudBox<T : Loud> : Box<T>
+@end
+
+@implementation LoudBox
+@end
+
+int main() {
+    return 0;
+}

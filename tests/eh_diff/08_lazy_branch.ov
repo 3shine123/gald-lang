@@ -1,0 +1,38 @@
+// 差分用例 8:迟求值 —— 三元未选中分支、&& 短路右操作数不得求值
+// (C 语义。EH 提升求值若越过分支边界,未选中分支的调用会照跑:
+//  副作用可见,且对接收者类未实现的 selector 会派发 NULL 槽 → 崩)
+#import <Foundation/Foundation.ov>
+
+@interface Bumper : NPObject {
+@public
+    int _side;
+}
+- (int)bump;
+- (int)side;
+@end
+
+@implementation Bumper
+- (int)bump {
+    _side = _side + 1;
+    NPLog(@"bump executed");
+    return 42;
+}
+- (int)side { return _side; }
+@end
+
+int main() {
+    Bumper *b = [[Bumper alloc] init];
+    int on = 1;
+    int off = 0;
+
+    int v1 = on ? 7 : [b bump];
+    NPLog(@"ternary_then v=%d side=%d", v1, [b side]);
+
+    int v2 = off ? [b bump] : 9;
+    NPLog(@"ternary_else v=%d side=%d", v2, [b side]);
+
+    int v3 = (off && ([b bump] != 0));
+    NPLog(@"and_short v=%d side=%d", v3, [b side]);
+
+    return 0;
+}

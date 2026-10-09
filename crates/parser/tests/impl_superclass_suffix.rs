@@ -5,7 +5,7 @@
 //
 // Fix: parse_class_implementation now consumes the optional `: Super` suffix
 // (and records it in the CST), matching parse_class_interface.
-use nepa_parser::Parser;
+use ovic_parser::Parser;
 
 fn decl_classes(src: &str) -> Vec<(String, String)> {
     let mut p = Parser::new(src);
@@ -14,9 +14,9 @@ fn decl_classes(src: &str) -> Vec<(String, String)> {
     for d in &unit.decls {
         if matches!(
             d.kind,
-            nepa_cst::CstDeclKind::ClassInterface | nepa_cst::CstDeclKind::ClassImplementation
+            ovic_cst::CstDeclKind::ClassInterface | ovic_cst::CstDeclKind::ClassImplementation
         ) {
-            let kind = if d.kind == nepa_cst::CstDeclKind::ClassInterface {
+            let kind = if d.kind == ovic_cst::CstDeclKind::ClassInterface {
                 "interface"
             } else {
                 "implementation"
@@ -98,5 +98,5 @@ int main() { return 0; }
     assert!(unit
         .decls
         .iter()
-        .any(|d| matches!(d.kind, nepa_cst::CstDeclKind::Function)));
+        .any(|d| matches!(d.kind, ovic_cst::CstDeclKind::Function)));
 }

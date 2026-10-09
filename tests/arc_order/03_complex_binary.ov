@@ -1,0 +1,32 @@
+#import <Foundation/Foundation.ov>
+
+// ARC order 03: a complex binary expression that calls two different selectors
+// on the same owned local — both calls must complete before the release.
+
+@interface AO03Holder : NPObject {
+@public
+    NPString *_s;
+}
+- (NPString *)text;
+- (int)offset;
+@end
+
+@implementation AO03Holder
+- (instancetype)init {
+    self = [super init];
+    if (self) { _s = [[NPString alloc] initWithUTF8String:"hello"]; }
+    return self;
+}
+- (void)dealloc {
+    _s = nil;
+    NPLog(@"ao03 dealloc");
+    [super dealloc];
+}
+- (NPString *)text { return _s; }
+- (int)offset { return 2; }
+@end
+
+int main() {
+    AO03Holder *h = [[AO03Holder alloc] init];
+    return (int)[[h text] length] + [h offset] - 7;
+}

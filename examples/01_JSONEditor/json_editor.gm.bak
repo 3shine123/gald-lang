@@ -1,5 +1,5 @@
-// json_editor.np — Nepa 全特性 JSON 编辑器
-// 编译: nepac run tests/JSONEditor/json_editor.np -fno-nepa-arc
+// json_editor.ov — Ovic 全特性 JSON 编辑器
+// 编译: ovicc run tests/JSONEditor/json_editor.ov -fno-ovic-arc
 // 特性覆盖: @protocol, @interface, @implementation, @property, @synthesize,
 //           @namespace, 继承, @category, 泛型<T>, Block, @selector,
 //           @try/@catch/@throw, @autoreleasepool, @public weak, instancetype
@@ -11,7 +11,7 @@
 #include <termios.h>
 #include <unistd.h>
 #include <sys/ioctl.h>
-#import "json_editor_types.nh"
+#import "json_editor_types.oh"
 
 // Raw-mode input reader: handles arrow keys for cursor movement, no echo of escape sequences
 // Falls back to fgets when stdin is not a terminal (piped input)
@@ -907,7 +907,7 @@ static int read_line(char *buf, int size) {
 // ============================================================================
 int main(int argc, const char *argv[]) {
     @autoreleasepool {
-        printf("═══ Nepa Full Feature Demo ═══\n\n");
+        printf("═══ Ovic Full Feature Demo ═══\n\n");
         printf("Features:\n");
         printf("  @namespace JSON { ... } — 7 classes\n");
         printf("  @protocol Value — polymorphic dispatch\n");

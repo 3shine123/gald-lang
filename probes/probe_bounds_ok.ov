@@ -1,0 +1,100 @@
+// Probe: generic protocol bounds — POSITIVE cases (checker stage).
+// Expected: compiles clean, exit 0. Covers:
+//   - conforming instantiation (Box<Dog *>, Dog declares <Greetable>)
+//   - escape channels: Box<id>, bare `Box`
+//   - multi-param bounds: Pair<K, V : Comparable> constrains only V
+//   - subclass re-declares the bound; instantiation checks along the chain
+
+#import <Foundation/Foundation.oh>
+
+@protocol Greetable
+- (NPString *)greeting;
+@end
+
+@protocol Comparable
+- (int)compare:(id)other;
+@end
+
+@interface Dog : NPObject <Greetable>
+- (NPString *)greeting;
+@end
+
+@implementation Dog
+- (NPString *)greeting { return @"woof"; }
+@end
+
+@interface Num : NPObject <Comparable>
+- (int)compare:(id)other;
+@end
+
+@implementation Num
+- (int)compare:(id)other { return 0; }
+@end
+
+@interface Box<T : Greetable> : NPObject {
+    T _value;
+}
+- (instancetype)initWithValue:(T)value;
+- (T)value;
+@end
+
+@implementation Box
+- (instancetype)initWithValue:(T)value {
+    self = [super init];
+    if (self) {
+        _value = value;
+    }
+    return self;
+}
+- (T)value { return _value; }
+@end
+
+// Multi-param: K unbounded, V bounded to Comparable.
+@interface Pair<K, V : Comparable> : NPObject {
+    K _k;
+    V _v;
+}
+- (instancetype)initWithValue:(K)k value:(V)v;
+@end
+
+@implementation Pair
+- (instancetype)initWithValue:(K)k value:(V)v {
+    self = [super init];
+    if (self) {
+        _k = k;
+        _v = v;
+    }
+    return self;
+}
+@end
+
+// Correct re-declaration of the inherited bound (§5.1).
+@interface MutableBox<T : Greetable> : Box<T>
+- (void)noop;
+@end
+
+@implementation MutableBox
+- (void)noop { }
+@end
+
+int main() {
+    // conforming instantiation
+    Box<Dog *> *b = [[Box<Dog *> alloc] initWithValue:[[Dog alloc] init]];
+    [b value];
+    // escape channel: id
+    Box<id> *e = [[Box<id> alloc] initWithValue:[[Dog alloc] init]];
+    (void)e;
+    // escape channel: bare spelling (no type_args — never triggers)
+    Box *bare = [[Box alloc] initWithValue:[[Dog alloc] init]];
+    (void)bare;
+    // multi-param: K gets Dog (unconstrained), V gets Num (conforming)
+    Pair<Dog *, Num *> *p =
+        [[Pair<Dog *, Num *> alloc] initWithValue:[[Dog alloc] init]
+                                            value:[[Num alloc] init]];
+    (void)p;
+    // subclass chain: bound from Box applies to MutableBox<Dog *> too
+    MutableBox<Dog *> *m =
+        [[MutableBox<Dog *> alloc] initWithValue:[[Dog alloc] init]];
+    [m noop];
+    return 0;
+}

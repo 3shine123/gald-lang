@@ -1,7 +1,7 @@
 //! Structured diagnostics shared by every front-end stage.
 //!
 //! Stages record `Diagnostic` values instead of pre-formatted strings; the
-//! renderer (nepac side) turns them into either clang-style annotated source
+//! renderer (ovicc side) turns them into either clang-style annotated source
 //! output or plain `file:line:col: message` lines. Rendering lives elsewhere
 //! so the recorder never needs source text or colors.
 
@@ -123,7 +123,7 @@ pub type SourceLookup<'a> = dyn Fn(&str) -> Option<String> + 'a;
 ///
 /// ```text
 /// error: null passed to a callee that requires a non-null argument
-///   --> foo.np:27:14
+///   --> foo.ov:27:14
 ///    |
 /// 27 |     [g greet:nil];
 ///    |            ~~~ ^
@@ -191,7 +191,7 @@ fn render_one(d: &Diagnostic, lookup: &SourceLookup, color: bool) -> String {
     ));
     out.push_str(&format!("{} | ", gutter));
     // Bytes before the caret render as spaces; multi-byte source content can
-    // desync byte columns from display columns, but Nepa source is effectively
+    // desync byte columns from display columns, but Ovic source is effectively
     // ASCII on code lines — revisit with display width if that changes.
     let col = d.col.max(1);
     out.push_str(&" ".repeat((col - 1).min(line_text.len())));
@@ -254,8 +254,8 @@ mod tests {
 
     #[test]
     fn plain_format_matches_historical_layout() {
-        let d = Diagnostic::error("foo.np", 27, 14, "boom");
-        assert_eq!(d.to_plain(), "foo.np:27:14: boom");
+        let d = Diagnostic::error("foo.ov", 27, 14, "boom");
+        assert_eq!(d.to_plain(), "foo.ov:27:14: boom");
         let d = Diagnostic::warning(String::new(), 3, 5, "synthetic");
         assert_eq!(d.to_plain(), "3:5: synthetic");
     }
@@ -263,14 +263,14 @@ mod tests {
     #[test]
     fn plain_lines_join_in_order() {
         let ds = vec![
-            Diagnostic::error("a.np", 1, 1, "one"),
-            Diagnostic::warning("a.np", 2, 1, "two"),
+            Diagnostic::error("a.ov", 1, 1, "one"),
+            Diagnostic::warning("a.ov", 2, 1, "two"),
         ];
-        assert_eq!(render_plain(&ds), "a.np:1:1: one\na.np:2:1: two");
+        assert_eq!(render_plain(&ds), "a.ov:1:1: one\na.ov:2:1: two");
     }
 
     fn lookup_ok(file: &str) -> Option<String> {
-        if file == "foo.np" {
+        if file == "foo.ov" {
             Some("int main(void) {\n    [g greet:nil];\n    return 0;\n}\n".into())
         } else {
             None
@@ -279,18 +279,18 @@ mod tests {
 
     #[test]
     fn annotated_renders_caret_with_gutter() {
-        let d = Diagnostic::error("foo.np", 2, 9, "boom");
+        let d = Diagnostic::error("foo.ov", 2, 9, "boom");
         let out = render_annotated(&[d], &lookup_ok);
         assert_eq!(
             out,
-            "error: boom\n --> foo.np:2:9\n  |\n2 |     [g greet:nil];\n  |         ^"
+            "error: boom\n --> foo.ov:2:9\n  |\n2 |     [g greet:nil];\n  |         ^"
         );
     }
 
     #[test]
     fn annotated_renders_clang_tilde_span() {
         // span columns 13..18 → caret at 13, tildes through 17
-        let d = Diagnostic::error("foo.np", 2, 13, "bad arg").with_end_col(18);
+        let d = Diagnostic::error("foo.ov", 2, 13, "bad arg").with_end_col(18);
         let out = render_annotated(&[d], &lookup_ok);
         let line = out.lines().last().unwrap();
         assert_eq!(line, "  |             ^~~~~");
@@ -298,15 +298,15 @@ mod tests {
 
     #[test]
     fn annotated_falls_back_to_plain_when_file_unreadable() {
-        let d = Diagnostic::error("missing.np", 4, 7, "nope");
+        let d = Diagnostic::error("missing.ov", 4, 7, "nope");
         let out = render_annotated(&[d], &lookup_ok);
-        assert_eq!(out, "missing.np:4:7: nope");
+        assert_eq!(out, "missing.ov:4:7: nope");
     }
 
     #[test]
     fn annotated_falls_back_when_line_out_of_range() {
-        let d = Diagnostic::error("foo.np", 99, 3, "beyond");
+        let d = Diagnostic::error("foo.ov", 99, 3, "beyond");
         let out = render_annotated(&[d], &lookup_ok);
-        assert_eq!(out, "foo.np:99:3: beyond");
+        assert_eq!(out, "foo.ov:99:3: beyond");
     }
 }

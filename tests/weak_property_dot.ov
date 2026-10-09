@@ -1,0 +1,39 @@
+// Regression: a weak property assigned through DOT syntax must register the
+// slot with the referent's weak list, so the slot is nil'd when the object
+// dies. Two defects made this fail silently:
+//   1. codegen lowered `h.thing = t` to a raw field write (`h->_thing = t`),
+//      skipping the synthesized setter's weak registration entirely;
+//   2. the property-synthesized ivar never got an entry in `ivar_weak`, so the
+//      `is_weak` lookup always resolved to false.
+// Exit code 0 = slot cleared correctly, 1 = dangling pointer (the bug).
+//
+// The probe is an ARC test: under MRC (-fno-ovic-arc) nothing releases `t`, so
+// the slot legitimately stays non-NULL and the exit code is 1. Weak clearing
+// presupposes the referent actually dies. Under ARC this source used to return
+// 1 for the *wrong* reason (the slot was never registered at all).
+#import <Foundation/Foundation.ov>
+
+@interface WPThing : NPObject
+@end
+
+@implementation WPThing
+@end
+
+@interface WPHolder : NPObject
+@property (weak) WPThing *thing;
+@end
+
+@implementation WPHolder
+@synthesize thing = _thing;
+@end
+
+int main() {
+    WPHolder *h = [[WPHolder alloc] init];
+    {
+        WPThing *t = [[WPThing alloc] init];
+        h.thing = t;              // dot write: must weak-register, not raw-store
+        if (h.thing == nil) return 2;   // sanity: it must be non-nil while alive
+    }
+    // `t` is gone; ARC released it, so the weak slot has to be nil now.
+    return (h.thing == nil) ? 0 : 1;
+}

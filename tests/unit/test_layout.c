@@ -1,9 +1,9 @@
-#include "nepa/layout.h"
-#include "nepa/parser.h"
-#include "nepa/lexer.h"
-#include "nepa/cst.h"
-#include "nepa/symbol.h"
-#include "nepa/binder.h"
+#include "ovic/layout.h"
+#include "ovic/parser.h"
+#include "ovic/lexer.h"
+#include "ovic/cst.h"
+#include "ovic/symbol.h"
+#include "ovic/binder.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -29,7 +29,7 @@ static int do_layout(symbol_table_t *st, translation_unit_t *unit) {
 static void test_empty(void) {
     TEST("layout empty");
     lexer_t lexer;
-    lexer_init(&lexer, "", 0, "test.np");
+    lexer_init(&lexer, "", 0, "test.ov");
     parser_t *p = parser_create(&lexer);
     translation_unit_t *unit = parser_parse_translation_unit(p);
     symbol_table_t *st = symtab_alloc();
@@ -45,7 +45,7 @@ static void test_interface_no_ivars(void) {
     TEST("layout @interface Foo @end");
     lexer_t lexer;
     const char *src = "@interface Foo @end";
-    lexer_init(&lexer, src, strlen(src), "test.np");
+    lexer_init(&lexer, src, strlen(src), "test.ov");
     parser_t *p = parser_create(&lexer);
     translation_unit_t *unit = parser_parse_translation_unit(p);
     symbol_table_t *st = symtab_alloc();
@@ -78,7 +78,7 @@ static void test_vtable_indices(void) {
         "@end";
 
     lexer_t lexer;
-    lexer_init(&lexer, src, strlen(src), "test.np");
+    lexer_init(&lexer, src, strlen(src), "test.ov");
     parser_t *p = parser_create(&lexer);
     translation_unit_t *unit = parser_parse_translation_unit(p);
     ASSERT(unit != NULL, "parse failed");

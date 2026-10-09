@@ -1,0 +1,87 @@
+// clang_stress.ov — 极端的 Clang 编译器扩展压测（可运行子集）。
+// 只使用 ovicc 语法分析器已完整支持的构造；解析器缺口见 clang_torture.ov。
+// 运行：ovicc -rewrite-ovic -backend clang clang_stress.ov -o /tmp/clang_stress.c
+//       clang -I include -o /tmp/clang_stress /tmp/clang_stress.c include/ovic/runtime.c
+//       /tmp/clang_stress
+
+#include <stdio.h>
+
+// ── clang-only __attribute__：复杂参数语法（嵌套括号 / 逗号 / =） ──
+__attribute__((availability(macos, introduced = 13.0, deprecated = 14.0)))
+int modern_api(int v);
+
+__attribute__((optnone))
+int helper(int v) { return v * 2; }
+
+__attribute__((noduplicate, nodebug, noinline))
+int pureish(int v) { return v ^ 0x5A5A; }
+
+__attribute__((warn_unused_result, returns_nonnull, malloc))
+static int *alloc_thing(int n) { return (int *)__builtin_alloca((size_t)n * 4); }
+
+static int apply_cb(int (*cb)(int), int x) { return cb(x); }
+
+// ── 常见（gcc+clang）属性 ──
+__attribute__((always_inline, gnu_inline))
+static inline int inl(int v) { return v + 1; }
+
+// ── struct 属性（受支持写法：名前；packed 真正生效需名前写法）
+// ── struct 字段属性（标量字段支持） ──
+__attribute__((aligned(16)))
+struct Vec4 {
+    int x, y, z, w;
+};
+
+struct Record {
+    int rid __attribute__((aligned(8)));
+    int score;
+    int name;
+};
+
+// ── __XXX 前缀关键字风暴 ──
+__extension__ struct Ext {
+    __extension__ int a;
+    __extension__ int b;
+};
+
+static __inline__ __attribute__((always_inline)) int inl2(int v) { return v + 2; }
+static __inline int inl3(int v) { return v + 3; }
+static __const int cst4 = 4;
+static __const__ int cst5 = 5;
+static __signed int sgn6 = 6;
+static __signed__ int sgn7 = 7;
+static __restrict int *rp;
+static __restrict__ int *rp2;
+
+int main(void) {
+    __typeof__(int) t1 = 1;
+    __typeof(t1) t2 = t1 + 1;
+    size_t a1 = __alignof__(int);
+    size_t a2 = __alignof(struct Vec4);
+
+    // ── 内置函数风暴 ──
+    int e = __builtin_expect(t2, 0);
+    int cp = __builtin_constant_p(42);
+    int pc = __builtin_popcount(0xF0F0F0F0);
+    int clz = __builtin_clz(1);
+    unsigned b32 = __builtin_bswap32(0x11223344);
+    int *tmp = alloc_thing(2);
+    tmp[0] = 77;
+    int thru = apply_cb(inl, 41);
+
+    // ── 内联汇编 ──
+    int z = 0;
+    __asm__ __volatile__("mov %0, %1" : "+r"(z) : "r"(5));
+
+    struct Vec4 v = { 1, 2, 3, 4 };
+    struct Record r = { 42, 9, 7 };
+    __extension__ struct Ext ex = { 7, 8 };
+
+    printf("clang_stress: t2=%d a1=%zu a2=%zu e=%d cp=%d pc=%d clz=%d b32=%x tmp0=%d thru=%d z=%d v=(%d,%d,%d,%d) r=(%d,%d,%d) ex=(%d,%d) helper=%d pureish=%d modern=%d inl2=%d inl3=%d cst4=%d cst5=%d sgn6=%d sgn7=%d\n",
+           t2, a1, a2, e, cp, pc, clz, b32, tmp[0], thru, z,
+           v.x, v.y, v.z, v.w, r.rid, r.score, r.name, ex.a, ex.b,
+           helper(21), pureish(3), modern_api(5), inl2(1), inl3(1), cst4, cst5, sgn6, sgn7);
+    return 0;
+}
+
+int modern_api(int v) { return v + 100; }

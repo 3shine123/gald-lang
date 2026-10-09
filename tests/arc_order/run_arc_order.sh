@@ -3,13 +3,13 @@
 #
 # WHY THIS EXISTS
 # ---------------
-# ARC injects `nepa_release` for owned locals at every exit point. **Order
+# ARC injects `ovic_release` for owned locals at every exit point. **Order
 # matters**: the exit expression (`return` / `@throw`) must be FULLY evaluated
 # before any local it uses is released — otherwise the release is a
 # use-after-free. Conversely a local used only by the exit expression must
 # still be released (skipping it is a leak).
 #
-# Each case is `NN_name.np` + `NN_name.out` (expected stdout under ARC).
+# Each case is `NN_name.ov` + `NN_name.out` (expected stdout under ARC).
 # Six combinations are exercised per case:
 #   {default, -eh checked, -eh legacy} x {ARC, MRC}
 #
@@ -17,30 +17,30 @@
 #   MRC: ARC injects nothing (manual memory management), so only exit 0 is
 #        asserted — dealloc output is not expected.
 #
-# Usage: ./run_arc_order.sh            NEPAC=target/debug/nepac ./run_arc_order.sh
+# Usage: ./run_arc_order.sh            OVICC=target/debug/ovicc ./run_arc_order.sh
 set -u
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 cd "$ROOT"
 
-NEPAC="${NEPAC:-}"
-if [[ -z "$NEPAC" ]]; then
-    for c in target/release/nepac target/debug/nepac; do
-        if [[ -x "$c" ]]; then NEPAC="$c"; break; fi
+OVICC="${OVICC:-}"
+if [[ -z "$OVICC" ]]; then
+    for c in target/release/ovicc target/debug/ovicc; do
+        if [[ -x "$c" ]]; then OVICC="$c"; break; fi
     done
 fi
-if [[ ! -x "${NEPAC:-}" ]]; then
-    echo "error: nepac not found (build it, or set NEPAC=)" >&2
+if [[ ! -x "${OVICC:-}" ]]; then
+    echo "error: ovicc not found (build it, or set OVICC=)" >&2
     exit 2
 fi
-# Absolute paths pass through unchanged: an unconditional "$PWD/$NEPAC"
-# would turn an absolute NEPAC into "$PWD/$PWD/target/.../nepac".
-case "$NEPAC" in
+# Absolute paths pass through unchanged: an unconditional "$PWD/$OVICC"
+# would turn an absolute OVICC into "$PWD/$PWD/target/.../ovicc".
+case "$OVICC" in
     /*) ;;
-    *) NEPAC="$PWD/$NEPAC" ;;
+    *) OVICC="$PWD/$OVICC" ;;
 esac
 
-WORK="${TMPDIR:-/tmp}/nepa_arc_order.$$"
+WORK="${TMPDIR:-/tmp}/ovic_arc_order.$$"
 mkdir -p "$WORK"
 trap 'rm -rf "$WORK"' EXIT
 
@@ -51,9 +51,9 @@ mode_flags() {
         arc-default) printf '' ;;
         arc-checked) printf -- '-eh checked' ;;
         arc-legacy)  printf -- '-eh legacy' ;;
-        mrc-default) printf -- '-fno-nepa-arc' ;;
-        mrc-checked) printf -- '-fno-nepa-arc -eh checked' ;;
-        mrc-legacy)  printf -- '-fno-nepa-arc -eh legacy' ;;
+        mrc-default) printf -- '-fno-ovic-arc' ;;
+        mrc-checked) printf -- '-fno-ovic-arc -eh checked' ;;
+        mrc-legacy)  printf -- '-fno-ovic-arc -eh legacy' ;;
     esac
 }
 
@@ -62,16 +62,16 @@ norm() {
 }
 
 echo "=== ARC evaluation-order suite ==="
-echo "nepac: $NEPAC"
+echo "ovicc: $OVICC"
 echo
 printf '%-30s %-12s %s\n' "case" "mode" "result"
 printf -- '--------------------------------------------------------------------------\n'
 
 PASS=0; FAIL=0; FAILED=()
 
-for np in "$SCRIPT_DIR"/[0-9][0-9]_*.np; do
+for np in "$SCRIPT_DIR"/[0-9][0-9]_*.ov; do
     [[ -f "$np" ]] || continue
-    name="$(basename "$np" .np)"
+    name="$(basename "$np" .ov)"
     ref="$SCRIPT_DIR/$name.out"
     for m in "${MODES[@]}"; do
         # shellcheck disable=SC2206
@@ -79,7 +79,7 @@ for np in "$SCRIPT_DIR"/[0-9][0-9]_*.np; do
         # NPLog writes to stderr (runtime.c), so merge the streams: for these
         # cases the program's observable output *is* the stderr transcript.
         log="$WORK/$name.$m.log"
-        "$NEPAC" run -o "$WORK/$name.$m.bin" ${ff[@]+"${ff[@]}"} "$np" >"$log" 2>&1
+        "$OVICC" run -o "$WORK/$name.$m.bin" ${ff[@]+"${ff[@]}"} "$np" >"$log" 2>&1
         rc=$?
         ok=1
         note=""

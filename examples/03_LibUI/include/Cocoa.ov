@@ -1,0 +1,67 @@
+/* ─────────────────────────────────────────────────────────────────────────
+ * Cocoa.ov — pure-Ovic AppKit bridge (Apple-only).
+ *
+ * Ovic is a C superset: we talk to libobjc directly — no .m file, no
+ * framework headers. The whole namespace is guarded by
+ * `#if defined(__APPLE__)` (the ovic preprocessor knows __APPLE__, so other
+ * platforms compile an empty namespace).
+ *
+ * Why dlsym: ovic's runtime exports its own `sel_registerName`, which
+ * shadows libobjc's at link time; and the real objc_msgSend must be handed
+ * the *registered* SEL pointer (the runtime uses the pointer value as the
+ * cache key), not a name string. So we fetch both entry points from
+ * /usr/lib/libobjc.A.dylib once and call them through typed pointers — one
+ * per calling shape we need (no args / long arg / char arg).
+ * ───────────────────────────────────────────────────────────────────────── */
+
+#if defined(__APPLE__)
+
+@namespace Cocoa
+
+#include <dlfcn.h>
+
+    /* ── libobjc (declared only — symbols live in libobjc.A.dylib) ── */
+    extern void *objc_getClass(const char *name);
+
+    /* objc_msgSend, one typed pointer per calling shape. (Note: 'self' is
+     * a keyword in ovic — never use it as a parameter name anywhere.) */
+    static void *(*nk_msgSend0)(void *target, void *sel) = 0;
+    static void *(*nk_msgSendL)(void *target, void *sel, long v) = 0;
+    static void *(*nk_msgSendC)(void *target, void *sel, char v) = 0;
+    /* Real sel_registerName. */
+    static void *(*nk_realSel)(const char *name) = 0;
+
+    static void nk_bridge_init(void) {
+        if (nk_msgSend0) return;
+        void *objc = dlopen("/usr/lib/libobjc.A.dylib", RTLD_NOW);
+        if (!objc) return;
+        void *send = dlsym(objc, "objc_msgSend");
+        nk_msgSend0 = (void *(*)(void *, void *))send;
+        nk_msgSendL = (void *(*)(void *, void *, long))send;
+        nk_msgSendC = (void *(*)(void *, void *, char))send;
+        nk_realSel  = (void *(*)(const char *))dlsym(objc, "sel_registerName");
+    }
+    @interface NSApp : NPObject
+        + (void)activateApp;
+    @end
+
+    @implementation NSApp : NPObject
+    /* [NSApp setActivationPolicy:NSApplicationActivationPolicyRegular]
+     * [NSApp activateIgnoringOtherApps:YES] */
+    + (void)activateApp {
+        nk_bridge_init();
+        if (!nk_msgSend0 || !nk_realSel) return;
+        void *cls = objc_getClass("NSApplication");
+        if (!cls) return;
+        void *app = nk_msgSend0(cls, nk_realSel("sharedApplication"));
+        if (!app) return;
+        nk_msgSendL(app, nk_realSel("setActivationPolicy:"),
+                    0 /* NSApplicationActivationPolicyRegular */);
+        nk_msgSendC(app, nk_realSel("activateIgnoringOtherApps:"),
+                    (char)1 /* YES */);
+    }
+    @end
+
+@endnamespace /* @namespace Cocoa */
+
+#endif /* defined(__APPLE__) */

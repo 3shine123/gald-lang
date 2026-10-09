@@ -1,4 +1,4 @@
-_nepac() {
+_ovicc() {
     local i cur prev opts cmd
     COMPREPLY=()
     if [[ "${BASH_VERSINFO[0]}" -ge 4 ]]; then
@@ -10,16 +10,16 @@ _nepac() {
     cmd=""
     opts=""
 
-    # Include the current word so `nepac run<Tab>` (no trailing space) is
+    # Include the current word so `ovicc run<Tab>` (no trailing space) is
     # detected as the `run` subcommand rather than re-offering "run".
     for i in "${COMP_WORDS[@]:0:COMP_CWORD+1}"
     do
         case "${cmd},${i}" in
             ",$1")
-                cmd="nepac"
+                cmd="ovicc"
                 ;;
-            nepac,run)
-                cmd="nepac__subcmd__run"
+            ovicc,run)
+                cmd="ovicc__subcmd__run"
                 ;;
             *)
                 ;;
@@ -27,14 +27,14 @@ _nepac() {
     done
 
     case "${cmd}" in
-        nepac)
-            opts="-v -o -I -L -l -S -Werror -eh -emit-bridge-header -rewrite-nepa --verbose --version -fnepa-arc -fno-nepa-arc -fno-checker -ffreestanding -nostdinc -no-comments -trace-refcount -trace-max-iters -trace-no-color -backend -asm -arch --gen-completions run"
+        ovicc)
+            opts="-v -o -I -L -l -S -Werror -eh -emit-bridge-header -rewrite-ovic --verbose --version -fovic-arc -fno-ovic-arc -fno-checker -ffreestanding -nostdinc -no-comments -trace-refcount -trace-max-iters -trace-no-color -backend -asm -arch --gen-completions run"
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 1 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
                 return 0
             fi
             case "${prev}" in
-                -rewrite-nepa)
+                -rewrite-ovic)
                     COMPREPLY=($(compgen -f "${cur}"))
                     return 0
                     ;;
@@ -50,11 +50,11 @@ _nepac() {
                     COMPREPLY=($(compgen -f "${cur}"))
                     return 0
                     ;;
-                -fnepa-arc)
+                -fovic-arc)
                     COMPREPLY=($(compgen -f "${cur}"))
                     return 0
                     ;;
-                -fno-nepa-arc)
+                -fno-ovic-arc)
                     COMPREPLY=($(compgen -f "${cur}"))
                     return 0
                     ;;
@@ -121,7 +121,7 @@ _nepac() {
             COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
             return 0
             ;;
-        nepac__subcmd__run)
+        ovicc__subcmd__run)
             opts=""
             if [[ ${cur} == -* ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
@@ -144,7 +144,7 @@ _nepac() {
 }
 
 if [[ "${BASH_VERSINFO[0]}" -eq 4 && "${BASH_VERSINFO[1]}" -ge 4 || "${BASH_VERSINFO[0]}" -gt 4 ]]; then
-    complete -F _nepac -o nosort -o bashdefault -o default nepac
+    complete -F _ovicc -o nosort -o bashdefault -o default ovicc
 else
-    complete -F _nepac -o bashdefault -o default nepac
+    complete -F _ovicc -o bashdefault -o default ovicc
 fi

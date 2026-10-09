@@ -1,7 +1,7 @@
-#import <Foundation/Foundation.np>
+#import <Foundation/Foundation.ov>
 
 /* Declarations shared by both TUs — the ONLY channel between them.
-   main.np never sees lib.np; it only sees these method signatures. */
+   main.ov never sees lib.ov; it only sees these method signatures. */
 @interface Greeter : NPObject
 - (const char *)greeting:(const char *)who;
 - (int)count;

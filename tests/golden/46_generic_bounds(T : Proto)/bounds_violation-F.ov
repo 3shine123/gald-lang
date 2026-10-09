@@ -1,0 +1,42 @@
+// -F sample (deliberate failure — documentation, not a suite test):
+// bound violation. Cat does not conform to Greetable, so the checker
+// rejects the specialization `Box<Cat *>` at the instantiation point:
+//   error: 'Cat' does not conform to protocol 'Greetable' required by
+//   'Box<T : Greetable>' — add <Greetable> to Cat's declaration or use a
+//   conforming type argument
+
+#import <Foundation/Foundation.oh>
+
+@protocol Greetable
+- (NPString *)greeting;
+@end
+
+@interface Cat : NPObject
+- (void)meow;
+@end
+
+@implementation Cat
+- (void)meow { }
+@end
+
+@interface Box<T : Greetable> : NPObject {
+    T _value;
+}
+- (instancetype)initWithValue:(T)value;
+@end
+
+@implementation Box
+- (instancetype)initWithValue:(T)value {
+    self = [super init];
+    if (self) {
+        _value = value;
+    }
+    return self;
+}
+@end
+
+int main() {
+    Box<Cat *> *bad = [[Box<Cat *> alloc] initWithValue:[[Cat alloc] init]];
+    (void)bad;
+    return 0;
+}

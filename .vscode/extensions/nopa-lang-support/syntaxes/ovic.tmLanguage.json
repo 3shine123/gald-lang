@@ -1,0 +1,620 @@
+{
+  "name": "Ovic",
+  "scopeName": "source.ov",
+  "fileTypes": ["np", "nh"],
+  "patterns": [
+    { "include": "#comments" },
+    { "include": "#preprocessor" },
+    { "include": "#strings" },
+    { "include": "#character" },
+    { "include": "#numbers" },
+    { "include": "#objc-at-interface" },
+    { "include": "#objc-at-implementation" },
+    { "include": "#objc-at-end" },
+    { "include": "#objc-at-property" },
+    { "include": "#ovic-at-await" },
+    { "include": "#objc-at-selector" },
+    { "include": "#objc-at-class-protocol" },
+    { "include": "#objc-at-access-control" },
+    { "include": "#objc-at-exception" },
+    { "include": "#ovic-noarc" },
+    { "include": "#objc-at-synchronized" },
+    { "include": "#objc-at-autoreleasepool" },
+    { "include": "#objc-at-protocol-spec" },
+    { "include": "#objc-at-dynamic-synthesize" },
+    { "include": "#objc-at-defs-encode" },
+    { "include": "#namespace-decl" },
+    { "include": "#using-decl" },
+    { "include": "#objc-types" },
+    { "include": "#objc-constants" },
+    { "include": "#objc-special" },
+    { "include": "#objc-property-attrs" },
+    { "include": "#objc-protocol-qualifiers" },
+    { "include": "#memory-management" },
+    { "include": "#c-types" },
+    { "include": "#c-storage-struct-enum" },
+    { "include": "#c-typedef" },
+    { "include": "#c-storage-modifiers" },
+    { "include": "#c-gcc-keywords" },
+    { "include": "#c-control" },
+    { "include": "#c-operators" },
+    { "include": "#block-syntax" },
+    { "include": "#namespace-access" },
+    { "include": "#method-signature" },
+    { "include": "#punctuation" }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.line.double-slash.ov",
+          "match": "//.*$"
+        },
+        {
+          "name": "comment.block.ov",
+          "begin": "/\\*",
+          "end": "\\*/"
+        }
+      ]
+    },
+    "preprocessor": {
+      "patterns": [
+        {
+          "name": "meta.preprocessor.include.ov",
+          "match": "^\\s*(#\\s*(?:import|include))\\s+[<\"]([^>\"]*)[>\"]",
+          "captures": {
+            "1": { "name": "keyword.control.import.include" },
+            "2": { "name": "string.quoted.other.lt" }
+          }
+        },
+        {
+          "name": "meta.preprocessor.macro.ov",
+          "match": "^\\s*(#\\s*define)\\s+([A-Za-z_][A-Za-z0-9_]*)",
+          "captures": {
+            "1": { "name": "keyword.control.define" },
+            "2": { "name": "entity.name.function.preprocessor" }
+          }
+        },
+        {
+          "name": "keyword.control.import",
+          "match": "^\\s*#\\s*(?:import|include|define|ifdef|ifndef|endif|pragma|if|else|elif|undef)\\b"
+        }
+      ]
+    },
+    "strings": {
+      "patterns": [
+        {
+          "name": "string.quoted.double",
+          "begin": "\"",
+          "end": "\"",
+          "patterns": [
+            {
+              "name": "constant.character.escape",
+              "match": "\\\\(?:[\"'\\\\abfnrtv0]|x[0-9a-fA-F]{1,2})"
+            }
+          ]
+        },
+        {
+          "name": "string.quoted.at",
+          "begin": "@\"",
+          "end": "\"",
+          "patterns": [
+            {
+              "name": "constant.character.escape",
+              "match": "\\\\(?:[\"'\\\\abfnrtv0]|x[0-9a-fA-F]{1,2})"
+            }
+          ]
+        }
+      ]
+    },
+    "character": {
+      "patterns": [
+        {
+          "name": "string.quoted.single",
+          "begin": "'",
+          "end": "'",
+          "patterns": [
+            {
+              "name": "constant.character.escape",
+              "match": "\\\\(?:[\"'\\\\abfnrtv0]|x[0-9a-fA-F]{1,2})"
+            }
+          ]
+        }
+      ]
+    },
+    "numbers": {
+      "patterns": [
+        {
+          "name": "constant.numeric.hex",
+          "match": "\\b0[xX][0-9a-fA-F]+[uUlL]*\\b"
+        },
+        {
+          "name": "constant.numeric.float",
+          "match": "\\b[0-9]+\\.[0-9]+(?:[eE][+-]?[0-9]+)?[fFlL]?\\b"
+        },
+        {
+          "name": "constant.numeric.float",
+          "match": "\\b[0-9]+[eE][+-]?[0-9]+[fFlL]?\\b"
+        },
+        {
+          "name": "constant.numeric.integer",
+          "match": "\\b[0-9]+[uUlL]*\\b"
+        }
+      ]
+    },
+
+    "objc-at-interface": {
+      "patterns": [
+        {
+          "name": "meta.interface-or-protocol.ov",
+          "begin": "(@interface)\\s+([A-Za-z_][A-Za-z0-9_]*)\\s*(:\\s*([A-Za-z_][A-Za-z0-9_]*))?",
+          "beginCaptures": {
+            "1": { "name": "storage.type" },
+            "2": { "name": "entity.name.type" },
+            "3": { "name": "punctuation.definition.entity.other.inherited-class" },
+            "4": { "name": "entity.other.inherited-class" }
+          },
+          "end": "(@end)\\b",
+          "endCaptures": {
+            "1": { "name": "storage.type" }
+          },
+          "patterns": [
+            { "include": "#comments" },
+            { "include": "#objc-at-property" },
+            { "include": "#ovic-at-await" },
+            { "include": "#objc-at-selector" },
+            { "include": "#objc-at-access-control" },
+            { "include": "#method-signature" },
+            { "include": "#c-types" },
+            { "include": "#objc-types" },
+            { "include": "#namespace-access" },
+            { "include": "#punctuation" }
+          ]
+        }
+      ]
+    },
+    "objc-at-implementation": {
+      "patterns": [
+        {
+          "name": "meta.implementation.ov",
+          "begin": "(@implementation)\\s+([A-Za-z_][A-Za-z0-9_]*)\\s*(:\\s*([A-Za-z_][A-Za-z0-9_]*))?",
+          "beginCaptures": {
+            "1": { "name": "storage.type" },
+            "2": { "name": "entity.name.type" },
+            "3": { "name": "punctuation.definition.entity.other.inherited-class" },
+            "4": { "name": "entity.other.inherited-class" }
+          },
+          "end": "(@end)\\b",
+          "endCaptures": {
+            "1": { "name": "storage.type" }
+          },
+          "patterns": [
+            { "include": "#comments" },
+            { "include": "#preprocessor" },
+            { "include": "#strings" },
+            { "include": "#character" },
+            { "include": "#numbers" },
+            { "include": "#objc-at-property" },
+            { "include": "#ovic-at-await" },
+            { "include": "#objc-at-selector" },
+            { "include": "#objc-at-access-control" },
+            { "include": "#objc-at-dynamic-synthesize" },
+            { "include": "#method-signature" },
+            { "include": "#objc-types" },
+            { "include": "#objc-constants" },
+            { "include": "#objc-special" },
+            { "include": "#memory-management" },
+            { "include": "#ovic-noarc" },
+            { "include": "#c-types" },
+            { "include": "#c-storage-struct-enum" },
+            { "include": "#c-typedef" },
+            { "include": "#c-storage-modifiers" },
+            { "include": "#c-gcc-keywords" },
+            { "include": "#c-control" },
+            { "include": "#c-operators" },
+            { "include": "#namespace-access" },
+            { "include": "#block-syntax" },
+            { "include": "#punctuation" }
+          ]
+        }
+      ]
+    },
+    "objc-at-end": {
+      "patterns": [
+        {
+          "name": "keyword.other",
+          "match": "@endnamespace\\b"
+        },
+        {
+          "name": "keyword.other",
+          "match": "@end\\b"
+        }
+      ]
+    },
+    "objc-at-property": {
+      "patterns": [
+        {
+          "name": "meta.property-directive.ov",
+          "begin": "(@property)\\s*(?:\\([^)]*\\))?\\s*",
+          "beginCaptures": {
+            "1": { "name": "storage.modifier" }
+          },
+          "end": "(?=;|$)",
+          "patterns": [
+            { "include": "#objc-property-attrs" },
+            { "include": "#c-types" },
+            { "include": "#objc-types" },
+            { "include": "#namespace-access" },
+            { "include": "#punctuation" }
+          ]
+        }
+      ]
+    },
+    "ovic-at-await": {
+      "patterns": [
+        {
+          "name": "keyword.control.await",
+          "match": "@await\\b"
+        }
+      ]
+    },
+    "objc-at-selector": {
+      "patterns": [
+        {
+          "name": "meta.selector.ov",
+          "begin": "(@selector)\\s*(\\()",
+          "beginCaptures": {
+            "1": { "name": "storage.type" },
+            "2": { "name": "punctuation.definition.storage.type" }
+          },
+          "end": "(\\))",
+          "endCaptures": {
+            "1": { "name": "punctuation.definition.storage.type" }
+          },
+          "patterns": [
+            {
+              "name": "support.function.any-method.name-of-parameter",
+              "match": "\\b(?:[a-zA-Z_:][\\w]*)+"
+            }
+          ]
+        }
+      ]
+    },
+    "objc-at-class-protocol": {
+      "patterns": [
+        {
+          "name": "storage.type",
+          "match": "@(?:class|protocol)\\b"
+        }
+      ]
+    },
+    "objc-at-access-control": {
+      "patterns": [
+        {
+          "name": "storage.modifier",
+          "match": "@(?:public|package|protected|private)\\b"
+        }
+      ]
+    },
+    "objc-at-exception": {
+      "patterns": [
+        {
+          "name": "keyword.control.exception",
+          "match": "@(?:try|catch|finally|throw)\\b"
+        }
+      ]
+    },
+    "ovic-noarc": {
+      "patterns": [
+        {
+          "name": "keyword.control.noarc",
+          "match": "@noarc\\b"
+        }
+      ]
+    },
+    "objc-at-synchronized": {
+      "patterns": [
+        {
+          "name": "keyword.control.synchronize",
+          "match": "@synchronized\\b"
+        }
+      ]
+    },
+    "objc-at-autoreleasepool": {
+      "patterns": [
+        {
+          "name": "keyword.control.autoreleasepool",
+          "match": "@autoreleasepool\\b"
+        }
+      ]
+    },
+    "objc-at-protocol-spec": {
+      "patterns": [
+        {
+          "name": "keyword.control.protocol-specification",
+          "match": "@(?:required|optional)\\b"
+        }
+      ]
+    },
+    "objc-at-dynamic-synthesize": {
+      "patterns": [
+        {
+          "name": "keyword.other.property.directive",
+          "match": "@(?:dynamic|synthesize)\\b"
+        }
+      ]
+    },
+    "objc-at-defs-encode": {
+      "patterns": [
+        {
+          "name": "keyword.other",
+          "match": "@(?:defs|encode)\\b"
+        }
+      ]
+    },
+
+    "namespace-decl": {
+      "patterns": [
+        {
+          "name": "meta.namespace.ov",
+          "begin": "(@namespace)\\s+([A-Za-z_][A-Za-z0-9_]*(?:::\\s*[A-Za-z_][A-Za-z0-9_]*)*)",
+          "beginCaptures": {
+            "1": { "name": "storage.type.namespace" },
+            "2": { "name": "entity.name.type.namespace" }
+          },
+          "end": "(@endnamespace)\\b",
+          "endCaptures": {
+            "1": { "name": "storage.type.namespace" }
+          },
+          "patterns": [
+            { "include": "$self" },
+            { "include": "#comments" }
+          ]
+        }
+      ]
+    },
+    "using-decl": {
+      "patterns": [
+        {
+          "name": "keyword.other.using",
+          "match": "@using\\b"
+        }
+      ]
+    },
+
+    "objc-types": {
+      "patterns": [
+        {
+          "name": "storage.type.id.objc",
+          "match": "\\b(?:id|Class|SEL|BOOL|IMP|instancetype|NPZone|IBOutlet|IBAction|unichar)\\b"
+        }
+      ]
+    },
+    "objc-constants": {
+      "patterns": [
+        {
+          "name": "constant.language",
+          "match": "\\b(?:YES|NO|Nil|nil|NULL)\\b"
+        }
+      ]
+    },
+    "objc-special": {
+      "patterns": [
+        {
+          "name": "variable.language.self",
+          "match": "\\b(?:self|super|_cmd)\\b"
+        }
+      ]
+    },
+    "objc-property-attrs": {
+      "patterns": [
+        {
+          "name": "storage.modifier",
+          "match": "\\b(?:readwrite|readonly|weak|strong|assign|retain|copy|nonatomic|getter|setter)\\b"
+        }
+      ]
+    },
+    "objc-protocol-qualifiers": {
+      "patterns": [
+        {
+          "name": "storage.modifier.protocol",
+          "match": "\\b(?:in|out|inout|oneway|bycopy|byref|nonnull|nullable|_Nonnull|_Nullable|_Null_unspecified)\\b"
+        }
+      ]
+    },
+    "memory-management": {
+      "patterns": [
+        {
+          "name": "storage.modifier",
+          "match": "\\b(?:__block|__weak|__strong|__autoreleasing|__unsafe_unretained)\\b"
+        }
+      ]
+    },
+
+    "c-types": {
+      "patterns": [
+        {
+          "name": "storage.type",
+          "match": "\\b(?:void|char|short|int|long|float|double|signed|unsigned|_Bool|bool)\\b"
+        }
+      ]
+    },
+    "c-storage-struct-enum": {
+      "patterns": [
+        {
+          "name": "storage.type.$1",
+          "match": "\\b(enum|struct|union)\\b"
+        }
+      ]
+    },
+    "c-typedef": {
+      "patterns": [
+        {
+          "name": "keyword.other.typedef",
+          "match": "\\btypedef\\b"
+        },
+        {
+          "name": "keyword.other.typeof",
+          "match": "\\b(?:sizeof|typeof)\\b"
+        }
+      ]
+    },
+    "c-storage-modifiers": {
+      "patterns": [
+        {
+          "name": "storage.modifier",
+          "match": "\\b(?:const|extern|register|restrict|static|volatile|inline|auto)\\b"
+        }
+      ]
+    },
+    "c-gcc-keywords": {
+      "patterns": [
+        {
+          "name": "keyword.other.asm",
+          "match": "\\b(?:asm|__asm|__asm__)\\b"
+        },
+        {
+          "name": "keyword.other.asm-qualifier",
+          "match": "\\b(?:__volatile|__volatile__)\\b"
+        },
+        {
+          "name": "keyword.other.gcc",
+          "match": "\\b(?:__typeof|__typeof__|__alignof|__alignof__|__extension__|__const__|__inline__|__signed__|__restrict__|__restrict|__inline|__signed)\\b"
+        }
+      ]
+    },
+    "c-control": {
+      "patterns": [
+        {
+          "name": "keyword.control",
+          "match": "\\b(?:return|if|else|switch|case|default|while|do|for|in|break|continue|goto)\\b"
+        }
+      ]
+    },
+    "c-operators": {
+      "patterns": [
+        {
+          "name": "keyword.operator.sizeof",
+          "match": "(?<!\\w)sizeof(?=\\s*[(\\[])"
+        },
+        {
+          "name": "keyword.operator.increment",
+          "match": "\\+\\+"
+        },
+        {
+          "name": "keyword.operator.decrement",
+          "match": "--"
+        },
+        {
+          "name": "keyword.operator.assignment.compound",
+          "match": "%=|\\+=|-=|\\*=(?<!\\()/="
+        },
+        {
+          "name": "keyword.operator.assignment.compound.bitwise",
+          "match": "&=|\\^=|<<=|>>=|\\|="
+        },
+        {
+          "name": "keyword.operator.bitwise.shift",
+          "match": "<<|>>"
+        },
+        {
+          "name": "keyword.operator.comparison",
+          "match": "!=|<=|>=|==|<|>"
+        },
+        {
+          "name": "keyword.operator.logical",
+          "match": "&&|!|\\|\\|"
+        },
+        {
+          "name": "keyword.operator",
+          "match": "&|\\||\\^|~"
+        },
+        {
+          "name": "keyword.operator.assignment",
+          "match": "="
+        },
+        {
+          "name": "keyword.operator",
+          "match": "%|\\*|/|-|\\+"
+        },
+        {
+          "name": "keyword.operator.ternary",
+          "match": "\\?"
+        },
+        {
+          "name": "keyword.operator.arrow",
+          "match": "->"
+        },
+        {
+          "name": "keyword.operator.variadic",
+          "match": "(?<!\\.)\\.(?=\\s*\\.)"
+        },
+        {
+          "name": "punctuation.vararg-ellipses",
+          "match": "(?<!\\.)\\.\\.\\.(?!\\.)"
+        },
+        {
+          "name": "keyword.operator.caret",
+          "match": "\\^"
+        }
+      ]
+    },
+
+    "block-syntax": {
+      "patterns": [
+        {
+          "name": "meta.block-literal.ov",
+          "match": "\\^(?:\\s*(?:void|int|char|float|double|long|short|unsigned|signed|id|BOOL)\\b)?\\s*\\(",
+          "captures": {
+            "0": { "name": "keyword.operator.caret" }
+          }
+        }
+      ]
+    },
+    "namespace-access": {
+      "patterns": [
+        {
+          "name": "entity.name.type.namespace",
+          "match": "\\b[A-Za-z_][A-Za-z0-9_]*(?:::[A-Za-z_][A-Za-z0-9_]*)+"
+        }
+      ]
+    },
+    "method-signature": {
+      "patterns": [
+        {
+          "name": "meta.function.objc",
+          "begin": "^\\s*([-+]\\s*\\()",
+          "beginCaptures": {
+            "1": { "name": "meta.function.objc" }
+          },
+          "end": "(\\))\\s*(\\w+\\b)",
+          "endCaptures": {
+            "1": { "name": "punctuation.definition.type.end.objc" },
+            "2": { "name": "entity.name.function.objc" }
+          },
+          "patterns": [
+            { "include": "#c-types" },
+            { "include": "#objc-types" },
+            { "include": "#namespace-access" }
+          ]
+        }
+      ]
+    },
+    "punctuation": {
+      "patterns": [
+        {
+          "name": "punctuation.terminator.statement",
+          "match": ";"
+        },
+        {
+          "name": "punctuation.separator.delimiter",
+          "match": ","
+        },
+        {
+          "name": "punctuation.separator.namespace",
+          "match": "::"
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,13 @@
+// Selector-visibility tiering probe:
+//   s1a — declared selector on a typed receiver: must stay silent.
+//   s1b — undeclared selector on a typed receiver: checker ERROR
+//         (was a warning; the per-method scope-frame fix killed the
+//         receiver mis-resolution that forced the downgrade).
+#import <Foundation/Foundation.oh>
+
+int main(void) {
+    NPString *s = [[NPString alloc] init];
+    [s isEqualToString:s];   // s1a: declared — no diagnostic
+    [s frobnicate];          // s1b: undeclared — must error
+    return 0;
+}

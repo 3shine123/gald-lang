@@ -1,33 +1,33 @@
 // Foundation —— 纯声明伞头（declaration-only）。
 //
-// 按项目约定（`.nh` = 声明，`.np` = 实现），导入本头**不会**内联任何
+// 按项目约定（`.oh` = 声明，`.ov` = 实现），导入本头**不会**内联任何
 // Foundation 实现：你的 TU 只生成你自己的代码，Foundation 的实现只在
 // 预编译库里存一份 —— 也就是 Objective-C 的模型。
 //
-//     #import <Foundation/Foundation.nh>            // 纯声明
-//     nepac app.np -I include -L <libdir> -lnepafoundation -o app
+//     #import <Foundation/Foundation.oh>            // 纯声明
+//     ovicc app.ov -I include -L <libdir> -lovicafoundation -o app
 //
 // 自包含单 TU 构建（实现内联进每个使用者，无需库）导入实现伞头：
 //
-//     #import <Foundation/Foundation.np>
+//     #import <Foundation/Foundation.ov>
 //
 // 库的构建见 tools/build-foundation-lib.sh。
 #include <stdint.h>
 #include <stddef.h>
 
-#include "nepa/runtime.h"
+#include "ovic/runtime.h"
 
-#import "NPObject.nh"
-#import "NPString.nh"
-#import "NPMutableString.nh"
-#import "NPArray.nh"
-#import "NPMutableArray.nh"
-#import "NPDictionary.nh"
-#import "NPMutableDictionary.nh"
-#import "NPSet.nh"
-#import "NPMutableSet.nh"
-#import "NPOrderedSet.nh"
-#import "NPPredicate.nh"
-#import "NPNumber.nh"
-#import "NPError.nh"
-#import "NPTask.nh"
+#import "NPObject.oh"
+#import "NPString.oh"
+#import "NPMutableString.oh"
+#import "NPArray.oh"
+#import "NPMutableArray.oh"
+#import "NPDictionary.oh"
+#import "NPMutableDictionary.oh"
+#import "NPSet.oh"
+#import "NPMutableSet.oh"
+#import "NPOrderedSet.oh"
+#import "NPPredicate.oh"
+#import "NPNumber.oh"
+#import "NPError.oh"
+#import "NPTask.oh"

@@ -1,3 +1,3 @@
-*.np linguist-language=Objective-C
-*.nh linguist-language=Objective-C
+*.ov linguist-language=Objective-C
+*.oh linguist-language=Objective-C
 tests/*.c linguist-generated=true

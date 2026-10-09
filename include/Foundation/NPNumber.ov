@@ -1,0 +1,87 @@
+#import <Foundation/NPNumber.oh>
+#import <Foundation/NPObject.ov>
+#include <stdio.h>
+
+@implementation NPNumber
+
+- (NPNumber *)initWithLongLong:(long long)value {
+    self = [super init];
+    if (self) {
+        _isDouble = 0;
+        _intValue = value;
+        _doubleValue = (double)value;
+    }
+    return self;
+}
+
+- (NPNumber *)initWithDouble:(double)value {
+    self = [super init];
+    if (self) {
+        _isDouble = 1;
+        _doubleValue = value;
+        _intValue = (long long)value;
+    }
+    return self;
+}
+
++ (NPNumber *)numberWithInt:(int)value {
+    @noarc {
+        return [[[self alloc] initWithLongLong:(long long)value] autorelease];
+    }
+}
+
++ (NPNumber *)numberWithLongLong:(long long)value {
+    @noarc {
+        return [[[self alloc] initWithLongLong:value] autorelease];
+    }
+}
+
++ (NPNumber *)numberWithDouble:(double)value {
+    @noarc {
+        return [[[self alloc] initWithDouble:value] autorelease];
+    }
+}
+
++ (NPNumber *)numberWithBool:(int)value {
+    @noarc {
+        return [[[self alloc] initWithLongLong:(long long)(value ? 1 : 0)] autorelease];
+    }
+}
+
++ (NPNumber *)numberWithChar:(char)value {
+    @noarc {
+        return [[[self alloc] initWithLongLong:(long long)value] autorelease];
+    }
+}
+
+- (int)intValue { return (int)_intValue; }
+- (long long)longLongValue { return _intValue; }
+- (double)doubleValue { return _isDouble ? _doubleValue : (double)_intValue; }
+- (int)boolValue { return _isDouble ? (_doubleValue != 0.0) : (_intValue != 0); }
+- (char)charValue { return (char)_intValue; }
+
+- (NPString *)description {
+    char buf[64];
+    if (_isDouble) {
+        snprintf(buf, sizeof(buf), "%g", _doubleValue);
+    } else {
+        snprintf(buf, sizeof(buf), "%lld", _intValue);
+    }
+    return [NPString stringWithUTF8String:buf];
+}
+
+- (BOOL)isEqual:(id)object {
+    if (self == (NPObject *)object) return YES;
+    if (!object) return NO;
+    if ([object isKindOfClass:[NPNumber class]]) {
+        return [self isEqualToNumber:(NPNumber *)object];
+    }
+    return [super isEqual:object];
+}
+
+- (int)isEqualToNumber:(NPNumber *)other {
+    if (!other) return 0;
+    return [self doubleValue] == [other doubleValue];
+}
+
+@end

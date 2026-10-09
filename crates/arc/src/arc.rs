@@ -1,7 +1,7 @@
-use nepa_ast::*;
-use nepa_cfg::*;
-use nepa_ownership::*;
-use nepa_cst::TypePrim;
+use ovic_ast::*;
+use ovic_cfg::*;
+use ovic_ownership::*;
+use ovic_cst::TypePrim;
 
 #[derive(Debug, Clone, Copy)]
 pub enum ArcActionKind {
@@ -54,7 +54,7 @@ fn make_release_stmt(target: &AstExpr) -> AstStmt {
         data: AstStmtData::Expr(AstExpr {
             kind: AstExprKind::FuncCall, expr_type: None, line: 0, col: 0,
             data: AstExprData::FuncCall {
-                func: None, name: "nepa_release".to_string(), callee: None, args: vec![target.clone()],
+                func: None, name: "ovic_release".to_string(), callee: None, args: vec![target.clone()],
             },
         }),
     }
@@ -87,7 +87,7 @@ fn var_ref_expr(name: &str) -> AstExpr {
 // behind a temporary:
 //
 //     return [[h text] length];  ⇒  __auto_type t = [[h text] length];
-//                                   nepa_release(h);
+//                                   ovic_release(h);
 //                                   return t;
 //
 // Two rules, pinned down by `tests/arc_order/`:
@@ -106,7 +106,7 @@ static ARC_TMP_SEQ: std::sync::atomic::AtomicUsize = std::sync::atomic::AtomicUs
 ///
 /// Two shapes qualify:
 ///   * `return h;` — a bare owned local is handed to the caller.
-///   * `return nepa_autorelease(h);` / `return [h autorelease];` — the object
+///   * `return ovic_autorelease(h);` / `return [h autorelease];` — the object
 ///     is handed to the autorelease pool; the value the caller receives is
 ///     +0 and must stay valid, so releasing it here would be a premature free.
 ///     Foundation relies on this (`NPArray +arrayWithObjects:count:`).
@@ -119,7 +119,7 @@ fn transferred_var(e: &AstExpr) -> Option<&str> {
     match &e.data {
         AstExprData::VarRef { name, .. } => Some(name.as_str()),
         AstExprData::FuncCall { name, args, .. }
-            if name == "nepa_autorelease" && args.len() == 1 =>
+            if name == "ovic_autorelease" && args.len() == 1 =>
         {
             match &args[0].data {
                 AstExprData::VarRef { name, .. } => Some(name.as_str()),
@@ -348,7 +348,7 @@ fn collect_captures_expr(e: &AstExpr, out: &mut Vec<String>) {
 // C labels are function-scoped, so `goto` can jump *out of* nested blocks —
 // nobody releases the locals of the scopes it leaves behind, which leaks every
 // owned object declared there (the pattern-switch lowering emits exactly this
-// shape: arm bodies live in nested compounds and `goto __nepa_swN_end` jumps
+// shape: arm bodies live in nested compounds and `goto __ovic_swN_end` jumps
 // out of them).
 //
 // Each statement list is identified by its SCOPE PATH: the sequence of
@@ -563,7 +563,7 @@ fn insert_exit_cleanup(
     // The temporary carries no ownership of its own — it is a plain copy of the
     // already-computed value, so no retain/release is introduced.
     let seq = ARC_TMP_SEQ.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
-    let tmp = format!("__nepa_arc_ret_{}", seq);
+    let tmp = format!("__ovic_arc_ret_{}", seq);
     let expr = exit_expr.expect("needs_tmp implies an expression").clone();
     let exit_stmt = if is_throw {
         AstStmt {
@@ -862,7 +862,7 @@ pub fn arc_local_analyze(body: &mut AstStmt, _cfg: &Cfg, method_name: &str) -> A
                 continue;
             }
 
-            // ── Handle manual `[var release]` / `nepa_release(var)`: forget var everywhere ──
+            // ── Handle manual `[var release]` / `ovic_release(var)`: forget var everywhere ──
             if let AstStmtData::Expr(e) = &stmts[i].data {
                 match &e.data {
                     AstExprData::MsgSend { receiver, selector, args, .. } if selector == "release" && args.is_empty() => {
@@ -870,7 +870,7 @@ pub fn arc_local_analyze(body: &mut AstStmt, _cfg: &Cfg, method_name: &str) -> A
                             drop_var(stack, name);
                         }
                     }
-                    AstExprData::FuncCall { name, args, .. } if name == "nepa_release" && args.len() == 1 => {
+                    AstExprData::FuncCall { name, args, .. } if name == "ovic_release" && args.len() == 1 => {
                         if let AstExprData::VarRef { name, .. } = &args[0].data {
                             drop_var(stack, name);
                         }
@@ -998,8 +998,8 @@ fn is_retain_release_pair(s1: &AstStmt, s2: &AstStmt) -> Option<bool> {
     let t1 = match &args1[0].data { AstExprData::VarRef { name, .. } => name, _ => return None };
     let t2 = match &args2[0].data { AstExprData::VarRef { name, .. } => name, _ => return None };
     if t1 != t2 { return None; }
-    let is_retain = |n: &str| n == "nepa_retain";
-    let is_release = |n: &str| n == "nepa_release";
+    let is_retain = |n: &str| n == "ovic_retain";
+    let is_release = |n: &str| n == "ovic_release";
     if (is_retain(name1) && is_release(name2)) || (is_release(name1) && is_retain(name2)) {
         Some(true)
     } else {

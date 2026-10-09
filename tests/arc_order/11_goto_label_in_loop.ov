@@ -1,0 +1,30 @@
+#import <Foundation/Foundation.ov>
+
+// ARC order 11: `goto` out of a loop body releases the iteration's local. The
+// label lives outside the loop, so the jump leaves the body scope.
+
+@interface AO11Item : NPObject
+- (int)value;
+@end
+
+@implementation AO11Item
+- (void)dealloc {
+    NPLog(@"ao11 dealloc");
+    [super dealloc];
+}
+- (int)value { return 11; }
+@end
+
+int main() {
+    for (int i = 0; i < 3; i++) {
+        AO11Item *x = [[AO11Item alloc] init];
+        NPLog(@"ao11 iter=%d", i);
+        if (i == 1) {
+            goto out;
+        }
+    }
+
+out:
+    NPLog(@"ao11 done");
+    return 0;
+}

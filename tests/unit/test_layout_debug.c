@@ -1,9 +1,9 @@
-#include "nepa/layout.h"
-#include "nepa/parser.h"
-#include "nepa/lexer.h"
-#include "nepa/cst.h"
-#include "nepa/symbol.h"
-#include "nepa/binder.h"
+#include "ovic/layout.h"
+#include "ovic/parser.h"
+#include "ovic/lexer.h"
+#include "ovic/cst.h"
+#include "ovic/symbol.h"
+#include "ovic/binder.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -27,7 +27,7 @@ int main(void) {
         "@end";
 
     lexer_t lexer;
-    lexer_init(&lexer, src, strlen(src), "test.np");
+    lexer_init(&lexer, src, strlen(src), "test.ov");
     parser_t *p = parser_create(&lexer);
     translation_unit_t *unit = parser_parse_translation_unit(p);
     printf("unit->decl_count = %d\n", unit->decl_count);

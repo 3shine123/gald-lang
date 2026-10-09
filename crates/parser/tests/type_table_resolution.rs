@@ -1,11 +1,11 @@
 //! C resolves `(X *)p` versus `x * y` by the *symbol table*, not by token shape:
-//! a name is a type name or it is an ordinary identifier. nepac hands the parser
-//! a type-name table recovered from the C preprocessor (`nepac::ctype_probe`)
+//! a name is a type name or it is an ordinary identifier. ovicc hands the parser
+//! a type-name table recovered from the C preprocessor (`ovicc::ctype_probe`)
 //! and marks it authoritative; these tests pin the decisions that follow, plus
 //! the fallback behaviour when no authoritative table is available (which must
 //! never reject code).
 
-use nepa_parser::Parser;
+use ovic_parser::Parser;
 
 fn type_names(names: &[&str]) -> Vec<String> {
     names.iter().map(|s| s.to_string()).collect()
@@ -20,13 +20,13 @@ fn statements(src: &str, names: &[String], complete: bool) -> Vec<String> {
         .find(|d| d.name.as_deref() == Some("main"))
         .expect("main");
     let mut out = Vec::new();
-    if let nepa_cst::CstDeclData::Function { body: Some(b), .. } = &main_fn.data {
-        if let nepa_cst::CstStmtData::Compound(stmts) = &b.data {
+    if let ovic_cst::CstDeclData::Function { body: Some(b), .. } = &main_fn.data {
+        if let ovic_cst::CstStmtData::Compound(stmts) = &b.data {
             for s in stmts {
                 out.push(match &s.data {
-                    nepa_cst::CstStmtData::Decl(d) => format!("Decl({})", d.name.as_deref().unwrap_or("?")),
-                    nepa_cst::CstStmtData::Expr(_) => "Expr".to_string(),
-                    nepa_cst::CstStmtData::Return(_) => "Return".to_string(),
+                    ovic_cst::CstStmtData::Decl(d) => format!("Decl({})", d.name.as_deref().unwrap_or("?")),
+                    ovic_cst::CstStmtData::Expr(_) => "Expr".to_string(),
+                    ovic_cst::CstStmtData::Return(_) => "Return".to_string(),
                     other => format!("Other({:?})", std::mem::discriminant(other)),
                 });
             }

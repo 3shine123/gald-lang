@@ -5,7 +5,7 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 
-NEPAC="${NEPAC:-../target/debug/nepac}"
+OVICC="${OVICC:-../target/debug/ovicc}"
 
 echo "==> transpile + compile as x86_64 + run (Rosetta)"
-"$NEPAC" -arch x86_64 run -asm asm_x86_ext.s asm_x86_fusion_test.np
+"$OVICC" -arch x86_64 run -asm asm_x86_ext.s asm_x86_fusion_test.ov

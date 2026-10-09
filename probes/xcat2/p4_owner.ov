@@ -1,0 +1,4 @@
+#import "p4.oh"
+@implementation Dog
+- (instancetype)init { return self; }
+@end

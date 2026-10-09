@@ -1,4 +1,4 @@
-#include "nepa/symbol.h"
+#include "ovic/symbol.h"
 #include <stdio.h>
 #include <string.h>
 

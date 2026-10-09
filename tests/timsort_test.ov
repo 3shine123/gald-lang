@@ -1,0 +1,201 @@
+// Timsort 排序测试（Ovic 语法版）
+// 演示：@interface/@implementation 类、多段 selector 方法、Block 比较器、
+//       @autoreleasepool、@"..." 字符串、NPLog、@public ivar
+// 用法: echo "5 23 6 4 75 1 3 63 464 322 46 8 0 89 1" | ovicc run tests/timsort_test.ov
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#import <Foundation/Foundation.ov>
+
+// Block 比较器类型：返回 a < b（升序）
+typedef BOOL (^CompareBlock)(int, int);
+
+static int g_stack[64];
+static size_t g_sp = 0;
+
+// ─── Ovic 类：封装 Timsort ───
+
+@interface TimSortSorter : NPObject
+{
+    @public
+    size_t _minrun;
+    BOOL _debug;
+}
+
+- (void)setMinrun:(size_t)m;
+- (size_t)minrun;
+
+// 二分查找左边界：在 a[lo..hi) 中找到第一个 大于等于 key 的位置
+- (size_t)lowerBound:(int *)a lo:(size_t)lo hi:(size_t)hi key:(int)key using:(CompareBlock)less;
+
+// 二分插入排序（用比较器）
+- (void)binaryInsertionSort:(int *)a lo:(size_t)lo hi:(size_t)hi using:(CompareBlock)less;
+
+// 合并两个相邻有序段（用比较器）
+- (void)merge:(int *)a tmp:(int *)tmp lo:(size_t)lo mid:(size_t)mid hi:(size_t)hi using:(CompareBlock)less;
+
+// 主入口：Timsort
+- (void)timsort:(int *)a count:(size_t)n using:(CompareBlock)less;
+
+@end
+
+@implementation TimSortSorter
+
+- (void)setMinrun:(size_t)m {
+    _minrun = m;
+}
+
+- (size_t)minrun {
+    return _minrun;
+}
+
+- (size_t)lowerBound:(int *)a lo:(size_t)lo hi:(size_t)hi key:(int)key using:(CompareBlock)less {
+    while (lo < hi) {
+        size_t mid = lo + (hi - lo) / 2;
+        if (less(a[mid], key)) { lo = mid + 1; }
+        else                   { hi = mid; }
+    }
+    return lo;
+}
+
+- (void)binaryInsertionSort:(int *)a lo:(size_t)lo hi:(size_t)hi using:(CompareBlock)less {
+    for (size_t i = lo + 1; i < hi; i++) {
+        int key = a[i];
+        size_t pos = [self lowerBound:a lo:lo hi:i key:key using:less];
+        if (pos < i) {
+            memmove(&a[pos + 1], &a[pos], (i - pos) * sizeof(int));
+            a[pos] = key;
+        }
+    }
+}
+
+- (void)merge:(int *)a tmp:(int *)tmp lo:(size_t)lo mid:(size_t)mid hi:(size_t)hi using:(CompareBlock)less {
+    size_t n1 = mid - lo;
+    memcpy(tmp, a + lo, n1 * sizeof(int));
+    size_t i = lo, j = 0, k = mid;
+    while (j < n1 && k < hi) {
+        if (!less(a[k], tmp[j])) { a[i++] = tmp[j++]; }
+        else                      { a[i++] = a[k++]; }
+    }
+    while (j < n1) { a[i++] = tmp[j++]; }
+}
+
+- (size_t)computeMinrun:(size_t)n {
+    size_t r = 0;
+    while (n >= 64) {
+        r |= n & 1;
+        n >>= 1;
+    }
+    return n + r;
+}
+
+- (void)timsort:(int *)a count:(size_t)n using:(CompareBlock)less {
+    if (n < 2) { return; }
+    _minrun = [self computeMinrun:n];
+    int *tmp = (int *)malloc((n / 2 + 1) * sizeof(int));
+    if (!tmp) { return; }
+    g_sp = 0;
+
+    size_t lo = 0;
+    while (lo < n) {
+        size_t hi = lo + 1;
+        if (hi < n && !less(a[hi], a[hi - 1])) {
+            while (hi < n && !less(a[hi], a[hi - 1])) { hi++; }
+        } else {
+            while (hi < n && less(a[hi], a[hi - 1])) { hi++; }
+            for (size_t p = lo, q = hi - 1; p < q; p++, q--) {
+                int t = a[p]; a[p] = a[q]; a[q] = t;
+            }
+        }
+        if (hi - lo < _minrun) {
+            size_t target = lo + _minrun;
+            if (target > n) { target = n; }
+            [self binaryInsertionSort:a lo:lo hi:target using:less];
+            hi = target;
+        }
+        g_stack[g_sp * 2] = (int)lo;        // run base
+        g_stack[g_sp * 2 + 1] = (int)(hi - lo); // run length
+        g_sp++;
+        lo = hi;
+    }
+
+    // 逐对合并（从后向前相邻合并）
+    while (g_sp > 1) {
+        size_t top = (g_sp - 1) * 2;
+        size_t base = (size_t)g_stack[top - 2];
+        size_t len1 = (size_t)g_stack[top - 1];
+        size_t len2 = (size_t)g_stack[top + 1];
+        [self merge:a tmp:tmp lo:base mid:base + len1 hi:base + len1 + len2 using:less];
+        g_stack[top - 2] = (int)base;
+        g_stack[top - 1] = (int)(len1 + len2);
+        g_sp--;
+    }
+    free(tmp);
+}
+
+@end
+
+// ─── 演示入口 ───
+
+@interface SortDemo : NPObject
++ (void)run;
+@end
+
+@implementation SortDemo
+
++ (void)run {
+    @autoreleasepool {
+        printf("Enter numbers separated by spaces:\n");
+        fflush(stdout);
+        char buf[65536];
+        if (!fgets(buf, sizeof(buf), stdin)) { return; }
+
+        size_t cap = 1024, count = 0;
+        int *vals = (int *)malloc(cap * sizeof(int));
+        if (!vals) { return; }
+
+        char *p = buf;
+        while (*p) {
+            while (*p == ' ' || *p == '\t' || *p == '\n') { p++; }
+            if (!*p) { break; }
+            char *end;
+            long v = strtol(p, &end, 10);
+            if (end == p) { break; }
+            if (count >= cap) {
+                cap *= 2;
+                vals = (int *)realloc(vals, cap * sizeof(int));
+            }
+            vals[count++] = (int)v;
+            p = end;
+        }
+        size_t n = count;
+
+        printf("Input (%zu): ", n);
+        for (size_t i = 0; i < n; i++) { printf("%d ", vals[i]); }
+        printf("\n");
+
+        TimSortSorter *sorter = [[TimSortSorter alloc] init];
+
+        long t0 = (long)clock();
+        [sorter timsort:vals count:n using:^BOOL(int a, int b) { return a < b; }];
+        long t1 = (long)clock();
+
+        printf("Sorted (%zu): ", n);
+        for (size_t i = 0; i < n; i++) { printf("%d ", vals[i]); }
+        printf("\n");
+
+        double ms = ((double)(t1 - t0) * 1000.0) / (double)CLOCKS_PER_SEC;
+        printf("Time: %.3f ms (minrun=%zu)\n", ms, [sorter minrun]);
+        NPLog(@"Sorted via Ovic TimSort (NPLog: %@ is %zu numbers)", [NPString stringWithUTF8String:"input"], n);
+
+        free(vals);
+    }
+}
+
+@end
+
+int main(void) {
+    [SortDemo run];
+    return 0;
+}

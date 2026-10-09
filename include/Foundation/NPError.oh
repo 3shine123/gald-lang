@@ -1,9 +1,9 @@
 #ifndef NPERROR_NH
 #define NPERROR_NH
 
-#import <Foundation/NPObject.nh>
-#import <Foundation/NPString.nh>
-#import <Foundation/NPDictionary.nh>
+#import <Foundation/NPObject.oh>
+#import <Foundation/NPString.oh>
+#import <Foundation/NPDictionary.oh>
 
 // Error domains, matching ObjC's convention of reversing-DNS prefixes.
 #define NPErrorDomain            @"NPErrorDomain"

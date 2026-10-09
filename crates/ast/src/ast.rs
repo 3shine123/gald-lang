@@ -1,4 +1,4 @@
-use nepa_cst::{CstParam, CstType, Nullability, TagKind, TypePrim};
+use ovic_cst::{CstParam, CstType, Nullability, TagKind, TypePrim};
 
 // ─── Type node ───────────────────────────────────────────────────────────────
 

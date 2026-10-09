@@ -1,6 +1,6 @@
-#import <Foundation/Foundation.np>
+#import <Foundation/Foundation.ov>
 
-/* Blocks across a TU boundary: the client passes a Nepa block to a lib-TU
+/* Blocks across a TU boundary: the client passes a Ovic block to a lib-TU
    method. The block must be copied (it outlives the call frame) and invoked
    from code the client never compiled. */
 typedef void (^Ticker)(int);

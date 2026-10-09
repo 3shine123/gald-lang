@@ -1,0 +1,41 @@
+// golden/36_macros — macro edge semantics end to end (ISO 9899 §6.10.3).
+//
+// Every expected line below was cross-checked against `clang -E -P /tmp/oracle.c`
+// (clang is the authority for the replacement rules; ovicc reimplements them in
+// crates/cpp and must agree, including the places where the rules are subtle:
+// whitespace collapsing in `#`, empty arguments, and `##` placemarkers).
+#include <stdio.h>
+
+#define STR(x)         #x
+#define XSTR(x)        STR(x)
+#define CAT(a, b)      a ## b
+#define MK(pre, tag)   Log pre ## tag
+#define ARR(name, ...) int name[] = { 0, ##__VA_ARGS__ }
+#define VSTR(...)      #__VA_ARGS__
+
+int main() {
+    // `#` — the argument's own spelling, runs of whitespace collapsed to one
+    // space, quotes escaped inside the produced literal.
+    printf("[%s]\n", STR(a   b));        // [a b]
+    printf("[%s]\n", STR(a "b" c));      // [a "b" c]
+    // §6.10.3p4 — `()` supplies one *empty* argument (not zero arguments).
+    printf("[%s]\n", STR());             // []
+    // `##` — one token from two. An empty operand is a placemarker: it glues
+    // nothing, so the neighbouring tokens stay separate (`Log tag`, not
+    // `Logtag`). Two-stage stringify is the usual idiom.
+    printf("[%s]\n", XSTR(MK(Log, tag)));  // [Log Logtag]
+    printf("[%s]\n", XSTR(MK(, tag)));     // [Log tag]
+    // `##` in a declarator position (macro call where a name is expected).
+    int CAT(np_, count) = 7;             // np_count
+    printf("[%d]\n", np_count);          // [7]
+    // GNU `,##__VA_ARGS__` — the comma is swallowed when the varargs are empty,
+    // so `ARR(bare)` initialises one element and `ARR(full, 1, 2)` three.
+    ARR(bare);
+    ARR(full, 1, 2);
+    printf("[%d]\n", (int)sizeof(bare) / (int)sizeof(int));  // [1]
+    printf("[%d]\n", (int)sizeof(full) / (int)sizeof(int));  // [3]
+    // `#__VA_ARGS__` stringifies the whole variadic tail, comma and all.
+    printf("[%s]\n", VSTR(1, 2));        // [1, 2]
+    printf("[%s]\n", VSTR());            // []
+    return 0;
+}

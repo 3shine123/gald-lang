@@ -1,0 +1,13 @@
+#import "model.oh"
+#import <Foundation/Foundation.ov>
+#include <stdio.h>
+
+/* client TU: sees only the .oh, never lib.ov */
+int main() {
+    Greeter *g = [[Greeter alloc] init];
+    printf("%s\n", [g greeting:"world"]);
+    printf("count=%d\n", [g count]);
+    printf("helper=%d\n", GreeterHelper(41));
+    ovic_release(g);
+    return 0;
+}

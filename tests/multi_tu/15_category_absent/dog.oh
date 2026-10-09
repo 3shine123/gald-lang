@@ -1,4 +1,4 @@
-#import <Foundation/Foundation.np>
+#import <Foundation/Foundation.ov>
 @interface Dog
 - (instancetype)init;
 @end

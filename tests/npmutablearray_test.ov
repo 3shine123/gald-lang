@@ -1,0 +1,86 @@
+#include <stdio.h>
+#import <Foundation/Foundation.ov>
+
+int main() {
+    @autoreleasepool {
+        // 1. arrayWithCapacity + addObject + inherited queries
+        NPMutableArray *m = [NPMutableArray arrayWithCapacity:2];
+        [m addObject:@"a"];
+        [m addObject:@"b"];
+        [m addObject:@"c"];
+        printf("1 count: %zu [0]: %s [1]: %s [2]: %s\n",
+            [m count],
+            [[m objectAtIndex:0] UTF8String],
+            [[m objectAtIndex:1] UTF8String],
+            [[m objectAtIndex:2] UTF8String]);
+        printf("1 first: %s last: %s\n",
+            [[m firstObject] UTF8String], [[m lastObject] UTF8String]);
+
+        // 2. insertObject:atIndex:
+        NPString *x = @"X";
+        NPString *y = @"Y";
+        NPString *z = @"Z";
+        [m insertObject:x atIndex:1];
+        printf("2 count: %zu [1]: %s\n", [m count], [[m objectAtIndex:1] UTF8String]);
+
+        // 3. replaceObjectAtIndex:withObject:
+        [m replaceObjectAtIndex:2 withObject:y];
+        printf("3 [2]: %s\n", [[m objectAtIndex:2] UTF8String]);
+
+        // 4. setObject:atIndex:
+        [m setObject:z atIndex:0];
+        printf("4 [0]: %s\n", [[m objectAtIndex:0] UTF8String]);
+
+        // 5. exchangeObjectAtIndex:withObjectAtIndex:
+        [m exchangeObjectAtIndex:0 withObjectAtIndex:2];
+        printf("5 [0]: %s [2]: %s\n",
+            [[m objectAtIndex:0] UTF8String], [[m objectAtIndex:2] UTF8String]);
+
+        // 6. removeObjectAtIndex: / removeLastObject / removeObject:
+        [m removeObjectAtIndex:0];
+        [m removeLastObject];
+        [m removeObject:x];
+        [m removeObject:z];
+        printf("6 count: %zu contains X: %d contains Z: %d\n",
+            [m count], [m containsObject:x], [m containsObject:z]);
+
+        // 7. addObjectsFromArray: + arrayWithObject:
+        NPMutableArray *other = [NPMutableArray arrayWithObject:@"tail"];
+        [m addObjectsFromArray:other];
+        printf("7 count: %zu last: %s\n", [m count], [[m lastObject] UTF8String]);
+
+        // 8. indexOfObject: / containsObject:
+        NPString *b = @"b";
+        [m addObject:b];
+        printf("8 index of b: %zu contains b: %d\n", [m indexOfObject:b], [m containsObject:b]);
+
+        // 9. removeAllObjects
+        [m removeAllObjects];
+        printf("9 count: %zu\n", [m count]);
+
+        // 10. array / arrayWithObjects:count:
+        NPMutableArray *empty = [NPMutableArray array];
+        printf("10 empty count: %zu\n", [empty count]);
+        id objs[3];
+        objs[0] = @"p";
+        objs[1] = @"q";
+        objs[2] = @"r";
+        NPMutableArray *m3 = [NPMutableArray arrayWithObjects:objs count:3];
+        printf("10 m3 count: %zu [2]: %s\n", [m3 count], [[m3 objectAtIndex:2] UTF8String]);
+
+        // 11. alloc + initWithArray: + initWithCapacity:
+        NPMutableArray *m4 = [[NPMutableArray alloc] initWithArray:m3];
+        printf("11 m4 count: %zu\n", [m4 count]);
+        NPMutableArray *m5 = [[NPMutableArray alloc] initWithObjects:objs count:3];
+        printf("11 m5 count: %zu\n", [m5 count]);
+
+        // 12. copy returns an immutable NPArray (+1, released by ARC)
+        NPArray *imm = [m4 copy];
+        printf("12 copy count: %zu\n", [imm count]);
+
+        // 13. description
+        printf("13 desc: %s\n", [[m4 description] UTF8String]);
+    }
+    printf("NPMutableArray tests done\n");
+    return 0;
+}

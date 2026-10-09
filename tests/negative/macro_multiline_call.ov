@@ -1,0 +1,15 @@
+// negative: ovic macro invocation not closed on one line
+// ovicc must refuse with a clear error (multi-line calls unsupported).
+#import <Foundation/Foundation.ov>
+#include <stdio.h>
+
+#define TAG(o) [o tag]
+
+int main() {
+    ovic_meta_init();
+    NPObject *w = (NPObject *)0;
+    // call split across lines — unsupported
+    printf("%d\n", TAG(
+        w));
+    return 0;
+}

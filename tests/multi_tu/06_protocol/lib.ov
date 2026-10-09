@@ -1,0 +1,16 @@
+#import "model.oh"
+#include <stdio.h>
+
+@implementation Rude : NPObject
+- (const char *)greet:(const char *)who {
+    static char buf[128];
+    snprintf(buf, sizeof(buf), "go away, %s", who);
+    return buf;
+}
+- (const char *)mood { return "rude"; }
+@end
+
+/* Called from the client with a protocol-typed pointer. */
+const char *GreetVia(id<Greeter> g, const char *who) {
+    return [g greet:who];
+}

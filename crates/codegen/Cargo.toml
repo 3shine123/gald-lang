@@ -1,12 +1,12 @@
 [package]
-name = "nepa-codegen"
+name = "ovic-codegen"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-nepa-cst = { path = "../cst" }
-nepa-ast = { path = "../ast" }
-nepa-symbol = { path = "../symbol" }
-nepa-elaborator = { path = "../elaborator" }
+ovic-cst = { path = "../cst" }
+ovic-ast = { path = "../ast" }
+ovic-symbol = { path = "../symbol" }
+ovic-elaborator = { path = "../elaborator" }
 attrs = { path = "../attrs" }
-nepa-ownership = { path = "../ownership" }
+ovic-ownership = { path = "../ownership" }

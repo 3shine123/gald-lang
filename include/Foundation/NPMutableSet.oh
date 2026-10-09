@@ -1,7 +1,7 @@
 #ifndef NPMUTABLESET_NH
 #define NPMUTABLESET_NH
 
-#import <Foundation/NPSet.nh>
+#import <Foundation/NPSet.oh>
 
 // Mutable counterpart of NPSet. Inherits the storage ivars (_items / _count /
 // _capacity) and the querying API (count / containsObject: / anyObject /

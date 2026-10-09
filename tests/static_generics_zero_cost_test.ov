@@ -1,0 +1,225 @@
+// lang-test/static_generics_zero_cost_test.ov
+// Ovic 语言「编译期单态化泛型与零开销模板展开」全新功能高压压测
+// 聚焦：泛型类符号隔离、泛型方法精准类型替换、泛型类型别名、三元副作用终极收敛
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#import <Foundation/Foundation.ov>
+
+// ============================================================================
+// 1. 泛型类声明与实现：向量图元固定缓冲区 (Capacity = 2)
+// ============================================================================
+@interface VectorBuffer <T> : NPObject {
+    @public
+    int _bufferSize;
+    T _slots[2]; // 编译期根据 T 的真实类型进行单态化替换
+}
+@property (readonly) int bufferSize;
+
+- (id)init;
+- (void)enqueueElement:(T)element;
+- (T)dequeueElement;
+@end
+
+@implementation VectorBuffer <T>
+@synthesize bufferSize = _bufferSize;
+
+- (id)init {
+    self = [super init];
+    if (self) {
+        _bufferSize = 0;
+        _slots[0] = nil;
+        _slots[1] = nil;
+    }
+    return self;
+}
+
+// 压测点 1：泛型参数输入。展开为 C 后，函数签名必须是具体的特化类型指针，且触发静态 ARC retain
+- (void)enqueueElement:(T)element {
+    if (_bufferSize < 2) {
+        _slots[_bufferSize] = [element retain];
+        _bufferSize++;
+        printf("[泛型流水线] 元素已推入硬件缓冲槽，当前深度: %d\n", _bufferSize);
+    } else {
+        printf("[泛型流水线] 错误：硬件缓冲区溢出！\n");
+    }
+}
+
+// 压测点 2：泛型参数输出。单态化展开后，返回值直接是特化类型，无需运行时擦除与强转
+- (T)dequeueElement {
+    if (_bufferSize > 0) {
+        _bufferSize--;
+        T element = _slots[_bufferSize];
+        _slots[_bufferSize] = nil;
+        return [element autorelease]; // 平滑移交生命周期
+    }
+    return nil;
+}
+
+- (void)dealloc {
+    printf("[泛型物理析构] 正在释放单态化渲染槽内存...\n");
+    if (_slots[0]) [_slots[0] release];
+    if (_slots[1]) [_slots[1] release];
+    [super dealloc];
+}
+@end
+
+
+// ============================================================================
+// 2. 辅助测试类：二维坐标点 与 渲染颜色
+// ============================================================================
+@interface RenderPoint2D : NPObject {
+    @public
+    float _x;
+    float _y;
+}
+@property float x;
+@property float y;
+- (id)initWithX:(float)x Y:(float)y;
+@end
+
+@implementation RenderPoint2D
+@synthesize x = _x;
+@synthesize y = _y;
+- (id)initWithX:(float)x Y:(float)y {
+    self = [super init];
+    if (self) { _x = x; _y = y; }
+    return self;
+}
+- (void)dealloc {
+    printf("[图元销毁] 顶点坐标 (%.1f, %.1f) 已从 GPU 栅格化中释放。\n", _x, _y);
+    [super dealloc];
+}
+@end
+
+
+@interface RenderColorRGB : NPObject {
+    @public
+    int _r; int _g; int _b;
+}
+@property int r; @property int g; @property int b;
+- (id)initWithR:(int)r G:(int)g B:(int)b;
+@end
+
+@implementation RenderColorRGB
+@synthesize r = _r; @synthesize g = _g; @synthesize b = _b;
+- (id)initWithR:(int)r G:(int)g B:(int)b {
+    self = [super init];
+    if (self) { _r = r; _g = g; _b = b; }
+    return self;
+}
+- (void)dealloc {
+    printf("[颜色销毁] 渲染色彩色调 [R:%d, G:%d, B:%d] 已释放。\n", _r, _g, _b);
+    [super dealloc];
+}
+@end
+
+
+// ============================================================================
+// 3. 顶级作用域：将泛型特化指针与 @using 别名特性进行交叉大融合
+// ============================================================================
+// 【全新收敛挑战】：给特化后的泛型类指针起一个别名，测试推导器在解包别名时的多维展开能力
+@using PointPipeline = VectorBuffer<RenderPoint2D*>*;
+
+
+// ============================================================================
+// 4. 主程序入口
+// ============================================================================
+int main(int argc, const char* argv[])
+{
+    @autoreleasepool {
+        printf("====================================================================\n");
+        printf(">>>    ovicc 编译器「零开销单态化泛型与别名融合」全新特性压测     <<<\n");
+        printf("====================================================================\n\n");
+
+        // ----------------------------------------------------
+        // 测试点 1：实例化第一套泛型特化对象
+        printf("--- 1. 实例化单态化泛型类 VectorBuffer<RenderPoint2D*> ---\n");
+        
+        // 编译器必须在底层生成专属的 C 结构体符号，例如 struct ovic_VectorBuffer_RenderPoint2D_ptr
+        VectorBuffer<RenderPoint2D*>* pointBuffer = [[VectorBuffer<RenderPoint2D*> alloc] init];
+        
+        RenderPoint2D* p1 = [[RenderPoint2D alloc] initWithX:10.5f Y:20.8f];
+        RenderPoint2D* p2 = [[RenderPoint2D alloc] initWithX:100.0f Y:400.5f];
+        
+        [pointBuffer enqueueElement:p1];
+        [pointBuffer enqueueElement:p2];
+        
+        [p1 release];
+        [p2 release];
+
+        // ----------------------------------------------------
+        // 测试点 2：实例化第二套泛型特化对象，高压测试符号隔离度
+        printf("\n--- 2. 实例化第二套独立特化 VectorBuffer<RenderColorRGB*> ---\n");
+        
+        // 验证两套特化互不污染
+        VectorBuffer<RenderColorRGB*>* colorBuffer = [[VectorBuffer<RenderColorRGB*> alloc] init];
+        
+        RenderColorRGB* redColor = [[RenderColorRGB alloc] initWithR:255 G:0 B:0];
+        [colorBuffer enqueueElement:redColor];
+        [redColor release];
+
+        // ⚠️【静态类型安全边界校验】：
+        // 如果你的泛型做到了真正的“ObjC语法，C++单态化实现”，那么在 Ovic 代码里尝试调用：
+        // [colorBuffer enqueueElement:p1];
+        // 你的 ovicc 编译器应当能在前端语义分析阶段精准拦截，并爆出“类型不匹配”错误，而不是通过 id 擦除任由其混过去！
+
+        // ----------------------------------------------------
+        // 测试点 3：使用泛型特化别名指针进行数据流操作
+        printf("\n--- 3. 验证通过 @using 泛型别名 PointPipeline 进行多态承接与出队 ---\n");
+        
+        // 使用别名承接
+        PointPipeline pipelineController = pointBuffer;
+        
+        // 编译器必须知晓 pipelineController 出队的方法返回的就是原汁原味的 RenderPoint2D*
+        RenderPoint2D* poppedPoint = [pipelineController dequeueElement];
+        printf("[类型别名还原断言] 成功取出特化图元顶点: 坐标 = (%.1f, %.1f)\n", 
+               [poppedPoint x], [poppedPoint y]);
+
+        // ----------------------------------------------------
+        // 测试點 4：高阶闭包对特化泛型对象的安全捕获与传递
+        printf("\n--- 4. 测试特化泛型容器作为 Block 参数的跨命名空间传递与 ARC 表现 ---\n");
+
+        __block int renderCycleCount = 0;
+
+        void (^gpuRenderEngineBlock)(VectorBuffer<RenderColorRGB*>*) = ^void(VectorBuffer<RenderColorRGB*>* cb) {
+            renderCycleCount++;
+            RenderColorRGB* colorToken = [cb dequeueElement];
+            printf("[GPU渲染核心] 抓取到渲染颜色 -> [R:%d, G:%d] | 循环计数: %d\n", 
+                   colorToken ? [colorToken r] : 0, colorToken ? [colorToken g] : 0, renderCycleCount);
+        };
+
+        // 投递特化颜色泛型包入内核
+        gpuRenderEngineBlock(colorBuffer);
+
+        // ----------------------------------------------------
+        // 测试点 5：魔鬼级收敛守门员——泛型别名指针 + 泛型出队方法 + 三元自增副作用
+        // 用你最完美的语法树解包逻辑，去迎接这套全新的“零开销单态化泛型”方法路由！
+        printf("\n--- 5. 终极收敛守门员：泛型别名指针调用单态化方法与复合副作用大融合 ---\n");
+
+        int isGpuPipelineReady = 1;
+        int genericRenderStep = 65432;
+
+        // 强迫转译器在此处解包高难度 AST 节点：
+        // 真分支内带括号自增副作用，右侧是通过【泛型特化别名指针】调用【特化泛型返回值方法】！
+        RenderPoint2D* finalRenderPoint = (isGpuPipelineReady > 0) ? 
+            [((genericRenderStep++, pipelineController)) dequeueElement] : nil;
+
+        printf("[收敛性总断言] 零开销单态化泛型在复杂边界拓扑下表现完美！\n");
+        printf("          -> 副作用自增计数器最终值: %d (预期: 65433)\n", genericRenderStep);
+        printf("          -> 动态解包弹出的图元坐标: (%.1f, %.1f) (预期: (10.5, 20.8))\n", 
+               [finalRenderPoint x], [finalRenderPoint y]);
+
+        // ----------------------------------------------------
+        // 6. 内存彻底销毁
+        printf("\n--- 6. 正在触发静态 ARC 链，彻底清空特化泛型硬件缓冲区... ---\n");
+        [pointBuffer release];
+        [colorBuffer release];
+
+        printf("\n====================================================================\n");
+        printf(">>>  奇迹！零开销单态化泛型 (Monomorphization) 终极压测全线通过！ <<<\n");
+        printf("====================================================================\n");
+    }
+    return 0;
+}

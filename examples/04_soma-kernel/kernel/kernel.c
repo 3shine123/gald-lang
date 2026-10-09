@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
-#include <nepa/runtime.h>
+#include <ovic/runtime.h>
 #include "kernel.h"
 
 /* ================= freestanding libc bits ================= */
@@ -357,7 +357,7 @@ void kprintf(const char *fmt, ...) {
     va_end(ap);
 }
 
-/* ================= Nepa module exports ================= */
+/* ================= Ovic module exports ================= */
 
 void soma_core_boot(void);
 void soma_io_wait(void);
@@ -367,31 +367,31 @@ unsigned int soma_xorshift(unsigned int seed);
 unsigned int soma_fnv1a(const char *s);
 unsigned int soma_rotl(unsigned int v, int sh);
 
-/* Nepa @namespace SomaCore + @interface Calculator (implicit root class) */
+/* Ovic @namespace SomaCore + @interface Calculator (implicit root class) */
 struct SomaCore__Calculator {
     struct NPClass *isa;
     uint32_t retain_count;
     int total;
 };
-extern NPClass nepa_SomaCore__Calculator_class;
-extern void nepa_meta_init(void);
+extern NPClass ovic_SomaCore__Calculator_class;
+extern void ovic_meta_init(void);
 void soma_class_demo(void);
 void soma_instance_demo(struct SomaCore__Calculator *acc);
 
-/* Nepa @interface NPIoError — exception object for @try/@catch */
+/* Ovic @interface NPIoError — exception object for @try/@catch */
 struct SomaCore__NPIoError {
     struct NPClass *isa;
     uint32_t retain_count;
     int code;
 };
-extern NPClass nepa_SomaCore__NPIoError_class;
+extern NPClass ovic_SomaCore__NPIoError_class;
 void soma_exc_demo(id err);
 void soma_heap_demo(void);
 void soma_advanced_demo(void);
 void soma_kbd_demo(void);
 
-/* Runtime globals (nepa___nepa_root_class, __nepa_exception_buf,
- * __nepa_exception_value, memcpy) are provided by runtime_freestanding.c. */
+/* Runtime globals (ovic___ovic_root_class, __ovic_exception_buf,
+ * __ovic_exception_value, memcpy) are provided by runtime_freestanding.c. */
 void kmain(void) {
     extern volatile uint32_t tick;
 
@@ -402,26 +402,26 @@ void kmain(void) {
     pit_init(100);
 
     kputs("\n=== SOMA KERNEL (i686, 32-bit protected mode) ===\n");
-    kputs("built: clang + nasm + nepac transpile, ran under qemu-system-i386\n");
+    kputs("built: clang + nasm + ovicc transpile, ran under qemu-system-i386\n");
 
-    /* Nepa -> C : the Nepa module prints via kputs/kputdec/kputhex */
+    /* Ovic -> C : the Ovic module prints via kputs/kputdec/kputhex */
     soma_core_boot();
 
-    /* Nepa advanced features: @namespace + @interface (implicit root class).
-     * nepa_meta_init() (emitted weak by the transpiler) fills in class
+    /* Ovic advanced features: @namespace + @interface (implicit root class).
+     * ovic_meta_init() (emitted weak by the transpiler) fills in class
      * metadata; the implicit root class metadata is defined above. */
-    nepa_meta_init();
+    ovic_meta_init();
     soma_class_demo();
 
     struct SomaCore__Calculator acc;
     memset(&acc, 0, sizeof(acc));
-    acc.isa = &nepa_SomaCore__Calculator_class;   /* hand-built instance */
+    acc.isa = &ovic_SomaCore__Calculator_class;   /* hand-built instance */
     soma_instance_demo(&acc);
 
     /* @try/@catch/@finally on bare metal: throw a hand-built NPIoError */
     struct SomaCore__NPIoError err;
     memset(&err, 0, sizeof(err));
-    err.isa = &nepa_SomaCore__NPIoError_class;
+    err.isa = &ovic_SomaCore__NPIoError_class;
     err.code = 42;
     soma_exc_demo((id)&err);
 
@@ -431,13 +431,13 @@ void kmain(void) {
     /* @protocol + @property + @synthesize + @public ivar access */
     soma_advanced_demo();
 
-    /* C -> Nepa : kernel calls Nepa math functions directly */
-    kprintf("[c] call Nepa: fib(15)=%d gcd(1071,462)=%d\n",
+    /* C -> Ovic : kernel calls Ovic math functions directly */
+    kprintf("[c] call Ovic: fib(15)=%d gcd(1071,462)=%d\n",
             soma_fib(15), soma_gcd(1071, 462));
-    kprintf("[c] call Nepa: rotl(0x12345678,4)=0x%x\n", soma_rotl(0x12345678u, 4));
-    kprintf("[c] call Nepa: fnv1a(\"nepa\")=0x%x\n", soma_fnv1a("nepa"));
+    kprintf("[c] call Ovic: rotl(0x12345678,4)=0x%x\n", soma_rotl(0x12345678u, 4));
+    kprintf("[c] call Ovic: fnv1a(\"ovic\")=0x%x\n", soma_fnv1a("ovic"));
 
-    /* Nepa inline asm io_wait (outb to 0x80) used from C */
+    /* Ovic inline asm io_wait (outb to 0x80) used from C */
     for (int i = 0; i < 16; i++) soma_io_wait();
 
     asm volatile("sti");

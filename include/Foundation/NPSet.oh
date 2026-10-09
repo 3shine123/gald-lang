@@ -1,9 +1,9 @@
 #ifndef NPSET_NH
 #define NPSET_NH
 
-#import <Foundation/NPObject.nh>
-#import <Foundation/NPArray.nh>
-#import <Foundation/NPPredicate.nh>
+#import <Foundation/NPObject.oh>
+#import <Foundation/NPArray.oh>
+#import <Foundation/NPPredicate.oh>
 
 // Immutable unordered collection of unique objects — the ObjC NSSet model.
 //
@@ -52,7 +52,7 @@
 - (void)addObjectsFromArray:(NPArray *)other;
 
 // Growth helper. MUST be declared here (public segment), not left private to
-// NPSet.np: NPMutableSet/NPOrderedSet run in their own owner TUs, and a
+// NPSet.ov: NPMutableSet/NPOrderedSet run in their own owner TUs, and a
 // private method only dispatches inside its owner TU — the subclasses'
 // vtables would carry a NULL slot for it and `[self _grow]` from the shared
 // addObject: would jump through NULL (the R1/R2 iron law, observed live).

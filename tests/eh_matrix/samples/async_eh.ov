@@ -1,0 +1,53 @@
+#import <Foundation/Foundation.ov>
+
+// Scenario 15 of the EH acceptance matrix: @await coexisting with the
+// exception machinery.
+//
+// The language rule being respected here (README "async/await"): a `@try`
+// must NOT span an `@await` (a jmp_buf/flag cannot survive a suspension
+// point), so the try/catch below is a same-body, post-await region. The
+// async chain itself is untouched by -eh: it is a separate lowering pass.
+
+@interface EhBoom : NPObject
+- (void)fire @throws;
+@end
+
+@implementation EhBoom
+- (void)fire @throws {
+    @throw @"boom";
+}
+@end
+
+@interface EhFetcher : NPObject
+- (async NPTask<int>)compute:(int)n;
+- (async NPTask<void>)runAll;
+@end
+
+@implementation EhFetcher
+- (async NPTask<int>)compute:(int)n {
+    int raw = @await n;              // suspension point
+    return raw * 2;
+}
+
+- (async NPTask<void>)runAll {
+    int x = @await [self compute:21];   // 42
+    @try {                               // does not span the @await above
+        EhBoom *b = [[EhBoom alloc] init];
+        [b fire];
+        NPLog(@"never runs");
+    }
+    @catch (NPString *e) {
+        NPLog(@"caught: %@", e);
+    }
+    @finally {
+        NPLog(@"finally runs");
+    }
+    NPLog(@"result=%d", x);
+}
+@end
+
+int main() {
+    EhFetcher *f = [[EhFetcher alloc] init];
+    [f runAll];
+    return 0;
+}

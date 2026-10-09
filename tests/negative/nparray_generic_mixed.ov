@@ -1,0 +1,8 @@
+// Negative: inserting a boxed scalar into a typed container must be rejected.
+#import <Foundation/Foundation.ov>
+
+int main() {
+    NPMutableArray<NPString *> *m = [[NPMutableArray<NPString *> alloc] init];
+    [m addObject:@42];
+    return 0;
+}

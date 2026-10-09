@@ -382,13 +382,13 @@ mod tests {
     #[test]
     fn legacy_line_table_locate() {
         let sm = SourceMap::new(vec![
-            ("main.np".into(), 1),
-            ("main.np".into(), 2),
-            ("foo.nh".into(), 10),
+            ("main.ov".into(), 1),
+            ("main.ov".into(), 2),
+            ("foo.oh".into(), 10),
         ]);
-        assert_eq!(sm.locate(1), ("main.np".to_string(), 1));
-        assert_eq!(sm.locate(2), ("main.np".to_string(), 2));
-        assert_eq!(sm.locate(3), ("foo.nh".to_string(), 10));
+        assert_eq!(sm.locate(1), ("main.ov".to_string(), 1));
+        assert_eq!(sm.locate(2), ("main.ov".to_string(), 2));
+        assert_eq!(sm.locate(3), ("foo.oh".to_string(), 10));
         assert_eq!(sm.locate(4), (String::new(), 4));
     }
 
@@ -416,9 +416,9 @@ mod tests {
     #[test]
     fn regions_merge_same_file_runs() {
         let sm = SourceMap::new(vec![
-            ("a.np".into(), 1),
-            ("a.np".into(), 2),
-            ("a.np".into(), 3),
+            ("a.ov".into(), 1),
+            ("a.ov".into(), 2),
+            ("a.ov".into(), 3),
         ]);
         assert_eq!(sm.regions().len(), 1);
         assert_eq!(sm.regions()[0].out_start, 1);
@@ -428,7 +428,7 @@ mod tests {
     #[test]
     fn registry_line_offsets() {
         let mut reg = SourceRegistry::new();
-        let id = reg.add("x.np", "one\ntwo\nthree");
+        let id = reg.add("x.ov", "one\ntwo\nthree");
         let f = reg.get(id).unwrap();
         assert_eq!(f.line_to_offset(2), Some(4));
         assert_eq!(f.offset_to_line(6), 2); // inside "two"
@@ -438,7 +438,7 @@ mod tests {
     #[test]
     fn locate_span_reports_file_identity() {
         let mut reg = SourceRegistry::new();
-        let a = reg.add("a.np", "line1\nline2\n");
+        let a = reg.add("a.ov", "line1\nline2\n");
         let regions = vec![LineRegion {
             out_start: 1,
             out_end: 2,

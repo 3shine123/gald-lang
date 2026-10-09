@@ -1,0 +1,28 @@
+#include <stdio.h>
+#import <Foundation/Foundation.ov>
+
+@interface Fibonacci : NPObject
+- (long)fib:(int)n;
+@end
+
+@implementation Fibonacci
+- (long)fib:(int)n {
+    if (n == 1 || n == 2) {
+        return 1;
+    } else {
+        return [self fib:n - 1] + [self fib:n - 2];
+    }
+}
+@end
+
+int main(int argc, const char * argv[]) {
+    @autoreleasepool {
+        int i;
+        for (i = 1; i <= 20; i++) {
+            Fibonacci *fibonacci = [[Fibonacci alloc] init];
+            long result = [fibonacci fib:i];
+            printf("fib(%d) = %ld\n", i, result);
+        }
+    }
+    return 0;
+}

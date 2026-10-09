@@ -1,9 +1,9 @@
-#import <Foundation/Foundation.np>
+#import <Foundation/Foundation.ov>
 
 /* NEGATIVE CASE — the suite asserts this one FAILS, loudly and legibly.
  *
- * Nepa's uniform vtable is built per translation unit from the set of instance
- * method names that TU sees. Here `model.nh` declares only `show`, so the
+ * Ovic's uniform vtable is built per translation unit from the set of instance
+ * method names that TU sees. Here `model.oh` declares only `show`, so the
  * client TU's layout has one slot. The lib TU implements an EXTRA method that
  * the header never mentions, so its layout has two. The linker weak-merges the
  * two vtable instances into a single allocation, and dispatch through the
@@ -15,7 +15,7 @@
  * time with both signatures, the full method list, and the source file — rather
  * than being discovered as a mystery crash.
  *
- * The extra method is defined directly in lib.np's @implementation, NOT in the
+ * The extra method is defined directly in lib.ov's @implementation, NOT in the
  * shared header: a method named in the header would be collected by BOTH TUs
  * (codegen's pre-pass records every @interface method name it sees), and the
  * layouts would agree — which is why declaring `extra` here would silently turn

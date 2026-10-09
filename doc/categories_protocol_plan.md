@@ -4,8 +4,8 @@
 > §1–§7 保留为设计档案，其中部分假设已被实测修正（以 §8 为准）。
 > 起因：`doc/architecture.md` 已知限制——「categories / 协议继承的跨 TU 场景
 > 支持有限」（`ROADMAP.md` 语言缺口两条）。本规划回答两个问题：ObjC 是怎么
-> 做的；在 nepa「ObjC 语义 + 静态实现 + 无 msgSend」的铁律下，最合理的对应
-> 方案是什么。结论先行：**ObjC 用运行期合并类别，nepa 没有运行时，就让链接
+> 做的；在 ovic「ObjC 语义 + 静态实现 + 无 msgSend」的铁律下，最合理的对应
+> 方案是什么。结论先行：**ObjC 用运行期合并类别，ovic 没有运行时，就让链接
 > 器当运行时——类别方法槽用弱符号，链接期完成 ObjC 在 `attachCategories`
 > 里做的事**。
 
@@ -38,7 +38,7 @@
 - 类别**不能加 ivar**（struct 布局编译期已定）；类别里的 @property 只是个
   声明，getter/setter 要自己写（class extension `@interface Dog ()` 才能加
   ivar，它在编译期合并进主类，不走运行期类别通道）。
-- 全部机制依赖 `objc_msgSend` 按名查找——nepa 没有这一层。
+- 全部机制依赖 `objc_msgSend` 按名查找——ovic 没有这一层。
 
 ### 2.2 协议：容器式继承 + 双层一致性
 
@@ -62,7 +62,7 @@
 
 ### D1 —— 类别方法的跨 TU 汇入 = 弱符号槽（链接器当运行时）
 
-owner TU 发射 vtable 实例时，对「声明在共享 `.nh`、实现可能在别的 TU 的类别
+owner TU 发射 vtable 实例时，对「声明在共享 `.oh`、实现可能在别的 TU 的类别
 方法」生成：
 
 ```c
@@ -87,10 +87,10 @@ extern void Dog_bark(Dog *self) __attribute__((weak));   /* 弱 extern */
 
 ### D2 —— 布局规则零新增：类别方法按声明位置入段
 
-- 声明在共享 `.nh` 的类别接口方法 → 公共段（R1 现有定义自动涵盖，需把
+- 声明在共享 `.oh` 的类别接口方法 → 公共段（R1 现有定义自动涵盖，需把
   公共段收集器扩展到 CategoryInterface——现状是否已计入列为 P0 探针②）。
-- 仅出现在本 TU 主文件的类别（声明+实现都在 .np）→ 私有段，只许 TU 内派发
-  ——与「跨 TU 方法必须写进共享 .nh」既有铁律**完全同构**，无新法。
+- 仅出现在本 TU 主文件的类别（声明+实现都在 .ov）→ 私有段，只许 TU 内派发
+  ——与「跨 TU 方法必须写进共享 .oh」既有铁律**完全同构**，无新法。
 - `__sig` 语义不变：公共段一致即合法，私有尾差异合法（11 号场景先例）。
 
 ### D3 —— ivar 规则与 ObjC 严格对齐
@@ -103,7 +103,7 @@ extern void Dog_bark(Dog *self) __attribute__((weak));   /* 弱 extern */
 ### D4 —— 同名冲突：静态模型直接非法，比 ObjC 更早失败
 
 - 类别方法与主类方法同名：同 TU → binder/codegen 层直接报错（ObjC 是静默
-  覆盖 + 顺序依赖坑，nepa 没有运行期查找顺序，无法复刻其语义，复刻半吊子
+  覆盖 + 顺序依赖坑，ovic 没有运行期查找顺序，无法复刻其语义，复刻半吊子
   不如禁止）；跨 TU → 强符号 duplicate symbol，链接期天然报错，与 R2
   「双 @implementation 撞链接失败」同一哲学。
 - 两个类别同名方法：同上，链接期 duplicate，明确报错。
@@ -132,8 +132,8 @@ extern void Dog_bark(Dog *self) __attribute__((weak));   /* 弱 extern */
 
 | # | 探针 | 证实/证伪什么 | 决定 |
 |---|---|---|---|
-| P0① | owner `.np` + 类别 TU 分开编译链接，类别方法跨 TU 调用 | 现状到底怎么断：链接错、NULL 槽 segv、还是碰巧能跑 | 记录基线行为，作为 D1 的对照 |
-| P0② | `.nh` 里 `@interface Dog (Tricks)` 声明，两个 TU import 后各查 vtable 布局 | 公共段收集器是否已把 CategoryInterface 声明计入 R1 段 | 已计入 → D2 零改动；未计入 → 收集器一处扩展 |
+| P0① | owner `.ov` + 类别 TU 分开编译链接，类别方法跨 TU 调用 | 现状到底怎么断：链接错、NULL 槽 segv、还是碰巧能跑 | 记录基线行为，作为 D1 的对照 |
+| P0② | `.oh` 里 `@interface Dog (Tricks)` 声明，两个 TU import 后各查 vtable 布局 | 公共段收集器是否已把 CategoryInterface 声明计入 R1 段 | 已计入 → D2 零改动；未计入 → 收集器一处扩展 |
 | P1 | 弱 extern 槽：类别 TU 在场/缺席两种链接 | 弱未定义取址在 clang/PE(zig cc) 下是否可靠为 NULL | NULL → D1 弱符号；非 NULL → D1 备胎强 extern |
 | P2 | 类别同名主类方法（同 TU） | 现有行为是什么（静默覆盖？编译错？） | 决定 D4 报错挂在 binder 还是 codegen |
 | P3 | `id<P>` 接收者跨 TU 派发，父协议方法槽位 | 协议继承跨 TU 布局是否天然成立 | 成立 → D5 只还债；不成立 → 补收集器 |
@@ -172,18 +172,18 @@ extern void Dog_bark(Dog *self) __attribute__((weak));   /* 弱 extern */
 
 P0/P1 探针已完成，实测结论修正了本方案的两处假设：
 
-- **P0 实测**：类别 TU 参与链接时 `NEPA_VTABLE_$_Dog` / `NEPA_CLASS_$_Dog` /
-  `NEPA_GETCLASS_$_Dog` duplicate symbol——类别 `@implementation Dog (Tricks)`
+- **P0 实测**：类别 TU 参与链接时 `OVIC_VTABLE_$_Dog` / `OVIC_CLASS_$_Dog` /
+  `OVIC_GETCLASS_$_Dog` duplicate symbol——类别 `@implementation Dog (Tricks)`
   目前被 codegen 当作类的 owner 强发元数据。**实现前提：类别实现 TU 不得
   认领类所有权**（`owned_classes` 排除 category impl），否则 D1 无从谈起。
 - **P1 实测（macOS arm64 clang）**：默认 ld **拒绝**未定义弱 extern（链接期
   报错，非 NULL）；`-undefined dynamic_lookup` 下取址可靠为 NULL。因此弱
-  符号主案**必须由 nepac 驱动在链接时注入 `-Wl,-U,_<sym>` 或等效 flag**，
+  符号主案**必须由 ovicc 驱动在链接时注入 `-Wl,-U,_<sym>` 或等效 flag**，
   或者退到备胎强 extern。链接器行为是平台差异点，不能当稳定语义。
 - **P1 矩阵扩展（评审采纳）**：补 Linux clang / GCC / ELF、静态库归档、
   链接顺序交换、多类别、类别缺席七种组合；若结果依赖链接顺序，弃弱符号
   主案改备胎。
-- **槽位规则钉死（评审采纳，P0 已部分证实）**：槽位由共享 `.nh` 声明集
+- **槽位规则钉死（评审采纳，P0 已部分证实）**：槽位由共享 `.oh` 声明集
   决定，类别**实现**在场与否不改变布局（三 TU `__sig` 同值已证）；实现时
   以 `tests/multi_tu/14` 两个用例（在场/缺席 `__sig` 与槽值断言）固化。
 - **selector 检查分级（评审采纳，独立于本方案立项）**：用户源内静态
@@ -226,15 +226,15 @@ P0/P1 探针已完成，实测结论修正了本方案的两处假设：
 
 - 管线打通：`AstDeclData::Protocol` 新变体（elaborator 原来直接丢弃
   `ProtocolData`）；`ClassInfo`/`CgClassMeta`/`CgUnit` 加 protocols 数据。
-- 发射：`NEPA_PROTO_$_<P>` 静态 NPProtocol 实例（parents 递归、
-  required/optional 分表）+ `NEPA_PROTOS_$_<Class>` 每类指针数组 +
+- 发射：`OVIC_PROTO_$_<P>` 静态 NPProtocol 实例（parents 递归、
+  required/optional 分表）+ `OVIC_PROTOS_$_<Class>` 每类指针数组 +
   NPClass 的 `.protocols/.protocol_count` 静态填充与 metaInit 回填双路。
-- 运行时：`nepa_class_conformsToProtocol(cls, proto)`（runtime.c）沿
+- 运行时：`ovic_class_conformsToProtocol(cls, proto)`（runtime.c）沿
   父类链 + 协议父链递归判定；`[x conformsToProtocol:@protocol(P)]` 在
   codegen 特判改写为该查询（receiver 取 `->isa`）。
 - 实测修复的坑：① 协议父链里写类名（`@protocol P <NPObject>`，ObjC 合法
-  拼写）会生成未定义 `NEPA_PROTO_$_NPObject`——发射前过滤类名；② 泛型
-  参数名混进 conformance 列表（`NEPA_PROTO_$_T`）——按 type_params 过滤；
+  拼写）会生成未定义 `OVIC_PROTO_$_NPObject`——发射前过滤类名；② 泛型
+  参数名混进 conformance 列表（`OVIC_PROTO_$_T`）——按 type_params 过滤；
   ③ metaInit 复合字面量里的 inline `NPProtocol*[]` 在栈上，返回后悬垂
   （conforms 查询 segfault）——改发命名静态数组；④ 命名空间 FQN 截断
   （log_analyzer 的 `LogTool` 残名）——三处发射统一走 `known_protocols`
@@ -243,10 +243,10 @@ P0/P1 探针已完成，实测结论修正了本方案的两处假设：
   cargo test 53 全过、test_all 350/360（与基线一致）、multi_tu 15/15。
 - golden：harness 只比对 `.out`，全部协议相关 golden 输出不变；07 的
   `conformance.c` 是改名前陈旧物（不被比对），已顺手重生成。
-- 已补：协议符号 `NEPA_PROTO_$_P` 以 weak 定义跨 TU 合并为同一链接单元身份；
+- 已补：协议符号 `OVIC_PROTO_$_P` 以 weak 定义跨 TU 合并为同一链接单元身份；
   类别 TU 对 owner 类发 constructor 注册，把类别新增协议并入 `NPClass` 的
   协议表，注册操作幂等。回归用例见 `tests/multi_tu/16_category_protocol`。
-- 仍需保持的约束：类别方法声明必须出现在共享 `.nh`，否则公共 vtable 段不一致；
+- 仍需保持的约束：类别方法声明必须出现在共享 `.oh`，否则公共 vtable 段不一致；
   只有类别实现 TU 注册新增协议，声明-only 客户端不会重复注册。
 
 ### 遗留清单更新

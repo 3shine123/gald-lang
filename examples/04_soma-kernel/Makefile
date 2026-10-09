@@ -1,7 +1,7 @@
 # examples/04_soma-kernel/Makefile
-# Build a 32-bit protected-mode kernel from NASM + C + Nepa, bootable floppy image.
+# Build a 32-bit protected-mode kernel from NASM + C + Ovic, bootable floppy image.
 
-NEPAC   := ../../target/debug/nepac
+OVICC   := ../../target/debug/ovicc
 CC      := clang
 NASM    := nasm
 LD      := i686-elf-ld
@@ -9,7 +9,7 @@ OBJCOPY := i686-elf-objcopy
 
 CFLAGS   := -target i386-none-elf -m32 -ffreestanding -fno-builtin \
             -fno-stack-protector -fno-pic -fno-pie -mno-sse -mno-mmx \
-            -nostdlib -nostdinc -Iinclude -I../../include -D__NEPA_FREESTANDING \
+            -nostdlib -nostdinc -Iinclude -I../../include -D__OVIC_FREESTANDING \
             -Wall -Wextra -Wno-unused-parameter -O2
 NASMFLAGS := -f elf32
 LDFLAGS  := -m elf_i386 -T linker.ld -nostdlib
@@ -28,16 +28,16 @@ $(BUILD)/%.o: kernel/%.c kernel/kernel.h
 	@mkdir -p $(BUILD)
 	$(CC) $(CFLAGS) -c -o $@ $<
 
-# ---------- Nepa -> C transpile ----------
-$(BUILD)/soma_core.c: nepa/soma_core.np
+# ---------- Ovic -> C transpile ----------
+$(BUILD)/soma_core.c: ovic/soma_core.ov
 	@mkdir -p $(BUILD)
-	$(NEPAC) -rewrite-nepa -ffreestanding -o $@ $<
+	$(OVICC) -rewrite-ovic -ffreestanding -o $@ $<
 
 $(BUILD)/soma_core.o: $(BUILD)/soma_core.c
 	$(CC) $(CFLAGS) -c -o $@ $<
 
-# ---------- bare-metal runtime (bump allocator: nepa_alloc/nepa_release) ----------
-$(BUILD)/runtime_freestanding.o: ../../include/nepa/runtime_freestanding.c
+# ---------- bare-metal runtime (bump allocator: ovic_alloc/ovic_release) ----------
+$(BUILD)/runtime_freestanding.o: ../../include/ovic/runtime_freestanding.c
 	@mkdir -p $(BUILD)
 	$(CC) $(CFLAGS) -c -o $@ $<
 

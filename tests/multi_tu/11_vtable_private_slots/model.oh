@@ -1,4 +1,4 @@
-#import <Foundation/Foundation.np>
+#import <Foundation/Foundation.ov>
 
 // Public surface of `Widget`: what every TU is allowed to see and call.
 @interface Widget : NPObject

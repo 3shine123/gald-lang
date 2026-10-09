@@ -1,0 +1,24 @@
+#include <stdio.h>
+#import <Foundation/Foundation.ov>
+
+@interface Item : NPObject
+@end
+
+@implementation Item
+- (void)dealloc {
+    printf("dealloc\n");
+}
+@end
+
+int main() {
+    {
+        Item *a = [Item new];
+        if (a) {
+            printf("if branch\n");
+        } else {
+            printf("else branch\n");
+        }
+    }
+    printf("done\n");
+    return 0;
+}

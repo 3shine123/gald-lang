@@ -1,14 +1,14 @@
-#include "nepa/binder.h"
-#include "nepa/parser.h"
-#include "nepa/lexer.h"
-#include "nepa/cst.h"
+#include "ovic/binder.h"
+#include "ovic/parser.h"
+#include "ovic/lexer.h"
+#include "ovic/cst.h"
 #include <stdio.h>
 #include <string.h>
 
 int main(void) {
     const char *src = "@interface Foo\n- (int)bar;\n@end\n\n@implementation Foo\n- (int)bar {\n    return 42;\n}\n@end";
     lexer_t lexer;
-    lexer_init(&lexer, src, strlen(src), "test.np");
+    lexer_init(&lexer, src, strlen(src), "test.ov");
     parser_t *p = parser_create(&lexer);
     translation_unit_t *u = parser_parse_translation_unit(p);
     if (!u) {

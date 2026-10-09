@@ -1,10 +1,10 @@
 [package]
-name = "nepa-parser"
+name = "ovic-parser"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-nepa-lexer = { path = "../lexer" }
-nepa-cst = { path = "../cst" }
+ovic-lexer = { path = "../lexer" }
+ovic-cst = { path = "../cst" }
 [dev-dependencies]
-nepa-preprocessor = { path = "../preprocessor" }
+ovic-preprocessor = { path = "../preprocessor" }

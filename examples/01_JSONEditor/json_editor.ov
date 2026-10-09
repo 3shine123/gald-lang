@@ -1,0 +1,963 @@
+// json_editor.ov — Ovic 全特性 JSON 编辑器
+// 编译: ovicc run tests/JSONEditor/json_editor.ov -fno-ovic-arc
+// 特性覆盖: @protocol, @interface, @implementation, @property, @synthesize,
+//           @namespace, 继承, @category, 泛型<T>, Block, @selector,
+//           @try/@catch/@throw, @autoreleasepool, @public weak, instancetype
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+#include <termios.h>
+#include <unistd.h>
+#include <sys/ioctl.h>
+#import "json_editor_types.oh"
+
+// Raw-mode input reader: handles arrow keys for cursor movement, no echo of escape sequences
+// Falls back to fgets when stdin is not a terminal (piped input)
+static int read_line(char *buf, int size) {
+    if (!isatty(STDIN_FILENO)) {
+        if (!fgets(buf, size, stdin)) return 0;
+        int len = (int)strlen(buf);
+        while (len > 0 && (buf[len-1] == '\n' || buf[len-1] == '\r')) buf[--len] = '\0';
+        return len;
+    }
+
+    struct termios old, raw;
+    tcgetattr(STDIN_FILENO, &old);
+    raw = old;
+    raw.c_lflag &= ~(ECHO | ICANON);
+    raw.c_cc[VMIN] = 1;
+    raw.c_cc[VTIME] = 0;
+    tcsetattr(STDIN_FILENO, TCSANOW, &raw);
+
+    int pos = 0, len = 0;
+    while (len < size - 1) {
+        char c;
+        if (read(STDIN_FILENO, &c, 1) <= 0) break;
+
+        if (c == '\x1b') {
+            char seq[2];
+            if (read(STDIN_FILENO, &seq[0], 1) <= 0) break;
+            if (read(STDIN_FILENO, &seq[1], 1) <= 0) break;
+            if (seq[0] == '[') {
+                if (seq[1] == 'D' && pos > 0) { pos--; printf("\033[D"); fflush(stdout); }
+                else if (seq[1] == 'C' && pos < len) { pos++; printf("\033[C"); fflush(stdout); }
+                else if (seq[1] == '3' && pos < len) {
+                    // Forward Delete key (⌦): delete character at cursor
+                    memmove(&buf[pos], &buf[pos + 1], len - pos - 1);
+                    len--;
+                    buf[len] = '\0';
+                    write(STDOUT_FILENO, &buf[pos], (size_t)(len - pos));
+                    write(STDOUT_FILENO, " \b", 2);
+                    for (int i = len; i > pos; i--) printf("\b");
+                    fflush(stdout);
+                }
+                // Consume remaining bytes of multi-byte CSI sequences (e.g. Delete = \x1b[3~)
+                if (seq[1] < 0x40 || seq[1] > 0x7E) {
+                    char extra;
+                    while (read(STDIN_FILENO, &extra, 1) > 0) {
+                        if (extra >= 0x40 && extra <= 0x7E) break;
+                    }
+                }
+            }
+            continue;
+        }
+
+        if (c == '\n' || c == '\r') {
+            buf[len] = '\0';
+            break;
+        }
+
+        if (c == '\x08' || c == 127) {
+            if (pos > 0) {
+                memmove(&buf[pos - 1], &buf[pos], len - pos);
+                len--; pos--;
+                buf[len] = '\0';
+                write(STDOUT_FILENO, "\b", 1);
+                write(STDOUT_FILENO, &buf[pos], (size_t)(len - pos));
+                write(STDOUT_FILENO, " \b", 2);
+                for (int i = len; i > pos; i--) write(STDOUT_FILENO, "\b", 1);
+                fflush(stdout);
+            }
+            continue;
+        }
+
+        if (pos < len) memmove(&buf[pos + 1], &buf[pos], len - pos);
+        buf[pos] = c;
+        len++; pos++;
+        buf[len] = '\0';
+        write(STDOUT_FILENO, &c, 1);
+        if (pos < len) {
+            write(STDOUT_FILENO, &buf[pos], (size_t)(len - pos));
+            for (int i = len; i > pos; i--) write(STDOUT_FILENO, "\b", 1);
+        }
+        fflush(stdout);
+    }
+
+    putchar('\n');
+    tcsetattr(STDIN_FILENO, TCSANOW, &old);
+    return len;
+}
+
+// ============================================================================
+// @implementations
+// ============================================================================
+
+@namespace JSON
+
+    @implementation Error
+        - (instancetype)initWithMessage:(const char *)msg {
+            self = [super init];
+            if (self) { _message = strdup(msg); }
+            return self;
+        }
+        - (const char *)message { return _message; }
+        - (void)dealloc { free(_message); [super dealloc]; }
+    @end
+
+    @implementation Null
+        static Null *s_sharedNull = NULL;
+        + (id)sharedNull {
+            if (!s_sharedNull) s_sharedNull = [[Null alloc] init];
+            return s_sharedNull;
+        }
+        - (const char *)typeName { return "null"; }
+        - (void)printOn:(int)indent { printf("null"); }
+        - (id)copyValue { return [Null sharedNull]; }
+    @end
+
+    @implementation Bool
+        @synthesize value = _value;
+        - (instancetype)initWithBool:(BOOL)val {
+            self = [super init]; if (self) _value = val; return self;
+        }
+        - (const char *)typeName { return "bool"; }
+        - (void)printOn:(int)indent { printf(_value ? "true" : "false"); }
+        - (id)copyValue { return [[Bool alloc] initWithBool:_value]; }
+    @end
+
+    @implementation Number
+        @synthesize value = _value;
+        - (instancetype)initWithDouble:(double)val {
+            self = [super init]; if (self) _value = val; return self;
+        }
+        - (instancetype)initWithInt:(int)val {
+            self = [super init]; if (self) _value = (double)val; return self;
+        }
+        - (const char *)typeName { return "number"; }
+        - (void)printOn:(int)indent {
+            if (_value == (double)(int)_value) printf("%d", (int)_value);
+            else printf("%g", _value);
+        }
+        - (id)copyValue { return [[Number alloc] initWithDouble:_value]; }
+    @end
+
+    @implementation String
+        @synthesize value = _value;
+        - (instancetype)initWithString:(const char *)val {
+            self = [super init];
+            if (self) _value = val ? strdup(val) : strdup("");
+            return self;
+        }
+        - (void)dealloc { free(_value); [super dealloc]; }
+        - (const char *)typeName { return "string"; }
+        - (void)printOn:(int)indent {
+            printf("\"");
+            for (const char *p = _value; *p; p++) {
+                switch (*p) {
+                    case '"':  printf("\\\""); break;
+                    case '\\': printf("\\\\"); break;
+                    case '\b': printf("\\b"); break;
+                    case '\f': printf("\\f"); break;
+                    case '\n': printf("\\n"); break;
+                    case '\r': printf("\\r"); break;
+                    case '\t': printf("\\t"); break;
+                    default:
+                        if ((unsigned char)*p < 0x20) printf("\\u%04x", (unsigned char)*p);
+                        else putchar(*p);
+                        break;
+                }
+            }
+            printf("\"");
+        }
+        - (id)copyValue { return [[String alloc] initWithString:_value]; }
+    @end
+
+    @implementation Array
+        - (instancetype)init {
+            self = [super init];
+            if (self) {
+                _capacity = 4; _count = 0;
+                _items = (id *)malloc(_capacity * sizeof(id));
+            }
+            return self;
+        }
+        - (void)dealloc {
+            for (int i = 0; i < _count; i++) [_items[i] release];
+            free(_items); [super dealloc];
+        }
+        - (int)count { return _count; }
+        - (id)at:(int)idx {
+            return (idx >= 0 && idx < _count) ? _items[idx] : nil;
+        }
+        - (void)add:(id)val {
+            if (!val) return;
+            if (_count >= _capacity) {
+                _capacity *= 2;
+                _items = (id *)realloc(_items, _capacity * sizeof(id));
+            }
+            _items[_count++] = val; [val retain];
+        }
+        - (void)removeAt:(int)idx {
+            if (idx < 0 || idx >= _count) return;
+            [_items[idx] release];
+            memmove(&_items[idx], &_items[idx + 1], (_count - idx - 1) * sizeof(id));
+            _count--;
+        }
+        - (void)each:(void (^)(int idx, id val))block {
+            if (!block) return;
+            for (int i = 0; i < _count; i++) block(i, _items[i]);
+        }
+        - (const char *)typeName { return "array"; }
+        - (void)printOn:(int)indent {
+            if (_count == 0) { printf("[]"); return; }
+            printf("[\n");
+            for (int i = 0; i < _count; i++) {
+                for (int j = 0; j < indent + 1; j++) printf("    ");
+                [_items[i] printOn:indent + 1];
+                if (i < _count - 1) printf(",");
+                printf("\n");
+            }
+            for (int j = 0; j < indent; j++) printf("    ");
+            printf("]");
+        }
+        - (id)copyValue {
+            Array *c = [[Array alloc] init];
+            for (int i = 0; i < _count; i++) {
+                id v = [_items[i] copyValue]; [c add:v]; [v release];
+            }
+            return c;
+        }
+    @end
+
+    @implementation Object
+        - (instancetype)init {
+            self = [super init];
+            if (self) {
+                _capacity = 4; _count = 0;
+                _keys = (char **)malloc(_capacity * sizeof(char *));
+                _values = (id *)malloc(_capacity * sizeof(id));
+            }
+            return self;
+        }
+        - (void)dealloc {
+            for (int i = 0; i < _count; i++) { free(_keys[i]); [_values[i] release]; }
+            free(_keys); free(_values); [super dealloc];
+        }
+        - (int)count { return _count; }
+        - (const char *)atKey:(int)idx {
+            return (idx >= 0 && idx < _count) ? _keys[idx] : NULL;
+        }
+        - (id)atVal:(int)idx {
+            return (idx >= 0 && idx < _count) ? _values[idx] : nil;
+        }
+        - (id)get:(const char *)key {
+            if (!key) return nil;
+            for (int i = 0; i < _count; i++) {
+                if (strcmp(_keys[i], key) == 0) return _values[i];
+            }
+            return nil;
+        }
+        - (void)set:(id)val forKey:(const char *)key {
+            if (!key || !val) return;
+            for (int i = 0; i < _count; i++) {
+                if (strcmp(_keys[i], key) == 0) {
+                    [_values[i] release]; _values[i] = val; [val retain]; return;
+                }
+            }
+            if (_count >= _capacity) {
+                _capacity *= 2;
+                _keys = (char **)realloc(_keys, _capacity * sizeof(char *));
+                _values = (id *)realloc(_values, _capacity * sizeof(id));
+            }
+            _keys[_count] = strdup(key);
+            _values[_count] = val; [val retain]; _count++;
+        }
+        - (void)remove:(const char *)key {
+            if (!key) return;
+            for (int i = 0; i < _count; i++) {
+                if (strcmp(_keys[i], key) == 0) {
+                    free(_keys[i]); [_values[i] release]; _count--;
+                    if (i < _count) { _keys[i] = _keys[_count]; _values[i] = _values[_count]; }
+                    return;
+                }
+            }
+        }
+        - (void)each:(void (^)(int idx, id val))block {
+            if (!block) return;
+            for (int i = 0; i < _count; i++) block(i, _values[i]);
+        }
+        - (const char *)typeName { return "object"; }
+        - (void)printOn:(int)indent {
+            if (_count == 0) { printf("{}"); return; }
+            printf("{\n");
+            for (int i = 0; i < _count; i++) {
+                for (int j = 0; j < indent + 1; j++) printf("    ");
+                printf("\"%s\": ", _keys[i]);
+                [_values[i] printOn:indent + 1];
+                if (i < _count - 1) printf(",");
+                printf("\n");
+            }
+            for (int j = 0; j < indent; j++) printf("    ");
+            printf("}");
+        }
+        - (id)copyValue {
+            Object *c = [[Object alloc] init];
+            for (int i = 0; i < _count; i++) {
+                id v = [_values[i] copyValue];
+                [c set:v forKey:_keys[i]]; [v release];
+            }
+            return c;
+        }
+    @end
+
+@endnamespace // @namespace JSON
+
+// ============================================================================
+// Parser — C helpers + implementation
+// ============================================================================
+
+@namespace JSON
+
+    static void skip_ws(const char **p) {
+        while (**p && (unsigned char)**p <= 0x20) (*p)++;
+    }
+
+    static int parse_hex4(const char **p) {
+        int val = 0;
+        for (int i = 0; i < 4; i++) {
+            char c = *(*p)++;
+            if (c >= '0' && c <= '9') val = (val << 4) | (c - '0');
+            else if (c >= 'a' && c <= 'f') val = (val << 4) | (c - 'a' + 10);
+            else if (c >= 'A' && c <= 'F') val = (val << 4) | (c - 'A' + 10);
+            else return -1;
+        }
+        return val;
+    }
+
+    static char *parse_raw_string(const char **p) {
+        if (**p != '"') return NULL;
+        (*p)++;
+        int cap = 64, len = 0;
+        char *buf = (char *)malloc(cap);
+        while (**p) {
+            char c = **p;
+            if (c == '"') { (*p)++; break; }
+            if (c == '\\') {
+                (*p)++;
+                switch (**p) {
+                    case '"':  buf[len++] = '"'; break;
+                    case '\\': buf[len++] = '\\'; break;
+                    case '/':  buf[len++] = '/'; break;
+                    case 'b':  buf[len++] = '\b'; break;
+                    case 'f':  buf[len++] = '\f'; break;
+                    case 'n':  buf[len++] = '\n'; break;
+                    case 'r':  buf[len++] = '\r'; break;
+                    case 't':  buf[len++] = '\t'; break;
+                    case 'u': {
+                        (*p)++;
+                        int cp = parse_hex4(p);
+                        if (cp < 0) { free(buf); return NULL; }
+                        if (cp <= 0x7F) buf[len++] = (char)cp;
+                        else if (cp <= 0x7FF) {
+                            buf[len++] = (char)(0xC0 | (cp >> 6));
+                            buf[len++] = (char)(0x80 | (cp & 0x3F));
+                        } else {
+                            buf[len++] = (char)(0xE0 | (cp >> 12));
+                            buf[len++] = (char)(0x80 | ((cp >> 6) & 0x3F));
+                            buf[len++] = (char)(0x80 | (cp & 0x3F));
+                        }
+                        continue;
+                    }
+                    default: buf[len++] = **p; break;
+                }
+            } else { buf[len++] = c; }
+            (*p)++;
+            if (len >= cap - 4) { cap *= 2; buf = (char *)realloc(buf, cap); }
+        }
+        buf[len] = '\0';
+        return buf;
+    }
+
+    static id json_parse_value(const char **p);
+
+    static void THROW(const char *msg) @throws(Error *) {
+        Error *e = [[Error alloc] initWithMessage:msg];
+        @throw e;
+    }
+
+    static id json_parse_null(const char **p) {
+        if (strncmp(*p, "null", 4) == 0) { *p += 4; return [Null sharedNull]; }
+        THROW("Expected 'null'"); return nil;
+    }
+
+    static id json_parse_true(const char **p) {
+        if (strncmp(*p, "true", 4) == 0) {
+            *p += 4; return [[[Bool alloc] initWithBool:YES] autorelease];
+        }
+        THROW("Expected 'true'"); return nil;
+    }
+
+    static id json_parse_false(const char **p) {
+        if (strncmp(*p, "false", 5) == 0) {
+            *p += 5; return [[[Bool alloc] initWithBool:NO] autorelease];
+        }
+        THROW("Expected 'false'"); return nil;
+    }
+
+    static id json_parse_number(const char **p) {
+        const char *start = *p;
+        if (**p == '-') (*p)++;
+        while (**p && isdigit(**p)) (*p)++;
+        if (**p == '.') {
+            (*p)++; while (**p && isdigit(**p)) (*p)++;
+        }
+        if (**p == 'e' || **p == 'E') {
+            (*p)++;
+            if (**p == '+' || **p == '-') (*p)++;
+            while (**p && isdigit(**p)) (*p)++;
+        }
+        if (*p == start) THROW("Expected number");
+        int len = (int)(*p - start);
+        if (len >= 64) THROW("Number too long");
+        char buf[64]; strncpy(buf, start, len); buf[len] = '\0';
+        return [[[Number alloc] initWithDouble:strtod(buf, NULL)] autorelease];
+    }
+
+    static id json_parse_string(const char **p) {
+        char *raw = parse_raw_string(p);
+        if (!raw) THROW("Invalid string");
+        id result = [[String alloc] initWithString:raw];
+        free(raw);
+        return [result autorelease];
+    }
+
+    static id json_parse_array(const char **p) {
+        if (**p != '[') THROW("Expected '['");
+        (*p)++;
+        Array *arr = [[[Array alloc] init] autorelease];
+        skip_ws(p);
+        if (**p == ']') { (*p)++; return arr; }
+        while (1) {
+            skip_ws(p);
+            id val = json_parse_value(p);
+            skip_ws(p);
+            if (val) [arr add:val];
+            if (**p == ',') { (*p)++; skip_ws(p); }
+            else if (**p == ']') { (*p)++; break; }
+            else THROW("Expected ',' or ']' in array");
+        }
+        return arr;
+    }
+
+    static id json_parse_object(const char **p) {
+        if (**p != '{') THROW("Expected '{'");
+        (*p)++;
+        Object *obj = [[[Object alloc] init] autorelease];
+        skip_ws(p);
+        if (**p == '}') { (*p)++; return obj; }
+        while (1) {
+            skip_ws(p);
+            if (**p != '"') THROW("Expected string key");
+            char *key = parse_raw_string(p);
+            skip_ws(p);
+            if (**p != ':') { free(key); THROW("Expected ':' after key"); }
+            (*p)++;
+            skip_ws(p);
+            id val = json_parse_value(p);
+            if (key && val) [obj set:val forKey:key];
+            if (key) free(key);
+            skip_ws(p);
+            if (**p == ',') { (*p)++; skip_ws(p); }
+            else if (**p == '}') { (*p)++; break; }
+            else THROW("Expected ',' or '}' in object");
+        }
+        return obj;
+    }
+
+    static id json_parse_value(const char **p) {
+        skip_ws(p);
+        if (**p == '\0') return nil;
+        if (**p == 'n') return json_parse_null(p);
+        if (**p == 't') return json_parse_true(p);
+        if (**p == 'f') return json_parse_false(p);
+        if (**p == '"') return json_parse_string(p);
+        if (**p == '[') return json_parse_array(p);
+        if (**p == '{') return json_parse_object(p);
+        if (**p == '-' || isdigit(**p)) return json_parse_number(p);
+        THROW("Unexpected character"); return nil;
+    }
+
+    @implementation Parser
+        + (id)parse:(const char *)input {
+            if (!input || !*input) THROW("Empty input");
+            const char *p = input;
+            id result = json_parse_value(&p);
+            if (!result) THROW("Failed to parse");
+            skip_ws(&p);
+            if (*p) { [result release]; THROW("Trailing characters"); }
+            return result;
+        }
+    @end
+
+@endnamespace // @namespace JSON
+
+// ============================================================================
+// Category + Editor
+// ============================================================================
+
+@namespace JSON
+
+    @interface Object (Keys)
+        - (void)printKeys;
+    @end
+
+    @implementation Object (Keys)
+        - (void)printKeys {
+            if (_count == 0) { printf("(empty)\n"); return; }
+            for (int i = 0; i < _count; i++) {
+                if (i > 0) printf(", ");
+                printf("%s", _keys[i]);
+            }
+            printf("\n");
+        }
+    @end
+
+    // ─── Command dispatch table (flat string table, no arrays ───
+    static void cmdHelpPrint(void) {
+        printf("  %-20s %s\n", "print", "Print the JSON tree");
+    }
+    static void cmdHelpSet(void) {
+        printf("  %-20s %s\n", "set <key> <json>", "Set a key to a JSON value");
+    }
+    static void cmdHelpGet(void) {
+        printf("  %-20s %s\n", "get <key>", "Print value at key");
+    }
+    static void cmdHelpDel(void) {
+        printf("  %-20s %s\n", "del <key>", "Delete a key");
+    }
+    static void cmdHelpKeys(void) {
+        printf("  %-20s %s\n", "keys", "List all keys");
+    }
+    static void cmdHelpType(void) {
+        printf("  %-20s %s\n", "type [<key>]", "Show type");
+    }
+    static void cmdHelpLen(void) {
+        printf("  %-20s %s\n", "len", "Count of items");
+    }
+    static void cmdHelpNew(void) {
+        printf("  %-20s %s\n", "new", "Start with empty object");
+    }
+    static void cmdHelpParse(void) {
+        printf("  %-20s %s\n", "parse <json>", "Parse JSON as new root");
+    }
+    static void cmdHelpElist(void) {
+        printf("  %-20s %s\n", "elist", "Enumerate via Block");
+    }
+    static void cmdHelpSel(void) {
+        printf("  %-20s %s\n", "sel", "Show selectors demo");
+    }
+    static void cmdHelpHelp(void) {
+        printf("  %-20s %s\n", "help", "This help");
+    }
+    static void cmdHelpQuit(void) {
+        printf("  %-20s %s\n", "quit", "Exit");
+    }
+
+    // ─── @selector dispatch table (runtime) ───
+    static SEL cmdSel(const char *name) {
+        if (strcmp(name, "print") == 0) return @selector(cmdPrint);
+        if (strcmp(name, "set")   == 0) return @selector(cmdSet:);
+        if (strcmp(name, "get")   == 0) return @selector(cmdGet:);
+        if (strcmp(name, "del")   == 0) return @selector(cmdDel:);
+        if (strcmp(name, "keys")  == 0) return @selector(cmdKeys);
+        if (strcmp(name, "type")  == 0) return @selector(cmdType:);
+        if (strcmp(name, "len")   == 0) return @selector(cmdLen);
+        if (strcmp(name, "new")   == 0) return @selector(cmdNew);
+        if (strcmp(name, "parse") == 0) return @selector(cmdParse:);
+        if (strcmp(name, "elist") == 0) return @selector(cmdElist);
+        if (strcmp(name, "sel")   == 0) return @selector(cmdSels);
+        if (strcmp(name, "help")  == 0) return @selector(cmdHelp);
+        if (strcmp(name, "quit")  == 0) return @selector(cmdQuit);
+        return sel_registerName("");
+    }
+
+    @implementation Editor
+        - (instancetype)init {
+            self = [super init];
+            if (self) { _root = [[Object alloc] init]; _running = YES; _histCount = 0; }
+            return self;
+        }
+        - (void)dealloc { [_root release]; [super dealloc]; }
+
+        - (void)refreshDisplay {
+            // Terminal dimensions
+            struct winsize ws;
+            int rows = 24, cols = 80;
+            if (ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws) == 0) {
+                rows = ws.ws_row > 0 ? ws.ws_row : 24;
+                cols = ws.ws_col > 0 ? ws.ws_col : 80;
+            }
+            int mid = rows / 2;
+            int top_avail = mid - 3;
+            int bot_avail = rows - mid - 2;
+
+            // Capture JSON preview to string via stdout redirect
+            char json_buf[131072];
+            {
+                int p[2]; pipe(p);
+                int saved = dup(STDOUT_FILENO);
+                dup2(p[1], STDOUT_FILENO); close(p[1]);
+                [_root printOn:0];
+                printf("\n");
+                fflush(stdout);
+                dup2(saved, STDOUT_FILENO); close(saved);
+                ssize_t n = read(p[0], json_buf, sizeof(json_buf)-1);
+                json_buf[n > 0 ? n : 0] = '\0';
+                close(p[0]);
+            }
+
+            // Count JSON lines
+            int line_count = 1;
+            for (int i = 0; json_buf[i]; i++)
+                if (json_buf[i] == '\n') line_count++;
+
+            // Clear screen
+            printf("\033[2J\033[H");
+
+            // Top box
+            printf("╔");
+            for (int i = 0; i < cols - 2; i++) printf("═");
+            printf("╗\n");
+            printf("║  JSON Preview");
+            for (int i = 16; i < cols - 2; i++) putchar(' ');
+            printf("  ║\n");
+            printf("╚");
+            for (int i = 0; i < cols - 2; i++) printf("═");
+            printf("╝\n");
+
+            // JSON content — scrollable (show last top_avail lines)
+            int skip = line_count > top_avail ? line_count - top_avail : 0;
+            char *p = json_buf;
+            for (int i = 0; i < skip; i++) {
+                while (*p && *p != '\n') p++;
+                if (*p == '\n') p++;
+            }
+            int printed = 0;
+            while (*p && printed < top_avail) {
+                char *nl = p;
+                while (*nl && *nl != '\n') nl++;
+                char saved = *nl; *nl = '\0';
+                int plen = (int)strlen(p);
+                if (plen > cols - 2) {
+                    p[cols - 3] = '\0';
+                    printf("%s~\n", p);
+                } else {
+                    printf("%s\n", p);
+                }
+                *nl = saved;
+                p = *nl ? nl + 1 : nl;
+                printed++;
+            }
+            for (int i = printed; i < top_avail; i++) printf("\n");
+
+            // Divider
+            for (int i = 0; i < cols; i++) printf("─");
+            printf("\n");
+
+            // Command history (bottom area)
+            int pairs_fit = bot_avail / 2;
+            int hist_start = _histCount - pairs_fit;
+            if (hist_start < 0) hist_start = 0;
+            for (int i = hist_start; i < _histCount; i++) {
+                char *cmd = _histCmds + i * 256;
+                char *outp = _histOut + i * 512;
+                printf(">>> %s\n", cmd);
+                char out[512];
+                strncpy(out, outp, 511); out[511] = '\0';
+                int olen = (int)strlen(out);
+                while (olen > 0 && (out[olen-1] == '\n' || out[olen-1] == '\r'))
+                    out[--olen] = '\0';
+                if (olen > cols - 4) { out[cols - 4] = '\0'; strcat(out, "~"); }
+                printf("  %s\n", out);
+            }
+            int shown = (_histCount - hist_start) * 2;
+            for (int i = shown; i < bot_avail; i++) printf("\n");
+
+            // Prompt
+            printf(">>> ");
+            fflush(stdout);
+        }
+
+        - (void)run {
+            // Switch to alternate screen buffer
+            printf("\033[?1049h"); fflush(stdout);
+
+            while (_running) {
+                [self refreshDisplay];
+
+                int len = read_line(_inputBuf, sizeof(_inputBuf));
+                if (len < 0) break;
+                if (len == 0) continue;
+                if (_inputBuf[0] == '\0') continue;
+
+                // Parse cmd / arg
+                char *cmd = _inputBuf;
+                char *arg = "";
+                for (int i = 0; _inputBuf[i]; i++) {
+                    if (_inputBuf[i] == ' ') {
+                        _inputBuf[i] = '\0'; arg = _inputBuf + i + 1; break;
+                    }
+                }
+
+                // Capture stdout during command execution
+                int saved = dup(STDOUT_FILENO);
+                int pipe_r;
+                {
+                    int p[2]; pipe(p);
+                    dup2(p[1], STDOUT_FILENO); close(p[1]);
+                    pipe_r = p[0];
+                }
+
+                @autoreleasepool {
+                    SEL sel = cmdSel(cmd);
+                    if (sel.name[0] == '\0') {
+                        printf("  Unknown: '%s'. Type 'help'.\n", cmd);
+                    } else {
+                        const char *sn = sel.name;
+                        if      (strcmp(sn, "cmdPrint")  == 0) [self cmdPrint];
+                        else if (strcmp(sn, "cmdSet:")   == 0) [self cmdSet:arg];
+                        else if (strcmp(sn, "cmdGet:")   == 0) [self cmdGet:arg];
+                        else if (strcmp(sn, "cmdDel:")   == 0) [self cmdDel:arg];
+                        else if (strcmp(sn, "cmdKeys")   == 0) [self cmdKeys];
+                        else if (strcmp(sn, "cmdType:")  == 0) [self cmdType:arg];
+                        else if (strcmp(sn, "cmdLen")    == 0) [self cmdLen];
+                        else if (strcmp(sn, "cmdNew")    == 0) [self cmdNew];
+                        else if (strcmp(sn, "cmdParse:") == 0) [self cmdParse:arg];
+                        else if (strcmp(sn, "cmdElist")  == 0) [self cmdElist];
+                        else if (strcmp(sn, "cmdSels")   == 0) [self cmdSels];
+                        else if (strcmp(sn, "cmdHelp")   == 0) [self cmdHelp];
+                        else if (strcmp(sn, "cmdQuit")   == 0) [self cmdQuit];
+                    }
+                }
+
+                fflush(stdout);
+                dup2(saved, STDOUT_FILENO); close(saved);
+
+                char out_buf[8192];
+                ssize_t n = read(pipe_r, out_buf, sizeof(out_buf)-1);
+                out_buf[n > 0 ? n : 0] = '\0';
+                close(pipe_r);
+
+                if (_histCount < 500) {
+                    strncpy(_histCmds + _histCount * 256, _inputBuf, 255);
+                    _histCmds[_histCount * 256 + 255] = '\0';
+                    strncpy(_histOut + _histCount * 512, out_buf, 511);
+                    _histOut[_histCount * 512 + 511] = '\0';
+                    _histCount++;
+                } else {
+                    memmove(_histCmds, _histCmds + 256, (500 - 1) * 256);
+                    memmove(_histOut, _histOut + 512, (500 - 1) * 512);
+                    strncpy(_histCmds + 499 * 256, _inputBuf, 255);
+                    _histCmds[499 * 256 + 255] = '\0';
+                    strncpy(_histOut + 499 * 512, out_buf, 511);
+                    _histOut[499 * 512 + 511] = '\0';
+                }
+            }
+            // Restore normal screen buffer
+            printf("\033[?1049l"); fflush(stdout);
+        }
+
+        - (void)cmdPrint { [_root printOn:0]; printf("\n"); }
+
+        - (void)cmdSet:(const char *)arg {
+            if (!arg || !*arg) { printf("  Usage: set <key> <json>\n"); return; }
+            const char *space = strchr(arg, ' ');
+            if (!space) { printf("  Usage: set <key> <json>\n"); return; }
+            int klen = (int)(space - arg);
+            char key[256];
+            if (klen >= 256) klen = 255;
+            strncpy(key, arg, klen); key[klen] = '\0';
+
+            @try {
+                id val = [Parser parse:space + 1];
+                [val retain];
+                [(Object *)_root set:val forKey:key];
+                printf("  OK: %s = ", key); [val printOn:0]; printf("\n");
+                [val release];
+            }
+            @catch (Error *e) {
+                printf("  Error: %s\n", [e message]); [e release];
+            }
+        }
+
+        - (void)cmdGet:(const char *)arg {
+            if (!arg || !*arg) { printf("  Usage: get <key>\n"); return; }
+            id val = [(Object *)_root get:arg];
+            if (!val) { printf("  Not found: '%s'\n", arg); return; }
+            [val printOn:0]; printf("\n");
+        }
+
+        - (void)cmdDel:(const char *)arg {
+            if (!arg || !*arg) { printf("  Usage: del <key>\n"); return; }
+            [(Object *)_root remove:arg];
+            printf("  Deleted '%s'\n", arg);
+        }
+
+        - (void)cmdKeys { [(Object *)_root printKeys]; }
+
+        - (void)cmdType:(const char *)arg {
+            if (!arg || !*arg) { printf("  Root: %s\n", [_root typeName]); return; }
+            id val = [(Object *)_root get:arg];
+            if (!val) { printf("  Not found: '%s'\n", arg); return; }
+            printf("  '%s': %s\n", arg, [val typeName]);
+        }
+
+        - (void)cmdLen { printf("  Count: %d\n", [(Object *)_root count]); }
+
+        - (void)cmdNew {
+            [_root release]; _root = [[Object alloc] init];
+            printf("  New empty object.\n");
+        }
+
+        - (void)cmdParse:(const char *)arg {
+            if (!arg || !*arg) { printf("  Usage: parse <json>\n"); return; }
+            @try {
+                id nr = [Parser parse:arg];
+                [nr retain]; [_root release]; _root = nr;
+                printf("  Parsed OK:\n  "); [_root printOn:0]; printf("\n");
+            }
+            @catch (Error *e) {
+                printf("  Parse error: %s\n", [e message]); [e release];
+            }
+        }
+
+        - (void)cmdElist {
+            [(Object *)_root each:^(int k, id v) {
+                printf("  %s (%s): ",
+                    ((Object *)_root)->_keys[k], [v typeName]);
+                [v printOn:0]; printf("\n");
+            }];
+        }
+
+        - (void)cmdSels {
+            printf("  ── Selectors ──\n");
+            SEL sa[] = {
+                @selector(alloc), @selector(init), @selector(release),
+                @selector(retain), @selector(typeName), @selector(printOn:),
+                @selector(copyValue), @selector(cmdPrint), @selector(cmdSet:),
+            };
+            for (int i = 0; i < 9; i++)
+                printf("  SEL{name=\"%s\", hash=%u}\n", sa[i].name, sa[i].hash);
+            SEL c = sel_registerName("onValueChanged:");
+            printf("  sel_registerName: {name=\"%s\", hash=%u}\n", c.name, c.hash);
+        }
+
+        - (void)cmdHelp {
+            printf("  ── Commands ──\n");
+            cmdHelpPrint(); cmdHelpSet(); cmdHelpGet(); cmdHelpDel();
+            cmdHelpKeys(); cmdHelpType(); cmdHelpLen(); cmdHelpNew();
+            cmdHelpParse(); cmdHelpElist(); cmdHelpSel(); cmdHelpHelp();
+            cmdHelpQuit();
+        }
+
+        - (void)cmdQuit { printf("  Bye!\n"); _running = NO; }
+    @end
+
+@endnamespace // @namespace JSON
+
+// ============================================================================
+// 泛型 Buffer<T>
+// ============================================================================
+@implementation Buffer
+    - (instancetype)init { self = [super init]; if (self) _count = 0; return self; }
+    - (void)push:(T)item { if (_count < 16) _storage[_count++] = item; }
+    - (T)get:(int)index { return (index >= 0 && index < _count) ? _storage[index] : (T)0; }
+    - (int)count { return _count; }
+@end
+
+// ============================================================================
+// 弱引用 Watcher
+// ============================================================================
+@implementation Watcher
+    @synthesize target = _target;
+    - (instancetype)initWithTarget:(id)t {
+        self = [super init]; if (self) _target = t; return self;
+    }
+    - (void)dealloc {
+        printf("  [Watcher] dealloc. target=%p\n", (void *)_target);
+        [super dealloc];
+    }
+@end
+
+// ============================================================================
+// main
+// ============================================================================
+int main(int argc, const char *argv[]) {
+    @autoreleasepool {
+        printf("═══ Ovic Full Feature Demo ═══\n\n");
+        printf("Features:\n");
+        printf("  @namespace JSON { ... } — 7 classes\n");
+        printf("  @protocol Value — polymorphic dispatch\n");
+        printf("  @property/@synthesize — Bool, Number, String\n");
+        printf("  @selector — command dispatch table\n");
+        printf("  @try/@catch/@throw — error handling\n");
+        printf("  @autoreleasepool — memory management\n");
+        printf("  @category — Object (Keys)\n");
+        printf("  Block — enumeration callback\n");
+        printf("  @public weak — Watcher zeroing\n");
+        printf("  instancetype — init return types\n");
+        printf("  sel_registerName — runtime API\n");
+        printf("  Manual MRC — retain/release/dealloc\n\n");
+
+        // ── Part 1: @selector + sel_registerName ──
+        printf("─── 1. @selector + sel_registerName ───\n");
+        SEL a = @selector(init);
+        SEL b = sel_registerName("init");
+        printf("  selA: {name=\"%s\", hash=%u}\n", a.name, a.hash);
+        printf("  selB: {name=\"%s\", hash=%u}\n", b.name, b.hash);
+        printf("  Match: %s\n\n", a.hash == b.hash ? "YES" : "NO");
+
+        // ── Part 2: Weak ref ──
+        printf("─── 2. @public (weak) ───\n");
+        JSON::Object *wo = [[JSON::Object alloc] init];
+        Watcher *wt = [[Watcher alloc] initWithTarget:wo];
+        printf("  target before release: %p\n", (void *)wt->_target);
+        [wo release];
+        printf("  target after release:  %p\n", (void *)wt->_target);
+        [wt release];
+        printf("\n");
+
+        // ── Part 3: @try/@catch ──
+        printf("─── 4. @try/@catch ───\n");
+        @try {
+            id x = [JSON::Parser parse:"{bad"];
+            [x release];
+        }
+        @catch (JSON::Error *e) {
+            printf("  Caught: %s\n", [e message]);
+            [e release];
+        }
+        printf("\n");
+
+        // ── Part 5: Interactive Editor ──
+        printf("─── 5. Interactive JSON Editor ───\n");
+        JSON::Editor *ed = [[JSON::Editor alloc] init];
+        [ed run];
+        [ed release];
+
+        printf("\n═══ Done ═══\n");
+    }
+    return 0;
+}

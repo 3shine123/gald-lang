@@ -1,8 +1,8 @@
-#include "nepa/checker.h"
-#include "nepa/binder.h"
-#include "nepa/parser.h"
-#include "nepa/lexer.h"
-#include "nepa/cst.h"
+#include "ovic/checker.h"
+#include "ovic/binder.h"
+#include "ovic/parser.h"
+#include "ovic/lexer.h"
+#include "ovic/cst.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -15,7 +15,7 @@ static int passed = 0;
 
 static int do_check(const char *src) {
     lexer_t lexer;
-    lexer_init(&lexer, src, strlen(src), "test.np");
+    lexer_init(&lexer, src, strlen(src), "test.ov");
     parser_t *p = parser_create(&lexer);
     translation_unit_t *unit = parser_parse_translation_unit(p);
     if (!unit) { parser_destroy(p); return -1; }

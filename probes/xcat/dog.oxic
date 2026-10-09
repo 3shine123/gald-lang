@@ -1,8 +1,0 @@
-#import <Foundation/Foundation.nh>
-#import "dog.nh"
-@implementation Dog
-- (instancetype)init {
-    self = [super init];
-    return self;
-}
-@end

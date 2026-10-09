@@ -1,0 +1,25 @@
+#import <Foundation/Foundation.ov>
+@interface Boom : NPObject
+@end
+@implementation Boom
+@end
+
+@interface Outer : NPObject
+@end
+@implementation Outer
++ (void)run {
+    @try {
+        @try {
+            @throw [[Boom alloc] init];
+        } @catch (Boom *e) {
+            NPLog(@"inner caught, rethrowing");
+            @throw e;
+        }
+    } @catch (Boom *e) {
+        NPLog(@"outer caught (correct)");
+    }
+    NPLog(@"done");
+}
+@end
+
+int main() { [Outer run]; return 0; }

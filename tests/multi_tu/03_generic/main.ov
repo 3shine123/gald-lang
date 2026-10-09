@@ -1,0 +1,18 @@
+#import "model.oh"
+#include <stdio.h>
+
+/* client TU: names the same instantiation the lib TU defined */
+int main() {
+    int a = 10, b = 20, c = 30;
+    Stack<int *> *s = [[Stack<int *> alloc] init];
+    [s push:&a];
+    [s push:&b];
+    [s push:&c];
+    printf("size=%d\n", [s size]);
+    int *top = [s pop];
+    printf("top=%d\n", *top);
+    printf("size2=%d\n", [s size]);
+    printf("helper=%d\n", StackHelper());
+    ovic_release(s);
+    return 0;
+}

@@ -1,6 +1,0 @@
-#include <stdio.h>
-// 缺口(转译冲突):nepac 给函数定义自动加 __attribute__((weak)),
-// 与 clang-only 的 internal_linkage 冲突 → "weak declaration cannot have internal linkage"。
-__attribute__((internal_linkage))
-int helper(int v) { return v * 2; }
-int main(void) { helper(1); return 0; }

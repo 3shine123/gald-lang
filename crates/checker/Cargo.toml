@@ -1,9 +1,9 @@
 [package]
-name = "nepa-checker"
+name = "ovic-checker"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-nepa-cst = { path = "../cst" }
-nepa-ast = { path = "../ast" }
-nepa-symbol = { path = "../symbol" }
+ovic-cst = { path = "../cst" }
+ovic-ast = { path = "../ast" }
+ovic-symbol = { path = "../symbol" }

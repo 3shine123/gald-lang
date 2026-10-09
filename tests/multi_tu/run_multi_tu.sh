@@ -3,13 +3,13 @@
 #
 # WHY THIS EXISTS
 # ---------------
-# Nepa's uniform vtable is built per translation unit from the set of instance
+# Ovic's uniform vtable is built per translation unit from the set of instance
 # methods that TU happens to see. Two TUs that see DIFFERENT method sets compile
-# two different `struct nepa_vtable` layouts, while the linker weak-merges the
+# two different `struct ovic_vtable` layouts, while the linker weak-merges the
 # vtable *instances* into a single allocation. Dispatch through the losing
 # layout then reads the wrong slot: silent garbage or a segfault at whatever
 # offset the miscalculation lands on. Plain C never hits this because every
-# struct definition is spelled out in the source; Nepa synthesises the layout,
+# struct definition is spelled out in the source; Ovic synthesises the layout,
 # so C's type system cannot protect us.
 #
 # This suite pins down, per language feature, whether it survives a cross-TU
@@ -17,15 +17,15 @@
 # not as a mystery crash three weeks later.
 #
 # Each case is a directory containing:
-#   *.nh   declarations shared by both TUs (the only channel between them)
-#   lib.np the "library" TU: defines the classes, exposes entry points
-#   main.np the "client" TU: sees only the .nh, drives the classes
+#   *.oh   declarations shared by both TUs (the only channel between them)
+#   lib.ov the "library" TU: defines the classes, exposes entry points
+#   main.ov the "client" TU: sees only the .oh, drives the classes
 #   expected.txt  the stdout the program must print (optional; absent = no
 #                 output assertion, only "it must run and exit 0")
 #
 # Usage:  ./run_multi_tu.sh            run everything
 #         ./run_multi_tu.sh 05_block   run one case (by dir name or number)
-#   NEPAC=path/to/nepac ./run_multi_tu.sh
+#   OVICC=path/to/ovicc ./run_multi_tu.sh
 set -u
 # Resolve the script location BEFORE any cd: $0 may be a relative path, and
 # resolving it after the cd below anchors it to the project root — invoking
@@ -33,32 +33,32 @@ set -u
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 cd "$SCRIPT_DIR/../.."
 
-if [[ -z "${NEPAC:-}" ]]; then
-    for cand in target/debug/nepac target/release/nepac; do
-        if [[ -x "$cand" ]]; then NEPAC="$cand"; break; fi
+if [[ -z "${OVICC:-}" ]]; then
+    for cand in target/debug/ovicc target/release/ovicc; do
+        if [[ -x "$cand" ]]; then OVICC="$cand"; break; fi
     done
 fi
-if [[ -z "${NEPAC:-}" || ! -x "$NEPAC" ]]; then
-    echo "error: nepac binary not found (build it, or set NEPAC=)" >&2
+if [[ -z "${OVICC:-}" || ! -x "$OVICC" ]]; then
+    echo "error: ovicc binary not found (build it, or set OVICC=)" >&2
     exit 2
 fi
 
 CASES_ROOT="$SCRIPT_DIR"
-NEPA_INC="$PWD/include"
-WORK="${TMPDIR:-/tmp}/nepa_multi_tu.$$"
+OVIC_INC="$PWD/include"
+WORK="${TMPDIR:-/tmp}/ovic_multi_tu.$$"
 mkdir -p "$WORK"
 trap 'rm -rf "$WORK"' EXIT
 
 FILTER="${1:-}"
 PASS=0; FAIL=0; FAILED_CASES=()
 
-# Emitted C needs -I include (nepa/runtime.h) and the case dir (its own .nh).
+# Emitted C needs -I include (ovic/runtime.h) and the case dir (its own .oh).
 # Note: Foundation is NOT imported by most cases — a case that only needs a
 # base class uses the implicit root, which keeps the method set (and therefore
 # the vtable layout) as small as possible. That is deliberate: the fewer
 # selectors a case drags in, the more precisely a failure points at the
 # feature under test.
-INCS=(-I "$NEPA_INC" -I "$NEPA_INC/Foundation")
+INCS=(-I "$OVIC_INC" -I "$OVIC_INC/Foundation")
 
 run_case() {
     local dir="$1" name
@@ -67,15 +67,15 @@ run_case() {
     mkdir -p "$out"
 
     local sources=()
-    while IFS= read -r f; do sources+=("$f"); done < <(find "$dir" -name '*.np' | sort)
+    while IFS= read -r f; do sources+=("$f"); done < <(find "$dir" -name '*.ov' | sort)
     if [[ ${#sources[@]} -eq 0 ]]; then
-        echo "SKIP  $name (no .np sources)"; return
+        echo "SKIP  $name (no .ov sources)"; return
     fi
 
     # 1. transpile every TU separately
     # A case may pin a stable cross-TU vtable layout: a SLOTS_MANIFEST marker
     # file in the case dir makes every TU compile with --slots <path>. The
-    # manifest lives in the WORK dir (nepac writes the assignment back after
+    # manifest lives in the WORK dir (ovicc writes the assignment back after
     # each compile; the case dir must stay clean). First TU creates it; the
     # append-only contract means later TUs keep its slot order.
     local slots_args=()
@@ -83,31 +83,31 @@ run_case() {
         slots_args=(--slots "$out/slots.manifest")
     fi
 
-    # NATIVE marker: drive nepac's own multi-input mode (`nepac main.np
-    # lib.np -o app`) instead of transpile-each-then-clang. Keeps the
+    # NATIVE marker: drive ovicc's own multi-input mode (`ovicc main.ov
+    # lib.ov -o app`) instead of transpile-each-then-clang. Keeps the
     # compiler's multi-TU feature itself under test, not just the link
     # mechanics it shares with every other case.
     local native=0
     [[ -f "$dir/NATIVE" ]] && native=1
 
     # Optional EH backend selection for the acceptance matrix:
-    #   NEPA_EH_FLAG="-eh checked" ./run_multi_tu.sh
+    #   OVIC_EH_FLAG="-eh checked" ./run_multi_tu.sh
     # Unset (the default) = the shipped default backend, zero behavior change.
     local eh_args=()
-    if [[ -n "${NEPA_EH_FLAG:-}" ]]; then
+    if [[ -n "${OVIC_EH_FLAG:-}" ]]; then
         # shellcheck disable=SC2206
-        eh_args=(${NEPA_EH_FLAG})
+        eh_args=(${OVIC_EH_FLAG})
     fi
 
     local tsrc objs=() t
     if [[ $native -eq 1 ]]; then
-        # NATIVE: one nepac command compiles and links every TU — the same
-        # job every other case does with per-TU -rewrite-nepa + clang below.
-        # main.np is the main TU (first input); the rest are extras.
+        # NATIVE: one ovicc command compiles and links every TU — the same
+        # job every other case does with per-TU -rewrite-ovic + clang below.
+        # main.ov is the main TU (first input); the rest are extras.
         local main_tu="" log="$out/$name.transpile.log"
         local rest=()
         for t in "${sources[@]}"; do
-            if [[ -z "$main_tu" && "$(basename "$t")" == "main.np" ]]; then
+            if [[ -z "$main_tu" && "$(basename "$t")" == "main.ov" ]]; then
                 main_tu="$t"
             else
                 rest+=("$t")
@@ -117,7 +117,7 @@ run_case() {
             main_tu="${sources[0]}"
             rest=("${sources[@]:1}")
         fi
-        if ! "$NEPAC" "$main_tu" ${rest[@]+"${rest[@]}"} -I "$dir" "${INCS[@]}" \
+        if ! "$OVICC" "$main_tu" ${rest[@]+"${rest[@]}"} -I "$dir" "${INCS[@]}" \
                 ${slots_args[@]+"${slots_args[@]}"} ${eh_args[@]+"${eh_args[@]}"} \
                 -o "$out/$name.bin" > "$log" 2>&1; then
             if [[ -f "$dir/EXPECT_FAIL" ]]; then
@@ -132,14 +132,14 @@ run_case() {
         # 1. transpile every TU separately
         # A case may pin a stable cross-TU vtable layout: a SLOTS_MANIFEST marker
         # file in the case dir makes every TU compile with --slots <path>. The
-        # manifest lives in the WORK dir (nepac writes the assignment back after
+        # manifest lives in the WORK dir (ovicc writes the assignment back after
         # each compile; the case dir must stay clean). First TU creates it; the
         # append-only contract means later TUs keep its slot order.
         for t in "${sources[@]}"; do
-            tsrc="$out/$(basename "${t%.np}").c"
+            tsrc="$out/$(basename "${t%.ov}").c"
             # NOTE: macOS bash 3.2 under `set -u` rejects "${empty_arr[@]}" —
             # the conditional expansion keeps empty slots_args legal.
-            if ! "$NEPAC" -rewrite-nepa "$t" -o "$tsrc" -I "$dir" "${INCS[@]}" ${slots_args[@]+"${slots_args[@]}"} ${eh_args[@]+"${eh_args[@]}"} > "$out/$name.transpile.log" 2>&1; then
+            if ! "$OVICC" -rewrite-ovic "$t" -o "$tsrc" -I "$dir" "${INCS[@]}" ${slots_args[@]+"${slots_args[@]}"} ${eh_args[@]+"${eh_args[@]}"} > "$out/$name.transpile.log" 2>&1; then
                 echo "FAIL  $name (transpile)"
                 sed 's/^/      /' "$out/$name.transpile.log" | head -12
                 FAIL=$((FAIL+1)); FAILED_CASES+=("$name"); return
@@ -149,7 +149,7 @@ run_case() {
 
         # 2. link them into one program together with the runtime
         if ! clang -std=c99 -fblocks -w "${INCS[@]}" \
-                "${objs[@]}" "$NEPA_INC/nepa/runtime.c" \
+                "${objs[@]}" "$OVIC_INC/ovic/runtime.c" \
                 -o "$out/$name.bin" > "$out/$name.link.log" 2>&1; then
         # A negative case may legitimately fail at LINK time. Under rule R2 a
         # class's metadata is emitted strong by the TU that owns its
@@ -226,7 +226,7 @@ run_case() {
     PASS=$((PASS+1))
 }
 
-echo "using nepac: $NEPAC"
+echo "using ovicc: $OVICC"
 echo "using clang: $(clang --version | head -1)"
 echo
 

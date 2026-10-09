@@ -1,0 +1,30 @@
+#import <Foundation/Foundation.ov>
+
+// ARC order 17: a `return` inside `@finally` overrides the `@try`'s return
+// value, and the owned local is still released exactly once on the way out.
+
+@interface AO17Item : NPObject
+@end
+
+@implementation AO17Item
+- (void)dealloc {
+    NPLog(@"ao17 dealloc");
+    [super dealloc];
+}
+@end
+
+int ao17_probe(void) {
+    AO17Item *x = [[AO17Item alloc] init];
+    @try {
+        return 1;
+    }
+    @finally {
+        NPLog(@"ao17 finally");
+        return 2;
+    }
+}
+
+int main() {
+    NPLog(@"ao17 r=%d", ao17_probe());
+    return 0;
+}

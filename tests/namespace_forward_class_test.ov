@@ -1,0 +1,55 @@
+// lang-test/namespace_forward_class_test.ov
+// 前向声明 @class + 跨命名空间继承 + @using 组合测试
+#include <stdio.h>
+#import <Foundation/Foundation.ov>
+
+@namespace Engine::Graphics
+    @interface Renderable
+    - (int)layer;
+    @end
+    @implementation Renderable
+    - (int)layer { return 7; }
+    @end
+@endnamespace
+
+@namespace Game
+    // @class 前向声明：codegen 必须为 Game::Player/Enemy 发射 struct 前向声明
+    @class Player;
+    @class Enemy;
+
+    @interface GameManager
+    - (void)spawnPlayer:(Player *)player;
+    - (void)spawnEnemy:(Enemy *)enemy;
+    @end
+    @implementation GameManager
+    - (void)spawnPlayer:(Player *)player { printf("spawn player\n"); }
+    - (void)spawnEnemy:(Enemy *)enemy { printf("spawn enemy\n"); }
+    @end
+@endnamespace
+
+@namespace UI
+    // 跨命名空间继承
+    @interface HUD : Engine::Graphics::Renderable
+    - (void)showPlayer:(Game::Player *)player;
+    @end
+    @implementation HUD
+    - (void)showPlayer:(Game::Player *)player { printf("show player\n"); }
+    @end
+@endnamespace
+
+@using Game::Player;
+
+int main() {
+    UI::HUD *h = [[UI::HUD alloc] init];
+    printf("layer=%d\n", [h layer]);
+
+    Game::GameManager *gm = [[Game::GameManager alloc] init];
+    [gm spawnPlayer:nil];
+    [gm spawnEnemy:nil];
+    [h showPlayer:nil];
+
+    Player *p = nil;  // 通过 @using 导入的短名
+    (void)p;
+    printf("done\n");
+    return 0;
+}

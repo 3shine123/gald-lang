@@ -1,0 +1,28 @@
+// test: object description (%% format)
+#include <stdio.h>
+#import <Foundation/Foundation.ov>
+
+@interface Player : NPObject {
+    @public
+    int level;
+}
+- (id)initWithLevel:(int)l;
+@end
+@implementation Player
+- (id)initWithLevel:(int)l {
+    self = [super init];
+    if (self) level = l;
+    return self;
+}
+@end
+
+int main() {
+    @autoreleasepool {
+        Player *p = [[Player alloc] initWithLevel:10];
+        NPLog(@"player: %@", p);
+        printf("level: %d\n", p->level);
+        [p release];
+    }
+    printf("description OK\n");
+    return 0;
+}

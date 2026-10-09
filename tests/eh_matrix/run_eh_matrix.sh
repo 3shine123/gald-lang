@@ -24,25 +24,25 @@
 #
 # Usage:
 #   ./run_eh_matrix.sh                # full matrix
-#   NEPAC=target/debug/nepac ./run_eh_matrix.sh
+#   OVICC=target/debug/ovicc ./run_eh_matrix.sh
 set -u
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 cd "$ROOT"
 
-NEPAC="${NEPAC:-}"
-if [[ -z "$NEPAC" ]]; then
-    for cand in target/release/nepac target/debug/nepac; do
-        if [[ -x "$cand" ]]; then NEPAC="$cand"; break; fi
+OVICC="${OVICC:-}"
+if [[ -z "$OVICC" ]]; then
+    for cand in target/release/ovicc target/debug/ovicc; do
+        if [[ -x "$cand" ]]; then OVICC="$cand"; break; fi
     done
 fi
-if [[ ! -x "$NEPAC" ]]; then
-    echo "error: nepac binary not found (build it, or set NEPAC=)" >&2
+if [[ ! -x "$OVICC" ]]; then
+    echo "error: ovicc binary not found (build it, or set OVICC=)" >&2
     exit 2
 fi
-NEPAC_ABS="$(cd "$(dirname "$NEPAC")" && pwd)/$(basename "$NEPAC")"
+OVICC_ABS="$(cd "$(dirname "$OVICC")" && pwd)/$(basename "$OVICC")"
 
-WORK="${TMPDIR:-/tmp}/nepa_eh_matrix.$$"
+WORK="${TMPDIR:-/tmp}/ovic_eh_matrix.$$"
 mkdir -p "$WORK"
 trap 'rm -rf "$WORK"' EXIT
 
@@ -82,14 +82,14 @@ norm_tail() {
 }
 
 echo "=== EH acceptance matrix ==="
-echo "nepac : $NEPAC_ABS"
+echo "ovicc : $OVICC_ABS"
 echo "clang : $(clang --version | head -1)"
 echo
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Generic scenario: run a .np in all three modes, compare stdout to the
+# Generic scenario: run a .ov in all three modes, compare stdout to the
 # reference .out when one is supplied.
-#   run_scene <scene> <file> <ref-or-empty> [extra nepac args...]
+#   run_scene <scene> <file> <ref-or-empty> [extra ovicc args...]
 # ─────────────────────────────────────────────────────────────────────────────
 run_scene() {
     local scene="$1" file="$2" ref="$3"; shift 3
@@ -99,14 +99,14 @@ run_scene() {
         eh_argv "$m"
         local d="$WORK/$scene.$m"
         local log="$d.stdout" errf="$d.stderr" rcfile="$d.rc" bin="$d.bin"
-        "$NEPAC_ABS" run -o "$bin" ${EH_ARGV[@]+"${EH_ARGV[@]}"} \
+        "$OVICC_ABS" run -o "$bin" ${EH_ARGV[@]+"${EH_ARGV[@]}"} \
             ${extra[@]+"${extra[@]}"} "$file" >"$log" 2>"$errf"
         local rc=$?
         local used_mrc=0
         # ARC->MRC retry: the exact fallback test_all.py applies to goldens
         # that still carry explicit retain/release.
         if [[ $rc -ne 0 ]] && grep -q "not allowed in ARC mode" "$errf"; then
-            "$NEPAC_ABS" run -o "$bin" -fno-nepa-arc ${EH_ARGV[@]+"${EH_ARGV[@]}"} \
+            "$OVICC_ABS" run -o "$bin" -fno-ovic-arc ${EH_ARGV[@]+"${EH_ARGV[@]}"} \
                 ${extra[@]+"${extra[@]}"} "$file" >"$log" 2>"$errf"
             rc=$?; used_mrc=1
         fi
@@ -138,7 +138,7 @@ report_scene() {
     || ! diff -q "$WORK/$scene.default.stdout" "$WORK/$scene.checked.stdout" >/dev/null 2>&1 \
     || ! diff -q "$WORK/$scene.default.stderr" "$WORK/$scene.checked.stderr" >/dev/null 2>&1; then
         grep -v "^${scene}|" "$ROWS" > "$ROWS.tmp" && mv "$ROWS.tmp" "$ROWS"
-        for m in "${MODES[@]}"; do record "$scene" "$m" "NEPARITY"; done
+        for m in "${MODES[@]}"; do record "$scene" "$m" "OVICRITY"; done
         echo "  ! $scene — default and explicit -eh checked DISAGREE (flip is not behavior-preserving)"
         return
     fi
@@ -159,33 +159,33 @@ report_scene() {
 # extra args
 # ─────────────────────────────────────────────────────────────────────────────
 GOLD="tests/golden"
-run_scene "01_plain_nepa"      "$GOLD/01_basics/hello_world.np"                    "$GOLD/01_basics/hello_world.out"
-run_scene "02_try_catch"       "$GOLD/15_exceptions/try_catch.np"                  "$GOLD/15_exceptions/try_catch.out"
-run_scene "03_nested_try"      "tests/eh_diff/03_nested_finally.np"                ""
-run_scene "04_finally_order"   "tests/eh_matrix/samples/finally_order.np"          ""
-run_scene "05_rethrow"         "tests/eh_diff/04_rethrow.np"                       ""
-run_scene "06_cross_frame"     "tests/eh_diff/01_cross_frame_release.np"           ""
-run_scene "07_arc"             "$GOLD/04_arc/retain_release.np"                    "$GOLD/04_arc/retain_release.out"
+run_scene "01_plain_ovic"      "$GOLD/01_basics/hello_world.ov"                    "$GOLD/01_basics/hello_world.out"
+run_scene "02_try_catch"       "$GOLD/15_exceptions/try_catch.ov"                  "$GOLD/15_exceptions/try_catch.out"
+run_scene "03_nested_try"      "tests/eh_diff/03_nested_finally.ov"                ""
+run_scene "04_finally_order"   "tests/eh_matrix/samples/finally_order.ov"          ""
+run_scene "05_rethrow"         "tests/eh_diff/04_rethrow.ov"                       ""
+run_scene "06_cross_frame"     "tests/eh_diff/01_cross_frame_release.ov"           ""
+run_scene "07_arc"             "$GOLD/04_arc/retain_release.ov"                    "$GOLD/04_arc/retain_release.out"
 # 08_mrc has no .out reference on purpose: retain_release.out is the ARC
 # transcript (it ends with a `dealloc` line MRC never prints, since MRC does
 # not release the object). The verdict here is "runs, and all three modes
 # agree", which report_scene enforces.
-run_scene "08_mrc"             "$GOLD/04_arc/retain_release.np"                    "" -fno-nepa-arc
-run_scene "09_autoreleasepool" "$GOLD/05_autoreleasepool/nested_pool.np"           "$GOLD/05_autoreleasepool/nested_pool.out"
-run_scene "11_foundation_big"  "$GOLD/13_foundation/04_npstring/npstring_test.np"  "$GOLD/13_foundation/04_npstring/npstring_test.out"
-run_scene "12_c_superset"      "$GOLD/22_c_superset/c_superset.np"                 ""
-run_scene "15_await_eh"        "tests/eh_matrix/samples/async_eh.np"               ""
-run_scene "16_block_throw"     "tests/eh_diff/06_block_throw.np"                   ""
+run_scene "08_mrc"             "$GOLD/04_arc/retain_release.ov"                    "" -fno-ovic-arc
+run_scene "09_autoreleasepool" "$GOLD/05_autoreleasepool/nested_pool.ov"           "$GOLD/05_autoreleasepool/nested_pool.out"
+run_scene "11_foundation_big"  "$GOLD/13_foundation/04_npstring/npstring_test.ov"  "$GOLD/13_foundation/04_npstring/npstring_test.out"
+run_scene "12_c_superset"      "$GOLD/22_c_superset/c_superset.ov"                 ""
+run_scene "15_await_eh"        "tests/eh_matrix/samples/async_eh.ov"               ""
+run_scene "16_block_throw"     "tests/eh_diff/06_block_throw.ov"                   ""
 # 17: the guard-density gate's runtime half — a program that cannot throw must
 # run identically in all three modes (the static half, "checked emits zero
 # guards", lives in gen_quality.sh).
-run_scene "17_no_throw_plain"  "tests/eh_matrix/samples/no_throw_plain.np"         ""
+run_scene "17_no_throw_plain"  "tests/eh_matrix/samples/no_throw_plain.ov"         ""
 # 18: full-syntax sweep (C superset + Foundation + inline asm + @throws + @await)
-run_scene "18_full_syntax"     "tests/full_syntax_test.np"                         "" -asm tests/full_syntax_test.s
+run_scene "18_full_syntax"     "tests/full_syntax_test.ov"                         "" -asm tests/full_syntax_test.s
 
 # ─────────────────────────────────────────────────────────────────────────────
 # 10. multi-TU: two separately-transpiled translation units linked together.
-#     Driven by tests/multi_tu/run_multi_tu.sh, which honours NEPA_EH_FLAG.
+#     Driven by tests/multi_tu/run_multi_tu.sh, which honours OVIC_EH_FLAG.
 # ─────────────────────────────────────────────────────────────────────────────
 scene_multi_tu() {
     local scene="10_multi_tu"
@@ -194,7 +194,7 @@ scene_multi_tu() {
         local log="$WORK/${scene}.${m}.log"
         # Every case, not just one: this is both the multi-TU/x-TU-layout gate
         # and a Foundation-inlining (large concatenated TU) gate.
-        NEPA_EH_FLAG="${EH_ARGV[*]:-}" NEPAC="$NEPAC_ABS" \
+        OVIC_EH_FLAG="${EH_ARGV[*]:-}" OVICC="$OVICC_ABS" \
             ./tests/multi_tu/run_multi_tu.sh >"$log" 2>&1
         if grep -qE "^multi-TU: [0-9]+ passed, 0 failed" "$log"; then
             record "$scene" "$m" "PASS"
@@ -216,14 +216,14 @@ scene_freestanding() {
         local d="$WORK/$scene.$m"; mkdir -p "$d"
         local log="$d/build.log"
         {
-            "$NEPAC_ABS" -rewrite-nepa -ffreestanding ${EH_ARGV[@]+"${EH_ARGV[@]}"} \
-                -o "$d/fs.c" tests/golden/25_freestanding/freestanding.np || exit 10
-            clang -I include -include nepa/runtime.h -D_FORTIFY_SOURCE=0 \
+            "$OVICC_ABS" -rewrite-ovic -ffreestanding ${EH_ARGV[@]+"${EH_ARGV[@]}"} \
+                -o "$d/fs.c" tests/golden/25_freestanding/freestanding.ov || exit 10
+            clang -I include -include ovic/runtime.h -D_FORTIFY_SOURCE=0 \
                 -Wno-unused-variable -c "$d/fs.c" -o "$d/fs.o" || exit 11
-            clang -I include -U__NEPA_FREESTANDING -D_FORTIFY_SOURCE=0 \
+            clang -I include -U__OVIC_FREESTANDING -D_FORTIFY_SOURCE=0 \
                 -c tests/golden/25_freestanding/helpers.c -o "$d/helpers.o" || exit 12
-            clang -I include -U__NEPA_FREESTANDING -D_FORTIFY_SOURCE=0 \
-                -c include/nepa/runtime_freestanding.c -o "$d/rt.o" || exit 13
+            clang -I include -U__OVIC_FREESTANDING -D_FORTIFY_SOURCE=0 \
+                -c include/ovic/runtime_freestanding.c -o "$d/rt.o" || exit 13
             clang "$d/fs.o" "$d/helpers.o" "$d/rt.o" -o "$d/fs" || exit 14
             "$d/fs" || exit 15
         } >"$log" 2>&1
@@ -244,12 +244,12 @@ scene_baremetal() {
         local d="$WORK/$scene.$m"; mkdir -p "$d"
         local log="$d/build.log"
         {
-            "$NEPAC_ABS" -rewrite-nepa -ffreestanding ${EH_ARGV[@]+"${EH_ARGV[@]}"} \
-                -o "$d/bm.c" "$bm/baremetal_test.np" || exit 10
-            clang -I include -include nepa/runtime.h -D_FORTIFY_SOURCE=0 \
+            "$OVICC_ABS" -rewrite-ovic -ffreestanding ${EH_ARGV[@]+"${EH_ARGV[@]}"} \
+                -o "$d/bm.c" "$bm/baremetal_test.ov" || exit 10
+            clang -I include -include ovic/runtime.h -D_FORTIFY_SOURCE=0 \
                 -Wno-unused-variable -c "$d/bm.c" -o "$d/bm.o" || exit 11
             clang -I include -D_FORTIFY_SOURCE=0 \
-                -c include/nepa/runtime_freestanding.c -o "$d/rt.o" || exit 12
+                -c include/ovic/runtime_freestanding.c -o "$d/rt.o" || exit 12
             clang -D_FORTIFY_SOURCE=0 -c "$bm/helpers.c" -o "$d/helpers.o" || exit 13
             clang -c "$bm/asm_ext.s" -o "$d/asm.o" || exit 14
             clang "$d/bm.o" "$d/helpers.o" "$d/rt.o" "$d/asm.o" -o "$d/bm" || exit 15
@@ -263,18 +263,18 @@ scene_baremetal
 # ─────────────────────────────────────────────────────────────────────────────
 # Gate: the DEFAULT invocation (no -eh flag) must actually be the checked
 # backend, and `-eh legacy` must actually be sjlj. Fingerprints:
-#   checked : __nepa_eh_flag present, setjmp/longjmp absent
-#   sjlj    : setjmp/longjmp present, __nepa_eh_flag absent
+#   checked : __ovic_eh_flag present, setjmp/longjmp absent
+#   sjlj    : setjmp/longjmp present, __ovic_eh_flag absent
 # ─────────────────────────────────────────────────────────────────────────────
 default_backend_gate() {
-    local probe="tests/golden/15_exceptions/try_catch.np"
+    local probe="tests/golden/15_exceptions/try_catch.ov"
     local d="$WORK/default_gate"; mkdir -p "$d"
-    "$NEPAC_ABS" -rewrite-nepa -fno-nepa-arc -o "$d/default.c" "$probe" >/dev/null 2>&1
-    "$NEPAC_ABS" -rewrite-nepa -eh legacy -fno-nepa-arc -o "$d/legacy.c" "$probe" >/dev/null 2>&1
+    "$OVICC_ABS" -rewrite-ovic -fno-ovic-arc -o "$d/default.c" "$probe" >/dev/null 2>&1
+    "$OVICC_ABS" -rewrite-ovic -eh legacy -fno-ovic-arc -o "$d/legacy.c" "$probe" >/dev/null 2>&1
     local dflag dsetj lflag lsetj
-    dflag=$(grep -c "__nepa_eh_flag" "$d/default.c" || true)
+    dflag=$(grep -c "__ovic_eh_flag" "$d/default.c" || true)
     dsetj=$(grep -cE "setjmp|longjmp" "$d/default.c" || true)
-    lflag=$(grep -c "__nepa_eh_flag" "$d/legacy.c" || true)
+    lflag=$(grep -c "__ovic_eh_flag" "$d/legacy.c" || true)
     lsetj=$(grep -cE "setjmp|longjmp" "$d/legacy.c" || true)
     echo "== default-backend gate =="
     echo "  no -eh flag : flag=$dflag setjmp=$dsetj   (want flag>0 setjmp=0 -> checked)"
@@ -318,7 +318,7 @@ for s in $SCENES; do
     for v in "${row[@]}"; do
         case "$v" in
             PASS|PASS\(mrc\)) ;;
-            NEPARITY) verdict="DEFAULT!=CHECKED" ;;
+            OVICRITY) verdict="DEFAULT!=CHECKED" ;;
             DIFF) verdict="MODE-DRIFT" ;;
             *) [[ "$verdict" == OK || "$verdict" == FAIL ]] && verdict="FAIL" ;;
         esac

@@ -1,0 +1,20 @@
+#include <stdio.h>
+#import <Foundation/Foundation.ov>
+
+@interface Item : NPObject
+@end
+
+@implementation Item
+- (void)dealloc {
+    printf("dealloc\n");
+}
+@end
+
+int main() {
+    @autoreleasepool {
+        Item *a = [Item new];
+        printf("inside pool\n");
+    }
+    printf("after pool\n");
+    return 0;
+}

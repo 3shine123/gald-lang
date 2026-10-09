@@ -1,8 +1,8 @@
 [package]
-name = "nepa-async"
+name = "ovic-async"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-nepa-ast = { path = "../ast" }
-nepa-cst = { path = "../cst" }
+ovic-ast = { path = "../ast" }
+ovic-cst = { path = "../cst" }

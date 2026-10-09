@@ -1,5 +1,5 @@
-use nepa_lexer::{KeywordKind, Lexer, Token, TokenKind};
-use nepa_cst::*;
+use ovic_lexer::{KeywordKind, Lexer, Token, TokenKind};
+use ovic_cst::*;
 
 pub struct Parser<'a> {
     lexer: Lexer<'a>,
@@ -16,7 +16,7 @@ pub struct Parser<'a> {
     panic_mode: bool,
     type_names: Vec<String>,
     /// True when `type_names` is known to be *complete* — i.e. it came from the
-    /// C preprocessor's own view of this TU's `#include`d headers (nepac's
+    /// C preprocessor's own view of this TU's `#include`d headers (ovicc's
     /// `ctype_probe`). Only then may the parser let the symbol table decide the
     /// cases C decides by the symbol table: whether `(X *)p` is a cast, and
     /// whether `x * y;` is a declaration. When the table is not authoritative
@@ -44,7 +44,7 @@ pub struct Parser<'a> {
     region_file: Option<String>,
     /// Maps inlined-buffer lines back to (file, source line), so the region can
     /// be scoped to one file. Injected by the pipeline (`pre.source_map`).
-    source_map: Option<nepa_cst::SourceMap>,
+    source_map: Option<ovic_cst::SourceMap>,
 }
 
 impl<'a> Parser<'a> {
@@ -102,7 +102,7 @@ impl<'a> Parser<'a> {
 
     /// Give the parser the pipeline's line→file map so an `NP_ASSUME_NONNULL`
     /// region can be scoped to the file that opened it.
-    pub fn set_source_map(&mut self, sm: nepa_cst::SourceMap) {
+    pub fn set_source_map(&mut self, sm: ovic_cst::SourceMap) {
         self.source_map = Some(sm);
         // The first token was read before the map arrived; catch it up so the
         // first diagnostic of a file is not the one that drifts.
@@ -187,7 +187,7 @@ impl<'a> Parser<'a> {
     /// to, or past the end of, the line the author actually wrote. Rows need no
     /// work here: the map's line half attributes the line, and the checker
     /// translates it when it renders a diagnostic.
-    fn remap_token_col(sm: &Option<nepa_cst::SourceMap>, token: &mut Token) {
+    fn remap_token_col(sm: &Option<ovic_cst::SourceMap>, token: &mut Token) {
         if let Some(sm) = sm {
             token.column = sm.adjust_col(token.line, token.column as u32).0 as usize;
         }
@@ -1585,7 +1585,7 @@ else if self.match_keyword(KeywordKind::Typeof) {
             // ("expected ')' after expression") can be replaced by the real
             // reason — but only when the type table is the C preprocessor's own
             // view, because otherwise a name may simply be a typedef we were
-            // never told about (a `#include`d header nepac passes through).
+            // never told about (a `#include`d header ovicc passes through).
             if !is_cast
                 && self.current.kind == TokenKind::Identifier
                 && self.type_table_is_authoritative()
@@ -1763,8 +1763,8 @@ else if self.match_keyword(KeywordKind::Typeof) {
 
             // Variadic Foundation collection constructor:
             //   [NPArray arrayWithObjects:a, b, c, nil]  →  @[a, b, c]
-            // ObjC variadic methods don't exist in Nepa; the array literal
-            // already lowers to the `nepa_array_create` runtime helper, so
+            // ObjC variadic methods don't exist in Ovic; the array literal
+            // already lowers to the `ovic_array_create` runtime helper, so
             // desugar to it (dropping the trailing `nil` terminator).
             let colon_count = selector.matches(':').count();
             if colon_count > 0 && args.len() > colon_count && selector == "arrayWithObjects:" {
@@ -2203,7 +2203,7 @@ else if self.match_keyword(KeywordKind::Typeof) {
         // mechanism (same criterion as @try) and keeps `await` a 100%-legal
         // C identifier with zero ambiguity — the ObjC precedent is
         // expression-position `@` machinery like `@selector(...)` and the
-        // `@42` boxing literal. Unlike C#/Swift, nepa is a C superset and
+        // `@42` boxing literal. Unlike C#/Swift, ovic is a C superset and
         // cannot afford to appropriate the identifier.
         if self.match_keyword(KeywordKind::AtAwait) {
             let inner = self.parse_unary()?;
@@ -2973,13 +2973,13 @@ else if self.match_keyword(KeywordKind::Typeof) {
                     Box::new(CstStmt { kind: CstStmtKind::Compound, line: 0, column: 0, data: CstStmtData::Compound(Vec::new()) })
                 );
                 // Desugar:
-                // { T *__nepa_fi = <coll> (borrowed, not owned);
-                //   for (size_t __nepa_fi_i = 0; __nepa_fi_i < [__nepa_fi count]; __nepa_fi_i++) {
-                //       T var = [__nepa_fi objectAtIndex:__nepa_fi_i]; body } }
+                // { T *__ovic_fi = <coll> (borrowed, not owned);
+                //   for (size_t __ovic_fi_i = 0; __ovic_fi_i < [__ovic_fi count]; __ovic_fi_i++) {
+                //       T var = [__ovic_fi objectAtIndex:__ovic_fi_i]; body } }
                 // The collection is an alias (never retained/released), the
                 // element variable is a borrowed element alias — ARC needs
                 // no injection and sees only plain For+Decl+MsgSend.
-                let fi = "__nepa_fi";
+                let fi = "__ovic_fi";
                 let mk_ident = |name: &str, line: usize, col: usize| CstExpr {
                     kind: CstExprKind::Ident, expr_type: None, line, col,
                     data: CstExprData::Ident(name.to_string()),
@@ -2993,14 +2993,14 @@ else if self.match_keyword(KeywordKind::Typeof) {
                     },
                 };
                 let coll_ident = || mk_ident(fi, coll_line, coll_col);
-                // { id __nepa_fi = <collection>;    (borrowed alias — no ARC;
+                // { id __ovic_fi = <collection>;    (borrowed alias — no ARC;
                 //   `id` already renders as `NPObject *` — do NOT set
-                //   is_pointer here, that emitted `NPObject * * __nepa_fi`)
+                //   is_pointer here, that emitted `NPObject * * __ovic_fi`)
                 // The alias is typed `id`, NOT the element type: the collection
                 // is whatever object the user passed (NPArray, or any type
                 // providing `count`/`objectAtIndex:`), which is unrelated to the
                 // loop variable's declared type. Using the element type here
-                // emitted `NPString * __nepa_fi = arr;` — the checker then
+                // emitted `NPString * __ovic_fi = arr;` — the checker then
                 // rejected every for-in whose element type was more specific
                 // than the collection's (e.g. `for (NPString *item in npArray)`).
                 let coll_decl = CstStmt {
@@ -3019,25 +3019,25 @@ else if self.match_keyword(KeywordKind::Typeof) {
                         attributes: Vec::new(),
                     }),
                 };
-                // __nepa_fi_i < [__nepa_fi count]
+                // __ovic_fi_i < [__ovic_fi count]
                 let cond = CstExpr {
                     kind: CstExprKind::Binary, expr_type: None, line: coll_line, col: coll_col,
                     data: CstExprData::Binary {
                         op: 8, // <
-                        left: Box::new(mk_ident("__nepa_fi_i", coll_line, coll_col)),
+                        left: Box::new(mk_ident("__ovic_fi_i", coll_line, coll_col)),
                         right: Box::new(mk_msg(coll_ident(), "count", None, coll_line, coll_col)),
                     },
                 };
-                // __nepa_fi_i++
+                // __ovic_fi_i++
                 let incr = CstExpr {
                     kind: CstExprKind::Unary, expr_type: None, line: coll_line, col: coll_col,
                     data: CstExprData::Unary {
                         op: 1, // ++
-                        operand: Box::new(mk_ident("__nepa_fi_i", coll_line, coll_col)),
+                        operand: Box::new(mk_ident("__ovic_fi_i", coll_line, coll_col)),
                         is_postfix: true,
                     },
                 };
-                // T var = [__nepa_fi objectAtIndex:__nepa_fi_i]
+                // T var = [__ovic_fi objectAtIndex:__ovic_fi_i]
                 let elem_decl = CstStmt {
                     kind: CstStmtKind::Decl, line: coll_line, column: coll_col,
                     data: CstStmtData::Decl(CstDecl {
@@ -3049,7 +3049,7 @@ else if self.match_keyword(KeywordKind::Typeof) {
                             var_type: Some(Box::new(var_type.clone())),
                             initializer: Some(Box::new(mk_msg(
                                 coll_ident(), "objectAtIndex:",
-                                Some(mk_ident("__nepa_fi_i", coll_line, coll_col)),
+                                Some(mk_ident("__ovic_fi_i", coll_line, coll_col)),
                                 coll_line, coll_col,
                             ))),
                             is_static: false, is_extern: false,
@@ -3072,13 +3072,13 @@ else if self.match_keyword(KeywordKind::Typeof) {
                     kind: CstStmtKind::Compound, line: coll_line, column: coll_col,
                     data: CstStmtData::Compound(loop_body_stmts),
                 });
-                // size_t __nepa_fi_i = 0  (for-init counter declaration)
+                // size_t __ovic_fi_i = 0  (for-init counter declaration)
                 let counter_init = CstStmt {
                     kind: CstStmtKind::Decl, line: coll_line, column: coll_col,
                     data: CstStmtData::Decl(CstDecl {
                         kind: CstDeclKind::Variable,
                         line: coll_line, column: coll_col,
-                        name: Some("__nepa_fi_i".to_string()),
+                        name: Some("__ovic_fi_i".to_string()),
                         next: None,
                         data: CstDeclData::Variable {
                             var_type: Some(Box::new({
@@ -3197,7 +3197,7 @@ else if self.match_keyword(KeywordKind::Typeof) {
                 // Same degeneration with a cond arm ALONE, when the subject is
                 // syntactically an object: no object arm forces `__auto_type`,
                 // but `__auto_type` of a pointer is still a pointer, so
-                // `__auto_type __nepa_sw = @7; __nepa_sw > 100` is an always-true
+                // `__auto_type __ovic_sw = @7; __ovic_sw > 100` is an always-true
                 // pointer compare. A variable subject (`id o; switch (o)`) needs
                 // real type information, which M1 does not have — that residual
                 // case is documented as a known limit.
@@ -3747,11 +3747,11 @@ else if self.match_keyword(KeywordKind::Typeof) {
     fn parse_declaration(&mut self) -> Option<CstDecl> {
         // `NP_ASSUME_NONNULL_BEGIN` / `NP_ASSUME_NONNULL_END` — true syntax,
         // NOT macros. ObjC's spelling is a macro wrapping
-        // `_Pragma("clang assume_nonnull begin")`, which nepac cannot use: it
+        // `_Pragma("clang assume_nonnull begin")`, which ovicc cannot use: it
         // refuses `_Pragma` inside a macro body (crates/cpp — a source-level
         // expander has no invocation-site position to place it).
         //
-        // So the region is applied here, in nepac's own parser
+        // So the region is applied here, in ovicc's own parser
         // (`parse_type_annotated` coerces unannotated pointers to Nonnull), and
         // the marker is rewritten to the clang pragma the macro would have
         // expanded to — emitted via the existing RawLine channel so BOTH sides
@@ -4741,7 +4741,7 @@ if self.current.kind == TokenKind::Identifier {
                 self.advance();
                 names.push(tp.clone());
                 // Optional bound: `T : Greetable` (bare protocol), `T : id<Greetable>`
-                // (ObjC spelling — the shell is stripped, nepa protocol types are
+                // (ObjC spelling — the shell is stripped, ovic protocol types are
                 // compile-time labels so both spellings are equivalent), or
                 // `T : NSObject *` (class-pointer bound, stored bare). A protocol
                 // conformance list never carries a colon, so this only fires for
@@ -4751,7 +4751,7 @@ if self.current.kind == TokenKind::Identifier {
                     if self.current.kind == TokenKind::Keyword
                         && self.current.keyword == KeywordKind::Id {
                         // ObjC spelling `T : id<P, Q>` — the shell is stripped
-                        // (nepa protocol types are compile-time labels, so
+                        // (ovic protocol types are compile-time labels, so
                         // `id<P>` and bare `P` are equivalent); each protocol
                         // in the conjunction becomes its own bound entry.
                         self.advance();
@@ -5813,7 +5813,7 @@ fn is_object_literal(e: &CstExpr) -> bool {
 
 /// True when the expression provably cannot be a C `case` label: it contains a
 /// message send, a call or an assignment. C requires an integer constant
-/// expression, which none of those can be — but Nepa let them through and
+/// expression, which none of those can be — but Ovic let them through and
 /// emitted `case [obj msg]:`, so the error surfaced from the generated C.
 /// Conservative by construction: an unrecognized node shape returns false, so
 /// this can only ever flag what is definitely invalid.
@@ -5863,7 +5863,7 @@ fn expr_is_definitely_object(e: &CstExpr) -> bool {
     }
     match &e.data {
         CstExprData::Cast { target_type, .. } => target_type.is_pointer,
-        // A message send is an object by definition in Nepa, but its *value*
+        // A message send is an object by definition in Ovic, but its *value*
         // may be a scalar-returning method, so it is not flagged.
         _ => false,
     }
@@ -5875,7 +5875,7 @@ struct PatternArms {
     arms: Vec<CstArm>,
     has_default: bool,
     /// `default:` body, grouped with its fallthrough siblings; the pattern
-    /// crate emits it as the `__nepa_case_d` labeled block.
+    /// crate emits it as the `__ovic_case_d` labeled block.
     default_body: Option<Box<CstStmt>>,
     /// A plain constant `case N:` arm appeared alongside pattern arms. The two
     /// families cannot share one lowered switch (M1): the C path needs the
@@ -6008,7 +6008,7 @@ mod tests {
     // `#[test]` bodies are stripped from a non-test build, so an ungated
     // `use super::*` here warns as unused in `cargo build` while being
     // required by `cargo test` (CstDeclKind/CstDeclData reach this module only
-    // through the file-level `use nepa_cst::*` in the parent). Gate it.
+    // through the file-level `use ovic_cst::*` in the parent). Gate it.
     #[cfg(test)]
     use super::*;
 
@@ -6058,18 +6058,18 @@ mod tests {
     }
 
     #[test]
-    fn test_debug_nepa_alloc() {
-        let source = r#"id nepa_alloc(struct NPClass *cls);"#;
+    fn test_debug_ovic_alloc() {
+        let source = r#"id ovic_alloc(struct NPClass *cls);"#;
         let mut p = Parser::new(source);
         let unit = p.parse_translation_unit().unwrap();
         println!("decls: {}", unit.decls.len());
         for d in &unit.decls {
             println!("kind: {:?}", d.kind);
             println!("name: {:?}", d.name);
-            if let nepa_cst::CstDeclData::Function { ref return_type, ref params, .. } = d.data {
+            if let ovic_cst::CstDeclData::Function { ref return_type, ref params, .. } = d.data {
                 println!("return_type: {:?}", return_type);
                 if let Some(ref p) = params {
-                    let mut q: Option<&Box<nepa_cst::CstParam>> = Some(p);
+                    let mut q: Option<&Box<ovic_cst::CstParam>> = Some(p);
                     while let Some(param) = q {
                         println!("  param name: {:?}", param.name);
                         println!("  param type: {:?}", param.par_type);

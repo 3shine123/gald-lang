@@ -1,0 +1,37 @@
+// Block literal return type inference (golden: no explicit ^T → inferred from return exprs)
+#import <Foundation/Foundation.ov>
+
+typedef int (^IntBlock2)(int, int);
+typedef double (^DblBlock)(double);
+
+static int applyTwice(IntBlock2 f, int v) { return f(v, v); }
+
+int main() {
+    // 1. Inferred int: no explicit return type, `return a * b;`
+    IntBlock2 mul = ^(int a, int b){ return a * b; };
+    NPLog(@"mul=%d", applyTwice(mul, 3));
+
+    // 2. Explicit ^int wins (written anyway)
+    IntBlock2 explicit_b = ^int(int a, int b){ return a + b; };
+    NPLog(@"explicit=%d", applyTwice(explicit_b, 5));
+
+    // 3. Multiple returns, same type
+    IntBlock2 clamp = ^(int a, int b){
+        if (a > b) { return b; }
+        return a;
+    };
+    NPLog(@"clamp=%d", applyTwice(clamp, 9));
+
+    // 4. void block untouched
+    void (^sayHi)(void) = ^{ NPLog(@"hi"); };
+    sayHi();
+
+    // 5. Paren/cast classified: return (int)(x * 2.0) → int
+    IntBlock2 casted = ^(int a, int b){ return (int)(a * 2.0) + b; };
+    NPLog(@"casted=%d", applyTwice(casted, 7));
+
+    // 6. double inferred
+    DblBlock half = ^(double x){ return x / 2.0; };
+    NPLog(@"half=%.1f", half(9.0));
+    return 0;
+}

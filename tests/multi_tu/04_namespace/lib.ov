@@ -1,0 +1,18 @@
+#import "model.oh"
+#include <stdio.h>
+
+@namespace Geo
+    @implementation Point : NPObject
+    - (int)x { return _x; }
+    - (int)y { return _y; }
+    - (int)magnitude { return _x + _y; }
+    @end
+
+    @implementation Origin : Point
+    - (int)x { return 0; }
+    - (int)y { return 0; }
+    - (int)magnitude { return 0; }
+    @end
+@endnamespace
+
+int GeoHelper(void) { return 5; }

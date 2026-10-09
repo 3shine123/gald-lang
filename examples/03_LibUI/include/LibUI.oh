@@ -1,15 +1,15 @@
 /* ─────────────────────────────────────────────────────────────────────────
- * LibUI.nh — ObjC-style declarations for the libui-ng wrapper.
+ * LibUI.oh — ObjC-style declarations for the libui-ng wrapper.
  *
- * Pure Nepa: no `struct uiXxx` ever leaks out of LibUI.np. Every widget
+ * Pure Ovic: no `struct uiXxx` ever leaks out of LibUI.ov. Every widget
  * inherits from `Control`, so `append:`/`setContent:` take a `Control *`
- * and you never touch a handle yourself. Callbacks take Nepa blocks.
+ * and you never touch a handle yourself. Callbacks take Ovic blocks.
  * ───────────────────────────────────────────────────────────────────────── */
 
 #ifndef LIBUI_NH
 #define LIBUI_NH
 
-#import <Foundation/Foundation.np>
+#import <Foundation/Foundation.ov>
 
 @namespace LibUI
 

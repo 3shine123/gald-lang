@@ -1,7 +1,7 @@
-//! Sidecar source-map file (`.np.map`) — the versioned JSON schema of 阶段 4
+//! Sidecar source-map file (`.ov.map`) — the versioned JSON schema of 阶段 4
 //! (`doc/source_locations_debug_lsp_plan.md` lines 66-74).
 //!
-//! The file maps **generated C lines** back to **Nepa source lines**. Its
+//! The file maps **generated C lines** back to **Ovic source lines**. Its
 //! ground truth is the `#line` directive stream in the generated C, which is
 //! exactly what the C preprocessor consumes, so the map can never disagree
 //! with what clang diagnostics show. Within one mapping the source line
@@ -14,10 +14,10 @@
 //! ```json
 //! {
 //!   "version": 1,
-//!   "generator": "nepac",
-//!   "primary_source": "main.np",
+//!   "generator": "ovicc",
+//!   "primary_source": "main.ov",
 //!   "generated": { "path": "main.c", "hash": "fnv1a64:…" },
-//!   "sources": [ { "id": 0, "path": "main.np", "hash": "fnv1a64:…" } ],
+//!   "sources": [ { "id": 0, "path": "main.ov", "hash": "fnv1a64:…" } ],
 //!   "mappings": [
 //!     { "c_start": 120, "c_end": 480,
 //!       "c_start_line": 9, "c_start_col": 1, "c_end_line": 11, "c_end_col": 14,
@@ -44,7 +44,7 @@
 //!   — the field is a plain string so consumers must treat unknown kinds as
 //!   synthetic-ish and keep parsing).
 //!
-//! JSON is written by hand: `nepa-cst` is intentionally dependency-free and
+//! JSON is written by hand: `ovic-cst` is intentionally dependency-free and
 //! this schema is write-only for the compiler (the reader lives in the
 //! future LSP/debugger-adapter consumers, 阶段 6).
 //!
@@ -107,7 +107,7 @@ pub struct Mapping {
 pub struct SourceMapFile {
     pub version: u64,
     pub generator: String,
-    /// The main `.np` translation unit this build compiled.
+    /// The main `.ov` translation unit this build compiled.
     pub primary_source: String,
     pub generated: GeneratedArtifact,
     /// Sorted by `path` at serialization; `id` follows the sorted order.
@@ -258,8 +258,8 @@ mod tests {
     #[test]
     fn to_json_orders_and_omits_synthetic_source_fields() {
         let mut f = SourceMapFile::new(
-            "nepac",
-            "main.np",
+            "ovicc",
+            "main.ov",
             GeneratedArtifact {
                 path: "main.c".into(),
                 hash: hash_tag(b"C"),
@@ -268,12 +268,12 @@ mod tests {
         f.sources = vec![
             SourceEntry {
                 id: 0,
-                path: "main.np".into(),
+                path: "main.ov".into(),
                 hash: String::new(),
             },
             SourceEntry {
                 id: 1,
-                path: "lib.nh".into(),
+                path: "lib.oh".into(),
                 hash: hash_tag(b"L"),
             },
         ];

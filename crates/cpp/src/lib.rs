@@ -1,14 +1,14 @@
-//! Nepa-side macro expansion.
+//! Ovic-side macro expansion.
 //!
-//! Nepa is a C superset: plain C `#define`s are passed through verbatim to the
+//! Ovic is a C superset: plain C `#define`s are passed through verbatim to the
 //! C compiler, which expands them as usual. But a macro whose body contains
-//! nepa-specific syntax (`[receiver msg]`, `@keyword`, `^{...}`) cannot be
-//! expanded by any C compiler — the body is not C. For those macros nepac
+//! ovic-specific syntax (`[receiver msg]`, `@keyword`, `^{...}`) cannot be
+//! expanded by any C compiler — the body is not C. For those macros ovicc
 //! expands them itself, at the source level, before lexing.
 //!
 //! The expansion algorithm follows the C standard's specification of macro
 //! replacement (ISO/IEC 9899:2011 §6.10.3), implemented independently against
-//! nepa's own token model:
+//! ovic's own token model:
 //!
 //! - object-like macros: name → replacement list, then rescan (§6.10.3.1)
 //! - function-like macros: arguments collected on balanced parens, each
@@ -48,17 +48,17 @@ pub struct MacroDef {
     pub body: String,
 }
 
-/// True when the macro body contains nepa-specific syntax that a C compiler
+/// True when the macro body contains ovic-specific syntax that a C compiler
 /// could not expand: an `@` keyword, a message send, or a block literal.
 ///
 /// Heuristic (conservative in the harmless direction): an ObjC message send
 /// has `[` in token-initial position (preceded by whitespace, start of line,
 /// or an opening punctuation), whereas C indexing glues `[` directly onto an
 /// identifier/`)`/`]`. If a pure-C macro is misclassified anyway, expansion is
-/// still harmless — the body has no nepa syntax, so splicing it back yields
+/// still harmless — the body has no ovic syntax, so splicing it back yields
 /// the same text; the only loss is that the definition no longer reaches the
 /// C prelude.
-pub fn body_has_nepa_syntax(body: &str) -> bool {
+pub fn body_has_ovic_syntax(body: &str) -> bool {
     let bytes = body.as_bytes();
     let mut i = 0;
     let mut prev_significant: Option<u8> = None; // last non-space char
@@ -66,7 +66,7 @@ pub fn body_has_nepa_syntax(body: &str) -> bool {
         match bytes[i] {
             b'@' if i + 1 < bytes.len() && !matches!(bytes[i + 1], b' ' | b'\t' | b'(' | b')' | b',' | b';') => {
                 // @keyword, @"boxed literal", @42 — anything ObjC-ish. A lone
-                // @ followed by punctuation/whitespace is not nepa syntax.
+                // @ followed by punctuation/whitespace is not ovic syntax.
                 return true;
             }
             b'[' => {
@@ -228,7 +228,7 @@ fn find_matching_paren(bytes: &[u8], open: usize) -> Option<usize> {
     None
 }
 
-/// Expand every nepa macro invocation in `src`.
+/// Expand every ovic macro invocation in `src`.
 /// Errors describe the problem with a 1-based line number in `src`.
 pub fn expand(src: &str, table: &HashMap<String, MacroDef>) -> Result<String, String> {
     Ok(expand_mapped(src, table)?.0)
@@ -344,7 +344,7 @@ fn segs_in_range(segs: &[Seg], from: usize, to: usize, joined: bool) -> Vec<Seg>
     out
 }
 
-/// Expand every nepa macro invocation in `src`, letting a function-like call
+/// Expand every ovic macro invocation in `src`, letting a function-like call
 /// span source lines, and report where each output line came from: one
 /// [`ExpandedLine`] per emitted line, in order.
 ///
@@ -359,7 +359,7 @@ fn segs_in_range(segs: &[Seg], from: usize, to: usize, joined: bool) -> Vec<Seg>
 /// Each line's `segs` carry the same provenance for **columns**: an expansion
 /// moves text that follows it along the line, and the bytes it produced have no
 /// column in the source at all. Consumers remap columns with
-/// `nepa_cst::SourceMap::adjust_col`.
+/// `ovic_cst::SourceMap::adjust_col`.
 pub fn expand_mapped(src: &str, table: &HashMap<String, MacroDef>)
     -> Result<(String, Vec<ExpandedLine>), String>
 {
@@ -491,7 +491,7 @@ fn expand_line(line: &str, table: &HashMap<String, MacroDef>, active: &mut HashS
                 Some(def) => {
                     if body_has_pragma(&def.body) {
                         return Err(format!(
-                            "macro '{}' has '_Pragma' in its body, which nepa cannot expand — \
+                            "macro '{}' has '_Pragma' in its body, which ovic cannot expand — \
                              '_Pragma' (ISO/IEC 9899:2011 §6.10.9) takes effect at the invocation \
                              site during preprocessing, and a source-level expander has no position \
                              to place it; write the _Pragma(...) directly on its own source line instead",
@@ -821,8 +821,8 @@ mod tests {
 
     #[test]
     fn object_like_plain_passthrough_not_expanded_here() {
-        // A body without nepa syntax is still fine to expand — but preprocessor
-        // only routes nepa-syntax bodies here.
+        // A body without ovic syntax is still fine to expand — but preprocessor
+        // only routes ovic-syntax bodies here.
         let t = tbl(&["#define TWICE(x) ((x) + (x))"]);
         assert_eq!(expand("int y = TWICE(3);", &t).unwrap(), "int y = ((3) + (3));");
     }
@@ -986,14 +986,14 @@ mod tests {
     }
 
     #[test]
-    fn body_has_nepa_detection() {
-        assert!(body_has_nepa_syntax("[v tag]"));
-        assert!(body_has_nepa_syntax("do { [v tag]; } while (0)"));
-        assert!(body_has_nepa_syntax("@throw e"));
-        assert!(body_has_nepa_syntax("^{ return 1; }"));
-        assert!(!body_has_nepa_syntax("tab[x]"));
-        assert!(!body_has_nepa_syntax("((int *)p)[i]"));
-        assert!(!body_has_nepa_syntax("a[i] + b[j]"));
+    fn body_has_ovic_detection() {
+        assert!(body_has_ovic_syntax("[v tag]"));
+        assert!(body_has_ovic_syntax("do { [v tag]; } while (0)"));
+        assert!(body_has_ovic_syntax("@throw e"));
+        assert!(body_has_ovic_syntax("^{ return 1; }"));
+        assert!(!body_has_ovic_syntax("tab[x]"));
+        assert!(!body_has_ovic_syntax("((int *)p)[i]"));
+        assert!(!body_has_ovic_syntax("a[i] + b[j]"));
     }
 
     #[test]

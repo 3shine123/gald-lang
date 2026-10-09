@@ -1,0 +1,252 @@
+// asm_fusion_test.ov
+// 极致汇编融合压测：内联 asm + 外部 .s + Ovic 高级特性
+// 融合：命名空间 / 类继承 / VTable 多态 / 协议 / 属性@ynthesize / Block闭包(__block捕获)
+//      / @autoreleasepool+ARC / @try@catch@finally / struct+强制cast / 函数指针 / @selector / __weak
+// 外部汇编: asm_crc32, asm_rotl32, asm_clz32, asm_bitrev32 (见 asm_fusion_test.s)
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#import <Foundation/Foundation.ov>
+
+// ---- 外部汇编符号声明 ----
+extern unsigned asm_crc32(const unsigned char* buf, int len);
+extern unsigned asm_rotl32(unsigned x, int n);
+extern unsigned asm_clz32(unsigned x);
+extern unsigned asm_bitrev32(unsigned x);
+
+// ---- C 超集 struct ----
+typedef struct {
+    unsigned lo;
+    unsigned hi;
+} DigestPair;
+
+// ---- 顶层协议 ----
+@protocol IChecksum
+- (unsigned)finalChecksum;
+- (const char*)schemeName;
+@end
+
+// ============ 命名空间 + 协议实现 + 类继承 ============
+@namespace Kernel::Crypto
+
+    @interface BlockHasher : NPObject <IChecksum> {
+        @public
+        unsigned _state;
+        unsigned _digest;
+        int _rounds;
+        const char* _label;
+    }
+    @property (nonatomic, assign) unsigned state;
+    @property int rounds;
+    @property (readonly) const char* label;
+
+    - (id)initWithLabel:(const char*)label;
+    - (unsigned)mixWord:(unsigned)word;
+    - (void)absorbBytes:(const unsigned char*)buf length:(int)len;
+    - (unsigned)leadingZerosOf:(unsigned)value;
+    - (int)isEvenViaAsmGoto:(unsigned)value;
+    - (void)corruptAndThrow @throws;
+    @end
+
+    @implementation BlockHasher
+    @synthesize state = _state;
+    @synthesize rounds = _rounds;
+    @synthesize label = _label;
+
+    - (id)initWithLabel:(const char*)label {
+        self = [super init];
+        if (self) {
+            _state = 0x811C9DC5;   // FNV-1a 偏移基底
+            _digest = 0;
+            _rounds = 0;
+            _label = label;
+        }
+        return self;
+    }
+
+    - (unsigned)mixWord:(unsigned)word {
+        // 内联 asm：state ^= word;  state = rotl(state,5)  (等价 ror 27)
+        // 注意 %w 修饰符：AArch64 上使 32 位操作数使用 w 寄存器，
+        // 否则 %r 会映射到 x 寄存器导致 64 位 ror 破坏低 32 位的 32 位变量。
+        asm volatile("eor %w[s], %w[s], %w[w]\n\t"
+                     "ror %w[s], %w[s], #27"
+                     : [s] "+r"(_state)
+                     : [w] "r"(word)
+                     : "cc");
+        _rounds++;
+        return _state;
+    }
+
+    - (void)absorbBytes:(const unsigned char*)buf length:(int)len {
+        // 外部 asm 计算 CRC，内联 asm 把结果搬运回 ivar
+        unsigned crc = asm_crc32(buf, len);
+        asm volatile("mov %w[d], %w[c]"
+                     : [d] "=r"(_digest)
+                     : [c] "r"(crc)
+                     : "memory");
+        _rounds += len;
+    }
+
+    - (unsigned)finalChecksum {
+        return _digest;
+    }
+
+    - (const char*)schemeName {
+        return _label;
+    }
+
+    - (unsigned)leadingZerosOf:(unsigned)value {
+        return asm_clz32(value);
+    }
+
+    - (int)isEvenViaAsmGoto:(unsigned)value {
+        // asm goto：根据低位跳到标签，配合 C 标签语句
+        asm goto("tst %w0, #1\n\tb.eq %l[even_label]"
+                 : : "r"(value) : "cc" : even_label);
+        goto odd_exit;
+    even_label:
+        goto even_exit;
+    odd_exit:
+        return 0;
+    even_exit:
+        return 1;
+    }
+
+    - (void)corruptAndThrow @throws {
+        printf("    [%s] 检测到管线损坏，准备抛异常...\n", _label);
+        @throw [NPObject alloc];
+    }
+
+    - (void)dealloc {
+        printf("    [析构] %s 已被 ARC 回收，最终摘要: state=%08X digest=%08X rounds=%d\n",
+               _label, _state, _digest, _rounds);
+        [super dealloc];
+    }
+    @end
+@endnamespace
+
+// ============ 主程序 ============
+int main(int argc, const char* argv[])
+{
+    @autoreleasepool {
+        printf("====================================================================\n");
+        printf(">>>    ovicc「内联 asm + 外部 .s + Ovic 高级特性」极致融合压测    <<<\n");
+        printf("====================================================================\n\n");
+
+        // --------------------------------------------------
+        // 1. 命名空间类 + 内联 asm 混洗
+        Kernel::Crypto::BlockHasher* hasher =
+            [[Kernel::Crypto::BlockHasher alloc] initWithLabel:"Kernel-CRC32"];
+
+        printf("--- 1. 内联 asm 混洗 (state = rotl(state^word, 5)) ---\n");
+        unsigned a = [hasher mixWord:0x01020304];
+        unsigned b = [hasher mixWord:0xDEADBEEF];
+        printf("    mixWord(01020304)=%08X\n", a);
+        printf("    mixWord(DEADBEEF)=%08X\n", b);
+        printf("    rounds=%d\n", [hasher rounds]);
+
+        // --------------------------------------------------
+        // 2. 外部 asm CRC32（已知向量 CBF43926）
+        printf("\n--- 2. 外部 asm crc32 (已知标准向量) ---\n");
+        [hasher absorbBytes:(const unsigned char*)"123456789" length:9];
+        unsigned crc = [hasher finalChecksum];
+        printf("    crc32(\"123456789\") = %08X  (期望 CBF43926)\n", crc);
+
+        // --------------------------------------------------
+        // 3. 外部 asm rotl / clz / bitrev
+        printf("\n--- 3. 外部 asm rotl32 / clz32 / bitrev32 ---\n");
+        printf("    rotl32(12345678, 8)    = %08X  (期望 34567812)\n", asm_rotl32(0x12345678, 8));
+        printf("    clz32(1)               = %d  (期望 31)\n", asm_clz32(1));
+        printf("    clz32(0)               = %d  (期望 32)\n", asm_clz32(0));
+        printf("    bitrev32(0F0F0F0F)     = %08X  (期望 F0F0F0F0)\n", asm_bitrev32(0x0F0F0F0F));
+
+        // --------------------------------------------------
+        // 4. 方法内 asm goto + C 标签
+        printf("\n--- 4. 方法内 asm goto 奇偶校验 ---\n");
+        printf("    isEvenViaAsmGoto(42) = %d  (期望 1)\n", [hasher isEvenViaAsmGoto:42]);
+        printf("    isEvenViaAsmGoto(7)  = %d  (期望 0)\n", [hasher isEvenViaAsmGoto:7]);
+
+        // --------------------------------------------------
+        // 5. struct + C 风格 cast + 内联 asm
+        printf("\n--- 5. struct + C cast + 内联 asm (xor 合并字段) ---\n");
+        DigestPair pair;
+        pair.lo = crc;
+        pair.hi = asm_rotl32(0x12345678, 8);
+        unsigned* raw = (unsigned*)&pair;   // C 风格强制转换
+        printf("    cast 读取: raw[0]=%08X raw[1]=%08X\n", raw[0], raw[1]);
+
+        unsigned fused = 0;
+        asm("eor %w[out], %w[a], %w[b]"
+            : [out] "=r"(fused)
+            : [a] "r"(pair.lo), [b] "r"(pair.hi));
+        printf("    fused = lo ^ hi = %08X\n", fused);
+
+        // --------------------------------------------------
+        // 6. 函数指针调用外部汇编
+        printf("\n--- 6. 函数指针指向外部 asm 符号 ---\n");
+        unsigned (*crc_fn)(const unsigned char*, int) = asm_crc32;
+        unsigned via_fn = crc_fn((const unsigned char*)"hello", 5);
+        printf("    (*crc_fn)(\"hello\") = %08X  (期望 3610A686)\n", via_fn);
+
+        // --------------------------------------------------
+        // 7. Block 闭包 + __block 状态捕获（回调消化汇编结果）
+        printf("\n--- 7. Block 闭包捕获状态，消费 asm 结果 ---\n");
+        __block int callbackCount = 0;
+        __block unsigned combined = 0;
+        void (^onDigest)(unsigned) = ^void(unsigned value) {
+            callbackCount++;
+            combined ^= value;
+            printf("    [block] 回调#%d digest=%08X combined=%08X\n",
+                   callbackCount, value, combined);
+        };
+        onDigest(crc);
+        onDigest(via_fn);
+        printf("    block: callbackCount=%d\n", callbackCount);
+
+        // --------------------------------------------------
+        // 8. 协议多态（id<IChecksum> 静态转换 + 派发）
+        printf("\n--- 8. 协议多态派发 ---\n");
+        id<IChecksum> polym = (id<IChecksum>)hasher;
+        printf("    schemeName   = %s\n", [polym schemeName]);
+        printf("    finalChecksum= %08X\n", [polym finalChecksum]);
+
+        // --------------------------------------------------
+        // 9. @selector 取协议方法名
+        printf("\n--- 9. @selector ---\n");
+        SEL checksumSel = @selector(finalChecksum);
+        printf("    SEL name = %s\n", checksumSel.name);
+
+        // --------------------------------------------------
+        // 10. __weak 弱引用监控
+        printf("\n--- 10. __weak 弱引用（对象存活期间非空） ---\n");
+        __weak Kernel::Crypto::BlockHasher* weakWatch = hasher;
+        printf("    weakWatch 存活: %s\n", weakWatch ? "yes(non-nil)" : "NO(nil-bug)");
+
+        // --------------------------------------------------
+        // 11. @try/@catch/@finally 捕获内联流水线异常
+        printf("\n--- 11. @try/@catch/@finally + @throw ---\n");
+        @try {
+            [hasher corruptAndThrow];
+            printf("    这行永远不该打印\n");
+        } @catch(id exc) {
+            printf("    已捕获异常，hasher 状态仍可查询: state=%08X\n", [hasher state]);
+        } @finally {
+            printf("    finally 永远执行\n");
+        }
+
+        // --------------------------------------------------
+        // 12. 多态再验证 + 释放
+        printf("\n--- 12. 收尾：协议方法一致性 + ARC 释放 ---\n");
+        unsigned recomputed = asm_crc32((const unsigned char*)"123456789", 9);
+        printf("    与直接调用比对: %s\n",
+               ([hasher finalChecksum] == recomputed) ? "MATCH(ok)" : "MISMATCH(bug)");
+
+        [hasher release];
+
+        printf("\n====================================================================\n");
+        printf(">>>   完美！内联 asm 与真实汇编在 Ovic 高级特性中无缝融合！   <<<\n");
+        printf("====================================================================\n");
+    }
+    return 0;
+}

@@ -1,0 +1,134 @@
+// lang-test/runtime_hijack_test.ov
+// 专为 ovicc 设计的「匿名多态、不透明指针劫持与复合边界」极限测试
+// 基准框架：NPFoundation
+
+#import <Foundation/Foundation.ov>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+// ============ 1. 两个完全没有血缘关系的类（测试动态符号查找） ============
+
+@interface NPShipKernel : NPObject
+{
+    @private
+    int _safetyRating;
+}
+- (id)init;
+- (void)executeCommandChain:(int)code;
+- (int)getRating;
+@end
+
+@implementation NPShipKernel
+- (id)init { self = [super init]; if(self){ _safetyRating = 100; } return self; }
+- (void)executeCommandChain:(int)code {
+    _safetyRating -= code;
+    printf("[地球飞船核心] 收到指令流。安全指数下降至: %d\n", _safetyRating);
+}
+- (int)getRating { return _safetyRating; }
+@end
+
+
+@interface NPAlienTech : NPObject
+{
+    @public
+    int _alienEnergyCells; // 故意暴露给外部进行劫持测试
+}
+- (id)init;
+- (void)executeCommandChain:(int)code;
+@end
+
+@implementation NPAlienTech
+- (id)init { self = [super init]; if(self){ _alienEnergyCells = 999; } return self; }
+- (void)executeCommandChain:(int)code {
+    _alienEnergyCells += code * 10;
+    printf("[外星未知科技] 捕获暗能量。晶核能量飙升至: %d\n", _alienEnergyCells);
+}
+@end
+
+
+// ============ 2. 劫持控制器（通过 id 万能指针和强转进行破坏） ============
+@interface NPRuntimetHijacker : NPObject
+{
+    @private
+    id _anonymousTarget; // 不透明万能指针
+}
+- (id)initWithTarget:(id)target;
+- (void)forceExecute:(int)val;
+- (void)hijackAlienMemory:(id)alienObj;
+@end
+
+@implementation NPRuntimetHijacker
+- (id)initWithTarget:(id)target
+{
+    self = [super init];
+    if (self) {
+        _anonymousTarget = target; // 运行时动态绑定
+    }
+    return self;
+}
+
+- (void)forceExecute:(int)val
+{
+    // 【压测点 1】匿名多态派发
+    // 转译器在编译期根本不知道 _anonymousTarget 到底是飞船还是外星科技
+    // 它必须生成纯粹的动态派发逻辑，根据运行时的实际对象去调用对应的方法
+    [_anonymousTarget executeCommandChain:val];
+}
+
+- (void)hijackAlienMemory:(id)alienObj
+{
+    // 【压测点 2】跨对象强转与成员变量越权修改
+    // 将万能 id 指针强转为具体类型，并利用 -> 运算符直接跨类篡改内部值
+    NPAlienTech* rawTech = (NPAlienTech*)alienObj;
+    rawTech->_alienEnergyCells = 404; // 暴力清空外星核心的能量
+    printf("[劫持黑客] 成功利用指针越权强行修改外星内存！当前能量已被篡改为: %d\n", rawTech->_alienEnergyCells);
+}
+@end
+
+
+// ============ 3. 主入口 ============
+int main(int argc, const char* argv[])
+{
+    @autoreleasepool {
+        printf("==================================================\n");
+        printf(">>>    ovicc 编译器「匿名多态与内存劫持」压测    <<<\n");
+        printf("==================================================\n\n");
+
+        // 1. 创建两个毫无关联的实例
+        NPShipKernel* earthShip = [[NPShipKernel alloc] init];
+        NPAlienTech* alienTech = [[NPAlienTech alloc] init];
+
+        // 2. 将它们伪装成 id 扔进劫持器中
+        NPRuntimetHijacker* hijacker1 = [[NPRuntimetHijacker alloc] initWithTarget:earthShip];
+        NPRuntimetHijacker* hijacker2 = [[NPRuntimetHijacker alloc] initWithTarget:alienTech];
+
+        printf("--- 测试点 1: 验证不透明指针的动态多态派发 ---\n");
+        [hijacker1 forceExecute:15]; // 应该跑进 NPShipKernel
+        [hijacker2 forceExecute:15]; // 应该跑进 NPAlienTech
+
+        printf("\n--- 测试点 2: 验证跨对象实例变量强转劫持 ---\n");
+        [hijacker1 hijackAlienMemory:alienTech];
+
+        // 3. 【编译期噩梦】测试点 3: 逗号表达式与方括号语法边界大混淆
+        printf("\n--- 测试点 3: 恶心语法边界（C原生逗号表达式混用） ---\n");
+        int dynamicCounter = 10;
+        
+        // 这一行包含 C 语言的括号结合律、逗号表达式自增、以及末尾的方括号消息传递
+        // 转译器绝对不能把开头的 (dynamicCounter++, earthShip) 误当成方法调用的一部分
+        int finalRating = [((dynamicCounter++, earthShip)) getRating];
+        
+        printf("[语法断言] 边界解析成功！副作用自增值: %d, 飞船评级: %d\n", dynamicCounter, finalRating);
+
+        // 4. 回收内存
+        [earthShip release];
+        [alienTech release];
+        [hijacker1 release];
+        [hijacker2 release];
+
+        printf("\n==================================================\n");
+        printf(">>>      天花板也被顶破了！ovicc 转译器无懈可击！  <<<\n");
+        printf("==================================================\n");
+    }
+    return 0;
+}r

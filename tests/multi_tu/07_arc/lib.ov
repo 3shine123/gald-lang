@@ -1,0 +1,15 @@
+#import "model.oh"
+
+@implementation Vault : NPObject {
+    @public
+    int _total;
+}
+- (int)total { return _total; }
+@end
+
+/* Convenience-style return: the caller does NOT own it. */
+NPString *VaultToken(void) {
+    return [NPString stringWithUTF8String:"s3cret"];
+}
+
+int VaultHelper(void) { return 64; }

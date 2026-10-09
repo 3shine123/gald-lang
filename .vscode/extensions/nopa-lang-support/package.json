@@ -1,9 +1,9 @@
 {
-  "name": "nepa-lang",
-  "displayName": "Nepa Language",
-  "description": "Syntax highlighting and language support for Nepa — a statically-dispatched Objective-C dialect",
+  "name": "ovic-lang",
+  "displayName": "Ovic Language",
+  "description": "Syntax highlighting and language support for Ovic — a statically-dispatched Objective-C dialect",
   "version": "0.2.0",
-  "publisher": "nepa-lang",
+  "publisher": "ovic-lang",
   "engines": {
     "vscode": "^1.80.0"
   },
@@ -13,24 +13,24 @@
   "contributes": {
     "languages": [
       {
-        "id": "nepa",
+        "id": "ovic",
         "aliases": [
-          "Nepa",
-          "nepa",
-          ".np"
+          "Ovic",
+          "ovic",
+          ".ov"
         ],
         "extensions": [
-          ".np",
-          ".nh"
+          ".ov",
+          ".oh"
         ],
         "configuration": "./language-configuration.json"
       }
     ],
     "grammars": [
       {
-        "language": "nepa",
-        "scopeName": "source.np",
-        "path": "./syntaxes/nepa.tmLanguage.json"
+        "language": "ovic",
+        "scopeName": "source.ov",
+        "path": "./syntaxes/ovic.tmLanguage.json"
       }
     ]
   }

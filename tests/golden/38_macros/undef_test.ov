@@ -1,0 +1,28 @@
+// probe: #undef removes a ovic macro (invocations after it stay literal → parse error if used)
+#import <Foundation/Foundation.ov>
+#include <stdio.h>
+
+#define TAG(o) [o tag]
+#undef TAG
+
+@interface Widget { int uid; }
++ (id) alloc;
+- (id) init;
+- (int) tag;
+- (int) addTo:(int)v times:(int)k;
+@end
+@implementation Widget
++ (id) alloc { return ovic_alloc(self); }
+- (id) init   { return self; }
+- (int) tag   { return uid; }
+- (int) addTo:(int)v times:(int)k { uid += v * k; return uid; }
+@end
+
+int main() {
+    ovic_meta_init();
+    Widget *w = [[Widget alloc] init];
+    [w addTo:9 times:0];
+    // TAG is #undef'd: expand nothing; write the send directly.
+    printf("%d\n", [w tag]);
+    return 0;
+}

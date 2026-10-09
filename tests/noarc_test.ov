@@ -1,0 +1,25 @@
+#include <stdio.h>
+#import <Foundation/Foundation.ov>
+
+int main() {
+    @autoreleasepool {
+        NPObject *o = [[NPObject alloc] init];
+
+        // @noarc { } permits manual memory management even in ARC mode.
+        // Keep the manual pair BALANCED: ARC still owns `o` at scope end and
+        // will release it, so an extra release here over-releases the object
+        // (that made the ARC attempt crash and the file fall back to MRC —
+        // the fallback masked a bug in the test, not in the compiler).
+        @noarc {
+            [o retain];
+            [o release];
+        }
+
+        // Convenience constructors still work (Foundation uses @noarc internally).
+        NPString *s = [NPString stringWithUTF8String:"hello"];
+        printf("s=%s\n", [s UTF8String]);
+
+        printf("noarc ok\n");
+    }
+    return 0;
+}

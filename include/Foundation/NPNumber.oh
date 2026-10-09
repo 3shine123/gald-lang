@@ -1,8 +1,8 @@
 #ifndef NPNUMBER_NH
 #define NPNUMBER_NH
 
-#import <Foundation/NPObject.nh>
-#import <Foundation/NPString.nh>
+#import <Foundation/NPObject.oh>
+#import <Foundation/NPString.oh>
 
 @interface NPNumber : NPObject {
 @public

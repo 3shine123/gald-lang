@@ -1,13 +1,13 @@
 [-> 中文](CHINESE.md)
 
 <div align="center">
-<img src="doc/assets/Nepa_avatar.svg" alt="Nepa_avatar" width="210">
+<img src="doc/assets/Ovic_avatar.svg" alt="Ovic_avatar" width="210">
 
-# The Nepa Programming Language
+# The Ovic Programming Language
 
 [**View Project Examples**](#project-examples)
 
-[Overview](#overview) · [Why Nepa?](#why-nepa) · [Project Examples](#project-examples) · [Quick Start](#quick-start) · [Language Features](#language-features) · [New Features](#new-features) · [Compilation & CLI](#compilation--cli) · [Code Examples](#code-examples) · [Design Principles](#design-principles) · [Roadmap](#roadmap) · [FAQ](#faq)
+[Overview](#overview) · [Why Ovic?](#why-ovic) · [Project Examples](#project-examples) · [Quick Start](#quick-start) · [Language Features](#language-features) · [New Features](#new-features) · [Compilation & CLI](#compilation--cli) · [Code Examples](#code-examples) · [Design Principles](#design-principles) · [Roadmap](#roadmap) · [FAQ](#faq)
 
 </div>
 
@@ -25,15 +25,15 @@
 
 ## **Overview**
 
-Nepa is a **purely static** Objective-C dialect (C superset language). Nepa source is transpiled to C99, then compiled to native machine code by Clang. No runtime message forwarding, no GC pauses, no JIT warm-up — all method dispatch, memory management, and polymorphism are resolved at compile time. It currently works — there are games and tools running in it. If you find it interesting, feel free to give it a try.
+Ovic is a **purely static** Objective-C dialect (C superset language). Ovic source is transpiled to C99, then compiled to native machine code by Clang. No runtime message forwarding, no GC pauses, no JIT warm-up — all method dispatch, memory management, and polymorphism are resolved at compile time. It currently works — there are games and tools running in it. If you find it interesting, feel free to give it a try.
 
 I don't intend to replace ObjC or Swift. I just miss ObjC's syntax and wanted to let it live again in a statically compiled world. ☺️
 
 ---
 
-## Why Nepa?
+## Why Ovic?
 
-I simply like ObjC's message send syntax `[obj message]`. ObjC's runtime (`objc_msgSend`) is heavy, and I wanted to write ObjC-like code that compiles straight to C — so Nepa was born: ObjC syntax compiled statically, no runtime dependency, generating clean C.
+I simply like ObjC's message send syntax `[obj message]`. ObjC's runtime (`objc_msgSend`) is heavy, and I wanted to write ObjC-like code that compiles straight to C — so Ovic was born: ObjC syntax compiled statically, no runtime dependency, generating clean C.
 
 This is not a production-ready language. It's a toy, exploring the question: "what happens if you transpile ObjC into plain static C?"
 
@@ -49,6 +49,18 @@ This is not a production-ready language. It's a toy, exploring the question: "wh
 - **Readable**: generated C is meant to be read by humans
 - **Lightweight**: just one small static runtime
 
+### Why the `NP-` Prefix Stays
+
+The language has changed its name, but the Foundation classes keep their `NP-` prefix (`NPObject`, `NPString`, `NPArray`, …). It comes from **"Nupa"** — the project's original working name before it became Ovic.
+
+Keeping it is deliberate:
+
+- **History you can read** — every `NP` class carries the name of the project's origin, even as the language name changed around it.
+- **Same role as `NS`/`CF`** — ObjC uses a two-letter class prefix to mark the framework (`NSObject`, `NSString`); `NP` plays exactly that role for Ovic's Foundation. The full naming rules live in `NAMING.md`.
+- **Stability over churn** — renaming classes would break every existing `.ov` file, bridge headers (`ovic_NPString_UTF8String`), and metadata symbols (`OVIC_CLASS_$_NPString`) for zero semantic gain. The prefix is not tied to the language name, so language renames don't touch it.
+
+So: language name = Ovic, compiler = `ovicc`, but classes stay `NP*` — Nupa's fingerprint in the standard library.
+
 ---
 
 ## Project Examples
@@ -59,10 +71,10 @@ This is not a production-ready language. It's a toy, exploring the question: "wh
 
 | Project               | Description                                                                              | Run                            |
 | --------------------- | ---------------------------------------------------------------------------------------- | ------------------------------ |
-| **`04_soma-kernel/`** | Tiny 32‑bit i386 OS kernel (NASM + C + Nepa), bare‑metal `-ffreestanding` mode                | `./run.sh` or `./run.sh --gui` |
-| **`03_LibUI/`**       | GUI app via [libui-ng](https://github.com/libui-ng/libui-ng), all callbacks in pure Nepa | `./run_libui.sh`               |
+| **`04_soma-kernel/`** | Tiny 32‑bit i386 OS kernel (NASM + C + Ovic), bare‑metal `-ffreestanding` mode                | `./run.sh` or `./run.sh --gui` |
+| **`03_LibUI/`**       | GUI app via [libui-ng](https://github.com/libui-ng/libui-ng), all callbacks in pure Ovic | `./run_libui.sh`               |
 | **`02_ncurses/`**     | Terminal demos (`ncurses_demo`, `sysmon`) using `Terminal::Ncurses`                      | `make run`                     |
-| **`01_JSONEditor/`**  | Multi‑file JSON editor with split‑screen terminal preview                                | `nepac run json_editor.np`     |
+| **`01_JSONEditor/`**  | Multi‑file JSON editor with split‑screen terminal preview                                | `ovicc run json_editor.ov`     |
 
 ---
 
@@ -77,81 +89,81 @@ This is not a production-ready language. It's a toy, exploring the question: "wh
 ### Build
 
 ```bash
-git clone https://github.com/3shine123/nepa-lang.git
-cd nepa-lang
+git clone https://github.com/3shine123/ovic-lang.git
+cd ovic-lang
 cargo build --release
 ```
 
 ### Install
 
-The build automatically drops an `install.sh` (plus headers and `libnepa.a`) next to the `nepac` binary. Install it to your system with:
+The build automatically drops an `install.sh` (plus headers and `libovic.a`) next to the `ovicc` binary. Install it to your system with:
 
 ```bash
 # After building from source — the script lives next to the binary
 cd target/release        # or target/debug if you ran a plain `cargo build`
-./install.sh             # installs to /opt/nepa by default
+./install.sh             # installs to /opt/ovic by default
 ./install.sh /usr/local  # optional: pick a different prefix
 ```
 
 This installs:
 
-- **binary** → `<prefix>/bin/nepac`
-- **static lib** → `<prefix>/lib/libnepa.a`
+- **binary** → `<prefix>/bin/ovicc`
+- **static lib** → `<prefix>/lib/libovic.a`
 - **headers** → `<prefix>/include/`
-- **system headers** → `/usr/local/include/{Foundation,nepa}/` (needs write permission; skip with `sudo` or pass a second arg like `./install.sh /opt/nepa ~/include`)
+- **system headers** → `/usr/local/include/{Foundation,ovic}/` (needs write permission; skip with `sudo` or pass a second arg like `./install.sh /opt/ovic ~/include`)
 
 The installer auto-detects your language (中文 / English).
 
-Alternatively, download a prebuilt release archive (`nepa-<platform>.tar.gz` or `.zip`) from the releases page, extract it, and run the `install.sh` inside:
+Alternatively, download a prebuilt release archive (`ovic-<platform>.tar.gz` or `.zip`) from the releases page, extract it, and run the `install.sh` inside:
 
 ```bash
-tar xzf nepa-x86_64-unknown-linux-musl.tar.gz
-cd nepa-x86_64-unknown-linux-musl
+tar xzf ovic-x86_64-unknown-linux-musl.tar.gz
+cd ovic-x86_64-unknown-linux-musl
 ./install.sh
 ```
 
-> **Tip:** with `nepac` on your PATH and system headers installed, `<nepa/runtime.h>` and `<Foundation/...>` resolve automatically — no `-I include` needed.
+> **Tip:** with `ovicc` on your PATH and system headers installed, `<ovic/runtime.h>` and `<Foundation/...>` resolve automatically — no `-I include` needed.
 
-### Compile a Nepa Program
+### Compile a Ovic Program
 
 ```bash
-# Just output C code (auto-derives .np → .c)
-nepac -rewrite-nepa hello.np
-nepac hello.np -rewrite-nepa               # flag works anywhere
-nepac -rewrite-nepa hello.np -o out.c      # explicit path also works
-# (--rewrite-nepa double-dash form also accepted)
+# Just output C code (auto-derives .ov → .c)
+ovicc -rewrite-ovic hello.ov
+ovicc hello.ov -rewrite-ovic               # flag works anywhere
+ovicc -rewrite-ovic hello.ov -o out.c      # explicit path also works
+# (--rewrite-ovic double-dash form also accepted)
 
 # Compile the transpiled C alone with Clang — two ways:
 #   1) compile the runtime source directly
-clang -I include -o hello hello.c include/nepa/runtime.c
-#   2) link the prebuilt libnepa.a (lives next to the nepac binary)
-clang -I include -o hello hello.c -Ltarget/release -lnepa
+clang -I include -o hello hello.c include/ovic/runtime.c
+#   2) link the prebuilt libovic.a (lives next to the ovicc binary)
+clang -I include -o hello hello.c -Ltarget/release -lovic
 
 # Compile to executable
-nepac hello.np -o hello_bin                # transpile + compile + link
+ovicc hello.ov -o hello_bin                # transpile + compile + link
 
 # Multi-TU: extra positional inputs are compiled and linked in; .o/.a as-is
-nepac main.np lib.np -I include -o app     # two TUs, one command (no manual clang)
-nepac main.np lib.o libfoo.a -o app        # mix nepa sources with prebuilt objects
+ovicc main.ov lib.ov -I include -o app     # two TUs, one command (no manual clang)
+ovicc main.ov lib.o libfoo.a -o app        # mix ovic sources with prebuilt objects
 
 # Precompiled Foundation library: build once, link in every project
-./tools/build-foundation-lib.sh                            # → target/foundation/libnepafoundation.a
-nepac app.np -I include -L target/foundation -lnepafoundation -o app   # explicit
-nepac app.np -o app                                        # or: auto-linked when findable (decl-only clients)
+./tools/build-foundation-lib.sh                            # → target/foundation/libovicfoundation.a
+ovicc app.ov -I include -L target/foundation -lovicfoundation -o app   # explicit
+ovicc app.ov -o app                                        # or: auto-linked when findable (decl-only clients)
 
 # Compile + run
-nepac run hello.np
-nepac run hello.np -o hello_bin            # keep binary after run
-nepac run hello.np                          # auto-clean temp binary
+ovicc run hello.ov
+ovicc run hello.ov -o hello_bin            # keep binary after run
+ovicc run hello.ov                          # auto-clean temp binary
 
 # Show compilation warnings
-nepac -v run hello.np
+ovicc -v run hello.ov
 
-# [!] Error: .c output without -rewrite-nepa
-nepac hello.np -o hello.c   → Error: use -rewrite-nepa to output C code
+# [!] Error: .c output without -rewrite-ovic
+ovicc hello.ov -o hello.c   → Error: use -rewrite-ovic to output C code
 
 # [!] Error: no output method specified
-nepac hello.np              → Error: specify -o or -rewrite-nepa
+ovicc hello.ov              → Error: specify -o or -rewrite-ovic
 ```
 
 ### Foundation: Two Usage Modes
@@ -160,9 +172,9 @@ Foundation supports two modes. Both are fully supported; **for real projects we 
 
 **Self-contained / unity mode** — implementations are inlined via `#import`; no library needed. Good for single files, quick experiments, and legacy builds:
 
-```nepa
-// hello.np
-#import <Foundation/Foundation.np>   // declarations + implementations, all inlined
+```ovic
+// hello.ov
+#import <Foundation/Foundation.ov>   // declarations + implementations, all inlined
 
 int main() {
     NPLog(@"hello %@", [NPString stringWithUTF8String:"world"]);
@@ -171,14 +183,14 @@ int main() {
 ```
 
 ```bash
-nepac run hello.np
+ovicc run hello.ov
 ```
 
 **Precompiled Foundation / multi-TU mode (recommended)** — the implementation lives in a static library built once; your TU only compiles your own code:
 
-```nepa
-// app.np
-#import <Foundation/Foundation.nh>   // declarations only — nothing inlined
+```ovic
+// app.ov
+#import <Foundation/Foundation.oh>   // declarations only — nothing inlined
 
 int main() {
     NPLog(@"hello %@", [NPString stringWithUTF8String:"world"]);
@@ -187,42 +199,42 @@ int main() {
 ```
 
 ```bash
-./tools/build-foundation-lib.sh   # once → target/foundation/libnepafoundation.a
-nepac app.np -o app               # the library is found and linked automatically
+./tools/build-foundation-lib.sh   # once → target/foundation/libovicfoundation.a
+ovicc app.ov -o app               # the library is found and linked automatically
 ```
 
-Under the hood: in self-contained mode the inlined implementations are not their TU's main file, so their class metadata is weak (duplicated per TU and merged). In library mode each Foundation `.np` is compiled as its own TU, so its `@implementation` owns the metadata and emits it strong — one copy in the archive. Full owner/strong/weak rules: `doc/architecture.md`.
+Under the hood: in self-contained mode the inlined implementations are not their TU's main file, so their class metadata is weak (duplicated per TU and merged). In library mode each Foundation `.ov` is compiled as its own TU, so its `@implementation` owns the metadata and emits it strong — one copy in the archive. Full owner/strong/weak rules: `doc/architecture.md`.
 
 ### Shell Completion (Tab autocomplete)
 
-`nepac` ships with generated completion scripts for **zsh**, **bash** and **fish**, built with
+`ovicc` ships with generated completion scripts for **zsh**, **bash** and **fish**, built with
 [clap_complete](https://crates.io/crates/clap_complete). Regenerate them any time with:
 
 ```bash
-nepac -gen-completions zsh > _nepac
-nepac -gen-completions bash > nepac.bash
-nepac -gen-completions fish > nepac.fish
+ovicc -gen-completions zsh > _ovicc
+ovicc -gen-completions bash > ovicc.bash
+ovicc -gen-completions fish > ovicc.fish
 ```
 
-The scripts are also copied into the install bundle (`share/nepac/completions/`) by `install.sh`.
+The scripts are also copied into the install bundle (`share/ovicc/completions/`) by `install.sh`.
 
 **zsh** — add the directory to `fpath` before `compinit` runs:
 
 ```zsh
-fpath=(/opt/nepa/share/nepac/completions $fpath)
+fpath=(/opt/ovic/share/ovicc/completions $fpath)
 autoload -U compinit && compinit
 ```
 
 **bash**:
 
 ```bash
-source /opt/nepa/share/nepac/completions/nepac.bash
+source /opt/ovic/share/ovicc/completions/ovicc.bash
 ```
 
 **fish**:
 
 ```fish
-source /opt/nepa/share/nepac/completions/nepac.fish
+source /opt/ovic/share/ovicc/completions/ovicc.fish
 ```
 
 After installing a new version, clear the zsh cache with `rm -f ~/.zcompdump*` and open a new terminal.
@@ -243,7 +255,7 @@ cargo test --workspace
 
 ### Class System
 
-```nepa
+```ovic
 @interface Animal : NPObject {
 @public
     NPString *_name;
@@ -269,7 +281,7 @@ cargo test --workspace
 
 ### Protocol
 
-```nepa
+```ovic
 @protocol Drawable
 - (void)draw;
 - (BOOL)isVisible;
@@ -281,7 +293,7 @@ cargo test --workspace
 
 ### Properties
 
-```nepa
+```ovic
 @interface Person : NPObject
 @property NPString *name;
 @property int age;
@@ -291,7 +303,7 @@ cargo test --workspace
 
 ### Category
 
-```nepa
+```ovic
 @interface Person (Printing)
 - (void)printGreeting;
 @end
@@ -305,7 +317,7 @@ cargo test --workspace
 
 ### Block
 
-```nepa
+```ovic
 int (^square)(int) = ^int(int x) {
     return x * x;
 };
@@ -318,7 +330,7 @@ void (^logAndCall)(NPString *, void (^)(void)) = ^void(NPString *msg, void (^nex
 
 ### @autoreleasepool
 
-```nepa
+```ovic
 @autoreleasepool {
     NPString *temp = [NPString stringWithUTF8String:"hello"];
     // temp is released when the pool pops
@@ -327,13 +339,13 @@ void (^logAndCall)(NPString *, void (^)(void)) = ^void(NPString *msg, void (^nex
 
 ### @selector
 
-```nepa
+```ovic
 SEL sel = @selector(doSomething:);
 ```
 
 ### Full C Compatibility
 
-```nepa
+```ovic
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -344,9 +356,9 @@ SEL sel = @selector(doSomething:);
 
 ### C Attributes (__attribute__)
 
-Nepa supports `__attribute__((...))` pass-through. You can write C `__attribute__` on global declarations and struct fields, and the compiler preserves them verbatim in the generated C output.
+Ovic supports `__attribute__((...))` pass-through. You can write C `__attribute__` on global declarations and struct fields, and the compiler preserves them verbatim in the generated C output.
 
-```nepa
+```ovic
 __attribute__((packed))
 struct Point {
     int x;
@@ -369,11 +381,11 @@ Unknown attributes (not in the table) produce a warning and pass through — nev
 
 ### Memory Management
 
-Nepa uses **compile-time static ARC**. The compiler determines each object reference's lifetime through CFG dataflow analysis and inserts retain/release calls automatically. No manual `retain`/`release`/`autorelease` needed.
+Ovic uses **compile-time static ARC**. The compiler determines each object reference's lifetime through CFG dataflow analysis and inserts retain/release calls automatically. No manual `retain`/`release`/`autorelease` needed.
 
-In MRC mode (`-fno-nepa-arc`):
+In MRC mode (`-fno-ovic-arc`):
 
-```nepa
+```ovic
 NPObject *obj = [[NPObject alloc] init];
 // ... use obj ...
 [obj release]; // MRC manual release
@@ -381,12 +393,12 @@ NPObject *obj = [[NPObject alloc] init];
 
 ### C Bridge (`-emit-bridge-header`)
 
-Nepa transpiles to C, but calling Nepa object methods from C normally requires verbose vtable-index and SEL-constant boilerplate. `-emit-bridge-header` generates a header with `static inline` wrappers for every method, so C code can call Nepa objects like ordinary C functions.
+Ovic transpiles to C, but calling Ovic object methods from C normally requires verbose vtable-index and SEL-constant boilerplate. `-emit-bridge-header` generates a header with `static inline` wrappers for every method, so C code can call Ovic objects like ordinary C functions.
 
-**Usage**: transpile a Nepa library to C, then generate the bridge header:
+**Usage**: transpile a Ovic library to C, then generate the bridge header:
 
 ```bash
-nepac -rewrite-nepa lib.np -o lib.c -emit-bridge-header lib.h
+ovicc -rewrite-ovic lib.ov -o lib.c -emit-bridge-header lib.h
 ```
 
 Then include the bridge header from C:
@@ -395,97 +407,97 @@ Then include the bridge header from C:
 #include "lib.h"
 
 int main(void) {
-    nepa_metaInit();  // metadata back-fill — see the note below
+    ovic_metaInit();  // metadata back-fill — see the note below
 
-    // Class method: nepa_<Class>_<method>(params...)
-    NPString *s = nepa_NPString_stringWithUTF8String_("Hello");
+    // Class method: ovic_<Class>_<method>(params...)
+    NPString *s = ovic_NPString_stringWithUTF8String_("Hello");
 
-    // Instance method: nepa_<Class>_<method>(self, params...)
-    size_t len = nepa_NPString_length(s);
-    const char *cstr = nepa_NPString_UTF8String(s);
+    // Instance method: ovic_<Class>_<method>(self, params...)
+    size_t len = ovic_NPString_length(s);
+    const char *cstr = ovic_NPString_UTF8String(s);
 
-    // Nested message send (like Nepa's [[s UTF8String] ...])
-    const char *nested = nepa_NPString_UTF8String(
-        nepa_NPString_stringWithUTF8String_("nested")
+    // Nested message send (like Ovic's [[s UTF8String] ...])
+    const char *nested = ovic_NPString_UTF8String(
+        ovic_NPString_stringWithUTF8String_("nested")
     );
 
-    // Multi-argument message send (like Nepa's [arr replaceObjectAtIndex:0 withObject:obj])
-    NPArray *arr = nepa_NPArray_arrayWithObject_(s);
-    nepa_NPArray_replaceObjectAtIndex_withObject_(arr, 0, s);
+    // Multi-argument message send (like Ovic's [arr replaceObjectAtIndex:0 withObject:obj])
+    NPArray *arr = ovic_NPArray_arrayWithObject_(s);
+    ovic_NPArray_replaceObjectAtIndex_withObject_(arr, 0, s);
 
     // Each colon in the selector becomes an underscore in the function name:
-    //   [obj foo:arg1 bar:arg2] → nepa_<Class>_foo_bar_(obj, arg1, arg2)
+    //   [obj foo:arg1 bar:arg2] → ovic_<Class>_foo_bar_(obj, arg1, arg2)
     //   [m replaceCharactersInRange:rng withString:str]
-    //   → nepa_NPMutableString_replaceCharactersInRange_withString_(m, rng, str)
+    //   → ovic_NPMutableString_replaceCharactersInRange_withString_(m, rng, str)
 }
 ```
 
 Link against the transpiled `.c` and `runtime.c`:
 
 ```bash
-clang caller.c lib.c include/nepa/runtime.c -I include -o app
+clang caller.c lib.c include/ovic/runtime.c -I include -o app
 ```
 
-⚠️ The bridge header uses `sel_registerName` to resolve selectors at runtime, so it does **not** depend on the codegen-generated `static const` SEL constants (which are file-local and invisible across translation units). Class metadata itself is **statically initialized at load time** by every TU whose main file holds the `@implementation` — which is all `nepac` workflows. `nepa_metaInit()` stays in the examples as a harmless idempotent back-fill; it is only *required* when a build reaches implementations through `#import "*.np"` (single-TU umbrella builds), where no TU owns the metadata.
+⚠️ The bridge header uses `sel_registerName` to resolve selectors at runtime, so it does **not** depend on the codegen-generated `static const` SEL constants (which are file-local and invisible across translation units). Class metadata itself is **statically initialized at load time** by every TU whose main file holds the `@implementation` — which is all `ovicc` workflows. `ovic_metaInit()` stays in the examples as a harmless idempotent back-fill; it is only *required* when a build reaches implementations through `#import "*.ov"` (single-TU umbrella builds), where no TU owns the metadata.
 
 #### Memory Management from C
 
-Nepa's **ARC is compile-time and applies only to `.np` source** — it never sees calls coming from C. When C code calls bridge functions, objects are **not** automatically retained or released. Manage them manually, following the ObjC memory-management naming convention:
+Ovic's **ARC is compile-time and applies only to `.ov` source** — it never sees calls coming from C. When C code calls bridge functions, objects are **not** automatically retained or released. Manage them manually, following the ObjC memory-management naming convention:
 
 | Method family                                  | Caller owns?       | What C code must do                                                             |
 | ---------------------------------------------- | ------------------ | ------------------------------------------------------------------------------- |
-| `alloc`, `new`, `copy`, `mutableCopy`          | ✅ +1               | Must call `nepa_release(obj)` when done                                         |
+| `alloc`, `new`, `copy`, `mutableCopy`          | ✅ +1               | Must call `ovic_release(obj)` when done                                         |
 | `init`                                         | ❌ consumes `alloc` | Nothing                                                                         |
-| everything else (e.g. `stringWithUTF8String:`) | ❌ autoreleased     | Nothing, but `nepa_retain(obj)` if it must outlive the current autorelease pool |
+| everything else (e.g. `stringWithUTF8String:`) | ❌ autoreleased     | Nothing, but `ovic_retain(obj)` if it must outlive the current autorelease pool |
 
 ```c
 #include "lib.h"
 
 int main(void) {
-    nepa_metaInit();
-    nepa_autoreleasepool_t *pool = nepa_autoreleasepoolPush();
+    ovic_metaInit();
+    ovic_autoreleasepool_t *pool = ovic_autoreleasepoolPush();
 
     // +1 (returns autoreleased convenience object); use within this pool only
-    NPString *s = nepa_NPString_stringWithUTF8String_("hello");
-    printf("%s\n", nepa_NPString_UTF8String(s));
+    NPString *s = ovic_NPString_stringWithUTF8String_("hello");
+    printf("%s\n", ovic_NPString_UTF8String(s));
 
     // If it must outlive the pool: retain now, release later
-    NPString *t = nepa_NPString_stringWithUTF8String_("world");
-    nepa_retain(t);
-    nepa_autoreleasepoolPop(pool);      // t survives (was retained)
-    printf("%s\n", nepa_NPString_UTF8String(t));
-    nepa_release(t);
+    NPString *t = ovic_NPString_stringWithUTF8String_("world");
+    ovic_retain(t);
+    ovic_autoreleasepoolPop(pool);      // t survives (was retained)
+    printf("%s\n", ovic_NPString_UTF8String(t));
+    ovic_release(t);
 
     // alloc-family returns +1 → must release
-    NPString *u = nepa_NPString_alloc(nepa_NPString_stringWithUTF8String_("x") /* placeholder */);
-    // (real usage: nepa_NPString_copy(s) returns +1, release it)
-    NPString *copy = nepa_NPString_copy(s);
-    nepa_release(copy);
+    NPString *u = ovic_NPString_alloc(ovic_NPString_stringWithUTF8String_("x") /* placeholder */);
+    // (real usage: ovic_NPString_copy(s) returns +1, release it)
+    NPString *copy = ovic_NPString_copy(s);
+    ovic_release(copy);
 }
 ```
 
-`nepa_retain`, `nepa_release`, `nepa_autorelease`, `nepa_autoreleasepoolPush`/`nepa_autoreleasepoolPop` are declared in `<nepa/runtime.h>` and work on any Nepa object. This is exactly the manual-retain-count (MRC) model — from the C side you can think of Nepa objects as raw pointers you own or don't own by convention.
+`ovic_retain`, `ovic_release`, `ovic_autorelease`, `ovic_autoreleasepoolPush`/`ovic_autoreleasepoolPop` are declared in `<ovic/runtime.h>` and work on any Ovic object. This is exactly the manual-retain-count (MRC) model — from the C side you can think of Ovic objects as raw pointers you own or don't own by convention.
 
 ---
 
 ## New Features
 
-Nepa adds features on top of Objective-C syntax that ObjC itself doesn't have.
+Ovic adds features on top of Objective-C syntax that ObjC itself doesn't have.
 
 **Recent highlights:**
 
-- **Predicates / KVC (`NPPredicate`)** — a runtime format-string parser + evaluation engine living entirely in the Foundation library (`age > 18 AND name BEGINSWITH[c] 'A'`, `ANY tags LIKE '*dev*'`), backed by compile-time KVC accessor tables (`NEPA_KVC_$_X`, strong in the owner TU) and a host filtering API (`filteredArrayUsingPredicate:` / `indexOfObjectMatchingPredicate:` / `filterUsingPredicate:`; a `nil` predicate is the identity). The compiler never parses the format string — see `doc/architecture.md` §12.
+- **Predicates / KVC (`NPPredicate`)** — a runtime format-string parser + evaluation engine living entirely in the Foundation library (`age > 18 AND name BEGINSWITH[c] 'A'`, `ANY tags LIKE '*dev*'`), backed by compile-time KVC accessor tables (`OVIC_KVC_$_X`, strong in the owner TU) and a host filtering API (`filteredArrayUsingPredicate:` / `indexOfObjectMatchingPredicate:` / `filterUsingPredicate:`; a `nil` predicate is the identity). The compiler never parses the format string — see `doc/architecture.md` §12.
 - **Sets (`NPSet` / `NPMutableSet` / `NPOrderedSet`)** — hash-bucket set containers in the Foundation library (unique elements, `containsObject:` / `anyObject` / `setWithObjects:count:`), with `NPOrderedSet` preserving insertion order; all container methods dispatch through the static vtable, so they are safe across TUs.
-- **Native bare-metal support (`-ffreestanding`)** — compiles to self-contained C with no libc, no Foundation, no TLS; `@try/@catch` uses `__builtin_setjmp/longjmp`, and a zero-boilerplate `runtime_freestanding.c` provides the bump allocator, `NEPA_CLASS_$_nepa_root`, exception state, and `memcpy`.
+- **Native bare-metal support (`-ffreestanding`)** — compiles to self-contained C with no libc, no Foundation, no TLS; `@try/@catch` uses `__builtin_setjmp/longjmp`, and a zero-boilerplate `runtime_freestanding.c` provides the bump allocator, `OVIC_CLASS_$_ovic_root`, exception state, and `memcpy`.
 - **C superset** — `@protocol` + conformance, `@property` + `@synthesize`, `instancetype`, `@public` ivars, dot syntax, structs + function pointers, inline asm, C-style casts.
-- **Typed `@catch`** — catch arms match via `__nepa_eh_isa` (isKindOf: superclass-chain semantics, like ObjC): a parent-class arm catches subclass instances, and the first matching arm consumes the exception so later arms never double-catch.
+- **Typed `@catch`** — catch arms match via `__ovic_eh_isa` (isKindOf: superclass-chain semantics, like ObjC): a parent-class arm catches subclass instances, and the first matching arm consumes the exception so later arms never double-catch.
 - **ARC fixes** — scope-stack model no longer releases parent-scope variables at nested scope end; `for`-init object hoisting stops leaks and invalid `for` headers.
-- **`@noarc` block** — block-level MRC: in ARC mode, manual `retain`/`release`/`dealloc`/`autorelease` inside `@noarc { }` is allowed; the block-level analogue of `-fno-nepa-arc` and clang's `-fno-objc-arc`.
+- **`@noarc` block** — block-level MRC: in ARC mode, manual `retain`/`release`/`dealloc`/`autorelease` inside `@noarc { }` is allowed; the block-level analogue of `-fno-ovic-arc` and clang's `-fno-objc-arc`.
 - **`__attribute__` pass-through + `-backend`** — full support for C `__attribute__((...))` and all `__`-prefixed C predefined identifiers (`__FILE__`, `__LINE__`, `__builtin_*`, `__extension__`, `__typeof__`, `__alignof__`, ...); the `-backend` flag controls which compiler-specific attributes are allowed.
 
 ### for-in Enumeration
 
-```nepa
+```ovic
 for (NPString *s in arr) {
     printf("%s\n", [s UTF8String]);
 }
@@ -505,7 +517,7 @@ class 'Circle' does not implement required method 'draw' from protocol 'Drawable
 
 Reuse C's `&` operator to require several protocols at once — no new syntax:
 
-```nepa
+```ovic
 // ① Intersection type: the receiver must implement both
 void render(id<Drawable & Serializable> item);
 
@@ -520,7 +532,7 @@ Protocol types stay compile-time constraint labels only — vtable slots are una
 
 The official ObjC spellings are now implemented on the root class, enabling idiomatic multi-way dispatch without any new language construct:
 
-```nepa
+```ovic
 for (id item in items) {
     if ([item isKindOfClass:[Dog class]]) {
         [(Dog *)item bark];
@@ -534,9 +546,9 @@ for (id item in items) {
 
 ### Struct `==` / `!=` Value Comparison
 
-C rejects `a == b` on structs outright; Nepa reuses the existing operators and desugars to a generated field-by-field compare function:
+C rejects `a == b` on structs outright; Ovic reuses the existing operators and desugars to a generated field-by-field compare function:
 
-```nepa
+```ovic
 struct Point a = {1, 2};
 struct Point b = {1, 2};
 
@@ -548,9 +560,9 @@ p == &a               // pointer comparison semantics unchanged
 
 ### async/await (`@await`)
 
-A method whose body contains `@await` is async — mirroring C++20's `co_await`-based coroutines. The `async` modifier sits **before the return type** and is part of the signature (visible in the `.nh`), so callers can see a method suspends without reading its body:
+A method whose body contains `@await` is async — mirroring C++20's `co_await`-based coroutines. The `async` modifier sits **before the return type** and is part of the signature (visible in the `.oh`), so callers can see a method suspends without reading its body:
 
-```nepa
+```ovic
 @interface Fetcher : NPObject
 - (async NPTask<int>)compute:(int)n;   // suspends, yields an int
 - (async NPTask<void>)runAll;          // async void = the entry method
@@ -579,16 +591,16 @@ int main() {
 Design rules:
 
 - **`async` is a signature-level modifier on the return type** — `(async NPTask<T>)`. `NPTask<T>` is a real type: a bare `- (NPTask<int>)load` is an *ordinary synchronous* method that merely returns a task object, while `async NPTask<T>` suspends — the two are statically distinguishable.
-- **Infection is chain-based** — a method calling `@await` becomes async itself; a suspending method *must* declare the modifier (checker-enforced, see below). Task handles are first-class values: a bare async call *creates* the task (`NPTask<T> *`); `[task start]` and `@await t` drive it, and awaiting the same task twice is legal (the result is cached). Writing the call — or `[t start]` — at **statement position** is the async entry: hosted code drives it to completion right there (lowered to `nepa_task_await`), freestanding code never drives and leaves the pump to your `main`; there is deliberately no pump at `main`'s exit (ARC releases the receiver first).
+- **Infection is chain-based** — a method calling `@await` becomes async itself; a suspending method *must* declare the modifier (checker-enforced, see below). Task handles are first-class values: a bare async call *creates* the task (`NPTask<T> *`); `[task start]` and `@await t` drive it, and awaiting the same task twice is legal (the result is cached). Writing the call — or `[t start]` — at **statement position** is the async entry: hosted code drives it to completion right there (lowered to `ovic_task_await`), freestanding code never drives and leaves the pump to your `main`; there is deliberately no pump at `main`'s exit (ARC releases the receiver first).
 - **`@await` lowers to a state machine** — the body is split at suspension points into a `switch(task->state)` driver over a heap `NPTask`; locals that survive a suspension are lifted into a per-method frame struct.
 - **`@try` spanning an `@await`** is rejected (a `jmp_buf` cannot survive a suspension point); `@noarc` across awaits is allowed; break/continue across awaits become state jumps.
-- A cooperative single-thread scheduler (`nepa_sched_run`) and I/O integration are planned as the next milestone.
+- A cooperative single-thread scheduler (`ovic_sched_run`) and I/O integration are planned as the next milestone.
 
 ### Switch Pattern Matching (`case` patterns)
 
 `case` labels accept **patterns**, not just integer constants. Type dispatch stays a method chain in spirit — the patterns desugar to `isKindOfClass:` / `isEqual:` / comparisons — but you write them declaratively:
 
-```nepa
+```ovic
 // Object patterns mix freely in one switch:
 switch (subject) {
     case NPString *s:                      // type binding → isKindOfClass:
@@ -628,7 +640,7 @@ switch (n) {
 
 | pattern | lowers to |
 |---------|-----------|
-| `T *name` | `nepa_isKindOfClass(subject, &NEPA_CLASS_$_T)`; inside the arm, `name` is already bound to `(T *)subject` |
+| `T *name` | `ovic_isKindOfClass(subject, &OVIC_CLASS_$_T)`; inside the arm, `name` is already bound to `(T *)subject` |
 | `> 10`, `< 10`, `>= 0`, `<= 9` | `subject > 10` (the subject is spliced into the dangling operand) |
 | `> 0 && < 100` | `subject > 0 && subject < 100` |
 | `@"lit"`, `@42`, `@YES`, `@'c'`, `@(expr)` | `[subject isEqual:<literal>]` — value semantics, so `@"lit"` matches a *different* NPString with the same contents |
@@ -650,7 +662,7 @@ Implementation: the parser classifies each label and flattens the whole switch i
 
 ### Boxed Literals (`@(expr)` / `@YES` / `@NO` / `@'c'`)
 
-```nepa
+```ovic
 NPNumber *a = @123;          // int
 NPNumber *b = @1.5;          // double
 NPNumber *c = @YES;          // BOOL → 1
@@ -668,7 +680,7 @@ illegal type 'NPString *' in a boxed expression — '@(...)' accepts arithmetic 
 
 ### Dictionary Literals (`@{ key: value }`)
 
-```nepa
+```ovic
 NPDictionary *d = @{ @"a": @1, @"b": @2, @"c": @3 };
 NPLog(@"%d", [[d objectForKey:@"b"] intValue]);   // 2
 printf("%lu\n", (unsigned long)[d count]);        // 3
@@ -689,9 +701,9 @@ illegal type 'int' in a dictionary literal — keys and values must be Objective
 
 ### Exception Semantics (`-eh checked` — the default backend)
 
-Nepa's exceptions are **ObjC exceptions by value, without unwinding**. `@try`/`@catch`/`@finally`/`@throw` behave exactly like clang's `-fobjc-arc-exceptions` mode — and a differential test suite (`tests/eh_diff/run_eh_diff.sh`) locks this in by running each case under both nepac and real clang/ObjC, then diffing stderr line by line (7/7 cases pass).
+Ovic's exceptions are **ObjC exceptions by value, without unwinding**. `@try`/`@catch`/`@finally`/`@throw` behave exactly like clang's `-fobjc-arc-exceptions` mode — and a differential test suite (`tests/eh_diff/run_eh_diff.sh`) locks this in by running each case under both ovicc and real clang/ObjC, then diffing stderr line by line (7/7 cases pass).
 
-```nepa
+```ovic
 @interface Boom : NPObject
 - (void)fire;
 @end
@@ -728,7 +740,7 @@ The semantics you get:
 - **Uncaught exceptions abort** with ObjC's wording: `*** Terminating app due to uncaught exception of class 'NPString'`, exit code 1.
 - **C callers can't miss an exception** — bridge-header wrappers check the error flag and abort rather than silently returning a zero value.
 
-**`-eh checked` is the default backend** — a plain `nepac run` compiles with it. `-eh legacy` (alias `-eh sjlj`) selects the old zero-overhead setjmp backend and remains a complete rollback; that backend has the classic limitation: a cross-frame throw skips intermediate frames' cleanup (documented below).
+**`-eh checked` is the default backend** — a plain `ovicc run` compiles with it. `-eh legacy` (alias `-eh sjlj`) selects the old zero-overhead setjmp backend and remains a complete rollback; that backend has the classic limitation: a cross-frame throw skips intermediate frames' cleanup (documented below).
 
 ### `@throws` — Declared Exceptions
 
@@ -741,7 +753,7 @@ The semantics you get:
 | Shape | `@throw expr;` | `@throws(T *)` or bare `@throws` |
 | In generated C | yes (the setjmp/flag machinery) | **never** — no code, no vtable slot |
 
-```nepa
+```ovic
 @interface Repo : NPObject
 - (NPString *)fetch:(const char *)url @throws(NPError *);   // throws NPError *
 - (int)parse:(const char *)s @throws;                       // throws; type unstated
@@ -758,7 +770,7 @@ The semantics you get:
 @end
 ```
 
-Apple has occupied exactly this slot — trailing metadata before the `;` — with macros for over a decade (`NS_DESIGNATED_INITIALIZER`, `NS_REQUIRES_NIL_TERMINATION`, `API_AVAILABLE(...)`). Nepa promotes the slot to first-class syntax and lets the checker reconcile it.
+Apple has occupied exactly this slot — trailing metadata before the `;` — with macros for over a decade (`NS_DESIGNATED_INITIALIZER`, `NS_REQUIRES_NIL_TERMINATION`, `API_AVAILABLE(...)`). Ovic promotes the slot to first-class syntax and lets the checker reconcile it.
 
 **What the checker enforces**
 
@@ -771,7 +783,7 @@ Apple has occupied exactly this slot — trailing metadata before the `;` — wi
 
 A `@throw` caught by a `@try` **in the same body** is never an escape, so `main` and locally-guarded helpers need no annotation:
 
-```nepa
+```ovic
 static void bad(int n) {                        // error: escapes 'bad'
     if (n < 0) {
         @throw [[AppError alloc] init];
@@ -797,30 +809,30 @@ static void guarded(int n) {                    // fine — caught locally
 
 The type check is deliberately conservative: `@"..."` literals, bare C strings, casts, and variables of known type are judged; a message send is not (its class is not knowable from a selector-only registry), so it satisfies any declared type. Annotations are compile-time only — adding or removing `@throws` never changes generated C, program output, or ARC behaviour. Misusing the pair is itself an error: `@throws` inside a body, or `@throw(...)` on a declaration, each gets a diagnostic naming the other keyword.
 
-### Implicit Root Class (`nepa_root`)
+### Implicit Root Class (`ovic_root`)
 
-Nepa now supports user-defined root classes. You no longer need to inherit from `NPObject` — an `@interface` without a superclass automatically gets a compiler-injected implicit root class `nepa_root`, while keeping `id` type uniformity and static dispatch.
+Ovic now supports user-defined root classes. You no longer need to inherit from `NPObject` — an `@interface` without a superclass automatically gets a compiler-injected implicit root class `ovic_root`, while keeping `id` type uniformity and static dispatch.
 
 **Before:**
 
-```nepa
+```ovic
 @interface Animal : NPObject   // had to inherit NPObject
 ```
 
 **After:**
 
-```nepa
+```ovic
 @interface Animal              // no superclass → implicit root class
 @interface Animal : NPObject   // explicit NPObject still works
 ```
 
-Both are valid, and `id` can point to any Nepa object.
+Both are valid, and `id` can point to any Ovic object.
 
 #### How It Works
 
-When no superclass is specified, the compiler injects `nepa_root`:
+When no superclass is specified, the compiler injects `ovic_root`:
 
-```nepa
+```ovic
 // User code:
 @interface Animal {
     int age;
@@ -829,7 +841,7 @@ When no superclass is specified, the compiler injects `nepa_root`:
 @end
 
 // Compiler treats as:
-@interface Animal : nepa_root {
+@interface Animal : ovic_root {
     int age;
 }
 - (void)speak;
@@ -840,17 +852,17 @@ Generated C code:
 
 ```c
 // Built-in structures
-struct nepa_object_header {
-    struct nepa_vtable *vtable;
+struct ovic_object_header {
+    struct ovic_vtable *vtable;
 };
 
-struct nepa_root {
-    struct nepa_object_header header;
+struct ovic_root {
+    struct ovic_object_header header;
 };
 
 // Animal's struct
 struct Animal {
-    struct nepa_root __super;  // contains header
+    struct ovic_root __super;  // contains header
     int age;
 };
 ```
@@ -858,20 +870,20 @@ struct Animal {
 #### `id` Type
 
 ```c
-typedef struct nepa_root *nepa_id_t;
+typedef struct ovic_root *ovic_id_t;
 ```
 
-`id` is no longer tied to `NPObject` — it only requires the object to start with `nepa_root`. This means:
+`id` is no longer tied to `NPObject` — it only requires the object to start with `ovic_root`. This means:
 
-```nepa
+```ovic
 Animal *a = [[Animal alloc] init];
-id obj = a;                    // valid: Animal inherits from nepa_root
+id obj = a;                    // valid: Animal inherits from ovic_root
 [obj speak];                   // static dispatch: obj->header.vtable[...]
 ```
 
 #### Explicit Inheritance Still Works
 
-```nepa
+```ovic
 @interface Dog : Animal {
     NPString *breed;
 }
@@ -882,19 +894,19 @@ Generated C:
 
 ```c
 struct Dog {
-    struct Animal __super;     // contains nepa_root → header
+    struct Animal __super;     // contains ovic_root → header
     struct NPString *breed;
 };
 ```
 
-#### `NPObject` vs `nepa_root`
+#### `NPObject` vs `ovic_root`
 
 | Declaration                 | Means                             | Use Case                        |
 | --------------------------- | --------------------------------- | ------------------------------- |
-| `@interface Xxx`            | Implicit `nepa_root`, lightweight | Custom layout, kernel, embedded |
+| `@interface Xxx`            | Implicit `ovic_root`, lightweight | Custom layout, kernel, embedded |
 | `@interface Xxx : NPObject` | Explicit NPObject, full runtime   | User apps, ARC, retain/release  |
 
-```nepa
+```ovic
 // Lightweight root class, no refcounting overhead
 @interface KernelTask {
     int pid;
@@ -911,24 +923,24 @@ struct Dog {
 
 #### Bare-Metal / Freestanding Support (`-ffreestanding`)
 
-Nepa can compile to **self-contained C with no libc, no Foundation, no TLS**, for kernels, MCUs, and bare-metal embedded development.
+Ovic can compile to **self-contained C with no libc, no Foundation, no TLS**, for kernels, MCUs, and bare-metal embedded development.
 
 ```bash
-nepac -rewrite-nepa -ffreestanding kernel.np   # emits self-contained C
+ovicc -rewrite-ovic -ffreestanding kernel.ov   # emits self-contained C
 ```
 
 In `-ffreestanding` mode the transpiled C:
 
-- does **not** `#include <string.h>`; instead `#include <nepa/runtime.h>` (freestanding branch)
+- does **not** `#include <string.h>`; instead `#include <ovic/runtime.h>` (freestanding branch)
 - implements `@try/@catch/@finally` with the default `-eh checked` backend — plain flag + guard control flow, **no `setjmp`/`longjmp` and no `jmp_buf` at all**, which is what makes the bare-metal target work. (`-eh legacy` falls back to `__builtin_setjmp/longjmp`, with plain non-`__thread` exception globals.)
 - is self-contained for `SEL`/`NPClass`/`NPObject`/`id`
 - does **not** bundle the Clang Blocks runtime — block literals reference `__NSConcreteStackBlock`/`_Block_copy`/`_Block_release`; on real bare metal, either link a Blocks runtime port or use `-backend portable`/`-backend gcc` (blocks lower to plain C functions, no ABI symbols)
 
-The user only provides: `NEPA_CLASS_$_nepa_root`, the exception globals (if using `@try`), `memcpy` (if using `@try`), and freestanding headers (`stdint.h`/`stddef.h`/`stdbool.h`).
+The user only provides: `OVIC_CLASS_$_ovic_root`, the exception globals (if using `@try`), `memcpy` (if using `@try`), and freestanding headers (`stdint.h`/`stddef.h`/`stdbool.h`).
 
-**Bare-metal allocator + `[[Class alloc] init]`** (`include/nepa/runtime_freestanding.c`):
+**Bare-metal allocator + `[[Class alloc] init]`** (`include/ovic/runtime_freestanding.c`):
 
-```nepa
+```ovic
 @interface HeapCounter {
     int total;
 }
@@ -937,7 +949,7 @@ The user only provides: `NEPA_CLASS_$_nepa_root`, the exception globals (if usin
 - (int) add:(int)x;
 @end
 @implementation HeapCounter
-+ (id) alloc  { return nepa_alloc(self); }   // bump allocator
++ (id) alloc  { return ovic_alloc(self); }   // bump allocator
 - (id) init   { return self; }
 - (int) add:(int)x { total += x; return total; }
 @end
@@ -954,25 +966,25 @@ Features verified bare-metal (`examples/04_soma-kernel/` i386 protected-mode ker
 - Class / instance method messaging
 - `@try/@catch/@finally`
 - `@selector`, inline asm, C-style casts
-- `[[Class alloc] init]` heap allocation + ARC auto-`nepa_release`
+- `[[Class alloc] init]` heap allocation + ARC auto-`ovic_release`
 
 Sample output (soma-kernel under qemu):
 
 ```
-[nepa] class method [SomaCore::Calculator compute:21] = 43
-[nepa] instance methods on C-created obj: add:7 -> 7, add:35 -> 42, value = 42
-[nepa] @try/@catch demo:
+[ovic] class method [SomaCore::Calculator compute:21] = 43
+[ovic] instance methods on C-created obj: add:7 -> 7, add:35 -> 42, value = 42
+[ovic] @try/@catch demo:
        try body, throwing...
        caught [e errorCode] = 42
        finally always runs
        after-try continues
-[nepa] alloc+init (bump allocator):
+[ovic] alloc+init (bump allocator):
        [c add:10]=10 [c add:20]=30 [c value]=30
 ```
 
 #### Method Dispatch
 
-All Nepa objects dispatch through a unified VTable mechanism:
+All Ovic objects dispatch through a unified VTable mechanism:
 
 ```c
 // [obj doSomething:arg]
@@ -986,21 +998,21 @@ The compiler assigns a fixed global index to each selector. All classes place th
 The object header is minimal:
 
 ```c
-struct nepa_object_header {
-    struct nepa_vtable *vtable;
+struct ovic_object_header {
+    struct ovic_vtable *vtable;
     // no retain count, no flags
 };
 ```
 
-Reference counting is managed by compile-time static ARC analysis, not stored in the object. `nepa_id_t` is a plain C pointer (8 bytes on 64-bit), zero ABI overhead for passing, assigning, and array storage.
+Reference counting is managed by compile-time static ARC analysis, not stored in the object. `ovic_id_t` is a plain C pointer (8 bytes on 64-bit), zero ABI overhead for passing, assigning, and array storage.
 
 #### Status
 
    Implemented:
 
 - [x] Implicit root class injection (semantic analysis)
-- [x] `nepa_root` and `nepa_object_header` C code generation
-- [x] `id` → `nepa_id_t` type mapping
+- [x] `ovic_root` and `ovic_object_header` C code generation
+- [x] `id` → `ovic_id_t` type mapping
 - [x] Unified VTable index allocation
 - [x] Root/subclass struct generation
 - [x] Unit test coverage
@@ -1009,7 +1021,7 @@ Reference counting is managed by compile-time static ARC analysis, not stored in
 
 `@namespace` organizes classes, functions, and constants, avoiding global name collisions. This is a feature ObjC lacks — traditional ObjC relies on prefix conventions (e.g., `NS`, `UI`) to simulate namespacing.
 
-```nepa
+```ovic
 @namespace Game
     @interface Player : NPObject {
         int health;
@@ -1037,13 +1049,13 @@ Reference counting is managed by compile-time static ARC analysis, not stored in
 
 **Encoding rules**: `::` separators are encoded as `__` in C symbols.
 
-| Nepa Symbol                   | Transpiled C Symbol          |
+| Ovic Symbol                   | Transpiled C Symbol          |
 | ----------------------------- | ---------------------------- |
 | `Game::Player`                | `Game__Player`               |
 | `Game::Entities::Enemy`       | `Game__Entities__Enemy`      |
 | Method `-[Game::Player init]` | `Game__Player_init`          |
-| VTable                        | `NEPA_VTABLE_$_Game__Player` |
-| Class metadata                | `NEPA_CLASS_$_Game__Player`  |
+| VTable                        | `OVIC_VTABLE_$_Game__Player` |
+| Class metadata                | `OVIC_CLASS_$_Game__Player`  |
 
 **Features**:
 
@@ -1060,7 +1072,7 @@ Reference counting is managed by compile-time static ARC analysis, not stored in
 
 **Form 1: Import a fully qualified name**
 
-```nepa
+```ovic
 @using Game::Player;
 Game::Player *p = [[Game::Player alloc] init];
 // After @using, the short name Player can be used instead
@@ -1069,7 +1081,7 @@ Player *p = [[Player alloc] init];
 
 **Form 2: Import with an alias**
 
-```nepa
+```ovic
 @using GP = Game::Player;
 // GP is an alias for Game::Player
 GP *p = [[GP alloc] init];
@@ -1077,7 +1089,7 @@ GP *p = [[GP alloc] init];
 
 **Form 3: Import an entire namespace**
 
-```nepa
+```ovic
 @using namespace Game;
 // All classes under Game can be accessed by short name
 Player *p = [[Player alloc] init];
@@ -1094,13 +1106,13 @@ Enemy *e = [[Enemy alloc] init];
 
 In ARC mode, the checker forbids manual memory management:
 
-```nepa
+```ovic
 [obj release]; // error: explicit 'release' not allowed in ARC mode
 ```
 
-`@noarc { }` scopes a block where you manage memory manually — the block-level analogue of `-fno-nepa-arc` (and clang's `-fno-objc-arc`):
+`@noarc { }` scopes a block where you manage memory manually — the block-level analogue of `-fno-ovic-arc` (and clang's `-fno-objc-arc`):
 
-```nepa
+```ovic
 @noarc {
     [obj retain];
     [obj release];
@@ -1113,7 +1125,7 @@ Key points:
 - **Block-level scope** — only statements inside `@noarc { }` are exempt. Everything outside still uses static ARC, and manual `retain`/`release`/`dealloc`/`autorelease` outside the block is a compile error.
 - **No ARC injection** — the ARC analyzer skips `@noarc` blocks entirely, inserting no retain/release for objects used there.
 - **Runtime-method exemption** — the implementations of `retain`/`release`/`dealloc`/`autorelease` themselves may call these methods without `@noarc`.
-- **Whole-program analogue** — `-fno-nepa-arc` switches the whole program to MRC; `@noarc` does the same for a single block.
+- **Whole-program analogue** — `-fno-ovic-arc` switches the whole program to MRC; `@noarc` does the same for a single block.
 - **Foundation** — the NPString/NPMutableString convenience constructors (`+stringWithUTF8String:`, `+stringWithString:`) wrap their deliberate `autorelease` in `@noarc { }`.
 
 ---
@@ -1123,8 +1135,8 @@ Key points:
 `-trace-refcount` runs a static reference-count simulator over the AST **after** ARC injection, printing a chronological, color-coded trace of every retained object's count, then exits without codegen or compilation. It is a debug aid for verifying that each object is released exactly once (no leaks, no double-releases).
 
 ```bash
-nepac -trace-refcount app.np                          # color trace
-nepac -trace-refcount -trace-no-color -trace-max-iters 2 app.np
+ovicc -trace-refcount app.ov                          # color trace
+ovicc -trace-refcount -trace-no-color -trace-max-iters 2 app.ov
 ```
 
 Options:
@@ -1139,7 +1151,7 @@ Options:
 
 Go-style deferred cleanup: `@defer { ... }` registers its body with the innermost enclosing block, and the body runs at **every exit** of that block — the natural end, a `return` at any depth, a `break`/`continue` that jumps out of it, and a same-function `@throw` — innermost first (LIFO).
 
-```nepa
+```ovic
 - (void)work {
     FILE *f = fopen("cfg.txt", "r");
     @defer { fclose(f); }            // runs at every exit below
@@ -1163,9 +1175,9 @@ Implementation: pure desugar (`crates/defer`, pipeline step 3.9 — after the `-
 
 ### `async NPTask<T>` — Async Method Modifier
 
-`@await` alone left one soft spot: a header cannot tell you whether a method suspends. The `async` modifier promotes async-ness to a **signature-level flag**: it sits before the return type (`(async NPTask<T>)`), so it is visible in the `.nh` while `NPTask<T>` stays a real type (the emitted C returns `NPTask *`). A bare `(NPTask<T>)` means the opposite — a synchronous method that merely returns a task object.
+`@await` alone left one soft spot: a header cannot tell you whether a method suspends. The `async` modifier promotes async-ness to a **signature-level flag**: it sits before the return type (`(async NPTask<T>)`), so it is visible in the `.oh` while `NPTask<T>` stays a real type (the emitted C returns `NPTask *`). A bare `(NPTask<T>)` means the opposite — a synchronous method that merely returns a task object.
 
-```nepa
+```ovic
 @interface Fetcher : NPObject
 - (async NPTask<int>)compute:(int)n;   // suspends, yields an int
 + (async NPTask<void>)runAll;          // entry point
@@ -1187,9 +1199,9 @@ The body's awaits decide the truth, and the checker reconciles both directions:
 - `async` must modify an `NPTask<T>` return type and nothing else — `'async' requires return type 'NPTask<T>' — 'async' is a method modifier, not a type qualifier` (exactly one type argument).
 - Task handles are first-class values: `NPTask<T> *` is legal in variables, parameters and ivars (the opposite of the old `NPAsync` marker) — `@await t` is the only way to read the result.
 - `NPTask` is a reserved class name; `async` is now a keyword.
-- **Entry is statement position** — `[f runAll];` (return value discarded) and a statement-position `[t start];` are the async entry: hosted code drives them to completion right there (lowered to `nepa_task_await`), bare-metal code only enqueues and expects the user's own pump. There is deliberately no pump at `main`'s exit — ARC's scope-end release lands later.
+- **Entry is statement position** — `[f runAll];` (return value discarded) and a statement-position `[t start];` are the async entry: hosted code drives them to completion right there (lowered to `ovic_task_await`), bare-metal code only enqueues and expects the user's own pump. There is deliberately no pump at `main`'s exit — ARC's scope-end release lands later.
 
-Golden: `tests/golden/37_async_modifier/`; negatives under `tests/negative/async_nptask_*.np`.
+Golden: `tests/golden/37_async_modifier/`; negatives under `tests/negative/async_nptask_*.ov`.
 
 ### Object Subscripting (`a[0]` on NPArray)
 
@@ -1200,7 +1212,7 @@ Golden: `tests/golden/37_async_modifier/`; negatives under `tests/negative/async
 | `recv[i]` | `[recv objectAtIndex:i]` | receiver's class declares `objectAtIndex:` |
 | `recv[i] = v` | `[recv setObject:v atIndex:i]` | class also declares `setObject:atIndex:` |
 
-```nepa
+```ovic
 NPArray *a = @[ @"x", @"y", @"z" ];
 NPLog(@"%@", a[0]);            // → [a objectAtIndex:0]
 NPMutableArray *m = [NPMutableArray array];
@@ -1218,35 +1230,35 @@ Generic containers **monomorphize and are type-checked**. `NPArray<NPString *>` 
 
 #### True generics across translation units
 
-Nepa's generics are deliberately different from Objective-C lightweight generics. Objective-C keeps one runtime class and uses generic arguments mainly as compiler annotations. Nepa keeps the source spelling familiar (`Factory<NPString *>`) but generates a real monomorphized class: a distinct C struct, methods, vtable, metadata, and ABI for each concrete argument list. There is no type-erased fallback for a specialized use.
+Ovic's generics are deliberately different from Objective-C lightweight generics. Objective-C keeps one runtime class and uses generic arguments mainly as compiler annotations. Ovic keeps the source spelling familiar (`Factory<NPString *>`) but generates a real monomorphized class: a distinct C struct, methods, vtable, metadata, and ABI for each concrete argument list. There is no type-erased fallback for a specialized use.
 
-In a multi-TU build, the compiler first scans all `.np` inputs for concrete specializations and forwards that demand to every TU. A TU emits the specialization only when it contains the generic implementation body; declaration-only TUs emit references to the same mangled specialization. This makes the following work without a dummy variable in the library TU:
+In a multi-TU build, the compiler first scans all `.ov` inputs for concrete specializations and forwards that demand to every TU. A TU emits the specialization only when it contains the generic implementation body; declaration-only TUs emit references to the same mangled specialization. This makes the following work without a dummy variable in the library TU:
 
-```nepa
-// model.nh — shared declaration
+```ovic
+// model.oh — shared declaration
 @interface Factory<T> : NPObject
 + (T)make;
 @end
 
-// lib.np — implementation TU
-#import "model.nh"
+// lib.ov — implementation TU
+#import "model.oh"
 @implementation Factory
 + (T)make { return nil; }
 @end
 
-// main.np — client TU
-#import "model.nh"
+// main.ov — client TU
+#import "model.oh"
 int main(void) {
     NPString *s = [Factory<NPString *> make];
     return s == nil ? 0 : 1;
 }
 ```
 
-Build both inputs together: `nepac main.np lib.np -I . -o app`. The implementation must be available in one of the inputs (or in the source/module form used to build the library). A precompiled library can provide a fixed set of specializations, but it cannot invent a new method body for an argument type whose implementation was not shipped. If two TUs provide the same specialization, the normal owner/strong-metadata rules reject the duplicate definition instead of silently choosing an ABI.
+Build both inputs together: `ovicc main.ov lib.ov -I . -o app`. The implementation must be available in one of the inputs (or in the source/module form used to build the library). A precompiled library can provide a fixed set of specializations, but it cannot invent a new method body for an argument type whose implementation was not shipped. If two TUs provide the same specialization, the normal owner/strong-metadata rules reject the duplicate definition instead of silently choosing an ABI.
 
-This is the intended trade-off: Nepa matches Objective-C's call-site style, while its semantics are closer to C++ templates—concrete types are checked and compiled into separate code, and unused specializations do not exist.
+This is the intended trade-off: Ovic matches Objective-C's call-site style, while its semantics are closer to C++ templates—concrete types are checked and compiled into separate code, and unused specializations do not exist.
 
-```nepa
+```ovic
 NPMutableArray<NPString *> *m = [NPMutableArray array];
 [m addObject:@"a"];
 NPString *s = [m objectAtIndex:0];      // NPString *, not id
@@ -1272,7 +1284,7 @@ Note the cost: specialization is compile-time code, not free type safety. The sa
 
 Type parameters accept class-level constraints — ObjC spelling (`T : id<Summable>`), bare protocol name (`T : Summable`), or a class pointer (`T : NSObject *`); all are stored and diagnosed as the bare name:
 
-```nepa
+```ovic
 @protocol Greetable
 - (NPString *)greeting;
 @end
@@ -1287,19 +1299,19 @@ Type parameters accept class-level constraints — ObjC spelling (`T : id<Summab
 @interface Pair<K, V : Comparable> : NPObject { ... }
 
 // subclass must RE-DECLARE the inherited bound (explicit spelling, same
-// philosophy as full ivar layouts in shared .nh headers) and must not
+// philosophy as full ivar layouts in shared .oh headers) and must not
 // weaken it
 @interface MutableBox<T : Greetable> : Box<T> { ... }
 ```
 
 The checker enforces bounds at **explicit specialization points** (`Box<Dog *> *b = ...;`): a violating argument is an error (all violations reported at once). Escape channels — `id`, `instancetype`, nested type-param slots, forward-declared shells, unresolvable bound names — pass silently (a missed report beats a false one, same philosophy as the rest of the checker). Bare spellings (`Box *`) never trigger: erasure compatibility, today's code keeps compiling. Bounds are pure compile-time metadata — **zero codegen**, golden output byte-identical; `-fno-checker` turns the check off. Method-level constraints (`where U : P`) are not supported. Golden: `tests/golden/46_generic_bounds/`.
 
-### Nepa-Syntax Macros (dual-track `#define`)
+### Ovic-Syntax Macros (dual-track `#define`)
 
-`#define` bodies containing **nepa syntax** (`[recv msg]`, `@`-literals, `^{}` blocks) used to be passed through verbatim to the C compiler — a syntax error. nepac now parses and expands them at the source level. Plain-C macro bodies pass through unchanged and are expanded by the C compiler as before; behavior is identical there.
+`#define` bodies containing **ovic syntax** (`[recv msg]`, `@`-literals, `^{}` blocks) used to be passed through verbatim to the C compiler — a syntax error. ovicc now parses and expands them at the source level. Plain-C macro bodies pass through unchanged and are expanded by the C compiler as before; behavior is identical there.
 
-```nepa
-#define TAG(o)      [o tag]                    // nepa track: expanded by nepac
+```ovic
+#define TAG(o)      [o tag]                    // ovic track: expanded by ovicc
 #define BUMP(o, n)  [o addTo:n times:1]
 #define LOG(x)      NPLog(@"tag=%d", x)        // body contains an @literal
 #define TWICE(x)    ((x) + (x))                // C track: expanded by clang
@@ -1309,7 +1321,7 @@ BUMP(w, 3);
 LOG(TAG(w));
 ```
 
-Expansion rules follow ISO C §6.10.3 (implemented independently in `crates/cpp`, cross-checked line-by-line against `clang -E`): arguments are fully expanded before substitution (`#`/`##` operands use raw text), `#param` stringifies, `a ## b` pastes, `__VA_ARGS__` joins with commas, self-recursive macros freeze (blue-paint), a function-like macro's bare name outside a call does not expand, and `\` continuations join logical lines. Conditional directives (`#if`/`#ifdef`/`#ifndef`/`#elif`/`#else`/`#endif`) are evaluated by nepac too — `defined(X)` operands are exempt from expansion, skipped groups don't define macros, and malformed conditionals error instead of silently swallowing the file.
+Expansion rules follow ISO C §6.10.3 (implemented independently in `crates/cpp`, cross-checked line-by-line against `clang -E`): arguments are fully expanded before substitution (`#`/`##` operands use raw text), `#param` stringifies, `a ## b` pastes, `__VA_ARGS__` joins with commas, self-recursive macros freeze (blue-paint), a function-like macro's bare name outside a call does not expand, and `\` continuations join logical lines. Conditional directives (`#if`/`#ifdef`/`#ifndef`/`#elif`/`#else`/`#endif`) are evaluated by ovicc too — `defined(X)` operands are exempt from expansion, skipped groups don't define macros, and malformed conditionals error instead of silently swallowing the file.
 
 Limits (clear errors, not silent): a macro invocation must close on one line (use `\` to continue), and macro bodies may not contain `_Pragma`. Golden: `tests/golden/38_macros/`.
 
@@ -1317,7 +1329,7 @@ Limits (clear errors, not silent): a macro invocation must close on one line (us
 
 All six C99 designated-initializer forms work, including the ones ObjC's C subset never needed:
 
-```nepa
+```ovic
 struct Point { int x; int y; };
 struct Point p1 = { .x = 1, .y = 2 };      // 1. full designated
 struct Point p2 = { .y = 5 };               // 2. partial — omitted fields zero-filled
@@ -1337,7 +1349,7 @@ Positional entries continue from the last designated field (form 3 puts `7` in `
 
 `float _Complex` / `double _Complex` declarations, typedefs, and parameters pass through untouched, and imaginary literals (`2.0i`, `1e3j`) are emitted **raw** — the imaginary part used to be silently dropped (`2.0i` → `2.0f`).
 
-```nepa
+```ovic
 #include <complex.h>
 typedef float _Complex cfloat;
 
@@ -1347,7 +1359,7 @@ cfloat f = 1.5;
 printf("A=%.1f+%.1fi\n", creal(z), cimag(z));
 ```
 
-Known limit: the nepa checker has no complex type inference (narrowing between complex widths isn't warned; semantics are enforced by the C compiler). Golden: `tests/golden/39_complex/`.
+Known limit: the ovic checker has no complex type inference (narrowing between complex widths isn't warned; semantics are enforced by the C compiler). Golden: `tests/golden/39_complex/`.
 
 ---
 
@@ -1356,7 +1368,7 @@ Known limit: the nepa checker has no complex type inference (narrowing between c
 ### Command-Line Options
 
 ```bash
-nepac [options] <input.np>
+ovicc [options] <input.ov>
 
 Modes:
   (none)            Default: transpile + compile to binary (requires -o)
@@ -1368,9 +1380,9 @@ Options:
   -L <dir>          Add library search path
   -v, --verbose     Show verbose output (including Clang warnings)
   -V, --version     Show version number
-  -rewrite-nepa     Output C code only (no compilation)
-  -fnepa-arc        Enable ARC (default)
-  -fno-nepa-arc     Disable ARC (manual MRC mode)
+  -rewrite-ovic     Output C code only (no compilation)
+  -fovic-arc        Enable ARC (default)
+  -fno-ovic-arc     Disable ARC (manual MRC mode)
   -fno-checker      Skip type checking
   -eh <mode>        Exception backend: checked (default) or legacy (alias sjlj)
   -ffreestanding    Bare-metal/freestanding output (no libc, no TLS)
@@ -1378,7 +1390,7 @@ Options:
   -arch <target>    Build for target architecture (e.g. -arch x86_64)
   -asm <file.s>     Link a real assembly file (repeatable)
   -gen-completions <shell>  Generate shell completion script (zsh|bash|fish)
-  -emit-bridge-header <file.h>  Generate a C bridge header for calling Nepa from C
+  -emit-bridge-header <file.h>  Generate a C bridge header for calling Ovic from C
 
 Refcount trace (debug aid):
   -trace-refcount                Print a static reference-count trace of each retained object, in source order
@@ -1401,18 +1413,18 @@ cargo test --workspace
 
 ### Precompiled Foundation Library
 
-Instead of inlining Foundation into every TU (`#import <Foundation/Foundation.np>`, the self-contained umbrella), build it once as a static library and link every project against it — faster per-file compiles, one copy of the implementation:
+Instead of inlining Foundation into every TU (`#import <Foundation/Foundation.ov>`, the self-contained umbrella), build it once as a static library and link every project against it — faster per-file compiles, one copy of the implementation:
 
 ```bash
-./tools/build-foundation-lib.sh            # → target/foundation/libnepafoundation.a
+./tools/build-foundation-lib.sh            # → target/foundation/libovicfoundation.a
 ```
 
-The script transpiles each Foundation `.np` as its **own translation unit** (a generated wrapper prepends the full declaration surface, then inlines the implementation text), compiles, and archives. Because each `@implementation` lands in its TU's main file, R2 ownership automatically emits that class's metadata as STRONG symbols — the script nm-verifies all nine and fails loudly if any come out weak. No `-fstrong-metadata` exists any more: ownership is derived by construction.
+The script transpiles each Foundation `.ov` as its **own translation unit** (a generated wrapper prepends the full declaration surface, then inlines the implementation text), compiles, and archives. Because each `@implementation` lands in its TU's main file, R2 ownership automatically emits that class's metadata as STRONG symbols — the script nm-verifies all nine and fails loudly if any come out weak. No `-fstrong-metadata` exists any more: ownership is derived by construction.
 
 Clients then import only the declaration header:
 
-```nepa
-#import <Foundation/Foundation.nh>    // declarations only — no implementations inlined
+```ovic
+#import <Foundation/Foundation.oh>    // declarations only — no implementations inlined
 
 int main() {
     NPString *s = [NPString stringWithUTF8String:"hello"];
@@ -1422,24 +1434,24 @@ int main() {
 ```
 
 ```bash
-nepac app.np -I include -L target/foundation -lnepafoundation -o app   # explicit
+ovicc app.ov -I include -L target/foundation -lovicfoundation -o app   # explicit
 
-# … or let nepac find and link the library itself:
-nepac app.np -o app
+# … or let ovicc find and link the library itself:
+ovicc app.ov -o app
 ```
 
 Notes:
 
 - **No flags to remember** — a main file holding `@implementation` is strong automatically; declaration-only clients stay weak, which is correct (the library's tables win the link).
-- **Auto-link** — nepac links `libnepafoundation.a` automatically when it can find one (next to the binary, `target/foundation`, `/opt/nepa/lib`, `/usr/local/lib/nepa`, or your `-L` dirs). It only fires for **declaration-only clients**: a TU that inlines Foundation implementations (`Foundation.np`, directly or through an imported `.nh`) is skipped, so self-contained programs and multi-TU builds never see the library's strong vtables. `-ffreestanding`, shared mode, and an explicit `-lnepafoundation` all suppress the auto link.
-- **`nepa_metaInit()`** is only *required* for umbrella builds that reach implementations through `#import "*.np"` (single-TU builds where no TU owns the metadata). With the precompiled library — and with every normal `nepac` workflow — metadata is statically initialized at load time and the call is an idempotent no-op.
+- **Auto-link** — ovicc links `libovicfoundation.a` automatically when it can find one (next to the binary, `target/foundation`, `/opt/ovic/lib`, `/usr/local/lib/ovic`, or your `-L` dirs). It only fires for **declaration-only clients**: a TU that inlines Foundation implementations (`Foundation.ov`, directly or through an imported `.oh`) is skipped, so self-contained programs and multi-TU builds never see the library's strong vtables. `-ffreestanding`, shared mode, and an explicit `-lovicfoundation` all suppress the auto link.
+- **`ovic_metaInit()`** is only *required* for umbrella builds that reach implementations through `#import "*.ov"` (single-TU builds where no TU owns the metadata). With the precompiled library — and with every normal `ovicc` workflow — metadata is statically initialized at load time and the call is an idempotent no-op.
 - Re-implementing a library class in a client is standard C override semantics against the archive (the library's member stays dormant unless referenced) — but slots for methods you do not implement stay NULL, so implement everything you dispatch.
 
 ### Hello World
 
-```nepa
+```ovic
 #include <stdio.h>
-#import <Foundation/Foundation.np>
+#import <Foundation/Foundation.ov>
 
 @interface Greeter : NPObject
 - (void)greet;
@@ -1447,7 +1459,7 @@ Notes:
 
 @implementation Greeter
 - (void)greet {
-    printf("Hello, Nepa!\n");
+    printf("Hello, Ovic!\n");
 }
 @end
 
@@ -1462,7 +1474,7 @@ int main() {
 
 ### Polymorphism
 
-```nepa
+```ovic
 @interface Animal : NPObject
 - (void)speak;
 @end
@@ -1497,7 +1509,7 @@ int main() {
 
 ### Block + ARC
 
-```nepa
+```ovic
 typedef void (^EventHandler)(int code, NPString *msg);
 
 @interface Engine : NPObject
@@ -1518,9 +1530,9 @@ int main() {
 
 ### Static Generics
 
-Nepa compiles generics at compile time via **monomorphization** — each `DataPack<QuantumToken *>` becomes a standalone C struct `DataPack_QuantumToken_ptr` with concrete type substitutions. No type erasure, no boxing, no runtime overhead.
+Ovic compiles generics at compile time via **monomorphization** — each `DataPack<QuantumToken *>` becomes a standalone C struct `DataPack_QuantumToken_ptr` with concrete type substitutions. No type erasure, no boxing, no runtime overhead.
 
-```nepa
+```ovic
 @interface DataPack<T> : NPObject {
     @public
     int _count;
@@ -1541,7 +1553,7 @@ Nepa compiles generics at compile time via **monomorphization** — each `DataPa
         _count--;
         T item = _storage[_count];
         _storage[_count] = 0;
-        return nepa_autorelease(item);
+        return ovic_autorelease(item);
     }
     return 0;
 }
@@ -1581,11 +1593,11 @@ ObjC's runtime is powerful, but I don't want to depend on it. Make all decisions
 
 ### 2. Generate Human-Readable C
 
-Nepa's "backend" is **human-readable C99**, not LLVM IR. This means:
+Ovic's "backend" is **human-readable C99**, not LLVM IR. This means:
 
 - Debug with standard Clang/LLDB tools
 - Generated C can be reviewed, modified, embedded in other projects
-- No LLVM backend lock-in — wherever Clang runs, Nepa runs
+- No LLVM backend lock-in — wherever Clang runs, Ovic runs
 
 ### 3. Incremental
 
@@ -1597,7 +1609,7 @@ Start from a class system, add things gradually:
 - ✅ @selector / VTable polymorphism
 - ✅ @namespace
 - ✅ Exception handling (`@try`/`@catch`/`@finally`/`@throw`) — **default backend is `-eh checked`** (flag + guard lowering, unwind-safe ARC: a cross-function throw releases every frame's owned locals; no `setjmp`/`longjmp`, so it works on bare metal)
-  - `-eh legacy` (alias `-eh sjlj`) selects the old `setjmp`/`longjmp` backend. ⚠️ Its documented limit (verified with ASan): an object owned by an **intermediate frame** leaks on a **cross-function throw** — `longjmp` skips its scope-end `nepa_release`. That limit does not apply to the default backend.
+  - `-eh legacy` (alias `-eh sjlj`) selects the old `setjmp`/`longjmp` backend. ⚠️ Its documented limit (verified with ASan): an object owned by an **intermediate frame** leaks on a **cross-function throw** — `longjmp` skips its scope-end `ovic_release`. That limit does not apply to the default backend.
 - ⏳ Foundation standard library
 - ⏳ Compiler self-hosting
 
@@ -1684,9 +1696,9 @@ Generated C should be as clear as handwritten C:
 
 Not yet. But it is **real** - it compiles, it runs, and it is designed with growth in mind. If you find syntax appealing and want to contributem, you are welcome.
 
-### What can Nepa do?
+### What can Ovic do?
 
-Write small games, tools, toys. The snake game, Flappy Bird, space shooter, tic-tac-toe in this repo are all written in Nepa, running in the terminal.
+Write small games, tools, toys. The snake game, Flappy Bird, space shooter, tic-tac-toe in this repo are all written in Ovic, running in the terminal.
 
 ### What's missing compared to ObjC?
 

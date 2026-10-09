@@ -1,0 +1,25 @@
+#include <stdio.h>
+#import <Foundation/Foundation.ov>
+
+@interface Item : NPObject
+@end
+
+@implementation Item
+- (void)dealloc {
+    printf("dealloc\n");
+}
+@end
+
+int main() {
+    {
+        Item *a = [Item new];
+        printf("a created\n");
+        {
+            Item *b = [Item new];
+            printf("b created\n");
+        }
+        printf("b scope ended\n");
+    }
+    printf("a scope ended\n");
+    return 0;
+}

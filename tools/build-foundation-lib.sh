@@ -4,33 +4,33 @@
 #   ./tools/build-foundation-lib.sh [outdir]        # default: target/foundation
 #
 # Per-TU compilation (doc/stable_slots_plan.md §11, plan A): every Foundation
-# `.np` is compiled as its OWN translation unit — i.e. as a main file — so R2
+# `.ov` is compiled as its OWN translation unit — i.e. as a main file — so R2
 # ownership makes each owned class's metadata STRONG automatically. No
 # -fstrong-metadata anywhere.
 #
-#   nepac app.np -I include -L<outdir> -lnepafoundation -o app
+#   ovicc app.ov -I include -L<outdir> -lovicfoundation -o app
 #
-# The client imports `Foundation.nh` — the DECLARATION-ONLY umbrella (per the
-# project's .nh = declarations / .np = implementations convention).
+# The client imports `Foundation.oh` — the DECLARATION-ONLY umbrella (per the
+# project's .oh = declarations / .ov = implementations convention).
 set -euo pipefail
 
 root="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$root"
 
-nepac="${NEPAC:-}"
-if [[ -z "$nepac" ]]; then
-    for cand in target/debug/nepac target/release/nepac; do
-        if [[ -x "$cand" ]]; then nepac="$cand"; break; fi
+ovicc="${OVICC:-}"
+if [[ -z "$ovicc" ]]; then
+    for cand in target/debug/ovicc target/release/ovicc; do
+        if [[ -x "$cand" ]]; then ovicc="$cand"; break; fi
     done
 fi
-if [[ -z "$nepac" || ! -x "$nepac" ]]; then
-    echo "error: nepac not found (run 'cargo build', or set NEPAC=/path/to/nepac)" >&2
+if [[ -z "$ovicc" || ! -x "$ovicc" ]]; then
+    echo "error: ovicc not found (run 'cargo build', or set OVICC=/path/to/ovicc)" >&2
     exit 2
 fi
 
 outdir="${1:-target/foundation}"
 mkdir -p "$outdir"
-lib="$outdir/libnepafoundation.a"
+lib="$outdir/libovicfoundation.a"
 
 # Mach-O prepends `_` to every C symbol; ELF uses the name as written.
 sym_prefix=""
@@ -57,14 +57,14 @@ nm_is_weak() {
 
 check_strong() {
     local obj="$1" cls="$2"
-    for member in "NEPA_VTABLE_\$_${cls}" "NEPA_META_VTABLE_\$_${cls}_inst" "NEPA_GETCLASS_\$_${cls}"; do
+    for member in "OVIC_VTABLE_\$_${cls}" "OVIC_META_VTABLE_\$_${cls}_inst" "OVIC_GETCLASS_\$_${cls}"; do
         local sym="${sym_prefix}${member}"
         if ! nm "$obj" 2>/dev/null | grep -qF -- " $sym"; then
             echo "  error: symbol $sym not found in $obj" >&2
             exit 1
         fi
         if nm_is_weak "$obj" "$sym"; then
-            echo "  error: $sym is WEAK — R2 ownership did not apply (is $cls really implemented in $(basename "$obj" .o).np?)" >&2
+            echo "  error: $sym is WEAK — R2 ownership did not apply (is $cls really implemented in $(basename "$obj" .o).ov?)" >&2
             exit 1
         fi
         echo "  ok: $sym"
@@ -73,35 +73,35 @@ check_strong() {
 
 echo "[1/4] transpile + compile each Foundation TU (wrapper = decl surface + implementation)"
 # Each TU is a generated WRAPPER: the full declaration surface
-# (Foundation.nh, the declaration-only umbrella) first, then the
-# implementation .np's own text — the
+# (Foundation.oh, the declaration-only umbrella) first, then the
+# implementation .ov's own text — the
 # @implementation lands in the MAIN FILE (not via #import), so R2 ownership
 # still applies and this TU's metadata is strong. The full surface gives
 # every TU the same shared vtable segment as a client (same __sig), and stub
 # references to sibling implementations resolve from the archive at final
-# link. The source .np files stay UNPOLLUTED — self-contained TUs that inline
+# link. The source .ov files stay UNPOLLUTED — self-contained TUs that inline
 # them keep exactly the declaration surface they asked for.
-# Note: NPObject.np imports "NPObject.nh" in quoted form; the extra
+# Note: NPObject.ov imports "NPObject.oh" in quoted form; the extra
 # -I include/Foundation keeps that resolvable from the wrapper's location.
 objs=()
 tus="$outdir/_tus"
 rm -rf "$tus"   # stale wrappers from an interrupted earlier run must not survive
 mkdir -p "$tus"
 rm -f "$outdir"/*.o   # stale objects from an earlier run must not linger into [3/4]
-for gm in include/Foundation/*.np; do
-    name="$(basename "$gm" .np)"
-    # Skip the self-contained umbrella (Foundation.np): it is not a class —
+for gm in include/Foundation/*.ov; do
+    name="$(basename "$gm" .ov)"
+    # Skip the self-contained umbrella (Foundation.ov): it is not a class —
     # it has no vtable to verify, and archiving it would re-inline every
     # implementation into the library, defeating the per-TU build.
-    # Skip NPTask.np for the same reason: `NPTask<T>` is the runtime task
+    # Skip NPTask.ov for the same reason: `NPTask<T>` is the runtime task
     # HANDLE (route A), not a class — no implementation, no vtable
     # (doc/async_nptask_plan.md §Foundation 壳层).
     [[ "$name" == "Foundation" || "$name" == "NPTask" ]] && continue
-    wrap="$tus/$name.np"
-    { echo '#import <Foundation/Foundation.nh>'; cat "$gm"; } > "$wrap"
+    wrap="$tus/$name.ov"
+    { echo '#import <Foundation/Foundation.oh>'; cat "$gm"; } > "$wrap"
     c="$outdir/$name.c"
     o="$outdir/$name.o"
-    "$nepac" -rewrite-nepa "$wrap" -o "$c" -I include -I include/Foundation
+    "$ovicc" -rewrite-ovic "$wrap" -o "$c" -I include -I include/Foundation
     clang -c -w "$c" -o "$o" -I include
     objs+=("$o")
     echo "  $name"
@@ -112,12 +112,12 @@ rm -f "$lib"
 ar rcs "$lib" "${objs[@]}"
 
 echo "[3/4] verify per-TU owned metadata is strong (nm)"
-# Every Foundation .np implements exactly the class it is named after, so the
+# Every Foundation .ov implements exactly the class it is named after, so the
 # basename IS the owned class. If any of these is weak, ownership did not
 # apply and a client TU's stub could win the link — fail loudly instead of
 # shipping a landmine.
-for gm in include/Foundation/*.np; do
-    name="$(basename "$gm" .np)"
+for gm in include/Foundation/*.ov; do
+    name="$(basename "$gm" .ov)"
     [[ "$name" == "Foundation" || "$name" == "NPTask" ]] && continue   # no vtable to verify (see [1/4])
     check_strong "$outdir/$name.o" "$name"
 done

@@ -1,4 +1,4 @@
-//! Extraction of the sidecar source map (`.np.map`) from the FINAL generated
+//! Extraction of the sidecar source map (`.ov.map`) from the FINAL generated
 //! C text, by scanning its `#line` directive stream
 //! (`doc/source_locations_debug_lsp_plan.md` 阶段 4).
 //!
@@ -14,14 +14,14 @@
 //!
 //! The scanner is a strict C lexer state machine (code / line comment / block
 //! comment / string / char literal). Directives are recognized only at
-//! column 0 in code context — nepac always emits them there, and a `#line`
+//! column 0 in code context — ovicc always emits them there, and a `#line`
 //! inside a passthrough comment or string literal can never fake a mapping.
 //! Lines before the first directive are unmapped: that is exactly the
 //! preprocessor's view (they keep the generated file's own numbering).
 
 use std::fs;
 
-use nepa_cst::source_map_file::{
+use ovic_cst::source_map_file::{
     hash_tag, GeneratedArtifact, Mapping, SourceEntry, SourceMapFile,
 };
 
@@ -31,7 +31,7 @@ use crate::codegen::SYNTHETIC_FILE;
 pub struct ExtractOptions<'a> {
     /// Path recorded for the generated C artifact (`generated.path`).
     pub generated_path: String,
-    /// The main `.np` translation unit this build compiled.
+    /// The main `.ov` translation unit this build compiled.
     pub primary_source: String,
     /// In-memory contents for source hashing, preferred over disk re-reads:
     /// `(path as spelled in the #line stream, content)` pairs.
@@ -306,7 +306,7 @@ pub fn extract_source_map(c_text: &str, opts: &ExtractOptions) -> SourceMapFile 
     }
 
     let mut f = SourceMapFile::new(
-        "nepac",
+        "ovicc",
         &opts.primary_source,
         GeneratedArtifact {
             path: opts.generated_path.clone(),
@@ -327,31 +327,31 @@ mod tests {
     ) -> ExtractOptions<'a> {
         ExtractOptions {
             generated_path: "main.c".into(),
-            primary_source: "main.np".into(),
+            primary_source: "main.ov".into(),
             source_contents: contents,
         }
     }
 
     #[test]
     fn basic_regions_spans_and_offsets() {
-        let c_text = "#include <stdio.h>\n\n#line 3 \"main.np\"\nint a = 1;\nint b = 2;\n#line 1 \"<nepa-generated>\"\nvoid glue(void) {}\nstatic int x;\n#line 7 \"lib.nh\"\nreturn7;\n";
+        let c_text = "#include <stdio.h>\n\n#line 3 \"main.ov\"\nint a = 1;\nint b = 2;\n#line 1 \"<ovic-generated>\"\nvoid glue(void) {}\nstatic int x;\n#line 7 \"lib.oh\"\nreturn7;\n";
         let m = extract_source_map(c_text, &opts(&[]));
         assert_eq!(m.sources.len(), 2);
-        // Sorted by path: lib.nh < main.np.
-        assert_eq!(m.sources[0].path, "lib.nh");
+        // Sorted by path: lib.oh < main.ov.
+        assert_eq!(m.sources[0].path, "lib.oh");
         assert_eq!(m.sources[0].id, 0);
-        assert_eq!(m.sources[1].path, "main.np");
+        assert_eq!(m.sources[1].path, "main.ov");
         assert_eq!(m.sources[1].id, 1);
 
         assert_eq!(m.mappings.len(), 3);
-        // Region A: C lines 4-5 ← main.np 3-4.
+        // Region A: C lines 4-5 ← main.ov 3-4.
         let a = &m.mappings[0];
         assert_eq!(a.c_start_line, 4);
         assert_eq!(a.c_end_line, 5);
         assert_eq!(a.c_start, c_text.find("int a = 1;").unwrap() as u64);
         assert_eq!(
             a.c_end,
-            c_text.find("#line 1 \"<nepa-generated>\"").unwrap() as u64
+            c_text.find("#line 1 \"<ovic-generated>\"").unwrap() as u64
         );
         assert_eq!(a.src_id, Some(1));
         assert_eq!(a.src_line_start, 3);
@@ -376,10 +376,10 @@ mod tests {
 
     #[test]
     fn escaped_path_is_unescaped() {
-        let c_text = "x;\n#line 2 \"dir\\\\my \\\"x\\\".np\"\ny;\n";
+        let c_text = "x;\n#line 2 \"dir\\\\my \\\"x\\\".ov\"\ny;\n";
         let m = extract_source_map(c_text, &opts(&[]));
         assert_eq!(m.sources.len(), 1);
-        assert_eq!(m.sources[0].path, "dir\\my \"x\".np");
+        assert_eq!(m.sources[0].path, "dir\\my \"x\".ov");
         assert_eq!(m.mappings.len(), 1);
         assert_eq!(m.mappings[0].src_id, Some(0));
         // Directive occupies physical line 2, so it numbers line 3 as src 2.
@@ -390,7 +390,7 @@ mod tests {
     #[test]
     fn directive_inside_comment_or_string_is_ignored() {
         // Block comment spanning lines, string with #line inside, char escape.
-        let c_text = "/*\n#line 99 \"fake.np\"\n*/\nconst char* s = \"#line 5 \\\"x\\\"\";\nchar c = '\\'';\n// #line 6 \"also.np\"\n";
+        let c_text = "/*\n#line 99 \"fake.ov\"\n*/\nconst char* s = \"#line 5 \\\"x\\\"\";\nchar c = '\\'';\n// #line 6 \"also.ov\"\n";
         let m = extract_source_map(c_text, &opts(&[]));
         assert!(m.sources.is_empty());
         assert!(m.mappings.is_empty());
@@ -398,7 +398,7 @@ mod tests {
 
     #[test]
     fn string_continuation_keeps_line_accounting() {
-        let c_text = "char* s = \"abc\\\ndef\";\n#line 4 \"m.np\"\nx;\n";
+        let c_text = "char* s = \"abc\\\ndef\";\n#line 4 \"m.ov\"\nx;\n";
         let m = extract_source_map(c_text, &opts(&[]));
         assert_eq!(m.mappings.len(), 1);
         let r = &m.mappings[0];
@@ -420,7 +420,7 @@ mod tests {
 
     #[test]
     fn trailing_directive_without_newline_is_empty_scope() {
-        let c_text = "a;\n#line 5 \"m.np\"";
+        let c_text = "a;\n#line 5 \"m.ov\"";
         let m = extract_source_map(c_text, &opts(&[]));
         assert!(m.mappings.is_empty());
         assert_eq!(m.sources.len(), 1); // still declared as a source
@@ -428,16 +428,16 @@ mod tests {
 
     #[test]
     fn leading_whitespace_directive_is_not_recognized() {
-        // nepac emits column 0 only; indented `#line` stays unparsed.
-        let c_text = "  #line 5 \"m.np\"\nx;\n";
+        // ovicc emits column 0 only; indented `#line` stays unparsed.
+        let c_text = "  #line 5 \"m.ov\"\nx;\n";
         let m = extract_source_map(c_text, &opts(&[]));
         assert!(m.mappings.is_empty());
     }
 
     #[test]
     fn source_hash_prefers_caller_contents() {
-        let c_text = "#line 1 \"main.np\"\nx;\n";
-        let contents = vec![("main.np".to_string(), "int x;\n".to_string())];
+        let c_text = "#line 1 \"main.ov\"\nx;\n";
+        let contents = vec![("main.ov".to_string(), "int x;\n".to_string())];
         let m = extract_source_map(c_text, &opts(&contents));
         assert_eq!(m.sources[0].hash, hash_tag(b"int x;\n"));
     }

@@ -4,10 +4,10 @@
 //! scope-end releases on intermediate frames are never skipped (the cross-
 //! function leak of the sjlj backend disappears by construction):
 //!
-//! - `@throw e`      -> `__nepa_eh_flag = 1; __nepa_eh_val = (NPObject *)e; return <zero>;`
-//! - every call site -> call, then `if (__nepa_eh_flag) { return <zero>; }`
+//! - `@throw e`      -> `__ovic_eh_flag = 1; __ovic_eh_val = (NPObject *)e; return <zero>;`
+//! - every call site -> call, then `if (__ovic_eh_flag) { return <zero>; }`
 //! - `@try` body     -> plain code (flag is provably clear on entry)
-//! - `@catch (T *e)` -> `if (__nepa_eh_flag) { e = (T *)__nepa_eh_val; __nepa_eh_flag = 0; ... }`
+//! - `@catch (T *e)` -> `if (__ovic_eh_flag) { e = (T *)__ovic_eh_val; __ovic_eh_flag = 0; ... }`
 //!                      with isa check for typed catches; non-matching typed
 //!                      catch re-arms the flag and falls through.
 //! - `@finally`      -> runs on the natural merge point (both paths are
@@ -24,7 +24,7 @@
 
 #![deny(dead_code)]
 
-use nepa_ast::{AstDecl, AstDeclData, AstExpr, AstExprData, AstStmt, AstStmtData, AstUnit};
+use ovic_ast::{AstDecl, AstDeclData, AstExpr, AstExprData, AstStmt, AstStmtData, AstUnit};
 use std::fmt;
 
 // ─── Diagnostics ─────────────────────────────────────────────────────────────
@@ -138,7 +138,7 @@ fn check_expr_blocks(e: &AstExpr, d: &mut EhDiagnostics) {
         // call-bearing statement is guarded) takes over. So throws are ALLOWED
         // here (differential case 06); validate the body like any statement
         // list. The one real boundary — the flag crossing a pure C frame —
-        // does not apply: block invokes are nepa-generated functions whose
+        // does not apply: block invokes are ovic-generated functions whose
         // caller is guarded.
         check_stmt_top(b, false, d);
     }
@@ -182,10 +182,10 @@ fn expr_children(e: &AstExpr) -> Vec<&AstExpr> {
 //
 // Rewrites (only in units compiled with -eh checked):
 //
-//   @throw e            ->  __nepa_eh_flag = 1;
-//                           __nepa_eh_val = (NPObject *)(void *)(e);
+//   @throw e            ->  __ovic_eh_flag = 1;
+//                           __ovic_eh_val = (NPObject *)(void *)(e);
 //                           return <zero>;
-//   <call sites>        ->  call; if (__nepa_eh_flag) { return <zero>; }
+//   <call sites>        ->  call; if (__ovic_eh_flag) { return <zero>; }
 //   @try B C F          ->  B'  (guard-rewritten: statements after the first
 //                            throwing call are wrapped in if (flag == 0))
 //                           + catch arms as plain if (flag) blocks
@@ -195,8 +195,8 @@ fn expr_children(e: &AstExpr) -> Vec<&AstExpr> {
 // inserts scope-end releases on ALL paths — the sjlj cross-function leak is
 // impossible by construction.
 
-use nepa_ast::{AstType};
-use nepa_cst::TypePrim;
+use ovic_ast::{AstType};
+use ovic_cst::TypePrim;
 
 /// `NPObject *` type node (for the error value cast).
 fn npobject_ptr_type() -> AstType {
@@ -208,28 +208,28 @@ fn npobject_ptr_type() -> AstType {
 
 fn int_expr(n: i64) -> AstExpr {
     AstExpr {
-        kind: nepa_ast::AstExprKind::Int, expr_type: None, line: 0, col: 0,
+        kind: ovic_ast::AstExprKind::Int, expr_type: None, line: 0, col: 0,
         data: AstExprData::Int(n),
     }
 }
 
 fn varref(name: &str) -> AstExpr {
     AstExpr {
-        kind: nepa_ast::AstExprKind::VarRef, expr_type: None, line: 0, col: 0,
+        kind: ovic_ast::AstExprKind::VarRef, expr_type: None, line: 0, col: 0,
         data: AstExprData::VarRef { sym: None, name: name.into() },
     }
 }
 
 fn expr_stmt(e: AstExpr) -> AstStmt {
     AstStmt {
-        kind: nepa_ast::AstStmtKind::Expr, line: 0, col: 0,
+        kind: ovic_ast::AstStmtKind::Expr, line: 0, col: 0,
         data: AstStmtData::Expr(e),
     }
 }
 
 fn assign_stmt(target: &str, value: AstExpr) -> AstStmt {
     expr_stmt(AstExpr {
-        kind: nepa_ast::AstExprKind::Assign, expr_type: None, line: 0, col: 0,
+        kind: ovic_ast::AstExprKind::Assign, expr_type: None, line: 0, col: 0,
         data: AstExprData::Assign { target: Box::new(varref(target)), value: Box::new(value) },
     })
 }
@@ -246,11 +246,11 @@ fn return_zero(ret: &AstType) -> AstStmt {
         None
     } else if aggregate_zero(ret) {
         Some(Box::new(AstExpr {
-            kind: nepa_ast::AstExprKind::Cast, expr_type: None, line: 0, col: 0,
+            kind: ovic_ast::AstExprKind::Cast, expr_type: None, line: 0, col: 0,
             data: AstExprData::Cast {
                 target_type: ret.clone(),
                 expr: Box::new(AstExpr {
-                    kind: nepa_ast::AstExprKind::InitList, expr_type: None, line: 0, col: 0,
+                    kind: ovic_ast::AstExprKind::InitList, expr_type: None, line: 0, col: 0,
                     data: AstExprData::InitList(vec![int_expr(0)]),
                 }),
             },
@@ -259,7 +259,7 @@ fn return_zero(ret: &AstType) -> AstStmt {
         Some(Box::new(int_expr(0)))
     };
     AstStmt {
-        kind: nepa_ast::AstStmtKind::Return, line: 0, col: 0,
+        kind: ovic_ast::AstStmtKind::Return, line: 0, col: 0,
         data: AstStmtData::Return(val),
     }
 }
@@ -270,7 +270,7 @@ fn return_zero(ret: &AstType) -> AstStmt {
 /// an aggregate typedef (`NPRange`) from a scalar one (`size_t`) here — and
 /// both take the compound literal: it is the only C99 form valid for the
 /// former, and still perfectly valid for the latter. `Sel` joins them because
-/// nepa's `SEL` is a struct, not an integer — and a bare `SEL` has NO name
+/// ovic's `SEL` is a struct, not an integer — and a bare `SEL` has NO name
 /// (`TypePrim::Sel` with `name: None`), so it must be matched on the prim
 /// alone or the tail guard emits `return 0;` into a struct-returning function
 /// (json_editor's `static SEL cmdSel`, clang: "returning 'int' from a
@@ -285,23 +285,23 @@ fn aggregate_zero(t: &AstType) -> bool {
             || (t.name.is_some() && matches!(t.prim, TypePrim::Named)))
 }
 
-/// Wrap `s` in `if (!__nepa_eh_flag) { s }`.
+/// Wrap `s` in `if (!__ovic_eh_flag) { s }`.
 fn guard_stmt(s: AstStmt) -> AstStmt {
-    // `if (__nepa_eh_flag == 0) { s }` — Binary op 12 is `==` (codegen
+    // `if (__ovic_eh_flag == 0) { s }` — Binary op 12 is `==` (codegen
     // op_to_str table, verified in AGENTS.md).
     AstStmt {
-        kind: nepa_ast::AstStmtKind::If, line: 0, col: 0,
+        kind: ovic_ast::AstStmtKind::If, line: 0, col: 0,
         data: AstStmtData::If {
             cond: Box::new(AstExpr {
-                kind: nepa_ast::AstExprKind::Binary, expr_type: None, line: 0, col: 0,
+                kind: ovic_ast::AstExprKind::Binary, expr_type: None, line: 0, col: 0,
                 data: AstExprData::Binary {
                     op: 12,
-                    left: Box::new(varref("__nepa_eh_flag")),
+                    left: Box::new(varref("__ovic_eh_flag")),
                     right: Box::new(int_expr(0)),
                 },
             }),
             then: Box::new(AstStmt {
-                kind: nepa_ast::AstStmtKind::Compound, line: 0, col: 0,
+                kind: ovic_ast::AstStmtKind::Compound, line: 0, col: 0,
                 data: AstStmtData::Compound(vec![s]),
             }),
             else_: None,
@@ -309,24 +309,24 @@ fn guard_stmt(s: AstStmt) -> AstStmt {
     }
 }
 
-/// `__nepa_eh_flag == <n>` — the query form used by every guard below.
+/// `__ovic_eh_flag == <n>` — the query form used by every guard below.
 fn flag_is(n: i64) -> AstExpr {
     AstExpr {
-        kind: nepa_ast::AstExprKind::Binary, expr_type: None, line: 0, col: 0,
+        kind: ovic_ast::AstExprKind::Binary, expr_type: None, line: 0, col: 0,
         data: AstExprData::Binary {
             op: 12, // ==
-            left: Box::new(varref("__nepa_eh_flag")),
+            left: Box::new(varref("__ovic_eh_flag")),
             right: Box::new(int_expr(n)),
         },
     }
 }
 
-/// `__nepa_eh_flag == 0 && <cond>` — loop conditions. A body that may arm the
+/// `__ovic_eh_flag == 0 && <cond>` — loop conditions. A body that may arm the
 /// flag must stop looping (ObjC leaves the loop at the throw), so the condition
 /// is only consulted while nothing is in flight.
 fn cond_and_flag_clear(cond: AstExpr) -> AstExpr {
     AstExpr {
-        kind: nepa_ast::AstExprKind::Binary, expr_type: None, line: 0, col: 0,
+        kind: ovic_ast::AstExprKind::Binary, expr_type: None, line: 0, col: 0,
         data: AstExprData::Binary {
             op: 17, // &&
             left: Box::new(flag_is(0)),
@@ -341,7 +341,7 @@ fn cond_and_flag_clear(cond: AstExpr) -> AstExpr {
 /// propagate to an enclosing @catch (differential cases 03/04/05).
 fn logical_or(a: AstExpr, b: AstExpr) -> AstExpr {
     AstExpr {
-        kind: nepa_ast::AstExprKind::Binary, expr_type: None, line: 0, col: 0,
+        kind: ovic_ast::AstExprKind::Binary, expr_type: None, line: 0, col: 0,
         data: AstExprData::Binary {
             op: 18,
             left: Box::new(a),
@@ -350,11 +350,11 @@ fn logical_or(a: AstExpr, b: AstExpr) -> AstExpr {
     }
 }
 
-/// `name(args...)` — runtime calls injected by the desugar (`nepa_retain`,
-/// `nepa_autorelease`, `__nepa_eh_*`).
+/// `name(args...)` — runtime calls injected by the desugar (`ovic_retain`,
+/// `ovic_autorelease`, `__ovic_eh_*`).
 fn func_call(name: &str, args: Vec<AstExpr>) -> AstExpr {
     AstExpr {
-        kind: nepa_ast::AstExprKind::FuncCall, expr_type: None, line: 0, col: 0,
+        kind: ovic_ast::AstExprKind::FuncCall, expr_type: None, line: 0, col: 0,
         data: AstExprData::FuncCall {
             func: None,
             name: name.into(),
@@ -375,10 +375,10 @@ fn next_seq() -> usize {
 /// A plain `T name = init;` (or bare `T name;`) declaration statement.
 fn var_decl(name: &str, ty: AstType, init: Option<AstExpr>, line: usize, col: usize) -> AstStmt {
     AstStmt {
-        kind: nepa_ast::AstStmtKind::Decl,
+        kind: ovic_ast::AstStmtKind::Decl,
         line, col,
         data: AstStmtData::Decl(AstDecl {
-            kind: nepa_ast::AstDeclKind::Variable,
+            kind: ovic_ast::AstDeclKind::Variable,
             name: Some(name.into()),
             line, col,
             data: AstDeclData::Variable {
@@ -500,10 +500,10 @@ fn desugar_decl(decl: &mut AstDecl, fx: &EffectTable) {
 
 /// Rewrite a function body.
 ///
-/// NOTE: there is deliberately NO `__nepa_eh_flag = 0;` entry clear. The flag is
+/// NOTE: there is deliberately NO `__ovic_eh_flag = 0;` entry clear. The flag is
 /// a *pending exception* global, and the code that runs while an exception is in
-/// flight is exactly the cleanup ARC injects (scope-end `nepa_release` →
-/// `dealloc`, itself a nepa method body). Clearing the flag in every body
+/// flight is exactly the cleanup ARC injects (scope-end `ovic_release` →
+/// `dealloc`, itself a ovic method body). Clearing the flag in every body
 /// destroys the pending exception the moment any cleanup runs — the M1.5 bug
 /// that made `@catch` never fire in 01/02 (case 01: `middle` releases `m`,
 /// `Item_dealloc` clears the flag, `main`'s `@catch` never sees it).
@@ -521,13 +521,13 @@ fn desugar_body(body: &mut AstStmt, ret: &AstType, is_main: bool, fx: &EffectTab
                 // Uncaught exception escaping main: abort with ObjC wording.
                 // No return value of ours — the process is dying here.
                 stmts.push(AstStmt {
-                    kind: nepa_ast::AstStmtKind::If, line: 0, col: 0,
+                    kind: ovic_ast::AstStmtKind::If, line: 0, col: 0,
                     data: AstStmtData::If {
                         cond: Box::new(flag_is(1)),
                         then: Box::new(AstStmt {
-                            kind: nepa_ast::AstStmtKind::Compound, line: 0, col: 0,
+                            kind: ovic_ast::AstStmtKind::Compound, line: 0, col: 0,
                             data: AstStmtData::Compound(vec![
-                                expr_stmt(func_call("nepa_eh_uncaught", vec![])),
+                                expr_stmt(func_call("ovic_eh_uncaught", vec![])),
                             ]),
                         }),
                         else_: None,
@@ -540,14 +540,14 @@ fn desugar_body(body: &mut AstStmt, ret: &AstType, is_main: bool, fx: &EffectTab
     }
 }
 
-/// `if (__nepa_eh_flag == 1) { return <zero>; }` — function-tail propagation.
+/// `if (__ovic_eh_flag == 1) { return <zero>; }` — function-tail propagation.
 fn if_armed_ret(zero_ret: &AstStmt) -> AstStmt {
     AstStmt {
-        kind: nepa_ast::AstStmtKind::If, line: 0, col: 0,
+        kind: ovic_ast::AstStmtKind::If, line: 0, col: 0,
         data: AstStmtData::If {
             cond: Box::new(flag_is(1)),
             then: Box::new(AstStmt {
-                kind: nepa_ast::AstStmtKind::Compound, line: 0, col: 0,
+                kind: ovic_ast::AstStmtKind::Compound, line: 0, col: 0,
                 data: AstStmtData::Compound(vec![zero_ret.clone()]),
             }),
             else_: None,
@@ -596,7 +596,7 @@ fn rewrite_stmts(stmts: &mut Vec<AstStmt>, zero_ret: &AstStmt, fx: &EffectTable)
             return;
         }
         let mut tail_block = AstStmt {
-            kind: nepa_ast::AstStmtKind::Compound,
+            kind: ovic_ast::AstStmtKind::Compound,
             line: 0,
             col: 0,
             data: AstStmtData::Compound(tail),
@@ -651,21 +651,21 @@ fn throw_effect(th: &AstType) -> Effect {
     }
 }
 
-/// C runtime primitives and libc functions that cannot run nepa code and
+/// C runtime primitives and libc functions that cannot run ovic code and
 /// therefore cannot arm the error flag.
 const NOTHROW_C_FUNCS: &[&str] = &[
-    "nepa_retain", "nepa_release", "nepa_autorelease", "nepa_malloc", "nepa_free",
-    "nepa_alloc", "nepa_init", "nepa_stringFromCstr", "nepa_string_from_cstr",
-    "nepa_metaInit", "nepa_meta_init", "nepa_isKindOfClass", "nepa_isKindOf",
-    "nepa_weakRegister", "nepa_weakUnregister", "nepa_weakClearAll",
-    "nepa_syncLock", "nepa_syncUnlock", "nepa_eh_isa", "nepa_eh_uncaught",
-    "nepa_task_create", "nepa_task_resume", "nepa_task_join",
+    "ovic_retain", "ovic_release", "ovic_autorelease", "ovic_malloc", "ovic_free",
+    "ovic_alloc", "ovic_init", "ovic_stringFromCstr", "ovic_string_from_cstr",
+    "ovic_metaInit", "ovic_meta_init", "ovic_isKindOfClass", "ovic_isKindOf",
+    "ovic_weakRegister", "ovic_weakUnregister", "ovic_weakClearAll",
+    "ovic_syncLock", "ovic_syncUnlock", "ovic_eh_isa", "ovic_eh_uncaught",
+    "ovic_task_create", "ovic_task_resume", "ovic_task_join",
     "printf", "fprintf", "sprintf", "snprintf", "puts", "putchar", "fputs",
     "fwrite", "strlen", "strcmp", "strncmp", "memcpy", "memset", "memmove",
     "abort", "exit", "calloc", "malloc", "free", "realloc",
     "kputs", "kputdec", "kputhex", "kputc", "kprintf",
     "NPLog", "__NPLogv",
-    "nepa_array_create", "nepa_dictionary_create",
+    "ovic_array_create", "ovic_dictionary_create",
     "va_start", "va_arg", "va_end", "va_copy",
 ];
 
@@ -781,12 +781,12 @@ impl EffectTable {
                 }
             }
             // Assigning the error flag IS the arming mechanism: the desugared
-            // `@throw` compound ends in `__nepa_eh_flag = 1;` and its helpers
-            // (nepa_retain/nepa_autorelease) are NoThrow-whitelisted — without
+            // `@throw` compound ends in `__ovic_eh_flag = 1;` and its helpers
+            // (ovic_retain/ovic_autorelease) are NoThrow-whitelisted — without
             // this rule the rewritten throw would look harmless and lose the
             // tail guard that routes control to the catch arms / caller.
             AstExprData::Assign { target, .. } if matches!(&target.data,
-                AstExprData::VarRef { name, .. } if name == "__nepa_eh_flag") => Effect::MayThrow,
+                AstExprData::VarRef { name, .. } if name == "__ovic_eh_flag") => Effect::MayThrow,
             _ => Effect::NoThrow,
         }
     }
@@ -949,7 +949,7 @@ impl EffectTable {
 }
 
 /// Selector families whose result the caller owns (`alloc`/`new`/`copy`/
-/// `mutableCopy`-prefixed, plus `init`). Ownership in nepa is decided by method
+/// `mutableCopy`-prefixed, plus `init`). Ownership in ovic is decided by method
 /// *name* (`crates/ownership/src/ownership.rs`), so hoisting such a call into a
 /// temporary would move its +1 away from the binding site ARC accounts for.
 fn owns_result(selector: &str) -> bool {
@@ -1006,7 +1006,7 @@ fn auto_type() -> AstType {
 ///   - the statement's own top-level expression is not hoisted in statement
 ///     positions where a void result is legal (`[obj foo];`, `return [obj bar];`)
 ///   - C function calls are not hoisted (Foundation's runtime primitives would
-///     gain a temporary each; only nepa message sends can `@throw` here)
+///     gain a temporary each; only ovic message sends can `@throw` here)
 ///   - expressions containing an owned call (see `owns_result`) are untouched
 fn hoist_stmt_calls(s: &mut AstStmt) -> Vec<AstStmt> {
     let mut pre: Vec<AstStmt> = Vec::new();
@@ -1087,7 +1087,7 @@ fn hoist_expr(e: &mut AstExpr, top: bool, pre: &mut Vec<AstStmt>, line: usize, c
     if !hoistable || expr_has_owning_call(e) {
         return;
     }
-    let tmp = format!("__nepa_eh_tmp_{}", next_seq());
+    let tmp = format!("__ovic_eh_tmp_{}", next_seq());
     let value = std::mem::replace(e, varref(&tmp));
     pre.push(var_decl(&tmp, auto_type(), Some(value), line, col));
 }
@@ -1097,13 +1097,13 @@ fn rewrite_stmt(s: &mut AstStmt, zero_ret: &AstStmt, fx: &EffectTable) {
     match &mut s.data {
         AstStmtData::Throw(expr) => {
             // Ownership mirrors clang's ARC lowering of `@throw`:
-            //   NPObject *__nepa_eh_thrown_N = (NPObject *)(<e>);  /* ARC owns this temp */
-            //   __nepa_eh_val = __nepa_eh_thrown_N;
-            //   nepa_retain(__nepa_eh_val);      /* the in-flight exception holds one ref */
-            //   nepa_autorelease(__nepa_eh_val); /* clang's objc_retainAutorelease: the
+            //   NPObject *__ovic_eh_thrown_N = (NPObject *)(<e>);  /* ARC owns this temp */
+            //   __ovic_eh_val = __ovic_eh_thrown_N;
+            //   ovic_retain(__ovic_eh_val);      /* the in-flight exception holds one ref */
+            //   ovic_autorelease(__ovic_eh_val); /* clang's objc_retainAutorelease: the
             //                                       object dies when the enclosing
             //                                       @autoreleasepool drains */
-            //   __nepa_eh_flag = 1;
+            //   __ovic_eh_flag = 1;
             //
             // NO `return <zero>` here: control must reach the end of the
             // enclosing statement list, otherwise a `@catch`/`@finally` in the
@@ -1111,23 +1111,23 @@ fn rewrite_stmt(s: &mut AstStmt, zero_ret: &AstStmt, fx: &EffectTable) {
             // the remaining statements). Outside any @try the function-tail
             // guard `if (flag) return <zero>` does the frame-crossing.
             let n = next_seq();
-            let tmp = format!("__nepa_eh_thrown_{}", n);
+            let tmp = format!("__ovic_eh_thrown_{}", n);
             let val_expr: Box<AstExpr> = match expr.take() {
                 Some(e) => e,
                 None => Box::new(varref("nil")),
             };
             let cast = AstExpr {
-                kind: nepa_ast::AstExprKind::Cast, expr_type: None, line: s.line, col: s.col,
+                kind: ovic_ast::AstExprKind::Cast, expr_type: None, line: s.line, col: s.col,
                 data: AstExprData::Cast { target_type: npobject_ptr_type(), expr: val_expr },
             };
             *s = AstStmt {
-                kind: nepa_ast::AstStmtKind::Compound, line: s.line, col: s.col,
+                kind: ovic_ast::AstStmtKind::Compound, line: s.line, col: s.col,
                 data: AstStmtData::Compound(vec![
                     var_decl(&tmp, npobject_ptr_type(), Some(cast), s.line, s.col),
-                    assign_stmt("__nepa_eh_val", varref(&tmp)),
-                    expr_stmt(func_call("nepa_retain", vec![varref("__nepa_eh_val")])),
-                    expr_stmt(func_call("nepa_autorelease", vec![varref("__nepa_eh_val")])),
-                    assign_stmt("__nepa_eh_flag", int_expr(1)),
+                    assign_stmt("__ovic_eh_val", varref(&tmp)),
+                    expr_stmt(func_call("ovic_retain", vec![varref("__ovic_eh_val")])),
+                    expr_stmt(func_call("ovic_autorelease", vec![varref("__ovic_eh_val")])),
+                    assign_stmt("__ovic_eh_flag", int_expr(1)),
                 ]),
             };
         }
@@ -1224,14 +1224,14 @@ fn rewrite_stmt(s: &mut AstStmt, zero_ret: &AstStmt, fx: &EffectTable) {
 ///
 /// The flag is provably clear on try entry (propagation returns immediately;
 /// a catch takes the flag), so the try body needs no entry check.
-/// Wrap a catch parameter declaration: `T name = (T)__nepa_eh_val;` or bare.
+/// Wrap a catch parameter declaration: `T name = (T)__ovic_eh_val;` or bare.
 fn catch_param_decl(param_type: &str, param_name: &str, init: Option<AstExpr>, line: usize, col: usize) -> AstStmt {
     let vt = type_from_c_spelling(param_type);
     AstStmt {
-        kind: nepa_ast::AstStmtKind::Decl,
+        kind: ovic_ast::AstStmtKind::Decl,
         line, col,
         data: AstStmtData::Decl(AstDecl {
-            kind: nepa_ast::AstDeclKind::Variable,
+            kind: ovic_ast::AstDeclKind::Variable,
             name: Some(param_name.into()),
             line, col,
             data: AstDeclData::Variable {
@@ -1272,20 +1272,20 @@ fn rewrite_try(
     line: usize, col: usize,
 ) -> AstStmt {
     //   {
-    //       int __nepa_eh_saved_N = __nepa_eh_flag;   /* hand in-flight state back on exit */
-    //       __nepa_eh_flag = 0;
-    //       [int __nepa_eh_done_N = 0;]               /* only when there are catches */
+    //       int __ovic_eh_saved_N = __ovic_eh_flag;   /* hand in-flight state back on exit */
+    //       __ovic_eh_flag = 0;
+    //       [int __ovic_eh_done_N = 0;]               /* only when there are catches */
     //       <try body: throwing call sites arm the flag, the tail is guarded>
-    //       if (__nepa_eh_flag == 1 && __nepa_eh_done_N == 0) {
-    //           if (__nepa_eh_isa((NPObject *)__nepa_eh_val, &NEPA_CLASS_$_T)) {  /* typed only */
-    //               __nepa_eh_done_N = 1;
-    //               __nepa_eh_flag = 0;
-    //               T *e = (T *)__nepa_eh_val;
+    //       if (__ovic_eh_flag == 1 && __ovic_eh_done_N == 0) {
+    //           if (__ovic_eh_isa((NPObject *)__ovic_eh_val, &OVIC_CLASS_$_T)) {  /* typed only */
+    //               __ovic_eh_done_N = 1;
+    //               __ovic_eh_flag = 0;
+    //               T *e = (T *)__ovic_eh_val;
     //               <body>
     //           }
     //       }
     //       <finally>
-    //       __nepa_eh_flag = __nepa_eh_saved_N || __nepa_eh_flag;
+    //       __ovic_eh_flag = __ovic_eh_saved_N || __ovic_eh_flag;
     //   }
     //
     // Entry save/clear: the body must not see an exception that was already in
@@ -1293,16 +1293,16 @@ fn rewrite_try(
     // Exit restore: an unhandled flag stays visible to the enclosing guard tail
     // and therefore propagates to the caller.
     //
-    // `__nepa_eh_done_N` is the objc_end_catch latch — once an arm has handled
+    // `__ovic_eh_done_N` is the objc_end_catch latch — once an arm has handled
     // the exception its siblings must not, so an exception thrown *by* an arm
     // body (rethrow, case 04) leaves the @try instead of re-entering a sibling.
     let seq = next_seq();
-    let saved = format!("__nepa_eh_saved_{}", seq);
-    let done = format!("__nepa_eh_done_{}", seq);
+    let saved = format!("__ovic_eh_saved_{}", seq);
+    let done = format!("__ovic_eh_done_{}", seq);
 
     let mut out: Vec<AstStmt> = Vec::new();
-    out.push(var_decl(&saved, AstType::new(TypePrim::Int), Some(varref("__nepa_eh_flag")), line, col));
-    out.push(assign_stmt("__nepa_eh_flag", int_expr(0)));
+    out.push(var_decl(&saved, AstType::new(TypePrim::Int), Some(varref("__ovic_eh_flag")), line, col));
+    out.push(assign_stmt("__ovic_eh_flag", int_expr(0)));
     if !catches.is_empty() {
         out.push(var_decl(&done, AstType::new(TypePrim::Int), Some(int_expr(0)), line, col));
     }
@@ -1315,7 +1315,7 @@ fn rewrite_try(
     if let AstStmtData::Compound(inner) = &mut try_block.data {
         rewrite_stmts(inner, zero_ret, fx);
         out.push(AstStmt {
-            kind: nepa_ast::AstStmtKind::Compound, line: try_block.line, col: try_block.col,
+            kind: ovic_ast::AstStmtKind::Compound, line: try_block.line, col: try_block.col,
             data: AstStmtData::Compound(std::mem::take(inner)),
         });
     } else {
@@ -1324,10 +1324,10 @@ fn rewrite_try(
     }
 
     // Catch arms. Each becomes:
-    //   if (__nepa_eh_flag == 1 && __nepa_eh_done_N == 0) {
-    //       [if (__nepa_eh_isa((NPObject *)val, &class)) {]   /* typed catch only */
-    //       __nepa_eh_done_N = 1;
-    //       __nepa_eh_flag = 0;
+    //   if (__ovic_eh_flag == 1 && __ovic_eh_done_N == 0) {
+    //       [if (__ovic_eh_isa((NPObject *)val, &class)) {]   /* typed catch only */
+    //       __ovic_eh_done_N = 1;
+    //       __ovic_eh_flag = 0;
     //       <param decl if used>
     //       <body rewritten>
     //       [}]
@@ -1345,15 +1345,15 @@ fn rewrite_try(
 
             let mut arm: Vec<AstStmt> = vec![
                 assign_stmt(&done, int_expr(1)),
-                assign_stmt("__nepa_eh_flag", int_expr(0)),
+                assign_stmt("__ovic_eh_flag", int_expr(0)),
             ];
             // Declare the catch param only if the body uses it (dead-store
             // precedent from codegen's sjlj path).
             let param_used = stmt_refs_name(body, &param_name);
             if param_used {
                 let cast = AstExpr {
-                    kind: nepa_ast::AstExprKind::Cast, expr_type: None, line, col,
-                    data: AstExprData::Cast { target_type: type_from_c_spelling(&param_type), expr: Box::new(varref("__nepa_eh_val")) },
+                    kind: ovic_ast::AstExprKind::Cast, expr_type: None, line, col,
+                    data: AstExprData::Cast { target_type: type_from_c_spelling(&param_type), expr: Box::new(varref("__ovic_eh_val")) },
                 };
                 arm.push(catch_param_decl(&param_type, &param_name, Some(cast), line, col));
             } else {
@@ -1363,12 +1363,12 @@ fn rewrite_try(
             arm.push((**body).clone());
 
             let mut handled = AstStmt {
-                kind: nepa_ast::AstStmtKind::Compound, line, col,
+                kind: ovic_ast::AstStmtKind::Compound, line, col,
                 data: AstStmtData::Compound(arm),
             };
             if !is_id_catch {
                 handled = AstStmt {
-                    kind: nepa_ast::AstStmtKind::If, line, col,
+                    kind: ovic_ast::AstStmtKind::If, line, col,
                     data: AstStmtData::If {
                         cond: Box::new(isa_test_expr(&param_type, line, col)),
                         then: Box::new(handled),
@@ -1378,22 +1378,22 @@ fn rewrite_try(
             }
 
             out.push(AstStmt {
-                kind: nepa_ast::AstStmtKind::If, line, col,
+                kind: ovic_ast::AstStmtKind::If, line, col,
                 data: AstStmtData::If {
                     cond: Box::new(AstExpr {
-                        kind: nepa_ast::AstExprKind::Binary, expr_type: None, line, col,
+                        kind: ovic_ast::AstExprKind::Binary, expr_type: None, line, col,
                         data: AstExprData::Binary {
                             op: 17, // &&
                             left: Box::new(AstExpr {
-                                kind: nepa_ast::AstExprKind::Binary, expr_type: None, line, col,
+                                kind: ovic_ast::AstExprKind::Binary, expr_type: None, line, col,
                                 data: AstExprData::Binary {
                                     op: 12, // ==
-                                    left: Box::new(varref("__nepa_eh_flag")),
+                                    left: Box::new(varref("__ovic_eh_flag")),
                                     right: Box::new(int_expr(1)),
                                 },
                             }),
                             right: Box::new(AstExpr {
-                                kind: nepa_ast::AstExprKind::Binary, expr_type: None, line, col,
+                                kind: ovic_ast::AstExprKind::Binary, expr_type: None, line, col,
                                 data: AstExprData::Binary {
                                     op: 12, // ==
                                     left: Box::new(varref(&done)),
@@ -1430,10 +1430,10 @@ fn rewrite_try(
     }
 
     // Hand the in-flight state back (an unhandled flag must keep propagating).
-    out.push(assign_stmt("__nepa_eh_flag", logical_or(varref(&saved), varref("__nepa_eh_flag"))));
+    out.push(assign_stmt("__ovic_eh_flag", logical_or(varref(&saved), varref("__ovic_eh_flag"))));
 
     AstStmt {
-        kind: nepa_ast::AstStmtKind::Compound, line, col,
+        kind: ovic_ast::AstStmtKind::Compound, line, col,
         data: AstStmtData::Compound(out),
     }
 }
@@ -1486,44 +1486,44 @@ fn splice_finally_before_exits(s: &mut AstStmt, fin: &AstStmt) {
 
 /// Run a statement with the exception flag isolated from an exception that is
 /// already in flight, handing it back afterwards:
-///   { int __nepa_eh_saved_N = __nepa_eh_flag; __nepa_eh_flag = 0; <s>;
-///     __nepa_eh_flag = __nepa_eh_saved_N || __nepa_eh_flag; }
+///   { int __ovic_eh_saved_N = __ovic_eh_flag; __ovic_eh_flag = 0; <s>;
+///     __ovic_eh_flag = __ovic_eh_saved_N || __ovic_eh_flag; }
 /// Used for @finally bodies; a @try body does the same inline in `rewrite_try`
 /// (there the saved value has to stay live until the arms have run).
 fn isolated_block(s: AstStmt, line: usize, col: usize) -> AstStmt {
-    let saved = format!("__nepa_eh_saved_{}", next_seq());
+    let saved = format!("__ovic_eh_saved_{}", next_seq());
     AstStmt {
-        kind: nepa_ast::AstStmtKind::Compound, line, col,
+        kind: ovic_ast::AstStmtKind::Compound, line, col,
         data: AstStmtData::Compound(vec![
-            var_decl(&saved, AstType::new(TypePrim::Int), Some(varref("__nepa_eh_flag")), line, col),
-            assign_stmt("__nepa_eh_flag", int_expr(0)),
+            var_decl(&saved, AstType::new(TypePrim::Int), Some(varref("__ovic_eh_flag")), line, col),
+            assign_stmt("__ovic_eh_flag", int_expr(0)),
             s,
-            assign_stmt("__nepa_eh_flag", logical_or(varref(&saved), varref("__nepa_eh_flag"))),
+            assign_stmt("__ovic_eh_flag", logical_or(varref(&saved), varref("__ovic_eh_flag"))),
         ]),
     }
 }
 
 /// isa test for a typed catch, used as the arm's condition:
-///   __nepa_eh_isa((NPObject *)__nepa_eh_val, &NEPA_CLASS_$_<Flat>)
+///   __ovic_eh_isa((NPObject *)__ovic_eh_val, &OVIC_CLASS_$_<Flat>)
 /// 1 = match, 0 = mismatch (runtime.c). A mismatch is a plain false condition:
 /// flag and the arm's `done` latch stay untouched, so the next arm — or the
 /// enclosing guard tail — keeps seeing the exception.
 fn isa_test_expr(param_type: &str, line: usize, col: usize) -> AstExpr {
     let flat = param_type.trim_end_matches(" *").replace("::", "__");
-    func_call("__nepa_eh_isa", vec![
+    func_call("__ovic_eh_isa", vec![
         AstExpr {
-            kind: nepa_ast::AstExprKind::Cast, expr_type: None, line, col,
+            kind: ovic_ast::AstExprKind::Cast, expr_type: None, line, col,
             data: AstExprData::Cast {
                 target_type: npobject_ptr_type(),
-                expr: Box::new(varref("__nepa_eh_val")),
+                expr: Box::new(varref("__ovic_eh_val")),
             },
         },
-        // &NEPA_CLASS_$_<Flat> — codegen emits the weak class metadata
+        // &OVIC_CLASS_$_<Flat> — codegen emits the weak class metadata
         // definition (and extern decl) in every TU, so this resolves at link
         // time even for header-only imported classes.
         AstExpr {
-            kind: nepa_ast::AstExprKind::VarRef, expr_type: None, line, col,
-            data: AstExprData::VarRef { sym: None, name: format!("&NEPA_CLASS_$_{}", flat) },
+            kind: ovic_ast::AstExprKind::VarRef, expr_type: None, line, col,
+            data: AstExprData::VarRef { sym: None, name: format!("&OVIC_CLASS_$_{}", flat) },
         },
     ])
 }
@@ -1562,8 +1562,8 @@ fn rewrite_decl(d: &mut AstDecl, fx: &EffectTable) {
 
 /// Minimal C spelling of a CstType (catch param types only — pointer-to-
 /// named, id, or scalar).
-fn cst_type_to_c_str(t: &nepa_cst::CstType) -> String {
-    use nepa_cst::TagKind as TK;
+fn cst_type_to_c_str(t: &ovic_cst::CstType) -> String {
+    use ovic_cst::TagKind as TK;
     let mut s = String::new();
     if t.is_const { s.push_str("const "); }
     match t.prim {
@@ -1678,10 +1678,10 @@ fn decl_refs_name(d: &AstDecl, name: &str) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use nepa_ast::AstType;
-    use nepa_cst::{CstParam, TypePrim};
+    use ovic_ast::AstType;
+    use ovic_cst::{CstParam, TypePrim};
 
-    /// ③ A bare `SEL` (`TypePrim::Sel` with no name) is a *struct* in nepa's
+    /// ③ A bare `SEL` (`TypePrim::Sel` with no name) is a *struct* in ovic's
     /// runtime, so its tail guard must emit `(SEL){0}`, never `0`. Regression
     /// for json_editor's `static SEL cmdSel` — clang rejected the emitted
     /// `return 0;` ("returning 'int' from a function with incompatible result
@@ -1719,35 +1719,35 @@ mod tests {
     #[test]
     fn checked_desugar_leaves_no_try_node() {
         let throw = AstStmt {
-            kind: nepa_ast::AstStmtKind::Throw, line: 0, col: 0,
+            kind: ovic_ast::AstStmtKind::Throw, line: 0, col: 0,
             data: AstStmtData::Throw(Some(Box::new(int_expr(1)))),
         };
         let try_block = AstStmt {
-            kind: nepa_ast::AstStmtKind::Compound, line: 0, col: 0,
+            kind: ovic_ast::AstStmtKind::Compound, line: 0, col: 0,
             data: AstStmtData::Compound(vec![throw]),
         };
         let catch = AstStmt {
-            kind: nepa_ast::AstStmtKind::Catch, line: 0, col: 0,
+            kind: ovic_ast::AstStmtKind::Catch, line: 0, col: 0,
             data: AstStmtData::Catch {
                 param: CstParam {
                     par_type: None, name: Some("e".into()), external_name: None,
                     next: None, attributes: Vec::new(),
                 },
                 body: Box::new(AstStmt {
-                    kind: nepa_ast::AstStmtKind::Compound, line: 0, col: 0,
+                    kind: ovic_ast::AstStmtKind::Compound, line: 0, col: 0,
                     data: AstStmtData::Compound(vec![]),
                 }),
             },
         };
         let finally = AstStmt {
-            kind: nepa_ast::AstStmtKind::Finally, line: 0, col: 0,
+            kind: ovic_ast::AstStmtKind::Finally, line: 0, col: 0,
             data: AstStmtData::Finally(Box::new(AstStmt {
-                kind: nepa_ast::AstStmtKind::Compound, line: 0, col: 0,
+                kind: ovic_ast::AstStmtKind::Compound, line: 0, col: 0,
                 data: AstStmtData::Compound(vec![]),
             })),
         };
         let try_stmt = AstStmt {
-            kind: nepa_ast::AstStmtKind::Try, line: 0, col: 0,
+            kind: ovic_ast::AstStmtKind::Try, line: 0, col: 0,
             data: AstStmtData::Try {
                 try_block: Box::new(try_block),
                 catches: vec![catch],
@@ -1755,11 +1755,11 @@ mod tests {
             },
         };
         let body = AstStmt {
-            kind: nepa_ast::AstStmtKind::Compound, line: 0, col: 0,
+            kind: ovic_ast::AstStmtKind::Compound, line: 0, col: 0,
             data: AstStmtData::Compound(vec![try_stmt]),
         };
         let func = AstDecl {
-            kind: nepa_ast::AstDeclKind::Function, name: Some("probe".into()), line: 1, col: 1,
+            kind: ovic_ast::AstDeclKind::Function, name: Some("probe".into()), line: 1, col: 1,
             data: AstDeclData::Function {
                 func_sym: None, return_type: Some(Box::new(AstType::new(TypePrim::Int))),
                 params: None, body: Some(Box::new(body)),
@@ -1767,14 +1767,14 @@ mod tests {
             },
             attributes: Vec::new(),
         };
-        let mut unit = AstUnit { decls: vec![func], filename: "probe.np".into() };
+        let mut unit = AstUnit { decls: vec![func], filename: "probe.ov".into() };
         desugar_unit(&mut unit);
 
         assert!(
             !unit_has_try(&unit),
             "checked desugar must rewrite every @try away (else codegen's setjmp arm runs)"
         );
-        assert!(unit_uses_eh_flag(&unit), "checked desugar must arm the __nepa_eh_flag protocol");
+        assert!(unit_uses_eh_flag(&unit), "checked desugar must arm the __ovic_eh_flag protocol");
     }
 
     fn unit_has_try(unit: &AstUnit) -> bool {
@@ -1798,11 +1798,11 @@ mod tests {
 
     fn unit_uses_eh_flag(unit: &AstUnit) -> bool {
         // Recursive: the guard condition desugar emits is
-        // `__nepa_eh_flag == 1 && __nepa_eh_done_N == 0` — a Binary, not a bare
+        // `__ovic_eh_flag == 1 && __ovic_eh_done_N == 0` — a Binary, not a bare
         // VarRef. A top-level-only match silently read every real guard as
         // "no flag" (this test's own bug, not the product's).
         fn expr_uses(e: &AstExpr) -> bool {
-            if matches!(&e.data, AstExprData::VarRef { name, .. } if name == "__nepa_eh_flag") {
+            if matches!(&e.data, AstExprData::VarRef { name, .. } if name == "__ovic_eh_flag") {
                 return true;
             }
             EffectTable::effect_children(e).into_iter().any(expr_uses)
@@ -1870,7 +1870,7 @@ mod tests {
     #[test]
     fn throwing_loop_condition_keeps_its_flag_guard() {
         let throw = AstStmt {
-            kind: nepa_ast::AstStmtKind::Throw, line: 0, col: 0,
+            kind: ovic_ast::AstStmtKind::Throw, line: 0, col: 0,
             data: AstStmtData::Throw(Some(Box::new(int_expr(1)))),
         };
         let mut unit = unit_with_while(Some(throw));
@@ -1885,7 +1885,7 @@ mod tests {
     // ── helpers for the two guard-density tests ──────────────────────────────
 
     fn expr_uses_flag(e: &AstExpr) -> bool {
-        if matches!(&e.data, AstExprData::VarRef { name, .. } if name == "__nepa_eh_flag") {
+        if matches!(&e.data, AstExprData::VarRef { name, .. } if name == "__ovic_eh_flag") {
             return true;
         }
         EffectTable::effect_children(e).into_iter().any(expr_uses_flag)
@@ -1911,28 +1911,28 @@ mod tests {
     /// put a flag guard on the condition is the effect analysis under test.
     fn unit_with_while(extra: Option<AstStmt>) -> AstUnit {
         let mut items = vec![AstStmt {
-            kind: nepa_ast::AstStmtKind::Expr, line: 0, col: 0,
+            kind: ovic_ast::AstStmtKind::Expr, line: 0, col: 0,
             data: AstStmtData::Expr(int_expr(1)),
         }];
         if let Some(x) = extra {
             items.push(x);
         }
         let while_stmt = AstStmt {
-            kind: nepa_ast::AstStmtKind::While, line: 0, col: 0,
+            kind: ovic_ast::AstStmtKind::While, line: 0, col: 0,
             data: AstStmtData::While {
                 cond: Box::new(int_expr(1)),
                 body: Box::new(AstStmt {
-                    kind: nepa_ast::AstStmtKind::Compound, line: 0, col: 0,
+                    kind: ovic_ast::AstStmtKind::Compound, line: 0, col: 0,
                     data: AstStmtData::Compound(items),
                 }),
             },
         };
         let body = AstStmt {
-            kind: nepa_ast::AstStmtKind::Compound, line: 0, col: 0,
+            kind: ovic_ast::AstStmtKind::Compound, line: 0, col: 0,
             data: AstStmtData::Compound(vec![while_stmt]),
         };
         let func = AstDecl {
-            kind: nepa_ast::AstDeclKind::Function, name: Some("probe".into()), line: 1, col: 1,
+            kind: ovic_ast::AstDeclKind::Function, name: Some("probe".into()), line: 1, col: 1,
             data: AstDeclData::Function {
                 func_sym: None, return_type: Some(Box::new(AstType::new(TypePrim::Int))),
                 params: None, body: Some(Box::new(body)),
@@ -1940,6 +1940,6 @@ mod tests {
             },
             attributes: Vec::new(),
         };
-        AstUnit { decls: vec![func], filename: "probe.np".into() }
+        AstUnit { decls: vec![func], filename: "probe.ov".into() }
     }
 }

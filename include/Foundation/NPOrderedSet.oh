@@ -1,8 +1,8 @@
 #ifndef NPORDEREDSET_NH
 #define NPORDEREDSET_NH
 
-#import <Foundation/NPSet.nh>
-#import <Foundation/NPArray.nh>
+#import <Foundation/NPSet.oh>
+#import <Foundation/NPArray.oh>
 
 // Set that preserves insertion order — the ObjC NSOrderedSet model.
 //

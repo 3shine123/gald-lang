@@ -1,10 +1,10 @@
-#include "nepa/elaborator.h"
-#include "nepa/parser.h"
-#include "nepa/lexer.h"
-#include "nepa/cst.h"
-#include "nepa/symbol.h"
-#include "nepa/binder.h"
-#include "nepa/checker.h"
+#include "ovic/elaborator.h"
+#include "ovic/parser.h"
+#include "ovic/lexer.h"
+#include "ovic/cst.h"
+#include "ovic/symbol.h"
+#include "ovic/binder.h"
+#include "ovic/checker.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -31,7 +31,7 @@ static int run_elaboration(symbol_table_t *st, translation_unit_t *unit) {
 
 static symbol_table_t *parse_and_elab(const char *src, translation_unit_t **out_unit) {
     lexer_t lexer;
-    lexer_init(&lexer, src, strlen(src), "test.np");
+    lexer_init(&lexer, src, strlen(src), "test.ov");
     parser_t *p = parser_create(&lexer);
     *out_unit = parser_parse_translation_unit(p);
     parser_destroy(p);

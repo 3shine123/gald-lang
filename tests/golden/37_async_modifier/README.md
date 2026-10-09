@@ -11,17 +11,17 @@
   `NPTask<int> *t = [self loadCachedValue];` 是形态 A（lazy：只创建，不执行）。
 - `int y = @await t;` —— 形态 B（`@await` 一个任务变量）。
 - `int z = [self plain:5];` —— 与任务无关的普通同步调用。
-- `[task start];` 写在**语句位**：hosted 下就地驱动到完成（等价 `nepa_task_await(task)`），
+- `[task start];` 写在**语句位**：hosted 下就地驱动到完成（等价 `ovic_task_await(task)`），
   任务跑完时 receiver `f` 尚未被 ARC 释放。
 
 | 文件 | 期望 |
 |------|------|
-| `async_modifier_test.np` | 编译通过，stdout 为 `runAll x=42 y=84 z=6` |
+| `async_modifier_test.ov` | 编译通过，stdout 为 `runAll x=42 y=84 z=6` |
 | `async_modifier_test.out` | 上面那行 stdout 的人工基线 |
 | `async_modifier_test.c` | 生成 C 基线（人工参照；`test_all.py` 对该目录只判 rc） |
 
 ```bash
-./target/debug/nepac run tests/golden/37_async_modifier/async_modifier_test.np
+./target/debug/ovicc run tests/golden/37_async_modifier/async_modifier_test.ov
 ```
 
 ## 期望输出
@@ -34,19 +34,19 @@ runAll x=42 y=84 z=6
 
 调度策略属运行时，语言侧只认"语句位"这一个入口信号：
 
-1. **语句位 async 调用**（`[f runAll];`，结果被丢弃）→ `nepa_task_await([f runAll])`：
+1. **语句位 async 调用**（`[f runAll];`，结果被丢弃）→ `ovic_task_await([f runAll])`：
    未 `start` 的自动 `start`，并在**调用点**泵到完成。
-2. **语句位 `[t start];`** → `nepa_task_await(t)`：同样在调用点驱动到完成。
+2. **语句位 `[t start];`** → `ovic_task_await(t)`：同样在调用点驱动到完成。
 
 被接住的调用仍是 lazy（形态 A）：`NPTask<T> *t = [f run];` 只拿句柄，由调用方 `@await` 或语句位 `[t start]` 驱动。
 `-ffreestanding` 下两条一律不发射（裸机 `main` 自己泵）。
 
 **为什么不在 `main` 退出处兜底泵一次**：ARC 的 scope-end release 排在函数收尾，兜底泵必然晚于它——
-任务会在 receiver 已释放的堆内存上运行（实测 `nepa_async_state_runAll` EXC_BAD_ACCESS）。
+任务会在 receiver 已释放的堆内存上运行（实测 `ovic_async_state_runAll` EXC_BAD_ACCESS）。
 语句位驱动天然发生在 release 之前，是唯一安全的入口点。
 
 ## 实现注记
 
-- 状态机入口参数用**保留名** `__nepa_task`（不是 `t`）：用户局部 `NPTask<int> *t = …` 曾把参数 `t` 遮蔽，
+- 状态机入口参数用**保留名** `__ovic_task`（不是 `t`）：用户局部 `NPTask<int> *t = …` 曾把参数 `t` 遮蔽，
   展开出的 `t->self_obj` 读到未初始化的新局部 → SIGSEGV（本目录是回归源）。
-- 负例在 `tests/negative/async_nptask_*.np`（`async` 后非 `NPTask<T>` / 类型参数数不对 / 上下文关键字冲突）。
+- 负例在 `tests/negative/async_nptask_*.ov`（`async` 后非 `NPTask<T>` / 类型参数数不对 / 上下文关键字冲突）。

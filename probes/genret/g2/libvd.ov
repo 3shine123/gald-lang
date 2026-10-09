@@ -1,0 +1,14 @@
+#import "model.oh"
+
+// Variant: the lib TU also mentions the instantiation via a plain variable.
+// The result must be the same specialization as g2: demand collection is
+// idempotent and no local trigger is required.
+@implementation Factory
++ (T)make { return nil; }
+- (T)produce { return nil; }
+@end
+
+void FactoryTouch(void) {
+    Factory<NPString *> *t = nil;
+    (void)t;
+}

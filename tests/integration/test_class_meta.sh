@@ -2,9 +2,9 @@
 # Test that class metadata (+class getter, vtable, class var) is correctly generated
 set -euo pipefail
 
-NEPAC="${NEPAC:-./builddir/nepac}"
-FIXTURE="${1:-tests/fixtures/hello.np}"
-OUTPUT=$(mktemp /tmp/nepa_test_XXXX.c)
+OVICC="${OVICC:-./builddir/ovicc}"
+FIXTURE="${1:-tests/fixtures/hello.ov}"
+OUTPUT=$(mktemp /tmp/ovic_test_XXXX.c)
 trap "rm -f $OUTPUT" EXIT
 
 total=0
@@ -25,7 +25,7 @@ fail() {
 }
 
 # Compile the fixture
-"$NEPAC" "$FIXTURE" -o "$OUTPUT" 2>/dev/null || { fail "nepac failed"; exit 1; }
+"$OVICC" "$FIXTURE" -o "$OUTPUT" 2>/dev/null || { fail "ovicc failed"; exit 1; }
 
 # Check +class function declarations
 test_name "+class declaration exists"
@@ -35,15 +35,15 @@ test_name "+class definition has braces"
 if grep -qE "NPObject_getClass.*\{" "$OUTPUT"; then pass; else fail "NPObject_getClass body missing braces"; fi
 
 test_name "+class returns &class var"
-if grep -q "return &nepa_NPObject_class" "$OUTPUT"; then pass; else fail "NPObject_getClass missing &nepa_NPObject_class"; fi
+if grep -q "return &ovic_NPObject_class" "$OUTPUT"; then pass; else fail "NPObject_getClass missing &ovic_NPObject_class"; fi
 
 # Check class metadata variable
 test_name "class metadata variable declared"
-if grep -q "NPClass nepa_NPObject_class;" "$OUTPUT"; then pass; else fail "missing NPClass nepa_NPObject_class"; fi
+if grep -q "NPClass ovic_NPObject_class;" "$OUTPUT"; then pass; else fail "missing NPClass ovic_NPObject_class"; fi
 
 # Check vtable excludes class methods
 test_name "vtable excludes class methods"
-INST_VTABLE=$(awk '/nepa_NPObject_vtable_inst = \{/{flag=1; next} /^\};/{flag=0} flag' "$OUTPUT")
+INST_VTABLE=$(awk '/ovic_NPObject_vtable_inst = \{/{flag=1; next} /^\};/{flag=0} flag' "$OUTPUT")
 if echo "$INST_VTABLE" | grep -q "\.init"; then
     if echo "$INST_VTABLE" | grep -q "\.alloc"; then fail "alloc found in instance vtable"; else pass; fi
 else
@@ -52,7 +52,7 @@ fi
 
 # Check vtable contains instance methods
 test_name "vtable contains init and dealloc"
-VTABLE_CONTENT=$(awk '/nepa_NPObject_vtable_inst = \{/{flag=1; next} /^\};/{flag=0} flag' "$OUTPUT")
+VTABLE_CONTENT=$(awk '/ovic_NPObject_vtable_inst = \{/{flag=1; next} /^\};/{flag=0} flag' "$OUTPUT")
 if echo "$VTABLE_CONTENT" | grep -q "\.init"; then
     pass
 else
@@ -78,24 +78,24 @@ if grep -q "Student_getClass" "$OUTPUT"; then pass; else fail "missing Student_g
 
 # Meta vtable tests
 test_name "meta vtable exists for NPObject"
-if grep -q "nepa_NPObject_meta_vtable_inst" "$OUTPUT"; then pass; else fail "missing NPObject meta vtable"; fi
+if grep -q "ovic_NPObject_meta_vtable_inst" "$OUTPUT"; then pass; else fail "missing NPObject meta vtable"; fi
 
 test_name "meta vtable contains alloc and class"
-META_VTABLE=$(awk '/nepa_NPObject_meta_vtable_inst = \{/{flag=1; next} /^\};/{flag=0} flag' "$OUTPUT")
+META_VTABLE=$(awk '/ovic_NPObject_meta_vtable_inst = \{/{flag=1; next} /^\};/{flag=0} flag' "$OUTPUT")
 if echo "$META_VTABLE" | grep -q "\.alloc" && echo "$META_VTABLE" | grep -q "\.class"; then pass; else fail "alloc or class missing from meta vtable"; fi
 
 test_name "meta vtable uses getClass for +class"
 if grep -q "\.class = NPObject_getClass" "$OUTPUT"; then pass; else fail "meta vtable class field wrong"; fi
 
 test_name "NPClass has class_vtable pointer"
-if grep -q "\.class_vtable = &nepa_NPObject_meta_vtable_inst" "$OUTPUT"; then pass; else fail "missing class_vtable init"; fi
+if grep -q "\.class_vtable = &ovic_NPObject_meta_vtable_inst" "$OUTPUT"; then pass; else fail "missing class_vtable init"; fi
 
 # Class metadata init section
 test_name "class metadata init for NPObject"
-if grep -q "nepa_NPObject_class = (NPClass)" "$OUTPUT"; then pass; else fail "missing NPObject_class init"; fi
+if grep -q "ovic_NPObject_class = (NPClass)" "$OUTPUT"; then pass; else fail "missing NPObject_class init"; fi
 
 test_name "class metadata init for Student"
-if grep -q "nepa_Student_class = (NPClass)" "$OUTPUT"; then pass; else fail "missing Student_class init"; fi
+if grep -q "ovic_Student_class = (NPClass)" "$OUTPUT"; then pass; else fail "missing Student_class init"; fi
 
 # Compile the generated C with clang
 test_name "generated C compiles with clang"

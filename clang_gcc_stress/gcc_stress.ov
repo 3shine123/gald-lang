@@ -1,0 +1,103 @@
+// gcc_stress.ov — 极端的 GCC 编译器扩展压测（可运行子集）。
+// 只使用 ovicc 语法分析器已完整支持的构造；解析器缺口见 gcc_torture.ov。
+// 运行：ovicc -rewrite-ovic -backend gcc gcc_stress.ov -o /tmp/gcc_stress.c
+//       gcc -I include -o /tmp/gcc_stress /tmp/gcc_stress.c include/ovic/runtime.c
+//       /tmp/gcc_stress
+// 注：本机无真 gcc，用 clang 做 C 编译（gcc-only 属性大多被 clang 容忍为 no-op）；
+//     属性门禁由 ovicc 的 -backend gcc 校验。
+
+#include <stdio.h>
+
+// ── gcc-only __attribute__（clang 容忍为 no-op 的子集） ──
+__attribute__((noclone, noinline, noplt))
+int gcc_opt1(int v) { return v + 1; }
+
+__attribute__((cold))
+int cold_fn(int v) { return v * 3; }
+
+__attribute__((flatten))
+int flat_fn(int v) { return v + 4; }
+
+__attribute__((no_reorder))
+int noreorder_fn(int v) { return v + 5; }
+
+__attribute__((unsequenced))
+int unseq_fn(int v) { return v + 6; }
+
+__attribute__((reproducible))
+int repro_fn(int v) { return v + 7; }
+
+__attribute__((optimize("O3")))
+int opt_o3(int v) { return v * v; }
+
+__attribute__((no_sanitize_undefined))
+int noundef_fn(int v) { return v + 8; }
+
+__attribute__((noipa))
+int noipa_fn(int v) { return v + 9; }
+
+// ── 常见属性（带参数） ──
+__attribute__((format(printf, 1, 2)))
+__attribute__((nonnull(1)))
+int gprintf(const char *fmt, ...);
+
+__attribute__((always_inline, gnu_inline))
+static inline int ginl(int v) { return v + 1; }
+
+__attribute__((alloc_size(1)))
+static int *alloc_n(int n) { return (int *)__builtin_alloca((size_t)n * 4); }
+
+// ── struct 属性 ──
+__attribute__((aligned(32)))
+struct GVec {
+    int x, y, z, w;
+};
+
+struct GRec {
+    int rid __attribute__((aligned(8)));
+    int score;
+    int name;
+};
+
+// ── __XXX 前缀关键字风暴（gcc 变体） ──
+static __inline__ __attribute__((always_inline)) int ginl2(int v) { return v + 2; }
+static __inline int ginl3(int v) { return v + 3; }
+static __const int gc4 = 4;
+static __const__ int gc5 = 5;
+static __signed int gs6 = 6;
+static __signed__ int gs7 = 7;
+static __restrict int *grp;
+static __restrict__ int *grp2;
+
+int main(void) {
+    __typeof__(int) t1 = 1;
+    __typeof(t1) t2 = t1 + 1;
+    size_t a1 = __alignof__(int);
+    size_t a2 = __alignof(struct GVec);
+
+    // ── GCC 内置函数风暴（无类型参数、无整数后缀） ──
+    int e = __builtin_expect(t2, 0);
+    int cp = __builtin_constant_p(42);
+    int ce = __builtin_choose_expr(1, 111, 222);
+    int ffs = __builtin_ffs(12);
+    int ctz = __builtin_ctz(8);
+    int parity = __builtin_parity(7);
+    int pc = __builtin_popcount(0xF0F0F0F0);
+    long long pc64 = __builtin_popcountll(0xF0F0F0F0F0F0F0F0);
+    void *ra = __builtin_return_address(0);
+    int *tmp = alloc_n(2);
+    tmp[0] = 55;
+    int thru = ginl(41);
+
+    struct GVec v = { 1, 2, 3, 4 };
+    struct GRec r = { 42, 9, 7 };
+
+    printf("gcc_stress: t2=%d a1=%zu a2=%zu e=%d cp=%d ce=%d ffs=%d ctz=%d parity=%d pc=%d pc64=%lld ra=%p tmp0=%d thru=%d v=(%d,%d,%d,%d) r=(%d,%d,%d) o1=%d cold=%d flat=%d nore=%d unseq=%d repro=%d o3=%d noundef=%d noipa=%d inl2=%d inl3=%d c4=%d c5=%d s6=%d s7=%d\n",
+           t2, a1, a2, e, cp, ce, ffs, ctz, parity, pc, pc64, ra, tmp[0], thru,
+           v.x, v.y, v.z, v.w, r.rid, r.score, r.name,
+           gcc_opt1(1), cold_fn(2), flat_fn(3), noreorder_fn(4), unseq_fn(5), repro_fn(6),
+           opt_o3(7), noundef_fn(8), noipa_fn(9), ginl2(1), ginl3(1), gc4, gc5, gs6, gs7);
+    return 0;
+}
+
+int gprintf(const char *fmt, ...) { printf(fmt); return 0; }

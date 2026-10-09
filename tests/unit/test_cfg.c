@@ -1,5 +1,5 @@
-#include "nepa/cfg.h"
-#include "nepa/ast.h"
+#include "ovic/cfg.h"
+#include "ovic/ast.h"
 #include <stdio.h>
 #include <stdlib.h>
 

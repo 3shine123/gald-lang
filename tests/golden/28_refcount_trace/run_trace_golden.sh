@@ -1,37 +1,37 @@
 #!/bin/bash
 # run_trace_golden.sh — run the refcount tracer (-trace-refcount) over
-# tests/golden/28_refcount_trace/*.np and diff the output against *.out.
+# tests/golden/28_refcount_trace/*.ov and diff the output against *.out.
 # Usage: ./run_trace_golden.sh
-#   NEPAC    path to the nepac binary. Auto-detected: prefer an explicit $NEPAC,
-#           then target/release/nepac, then target/debug/nepac. Auto-detection
+#   OVICC    path to the ovicc binary. Auto-detected: prefer an explicit $OVICC,
+#           then target/release/ovicc, then target/debug/ovicc. Auto-detection
 #           matters because a stale binary silently produces line-number-only
 #           diffs that look like real regressions.
 set -u
 cd "$(dirname "$0")/../../.."
 
-if [[ -z "${NEPAC:-}" ]]; then
-    for cand in target/release/nepac target/debug/nepac; do
-        if [[ -x "$cand" ]]; then NEPAC="$cand"; break; fi
+if [[ -z "${OVICC:-}" ]]; then
+    for cand in target/release/ovicc target/debug/ovicc; do
+        if [[ -x "$cand" ]]; then OVICC="$cand"; break; fi
     done
 fi
-if [[ -z "${NEPAC:-}" || ! -x "$NEPAC" ]]; then
-    echo "error: nepac binary not found (build it, or set NEPAC=)" >&2
+if [[ -z "${OVICC:-}" || ! -x "$OVICC" ]]; then
+    echo "error: ovicc binary not found (build it, or set OVICC=)" >&2
     exit 2
 fi
-echo "using nepac: $NEPAC"
+echo "using ovicc: $OVICC"
 DIR=tests/golden/28_refcount_trace
 PASS=0
 FAIL=0
 
-for np in "$DIR"/*.np; do
-    out="${np%.np}.out"
+for np in "$DIR"/*.ov; do
+    out="${np%.ov}.out"
     if [[ ! -f "$out" ]]; then
         echo "SKIP  $np (no $out)"
         continue
     fi
     # trace with colors disabled for deterministic diffing
     tmp=/tmp/refcount_trace.$$.txt
-    "$NEPAC" -trace-refcount -trace-no-color -trace-max-iters 2 "$np" > "$tmp" 2>&1
+    "$OVICC" -trace-refcount -trace-no-color -trace-max-iters 2 "$np" > "$tmp" 2>&1
     rc=$?
     if [[ $rc -ne 0 ]]; then
         echo "FAIL  $np (tracer exit $rc)"

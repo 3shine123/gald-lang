@@ -6,7 +6,7 @@
 
 struct NPClass;
 
-@interface nepa_root
+@interface ovic_root
 - (id)init;
 - (void)dealloc;
 - (void)release;
@@ -17,7 +17,7 @@ struct NPClass;
 - (id)description;
 @end
 
-@interface NPObject : nepa_root
+@interface NPObject : ovic_root
 + (id)alloc;
 + (id)new;
 - (id)init;

@@ -1,0 +1,43 @@
+#include <stdio.h>
+#import <Foundation/Foundation.ov>
+
+@interface Animal : NPObject
+- (void)speak;
+@end
+
+@interface Dog : Animal
+- (void)speak;
+@end
+
+@interface Cat : Animal
+- (void)speak;
+@end
+
+@implementation Animal
+- (void)speak {
+    printf("?... ");
+}
+@end
+
+@implementation Dog
+- (void)speak {
+    printf("Woof! ");
+}
+@end
+
+@implementation Cat
+- (void)speak {
+    printf("Meow! ");
+}
+@end
+
+int main() {
+    Animal *arr[2];
+    arr[0] = [[Dog alloc] init];
+    arr[1] = [[Cat alloc] init];
+    for (int i = 0; i < 2; i++) {
+        [arr[i] speak];
+    }
+    printf("\n");
+    return 0;
+}

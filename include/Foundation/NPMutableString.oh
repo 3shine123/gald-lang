@@ -1,7 +1,7 @@
 #ifndef NPMUTABLESTRING_NH
 #define NPMUTABLESTRING_NH
 
-#import <Foundation/NPString.nh>
+#import <Foundation/NPString.oh>
 
 @interface NPMutableString : NPString {
 @public

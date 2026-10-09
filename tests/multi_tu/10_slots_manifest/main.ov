@@ -1,0 +1,10 @@
+#import "extra.oh"
+#include <stdio.h>
+
+int main() {
+    Calc *c = [[Calc alloc] init];
+    int r = [c add:3 to:4];
+    if (r != 7) { return 1; }
+    printf("add ok: %d\n", r);
+    return 0;
+}

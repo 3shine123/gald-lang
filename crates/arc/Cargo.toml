@@ -1,10 +1,10 @@
 [package]
-name = "nepa-arc"
+name = "ovic-arc"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-nepa-ast = { path = "../ast" }
-nepa-cfg = { path = "../cfg" }
-nepa-ownership = { path = "../ownership" }
-nepa-cst = { path = "../cst" }
+ovic-ast = { path = "../ast" }
+ovic-cfg = { path = "../cfg" }
+ovic-ownership = { path = "../ownership" }
+ovic-cst = { path = "../cst" }

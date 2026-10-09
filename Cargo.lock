@@ -121,197 +121,197 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a6cb138bb79a146c1bd460005623e142ef0181e3d0219cb493e02f7d08a35695"
 
 [[package]]
-name = "nepa-arc"
+name = "once_cell_polyfill"
+version = "1.70.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "384b8ab6d37215f3c5301a95a4accb5d64aa607f1fcb26a11b5303878451b4fe"
+
+[[package]]
+name = "ovic-arc"
 version = "0.1.0"
 dependencies = [
- "nepa-ast",
- "nepa-cfg",
- "nepa-cst",
- "nepa-ownership",
+ "ovic-ast",
+ "ovic-cfg",
+ "ovic-cst",
+ "ovic-ownership",
 ]
 
 [[package]]
-name = "nepa-ast"
+name = "ovic-ast"
 version = "0.1.0"
 dependencies = [
- "nepa-cst",
+ "ovic-cst",
 ]
 
 [[package]]
-name = "nepa-async"
+name = "ovic-async"
 version = "0.1.0"
 dependencies = [
- "nepa-ast",
- "nepa-cst",
+ "ovic-ast",
+ "ovic-cst",
 ]
 
 [[package]]
-name = "nepa-binder"
+name = "ovic-binder"
 version = "0.1.0"
 dependencies = [
- "nepa-ast",
- "nepa-cst",
- "nepa-lexer",
- "nepa-parser",
- "nepa-symbol",
+ "ovic-ast",
+ "ovic-cst",
+ "ovic-lexer",
+ "ovic-parser",
+ "ovic-symbol",
 ]
 
 [[package]]
-name = "nepa-cfg"
+name = "ovic-cfg"
 version = "0.1.0"
 dependencies = [
- "nepa-ast",
+ "ovic-ast",
 ]
 
 [[package]]
-name = "nepa-checker"
+name = "ovic-checker"
 version = "0.1.0"
 dependencies = [
- "nepa-ast",
- "nepa-cst",
- "nepa-symbol",
+ "ovic-ast",
+ "ovic-cst",
+ "ovic-symbol",
 ]
 
 [[package]]
-name = "nepa-codegen"
+name = "ovic-codegen"
 version = "0.1.0"
 dependencies = [
  "attrs",
- "nepa-ast",
- "nepa-cst",
- "nepa-elaborator",
- "nepa-ownership",
- "nepa-symbol",
+ "ovic-ast",
+ "ovic-cst",
+ "ovic-elaborator",
+ "ovic-ownership",
+ "ovic-symbol",
 ]
 
 [[package]]
-name = "nepa-cpp"
+name = "ovic-cpp"
 version = "0.1.0"
 
 [[package]]
-name = "nepa-cst"
+name = "ovic-cst"
 version = "0.1.0"
 
 [[package]]
-name = "nepa-cst-visit"
+name = "ovic-cst-visit"
 version = "0.1.0"
 dependencies = [
- "nepa-cst",
+ "ovic-cst",
 ]
 
 [[package]]
-name = "nepa-defer"
+name = "ovic-defer"
 version = "0.1.0"
 dependencies = [
- "nepa-ast",
- "nepa-cst",
+ "ovic-ast",
+ "ovic-cst",
 ]
 
 [[package]]
-name = "nepa-eh"
+name = "ovic-eh"
 version = "0.1.0"
 dependencies = [
- "nepa-ast",
- "nepa-cst",
+ "ovic-ast",
+ "ovic-cst",
 ]
 
 [[package]]
-name = "nepa-elaborator"
+name = "ovic-elaborator"
 version = "0.1.0"
 dependencies = [
- "nepa-ast",
- "nepa-binder",
- "nepa-cst",
- "nepa-symbol",
+ "ovic-ast",
+ "ovic-binder",
+ "ovic-cst",
+ "ovic-symbol",
 ]
 
 [[package]]
-name = "nepa-layout"
+name = "ovic-layout"
 version = "0.1.0"
 
 [[package]]
-name = "nepa-lexer"
+name = "ovic-lexer"
 version = "0.1.0"
 
 [[package]]
-name = "nepa-ownership"
+name = "ovic-ownership"
 version = "0.1.0"
 dependencies = [
- "nepa-ast",
+ "ovic-ast",
 ]
 
 [[package]]
-name = "nepa-parser"
+name = "ovic-parser"
 version = "0.1.0"
 dependencies = [
- "nepa-cst",
- "nepa-lexer",
- "nepa-preprocessor",
+ "ovic-cst",
+ "ovic-lexer",
+ "ovic-preprocessor",
 ]
 
 [[package]]
-name = "nepa-pattern"
+name = "ovic-pattern"
 version = "0.1.0"
 dependencies = [
- "nepa-ast",
- "nepa-cst",
+ "ovic-ast",
+ "ovic-cst",
 ]
 
 [[package]]
-name = "nepa-preprocessor"
+name = "ovic-preprocessor"
 version = "0.1.0"
 dependencies = [
- "nepa-cpp",
- "nepa-cst",
+ "ovic-cpp",
+ "ovic-cst",
 ]
 
 [[package]]
-name = "nepa-symbol"
+name = "ovic-symbol"
 version = "0.1.0"
 dependencies = [
- "nepa-cst",
+ "ovic-cst",
 ]
 
 [[package]]
-name = "nepa-trace"
+name = "ovic-trace"
 version = "0.1.0"
 dependencies = [
- "nepa-ast",
- "nepa-cst",
- "nepa-ownership",
+ "ovic-ast",
+ "ovic-cst",
+ "ovic-ownership",
 ]
 
 [[package]]
-name = "nepac"
+name = "ovicc"
 version = "0.1.0"
 dependencies = [
  "attrs",
  "cc",
  "clap",
  "clap_complete",
- "nepa-arc",
- "nepa-ast",
- "nepa-async",
- "nepa-binder",
- "nepa-cfg",
- "nepa-checker",
- "nepa-codegen",
- "nepa-cst",
- "nepa-defer",
- "nepa-eh",
- "nepa-elaborator",
- "nepa-parser",
- "nepa-pattern",
- "nepa-preprocessor",
- "nepa-symbol",
- "nepa-trace",
+ "ovic-arc",
+ "ovic-ast",
+ "ovic-async",
+ "ovic-binder",
+ "ovic-cfg",
+ "ovic-checker",
+ "ovic-codegen",
+ "ovic-cst",
+ "ovic-defer",
+ "ovic-eh",
+ "ovic-elaborator",
+ "ovic-parser",
+ "ovic-pattern",
+ "ovic-preprocessor",
+ "ovic-symbol",
+ "ovic-trace",
 ]
-
-[[package]]
-name = "once_cell_polyfill"
-version = "1.70.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "384b8ab6d37215f3c5301a95a4accb5d64aa607f1fcb26a11b5303878451b4fe"
 
 [[package]]
 name = "shlex"

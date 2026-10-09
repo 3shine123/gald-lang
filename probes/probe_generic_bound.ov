@@ -1,0 +1,44 @@
+// Probe 1: does `@interface Foo<T : Proto>` parse and check at all?
+// Expected verdict: either a clear "not supported" diagnostic, a silent
+// miscompile, or acceptance — the probe decides which.
+
+#import <Foundation/Foundation.oh>
+
+@protocol Greetable
+- (NPString *)greeting;
+@end
+
+// Bound syntax: does the parser accept `T : Greetable`?
+@interface Box<T : Greetable> : NPObject {
+    T _value;
+}
+- (instancetype)initWithValue:(T)value;
+- (T)value;
+@end
+
+@implementation Box
+- (instancetype)initWithValue:(T)value {
+    self = [super init];
+    if (self) {
+        _value = value;
+    }
+    return self;
+}
+- (T)value {
+    return _value;
+}
+@end
+
+// Class that DOES declare <Greetable> (file scope — classes cannot be
+// declared inside a function body).
+@interface Dog : NPObject <Greetable>
+- (NPString *)greeting;
+@end
+
+int main() {
+    // Bound-carrying instantiation: checker ignores bounds for now, so this
+    // must compile cleanly and print via the protocol-free path.
+    Box<Dog *> *b = [[Box<Dog *> alloc] initWithValue:[[Dog alloc] init]];
+    [b value];
+    return 0;
+}

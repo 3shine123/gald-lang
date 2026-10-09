@@ -3,27 +3,27 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 
-NEPAC=../../../target/debug/nepac
+OVICC=../../../target/debug/ovicc
 BUILD=build
 mkdir -p "$BUILD"
 
 echo "== transpiling =="
-"$NEPAC" -rewrite-nepa -ffreestanding -o "$BUILD/stress.c" stress.np
+"$OVICC" -rewrite-ovic -ffreestanding -o "$BUILD/stress.c" stress.ov
 
 echo "== compiling transpiled C =="
-clang -I../../../include -include nepa/runtime.h \
+clang -I../../../include -include ovic/runtime.h \
     -D_FORTIFY_SOURCE=0 -Wno-unused-variable \
     -c "$BUILD/stress.c" -o "$BUILD/stress.o"
 
 echo "== compiling helpers (kputs, kputdec, ...) =="
-clang -I../../../include -U__NEPA_FREESTANDING \
+clang -I../../../include -U__OVIC_FREESTANDING \
     -D_FORTIFY_SOURCE=0 \
     -c helpers.c -o "$BUILD/helpers.o"
 
 echo "== compiling bare-metal runtime =="
-clang -I../../../include -U__NEPA_FREESTANDING \
+clang -I../../../include -U__OVIC_FREESTANDING \
     -D_FORTIFY_SOURCE=0 \
-    -c ../../../include/nepa/runtime_freestanding.c -o "$BUILD/runtime_freestanding.o"
+    -c ../../../include/ovic/runtime_freestanding.c -o "$BUILD/runtime_freestanding.o"
 
 echo "== linking =="
 clang "$BUILD/stress.o" "$BUILD/helpers.o" "$BUILD/runtime_freestanding.o" -o "$BUILD/stress"

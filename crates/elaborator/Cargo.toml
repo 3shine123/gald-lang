@@ -1,10 +1,10 @@
 [package]
-name = "nepa-elaborator"
+name = "ovic-elaborator"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-nepa-cst = { path = "../cst" }
-nepa-ast = { path = "../ast" }
-nepa-symbol = { path = "../symbol" }
-nepa-binder = { path = "../binder" }
+ovic-cst = { path = "../cst" }
+ovic-ast = { path = "../ast" }
+ovic-symbol = { path = "../symbol" }
+ovic-binder = { path = "../binder" }

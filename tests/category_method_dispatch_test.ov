@@ -1,0 +1,51 @@
+#include <stdio.h>
+#import <Foundation/Foundation.ov>
+
+// Category on NPObject itself - adding a class method to all objects
+@interface NPObject (Debug)
+- (const char *)objectTag;
+@end
+
+@implementation NPObject (Debug)
+- (const char *)objectTag {
+    return "NPObject";
+}
+@end
+
+// Test that a category on a subclass also works
+@interface MyWidget : NPObject
+- (int)value;
+@end
+
+@implementation MyWidget
+- (int)value {
+    return 42;
+}
+@end
+
+@interface MyWidget (WidgetExt)
+- (int)doubleValue;
+@end
+
+@implementation MyWidget (WidgetExt)
+- (int)doubleValue {
+    return [self value] * 2;
+}
+@end
+
+int main() {
+    @autoreleasepool {
+        // Call category method on NPObject
+        NPObject *base = [[NPObject alloc] init];
+        printf("base tag: %s\n", [base objectTag]);
+
+        // Call category method on subclass
+        MyWidget *w = [[MyWidget alloc] init];
+        printf("widget value: %d\n", [w value]);
+        printf("widget double: %d\n", [w doubleValue]);
+
+        // Also test that NPObject category method works on subclass
+        printf("widget tag: %s\n", [w objectTag]);
+    }
+    return 0;
+}

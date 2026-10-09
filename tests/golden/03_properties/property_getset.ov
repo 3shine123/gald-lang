@@ -1,0 +1,16 @@
+#include <stdio.h>
+#import <Foundation/Foundation.ov>
+
+@interface Counter : NPObject
+@property int count;
+@end
+
+@implementation Counter
+@end
+
+int main() {
+    Counter *c = [[Counter alloc] init];
+    c.count = 10;
+    printf("Count: %d\n", c.count);
+    return 0;
+}

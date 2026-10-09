@@ -1,0 +1,210 @@
+#import <Foundation/NPSet.oh>
+#import <Foundation/NPString.oh>
+#include <string.h>
+#include <stdlib.h>
+
+@implementation NPSet
+
+- (void)dealloc {
+    for (size_t i = 0; i < _count; i++) {
+        if (_items[i]) {
+            ovic_release(_items[i]);
+        }
+    }
+    free(_items);
+    _items = NULL;
+    _count = 0;
+    _capacity = 0;
+    [super dealloc];
+}
+
++ (NPSet *)set {
+    return [self setWithObjects:NULL count:0];
+}
+
++ (NPSet *)setWithObject:(id)object {
+    return [self setWithObjects:&object count:1];
+}
+
++ (NPSet *)setWithObjects:(id *)objects count:(size_t)n {
+    @noarc {
+        NPSet *set = [[self alloc] init];
+        if (!set) return nil;
+        if (n > 0 && objects) {
+            NPObject **items = (NPObject **)calloc(n, sizeof(NPObject *));
+            if (items) {
+                size_t stored = 0;
+                for (size_t i = 0; i < n; i++) {
+                    // A nil object names no element; skipping it keeps _count
+                    // honest instead of leaving a hole the scan would step
+                    // through.
+                    if (!objects[i]) {
+                        continue;
+                    }
+                    // Uniqueness: skip an element already present (isEqual:).
+                    BOOL present = NO;
+                    for (size_t j = 0; j < stored; j++) {
+                        if ([items[j] isEqual:objects[i]]) {
+                            present = YES;
+                            break;
+                        }
+                    }
+                    if (present) {
+                        continue;
+                    }
+                    items[stored] = ovic_retain(objects[i]);
+                    stored++;
+                }
+                set->_items = items;
+                set->_count = stored;
+                set->_capacity = n;
+            }
+        }
+        return [set autorelease];
+    }
+}
+
++ (NPSet *)setWithArray:(NPArray *)array {
+    size_t n = [array count];
+    if (n == 0) {
+        return [self setWithObjects:NULL count:0];
+    }
+    // Copy the element pointers out so the existing (id *) factory path is
+    // reused — no second storage implementation to keep in sync.
+    id *objects = (id *)calloc(n, sizeof(id));
+    if (!objects) {
+        return [self setWithObjects:NULL count:0];
+    }
+    for (size_t i = 0; i < n; i++) {
+        objects[i] = [array objectAtIndex:i];
+    }
+    NPSet *result = [self setWithObjects:objects count:n];
+    free(objects);
+    return result;
+}
+
+- (size_t)count {
+    return _count;
+}
+
+// Linear scan with `isEqual:` — value semantics for NPString/NPNumber
+// elements (see their isEqual: overrides). _items[i] is never NULL on a set
+// built through the public API (nil is skipped at the mutator), but a guard
+// keeps a hand-built ivar layout from crashing the scan.
+- (BOOL)containsObject:(id)object {
+    if (!object) return NO;
+    for (size_t i = 0; i < _count; i++) {
+        if (_items[i] && [_items[i] isEqual:object]) {
+            return YES;
+        }
+    }
+    return NO;
+}
+
+- (id)anyObject {
+    if (_count == 0) return NULL;
+    return _items[0];
+}
+
+// Growth: double the capacity (start at 8) when full. realloc keeps the old
+// contents; the new tail is zeroed so a partially-grown table never exposes
+// uninitialized slots to the scan.
+- (void)_grow {
+    if (_count < _capacity) return;
+    size_t ncap = _capacity == 0 ? 8 : _capacity * 2;
+    NPObject **grown = (NPObject **)realloc(_items, ncap * sizeof(NPObject *));
+    if (!grown) return;
+    memset(grown + _capacity, 0, (ncap - _capacity) * sizeof(NPObject *));
+    _items = grown;
+    _capacity = ncap;
+}
+
+// Implemented HERE (not on NPMutableSet) because the vtable slots are declared
+// on NPSet: NPOrderedSet inherits them, and every subclass's vtable must be
+// able to resolve the function. Uniqueness + nil-skip keeps _count honest.
+- (void)addObject:(id)object {
+    if (!object) return;
+    if ([self containsObject:object]) return;
+    [self _grow];
+    if (_count >= _capacity) return; // realloc failed; drop rather than overflow
+    _items[_count] = ovic_retain(object);
+    _count++;
+}
+
+- (void)addObjectsFromArray:(NPArray *)other {
+    if (!other) return;
+    size_t n = [other count];
+    for (size_t i = 0; i < n; i++) {
+        [self addObject:[other objectAtIndex:i]];
+    }
+}
+
+- (NPArray *)allObjects {
+    return [NPArray arrayWithObjects:_items count:_count];
+}
+
+// Predicate filtering over the set's storage order; same borrowed-pointer
+// hand-off as NPArray's implementation (the result array owns the +1).
+- (NPArray *)filteredArrayUsingPredicate:(NPPredicate *)pred {
+    if (!pred) {
+        return [NPArray arrayWithObjects:_items count:_count];
+    }
+    if (_count == 0) {
+        return [NPArray arrayWithObjects:NULL count:0];
+    }
+    NPObject **hits = (NPObject **)malloc(_count * sizeof(NPObject *));
+    if (!hits) {
+        return [NPArray arrayWithObjects:NULL count:0];
+    }
+    size_t hit_count = 0;
+    for (size_t i = 0; i < _count; i++) {
+        if (_items[i] && [pred evaluateWithObject:_items[i]]) {
+            hits[hit_count] = _items[i];
+            hit_count++;
+        }
+    }
+    NPArray *result = [NPArray arrayWithObjects:hits count:hit_count];
+    free(hits);
+    return result;
+}
+
+- (BOOL)isEqual:(id)object {
+    if (self == (NPObject *)object) return YES;
+    if (!object) return NO;
+    if (![object isKindOfClass:[NPSet class]]) {
+        return [super isEqual:object];
+    }
+    NPSet *other = (NPSet *)object;
+    if ([other count] != _count) return NO;
+    // Same count + every element of self contained in other ⇒ equal sets.
+    for (size_t i = 0; i < _count; i++) {
+        if (![_items[i] isEqual:NULL] && ![other containsObject:_items[i]]) {
+            return NO;
+        }
+    }
+    return YES;
+}
+
+// `-copy` honors the ObjC convention: the caller owns the result (+1).
+// Returns an immutable NPSet even when invoked on a mutable subclass.
+- (id)copy {
+    return ovic_retain([NPSet setWithObjects:_items count:_count]);
+}
+
+- (NPString *)description {
+    NPString *result = [NPString stringWithUTF8String:"{("];
+    for (size_t i = 0; i < _count; i++) {
+        if (i > 0) {
+            result = [result stringByAppendingUTF8String:", "];
+        }
+        if (_items[i]) {
+            result = [result stringByAppendingString:[_items[i] description]];
+        } else {
+            result = [result stringByAppendingUTF8String:"(null)"];
+        }
+    }
+    result = [result stringByAppendingUTF8String:")}"];
+    return result;
+}
+
+@end

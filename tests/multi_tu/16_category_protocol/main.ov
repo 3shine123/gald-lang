@@ -1,0 +1,11 @@
+#import "model.oh"
+#include <stdio.h>
+
+int main(void) {
+    Widget *w = [[Widget alloc] init];
+    id obj = w;
+    int ok = [obj conformsToProtocol:@protocol(Tagged)];
+    printf("conforms=%d tag=%d\n", ok, [w tag]);
+    ovic_release(w);
+    return ok == 1 ? 0 : 1;
+}

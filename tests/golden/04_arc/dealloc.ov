@@ -1,0 +1,21 @@
+#include <stdio.h>
+#import <Foundation/Foundation.ov>
+
+@interface Item : NPObject
+@property int id;
+@end
+
+@implementation Item
+- (void)dealloc {
+    printf("Item %d dealloc\n", self.id);
+}
+@end
+
+int main() {
+    Item *a = [Item new];
+    a.id = 1;
+    Item *b = [Item new];
+    b.id = 2;
+    printf("created %d and %d\n", a.id, b.id);
+    return 0;
+}
