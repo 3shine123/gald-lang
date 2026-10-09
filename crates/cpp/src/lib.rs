@@ -234,9 +234,119 @@ pub fn expand(src: &str, table: &HashMap<String, MacroDef>) -> Result<String, St
     Ok(expand_mapped(src, table)?.0)
 }
 
+/// How one run of bytes on an expanded line came to be.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum SegKind {
+    /// Verbatim source text, starting at this 1-based byte column of the
+    /// source line it was scanned from.
+    Verbatim { src_col: u32 },
+    /// Output of expanding the macro invoked at this 1-based byte column: the
+    /// bytes have no column of their own in the source, so they name the call.
+    Invocation { col: u32 },
+}
+
+/// One run of bytes on an output line; `len` is in bytes.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct Seg {
+    pub len: u32,
+    pub kind: SegKind,
+}
+
+/// One expanded output line: the source line it is attributed to, plus the runs
+/// its bytes came from, left to right.
+#[derive(Debug, Clone)]
+pub struct ExpandedLine {
+    /// 1-based line in the *input*: the invocation site's line for a call, the
+    /// line's own number otherwise — the attribution the map has always used.
+    pub src_line: u32,
+    pub segs: Vec<Seg>,
+}
+
+/// Record `n` output bytes, merging into the previous run when it continues the
+/// same one (adjacent verbatim bytes, or one macro expanding in two steps).
+fn push_seg(segs: &mut Vec<Seg>, n: u32, kind: SegKind) {
+    if n == 0 { return; }
+    if let Some(last) = segs.last_mut() {
+        let continues = match (last.kind, kind) {
+            (SegKind::Verbatim { src_col: a }, SegKind::Verbatim { src_col: b }) => a + last.len == b,
+            (SegKind::Invocation { col: a }, SegKind::Invocation { col: b }) => a == b,
+            _ => false,
+        };
+        if continues { last.len += n; return; }
+    }
+    segs.push(Seg { len: n, kind });
+}
+
+/// Append verbatim text scanned at 1-based byte column `src_col`.
+fn push_verbatim(out: &mut String, segs: &mut Vec<Seg>, text: &str, src_col: u32) {
+    if text.is_empty() { return; }
+    out.push_str(text);
+    push_seg(segs, text.len() as u32, SegKind::Verbatim { src_col });
+}
+
+/// Append text the macro invoked at 1-based byte column `col` produced.
+fn push_invocation(out: &mut String, segs: &mut Vec<Seg>, text: &str, col: u32) {
+    if text.is_empty() { return; }
+    out.push_str(text);
+    push_seg(segs, text.len() as u32, SegKind::Invocation { col });
+}
+
+/// Append one scanned byte verbatim. The byte keeps the scanner's historical
+/// `as char` re-encoding so the output text is unchanged; only the recorded run
+/// length follows what was actually written.
+fn push_byte_verbatim(out: &mut String, segs: &mut Vec<Seg>, b: u8, src_col: u32) {
+    let before = out.len();
+    out.push(b as char);
+    let n = (out.len() - before) as u32;
+    push_seg(segs, n, SegKind::Verbatim { src_col });
+}
+
+/// Slice the run list to the byte range `[from, to)` of one output line.
+///
+/// `joined` marks a chunk that pulled in further source lines: text before the
+/// call keeps its own column (it is still on the line the author wrote), but
+/// everything after it sits inside the collapsed call, so those bytes name the
+/// invocation site — the same place their line is attributed to.
+fn segs_in_range(segs: &[Seg], from: usize, to: usize, joined: bool) -> Vec<Seg> {
+    let first_invocation = segs.iter().find_map(|s| match s.kind {
+        SegKind::Invocation { col } => Some(col),
+        SegKind::Verbatim { .. } => None,
+    });
+    let mut out: Vec<Seg> = Vec::new();
+    let mut pos = 0usize;
+    let mut seen_invocation = false;
+    for seg in segs {
+        let seg_start = pos;
+        let seg_end = pos + seg.len as usize;
+        pos = seg_end;
+        let (a, b) = (seg_start.max(from), seg_end.min(to));
+        if a < b {
+            let n = (b - a) as u32;
+            let kind = match seg.kind {
+                SegKind::Verbatim { src_col } => {
+                    let col = src_col + (a - seg_start) as u32;
+                    match first_invocation {
+                        Some(col) if joined && seen_invocation => SegKind::Invocation { col },
+                        _ => SegKind::Verbatim { src_col: col },
+                    }
+                }
+                SegKind::Invocation { col } => {
+                    seen_invocation = true;
+                    SegKind::Invocation { col }
+                }
+            };
+            push_seg(&mut out, n, kind);
+        } else if let SegKind::Invocation { .. } = seg.kind {
+            // Passed it: what follows on this line is inside the call.
+            seen_invocation = true;
+        }
+    }
+    out
+}
+
 /// Expand every nepa macro invocation in `src`, letting a function-like call
-/// span source lines, and report where each output line came from: `lines[i]`
-/// is the 1-based source line that output line `i` is attributed to.
+/// span source lines, and report where each output line came from: one
+/// [`ExpandedLine`] per emitted line, in order.
 ///
 /// A call split across lines is expanded as a whole, and every line it produces
 /// is attributed to the line the call *starts* on — its invocation site. That
@@ -245,25 +355,35 @@ pub fn expand(src: &str, table: &HashMap<String, MacroDef>) -> Result<String, St
 /// entry per **output** line, not per input line, so source lines collapsed by
 /// the expansion (an argument spread over three lines becomes one) cannot shift
 /// every following position.
+///
+/// Each line's `segs` carry the same provenance for **columns**: an expansion
+/// moves text that follows it along the line, and the bytes it produced have no
+/// column in the source at all. Consumers remap columns with
+/// `nepa_cst::SourceMap::adjust_col`.
 pub fn expand_mapped(src: &str, table: &HashMap<String, MacroDef>)
-    -> Result<(String, Vec<u32>), String>
+    -> Result<(String, Vec<ExpandedLine>), String>
 {
     let src_lines: Vec<&str> = src.lines().collect();
     if table.is_empty() {
-        return Ok((src.to_string(), (1..=src_lines.len() as u32).collect()));
+        let lines = (1..=src_lines.len() as u32)
+            .map(|l| ExpandedLine { src_line: l, segs: Vec::new() })
+            .collect();
+        return Ok((src.to_string(), lines));
     }
     let mut out = String::with_capacity(src.len());
-    let mut map: Vec<u32> = Vec::new();
+    let mut map: Vec<ExpandedLine> = Vec::new();
     let mut i = 0usize;
     while i < src_lines.len() {
         let start = i + 1; // 1-based line the invocation starts on
         let mut buf = src_lines[i].to_string();
+        // Did the scan pull in further source lines (a call split over lines)?
+        let mut joined = false;
         // Streaming scan: an invocation still open at the end of the line pulls
         // in the next line and rescans from the start of the call, until it
         // closes or the input runs out.
-        let expanded = loop {
+        let (expanded, segs) = loop {
             match expand_line(&buf, table, &mut HashSet::new()) {
-                Ok(Scan::Text(s)) => break s,
+                Ok(Scan::Text { text, segs }) => break (text, segs),
                 Ok(Scan::Unclosed) => {
                     i += 1;
                     if i >= src_lines.len() {
@@ -272,20 +392,34 @@ pub fn expand_mapped(src: &str, table: &HashMap<String, MacroDef>)
                     }
                     buf.push('\n');
                     buf.push_str(src_lines[i]);
+                    joined = true;
                 }
                 Err(e) => return Err(format!("line {}: {}", start, e)),
             }
         };
-        for l in expanded.lines() {
-            out.push_str(l);
+        // One entry per output line. Splitting on '\n' by hand (rather than
+        // `str::lines`) keeps each line's byte range so the run list can be
+        // sliced to it; a trailing '\r' is dropped exactly as `lines` would.
+        let mut off = 0usize;
+        while off < expanded.len() {
+            let end = expanded[off..].find('\n').map(|p| off + p).unwrap_or(expanded.len());
+            let (piece, cut) = match expanded[off..end].strip_suffix('\r') {
+                Some(p) => (p, end - 1),
+                None => (&expanded[off..end], end),
+            };
+            out.push_str(piece);
             out.push('\n');
-            map.push(start as u32);
+            map.push(ExpandedLine {
+                src_line: start as u32,
+                segs: segs_in_range(&segs, off, cut, joined),
+            });
+            off = end + 1;
         }
         if expanded.is_empty() {
             // An invocation that expands to nothing still consumes its source
             // line: emit the (empty) line so `map` stays aligned with `out`.
             out.push('\n');
-            map.push(start as u32);
+            map.push(ExpandedLine { src_line: start as u32, segs: Vec::new() });
         }
         i += 1;
     }
@@ -309,8 +443,8 @@ fn is_ident_byte(c: u8, first: bool) -> bool {
 
 /// Outcome of scanning a chunk of source for macro invocations.
 enum Scan {
-    /// The chunk was expanded in full.
-    Text(String),
+    /// The chunk was expanded in full, with the runs `text` was made of.
+    Text { text: String, segs: Vec<Seg> },
     /// A function-like invocation was still open when the chunk ended, so the
     /// scan was inconclusive: more input is needed and the chunk must be
     /// rescanned as a whole — see `expand_mapped`, the only caller that can act
@@ -326,23 +460,24 @@ fn expand_line(line: &str, table: &HashMap<String, MacroDef>, active: &mut HashS
 {
     let bytes = line.as_bytes();
     let mut out = String::with_capacity(line.len());
+    let mut segs: Vec<Seg> = Vec::new();
     let mut i = 0;
     while i < bytes.len() {
         let c = bytes[i];
         if c == b'"' {
-            let end = skip_string(bytes, i, b'"');
-            out.push_str(&line[i..end.min(bytes.len())]);
-            i = end.min(bytes.len());
+            let end = skip_string(bytes, i, b'"').min(bytes.len());
+            push_verbatim(&mut out, &mut segs, &line[i..end], i as u32 + 1);
+            i = end;
             continue;
         }
         if c == b'\'' {
-            let end = skip_string(bytes, i, b'\'');
-            out.push_str(&line[i..end.min(bytes.len())]);
-            i = end.min(bytes.len());
+            let end = skip_string(bytes, i, b'\'').min(bytes.len());
+            push_verbatim(&mut out, &mut segs, &line[i..end], i as u32 + 1);
+            i = end;
             continue;
         }
         if c == b'/' && i + 1 < bytes.len() && bytes[i + 1] == b'/' {
-            out.push_str(&line[i..]);
+            push_verbatim(&mut out, &mut segs, &line[i..], i as u32 + 1);
             break;
         }
         if is_ident_byte(c, true) {
@@ -350,8 +485,9 @@ fn expand_line(line: &str, table: &HashMap<String, MacroDef>, active: &mut HashS
             while i < bytes.len() && is_ident_byte(bytes[i], false) { i += 1; }
             let name = &line[start..i];
             match table.get(name) {
-                None => out.push_str(name),
-                Some(_) if active.contains(name) => out.push_str(name), // frozen
+                None => push_verbatim(&mut out, &mut segs, name, start as u32 + 1),
+                // frozen: a name in the hide set stays verbatim source text
+                Some(_) if active.contains(name) => push_verbatim(&mut out, &mut segs, name, start as u32 + 1),
                 Some(def) => {
                     if body_has_pragma(&def.body) {
                         return Err(format!(
@@ -369,7 +505,10 @@ fn expand_line(line: &str, table: &HashMap<String, MacroDef>, active: &mut HashS
                             let body = expand_line(&def.body, table, active)?;
                             active.remove(name);
                             match body {
-                                Scan::Text(s) => out.push_str(&s),
+                                // The body is expansion output: its bytes name
+                                // the invocation, not the definition.
+                                Scan::Text { text, .. } => push_invocation(
+                                    &mut out, &mut segs, &text, start as u32 + 1),
                                 Scan::Unclosed => return Ok(Scan::Unclosed),
                             }
                         }
@@ -380,7 +519,7 @@ fn expand_line(line: &str, table: &HashMap<String, MacroDef>, active: &mut HashS
                             let mut j = i;
                             while j < bytes.len() && (bytes[j] == b' ' || bytes[j] == b'\t') { j += 1; }
                             if j >= bytes.len() || bytes[j] != b'(' {
-                                out.push_str(name);
+                                push_verbatim(&mut out, &mut segs, name, start as u32 + 1);
                                 continue;
                             }
                             let (args, has_close, end) = collect_args(bytes, j)?;
@@ -401,7 +540,10 @@ fn expand_line(line: &str, table: &HashMap<String, MacroDef>, active: &mut HashS
                                 Vec::with_capacity(args.len());
                             for a in &args {
                                 match expand_line(a, table, active)? {
-                                    Scan::Text(s) => expanded_args.push(s),
+                                    // Argument runs are re-scanned inside the
+                                    // body, so the caller records one run for
+                                    // the whole substitution.
+                                    Scan::Text { text, .. } => expanded_args.push(text),
                                     Scan::Unclosed => return Ok(Scan::Unclosed),
                                 }
                             }
@@ -410,7 +552,10 @@ fn expand_line(line: &str, table: &HashMap<String, MacroDef>, active: &mut HashS
                                 expand_function_like(def, &args, &expanded_args, table, active)?;
                             active.remove(name);
                             match body {
-                                Scan::Text(s) => out.push_str(&s),
+                                // Body plus substituted arguments are all
+                                // expansion output: they name the invocation.
+                                Scan::Text { text, .. } => push_invocation(
+                                    &mut out, &mut segs, &text, start as u32 + 1),
                                 Scan::Unclosed => return Ok(Scan::Unclosed),
                             }
                         }
@@ -419,10 +564,10 @@ fn expand_line(line: &str, table: &HashMap<String, MacroDef>, active: &mut HashS
             }
             continue;
         }
-        out.push(c as char);
+        push_byte_verbatim(&mut out, &mut segs, c, i as u32 + 1);
         i += 1;
     }
-    Ok(Scan::Text(out))
+    Ok(Scan::Text { text: out, segs })
 }
 
 /// Collect the comma-separated arguments of a macro call starting at `open`
@@ -880,6 +1025,26 @@ mod tests {
         assert!(e.contains("not closed"), "{}", e);
     }
 
+    /// The source line each output line is attributed to.
+    fn src_lines(map: &[ExpandedLine]) -> Vec<u32> {
+        map.iter().map(|l| l.src_line).collect()
+    }
+
+    #[test]
+    fn expand_mapped_records_column_provenance() {
+        // `SHORT` (5 bytes) expands to 10, so the text after it shifts right by
+        // 5 — while the bytes the expansion produced name the invocation.
+        let t = tbl(&["#define SHORT 0123456789"]);
+        let (text, map) = expand_mapped("x SHORT y\n", &t).unwrap();
+        assert_eq!(text, "x 0123456789 y\n");
+        assert_eq!(map[0].src_line, 1);
+        assert_eq!(map[0].segs, vec![
+            Seg { len: 2, kind: SegKind::Verbatim { src_col: 1 } },
+            Seg { len: 10, kind: SegKind::Invocation { col: 3 } },
+            Seg { len: 2, kind: SegKind::Verbatim { src_col: 8 } },
+        ]);
+    }
+
     #[test]
     fn expand_mapped_attributes_output_to_invocation_line() {
         // Three source lines collapse into one expanded line: the map has one
@@ -887,7 +1052,7 @@ mod tests {
         let t = tbl(&["#define PAIR(a, b) ((a) + (b))"]);
         let (text, map) = expand_mapped("int s =\n    PAIR(1,\n         2);\n", &t).unwrap();
         assert_eq!(text, "int s =\n    ((1) + (2));\n");
-        assert_eq!(map, vec![1, 2]);
+        assert_eq!(src_lines(&map), vec![1, 2]);
     }
 
     #[test]
@@ -895,7 +1060,7 @@ mod tests {
         let t = tbl(&["#define ONE 1"]);
         let (text, map) = expand_mapped("a\nONE\nb\n", &t).unwrap();
         assert_eq!(text, "a\n1\nb\n");
-        assert_eq!(map, vec![1, 2, 3]);
+        assert_eq!(src_lines(&map), vec![1, 2, 3]);
     }
 
     #[test]
@@ -903,7 +1068,7 @@ mod tests {
         let empty = HashMap::new();
         let (text, map) = expand_mapped("a\n\nb\n", &empty).unwrap();
         assert_eq!(text, "a\n\nb\n");
-        assert_eq!(map, vec![1, 2, 3]);
+        assert_eq!(src_lines(&map), vec![1, 2, 3]);
     }
 
     #[test]

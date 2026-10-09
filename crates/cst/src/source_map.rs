@@ -151,6 +151,34 @@ pub struct LineRegion {
     pub origin: SpanOrigin,
 }
 
+/// How a run of columns on one flattened line maps back to the source.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ColOrigin {
+    /// Verbatim source text that an expansion earlier on the same line shifted
+    /// by `delta` bytes: the real column is `out_col - delta`.
+    Verbatim { delta: i32 },
+    /// Text a macro expansion produced. It has no column of its own in the
+    /// source, so it resolves to the invocation site — the 1-based column of
+    /// the macro name at the call, which is where the author can act on it.
+    Invocation { col: u32 },
+}
+
+/// One run of columns on a flattened-buffer line whose column needs remapping.
+///
+/// Keyed by output line because an expansion shifts only the line it happens
+/// on; the line itself is translated by [`SourceMap::locate`]. Runs are
+/// disjoint and ordered left to right.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct ColumnRegion {
+    /// 1-based line in the flattened buffer.
+    pub out_line: u32,
+    /// First 1-based column covered (inclusive).
+    pub out_start: u32,
+    /// First column past the run (exclusive).
+    pub out_end: u32,
+    pub origin: ColOrigin,
+}
+
 /// Maps flattened-buffer lines to source files via [`LineRegion`]s.
 ///
 /// Built by the preprocessor; consumed by the diagnostic path
@@ -160,12 +188,15 @@ pub struct SourceMap {
     regions: Vec<LineRegion>,
     /// Files touched by this mapping (parallel data, indexed by SourceId).
     registry: SourceRegistry,
+    /// Column-provenance runs from macro expansion, keyed by flattened line.
+    /// Empty when no macro ran.
+    columns: Vec<ColumnRegion>,
 }
 
 impl SourceMap {
     /// Build from a region list + registry.
     pub fn from_regions(regions: Vec<LineRegion>, registry: SourceRegistry) -> Self {
-        SourceMap { regions, registry }
+        SourceMap { regions, registry, columns: Vec::new() }
     }
 
     pub fn regions(&self) -> &[LineRegion] {
@@ -174,6 +205,43 @@ impl SourceMap {
 
     pub fn registry(&self) -> &SourceRegistry {
         &self.registry
+    }
+
+    /// Attach the column-provenance runs the macro expander reported.
+    pub fn with_columns(mut self, columns: Vec<ColumnRegion>) -> Self {
+        self.columns = columns;
+        self
+    }
+
+    /// Correct a flattened-buffer column to its real source column, reporting
+    /// where that column came from (macro-expansion output is `Synthetic`).
+    ///
+    /// Lines come back through [`Self::locate`]; this covers the shift an
+    /// expansion causes *within* a line: text the expansion produced has no
+    /// column of its own and resolves to the invocation site, while text merely
+    /// pushed right by an expansion moves back by that delta.
+    pub fn adjust_col(&self, inlined_line: usize, out_col: u32) -> (u32, SpanOrigin) {
+        if self.columns.is_empty() {
+            return (out_col, SpanOrigin::Source);
+        }
+        let line = inlined_line as u32;
+        // Runs are sorted by (line, column) and disjoint, so the only candidate
+        // is the last one starting at or before this column.
+        let idx = self.columns.partition_point(|c| (c.out_line, c.out_start) <= (line, out_col));
+        if idx == 0 {
+            return (out_col, SpanOrigin::Source);
+        }
+        let c = &self.columns[idx - 1];
+        if c.out_line != line || out_col >= c.out_end {
+            return (out_col, SpanOrigin::Source);
+        }
+        match c.origin {
+            ColOrigin::Verbatim { delta } => (
+                (out_col as i64 - delta as i64).max(1) as u32,
+                SpanOrigin::Source,
+            ),
+            ColOrigin::Invocation { col } => (col, SpanOrigin::Synthetic),
+        }
     }
 
     pub fn is_empty(&self) -> bool {
@@ -260,7 +328,7 @@ impl SourceMap {
                 }),
             }
         }
-        SourceMap { regions, registry }
+        SourceMap { regions, registry, columns: Vec::new() }
     }
 
     /// Build from the old per-line `(file, line)` table but reuse an existing
@@ -298,7 +366,7 @@ impl SourceMap {
             }
         }
         let owned = std::mem::take(registry);
-        SourceMap { regions, registry: owned }
+        SourceMap { regions, registry: owned, columns: Vec::new() }
     }
 
     /// Total number of mapped flattened-buffer lines.
@@ -322,6 +390,27 @@ mod tests {
         assert_eq!(sm.locate(2), ("main.np".to_string(), 2));
         assert_eq!(sm.locate(3), ("foo.nh".to_string(), 10));
         assert_eq!(sm.locate(4), (String::new(), 4));
+    }
+
+    #[test]
+    fn adjust_col_moves_expansion_output_to_invocation() {
+        // `SHORT` (5 bytes) expands to 10 bytes at column 1, so the tail of the
+        // line is shifted right by 5: `nil` at flattened column 26 is really at
+        // 21 — and anything the expansion produced points at the call instead.
+        let sm = SourceMap::from_regions(vec![], SourceRegistry::new()).with_columns(vec![
+            ColumnRegion {
+                out_line: 1, out_start: 1, out_end: 11,
+                origin: ColOrigin::Invocation { col: 1 },
+            },
+            ColumnRegion {
+                out_line: 1, out_start: 11, out_end: 27,
+                origin: ColOrigin::Verbatim { delta: 5 },
+            },
+        ]);
+        assert_eq!(sm.adjust_col(1, 3), (1, SpanOrigin::Synthetic));
+        assert_eq!(sm.adjust_col(1, 26), (21, SpanOrigin::Source));
+        // A line with no runs passes through untouched.
+        assert_eq!(sm.adjust_col(2, 26), (26, SpanOrigin::Source));
     }
 
     #[test]

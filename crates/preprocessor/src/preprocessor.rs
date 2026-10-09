@@ -2,7 +2,7 @@ use std::collections::{HashMap, HashSet};
 use std::fs;
 use std::path::Path;
 
-use nepa_cst::{SourceMap, SourceRegistry};
+use nepa_cst::{ColOrigin, ColumnRegion, SourceMap, SourceRegistry};
 
 use nepa_cpp::{self as cpp, MacroDef};
 
@@ -862,25 +862,59 @@ impl Preprocessor {
         // emitted line, each pointing at the line its call *starts* on (the
         // invocation site). Collapsing is therefore invisible to every later
         // diagnostic: positions still name the line the author wrote.
-        let (nepa_out, line_map) = if nepa_macros.is_empty() {
-            (nepa_out, line_map)
+        let (nepa_out, line_map, columns) = if nepa_macros.is_empty() {
+            (nepa_out, line_map, Vec::new())
         } else {
-            let (text, src_lines) = cpp::expand_mapped(&nepa_out, &nepa_macros)
+            let (text, expanded) = cpp::expand_mapped(&nepa_out, &nepa_macros)
                 .map_err(|e| format!("Macro expansion failed:\n[cpp] {}", e))?;
-            let mapped: Vec<(String, u32)> = src_lines
+            let mapped: Vec<(String, u32)> = expanded
                 .iter()
-                .filter_map(|&l| l.checked_sub(1).and_then(|k| line_map.get(k as usize)).cloned())
+                .filter_map(|l| l.src_line.checked_sub(1).and_then(|k| line_map.get(k as usize)).cloned())
                 .collect();
-            (text, mapped)
+            let columns = column_regions(&expanded);
+            (text, mapped, columns)
         };
 
         Ok(Preprocessor {
             resolved_nepa: nepa_out,
             c_headers: c_out,
-            source_map: SourceMap::from_line_table(line_map, &mut registry),
+            source_map: SourceMap::from_line_table(line_map, &mut registry).with_columns(columns),
         })
     }
 }
+
+/// Turn the expander's per-line runs into the column-provenance table the
+/// [`SourceMap`] carries: a verbatim run records how far an expansion shifted
+/// it, and expansion output names the invocation site it came from.
+fn column_regions(lines: &[cpp::ExpandedLine]) -> Vec<ColumnRegion> {
+    let mut columns = Vec::new();
+    for (idx, line) in lines.iter().enumerate() {
+        let out_line = idx as u32 + 1;
+        let mut col = 1u32;
+        for seg in &line.segs {
+            let out_start = col;
+            col += seg.len;
+            let out_end = col;
+            match seg.kind {
+                cpp::SegKind::Verbatim { src_col } => {
+                    let delta = out_start as i64 - src_col as i64;
+                    if delta != 0 {
+                        columns.push(ColumnRegion {
+                            out_line, out_start, out_end,
+                            origin: ColOrigin::Verbatim { delta: delta as i32 },
+                        });
+                    }
+                }
+                cpp::SegKind::Invocation { col: invoke } => columns.push(ColumnRegion {
+                    out_line, out_start, out_end,
+                    origin: ColOrigin::Invocation { col: invoke },
+                }),
+            }
+        }
+    }
+    columns
+}
+
 #[cfg(test)]
 mod if_eval_tests {
     use super::*;
