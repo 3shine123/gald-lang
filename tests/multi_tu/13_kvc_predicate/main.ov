@@ -22,7 +22,7 @@ int main() {
     NPArray *hits = [arr filteredArrayUsingPredicate:big];
     printf("hits=%d\n", (int)[hits count]);
 
-    ovic_release(a);
-    ovic_release(b);
+    ovel_release(a);
+    ovel_release(b);
     return 0;
 }

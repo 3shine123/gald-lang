@@ -1,5 +1,5 @@
-#include "ovic/ownership.h"
-#include "ovic/symbol.h"
+#include "ovel/ownership.h"
+#include "ovel/symbol.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -12,7 +12,7 @@ static int total = 0, passed = 0;
 
 static symbol_t *make_method(const char *name) {
     symbol_t *m = sym_alloc(SYM_METHOD, name);
-    m->data.method.return_type = calloc(1, sizeof(ovic_type_t));
+    m->data.method.return_type = calloc(1, sizeof(ovel_type_t));
     m->data.method.return_type->prim = TYPE_ID;
     return m;
 }

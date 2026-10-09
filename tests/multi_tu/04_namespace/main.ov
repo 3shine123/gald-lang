@@ -8,6 +8,6 @@ int main() {
     Geo::Point *p = o;
     printf("mag=%d\n", [p magnitude]);
     printf("helper=%d\n", GeoHelper());
-    ovic_release(o);
+    ovel_release(o);
     return 0;
 }

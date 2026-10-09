@@ -1,4 +1,4 @@
-# AGENTS.md — Ovic Language Project
+# AGENTS.md — Ovel Language Project
 
 > **Read first:** `doc/architecture.md` is the single source of truth for the current
 > architecture (pipeline, `.oh`/`.ov` semantics, Foundation modes, owner/strong/weak
@@ -22,16 +22,16 @@ version (`transpiler/`) is **gone** — the compiler is entirely Rust under `cra
 ## Project Layout
 
 ```text
-ovic-lang/
+ovel-lang/
 ├── crates/                  # Rust workspace — the compiler
 │   ├── lexer/ parser/ cst/ cst_visit/ elaborator/ binder/   # front end
 │   ├── checker/             # type checker (default on)
 │   ├── codegen/             # AST → C99
 │   ├── arc/ eh/ async/ defer/ pattern/ trace/               # lowering passes (pipeline order)
 │   ├── ownership/ preprocessor/ cpp/ symbol/ ast/ attrs/ cfg/ layout/
-│   └── ovicc/               # CLI driver + pipeline (main.rs, pipeline.rs)
+│   └── ovelc/               # CLI driver + pipeline (main.rs, pipeline.rs)
 ├── include/
-│   ├── ovic/                # runtime.h / runtime.c / runtime_freestanding.c
+│   ├── ovel/                # runtime.h / runtime.c / runtime_freestanding.c
 │   └── Foundation/          # 9 classes, each as a .oh (decl) + .ov (impl) pair,
 │                            #   plus Foundation.oh (decl umbrella) and
 │                            #   Foundation.ov (self-contained umbrella)
@@ -41,7 +41,7 @@ ovic-lang/
 │   ├── golden/              # .ov + expected .out pairs
 │   ├── stress/              # baremetal / hosted / interop (own runners)
 │   └── *.ov                 # individual integration programs
-├── tools/build-foundation-lib.sh   # → target/foundation/libovicfoundation.a
+├── tools/build-foundation-lib.sh   # → target/foundation/libovelfoundation.a
 ├── test_all.py              # full integration suite (test_all.sh = parallel wrapper)
 ├── doc/                     # architecture.md (start here), plans, archive/
 └── ROADMAP.md               # what is actually not done yet
@@ -49,49 +49,49 @@ ovic-lang/
 
 ## File Extension Convention
 
-- **`.oh`** — Ovic header: declarations (`@interface`, `@protocol`, typedefs, structs).
+- **`.oh`** — Ovel header: declarations (`@interface`, `@protocol`, typedefs, structs).
   Inlined by the preprocessor via `#import`, never compiled directly.
-- **`.ov`** — Ovic implementation: `@implementation`, functions, `int main`.
+- **`.ov`** — Ovel implementation: `@implementation`, functions, `int main`.
   Two uses: compiled as its own translation unit (multi-TU mode), or inlined via
   `#import` (self-contained mode).
-- `#import` of `.oh`/`.ov` is a ovic import; `#include` of `.h`/`.c` passes through to
+- `#import` of `.oh`/`.ov` is a ovel import; `#include` of `.h`/`.c` passes through to
   the C compiler verbatim. `.oh` (not `.h`) avoids colliding with C/ObjC system headers.
-- ovicc always defines `__OVIC__`; headers shared with plain C compilers guard
-  ovic-only syntax with `#ifdef __OVIC__` / `#else`.
+- ovelc always defines `__OVEL__`; headers shared with plain C compilers guard
+  ovel-only syntax with `#ifdef __OVEL__` / `#else`.
 - A `.oh` consumed in multi-TU mode must keep **full struct layouts** (ivar section) —
-  Ovic is a C superset, so `@public` ivars, struct fields, and member function pointers
+  Ovel is a C superset, so `@public` ivars, struct fields, and member function pointers
   require clients to see the layout. Do not treat opaque structs as the default rule.
 
 ## Build & Test Commands
 
 ```bash
-cargo build                      # debug ovicc → target/debug/ovicc (test_all uses this)
+cargo build                      # debug ovelc → target/debug/ovelc (test_all uses this)
 cargo build --release
 cargo test --workspace           # Rust unit tests
 
-./test_all.sh -j4                # full integration suite (wraps test_all.py; OVICC= overrides binary)
+./test_all.sh -j4                # full integration suite (wraps test_all.py; OVELC= overrides binary)
 ./tests/multi_tu/run_multi_tu.sh
 ./tests/eh_matrix/run_eh_matrix.sh
-./tests/eh_diff/run_eh_diff.sh           # OVICC= must be an absolute path
+./tests/eh_diff/run_eh_diff.sh           # OVELC= must be an absolute path
 ./tests/strong_metadata/run_strong_metadata_test.sh
 ./tests/arc_intern/run_arc_intern_test.sh
 
-./tools/build-foundation-lib.sh  # build target/foundation/libovicfoundation.a once
+./tools/build-foundation-lib.sh  # build target/foundation/libovelfoundation.a once
 ```
 
 ## Naming Conventions (used across all docs)
 
-- Project: **Ovic**; compiler binary: **ovicc**; runtime lib: **libovic.a**;
-  Foundation library: **libovicfoundation.a**.
+- Project: **Ovel**; compiler binary: **ovelc**; runtime lib: **libovel.a**;
+  Foundation library: **libovelfoundation.a**.
 - Classes keep the NP prefix: `NPObject`, `NPString`, `NPArray`, …
   The prefix comes from **"Nupa"**, the project's original working name before it
-  became Ovic. It is deliberately decoupled from the language name — language
+  became Ovel. It is deliberately decoupled from the language name — language
   renames must NOT touch `NP*` class names (breaking `.ov` files, bridge headers,
-  `OVIC_CLASS_$_NP*` symbols for zero gain). Same for lib names: `libovic.a` /
-  `libovicfoundation.a` (not libovica*, a legacy spelling that was removed).
+  `OVEL_CLASS_$_NP*` symbols for zero gain). Same for lib names: `libovel.a` /
+  `libovelfoundation.a` (not libovela*, a legacy spelling that was removed).
 - Mode names: **self-contained / unity mode** (`#import <Foundation/Foundation.ov>`) and
   **precompiled Foundation / multi-TU mode** (`#import <Foundation/Foundation.oh>` +
-  auto-linked `libovicfoundation.a`) — the recommended mode for real projects.
+  auto-linked `libovelfoundation.a`) — the recommended mode for real projects.
 - TU roles: **owner TU** (its main file holds the class's `@implementation`) and
   **declaration-only client** (imports `.oh` only). Historical synonyms
   (`decl-only`, `pure header`, `P3 header`) are deprecated.
@@ -99,7 +99,7 @@ cargo test --workspace           # Rust unit tests
 ## Multi-TU / Metadata / Vtable Constraints (iron laws)
 
 1. **Owner rule (R2):** the TU whose **main file** holds `@implementation X` emits
-   X's metadata (`OVIC_VTABLE_$_X`, `OVIC_CLASS_$_X`, getClass, …) as **strong**
+   X's metadata (`OVEL_VTABLE_$_X`, `OVEL_CLASS_$_X`, getClass, …) as **strong**
    symbols; declaration-only clients emit **weak stubs**. Two main-file
    implementations of the same class fail at link time with a duplicate symbol —
    by design. `-fstrong-metadata` **does not exist**; ownership is derived.
@@ -111,7 +111,7 @@ cargo test --workspace           # Rust unit tests
 3. **`__sig` (R3):** the startup layout-signature check covers the **public segment
    only**; private tail differences are legal. A mismatch aborts loudly (never
    silently misdispatches).
-4. **`ovic_metaInit`** is an idempotent compat backfill for self-contained umbrella
+4. **`ovel_metaInit`** is an idempotent compat backfill for self-contained umbrella
    builds only; owner/multi-TU paths rely on statically initialized `NPClass`
    metadata and do **not** call it.
 5. **Static dispatch:** there is no `objc_msgSend`. All message sends compile to
@@ -128,8 +128,8 @@ cargo test --workspace           # Rust unit tests
 
 ## Rules for Code Changes
 
-- **C superset iron law:** Ovic must remain a C superset. Never break legal C or
-  existing ovic syntax while adding checks; C-level warnings only add diagnostics,
+- **C superset iron law:** Ovel must remain a C superset. Never break legal C or
+  existing ovel syntax while adding checks; C-level warnings only add diagnostics,
   never change parsing paths.
 - **Verify before claiming done:** judge "feature works / not implemented" with a
   minimal probe first (past "not implemented" verdicts were disproven by probes);
@@ -137,7 +137,7 @@ cargo test --workspace           # Rust unit tests
   `./test_all.sh`, `multi_tu`, plus the affected specialized suite). Never mark an
   unverified fix complete.
 - **Debug via generated C:** first step for miscompiles is
-  `ovicc -rewrite-ovic file.ov -o file.c` and reading the C. `-asm` must come after
+  `ovelc -rewrite-ovel file.ov -o file.c` and reading the C. `-asm` must come after
   `run` on the command line.
 - **Parser discipline:** a failed `consume()` must not advance (it would eat the next
   declaration's first token); avoid positional line-number surgery when editing
@@ -145,13 +145,13 @@ cargo test --workspace           # Rust unit tests
 - **Do not resurrect deleted things:** `Foundation.decl.oh`, `make-decl-headers.sh`,
   and `-fstrong-metadata` are gone on purpose. `Foundation.oh` = declarations only,
   `Foundation.ov` = self-contained umbrella.
-- **auto-link gating:** ovicc auto-links `libovicfoundation.a` only for
+- **auto-link gating:** ovelc auto-links `libovelfoundation.a` only for
   declaration-only clients (source-level transitive `#import` scan decides); a TU
   that inlines Foundation implementations is skipped on purpose — do not "simplify"
   this to a generated-C text heuristic (two such heuristics were already falsified).
 - **Source location preservation:** when adding or changing AST/HIR nodes or lowering
   passes, preserve their source origin. New synthesized nodes should be marked or
-  documented as synthetic and retain the originating Ovic span when one exists.
+  documented as synthetic and retain the originating Ovel span when one exists.
   Do not add a parallel line-number/source-map mechanism: follow
   `doc/source_locations_debug_lsp_plan.md` and keep diagnostics, generated-C mappings,
   LSP, and debugger support on the shared SourceSpan/SourceMap model.

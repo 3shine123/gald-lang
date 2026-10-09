@@ -70,9 +70,9 @@
         if (_keys[i] && [_keys[i] isEqual:key]) {
             if (_values[i] != value) {
                 NPObject *old = _values[i];
-                _values[i] = ovic_retain(value);
+                _values[i] = ovel_retain(value);
                 if (old) {
-                    ovic_release(old);
+                    ovel_release(old);
                 }
             }
             return;
@@ -88,8 +88,8 @@
         _values = vs;
         _capacity = newcap;
     }
-    _keys[_count] = ovic_retain(key);
-    _values[_count] = ovic_retain(value);
+    _keys[_count] = ovel_retain(key);
+    _values[_count] = ovel_retain(value);
     _count++;
 }
 
@@ -113,10 +113,10 @@
             memmove(_values + i, _values + i + 1, (_count - i - 1) * sizeof(NPObject *));
             _count--;
             if (k) {
-                ovic_release(k);
+                ovel_release(k);
             }
             if (v) {
-                ovic_release(v);
+                ovel_release(v);
             }
             return;
         }
@@ -126,10 +126,10 @@
 - (void)removeAllObjects {
     for (size_t i = 0; i < _count; i++) {
         if (_keys[i]) {
-            ovic_release(_keys[i]);
+            ovel_release(_keys[i]);
         }
         if (_values[i]) {
-            ovic_release(_values[i]);
+            ovel_release(_values[i]);
         }
     }
     _count = 0;

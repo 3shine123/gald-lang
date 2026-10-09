@@ -4,7 +4,7 @@ CompileFlags:
     - "-I${workspaceRoot}/include"
     - "-I${workspaceRoot}/transpiler/include"
     - "-I${workspaceRoot}/builddir"
-    - "-DOVIC_VERSION=\"0.1.0\""
+    - "-DOVEL_VERSION=\"0.1.0\""
     - "-Wall"
     - "-Wextra"
     - "-Wpedantic"

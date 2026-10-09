@@ -1,9 +1,9 @@
 [package]
-name = "ovic-checker"
+name = "ovel-checker"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-ovic-cst = { path = "../cst" }
-ovic-ast = { path = "../ast" }
-ovic-symbol = { path = "../symbol" }
+ovel-cst = { path = "../cst" }
+ovel-ast = { path = "../ast" }
+ovel-symbol = { path = "../symbol" }

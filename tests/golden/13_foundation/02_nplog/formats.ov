@@ -4,7 +4,7 @@
 
 int main() {
     @autoreleasepool {
-        NPLog(@"mix: %d + %s = ok", 42, "ovic");
+        NPLog(@"mix: %d + %s = ok", 42, "ovel");
         NPLog(@"just text");
     }
     printf("NPLog format OK\n");

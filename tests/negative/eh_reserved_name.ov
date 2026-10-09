@@ -1,12 +1,12 @@
 // Negative probe: user declaration of runtime-owned EH names must error.
 // (The desugar's own _N-suffixed temporaries ARE declared and stay legal —
 // only the never-declared runtime globals are reserved.)
-#include "ovic/runtime.h"
+#include "ovel/runtime.h"
 #import "Foundation/NPObject.oh"
 #import "Foundation/NPObject.ov"
 
 int main() {
-    int __ovic_eh_flag = 0;         // reserved — expect error
-    id __ovic_exception_value = 0;  // reserved — expect error
+    int __ovel_eh_flag = 0;         // reserved — expect error
+    id __ovel_exception_value = 0;  // reserved — expect error
     return 0;
 }

@@ -1,7 +1,7 @@
 // clang_stress.ov — 极端的 Clang 编译器扩展压测（可运行子集）。
-// 只使用 ovicc 语法分析器已完整支持的构造；解析器缺口见 clang_torture.ov。
-// 运行：ovicc -rewrite-ovic -backend clang clang_stress.ov -o /tmp/clang_stress.c
-//       clang -I include -o /tmp/clang_stress /tmp/clang_stress.c include/ovic/runtime.c
+// 只使用 ovelc 语法分析器已完整支持的构造；解析器缺口见 clang_torture.ov。
+// 运行：ovelc -rewrite-ovel -backend clang clang_stress.ov -o /tmp/clang_stress.c
+//       clang -I include -o /tmp/clang_stress /tmp/clang_stress.c include/ovel/runtime.c
 //       /tmp/clang_stress
 
 #include <stdio.h>

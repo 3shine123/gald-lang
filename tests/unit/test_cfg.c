@@ -1,5 +1,5 @@
-#include "ovic/cfg.h"
-#include "ovic/ast.h"
+#include "ovel/cfg.h"
+#include "ovel/ast.h"
 #include <stdio.h>
 #include <stdlib.h>
 

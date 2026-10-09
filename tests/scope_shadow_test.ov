@@ -1,5 +1,5 @@
 // lang-test/scope_shadow_test.ov
-// 专为 ovicc 设计的「多层阴阳作用域遮蔽与生命周期逃逸」极限测试
+// 专为 ovelc 设计的「多层阴阳作用域遮蔽与生命周期逃逸」极限测试
 // 基准框架：NPFoundation
 
 #import <Foundation/Foundation.ov>
@@ -80,7 +80,7 @@ int main(int argc, const char* argv[])
 {
     @autoreleasepool {
         printf("==================================================\n");
-        printf(">>>    ovicc 编译器「阴阳作用域遮蔽与逃逸」压测    <<<\n");
+        printf(">>>    ovelc 编译器「阴阳作用域遮蔽与逃逸」压测    <<<\n");
         printf("==================================================\n\n");
 
         NPScopeMixer* mixer = [[NPScopeMixer alloc] init];

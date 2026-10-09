@@ -1,9 +1,9 @@
 {
-  "name": "ovic-lang",
-  "displayName": "Ovic Language",
-  "description": "Syntax highlighting and language support for Ovic — a statically-dispatched Objective-C dialect",
+  "name": "ovel-lang",
+  "displayName": "Ovel Language",
+  "description": "Syntax highlighting and language support for Ovel — a statically-dispatched Objective-C dialect",
   "version": "0.2.0",
-  "publisher": "ovic-lang",
+  "publisher": "ovel-lang",
   "engines": {
     "vscode": "^1.80.0"
   },
@@ -13,10 +13,10 @@
   "contributes": {
     "languages": [
       {
-        "id": "ovic",
+        "id": "ovel",
         "aliases": [
-          "Ovic",
-          "ovic",
+          "Ovel",
+          "ovel",
           ".ov"
         ],
         "extensions": [
@@ -28,9 +28,9 @@
     ],
     "grammars": [
       {
-        "language": "ovic",
+        "language": "ovel",
         "scopeName": "source.ov",
-        "path": "./syntaxes/ovic.tmLanguage.json"
+        "path": "./syntaxes/ovel.tmLanguage.json"
       }
     ]
   }

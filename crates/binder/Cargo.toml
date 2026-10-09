@@ -1,13 +1,13 @@
 [package]
-name = "ovic-binder"
+name = "ovel-binder"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-ovic-cst = { path = "../cst" }
-ovic-ast = { path = "../ast" }
-ovic-symbol = { path = "../symbol" }
+ovel-cst = { path = "../cst" }
+ovel-ast = { path = "../ast" }
+ovel-symbol = { path = "../symbol" }
 
 [dev-dependencies]
-ovic-lexer = { path = "../lexer" }
-ovic-parser = { path = "../parser" }
+ovel-lexer = { path = "../lexer" }
+ovel-parser = { path = "../parser" }

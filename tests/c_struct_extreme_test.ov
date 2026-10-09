@@ -1,7 +1,7 @@
 #include <stdio.h>
-#include <ovic/runtime.h>
+#include <ovel/runtime.h>
 
-// ═══ C/struct 极端语法矩阵：逐项验证 Ovic 的 C 超集覆盖 ════════════════════
+// ═══ C/struct 极端语法矩阵：逐项验证 Ovel 的 C 超集覆盖 ════════════════════
 // A: 命名 typedef struct
 typedef struct Point2 { int x; int y; } Point2;
 
@@ -25,7 +25,7 @@ typedef struct OuterG { struct InnerG inner; } OuterG;
 
 // H (unsupported, documented): anonymous inline struct field
 //   typedef struct AnonHolder { struct { int a; int b; } inl; } AnonHolder;
-//   —— Ovic 尚不支持匿名单内联 struct 字段，需命名 tag（见 AGENTS known limits）。
+//   —— Ovel 尚不支持匿名单内联 struct 字段，需命名 tag（见 AGENTS known limits）。
 
 // I: 位域
 typedef struct Bits2 { unsigned a : 3; unsigned b : 5; } Bits2;

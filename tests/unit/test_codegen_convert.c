@@ -1,6 +1,6 @@
-#include "ovic/codegen.h"
-#include "ovic/ast.h"
-#include "ovic/symbol.h"
+#include "ovel/codegen.h"
+#include "ovel/ast.h"
+#include "ovel/symbol.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -16,7 +16,7 @@ static symbol_t *make_func(const char *name) {
     symbol_t *s = sym_alloc(SYM_FUNCTION, name);
     s->data.func.return_type = np_type_from_cst(NULL);
     if (!s->data.func.return_type) {
-        s->data.func.return_type = calloc(1, sizeof(ovic_type_t));
+        s->data.func.return_type = calloc(1, sizeof(ovel_type_t));
     }
     s->data.func.return_type->prim = TYPE_VOID;
     return s;

@@ -1,29 +1,29 @@
 #!/bin/bash
 # examples/03_LibUI/run_libui.sh — transpile, compile, link, run the libui-ng demo.
 #
-# Pure Ovic: the only sources are .ov/.oh files. The demo inlines the wrapper
+# Pure Ovel: the only sources are .ov/.oh files. The demo inlines the wrapper
 # (include/LibUI.ov → one .c file), which is compiled and linked with the
-# Ovic runtime — no hand-written .c/.m files anywhere.
+# Ovel runtime — no hand-written .c/.m files anywhere.
 #
 # Requires: libui-ng built with meson (set LIBUI_DIR to your checkout)
-#           ovicc (built at ../../target/debug/ovicc or ../../target/release/ovicc)
+#           ovelc (built at ../../target/debug/ovelc or ../../target/release/ovelc)
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-OVICLANG="$(cd "$SCRIPT_DIR/../.." && pwd)"
+OVELLANG="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
-if [ -n "${OVICC:-}" ]; then
-    OVICC="$OVICC"
-elif [ -x "$OVICLANG/target/debug/ovicc" ]; then
-    OVICC="$OVICLANG/target/debug/ovicc"
+if [ -n "${OVELC:-}" ]; then
+    OVELC="$OVELC"
+elif [ -x "$OVELLANG/target/debug/ovelc" ]; then
+    OVELC="$OVELLANG/target/debug/ovelc"
 else
-    OVICC="$OVICLANG/target/release/ovicc"
+    OVELC="$OVELLANG/target/release/ovelc"
 fi
 
 if [ -n "${LIBUI_DIR:-}" ]; then
     LIBUI="$LIBUI_DIR"
-elif [ -d "$OVICLANG/../libui-ng" ]; then
-    LIBUI="$(cd "$OVICLANG/../libui-ng" && pwd)"
+elif [ -d "$OVELLANG/../libui-ng" ]; then
+    LIBUI="$(cd "$OVELLANG/../libui-ng" && pwd)"
 else
     echo "Error: libui-ng not found. Set LIBUI_DIR to your libui-ng checkout." >&2
     exit 1
@@ -33,13 +33,13 @@ BUILD=/tmp/libui_build
 rm -rf "$BUILD"
 mkdir -p "$BUILD"
 
-echo "==> Transpile (ovicc)..."
-"$OVICC" -rewrite-ovic "$SCRIPT_DIR/libui_demo.ov" -o "$BUILD/libui_demo.c" \
+echo "==> Transpile (ovelc)..."
+"$OVELC" -rewrite-ovel "$SCRIPT_DIR/libui_demo.ov" -o "$BUILD/libui_demo.c" \
     -I "$SCRIPT_DIR/include" -I "$LIBUI"
 
 echo "==> Compile + link (clang)..."
 FLAGS="-std=c99 -fblocks -w"
-INCLUDES=(-I "$OVICLANG/include" -I "$OVICLANG/include/Foundation" -I "$LIBUI")
+INCLUDES=(-I "$OVELLANG/include" -I "$OVELLANG/include/Foundation" -I "$LIBUI")
 if [ "$(uname)" = "Darwin" ]; then
     FRAMEWORKS=(-framework Cocoa)
 else
@@ -48,7 +48,7 @@ fi
 
 clang $FLAGS "${INCLUDES[@]}" \
     -x c "$BUILD/libui_demo.c" \
-    "$OVICLANG/include/ovic/runtime.c" \
+    "$OVELLANG/include/ovel/runtime.c" \
     -L "$LIBUI/build/meson-out" -lui \
     -Wl,-rpath,"$LIBUI/build/meson-out" \
     "${FRAMEWORKS[@]}" \

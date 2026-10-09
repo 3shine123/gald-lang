@@ -1,0 +1,28 @@
+[package]
+name = "ovelc"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+ovel-cst = { path = "../cst" }
+ovel-parser = { path = "../parser" }
+ovel-binder = { path = "../binder" }
+ovel-elaborator = { path = "../elaborator" }
+ovel-codegen = { path = "../codegen" }
+ovel-preprocessor = { path = "../preprocessor" }
+ovel-symbol = { path = "../symbol" }
+ovel-ast = { path = "../ast" }
+ovel-cfg = { path = "../cfg" }
+ovel-arc = { path = "../arc" }
+ovel-async = { path = "../async" }
+ovel-eh = { path = "../eh" }
+ovel-defer = { path = "../defer" }
+ovel-pattern = { path = "../pattern" }
+ovel-trace = { path = "../trace" }
+ovel-checker = { path = "../checker" }
+attrs = { path = "../attrs" }
+clap = "4.6.6"
+clap_complete = "4.6.9"
+
+[build-dependencies]
+cc = "1.0"

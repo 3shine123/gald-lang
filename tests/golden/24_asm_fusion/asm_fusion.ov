@@ -1,5 +1,5 @@
 // asm_fusion_test.ov
-// 极致汇编融合压测：内联 asm + 外部 .s + Ovic 高级特性
+// 极致汇编融合压测：内联 asm + 外部 .s + Ovel 高级特性
 // 融合：命名空间 / 类继承 / VTable 多态 / 协议 / 属性@ynthesize / Block闭包(__block捕获)
 //      / @autoreleasepool+ARC / @try@catch@finally / struct+强制cast / 函数指针 / @selector / __weak
 // 外部汇编: asm_crc32, asm_rotl32, asm_clz32, asm_bitrev32 (见 asm_fusion_test.s)
@@ -131,7 +131,7 @@ int main(int argc, const char* argv[])
 {
     @autoreleasepool {
         printf("====================================================================\n");
-        printf(">>>    ovicc「内联 asm + 外部 .s + Ovic 高级特性」极致融合压测    <<<\n");
+        printf(">>>    ovelc「内联 asm + 外部 .s + Ovel 高级特性」极致融合压测    <<<\n");
         printf("====================================================================\n\n");
 
         // --------------------------------------------------
@@ -242,10 +242,10 @@ int main(int argc, const char* argv[])
         printf("    与直接调用比对: %s\n",
                ([hasher finalChecksum] == recomputed) ? "MATCH(ok)" : "MISMATCH(bug)");
 
-        [hasher release];
+        // ARC 在作用域结束时自动释放 hasher（显式 release 在 ARC 模式下非法）
 
         printf("\n====================================================================\n");
-        printf(">>>   完美！内联 asm 与真实汇编在 Ovic 高级特性中无缝融合！   <<<\n");
+        printf(">>>   完美！内联 asm 与真实汇编在 Ovel 高级特性中无缝融合！   <<<\n");
         printf("====================================================================\n");
     }
     return 0;

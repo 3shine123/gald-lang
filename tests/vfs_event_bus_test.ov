@@ -1,5 +1,5 @@
 // lang-test/vfs_event_bus_test.ov
-// Ovic 语言全新压测案例：「操作系统虚拟文件系统 (VFS) 与异步 I/O 监听总线」
+// Ovel 语言全新压测案例：「操作系统虚拟文件系统 (VFS) 与异步 I/O 监听总线」
 // 核心轰炸点：@protocol 接口多态 + 泛型 Buffer<T> + 父子节点 __weak 弱引用 + Category 静态扩展 + Block 事件响应
 
 #include <stdio.h>
@@ -282,7 +282,7 @@ int main(int argc, const char* argv[])
 {
     @autoreleasepool {
         printf("=========================================================\n");
-        printf(">>>  ovicc 压测套件：「VFS 虚拟文件系统与异步总线」 <<<\n");
+        printf(">>>  ovelc 压测套件：「VFS 虚拟文件系统与异步总线」 <<<\n");
         printf("=========================================================\n\n");
 
         // ----------------------------------------------------

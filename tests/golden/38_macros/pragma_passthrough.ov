@@ -1,6 +1,6 @@
 /* golden/36_macros/pragma_passthrough — `_Pragma` is a C99 *pass-through line*.
  *
- * `_Pragma("...")` (ISO/IEC 9899:2011 §6.10.9) is not a ovic construct: ovicc
+ * `_Pragma("...")` (ISO/IEC 9899:2011 §6.10.9) is not a ovel construct: ovelc
  * parks the whole source line in a RawLine node and re-emits it verbatim at the
  * same position, exactly like `#pragma mark`. Position is the entire point of a
  * pragma, so the program below makes position observable at run time:

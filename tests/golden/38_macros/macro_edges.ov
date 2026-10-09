@@ -1,7 +1,7 @@
 // golden/36_macros — macro edge semantics end to end (ISO 9899 §6.10.3).
 //
 // Every expected line below was cross-checked against `clang -E -P /tmp/oracle.c`
-// (clang is the authority for the replacement rules; ovicc reimplements them in
+// (clang is the authority for the replacement rules; ovelc reimplements them in
 // crates/cpp and must agree, including the places where the rules are subtle:
 // whitespace collapsing in `#`, empty arguments, and `##` placemarkers).
 #include <stdio.h>

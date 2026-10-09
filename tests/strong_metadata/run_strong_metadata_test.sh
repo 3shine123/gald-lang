@@ -33,18 +33,18 @@ set -uo pipefail
 root="$(cd "$(dirname "$0")/../.." && pwd)"
 cd "$root"
 
-ovicc="${OVICC:-}"
-if [[ -z "$ovicc" ]]; then
-    for cand in target/debug/ovicc target/release/ovicc; do
-        if [[ -x "$cand" ]]; then ovicc="$cand"; break; fi
+ovelc="${OVELC:-}"
+if [[ -z "$ovelc" ]]; then
+    for cand in target/debug/ovelc target/release/ovelc; do
+        if [[ -x "$cand" ]]; then ovelc="$cand"; break; fi
     done
 fi
-if [[ -z "$ovicc" || ! -x "$ovicc" ]]; then
-    echo "error: ovicc not found (run 'cargo build', or set OVICC=/path/to/ovicc)" >&2
+if [[ -z "$ovelc" || ! -x "$ovelc" ]]; then
+    echo "error: ovelc not found (run 'cargo build', or set OVELC=/path/to/ovelc)" >&2
     exit 2
 fi
 
-work="$(mktemp -d "${TMPDIR:-/tmp}/ovic_strong_meta.XXXXXX")"
+work="$(mktemp -d "${TMPDIR:-/tmp}/ovel_strong_meta.XXXXXX")"
 trap 'rm -rf "$work"' EXIT
 
 pass=0; fail=0
@@ -66,7 +66,7 @@ int main() {
 EOF
 
 # ── 1. library metadata is strong (check 1 lives inside the build script) ──
-if OVICC="$ovicc" ./tools/build-foundation-lib.sh "$lib" > "$work/lib.log" 2>&1; then
+if OVELC="$ovelc" ./tools/build-foundation-lib.sh "$lib" > "$work/lib.log" 2>&1; then
     ok "1. library built with strong metadata (nm verified by the build script)"
 else
     bad "1. library build / strong-metadata verification"
@@ -74,7 +74,7 @@ else
 fi
 
 # ── 2. weak client + strong library: link and run ──
-if "$ovicc" "$client" -I include -L "$lib" -lovicafoundation -o "$work/app" > "$work/app.log" 2>&1; then
+if "$ovelc" "$client" -I include -L "$lib" -lovelfoundation -o "$work/app" > "$work/app.log" 2>&1; then
     out="$("$work/app" 2>&1)"; rc=$?
     if [[ $rc -eq 0 && "$out" == *"len=5 s=hello"* ]]; then
         ok "2. declaration-only client links against the strong library and runs"
@@ -97,11 +97,11 @@ EOF
 # Flag AFTER the input hits the option loop → "Unknown argument"; flag BEFORE
 # the input falls into the positional-input slot → "cannot read" — both orders
 # must fail loudly, and the post-input one must name the flag.
-if "$ovicc" "$work/flag_probe.ov" -fstrong-metadata -I include -o "$work/app_dup" > "$work/dup.log" 2>&1; then
+if "$ovelc" "$work/flag_probe.ov" -fstrong-metadata -I include -o "$work/app_dup" > "$work/dup.log" 2>&1; then
     bad "3. -fstrong-metadata was accepted — the deleted flag still parses"
 else
     if grep -q "Unknown argument: -fstrong-metadata" "$work/dup.log" \
-            && ! "$ovicc" -fstrong-metadata "$work/flag_probe.ov" -I include -o "$work/app_dup2" > "$work/dup2.log" 2>&1; then
+            && ! "$ovelc" -fstrong-metadata "$work/flag_probe.ov" -I include -o "$work/app_dup2" > "$work/dup2.log" 2>&1; then
         ok "3. deleted -fstrong-metadata is rejected loudly (Unknown argument; both arg orders fail)"
     else
         bad "3. old flag failed, but not with the expected diagnostics"
@@ -133,10 +133,10 @@ cat > "$work/driver.ov" <<'EOF'
 #import "model.oh"
 int main() { Widget *w = 0; if (w) { [w show]; } return 0; }
 EOF
-if "$ovicc" -rewrite-ovic "$work/lib_a.ov" -I "$work" -I include -o "$work/a.c" > "$work/a.log" 2>&1 \
-   && "$ovicc" -rewrite-ovic "$work/lib_b.ov" -I "$work" -I include -o "$work/b.c" > "$work/b.log" 2>&1 \
-   && "$ovicc" -rewrite-ovic "$work/driver.ov" -I "$work" -I include -o "$work/driver.c" >> "$work/a.log" 2>&1; then
-    if clang -std=c99 -w "$work/a.c" "$work/b.c" "$work/driver.c" include/ovic/runtime.c \
+if "$ovelc" -rewrite-ovel "$work/lib_a.ov" -I "$work" -I include -o "$work/a.c" > "$work/a.log" 2>&1 \
+   && "$ovelc" -rewrite-ovel "$work/lib_b.ov" -I "$work" -I include -o "$work/b.c" > "$work/b.log" 2>&1 \
+   && "$ovelc" -rewrite-ovel "$work/driver.ov" -I "$work" -I include -o "$work/driver.c" >> "$work/a.log" 2>&1; then
+    if clang -std=c99 -w "$work/a.c" "$work/b.c" "$work/driver.c" include/ovel/runtime.c \
             -I include -o "$work/dup_impl" > "$work/dup_impl.log" 2>&1; then
         bad "4. two TUs owning the same class linked without error (R2 regression)"
     elif grep -q "duplicate symbol" "$work/dup_impl.log"; then
@@ -210,15 +210,15 @@ cat > "$work/own.ov" <<'EOF'
 @end
 EOF
 gh_ok=1 gm_ok=1
-"$ovicc" -rewrite-ovic "$work/own.oh" -I include -o "$work/owngh.c" > "$work/owngh.log" 2>&1 \
+"$ovelc" -rewrite-ovel "$work/own.oh" -I include -o "$work/owngh.c" > "$work/owngh.log" 2>&1 \
     && clang -c -w "$work/owngh.c" -o "$work/owngh.o" -I include || gh_ok=0
-"$ovicc" -rewrite-ovic "$work/own.ov" -I "$work" -I include -o "$work/owngm.c" > "$work/owngm.log" 2>&1 \
+"$ovelc" -rewrite-ovel "$work/own.ov" -I "$work" -I include -o "$work/owngm.c" > "$work/owngm.log" 2>&1 \
     && clang -c -w "$work/owngm.c" -o "$work/owngm.o" -I include || gm_ok=0
 if [[ $gh_ok -eq 1 && $gm_ok -eq 1 ]]; then
-    check_strong "$work/owngh.o" "_OVIC_VTABLE_\$_OwnGh" "5a. standalone .oh with @implementation auto-strong (no flag)"
-    check_strong "$work/owngh.o" "_OVIC_META_VTABLE_\$_OwnGh_inst" "5b. ... and its meta vtable too"
-    check_strong "$work/owngm.o" "_OVIC_VTABLE_\$_OwnGm" "5c. standalone .ov with @implementation auto-strong (no flag)"
-    check_strong "$work/owngm.o" "_OVIC_META_VTABLE_\$_OwnGm_inst" "5d. ... and its meta vtable too"
+    check_strong "$work/owngh.o" "_OVEL_VTABLE_\$_OwnGh" "5a. standalone .oh with @implementation auto-strong (no flag)"
+    check_strong "$work/owngh.o" "_OVEL_META_VTABLE_\$_OwnGh_inst" "5b. ... and its meta vtable too"
+    check_strong "$work/owngm.o" "_OVEL_VTABLE_\$_OwnGm" "5c. standalone .ov with @implementation auto-strong (no flag)"
+    check_strong "$work/owngm.o" "_OVEL_META_VTABLE_\$_OwnGm_inst" "5d. ... and its meta vtable too"
 else
     bad "5. could not transpile/compile the standalone-TU probes"
     sed 's/^/      /' "$work/owngh.log" "$work/owngm.log" | tail -12
@@ -233,22 +233,22 @@ cat > "$work/client_decl.oh" <<'EOF'
 - (int)ping;
 @end
 EOF
-if "$ovicc" -rewrite-ovic "$work/client_decl.oh" -I include -o "$work/client_decl.c" > "$work/cd.log" 2>&1 \
+if "$ovelc" -rewrite-ovel "$work/client_decl.oh" -I include -o "$work/client_decl.c" > "$work/cd.log" 2>&1 \
         && clang -c -w "$work/client_decl.c" -o "$work/client_decl.o" -I include; then
-    check_weak "$work/client_decl.o" "_OVIC_VTABLE_\$_ClientGadget" "6. declaration-only .oh stub stays weak (no flag)"
+    check_weak "$work/client_decl.o" "_OVEL_VTABLE_\$_ClientGadget" "6. declaration-only .oh stub stays weak (no flag)"
 else
     bad "6. could not transpile/compile the declaration-only probe"
     sed 's/^/      /' "$work/cd.log" | tail -12
 fi
 
 # ── 7. §9 STRUCT DEDUP: a main file owning the root classes compiles clean ──
-# Section 4 emits guarded fallbacks for ovic_root/NPObject; the class-layout
+# Section 4 emits guarded fallbacks for ovel_root/NPObject; the class-layout
 # section used to re-emit the same bodies unguarded in the same file — a hard
 # C redefinition error. The dedup records Section 4's bodies, so each root
 # struct is defined exactly once and the Foundation root TU compiles alone.
 dedup_ok=1
-if "$ovicc" -rewrite-ovic include/Foundation/NPObject.ov -I include -o "$work/npo.c" > "$work/npo.log" 2>&1; then
-    root_defs=$(grep -c 'struct ovic_root {' "$work/npo.c")
+if "$ovelc" -rewrite-ovel include/Foundation/NPObject.ov -I include -o "$work/npo.c" > "$work/npo.log" 2>&1; then
+    root_defs=$(grep -c 'struct ovel_root {' "$work/npo.c")
     obj_defs=$(grep -c 'struct NPObject {' "$work/npo.c")
     if [[ "$root_defs" == "1" && "$obj_defs" == "1" ]] \
             && clang -c -w "$work/npo.c" -o "$work/npo.o" -I include 2>>"$work/npo.log"; then

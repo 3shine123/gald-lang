@@ -1,10 +1,10 @@
 [package]
-name = "ovic-arc"
+name = "ovel-arc"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-ovic-ast = { path = "../ast" }
-ovic-cfg = { path = "../cfg" }
-ovic-ownership = { path = "../ownership" }
-ovic-cst = { path = "../cst" }
+ovel-ast = { path = "../ast" }
+ovel-cfg = { path = "../cfg" }
+ovel-ownership = { path = "../ownership" }
+ovel-cst = { path = "../cst" }

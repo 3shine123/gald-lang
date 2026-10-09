@@ -2,7 +2,7 @@
 
 > 状态：设计定稿，未实现。目标：对齐 ObjC NSPredicate 的**完整语义**——
 > 格式串 DSL、键路径求值、可组合谓词对象、容器宿主 API——不做 block 简化版。
-> 前置矛盾（上轮评估已确认）：ovic 无运行时反射，按键名字符串找方法/ivar
+> 前置矛盾（上轮评估已确认）：ovel 无运行时反射，按键名字符串找方法/ivar
 > 的动作在现有架构里不存在。本规划用 **编译期 KVC 访问器表** 解决它：
 > 派发仍是静态 vtable，字符串只做**查表**，不做反射。
 
@@ -10,12 +10,12 @@
 
 ```
 @“age > 18 AND name LIKE 'A*'”
-  → [NPPredicate predicateWithFormat:]  (运行时, libovicfoundation)
+  → [NPPredicate predicateWithFormat:]  (运行时, libovelfoundation)
       │  DSL parser（Foundation 内，C 实现）
       ▼
   NPPredicate 对象（AST: 节点数组）
       │  evaluateWithObject:
-      │    每个键路径节点 → ovic_kvc_<Class>_<keypath 段> 查表
+      │    每个键路径节点 → ovel_kvc_<Class>_<keypath 段> 查表
       ▼
   BOOL 结果
 ```
@@ -30,7 +30,7 @@
 
 `NPPredicate.oh/.ov`，语义取 ObjC NSPredicate 格式串的常用全集：
 
-```ovic
+```ovel
 @interface NPPredicate : NPObject
 + (NPPredicate *)predicateWithFormat:(NPString *)format, ...;  // %@ 占位
 - (BOOL)evaluateWithObject:(id)object;
@@ -51,13 +51,13 @@
 实现位置：`NPPredicate.ov` 内一个递归下降 parser（token: 标识符/字符串/数字/
 运算符），产出节点数组（union tag + payload，手写 tagged union——正是 §7 的
 @sum 的 C 形态先例）。求值是树行走，叶子「键路径求值」调 KVC 表（支柱二）。
-**parser 完全在 Foundation 库里，编译器（ovicc）零参与 DSL 解析**——格式串
-对 ovicc 只是普通 NPString。
+**parser 完全在 Foundation 库里，编译器（ovelc）零参与 DSL 解析**——格式串
+对 ovelc 只是普通 NPString。
 
 ## 2. 支柱二：KVC 访问器表（codegen 生成）
 
 这是规划的核心发明。`[p valueForKey:@"age"]` 要工作，需要 `age → fn-ptr`
-的映射。ovic 没有 objc_msgSend 的 selector 注册表，但 codegen **编译期知道
+的映射。ovel 没有 objc_msgSend 的 selector 注册表，但 codegen **编译期知道
 每个类的全部方法名**——所以生成静态访问器表：
 
 ### 2.1 生成规则
@@ -68,15 +68,15 @@ NPPredicate」时发射，见 §2.4）：
 ```c
 /* 键 → getter。getter 形态统一为 id (*)(id self)：
    返回包装对象（int → NPNumber），无对应 ivar/property 的键缺席。 */
-static const struct ovic_kvc_entry ovic_kvc_entries_$_Person[] = {
-    { .key = "name", .get = ovic_kvc_wrap_Person_name },
-    { .key = "age",  .get = ovic_kvc_wrap_Person_age  },
+static const struct ovel_kvc_entry ovel_kvc_entries_$_Person[] = {
+    { .key = "name", .get = ovel_kvc_wrap_Person_name },
+    { .key = "age",  .get = ovel_kvc_wrap_Person_age  },
     { .key = NULL,   .get = NULL },                       /* 哨兵 */
 };
 ```
 
 包装函数由 codegen 合成（用户不写）：`- (int)age` 生成
-`ovic_kvc_wrap_Person_age` = `return [NPNumber numberWithInt:[(Person *)self age]]`——
+`ovel_kvc_wrap_Person_age` = `return [NPNumber numberWithInt:[(Person *)self age]]`——
 **方法体就是一条已有的静态 vtable 派发消息发送**，无新派发机制。
 
 ### 2.2 键的来源（收录规则）
@@ -87,12 +87,12 @@ getter 惯例）。收录顺序：property > ivar > 无参方法；同键先到�
 
 ### 2.3 查表与类链
 
-`ovic_kvc_lookup(id obj, const char *key)`：沿 `obj->isa` 的类链查每层的
-entries 表（`NPClass` 需新增 `const struct ovic_kvc_entry *kvc_entries;`
+`ovel_kvc_lookup(id obj, const char *key)`：沿 `obj->isa` 的类链查每层的
+entries 表（`NPClass` 需新增 `const struct ovel_kvc_entry *kvc_entries;`
 字段——runtime.h 唯一改动点，追加尾部字段不破既有静态初始化的编译期常量
 语义，字段缺省 NULL）。未命中返回 NULL，求值引擎报
 `key not key-value coding compliant`（对齐 ObjC 的
-`NSUndefinedKeyException`，但以 abort 呈现——ovic 无运行时异常注入）。
+`NSUndefinedKeyException`，但以 abort 呈现——ovel 无运行时异常注入）。
 
 ### 2.4 跨 TU 与元数据铁律核对
 
@@ -108,7 +108,7 @@ entries 表（`NPClass` 需新增 `const struct ovic_kvc_entry *kvc_entries;`
 
 ## 3. 支柱三：宿主 API
 
-```ovic
+```ovel
 // NPArray.oh 增补
 - (NPArray *)filteredArrayUsingPredicate:(NPPredicate *)pred;
 - (size_t)indexOfObjectMatchingPredicate:(NPPredicate *)pred;   // 首个命中
@@ -127,11 +127,11 @@ entries 表（`NPClass` 需新增 `const struct ovic_kvc_entry *kvc_entries;`
 
 不做谓词字面量语法（`@(...)` 已被 boxed expr 占用）。组合用方法：
 
-```ovic
+```ovel
 NPPredicate *both = [p1 ANDPredicate:p2];   // 逻辑组合 API
 ```
 
-## 5. 与 ovic 现有机制的交互核对（评审预演）
+## 5. 与 ovel 现有机制的交互核对（评审预演）
 
 | 机制 | 影响 |
 |---|---|
@@ -148,10 +148,10 @@ NPPredicate *both = [p1 ANDPredicate:p2];   // 逻辑组合 API
 - **MATCHES 正则**：POSIX ERE 子集自实现（`* + ? [] ^ $ . () |`）；PCRE
   回溯语义不承诺。ObjC 的 ICU 语法不兼容项记录在 Foundation 头注释。
 - **无反射的代价**：键必须在编译期存在于某个 `@implementation`——运行时
-  动态构造的类（ovic 也没有）自然不支持。
+  动态构造的类（ovel 也没有）自然不支持。
 - **占位符**：`%@`/`%d` 等有限集合（对齐 format 检查的 FormatArgKind），
   复杂对象参数按 `isEqual:` 参与。
-- **性能**：线性查表 + 每元素整棵谓词树求值。对 ovic 现有容器（本就线性
+- **性能**：线性查表 + 每元素整棵谓词树求值。对 ovel 现有容器（本就线性
   扫描）不引入新的复杂度台阶；哈希加速是容器层课题，不归谓词。
 
 ## 7. 实施顺序

@@ -1,20 +1,20 @@
 # System Monitor
 # Run: make run
 
-OVICC = ../../target/debug/ovicc
+OVELC = ../../target/debug/ovelc
 NCURSES = /opt/homebrew/opt/ncurses
 
 all: sysmon
 
 sysmon.c: sysmon.ov
-	$(OVICC) -rewrite-ovic sysmon.ov -o sysmon.c -fno-ovic-arc
+	$(OVELC) -rewrite-ovel sysmon.ov -o sysmon.c -fno-ovel-arc
 
 sysmon: sysmon.c
 	clang -std=c99 -fblocks \
 		-I ../../include -I ../../include/Foundation -I ../../include/Terminal \
 		-I $(NCURSES)/include \
 		sysmon.c \
-		../../include/ovic/runtime.c \
+		../../include/ovel/runtime.c \
 		../../include/Terminal/ncurses_mouse.c \
 		../../include/Terminal/sysinfo.c \
 		$(NCURSES)/lib/libncurses.dylib \

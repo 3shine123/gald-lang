@@ -1,7 +1,7 @@
 #import <Foundation/Foundation.ov>
 
 /* Class methods across TUs: `+` methods dispatch through the meta vtable, which
-   is a *separate* per-class struct (OVIC_META_VTABLE_$_X). That is a second
+   is a *separate* per-class struct (OVEL_META_VTABLE_$_X). That is a second
    layout that has to agree across the link, separate from the instance vtable. */
 @interface Factory : NPObject
 + (Factory *)make;

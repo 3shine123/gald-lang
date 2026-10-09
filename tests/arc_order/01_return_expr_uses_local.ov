@@ -4,7 +4,7 @@
 //
 // Root cause shape: `return <Binary using h>;` — the old analyzer did not
 // recognize a `Binary` top level as "using h", so it inserted
-// `ovic_release(h)` BEFORE the return expression: use-after-free.
+// `ovel_release(h)` BEFORE the return expression: use-after-free.
 //
 // `dealloc` clears `_s` so the failure is deterministic even if the freed
 // memory happens to be untouched: a prematurely released holder makes

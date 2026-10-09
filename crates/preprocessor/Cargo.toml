@@ -1,8 +1,8 @@
 [package]
-name = "ovic-preprocessor"
+name = "ovel-preprocessor"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-ovic-cst = { path = "../cst" }
-ovic-cpp = { path = "../cpp" }
+ovel-cst = { path = "../cst" }
+ovel-cpp = { path = "../cpp" }

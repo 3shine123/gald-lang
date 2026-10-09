@@ -1,5 +1,5 @@
 // lang-test/implicit_root_class_test.ov
-// Ovic 隐式根类 __ovic_root 专项压测
+// Ovel 隐式根类 __ovel_root 专项压测
 // 验证不写父类的 @interface 自动获得隐式根类
 
 #include <stdio.h>
@@ -163,7 +163,7 @@
 int main(int argc, const char* argv[]) {
     @autoreleasepool {
         printf("=========================================================\n");
-        printf(">>>  ovicc 隐式根类 __ovic_root 专项压测  <<<\n");
+        printf(">>>  ovelc 隐式根类 __ovel_root 专项压测  <<<\n");
         printf("=========================================================\n\n");
 
         // --- 1. 隐式根类基本功能 ---

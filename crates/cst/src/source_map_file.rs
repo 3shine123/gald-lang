@@ -1,7 +1,7 @@
 //! Sidecar source-map file (`.ov.map`) — the versioned JSON schema of 阶段 4
 //! (`doc/source_locations_debug_lsp_plan.md` lines 66-74).
 //!
-//! The file maps **generated C lines** back to **Ovic source lines**. Its
+//! The file maps **generated C lines** back to **Ovel source lines**. Its
 //! ground truth is the `#line` directive stream in the generated C, which is
 //! exactly what the C preprocessor consumes, so the map can never disagree
 //! with what clang diagnostics show. Within one mapping the source line
@@ -14,7 +14,7 @@
 //! ```json
 //! {
 //!   "version": 1,
-//!   "generator": "ovicc",
+//!   "generator": "ovelc",
 //!   "primary_source": "main.ov",
 //!   "generated": { "path": "main.c", "hash": "fnv1a64:…" },
 //!   "sources": [ { "id": 0, "path": "main.ov", "hash": "fnv1a64:…" } ],
@@ -44,7 +44,7 @@
 //!   — the field is a plain string so consumers must treat unknown kinds as
 //!   synthetic-ish and keep parsing).
 //!
-//! JSON is written by hand: `ovic-cst` is intentionally dependency-free and
+//! JSON is written by hand: `ovel-cst` is intentionally dependency-free and
 //! this schema is write-only for the compiler (the reader lives in the
 //! future LSP/debugger-adapter consumers, 阶段 6).
 //!
@@ -258,7 +258,7 @@ mod tests {
     #[test]
     fn to_json_orders_and_omits_synthetic_source_fields() {
         let mut f = SourceMapFile::new(
-            "ovicc",
+            "ovelc",
             "main.ov",
             GeneratedArtifact {
                 path: "main.c".into(),

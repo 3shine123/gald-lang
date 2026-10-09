@@ -2,14 +2,14 @@
 //
 // A call is a token sequence (§6.10.3): the newline between arguments is
 // whitespace, not a terminator. The source-level expander streams the next
-// source line in and expands the call as a whole — previously a ovic-track
+// source line in and expands the call as a whole — previously a ovel-track
 // call had to be closed on one line. The lines it collapses are attributed to
 // the line the call *starts* on, so a diagnostic inside (or after) the
 // expansion still names the line the author wrote.
 #import <Foundation/Foundation.ov>
 #include <stdio.h>
 
-// ovic-track bodies (contain message sends) — expanded by ovicc, not clang.
+// ovel-track bodies (contain message sends) — expanded by ovelc, not clang.
 #define TAG(o)              [o tag]
 #define ADD_TAGS(o, a, b)   ([o tag] + (a) + (b))
 
@@ -19,13 +19,13 @@
 - (int) tag;
 @end
 @implementation Widget
-+ (id) alloc { return ovic_alloc(self); }
++ (id) alloc { return ovel_alloc(self); }
 - (id) init   { uid = 5; return self; }
 - (int) tag   { return uid; }
 @end
 
 int main() {
-    ovic_meta_init();
+    ovel_meta_init();
     Widget *w = [[Widget alloc] init];
 
     // Arguments spread over three lines.

@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 """
-ovic test runner — parallel transpile + compile + run with timeout.
+ovel test runner — parallel transpile + compile + run with timeout.
 Usage: python3 test_all.py [-j JOBS]
 
-Environment overrides (useful for cross-platform testing, e.g. a musl ovicc
+Environment overrides (useful for cross-platform testing, e.g. a musl ovelc
 inside a Linux VM against the repo mounted at /mnt/mac):
-  OVICC=/path/to/ovicc   binary under test (default: target/debug/ovicc;
-                         same convention as run_trace_golden.sh's OVICC=)
-  OVIC_CC="clang ..."    C compiler + flags ovicc passes through to the backend
-                         (e.g. extra -I/-L/-l). Leave unset to use ovicc's
+  OVELC=/path/to/ovelc   binary under test (default: target/debug/ovelc;
+                         same convention as run_trace_golden.sh's OVELC=)
+  OVEL_CC="clang ..."    C compiler + flags ovelc passes through to the backend
+                         (e.g. extra -I/-L/-l). Leave unset to use ovelc's
                          built-in selection (clang; zig cc on Windows).
 """
 
@@ -26,9 +26,9 @@ PROJECT = Path(__file__).resolve().parent
 BUILDDIR = PROJECT / "builddir"
 INCLUDE = PROJECT / "include"
 
-# Binary override: OVICC=/path/to/ovicc python3 test_all.py  (e.g. cross-platform
-# testing with a musl binary on Linux VMs; same convention as run_trace_golden.sh's OVICC=)
-OVICC = Path(os.environ.get("OVICC", str(PROJECT / "target" / "debug" / "ovicc")))
+# Binary override: OVELC=/path/to/ovelc python3 test_all.py  (e.g. cross-platform
+# testing with a musl binary on Linux VMs; same convention as run_trace_golden.sh's OVELC=)
+OVELC = Path(os.environ.get("OVELC", str(PROJECT / "target" / "debug" / "ovelc")))
 RUN_TIMEOUT = 3
 
 # ── Collect test binary names from .ov files ──
@@ -73,10 +73,10 @@ for f in GM_FILES:
     stem = f.stem
     TEST_BINS.add(f"/tmp/{stem}")
 
-# ── Cleanup: kill orphaned ovicc processes + leftover test binaries on exit ──
+# ── Cleanup: kill orphaned ovelc processes + leftover test binaries on exit ──
 def _cleanup():
-    # Kill ovicc itself
-    subprocess.run(["pkill", "-f", r"target/(debug|release)/ovicc"], capture_output=True)
+    # Kill ovelc itself
+    subprocess.run(["pkill", "-f", r"target/(debug|release)/ovelc"], capture_output=True)
     # Kill all compiled test binaries (e.g. /tmp/core_fusion, /tmp/tt, …)
     for bin_path in TEST_BINS:
         subprocess.run(["pkill", "-f", f"^{bin_path}($| )"], capture_output=True)
@@ -179,12 +179,12 @@ def _needs_mrc(gm_path: Path) -> bool:
     # Check for manual retain/release/dealloc/autorelease calls
     has_mrc = bool(_re.search(r"\[\w+\s+(retain|release|autorelease|dealloc)\]", stripped))
     # Also check for ARC annotations in the file
-    has_arc_flag = bool(_re.search(r"-fno-ovic-arc", stripped))
+    has_arc_flag = bool(_re.search(r"-fno-ovel-arc", stripped))
     return has_mrc or has_arc_flag
 
 
 def _run_np(cmd: list, gm_path: Path, timeout: int) -> tuple:
-    """Run ovicc with the given command, return (stdout, stderr, returncode, timed_out)."""
+    """Run ovelc with the given command, return (stdout, stderr, returncode, timed_out)."""
     try:
         proc = subprocess.Popen(
             cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
@@ -219,10 +219,10 @@ def _compile_only(gm_path: Path, asm_args: list[str], inc_args: list[str],
     (interactive programs block on stdin and hit the timeout). Transpile +
     compile + link into a real binary must still succeed; that is the strongest
     verdict reachable without a TTY. Tries ARC first, then MRC (same fallback
-    the runner applies to `ovicc run`)."""
-    for extra, label in (([], "ARC"), (["-fno-ovic-arc"], "MRC")):
+    the runner applies to `ovelc run`)."""
+    for extra, label in (([], "ARC"), (["-fno-ovel-arc"], "MRC")):
         bin_path = Path(tmpdir) / (gm_path.stem + ".compileonly")
-        cmd = [str(OVICC), str(gm_path), "-o", str(bin_path)] + asm_args + inc_args + extra
+        cmd = [str(OVELC), str(gm_path), "-o", str(bin_path)] + asm_args + inc_args + extra
         try:
             proc = subprocess.run(cmd, capture_output=True, text=True,
                                   timeout=60, cwd=str(gm_path.parent))
@@ -235,7 +235,7 @@ def _compile_only(gm_path: Path, asm_args: list[str], inc_args: list[str],
 
 def process_gm(gm_file: str, tmpdir: Path) -> tuple[str, bool, list[str], str]:
     """
-    Run one .ov file via `ovicc run`.
+    Run one .ov file via `ovelc run`.
     First tries with ARC (default), then retries with MRC if it fails.
     Returns (relative_path, passed, info_lines, status_tag).
     """
@@ -270,7 +270,7 @@ def process_gm(gm_file: str, tmpdir: Path) -> tuple[str, bool, list[str], str]:
     inc_args = ["-I", str(gm_path.parent)]
 
     # Try with ARC first
-    cmd = [str(OVICC), "run", str(gm_path)] + asm_args + inc_args
+    cmd = [str(OVELC), "run", str(gm_path)] + asm_args + inc_args
     stdout, stderr, rc, timed_out = _run_np(cmd, gm_path, RUN_TIMEOUT + 2)
 
     if timed_out:
@@ -289,7 +289,7 @@ def process_gm(gm_file: str, tmpdir: Path) -> tuple[str, bool, list[str], str]:
         return rel, True, out_lines, "PASS"
 
     # ARC failed — retry with MRC
-    mrc_cmd = [str(OVICC), "run", str(gm_path), "-fno-ovic-arc"] + asm_args + inc_args
+    mrc_cmd = [str(OVELC), "run", str(gm_path), "-fno-ovel-arc"] + asm_args + inc_args
     mrc_stdout, mrc_stderr, mrc_rc, mrc_timed_out = _run_np(mrc_cmd, gm_path, RUN_TIMEOUT + 2)
 
     if mrc_timed_out:
@@ -347,7 +347,7 @@ def process_gm(gm_file: str, tmpdir: Path) -> tuple[str, bool, list[str], str]:
 # ── main ─────────────────────────────────────────────────────────
 
 def main():
-    parser = argparse.ArgumentParser(description="ovic test runner")
+    parser = argparse.ArgumentParser(description="ovel test runner")
     parser.add_argument("-j", type=int, default=0, help="parallel jobs (default: CPU count)")
     args = parser.parse_args()
     JOBS = args.j if args.j else (os.cpu_count() or 4)
@@ -376,7 +376,7 @@ def main():
     gm_retry = 0
     gm_retry_suspect = 0
     if gm_files:
-        with tempfile.TemporaryDirectory(prefix="ovic_test_") as tmpdir_str:
+        with tempfile.TemporaryDirectory(prefix="ovel_test_") as tmpdir_str:
             tmpdir = Path(tmpdir_str)
             with ThreadPoolExecutor(max_workers=JOBS) as executor:
                 futures = {executor.submit(process_gm, str(f), tmpdir): f for f in gm_files}
@@ -422,7 +422,7 @@ def main():
     ex_retry = 0
     ex_retry_suspect = 0
     if example_files:
-        with tempfile.TemporaryDirectory(prefix="ovic_example_") as tmpdir_str:
+        with tempfile.TemporaryDirectory(prefix="ovel_example_") as tmpdir_str:
             tmpdir = Path(tmpdir_str)
             with ThreadPoolExecutor(max_workers=JOBS) as executor:
                 futures = {executor.submit(process_gm, str(f), tmpdir): f for f in example_files}

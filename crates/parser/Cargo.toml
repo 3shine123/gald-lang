@@ -1,10 +1,10 @@
 [package]
-name = "ovic-parser"
+name = "ovel-parser"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-ovic-lexer = { path = "../lexer" }
-ovic-cst = { path = "../cst" }
+ovel-lexer = { path = "../lexer" }
+ovel-cst = { path = "../cst" }
 [dev-dependencies]
-ovic-preprocessor = { path = "../preprocessor" }
+ovel-preprocessor = { path = "../preprocessor" }

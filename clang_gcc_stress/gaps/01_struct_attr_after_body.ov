@@ -1,6 +1,6 @@
 #include <stdio.h>
 // 缺口:struct 右花括号之后的 __attribute__ 无法解析。
-// C 里这是合法写法,并能让 packed 真正生效。ovicc 只支持名前写法。
+// C 里这是合法写法,并能让 packed 真正生效。ovelc 只支持名前写法。
 struct P {
     int a;
     int b;

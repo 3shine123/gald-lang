@@ -1,5 +1,5 @@
 {
-  "name": "Ovic",
+  "name": "Ovel",
   "scopeName": "source.ov",
   "fileTypes": ["np", "nh"],
   "patterns": [
@@ -12,12 +12,12 @@
     { "include": "#objc-at-implementation" },
     { "include": "#objc-at-end" },
     { "include": "#objc-at-property" },
-    { "include": "#ovic-at-await" },
+    { "include": "#ovel-at-await" },
     { "include": "#objc-at-selector" },
     { "include": "#objc-at-class-protocol" },
     { "include": "#objc-at-access-control" },
     { "include": "#objc-at-exception" },
-    { "include": "#ovic-noarc" },
+    { "include": "#ovel-noarc" },
     { "include": "#objc-at-synchronized" },
     { "include": "#objc-at-autoreleasepool" },
     { "include": "#objc-at-protocol-spec" },
@@ -161,7 +161,7 @@
           "patterns": [
             { "include": "#comments" },
             { "include": "#objc-at-property" },
-            { "include": "#ovic-at-await" },
+            { "include": "#ovel-at-await" },
             { "include": "#objc-at-selector" },
             { "include": "#objc-at-access-control" },
             { "include": "#method-signature" },
@@ -195,7 +195,7 @@
             { "include": "#character" },
             { "include": "#numbers" },
             { "include": "#objc-at-property" },
-            { "include": "#ovic-at-await" },
+            { "include": "#ovel-at-await" },
             { "include": "#objc-at-selector" },
             { "include": "#objc-at-access-control" },
             { "include": "#objc-at-dynamic-synthesize" },
@@ -204,7 +204,7 @@
             { "include": "#objc-constants" },
             { "include": "#objc-special" },
             { "include": "#memory-management" },
-            { "include": "#ovic-noarc" },
+            { "include": "#ovel-noarc" },
             { "include": "#c-types" },
             { "include": "#c-storage-struct-enum" },
             { "include": "#c-typedef" },
@@ -250,7 +250,7 @@
         }
       ]
     },
-    "ovic-at-await": {
+    "ovel-at-await": {
       "patterns": [
         {
           "name": "keyword.control.await",
@@ -304,7 +304,7 @@
         }
       ]
     },
-    "ovic-noarc": {
+    "ovel-noarc": {
       "patterns": [
         {
           "name": "keyword.control.noarc",

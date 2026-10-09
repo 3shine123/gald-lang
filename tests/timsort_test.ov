@@ -1,7 +1,7 @@
-// Timsort 排序测试（Ovic 语法版）
+// Timsort 排序测试（Ovel 语法版）
 // 演示：@interface/@implementation 类、多段 selector 方法、Block 比较器、
 //       @autoreleasepool、@"..." 字符串、NPLog、@public ivar
-// 用法: echo "5 23 6 4 75 1 3 63 464 322 46 8 0 89 1" | ovicc run tests/timsort_test.ov
+// 用法: echo "5 23 6 4 75 1 3 63 464 322 46 8 0 89 1" | ovelc run tests/timsort_test.ov
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -14,7 +14,7 @@ typedef BOOL (^CompareBlock)(int, int);
 static int g_stack[64];
 static size_t g_sp = 0;
 
-// ─── Ovic 类：封装 Timsort ───
+// ─── Ovel 类：封装 Timsort ───
 
 @interface TimSortSorter : NPObject
 {
@@ -187,7 +187,7 @@ static size_t g_sp = 0;
 
         double ms = ((double)(t1 - t0) * 1000.0) / (double)CLOCKS_PER_SEC;
         printf("Time: %.3f ms (minrun=%zu)\n", ms, [sorter minrun]);
-        NPLog(@"Sorted via Ovic TimSort (NPLog: %@ is %zu numbers)", [NPString stringWithUTF8String:"input"], n);
+        NPLog(@"Sorted via Ovel TimSort (NPLog: %@ is %zu numbers)", [NPString stringWithUTF8String:"input"], n);
 
         free(vals);
     }

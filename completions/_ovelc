@@ -1,17 +1,17 @@
-#compdef ovicc
+#compdef ovelc
 
-_ovicc() {
+_ovelc() {
     if [[ $CURRENT -eq 2 ]]; then
         if [[ $PREFIX == -* ]]; then
             _arguments \
                 '-Werror[promote warnings to errors]' \
-                '-emit-bridge-header[emit a C bridge header for calling Ovic from C]' \
-                '-rewrite-ovic[transpile to C only (no link)]' \
+                '-emit-bridge-header[emit a C bridge header for calling Ovel from C]' \
+                '-rewrite-ovel[transpile to C only (no link)]' \
                 '-v[show verbose transpilation info]' \
                 '--verbose[show verbose transpilation info]' \
                 '--version[print version and exit]' \
-                '-fovic-arc[enable ARC (default)]' \
-                '-fno-ovic-arc[disable ARC (MRC)]' \
+                '-fovel-arc[enable ARC (default)]' \
+                '-fno-ovel-arc[disable ARC (MRC)]' \
                 '-fno-checker[skip type checking]' \
                 '-eh[exception backend: checked (default) or legacy/sjlj (setjmp/longjmp rollback)]' \
                 '-ffreestanding[bare-metal/freestanding output]' \
@@ -29,7 +29,7 @@ _ovicc() {
                 '-asm[link a real assembly file (repeatable)]' \
                 '-arch[target arch]'
         else
-            _values 'ovicc command' 'run'
+            _values 'ovelc command' 'run'
             _files
         fi
         return

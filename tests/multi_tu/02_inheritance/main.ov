@@ -10,6 +10,6 @@ int main() {
     printf("area=%d\n", [s area]);
     printf("radius=%d\n", [c radius]);
     printf("helper=%d\n", ShapeHelper());
-    ovic_release(c);
+    ovel_release(c);
     return 0;
 }

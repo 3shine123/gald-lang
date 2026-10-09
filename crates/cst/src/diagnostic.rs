@@ -1,7 +1,7 @@
 //! Structured diagnostics shared by every front-end stage.
 //!
 //! Stages record `Diagnostic` values instead of pre-formatted strings; the
-//! renderer (ovicc side) turns them into either clang-style annotated source
+//! renderer (ovelc side) turns them into either clang-style annotated source
 //! output or plain `file:line:col: message` lines. Rendering lives elsewhere
 //! so the recorder never needs source text or colors.
 
@@ -191,7 +191,7 @@ fn render_one(d: &Diagnostic, lookup: &SourceLookup, color: bool) -> String {
     ));
     out.push_str(&format!("{} | ", gutter));
     // Bytes before the caret render as spaces; multi-byte source content can
-    // desync byte columns from display columns, but Ovic source is effectively
+    // desync byte columns from display columns, but Ovel source is effectively
     // ASCII on code lines — revisit with display width if that changes.
     let col = d.col.max(1);
     out.push_str(&" ".repeat((col - 1).min(line_text.len())));

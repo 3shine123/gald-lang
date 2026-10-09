@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Regenerate the ovic attribute classification table from the official
+"""Regenerate the ovel attribute classification table from the official
 Clang and GCC documentation.
 
 Scrapes:

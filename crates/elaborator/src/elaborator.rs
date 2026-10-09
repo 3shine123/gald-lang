@@ -1,6 +1,6 @@
-use ovic_cst::*;
-use ovic_ast::*;
-use ovic_symbol::symbol::*;
+use ovel_cst::*;
+use ovel_ast::*;
+use ovel_symbol::symbol::*;
 
 pub struct Elaborator {
     pub symtab: Option<SymbolTable>,
@@ -232,7 +232,7 @@ impl Elaborator {
                 // `a = b != c`.
                 let inner = self.convert_expr(e).unwrap_or_else(make_int_expr);
                 AstExpr {
-                    kind: ovic_ast::AstExprKind::Paren, expr_type: inner.expr_type.clone(),
+                    kind: ovel_ast::AstExprKind::Paren, expr_type: inner.expr_type.clone(),
                     line: e.line, col: e.col,
                     data: AstExprData::Paren(Box::new(inner)),
                 }
@@ -827,9 +827,9 @@ impl Elaborator {
                 let cls_sym = self.symtab.as_ref().and_then(|st| st.find_class(&fqn)).map(|s| s.name.clone());
                 let cls_sym_clone = cls_sym.clone();
                 self.current_class_sym = cls_sym.clone();
-                // Inject implicit root class ovic_root for classes without explicit superclass
+                // Inject implicit root class ovel_root for classes without explicit superclass
                 let effective_superclass = superclass.as_ref().map(|s| s.clone()).or_else(|| {
-                    if fqn != "ovic_root" { Some("ovic_root".to_string()) } else { None }
+                    if fqn != "ovel_root" { Some("ovel_root".to_string()) } else { None }
                 });
                 let sup_name = effective_superclass.as_ref().and_then(|s| {
                     self.symtab.as_ref().and_then(|st| {
@@ -983,7 +983,7 @@ impl Elaborator {
                 // position, so consult the symbol table instead.
                 let (req, opt) = match self.symtab.as_ref().and_then(|st| st.find_protocol(cd.name.as_deref().unwrap_or(""))) {
                     Some(sym) => match &sym.data {
-                        ovic_symbol::SymbolData::Protocol { required_methods, optional_methods, .. } =>
+                        ovel_symbol::SymbolData::Protocol { required_methods, optional_methods, .. } =>
                             (required_methods.clone(), optional_methods.clone()),
                         _ => (Vec::new(), Vec::new()),
                     },

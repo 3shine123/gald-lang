@@ -3,7 +3,7 @@
 // ObjC type-introspection dispatch trio on the root class:
 //   isKindOfClass:      — isa-chain walk (official ObjC spelling)
 //   respondsToSelector: — uniform vtable NULL-slot check (compiler pseudo-method)
-//   isEqual:            — identity on ovic_root; NPString/NPNumber override with VALUE equality
+//   isEqual:            — identity on ovel_root; NPString/NPNumber override with VALUE equality
 
 @interface Dog : NPObject
 - (void)speak;

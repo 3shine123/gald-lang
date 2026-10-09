@@ -1,8 +1,8 @@
 #import <Foundation/Foundation.ov>
 
 // Negative: an object-literal subject with a dangling-comparison arm and no
-// object arm. `__auto_type __ovic_sw = @7;` still yields a *pointer*, so
-// `__ovic_sw > 100` is an always-true pointer compare — the arm is taken for
+// object arm. `__auto_type __ovel_sw = @7;` still yields a *pointer*, so
+// `__ovel_sw > 100` is an always-true pointer compare — the arm is taken for
 // every value. Expected: exit=1 with
 //   "switch subject is an object but a dangling comparison 'case' arm"
 //

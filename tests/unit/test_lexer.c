@@ -1,5 +1,5 @@
-#include "ovic/lexer.h"
-#include "ovic/token.h"
+#include "ovel/lexer.h"
+#include "ovel/token.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>

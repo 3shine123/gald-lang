@@ -1,7 +1,7 @@
-#include "ovic/arc.h"
-#include "ovic/cfg.h"
-#include "ovic/ownership.h"
-#include "ovic/ast.h"
+#include "ovel/arc.h"
+#include "ovel/cfg.h"
+#include "ovel/ownership.h"
+#include "ovel/ast.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -16,7 +16,7 @@ static int total = 0, passed = 0;
 
 static symbol_t *make_method(const char *name) {
     symbol_t *m = sym_alloc(SYM_METHOD, name);
-    m->data.method.return_type = calloc(1, sizeof(ovic_type_t));
+    m->data.method.return_type = calloc(1, sizeof(ovel_type_t));
     m->data.method.return_type->prim = TYPE_VOID;
     m->data.method.has_body = 1;
     return m;
@@ -69,7 +69,7 @@ static void test_retained_expr_needs_release(void) {
     TEST("arc local retained expr release");
     ast_expr_t *call = ast_expr_alloc(AST_EXPR_MSG_SEND);
     symbol_t *alloc_m = sym_alloc(SYM_METHOD, "alloc");
-    alloc_m->data.method.return_type = calloc(1, sizeof(ovic_type_t));
+    alloc_m->data.method.return_type = calloc(1, sizeof(ovel_type_t));
     alloc_m->data.method.return_type->prim = TYPE_ID;
     call->data.msg_send.method = alloc_m;
     call->type = ast_type_alloc();
@@ -99,7 +99,7 @@ static void test_ret_var_no_release(void) {
     // id obj = [Foo alloc]; — variable takes ownership
     ast_expr_t *call = ast_expr_alloc(AST_EXPR_MSG_SEND);
     symbol_t *alloc_m = sym_alloc(SYM_METHOD, "alloc");
-    alloc_m->data.method.return_type = calloc(1, sizeof(ovic_type_t));
+    alloc_m->data.method.return_type = calloc(1, sizeof(ovel_type_t));
     alloc_m->data.method.return_type->prim = TYPE_ID;
     call->data.msg_send.method = alloc_m;
     call->type = ast_type_alloc();
@@ -132,7 +132,7 @@ static void test_return_no_release(void) {
     TEST("arc local return no release");
     ast_expr_t *call = ast_expr_alloc(AST_EXPR_MSG_SEND);
     symbol_t *alloc_m = sym_alloc(SYM_METHOD, "alloc");
-    alloc_m->data.method.return_type = calloc(1, sizeof(ovic_type_t));
+    alloc_m->data.method.return_type = calloc(1, sizeof(ovel_type_t));
     alloc_m->data.method.return_type->prim = TYPE_ID;
     call->data.msg_send.method = alloc_m;
     call->type = ast_type_alloc();
@@ -262,7 +262,7 @@ static void test_insert_basic(void) {
     // Build: { [Foo alloc]; }
     ast_expr_t *call = ast_expr_alloc(AST_EXPR_MSG_SEND);
     symbol_t *alloc_m = sym_alloc(SYM_METHOD, "alloc");
-    alloc_m->data.method.return_type = calloc(1, sizeof(ovic_type_t));
+    alloc_m->data.method.return_type = calloc(1, sizeof(ovel_type_t));
     alloc_m->data.method.return_type->prim = TYPE_ID;
     call->data.msg_send.method = alloc_m;
     call->type = ast_type_alloc();

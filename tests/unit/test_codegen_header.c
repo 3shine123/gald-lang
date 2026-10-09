@@ -1,4 +1,4 @@
-#include "ovic/codegen.h"
+#include "ovel/codegen.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -80,7 +80,7 @@ static void test_header_runtime_include(void) {
 
     char *s = emit_header_to_str(u, "X_H");
     ASSERT(s != NULL, "got output");
-    ASSERT(strstr(s, "#include <ovic/runtime.h>") != NULL, "has runtime.h");
+    ASSERT(strstr(s, "#include <ovel/runtime.h>") != NULL, "has runtime.h");
     free(s);
     cg_unit_free(u);
     PASS();
@@ -93,8 +93,8 @@ static void test_header_class_meta(void) {
 
     char *s = emit_header_to_str(u, "META_H");
     ASSERT(s != NULL, "got output");
-    ASSERT(strstr(s, "extern NPClass ovic_Foo_class") != NULL, "has class extern");
-    ASSERT(strstr(s, "void ovic_meta_init(void)") != NULL, "has init decl");
+    ASSERT(strstr(s, "extern NPClass ovel_Foo_class") != NULL, "has class extern");
+    ASSERT(strstr(s, "void ovel_meta_init(void)") != NULL, "has init decl");
     free(s);
     cg_unit_free(u);
     PASS();
@@ -109,7 +109,7 @@ static void test_header_vtable_forward(void) {
 
     char *s = emit_header_to_str(u, "VT_H");
     ASSERT(s != NULL, "got output");
-    ASSERT(strstr(s, "struct ovic_Bar_vtable") != NULL, "has vtable forward");
+    ASSERT(strstr(s, "struct ovel_Bar_vtable") != NULL, "has vtable forward");
     free(s);
     cg_unit_free(u);
     PASS();

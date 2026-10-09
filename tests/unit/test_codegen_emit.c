@@ -1,4 +1,4 @@
-#include "ovic/codegen.h"
+#include "ovel/codegen.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -136,7 +136,7 @@ static void test_emit_call(void) {
     cg_expr_t *a1 = cg_expr_alloc(CEXPR_INT);
     a1->u.int_val = 7;
     cg_expr_t *args[] = {a1};
-    cg_expr_t *call = cg_call_expr("ovic_retain", "void", args, 1);
+    cg_expr_t *call = cg_call_expr("ovel_retain", "void", args, 1);
 
     cg_stmt_t *es = cg_stmt_alloc(CGSTMT_EXPR);
     es->u.expr = call;
@@ -149,7 +149,7 @@ static void test_emit_call(void) {
 
     char *s = emit_to_str(u);
     ASSERT(s != NULL, "got output");
-    ASSERT(strstr(s, "ovic_retain") != NULL, "has ovic_retain");
+    ASSERT(strstr(s, "ovel_retain") != NULL, "has ovel_retain");
     ASSERT(strstr(s, "7") != NULL, "has 7");
     free(s);
     cg_unit_free(u);
@@ -300,13 +300,13 @@ static void test_emit_protocol_meta(void) {
 
     char *s = emit_to_str(u);
     ASSERT(s != NULL, "got output");
-    ASSERT(strstr(s, "ovic_protocol_P") != NULL, "has protocol var");
+    ASSERT(strstr(s, "ovel_protocol_P") != NULL, "has protocol var");
     ASSERT(strstr(s, ".required_methods") != NULL, "has required_methods");
     ASSERT(strstr(s, "doIt") != NULL, "has doIt");
     ASSERT(strstr(s, "getValue") != NULL, "has getValue");
     ASSERT(strstr(s, ".required_count = 2") != NULL, "has required_count");
     ASSERT(strstr(s, ".protocols = (NPProtocol *[])") != NULL, "has class protocols");
-    ASSERT(strstr(s, "&ovic_protocol_P") != NULL, "links to protocol");
+    ASSERT(strstr(s, "&ovel_protocol_P") != NULL, "links to protocol");
     free(s);
     cg_unit_free(u);
     PASS();

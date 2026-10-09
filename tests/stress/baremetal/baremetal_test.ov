@@ -1,7 +1,7 @@
 // baremetal_test.ov — freestanding FULL-syntax stress test.
-// Compiled with `ovicc -rewrite-ovic -fno-libc` (no Foundation, no libc includes
+// Compiled with `ovelc -rewrite-ovel -fno-libc` (no Foundation, no libc includes
 // in generated C), then built on the host per golden/25 methodology:
-//   clang -include ovic/runtime.h  (libc setjmp available)
+//   clang -include ovel/runtime.h  (libc setjmp available)
 //   + runtime_freestanding.c (bump allocator, exception globals, pool)
 //   + helpers.c (console) + asm_ext.s (real ARM64 assembly)
 // Exercises every language feature usable without Foundation.
@@ -20,8 +20,8 @@ extern unsigned asm_rotr32(unsigned v, unsigned r);
 
 // ── preprocessor macro tracks (Sep 2026 fix) ──
 #define BM_MAX 8               // plain C macro → passes through to the C track
-#define BM_TAG @"baretag"      // ovic-syntax macro → filtered OUT of the C track
-                               // (invalid-C passthrough fix); ovicc still expands it
+#define BM_TAG @"baretag"      // ovel-syntax macro → filtered OUT of the C track
+                               // (invalid-C passthrough fix); ovelc still expands it
 
 typedef int (*IntFn)(int);
 typedef int (^IntBin)(int, int);
@@ -38,7 +38,7 @@ struct Ops {
 static int g_hits = 0;          // static global
 static int bump(void) { return ++g_hits; }   // static function
 
-// value-compare: struct == / != (checker desugars to ovic_struct_eq_*)
+// value-compare: struct == / != (checker desugars to ovel_struct_eq_*)
 static void check_struct_eq(void) {
     // Point == first: eq functions emit in discovery order, and Ops's eq
     // calls Point's — so Point's must be discovered before Ops's.
@@ -125,7 +125,7 @@ static unsigned loopsum(int n) {
     - (void) setCode:(int)c;
     @end
     @implementation Err
-    + (id) alloc { return ovic_alloc(self); }
+    + (id) alloc { return ovel_alloc(self); }
     - (id) init  { return self; }
     - (int) tag     { return 100; }
     - (int) heart   { return 1; }
@@ -139,19 +139,19 @@ static unsigned loopsum(int n) {
     - (int) errorCode;
     @end
     @implementation OtherErr
-    + (id) alloc { return ovic_alloc(self); }
+    + (id) alloc { return ovel_alloc(self); }
     - (id) init  { return self; }
     - (int) errorCode { return code; }
     @end
 
     // subclass for typed-@catch isa-chain coverage: the PARENT type (Err)
-    // must catch a SubErr instance via the isKindOf chain (__ovic_eh_isa)
+    // must catch a SubErr instance via the isKindOf chain (__ovel_eh_isa)
     @interface SubErr : Err { int spare; }
     + (id) alloc;
     - (id) init;
     @end
     @implementation SubErr
-    + (id) alloc { return ovic_alloc(self); }
+    + (id) alloc { return ovel_alloc(self); }
     - (id) init  { return self; }
     @end
 
@@ -184,7 +184,7 @@ static unsigned loopsum(int n) {
     + (int) make:(int)b plus:(int)delta { return b * 2 + delta; }
     // NOTE: naming this param `base` corrupts it to `base.__forwarding->__value`
     // (block-capture rewrite is name-global, not function-scoped)
-    + (id)   alloc { return ovic_alloc(self); }
+    + (id)   alloc { return ovel_alloc(self); }
     - (id)   init  { return self; }
     - (id)   initWithUid:(int)u weight:(int)w { uid = u; weight = w; return self; }
     - (int)  tag     { return uid; }
@@ -208,11 +208,11 @@ static unsigned loopsum(int n) {
         kputdec(av);
         kputs("\n");
     }
-    - (id)   retain       { ovic_retain(self); return self; }
-    - (void) release      { ovic_release(self); }
-    - (id)   autorelease { return ovic_autorelease(self); }
+    - (id)   retain       { ovel_retain(self); return self; }
+    - (void) release      { ovel_release(self); }
+    - (id)   autorelease { return ovel_autorelease(self); }
     - (void) dealloc     { }
-    - (BOOL) isKindOfClass:(Class)cls { return ovic_isKindOfClass(self, cls); }
+    - (BOOL) isKindOfClass:(Class)cls { return ovel_isKindOfClass(self, cls); }
     - (BOOL) isEqual:(id)object { return self == object; }
     @end
 
@@ -227,7 +227,7 @@ static unsigned loopsum(int n) {
     - (void) setBoost:(int)b;
     @end
     @implementation TurboWidget
-    + (id) alloc { return ovic_alloc(self); }
+    + (id) alloc { return ovel_alloc(self); }
     - (id) init  { return self; }
     - (int) tag  { return [super tag] + boost; }  // super dispatch
     - (int) boost { return boost; }
@@ -246,7 +246,7 @@ static unsigned loopsum(int n) {
     - (id) objectAtIndex:(unsigned)i;
     @end
     @implementation Array
-    + (id) alloc { return ovic_alloc(self); }
+    + (id) alloc { return ovel_alloc(self); }
     - (id) init  { return self; }
     - (void) add:(id)obj { if (_n < 8) { _items[_n] = obj; _n++; } }
     - (unsigned) count   { return (unsigned)_n; }
@@ -269,7 +269,7 @@ static unsigned loopsum(int n) {
 - (T) value;
 @end
 @implementation Box
-+ (id) alloc { return ovic_alloc(self); }
++ (id) alloc { return ovel_alloc(self); }
 - (id) init  { return self; }
 - (void) set:(T)v { _v = v; }
 - (T) value { return _v; }
@@ -285,7 +285,7 @@ static unsigned loopsum(int n) {
 - (void) setVoice:(int)v;
 @end
 @implementation Animal
-+ (id) alloc { return ovic_alloc(self); }
++ (id) alloc { return ovel_alloc(self); }
 - (id) init  { return self; }
 - (int) speak { return voice; }
 - (void) setVoice:(int)v { voice = v; }
@@ -300,13 +300,13 @@ static unsigned loopsum(int n) {
 - (void) setLeash:(int)l;
 @end
 @implementation Dog
-+ (id) alloc { return ovic_alloc(self); }
++ (id) alloc { return ovel_alloc(self); }
 - (id) init  { return self; }
 - (int) speak { return [super speak] + leash; }   // super dispatch + own ivar
 - (void) setLeash:(int)l { leash = l; }
 @end
 
-// C function that RECEIVES a ovic object and sends messages to it
+// C function that RECEIVES a ovel object and sends messages to it
 static int poke_tag(Metal::Widget *w) { return [w tag]; }
 static int poke_id_proto(id<Metal::Tagged> t) { return [t tag]; }   // id<P> receiver
 
@@ -408,7 +408,7 @@ static int sync_early(Metal::Widget *w) {
 }
 
 int main() {
-    // (ovic_metaInit() is emitted by codegen at the top of main)
+    // (ovel_metaInit() is emitted by codegen at the top of main)
     kputs("=== baremetal stress ===\n");
 
     // ── 1. C layer: struct eq / enum switch / loops / asm ──
@@ -702,7 +702,7 @@ skip_hit:
     kputdec(sync_early(w));
     kputs(" (relock survived)\n");
 
-    // typed @catch through the PARENT chain (__ovic_eh_isa / isKindOf)
+    // typed @catch through the PARENT chain (__ovel_eh_isa / isKindOf)
     Metal::SubErr *se = [[Metal::SubErr alloc] init];
     [se setCode:99];
     @try {

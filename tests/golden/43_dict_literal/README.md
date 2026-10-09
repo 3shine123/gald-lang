@@ -6,7 +6,7 @@
 
 **`@{}` = 空字典**（ObjC 语义：`@{}` 与 `@[]` 是两个字面量）；无冒号的非空 `@{a, b}` 保留宽容的数组回退。
 
-**键相等语义 = 值语义（本轮用户拍板）**：`isEqual:` 在 `ovic_root` 上仍是**指针身份**（同 `NSObject`），但 `NPString` / `NPNumber` 各自重写为**值相等**（委托 `isEqualToString:` / `isEqualToNumber:`，ObjC 的 NSString/NSNumber 正是如此）。这是字典键可用性的语义保证（2026-09-30 更新：字面量 interning 已落地，同内容字面量现为同一对象；值相等仍是语义保证）。`NPDictionary` 自身也按内容实现 `isEqual:`（同 count 且每键映射到相等的值）。
+**键相等语义 = 值语义（本轮用户拍板）**：`isEqual:` 在 `ovel_root` 上仍是**指针身份**（同 `NSObject`），但 `NPString` / `NPNumber` 各自重写为**值相等**（委托 `isEqualToString:` / `isEqualToNumber:`，ObjC 的 NSString/NSNumber 正是如此）。这是字典键可用性的语义保证（2026-09-30 更新：字面量 interning 已落地，同内容字面量现为同一对象；值相等仍是语义保证）。`NPDictionary` 自身也按内容实现 `isEqual:`（同 count 且每键映射到相等的值）。
 
 **用例**（`dict_literal.ov`，9 段）：
 
@@ -28,10 +28,10 @@
 illegal type 'int' in a dictionary literal — keys and values must be Objective-C objects
 ```
 
-对齐 ObjC 的 "collection element of type 'int' is not an Objective-C object"；裸标量发进 `ovic_dictionary_create` 的 vararg 会编译通过、运行期读垃圾。checker 逐**键与值**都检查（这一段修复同时让字面量内层的 `@(expr)` 装箱能触发改写）。
+对齐 ObjC 的 "collection element of type 'int' is not an Objective-C object"；裸标量发进 `ovel_dictionary_create` 的 vararg 会编译通过、运行期读垃圾。checker 逐**键与值**都检查（这一段修复同时让字面量内层的 `@(expr)` 装箱能触发改写）。
 
-**codegen**：`@{k: v, ...}` → `ovic_dictionary_create(n, k1, v1, ..., kn, vn)`——弱符号 helper（仿 `ovic_array_create`），仅当本 TU 内有 `NPDictionary` 时发射。nil 键跳过（不给扫描留洞）、nil 值存 NULL。
+**codegen**：`@{k: v, ...}` → `ovel_dictionary_create(n, k1, v1, ..., kn, vn)`——弱符号 helper（仿 `ovel_array_create`），仅当本 TU 内有 `NPDictionary` 时发射。nil 键跳过（不给扫描留洞）、nil 值存 NULL。
 
-**确定性与内存管理**：本特性与内存管理模式无关，ARC 与 `-fno-ovic-arc` 输出逐字节相同。
+**确定性与内存管理**：本特性与内存管理模式无关，ARC 与 `-fno-ovel-arc` 输出逐字节相同。
 
 **已知限制（如实）**：`NPDictionary` / `NPMutableDictionary` **已接泛型**（`NPDictionary<K, V>` 双参数特化），但 `objectForKeyedSubscript:`（`d[@"k"]`）**刻意未声明**——checker 的对象下标改写只认 `objectAtIndex:`，声明它反而会宣传一个会被发到错 selector 的写法。

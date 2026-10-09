@@ -1,13 +1,13 @@
-#ifndef OVIC_RUNTIME_H
-#define OVIC_RUNTIME_H
+#ifndef OVEL_RUNTIME_H
+#define OVEL_RUNTIME_H
 
 /*
- * Ovic runtime header.
+ * Ovel runtime header.
  *
  * Two modes:
  *   default               — host/OS mode: pulls in libc <setjmp.h>/<stdarg.h>,
  *                           exception state is thread-local (__thread).
- *   __OVIC_FREESTANDING   — bare-metal mode (set by `ovicc -fno-libc`):
+ *   __OVEL_FREESTANDING   — bare-metal mode (set by `ovelc -fno-libc`):
  *                           no libc headers; setjmp/longjmp map to Clang
  *                           builtins; exception state is plain globals
  *                           (single-core assumption). The user supplies
@@ -18,7 +18,7 @@
 #include <stddef.h>
 #include <stdbool.h>
 
-#ifdef __OVIC_FREESTANDING
+#ifdef __OVEL_FREESTANDING
 typedef void *jmp_buf[16];
 #define setjmp(env)         __builtin_setjmp(env)
 #define longjmp(env, val)   __builtin_longjmp((env), (val))
@@ -40,15 +40,15 @@ typedef struct {
 } SEL;
 
 typedef struct NPClass NPClass;
-typedef struct ovic_root ovic_root;
+typedef struct ovel_root ovel_root;
 typedef struct NPObject NPObject;
 typedef struct NPString NPString;
 typedef NPObject *id;
-typedef NPObject *ovic_id_t;
+typedef NPObject *ovel_id_t;
 
-/* Always declared: the transpiler's ovic_metaInit() references it.
+/* Always declared: the transpiler's ovel_metaInit() references it.
  * Definition comes from the user (freestanding) or Foundation (host). */
-extern NPClass OVIC_CLASS_$_ovic_root;
+extern NPClass OVEL_CLASS_$_ovel_root;
 
 /* memcpy is used by the @try/@catch @finally jmp_buf save/restore
  * (the generated code always calls memcpy for nesting save/restore).
@@ -57,17 +57,17 @@ extern NPClass OVIC_CLASS_$_ovic_root;
 void *memcpy(void *dst, const void *src, size_t n);
 #endif
 
-#ifdef __OVIC_FREESTANDING
+#ifdef __OVEL_FREESTANDING
 
-#ifndef OVIC_ROOT_DEFINED
-#define OVIC_ROOT_DEFINED
-struct ovic_root {
+#ifndef OVEL_ROOT_DEFINED
+#define OVEL_ROOT_DEFINED
+struct ovel_root {
     struct NPClass *isa;
     uint32_t retain_count;
 };
 #endif
 
-#endif /* end of __OVIC_FREESTANDING guarded structs */
+#endif /* end of __OVEL_FREESTANDING guarded structs */
 
 #ifndef NPOBJECT_DEFINED
 #define NPOBJECT_DEFINED
@@ -78,20 +78,20 @@ struct NPObject {
 #endif
 
 /* Key-value-coding accessor table for this class (NPPredicate support).
- * Emitted by codegen as the static array OVIC_KVC_$_<Class> when the TU can
+ * Emitted by codegen as the static array OVEL_KVC_$_<Class> when the TU can
  * see the NPPredicate declaration; the last entry's key is NULL (sentinel).
- * NULL on classes compiled without KVC emission — ovic_kvc_lookup skips
+ * NULL on classes compiled without KVC emission — ovel_kvc_lookup skips
  * those levels and walks on to the superclass. Appended last: existing
  * designated-initializer metadata (`.field = ...`) leaves it NULL. */
 /* Key-value-coding accessor table entry (NPPredicate support).
- * Emitted by codegen as the static array OVIC_KVC_$_<Class> when the TU can
+ * Emitted by codegen as the static array OVEL_KVC_$_<Class> when the TU can
  * see the NPPredicate declaration; the last entry's key is NULL (sentinel).
  * The getter wraps an ordinary static vtable dispatch and returns a boxed
  * result (scalars become NPNumber), so the engine needs no reflection. */
-typedef struct ovic_kvc_entry {
+typedef struct ovel_kvc_entry {
     const char *key;            /* NULL marks the sentinel end */
     id (*get)(id self);
-} ovic_kvc_entry;
+} ovel_kvc_entry;
 
 struct NPClass {
     const char *name;
@@ -101,14 +101,14 @@ struct NPClass {
     void *class_vtable;
     struct NPProtocol **protocols;
     int protocol_count;
-    /* Populated by ovic_metaInit() (codegen). ovic_release() calls it when the
+    /* Populated by ovel_metaInit() (codegen). ovel_release() calls it when the
      * retain count reaches 0, so per-class dealloc cleanup (free-ing ivars)
      * actually runs. NULL if the class defines no instance dealloc. */
     void (*dealloc)(NPObject *, SEL);
     /* KVC: key → getter (id (*)(id)). Compiled-time table, no reflection:
      * a key lookup walks the isa chain comparing key strings, then calls
      * the getter — which is an ordinary static vtable dispatch inside. */
-    const struct ovic_kvc_entry *kvc_entries;
+    const struct ovel_kvc_entry *kvc_entries;
 };
 
 // ─── Protocol types ──────────────────────────────────────────────────────────
@@ -135,10 +135,10 @@ struct NPProtocol {
    conformance is metadata-based: proto identity/name match or required-method
    subset check against the class's protocol graph. NULL-safe: any argument
    NULL → 0. */
-int ovic_class_conformsToProtocol(NPClass *cls, struct NPProtocol *proto);
+int ovel_class_conformsToProtocol(NPClass *cls, struct NPProtocol *proto);
 /* Category TUs can add protocol conformances to the owning class metadata
  * after static initialization. The registration is idempotent. */
-void ovic_register_category_protocols(NPClass *cls, struct NPProtocol **protocols, int count);
+void ovel_register_category_protocols(NPClass *cls, struct NPProtocol **protocols, int count);
 
 // ─── Internal types (for runtime implementation) ────────────────────────────────
 
@@ -168,83 +168,83 @@ struct np_object {
 
 SEL sel_registerName(const char *name);
 
-/* Class-metadata initialization. The transpiler emits `ovic_metaInit()` at the
+/* Class-metadata initialization. The transpiler emits `ovel_metaInit()` at the
  * top of every `main` and declares it in generated C; every other symbol in this
  * header is snake_case, so hand-written host code naturally reaches for
- * `ovic_meta_init()` and hits an implicit-declaration error. This alias accepts
+ * `ovel_meta_init()` and hits an implicit-declaration error. This alias accepts
  * that spelling. The target is defined by the generated C (weak, so exactly one
  * TU's copy wins the link); it is not declared here because a declaration would
  * force every TU — including ones with no classes — to define it. */
-void ovic_meta_init(void);
+void ovel_meta_init(void);
 
 /* Memory allocator (user-provided in freestanding; libc calloc/free on host).
- * ovic_malloc must zero-initialize memory. */
-void *ovic_malloc(size_t size);
-void  ovic_free(void *ptr);
+ * ovel_malloc must zero-initialize memory. */
+void *ovel_malloc(size_t size);
+void  ovel_free(void *ptr);
 
-NPObject *ovic_alloc(NPClass *cls);
-NPObject *ovic_init(NPObject *self);
+NPObject *ovel_alloc(NPClass *cls);
+NPObject *ovel_init(NPObject *self);
 
 // Exception globals (TLS for thread safety; plain globals in freestanding)
-#ifdef __OVIC_FREESTANDING
-extern jmp_buf __ovic_exception_buf;
-extern id     __ovic_exception_value;
+#ifdef __OVEL_FREESTANDING
+extern jmp_buf __ovel_exception_buf;
+extern id     __ovel_exception_value;
 #else
-extern __thread jmp_buf __ovic_exception_buf;
-extern __thread id     __ovic_exception_value;
+extern __thread jmp_buf __ovel_exception_buf;
+extern __thread id     __ovel_exception_value;
 #endif
 
 // Checked-exception (-eh checked) error flag: 1 while an error propagates.
-// Set by desugared `@throw`, cleared by the matching `@catch`; every ovic
+// Set by desugared `@throw`, cleared by the matching `@catch`; every ovel
 // call site checks it and early-returns to propagate. Same TLS/freestanding
 // split as the sjlj exception state above.
-#ifdef __OVIC_FREESTANDING
-extern int  __ovic_eh_flag;
-extern id   __ovic_eh_val;
+#ifdef __OVEL_FREESTANDING
+extern int  __ovel_eh_flag;
+extern id   __ovel_eh_val;
 #else
-extern __thread int  __ovic_eh_flag;
-extern __thread id   __ovic_eh_val;
+extern __thread int  __ovel_eh_flag;
+extern __thread id   __ovel_eh_val;
 #endif
 /* Isa check for typed catches: 1 when obj's isa chain matches cls.
- * NULL obj never matches. The desugar passes &OVIC_CLASS_$_<Flat> for the
+ * NULL obj never matches. The desugar passes &OVEL_CLASS_$_<Flat> for the
  * catch type (codegen emits the extern declaration in the same TU). */
-int __ovic_eh_isa(NPObject *obj, NPClass *cls);
+int __ovel_eh_isa(NPObject *obj, NPClass *cls);
 /* Uncaught checked exception escaped main: print ObjC wording + abort().
  * Called by main's function-tail guard (desugar) instead of `return zero`. */
-void ovic_eh_uncaught(void);
+void ovel_eh_uncaught(void);
 
-NPObject *ovic_retain(NPObject *obj);
-void ovic_release(NPObject *obj);
-NPObject *ovic_autorelease(NPObject *obj);
-BOOL ovic_isKindOf(NPObject *obj, NPClass *cls);
-/* Official ObjC spelling of ovic_isKindOf (same isa-chain walk). */
-BOOL ovic_isKindOfClass(NPObject *obj, NPClass *cls);
+NPObject *ovel_retain(NPObject *obj);
+void ovel_release(NPObject *obj);
+NPObject *ovel_autorelease(NPObject *obj);
+BOOL ovel_isKindOf(NPObject *obj, NPClass *cls);
+/* Official ObjC spelling of ovel_isKindOf (same isa-chain walk). */
+BOOL ovel_isKindOfClass(NPObject *obj, NPClass *cls);
 
 /* KVC lookup: walk obj's isa chain, scan each class's kvc_entries table for
  * `key`, call the getter. NULL when no class in the chain declares the key
  * (the caller — valueForKey: / the predicate engine — reports the error).
  * Lives here so the NPPredicate engine (Foundation) and a direct valueForKey:
  * call share one implementation. */
-id ovic_kvc_value(id obj, const char *key);
+id ovel_kvc_value(id obj, const char *key);
 
 // ─── Autorelease pool API ────────────────────────────────────────────────────────
 
-typedef struct ovic_autoreleasepool ovic_autoreleasepool_t;
-ovic_autoreleasepool_t *ovic_autoreleasepoolPush(void);
-void ovic_autoreleasepoolPop(ovic_autoreleasepool_t *pool);
+typedef struct ovel_autoreleasepool ovel_autoreleasepool_t;
+ovel_autoreleasepool_t *ovel_autoreleasepoolPush(void);
+void ovel_autoreleasepoolPop(ovel_autoreleasepool_t *pool);
 
 // ─── Async task API (route map item #4) ─────────────────────────────────────
 
 /* A cooperative async task. The desugared async method is a state machine:
  * each `await` splits the body into a segment stored in one switch state.
- * The generated method body creates a task, pumps ovic_task_resume until the
+ * The generated method body creates a task, pumps ovel_task_resume until the
  * state machine finishes (single-threaded cooperative scheduling: pumping
  * always makes progress), and reads the result from the frame. */
 typedef struct NPTask NPTask;
 
 /* State-machine entry written by the desugar pass.
  * Returns 0 = suspended at an await, 1 = finished. */
-typedef int (*ovic_task_entry_fn)(NPTask *task);
+typedef int (*ovel_task_entry_fn)(NPTask *task);
 
 struct NPTask {
     int state;                          /* current state-machine state */
@@ -254,7 +254,7 @@ struct NPTask {
                                            `state` — legacy create uses
                                            state=1 for the entry's first
                                            segment) */
-    ovic_task_entry_fn entry;           /* state machine body */
+    ovel_task_entry_fn entry;           /* state machine body */
     NPObject *self_obj;                 /* receiver the method runs on */
     void *frame;                        /* lifted locals (per-method struct) */
     void *result;                       /* return value slot (caller casts) */
@@ -263,20 +263,20 @@ struct NPTask {
 
 /* Create a task. `frame_size` is the size of the method's lifted-locals
  * struct; the frame is zero-initialized and owned by the task. */
-NPTask *ovic_task_create(ovic_task_entry_fn entry, NPObject *self_obj, size_t frame_size);
+NPTask *ovel_task_create(ovel_task_entry_fn entry, NPObject *self_obj, size_t frame_size);
 
 /* Run the state machine until it suspends (return 0) or finishes (return 1). */
-int ovic_task_resume(NPTask *task);
+int ovel_task_resume(NPTask *task);
 
 /* Pump the task to completion (cooperative single-thread scheduling) and
  * free it. Returns the task's result slot value. Legacy M1/M2 API — the
  * NPTask design (doc/async_nptask_plan.md) supersedes it with
- * start/await/mark_ready + ovic_sched_run; removed with the stage-D desugar
+ * start/await/mark_ready + ovel_sched_run; removed with the stage-D desugar
  * switch. */
-void *ovic_task_join(NPTask *task);
+void *ovel_task_join(NPTask *task);
 
 /* Mark the task finished (called by the state machine's final state). */
-void ovic_task_finish(NPTask *task);
+void ovel_task_finish(NPTask *task);
 
 // ─── NPTask scheduling layer (doc/async_nptask_plan.md, stage C) ────────────
 /* Lazy tasks + a cooperative ready queue. Mechanism only: scheduling POLICY
@@ -285,15 +285,15 @@ void ovic_task_finish(NPTask *task);
  * runtime_freestanding.c, fully usable on bare metal. */
 
 /* Allocator injection (C++ promise_type custom operator new precedent):
- * defaults to malloc/free on the host and ovic_malloc/ovic_free in
+ * defaults to malloc/free on the host and ovel_malloc/ovel_free in
  * freestanding. NULL arguments fall back to the defaults. Must be called
  * before the first task is created. */
-typedef void *(*ovic_task_alloc_fn)(size_t);
-typedef void (*ovic_task_free_fn)(void *);
-void ovic_task_set_allocator(ovic_task_alloc_fn alloc, ovic_task_free_fn free_fn);
+typedef void *(*ovel_task_alloc_fn)(size_t);
+typedef void (*ovel_task_free_fn)(void *);
+void ovel_task_set_allocator(ovel_task_alloc_fn alloc, ovel_task_free_fn free_fn);
 
 /* READY → enqueue. Idempotent: starting a started/finished task is a no-op. */
-int ovic_task_start(NPTask *task);
+int ovel_task_start(NPTask *task);
 
 /* Suspend the caller until `task` finishes; returns its (cached) result.
  * Auto-starts a not-yet-started task. Safe to call repeatedly — the result
@@ -301,23 +301,23 @@ int ovic_task_start(NPTask *task);
  * awaiting itself is fatal. When the caller is not itself a task (top-level
  * synchronous context), this pumps the queue until the task completes
  * (blocking-join shape). */
-void *ovic_task_await(NPTask *task);
+void *ovel_task_await(NPTask *task);
 
 /* Event-source hook: re-enqueue a suspended task (interrupt / DMA callback /
  * I/O completion on the host). No-op for tasks that are finished or already
  * queued. */
-void ovic_task_mark_ready(NPTask *task);
+void ovel_task_mark_ready(NPTask *task);
 
 /* Pump: run every ready task until it suspends or finishes, until the queue
  * drains, then return. The bare-metal drive pattern is a main loop of
- * `ovic_sched_run()` + a WFI / event wait — the pump is never invoked
+ * `ovel_sched_run()` + a WFI / event wait — the pump is never invoked
  * implicitly in freestanding mode. */
-void ovic_sched_run(void);
+void ovel_sched_run(void);
 
-/* The task currently executing inside ovic_sched_run (NULL at top level).
- * Used by ovic_task_await for self-await detection and by stage-D desugar
+/* The task currently executing inside ovel_sched_run (NULL at top level).
+ * Used by ovel_task_await for self-await detection and by stage-D desugar
  * for in-task suspension. */
-NPTask *ovic_task_current(void);
+NPTask *ovel_task_current(void);
 
 // ─── Internal API (for runtime implementation) ───────────────────────────────────
 
@@ -332,7 +332,7 @@ void np_object_dealloc(np_object_t *obj);
 // ─── Logging (like NSLog / NSObjCRuntime.h) ───────────────────────────────────
 
 void NPLog(NPString *format, ...);
-#ifndef __OVIC_FREESTANDING
+#ifndef __OVEL_FREESTANDING
 void __NPLogv(NPString *format, va_list args);
 #endif
 
@@ -349,20 +349,20 @@ void _Block_release(const void *aBlock);
 
 // ─── Weak reference API ─────────────────────────────────────────────────────────
 
-void ovic_weakRegister(NPObject **weak_loc, NPObject *target);
-void ovic_weakUnregister(NPObject **weak_loc);
-void ovic_weakClearAll(NPObject *target);
+void ovel_weakRegister(NPObject **weak_loc, NPObject *target);
+void ovel_weakUnregister(NPObject **weak_loc);
+void ovel_weakClearAll(NPObject *target);
 
 // ─── String literals ──────────────────────────────────────────────────────────
 
-NPObject *ovic_stringFromCstr(const char *cstr);
-void ovic_weakAutoCleanup(void *ptr);
+NPObject *ovel_stringFromCstr(const char *cstr);
+void ovel_weakAutoCleanup(void *ptr);
 
 // ─── @synchronized monitors ──────────────────────────────────────────────────
 //
 // Per-object lock table keyed by object address (FNV-1a into a fixed bucket
-// array). `ovic_syncLock` spins until the bucket's atomic flag is acquired and
-// returns the bucket index to hand to `ovic_syncUnlock`; the generated code
+// array). `ovel_syncLock` spins until the bucket's atomic flag is acquired and
+// returns the bucket index to hand to `ovel_syncUnlock`; the generated code
 // holds it in a `long` whose cleanup attribute releases the lock on every
 // scope exit (return/break/continue included — `longjmp` past the scope is
 // the one exit the attribute cannot see, so the checker warns on `@throw`
@@ -372,9 +372,9 @@ void ovic_weakAutoCleanup(void *ptr);
 // exclusion. Freestanding builds keep the API (single-core: lock/unlock are
 // no-ops) so transpiled code compiles unchanged.
 
-long ovic_syncLock(void *object);
-void ovic_syncUnlock(long bucket);
-void ovic_syncAutoCleanup(void *ptr);   // cleanup attr: long* → unlock
+long ovel_syncLock(void *object);
+void ovel_syncUnlock(long bucket);
+void ovel_syncAutoCleanup(void *ptr);   // cleanup attr: long* → unlock
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
 
@@ -383,4 +383,4 @@ void ovic_syncAutoCleanup(void *ptr);   // cleanup attr: long* → unlock
 #define NP_CLASS_SUPER(cls)       ((cls)->superclass)
 #define NP_VTABLE_LOOKUP(obj, idx)  ((obj)->isa->vtable->methods[(idx)])
 
-#endif /* OVIC_OBJECT_H */
+#endif /* OVEL_OBJECT_H */

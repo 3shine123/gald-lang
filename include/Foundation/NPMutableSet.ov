@@ -71,7 +71,7 @@
     if (!obj) return;
     for (size_t i = 0; i < _count; i++) {
         if (_items[i] && [_items[i] isEqual:obj]) {
-            ovic_release(_items[i]);
+            ovel_release(_items[i]);
             for (size_t j = i; j + 1 < _count; j++) {
                 _items[j] = _items[j + 1];
             }
@@ -85,7 +85,7 @@
 - (void)removeAllObjects {
     for (size_t i = 0; i < _count; i++) {
         if (_items[i]) {
-            ovic_release(_items[i]);
+            ovel_release(_items[i]);
             _items[i] = NULL;
         }
     }

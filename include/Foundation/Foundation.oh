@@ -5,7 +5,7 @@
 // 预编译库里存一份 —— 也就是 Objective-C 的模型。
 //
 //     #import <Foundation/Foundation.oh>            // 纯声明
-//     ovicc app.ov -I include -L <libdir> -lovicafoundation -o app
+//     ovelc app.ov -I include -L <libdir> -lovelfoundation -o app
 //
 // 自包含单 TU 构建（实现内联进每个使用者，无需库）导入实现伞头：
 //
@@ -15,7 +15,7 @@
 #include <stdint.h>
 #include <stddef.h>
 
-#include "ovic/runtime.h"
+#include "ovel/runtime.h"
 
 #import "NPObject.oh"
 #import "NPString.oh"

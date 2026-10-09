@@ -8,6 +8,6 @@ int main() {
     printf("%s\n", [g greeting:"world"]);
     printf("count=%d\n", [g count]);
     printf("helper=%d\n", GreeterHelper(41));
-    ovic_release(g);
+    ovel_release(g);
     return 0;
 }

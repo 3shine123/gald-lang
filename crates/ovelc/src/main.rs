@@ -44,22 +44,22 @@ fn scan_generic_instantiations(source: &str) -> Vec<String> {
 }
 use clap::{Command as ClapCommand, Arg};
 use clap_complete::{Shell, generate};
-use ovicc::pipeline::{Pipeline, DEFAULT_EH_CHECKED};
+use ovelc::pipeline::{Pipeline, DEFAULT_EH_CHECKED};
 use attrs;
 
-/// Locate the installed ovicc bundle root (the directory containing `include/`).
+/// Locate the installed ovelc bundle root (the directory containing `include/`).
 ///
-/// Resolution order (first candidate containing `include/ovic/runtime.h` wins):
-///   1. `$OVIC_HOME` — explicit override (also works when installed anywhere)
-///   2. the executable's own directory (bundle layout: `bin/ovicc` + `include/`)
-///   3. up to three parent directories (dev layout: `target/<profile>/ovicc`)
+/// Resolution order (first candidate containing `include/ovel/runtime.h` wins):
+///   1. `$OVEL_HOME` — explicit override (also works when installed anywhere)
+///   2. the executable's own directory (bundle layout: `bin/ovelc` + `include/`)
+///   3. up to three parent directories (dev layout: `target/<profile>/ovelc`)
 ///   4. the current directory (last-resort fallback)
 ///
 /// This replaces the old hard-coded "three parents up" guess, which broke once
-/// the install layout (e.g. on Windows) differed from `target/release/ovicc`.
+/// the install layout (e.g. on Windows) differed from `target/release/ovelc`.
 fn resolve_bundle_root() -> std::path::PathBuf {
     let mut candidates: Vec<std::path::PathBuf> = Vec::new();
-    if let Ok(home) = env::var("OVIC_HOME") {
+    if let Ok(home) = env::var("OVEL_HOME") {
         if !home.trim().is_empty() {
             candidates.push(std::path::PathBuf::from(home));
         }
@@ -67,8 +67,8 @@ fn resolve_bundle_root() -> std::path::PathBuf {
     if let Ok(exe) = env::current_exe() {
         let exe = std::fs::canonicalize(&exe).unwrap_or(exe);
         if let Some(dir) = exe.parent() {
-            // Prefer the bundle root (`PREFIX`, where `bin/ovicc` lives →
-            // `PREFIX/include`) and the dev root (`target/<profile>/ovicc` →
+            // Prefer the bundle root (`PREFIX`, where `bin/ovelc` lives →
+            // `PREFIX/include`) and the dev root (`target/<profile>/ovelc` →
             // `project/include`) BEFORE the executable's own directory. The
             // latter may contain a *stale* `include/` copied by build.rs, which
             // must not shadow the source tree.
@@ -84,7 +84,7 @@ fn resolve_bundle_root() -> std::path::PathBuf {
     }
     candidates.push(std::path::PathBuf::from("."));
     for c in &candidates {
-        if c.join("include").join("ovic").join("runtime.h").exists() {
+        if c.join("include").join("ovel").join("runtime.h").exists() {
             return c.clone();
         }
     }
@@ -94,13 +94,13 @@ fn resolve_bundle_root() -> std::path::PathBuf {
 /// Pick the C compiler for the chosen codegen backend, as a command word list
 /// (so multi-word compilers like `zig cc` work).
 ///
-/// - `$OVIC_CC` overrides everything (may contain spaces, e.g. `zig cc`).
+/// - `$OVEL_CC` overrides everything (may contain spaces, e.g. `zig cc`).
 /// - `-backend gcc` → `gcc`.
 /// - Otherwise: on Windows the default is `zig cc` (a single self-contained
 ///   toolchain that bundles libc for `windows-gnu`); on other platforms the
 ///   default is `clang`.
 fn select_c_compiler(backend: attrs::Backend) -> Vec<String> {
-    if let Ok(cc) = env::var("OVIC_CC") {
+    if let Ok(cc) = env::var("OVEL_CC") {
         let words: Vec<String> = cc.split_whitespace().map(|s| s.to_string()).collect();
         if !words.is_empty() {
             return words;
@@ -118,28 +118,28 @@ fn select_c_compiler(backend: attrs::Backend) -> Vec<String> {
     }
 }
 
-/// clap Command describing the ovicc CLI — used to generate shell completions.
+/// clap Command describing the ovelc CLI — used to generate shell completions.
 ///
-/// NOTE: ovicc's real CLI uses *single-dash* long flags (`-rewrite-ovic`,
-/// `-fno-ovic-arc`, `-arch`), which clap would normally normalize to
-/// `--rewrite-ovic` etc. We declare the clap options, then post-process the
+/// NOTE: ovelc's real CLI uses *single-dash* long flags (`-rewrite-ovel`,
+/// `-fno-ovel-arc`, `-arch`), which clap would normally normalize to
+/// `--rewrite-ovel` etc. We declare the clap options, then post-process the
 /// generated script in `gen_completions` to emit the single-dash forms.
 fn clap_command() -> ClapCommand {
-    ClapCommand::new("ovicc")
-        .version(env!("OVIC_VERSION"))
-        .about("Ovic language compiler")
+    ClapCommand::new("ovelc")
+        .version(env!("OVEL_VERSION"))
+        .about("Ovel language compiler")
         .disable_help_flag(true)
         .disable_version_flag(true)
         .disable_help_subcommand(true)
-        .arg(Arg::new("rewrite-ovic").long("rewrite-ovic")
+        .arg(Arg::new("rewrite-ovel").long("rewrite-ovel")
             .help("transpile to C only (no link)"))
         .arg(Arg::new("verbose").short('v').long("verbose")
             .help("show verbose transpilation info"))
         .arg(Arg::new("version").long("version")
             .help("print version and exit"))
-        .arg(Arg::new("arc").long("fovic-arc")
+        .arg(Arg::new("arc").long("fovel-arc")
             .help("enable ARC (default)"))
-        .arg(Arg::new("no-arc").long("fno-ovic-arc")
+        .arg(Arg::new("no-arc").long("fno-ovel-arc")
             .help("disable ARC (MRC)"))
         .arg(Arg::new("no-checker").long("fno-checker")
             .help("skip type checking"))
@@ -183,11 +183,11 @@ fn clap_command() -> ClapCommand {
             .arg(Arg::new("args").value_name("ARGS").num_args(0..).last(true)))
 }
 
-/// Map clap's double-dash normalization back to ovicc's single-dash flags.
+/// Map clap's double-dash normalization back to ovelc's single-dash flags.
 const DOUBLE_TO_SINGLE: &[(&str, &str)] = &[
-    ("--rewrite-ovic", "-rewrite-ovic"),
-    ("--fovic-arc", "-fovic-arc"),
-    ("--fno-ovic-arc", "-fno-ovic-arc"),
+    ("--rewrite-ovel", "-rewrite-ovel"),
+    ("--fovel-arc", "-fovel-arc"),
+    ("--fno-ovel-arc", "-fno-ovel-arc"),
     ("--fno-checker", "-fno-checker"),
     ("--eh", "-eh"),
     ("--ffreestanding", "-ffreestanding"),
@@ -217,7 +217,7 @@ fn gen_completions(shell: &str) {
     };
     let mut cmd = clap_command();
     let mut buf: Vec<u8> = Vec::new();
-    generate(shell, &mut cmd, "ovicc", &mut buf);
+    generate(shell, &mut cmd, "ovelc", &mut buf);
     let text = String::from_utf8_lossy(&buf).to_string();
     let mut out = text;
     for (from, to) in DOUBLE_TO_SINGLE {
@@ -234,10 +234,10 @@ fn gen_completions(shell: &str) {
     println!("{}", dedup.join("\n"));
 }
 
-fn find_libovic(custom_libs: &[String]) -> Option<String> {
+fn find_libovel(custom_libs: &[String]) -> Option<String> {
     if let Ok(exe_path) = std::env::current_exe() {
         if let Some(exe_dir) = exe_path.parent() {
-            let lib_path = exe_dir.join("libovic.a");
+            let lib_path = exe_dir.join("libovel.a");
             if lib_path.exists() {
                 return Some(exe_dir.to_string_lossy().to_string());
             }
@@ -245,12 +245,12 @@ fn find_libovic(custom_libs: &[String]) -> Option<String> {
     }
     let mut paths = vec![
         "builddir".to_string(),
-        "/opt/ovic/lib".to_string(),
-        "/usr/local/lib/ovic".to_string(),
+        "/opt/ovel/lib".to_string(),
+        "/usr/local/lib/ovel".to_string(),
     ];
     for p in custom_libs { paths.push(p.clone()); }
     for p in &paths {
-        let libpath = format!("{}/libovic.a", p);
+        let libpath = format!("{}/libovel.a", p);
         if std::path::Path::new(&libpath).exists() {
             return Some(p.clone());
         }
@@ -258,13 +258,13 @@ fn find_libovic(custom_libs: &[String]) -> Option<String> {
     None
 }
 
-/// Find a precompiled Foundation library, same policy as `find_libovic`:
+/// Find a precompiled Foundation library, same policy as `find_libovel`:
 /// next to the binary first, then known install/dev locations, then the
-/// user's `-L` dirs. Returns the DIRECTORY that holds `libovicfoundation.a`.
-fn find_libovicfoundation(custom_libs: &[String]) -> Option<String> {
+/// user's `-L` dirs. Returns the DIRECTORY that holds `libovelfoundation.a`.
+fn find_libovelfoundation(custom_libs: &[String]) -> Option<String> {
     if let Ok(exe_path) = std::env::current_exe() {
         if let Some(exe_dir) = exe_path.parent() {
-            let lib_path = exe_dir.join("libovicfoundation.a");
+            let lib_path = exe_dir.join("libovelfoundation.a");
             if lib_path.exists() {
                 return Some(exe_dir.to_string_lossy().to_string());
             }
@@ -272,12 +272,12 @@ fn find_libovicfoundation(custom_libs: &[String]) -> Option<String> {
     }
     let mut paths = vec![
         "target/foundation".to_string(), // in-repo dev location (build-foundation-lib.sh default)
-        "/opt/ovic/lib".to_string(),
-        "/usr/local/lib/ovic".to_string(),
+        "/opt/ovel/lib".to_string(),
+        "/usr/local/lib/ovel".to_string(),
     ];
     for p in custom_libs { paths.push(p.clone()); }
     for p in &paths {
-        let libpath = format!("{}/libovicfoundation.a", p);
+        let libpath = format!("{}/libovelfoundation.a", p);
         if std::path::Path::new(&libpath).exists() {
             return Some(p.clone());
         }
@@ -367,14 +367,14 @@ fn compile_to_binary(cc: &[String], c_code: &str, bin_path: &str, include_dirs: 
     // Compiler may be multi-word (e.g. `zig cc`): program + leading args.
     let program = cc.first().map(|s| s.as_str()).unwrap_or("clang");
     let cc_extra: Vec<String> = cc.get(1..).unwrap_or(&[]).to_vec();
-    if verbose { eprintln!("[ovicc] compiling with {}...", cc.join(" ")); }
+    if verbose { eprintln!("[ovelc] compiling with {}...", cc.join(" ")); }
     let self_dir = resolve_bundle_root();
     let include_root = self_dir.join("include");
     let foundation_include = self_dir.join("include").join("Foundation");
-    let runtime_c = self_dir.join("include").join("ovic").join("runtime.c");
+    let runtime_c = self_dir.join("include").join("ovel").join("runtime.c");
     if verbose {
-        eprintln!("[ovicc]   self_dir={:?}", self_dir);
-        eprintln!("[ovicc]   runtime_c={:?}", runtime_c);
+        eprintln!("[ovelc]   self_dir={:?}", self_dir);
+        eprintln!("[ovelc]   runtime_c={:?}", runtime_c);
     }
     let mut clang_args = vec![
         "-x".to_string(), "c".to_string(),
@@ -442,7 +442,7 @@ fn compile_to_binary(cc: &[String], c_code: &str, bin_path: &str, include_dirs: 
     for asm_file in asm_files {
         clang_args.push(asm_file.clone());
     }
-    // Apple frameworks to link (e.g. `-framework Cocoa`): lets Ovic programs
+    // Apple frameworks to link (e.g. `-framework Cocoa`): lets Ovel programs
     // link against ObjC bridges (or the runtime) via a thin C API.
     for fw in frameworks {
         clang_args.push("-framework".to_string());
@@ -459,22 +459,22 @@ fn compile_to_binary(cc: &[String], c_code: &str, bin_path: &str, include_dirs: 
         clang_args.push(d.clone());
     }
     if no_libc {
-        // Freestanding: user provides their own runtime (OVIC_CLASS_$_ovic_root,
+        // Freestanding: user provides their own runtime (OVEL_CLASS_$_ovel_root,
         // exception state, etc.).  Do NOT link the bundled runtime.c (which
         // depends on libc malloc, __thread, etc.).
-        if verbose { eprintln!("[ovicc]   bare-metal mode: skipping runtime.c"); }
+        if verbose { eprintln!("[ovelc]   bare-metal mode: skipping runtime.c"); }
     } else if shared {
         // Shared library: the runtime lives in the host executable — a module
         // must not carry its own copy (duplicate symbols / two metas). It talks
         // to the host through the ModAPI function-pointer table instead.
-        if verbose { eprintln!("[ovicc]   shared-library mode: skipping runtime.c"); }
+        if verbose { eprintln!("[ovelc]   shared-library mode: skipping runtime.c"); }
     } else {
-        // Link a prebuilt static libovic if one is available; otherwise compile
+        // Link a prebuilt static libovel if one is available; otherwise compile
         // the bundled runtime.c source. Never both (duplicate symbols).
-        if let Some(lib_path) = find_libovic(lib_dirs) {
+        if let Some(lib_path) = find_libovel(lib_dirs) {
             clang_args.push("-L".to_string());
             clang_args.push(lib_path);
-            clang_args.push("-lovic".to_string());
+            clang_args.push("-lovel".to_string());
         } else {
             clang_args.push(runtime_c.to_string_lossy().to_string());
         }
@@ -501,7 +501,7 @@ fn compile_to_binary(cc: &[String], c_code: &str, bin_path: &str, include_dirs: 
         clang_args.push("-lm".to_string());
     }
     // Auto-link the precompiled Foundation library when one is findable —
-    // same policy as libovic: found → its real tables win the link; not
+    // same policy as libovel: found → its real tables win the link; not
     // found → silent no-op (a TU that imports Foundation.ov inlines the
     // implementations itself and needs no library). Skipped in freestanding
     // (the bare-metal user provides everything), shared mode (the host owns
@@ -510,14 +510,14 @@ fn compile_to_binary(cc: &[String], c_code: &str, bin_path: &str, include_dirs: 
     // level in main): the archive's STRONG Foundation-only vtable would win
     // the weak merge and trip the __sig cross-TU check (multi_tu case 12).
     // Auto-link is for declaration-only clients (`Foundation.oh`) — the
-    // ObjC model. An explicit `-l ovicfoundation` suppresses the auto one
+    // ObjC model. An explicit `-l ovelfoundation` suppresses the auto one
     // (no duplicate).
-    if !no_libc && !shared && !foundation_impl_inlined && !libs.iter().any(|l| l == "ovicfoundation") {
-        if let Some(fdir) = find_libovicfoundation(lib_dirs) {
-            if verbose { eprintln!("[ovicc]   auto-linking Foundation from {}", fdir); }
+    if !no_libc && !shared && !foundation_impl_inlined && !libs.iter().any(|l| l == "ovelfoundation") {
+        if let Some(fdir) = find_libovelfoundation(lib_dirs) {
+            if verbose { eprintln!("[ovelc]   auto-linking Foundation from {}", fdir); }
             clang_args.push("-L".to_string());
             clang_args.push(fdir);
-            clang_args.push("-lovicfoundation".to_string());
+            clang_args.push("-lovelfoundation".to_string());
         }
     }
     // User link flags: -L dirs then -l libs, right before the implicit-libs
@@ -549,9 +549,9 @@ fn compile_to_binary(cc: &[String], c_code: &str, bin_path: &str, include_dirs: 
             eprintln!("\x1b[1;31merror:\x1b[0m failed to write to clang stdin: {}", e);
             std::process::exit(1);
         }
-        if verbose { eprintln!("[ovicc]   wrote {} bytes to clang", c_code.len()); }
+        if verbose { eprintln!("[ovelc]   wrote {} bytes to clang", c_code.len()); }
     }
-    if verbose { eprintln!("[ovicc]   waiting for clang..."); }
+    if verbose { eprintln!("[ovelc]   waiting for clang..."); }
 
     let status = match child.wait() {
         Ok(s) => s,
@@ -561,7 +561,7 @@ fn compile_to_binary(cc: &[String], c_code: &str, bin_path: &str, include_dirs: 
         }
     };
 
-    if verbose { eprintln!("[ovicc]   clang finished with status: {}", status); }
+    if verbose { eprintln!("[ovelc]   clang finished with status: {}", status); }
 
     if !status.success() {
         eprintln!("Compilation failed");
@@ -569,15 +569,15 @@ fn compile_to_binary(cc: &[String], c_code: &str, bin_path: &str, include_dirs: 
     }
 }
 
-/// All ovicc flags, grouped by dash count.
+/// All ovelc flags, grouped by dash count.
 /// Returns (single_dash_flags, double_dash_flags).
-fn ovicc_flags() -> (Vec<(&'static str, &'static str)>, Vec<(&'static str, &'static str)>) {
+fn ovelc_flags() -> (Vec<(&'static str, &'static str)>, Vec<(&'static str, &'static str)>) {
     let single = vec![
         ("-Werror",       "promote warnings to errors"),
-        ("-emit-bridge-header", "emit a C bridge header for calling Ovic from C"),
-        ("-rewrite-ovic", "transpile to C only (no link)"),
-        ("-fovic-arc",    "enable ARC (default)"),
-        ("-fno-ovic-arc", "disable ARC (MRC)"),
+        ("-emit-bridge-header", "emit a C bridge header for calling Ovel from C"),
+        ("-rewrite-ovel", "transpile to C only (no link)"),
+        ("-fovel-arc",    "enable ARC (default)"),
+        ("-fno-ovel-arc", "disable ARC (MRC)"),
         ("-fno-checker",  "skip type checking"),
         ("-eh",           "exception backend: checked or sjlj (default sjlj; 'legacy' is an alias)"),
         ("-ffreestanding", "bare-metal/freestanding output"),
@@ -606,7 +606,7 @@ fn ovicc_flags() -> (Vec<(&'static str, &'static str)>, Vec<(&'static str, &'sta
 /// Interactive flag picker: shows all matching flags and lets the user select one.
 /// `prefix` is either "-" or "--". Returns the chosen flag, or None on cancel/error.
 fn interactive_flag_picker(prefix: &str) -> Option<&'static str> {
-    let (single, double) = ovicc_flags();
+    let (single, double) = ovelc_flags();
     let (list, label) = if prefix == "--" {
         (double, "double-dash")
     } else {
@@ -618,7 +618,7 @@ fn interactive_flag_picker(prefix: &str) -> Option<&'static str> {
         return None;
     }
 
-    println!("=== Ovic {} flags ===", label);
+    println!("=== Ovel {} flags ===", label);
     for (i, (flag, desc)) in list.iter().enumerate() {
         println!("  {:>2}) {}  \x1b[2m{}\x1b[0m", i + 1, flag, desc);
     }
@@ -659,9 +659,9 @@ fn interactive_flag_picker(prefix: &str) -> Option<&'static str> {
 fn norm_flag(s: &str) -> &str {
     if s.starts_with("--") {
         match s {
-            "--rewrite-ovic" => "-rewrite-ovic",
-            "--fovic-arc" => "-fovic-arc",
-            "--fno-ovic-arc" => "-fno-ovic-arc",
+            "--rewrite-ovel" => "-rewrite-ovel",
+            "--fovel-arc" => "-fovel-arc",
+            "--fno-ovel-arc" => "-fno-ovel-arc",
             "--fno-checker" => "-fno-checker",
             "--eh" => "-eh",
             "--ffreestanding" => "-ffreestanding",
@@ -699,7 +699,7 @@ fn split_flag_value(arg: &str) -> (&str, Option<&str>) {
 
 fn main() {
     let args: Vec<String> = env::args().collect();
-    let version = env!("OVIC_VERSION");
+    let version = env!("OVEL_VERSION");
 
     // Bare "-" or "--" triggers an interactive flag picker.
     if args.len() > 1 && (args[1] == "-" || args[1] == "--") {
@@ -715,7 +715,7 @@ fn main() {
             match status {
                 Ok(s) => std::process::exit(s.code().unwrap_or(1)),
                 Err(e) => {
-                    eprintln!("error re-executing ovicc: {}", e);
+                    eprintln!("error re-executing ovelc: {}", e);
                     std::process::exit(1);
                 }
             }
@@ -726,7 +726,7 @@ fn main() {
 
     // Check for --version / -V first (before any other parsing)
     if args.len() > 1 && (args[1] == "--version" || args[1] == "-V") {
-        println!("ovicc version {}", version);
+        println!("ovelc version {}", version);
         return;
     }
 
@@ -742,8 +742,8 @@ fn main() {
     }
 
     // Hidden --autocomplete mode (mirrors clang): prints matching flags for shell Tab completion.
-    // The shell script calls `ovicc --autocomplete=<whole-command-so-far>` or
-    // `ovicc --autocomplete "<whole-command-so-far>"`.
+    // The shell script calls `ovelc --autocomplete=<whole-command-so-far>` or
+    // `ovelc --autocomplete "<whole-command-so-far>"`.
     if let Some(ac_arg) = args.iter().find(|a| a.starts_with("--autocomplete")) {
         // Strip the "--autocomplete[...]" prefix to get the raw command line.
         let raw = ac_arg.trim_start_matches("--autocomplete");
@@ -758,7 +758,7 @@ fn main() {
                 }
             }
         };
-        let (single, double) = ovicc_flags();
+        let (single, double) = ovelc_flags();
         let all = single.iter().chain(double.iter());
         // The word being completed is the last token — the shell joins words with
         // commas (like clang), so split on commas and whitespace.
@@ -776,17 +776,17 @@ fn main() {
     }
 
     if args.len() < 2 || args[1] == "-h" || args[1] == "--help" {
-        println!("Usage: ovicc [command] [options] <input.ov> [more.ov|file.o|lib.a ...]");
+        println!("Usage: ovelc [command] [options] <input.ov> [more.ov|file.o|lib.a ...]");
         println!();
         println!("Commands:");
         println!("  run                 Compile, run, then delete binary");
         println!();
         println!("Modes (default: compile to binary):");
-        println!("  -rewrite-ovic       Transpile to C only (no link; single input)");
+        println!("  -rewrite-ovel       Transpile to C only (no link; single input)");
         println!();
         println!("Multi-TU (compile mode): extra positional .ov files become additional");
         println!("translation units compiled and linked into the same binary; .o/.a files");
-        println!("are linked as-is. Example: ovicc main.ov lib.ov -I include -o app");
+        println!("are linked as-is. Example: ovelc main.ov lib.ov -I include -o app");
         println!("Transpilation Options:");
         println!("  -o <path>                            Output path (binary or .c)");
         println!("  -I <dir>                             Add include directory");
@@ -799,7 +799,7 @@ fn main() {
         println!("  -V, --version                        Print version and exit");
         println!();
         println!("Runtime Options:");
-        println!("  -fovic-arc                           Enable ARC (default)");
+        println!("  -fovel-arc                           Enable ARC (default)");
         println!("  -g                                   Emit debug symbols (-g -O0 to the C");
         println!("                                     compiler); with -line-directives, LLDB/");
         println!("                                     GDB show .ov/.oh file and line numbers");
@@ -812,7 +812,7 @@ fn main() {
         println!("  -np-map                              Emit a versioned .ov.map sidecar next");
         println!("                                     to the .ov source, mapping generated");
         println!("                                     C lines back to .ov/.oh sources");
-        println!("  -fno-ovic-arc                        Disable ARC (MRC)");
+        println!("  -fno-ovel-arc                        Disable ARC (MRC)");
         println!("  -ffreestanding                       Bare-metal/freestanding output");
         println!("                                     (no libc headers, no TLS, no bundled");
         println!("                                     runtime. The C compiler gets");
@@ -858,7 +858,7 @@ fn main() {
     let mut libs = Vec::new(); // -l <name> → clang -l<name>
     let mut asm_files = Vec::new();
     // Multi-TU mode: positional .ov inputs after the first. Each is transpiled
-    // in its own ovicc pass and linked into the same binary.
+    // in its own ovelc pass and linked into the same binary.
     let mut extra_inputs: Vec<String> = Vec::new();
     // Precompiled objects/archives passed as extra positionals: linked as-is.
     let mut extra_objects: Vec<String> = Vec::new();
@@ -869,7 +869,7 @@ fn main() {
     let mut debug_symbols = false; // -g: emit DWARF via -g -O0 (plan 阶段 3)
     let mut nostdinc = false;    // strip system include paths (orthogonal flag)
     let mut no_comments = false; // readability comments in generated C (on by default)
-    let mut ovic_map = false;      // -np-map: emit a .ov.map sidecar source map
+    let mut ovel_map = false;      // -np-map: emit a .ov.map sidecar source map
     let mut shared = false;      // dynamic library output (-shared/-dynamiclib)
     let mut werror = false;
     let mut verbose = false;
@@ -907,9 +907,9 @@ fn main() {
             let (nj, inline_val) = split_flag_value(&args[j]);
             if nj == "-v" {
                 verbose = true;
-            } else if nj == "-fno-ovic-arc" {
+            } else if nj == "-fno-ovel-arc" {
                 no_arc = true;
-            } else if nj == "-fovic-arc" {
+            } else if nj == "-fovel-arc" {
                 no_arc = false;
             } else if nj == "-fno-checker" {
                 no_checker = true;
@@ -972,13 +972,13 @@ fn main() {
 
     while i < args.len() {
         let (normalized, inline_val) = split_flag_value(&args[i]);
-        if normalized == "-rewrite-ovic" {
+        if normalized == "-rewrite-ovel" {
             mode = "rewrite";
             i += 1;
-        } else if normalized == "-fno-ovic-arc" {
+        } else if normalized == "-fno-ovel-arc" {
             no_arc = true;
             i += 1;
-        } else if normalized == "-fovic-arc" {
+        } else if normalized == "-fovel-arc" {
             no_arc = false;
             i += 1;
         } else if normalized == "-fno-checker" {
@@ -1101,7 +1101,7 @@ fn main() {
             i += 1;
         } else if normalized == "-np-map" || normalized == "--np-map" {
             // Plan 阶段 4: emit the versioned sidecar source map.
-            ovic_map = true;
+            ovel_map = true;
             i += 1;
         } else if normalized.starts_with("-l") && normalized.len() > 2
             && normalized[2..].chars().next().map_or(false, |c| c.is_ascii_alphanumeric())
@@ -1135,9 +1135,9 @@ fn main() {
             && (args[i].ends_with(".ov") || args[i].ends_with(".o") || args[i].ends_with(".a"))
         {
             // Additional input (multi-input mode). .ov → an extra translation
-            // unit (transpiled in its own ovicc pass); .o/.a → linked as-is.
+            // unit (transpiled in its own ovelc pass); .o/.a → linked as-is.
             // Compile mode only: in run mode positionals are program arguments,
-            // and -rewrite-ovic emits one .c per invocation.
+            // and -rewrite-ovel emits one .c per invocation.
             if args[i].ends_with(".ov") {
                 extra_inputs.push(args[i].clone());
             } else {
@@ -1145,7 +1145,7 @@ fn main() {
             }
             i += 1;
         } else if mode == "rewrite" && args[i].ends_with(".ov") {
-            eprintln!("error: multiple inputs are supported in compile mode only — run one -rewrite-ovic per file");
+            eprintln!("error: multiple inputs are supported in compile mode only — run one -rewrite-ovel per file");
             std::process::exit(1);
         } else if mode == "run" {
             program_args.push(args[i].clone());
@@ -1224,23 +1224,23 @@ fn main() {
     }
 
     // C compiler for the link step: default `clang`; `-backend gcc` → `gcc`;
-    // `$OVIC_CC` overrides. (Windows default is also clang.)
+    // `$OVEL_CC` overrides. (Windows default is also clang.)
     let cc = select_c_compiler(pipeline.backend);
     // The C type-name probe (see `ctype_probe`) runs the same compiler's
     // preprocessor, so it needs the same program and target arch.
     pipeline.c_cc = cc.clone();
     pipeline.c_arch = arch.clone();
-    // Escape hatch, same spirit as `$OVIC_CC`: skip the probe entirely (no
+    // Escape hatch, same spirit as `$OVEL_CC`: skip the probe entirely (no
     // compiler is spawned, no header is read). The parser then falls back to
     // the builtin type list and its shape heuristics.
-    pipeline.no_ctype_probe = std::env::var_os("OVIC_NO_CTYPE_PROBE").is_some();
+    pipeline.no_ctype_probe = std::env::var_os("OVEL_NO_CTYPE_PROBE").is_some();
     // `-line-directives` (plan 阶段 2, DEFAULT ON): emit `#line` in the
     // generated C so clang diagnostics point back at the .ov/.oh.
     // `-fno-line-directives` turns it off.
     pipeline.line_directives = !args.iter().any(|a| a == "-fno-line-directives" || a == "--fno-line-directives");
     // `-np-map` (plan 阶段 4): the pipeline extracts the sidecar from the final
     // generated C; the CLI decides where (and whether) it lands on disk.
-    pipeline.ovic_map = ovic_map;
+    pipeline.ovel_map = ovel_map;
 
     let c_code = match pipeline.transpile(&source, &input_path) {
         Ok(code) => code,
@@ -1255,7 +1255,7 @@ fn main() {
         return;
     }
 
-    // Multi-TU mode: transpile each extra .ov in its own ovicc subprocess.
+    // Multi-TU mode: transpile each extra .ov in its own ovelc subprocess.
     // One process per TU is required: codegen's method-metadata tables are
     // process-global (OnceLock), so a second in-process transpile is not
     // possible. Transpile-affecting flags are forwarded; link-only flags
@@ -1263,23 +1263,23 @@ fn main() {
     let mut extra_c_files: Vec<String> = Vec::new();
     if !extra_inputs.is_empty() {
         let exe = std::env::current_exe().unwrap_or_else(|e| {
-            eprintln!("error: cannot locate ovicc for multi-TU transpile: {}", e);
+            eprintln!("error: cannot locate ovelc for multi-TU transpile: {}", e);
             std::process::exit(1);
         });
         for (n, tu) in extra_inputs.iter().enumerate() {
             let stem = Path::new(tu).file_stem().and_then(|s| s.to_str()).unwrap_or("tu");
             let mut tmp = std::env::temp_dir();
-            tmp.push(format!("{}-{}-ovicc-{}.c", stem, std::process::id(), n));
+            tmp.push(format!("{}-{}-ovelc-{}.c", stem, std::process::id(), n));
             let mut cmd: Vec<String> = vec![
                 exe.to_string_lossy().to_string(),
-                "-rewrite-ovic".into(), tu.clone(),
+                "-rewrite-ovel".into(), tu.clone(),
                 "-o".into(), tmp.to_string_lossy().to_string(),
             ];
             for d in &include_dirs {
                 cmd.push("-I".into());
                 cmd.push(d.clone());
             }
-            if no_arc { cmd.push("-fno-ovic-arc".into()); }
+            if no_arc { cmd.push("-fno-ovel-arc".into()); }
             if no_checker { cmd.push("-fno-checker".into()); }
             if werror { cmd.push("-Werror".into()); }
             cmd.push("-eh".into());
@@ -1305,11 +1305,11 @@ fn main() {
             if no_comments { cmd.push("-no-comments".into()); }
             if verbose { cmd.push("-v".into()); }
             if verbose {
-                println!("[ovicc] transpiling extra TU: {}", tu);
+                println!("[ovelc] transpiling extra TU: {}", tu);
             }
             let status = Command::new(&cmd[0]).args(&cmd[1..]).status()
                 .unwrap_or_else(|e| {
-                    eprintln!("error: failed to spawn ovicc for {}: {}", tu, e);
+                    eprintln!("error: failed to spawn ovelc for {}: {}", tu, e);
                     std::process::exit(1);
                 });
             if !status.success() {
@@ -1328,10 +1328,10 @@ fn main() {
 
     // Plan 阶段 4: write the versioned sidecar source map (.ov.map) next to
     // the .ov source. The generated C's location differs per mode:
-    // -rewrite-ovic writes a real .c; compile/run pipe the C to the compiler
+    // -rewrite-ovel writes a real .c; compile/run pipe the C to the compiler
     // through stdin (recorded as "<stdin>" — the content hash still ties the
     // map to the exact C bytes that were built).
-    if ovic_map {
+    if ovel_map {
         if let Some(mut map) = pipeline.last_source_map.take() {
             map.generated.path = if mode == "rewrite" {
                 output.clone().unwrap_or_else(|| {
@@ -1353,7 +1353,7 @@ fn main() {
             match fs::write(&sidecar_path, map.to_json()) {
                 Ok(_) => {
                     if verbose {
-                        eprintln!("[ovicc] wrote source map {}", sidecar_path);
+                        eprintln!("[ovelc] wrote source map {}", sidecar_path);
                     }
                 }
                 Err(e) => {
@@ -1366,7 +1366,7 @@ fn main() {
 
     match mode {
         "rewrite" => {
-            // -rewrite-ovic: output C code to file
+            // -rewrite-ovel: output C code to file
             let output_path = output.unwrap_or_else(|| {
                 if input_path.ends_with(".ov") {
                     input_path[..input_path.len()-3].to_string() + ".c"
@@ -1418,7 +1418,7 @@ fn main() {
             let bin_path = output.unwrap_or_else(|| format!("a.out{}", std::env::consts::EXE_SUFFIX));
 
             if bin_path.ends_with(".c") {
-                eprintln!("error: use -rewrite-ovic to output C code");
+                eprintln!("error: use -rewrite-ovel to output C code");
                 std::process::exit(1);
             }
             let shared = shared

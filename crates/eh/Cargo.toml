@@ -1,8 +1,8 @@
 [package]
-name = "ovic-eh"
+name = "ovel-eh"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-ovic-ast = { path = "../ast" }
-ovic-cst = { path = "../cst" }
+ovel-ast = { path = "../ast" }
+ovel-cst = { path = "../cst" }

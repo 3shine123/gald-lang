@@ -8,7 +8,7 @@
 # ownership makes each owned class's metadata STRONG automatically. No
 # -fstrong-metadata anywhere.
 #
-#   ovicc app.ov -I include -L<outdir> -lovicfoundation -o app
+#   ovelc app.ov -I include -L<outdir> -lovelfoundation -o app
 #
 # The client imports `Foundation.oh` — the DECLARATION-ONLY umbrella (per the
 # project's .oh = declarations / .ov = implementations convention).
@@ -17,20 +17,20 @@ set -euo pipefail
 root="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$root"
 
-ovicc="${OVICC:-}"
-if [[ -z "$ovicc" ]]; then
-    for cand in target/debug/ovicc target/release/ovicc; do
-        if [[ -x "$cand" ]]; then ovicc="$cand"; break; fi
+ovelc="${OVELC:-}"
+if [[ -z "$ovelc" ]]; then
+    for cand in target/debug/ovelc target/release/ovelc; do
+        if [[ -x "$cand" ]]; then ovelc="$cand"; break; fi
     done
 fi
-if [[ -z "$ovicc" || ! -x "$ovicc" ]]; then
-    echo "error: ovicc not found (run 'cargo build', or set OVICC=/path/to/ovicc)" >&2
+if [[ -z "$ovelc" || ! -x "$ovelc" ]]; then
+    echo "error: ovelc not found (run 'cargo build', or set OVELC=/path/to/ovelc)" >&2
     exit 2
 fi
 
 outdir="${1:-target/foundation}"
 mkdir -p "$outdir"
-lib="$outdir/libovicfoundation.a"
+lib="$outdir/libovelfoundation.a"
 
 # Mach-O prepends `_` to every C symbol; ELF uses the name as written.
 sym_prefix=""
@@ -57,7 +57,7 @@ nm_is_weak() {
 
 check_strong() {
     local obj="$1" cls="$2"
-    for member in "OVIC_VTABLE_\$_${cls}" "OVIC_META_VTABLE_\$_${cls}_inst" "OVIC_GETCLASS_\$_${cls}"; do
+    for member in "OVEL_VTABLE_\$_${cls}" "OVEL_META_VTABLE_\$_${cls}_inst" "OVEL_GETCLASS_\$_${cls}"; do
         local sym="${sym_prefix}${member}"
         if ! nm "$obj" 2>/dev/null | grep -qF -- " $sym"; then
             echo "  error: symbol $sym not found in $obj" >&2
@@ -101,7 +101,7 @@ for gm in include/Foundation/*.ov; do
     { echo '#import <Foundation/Foundation.oh>'; cat "$gm"; } > "$wrap"
     c="$outdir/$name.c"
     o="$outdir/$name.o"
-    "$ovicc" -rewrite-ovic "$wrap" -o "$c" -I include -I include/Foundation
+    "$ovelc" -rewrite-ovel "$wrap" -o "$c" -I include -I include/Foundation
     clang -c -w "$c" -o "$o" -I include
     objs+=("$o")
     echo "  $name"

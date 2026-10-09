@@ -127,190 +127,190 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "384b8ab6d37215f3c5301a95a4accb5d64aa607f1fcb26a11b5303878451b4fe"
 
 [[package]]
-name = "ovic-arc"
+name = "ovel-arc"
 version = "0.1.0"
 dependencies = [
- "ovic-ast",
- "ovic-cfg",
- "ovic-cst",
- "ovic-ownership",
+ "ovel-ast",
+ "ovel-cfg",
+ "ovel-cst",
+ "ovel-ownership",
 ]
 
 [[package]]
-name = "ovic-ast"
+name = "ovel-ast"
 version = "0.1.0"
 dependencies = [
- "ovic-cst",
+ "ovel-cst",
 ]
 
 [[package]]
-name = "ovic-async"
+name = "ovel-async"
 version = "0.1.0"
 dependencies = [
- "ovic-ast",
- "ovic-cst",
+ "ovel-ast",
+ "ovel-cst",
 ]
 
 [[package]]
-name = "ovic-binder"
+name = "ovel-binder"
 version = "0.1.0"
 dependencies = [
- "ovic-ast",
- "ovic-cst",
- "ovic-lexer",
- "ovic-parser",
- "ovic-symbol",
+ "ovel-ast",
+ "ovel-cst",
+ "ovel-lexer",
+ "ovel-parser",
+ "ovel-symbol",
 ]
 
 [[package]]
-name = "ovic-cfg"
+name = "ovel-cfg"
 version = "0.1.0"
 dependencies = [
- "ovic-ast",
+ "ovel-ast",
 ]
 
 [[package]]
-name = "ovic-checker"
+name = "ovel-checker"
 version = "0.1.0"
 dependencies = [
- "ovic-ast",
- "ovic-cst",
- "ovic-symbol",
+ "ovel-ast",
+ "ovel-cst",
+ "ovel-symbol",
 ]
 
 [[package]]
-name = "ovic-codegen"
+name = "ovel-codegen"
 version = "0.1.0"
 dependencies = [
  "attrs",
- "ovic-ast",
- "ovic-cst",
- "ovic-elaborator",
- "ovic-ownership",
- "ovic-symbol",
+ "ovel-ast",
+ "ovel-cst",
+ "ovel-elaborator",
+ "ovel-ownership",
+ "ovel-symbol",
 ]
 
 [[package]]
-name = "ovic-cpp"
+name = "ovel-cpp"
 version = "0.1.0"
 
 [[package]]
-name = "ovic-cst"
+name = "ovel-cst"
 version = "0.1.0"
 
 [[package]]
-name = "ovic-cst-visit"
+name = "ovel-cst-visit"
 version = "0.1.0"
 dependencies = [
- "ovic-cst",
+ "ovel-cst",
 ]
 
 [[package]]
-name = "ovic-defer"
+name = "ovel-defer"
 version = "0.1.0"
 dependencies = [
- "ovic-ast",
- "ovic-cst",
+ "ovel-ast",
+ "ovel-cst",
 ]
 
 [[package]]
-name = "ovic-eh"
+name = "ovel-eh"
 version = "0.1.0"
 dependencies = [
- "ovic-ast",
- "ovic-cst",
+ "ovel-ast",
+ "ovel-cst",
 ]
 
 [[package]]
-name = "ovic-elaborator"
+name = "ovel-elaborator"
 version = "0.1.0"
 dependencies = [
- "ovic-ast",
- "ovic-binder",
- "ovic-cst",
- "ovic-symbol",
+ "ovel-ast",
+ "ovel-binder",
+ "ovel-cst",
+ "ovel-symbol",
 ]
 
 [[package]]
-name = "ovic-layout"
+name = "ovel-layout"
 version = "0.1.0"
 
 [[package]]
-name = "ovic-lexer"
+name = "ovel-lexer"
 version = "0.1.0"
 
 [[package]]
-name = "ovic-ownership"
+name = "ovel-ownership"
 version = "0.1.0"
 dependencies = [
- "ovic-ast",
+ "ovel-ast",
 ]
 
 [[package]]
-name = "ovic-parser"
+name = "ovel-parser"
 version = "0.1.0"
 dependencies = [
- "ovic-cst",
- "ovic-lexer",
- "ovic-preprocessor",
+ "ovel-cst",
+ "ovel-lexer",
+ "ovel-preprocessor",
 ]
 
 [[package]]
-name = "ovic-pattern"
+name = "ovel-pattern"
 version = "0.1.0"
 dependencies = [
- "ovic-ast",
- "ovic-cst",
+ "ovel-ast",
+ "ovel-cst",
 ]
 
 [[package]]
-name = "ovic-preprocessor"
+name = "ovel-preprocessor"
 version = "0.1.0"
 dependencies = [
- "ovic-cpp",
- "ovic-cst",
+ "ovel-cpp",
+ "ovel-cst",
 ]
 
 [[package]]
-name = "ovic-symbol"
+name = "ovel-symbol"
 version = "0.1.0"
 dependencies = [
- "ovic-cst",
+ "ovel-cst",
 ]
 
 [[package]]
-name = "ovic-trace"
+name = "ovel-trace"
 version = "0.1.0"
 dependencies = [
- "ovic-ast",
- "ovic-cst",
- "ovic-ownership",
+ "ovel-ast",
+ "ovel-cst",
+ "ovel-ownership",
 ]
 
 [[package]]
-name = "ovicc"
+name = "ovelc"
 version = "0.1.0"
 dependencies = [
  "attrs",
  "cc",
  "clap",
  "clap_complete",
- "ovic-arc",
- "ovic-ast",
- "ovic-async",
- "ovic-binder",
- "ovic-cfg",
- "ovic-checker",
- "ovic-codegen",
- "ovic-cst",
- "ovic-defer",
- "ovic-eh",
- "ovic-elaborator",
- "ovic-parser",
- "ovic-pattern",
- "ovic-preprocessor",
- "ovic-symbol",
- "ovic-trace",
+ "ovel-arc",
+ "ovel-ast",
+ "ovel-async",
+ "ovel-binder",
+ "ovel-cfg",
+ "ovel-checker",
+ "ovel-codegen",
+ "ovel-cst",
+ "ovel-defer",
+ "ovel-eh",
+ "ovel-elaborator",
+ "ovel-parser",
+ "ovel-pattern",
+ "ovel-preprocessor",
+ "ovel-symbol",
+ "ovel-trace",
 ]
 
 [[package]]

@@ -1,5 +1,5 @@
-#include "ovic/parser.h"
-#include "ovic/lexer.h"
+#include "ovel/parser.h"
+#include "ovel/lexer.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -610,7 +610,7 @@ static void test_stmt_throw(void) {
 // ── combined / realistic ───────────────────────────────────────────────────
 
 static void test_realistic_class(void) {
-    TEST("realistic Ovic class with multiple methods");
+    TEST("realistic Ovel class with multiple methods");
     const char *src =
         "@interface MyClass : NSObject <MyProtocol> {\n"
         "    int count;\n"

@@ -14,27 +14,27 @@ set -euo pipefail
 root="$(cd "$(dirname "$0")/../.." && pwd)"
 cd "$root"
 
-ovicc="${OVICC:-}"
-if [[ -z "$ovicc" ]]; then
-    for cand in target/debug/ovicc target/release/ovicc; do
-        if [[ -x "$cand" ]]; then ovicc="$cand"; break; fi
+ovelc="${OVELC:-}"
+if [[ -z "$ovelc" ]]; then
+    for cand in target/debug/ovelc target/release/ovelc; do
+        if [[ -x "$cand" ]]; then ovelc="$cand"; break; fi
     done
 fi
-if [[ -z "$ovicc" || ! -x "$ovicc" ]]; then
-    echo "error: ovicc not found (run 'cargo build', or set OVICC=/path/to/ovicc)" >&2
+if [[ -z "$ovelc" || ! -x "$ovelc" ]]; then
+    echo "error: ovelc not found (run 'cargo build', or set OVELC=/path/to/ovelc)" >&2
     exit 2
 fi
 
-work="$(mktemp -d "${TMPDIR:-/tmp}/ovic_arc_intern.XXXXXX")"
+work="$(mktemp -d "${TMPDIR:-/tmp}/ovel_arc_intern.XXXXXX")"
 trap 'rm -rf "$work"' EXIT
 
 src="tests/arc_intern/arc_intern_uaf.ov"
 bin="$work/repro"
 log="$work/asan.log"
 
-# Force the sanitizer through ovicc's C-compiler override.
-OVIC_CC="${OVIC_CC:-clang -fsanitize=address -g -O0}" \
-    "$ovicc" "$src" -I include -o "$bin" > "$work/build.log" 2>&1 || {
+# Force the sanitizer through ovelc's C-compiler override.
+OVEL_CC="${OVEL_CC:-clang -fsanitize=address -g -O0}" \
+    "$ovelc" "$src" -I include -o "$bin" > "$work/build.log" 2>&1 || {
         echo "FAIL: build failed"; sed 's/^/  /' "$work/build.log" | tail -20; exit 1;
     }
 

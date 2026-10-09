@@ -9,7 +9,7 @@
 `.out` 是程序 stdout 快照。`test_all.py` 只校验退出码（不比对 `.out`），输出有变化时需同步更新快照。
 
 ```bash
-./target/debug/ovicc run tests/golden/30_for_in/for_in_test.ov
+./target/debug/ovelc run tests/golden/30_for_in/for_in_test.ov
 ```
 
 ## 语法
@@ -30,9 +30,9 @@ for (NPString *s in arr) {
 for-in 在 **parser 阶段**就展开成普通 C for 循环：
 
 ```c
-{ T *__ovic_fi = <coll>;            /* 借用别名：只求值一次，ARC 不参与 */
-  for (size_t __ovic_fi_i = 0; __ovic_fi_i < [__ovic_fi count]; __ovic_fi_i++) {
-      T x = [__ovic_fi objectAtIndex:__ovic_fi_i];
+{ T *__ovel_fi = <coll>;            /* 借用别名：只求值一次，ARC 不参与 */
+  for (size_t __ovel_fi_i = 0; __ovel_fi_i < [__ovel_fi count]; __ovel_fi_i++) {
+      T x = [__ovel_fi objectAtIndex:__ovel_fi_i];
       ...body...
   } }
 ```
@@ -41,7 +41,7 @@ for-in 在 **parser 阶段**就展开成普通 C for 循环：
 
 - nil 安全：`[nil count] == 0`，集合为 nil 时循环体不执行
 - 元素借用语义：循环变量是元素别名，不 retain / release，ARC 无需注入
-- 集合只求值一次（`__ovic_fi` 暂存），即使表达式有副作用也安全
+- 集合只求值一次（`__ovel_fi` 暂存），即使表达式有副作用也安全
 
 这也是仓库的一贯做法：先例有 `@42` → `[NPNumber numberWithInt:]`、`arrayWithObjects:` → `@[...]`。原则是**每个新特性都走 desugar，不引入新 IR 机制**。
 

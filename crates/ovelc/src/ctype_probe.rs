@@ -6,7 +6,7 @@
 //! ObjC compiler can do that because it has preprocessed the `#include`s and
 //! knows every typedef they declare.
 //!
-//! ovicc deliberately does **not** read `#include`d headers (they are passed
+//! ovelc deliberately does **not** read `#include`d headers (they are passed
 //! through to the emitted C verbatim), so historically the parser had no type
 //! table for them and guessed from token shape instead: a hardcoded list of
 //! ~45 libc typedefs, plus "`IDENT *` looks like a declaration". Both guesses
@@ -23,8 +23,8 @@
 //!
 //! Struct/union/enum *tags* are deliberately not collected: in C a tag is not
 //! a type name (`(Foo *)p` is wrong even with `struct Foo` in scope — you must
-//! write `(struct Foo *)p`, which ovic's parser already handles from the
-//! keyword), so adding tags would make ovic accept code C rejects.
+//! write `(struct Foo *)p`, which ovel's parser already handles from the
+//! keyword), so adding tags would make ovel accept code C rejects.
 //!
 //! When the probe cannot run (no C compiler, a header that cannot be located,
 //! freestanding flags that reject the shim) the caller keeps the historical
@@ -38,7 +38,7 @@ use std::process::Command;
 use std::sync::atomic::{AtomicUsize, Ordering};
 
 /// Names the scanner never reports even if they appear in a declarator slot.
-/// They are all C/attribute keywords, i.e. things ovic's lexer handles as
+/// They are all C/attribute keywords, i.e. things ovel's lexer handles as
 /// keywords and that would be nonsense in the parser's type-name list.
 const NOT_TYPE_NAMES: &[&str] = &[
     // C89/C99/C11 keywords that can legally end a declarator chunk.
@@ -150,7 +150,7 @@ fn tokenize(src: &str) -> Vec<Tok> {
 ///
 /// The scanner is intentionally *over*-inclusive (a declarator it cannot parse
 /// precisely contributes whatever identifier it can see): a spurious entry
-/// only means ovic parses a cast/declaration that the C compiler will reject
+/// only means ovel parses a cast/declaration that the C compiler will reject
 /// anyway, whereas a missed entry would reject legal code.
 pub fn scan_c_type_names(preprocessed: &str) -> Vec<String> {
     let toks = tokenize(preprocessed);
@@ -281,8 +281,8 @@ pub fn probe_c_type_names(
         return None;
     }
     // Mirror the emitted C's own include so the table also covers the runtime
-    // typedefs the generated code can see (`ovic_autoreleasepool_t`, ...).
-    let mut shim = String::from("#include <ovic/runtime.h>\n");
+    // typedefs the generated code can see (`ovel_autoreleasepool_t`, ...).
+    let mut shim = String::from("#include <ovel/runtime.h>\n");
     for line in includes {
         shim.push_str(line);
         shim.push('\n');
@@ -291,7 +291,7 @@ pub fn probe_c_type_names(
     static COUNTER: AtomicUsize = AtomicUsize::new(0);
     let n = COUNTER.fetch_add(1, Ordering::Relaxed);
     let path = std::env::temp_dir().join(format!(
-        "ovic_ctype_probe_{}_{}.c",
+        "ovel_ctype_probe_{}_{}.c",
         std::process::id(),
         n
     ));

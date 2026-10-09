@@ -1,10 +1,10 @@
 [package]
-name = "ovic-elaborator"
+name = "ovel-elaborator"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-ovic-cst = { path = "../cst" }
-ovic-ast = { path = "../ast" }
-ovic-symbol = { path = "../symbol" }
-ovic-binder = { path = "../binder" }
+ovel-cst = { path = "../cst" }
+ovel-ast = { path = "../ast" }
+ovel-symbol = { path = "../symbol" }
+ovel-binder = { path = "../binder" }

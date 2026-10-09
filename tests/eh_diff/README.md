@@ -1,8 +1,8 @@
-# tests/eh_diff — 异常语义差分测试(ovic vs 真 ObjC)
+# tests/eh_diff — 异常语义差分测试(ovel vs 真 ObjC)
 
-每个用例是一对文件:`X.ov`(ovic 语义用例)+ `X.m`(**等价的真 ObjC 程序**)。
-ObjC 侧由系统 clang `-fobjc-arc` 编译运行,作为该语义的**基准实现**;ovic 侧用
-`ovicc run X.ov -eh checked` 走用户路径;两侧输出(NPLog/fprintf 都走 stderr)
+每个用例是一对文件:`X.ov`(ovel 语义用例)+ `X.m`(**等价的真 ObjC 程序**)。
+ObjC 侧由系统 clang `-fobjc-arc` 编译运行,作为该语义的**基准实现**;ovel 侧用
+`ovelc run X.ov -eh checked` 走用户路径;两侧输出(NPLog/fprintf 都走 stderr)
 逐行 diff,不一致即 FAIL。
 
 ## 用途
@@ -15,7 +15,7 @@ finally 顺序、rethrow、typed 链——都由这里的用例锁定。
 
 ```bash
 ./run_eh_diff.sh                      # 全部用例
-OVICC=target/release/ovicc ./run_eh_diff.sh   # 指定二进制(默认 target/debug)
+OVELC=target/release/ovelc ./run_eh_diff.sh   # 指定二进制(默认 target/debug)
 ```
 
 输出:`PASS/FAIL/KFAIL` 逐用例 + 汇总。`KFAIL` = `.ov` 头部标了
@@ -27,7 +27,7 @@ OVICC=target/release/ovicc ./run_eh_diff.sh   # 指定二进制(默认 target/de
 | 用例 | ObjC 语义(基准) |
 |------|------------------|
 | 01_cross_frame_release | 异常穿透中间帧时,该帧 ARC 管理的 owned 局部必须释放(sjlj 泄漏、checked 已对) |
-| 02_stmt_interrupt | 同一表达式内 `@throw` 立即中断:同语句的后续调用不得执行(clang 与 ovic codegen 均按左到右求值,用例锁定该行为;严格说 C 求值顺序未指定,若未来 codegen 右到左,两侧仍一致) |
+| 02_stmt_interrupt | 同一表达式内 `@throw` 立即中断:同语句的后续调用不得执行(clang 与 ovel codegen 均按左到右求值,用例锁定该行为;严格说 C 求值顺序未指定,若未来 codegen 右到左,两侧仍一致) |
 | 03_nested_finally | 内层 `@finally` 在异常传播给外层 catch **之前**执行;外层 finally 在 catch 之后执行 |
 | 04_rethrow | catch 内 `@throw e` 重抛到**外层**,不得重入本层 catch |
 | 05_typed_chain | typed catch 按 isa 匹配,不匹配放行给外层 |
@@ -39,4 +39,4 @@ OVICC=target/release/ovicc ./run_eh_diff.sh   # 指定二进制(默认 target/de
 
 - **异常穿越纯 C 帧**:unwind 可以,checked 不能(旗标无人检查会静默吞)。
   对策:bridge header wrapper 加旗标检查 → 明确 abort 而非静默。纯 C 帧没有
-  ovic 对象,不存在清理问题,这是唯一与 ObjC 的行为差,记录于 AGENTS.md。
+  ovel 对象,不存在清理问题,这是唯一与 ObjC 的行为差,记录于 AGENTS.md。

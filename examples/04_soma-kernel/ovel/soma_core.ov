@@ -1,9 +1,9 @@
-// soma_core.ov — Soma Kernel 的 Ovic 内核模块
+// soma_core.ov — Soma Kernel 的 Ovel 内核模块
 // 演示高级特性（不依赖 Foundation / 无闭包，可自由裸机）：
 //   - @namespace         命名空间：类名/符号自动带上 SomaCore__ 前缀
 //   - @interface          类定义：隐式根类（不继承 NPObject），裸机可运行
 //   - 类方法 / 实例方法   消息派发：类方法直接函数调用，实例方法走 isa->vtable
-// 转译后: ovicc -rewrite-ovic 输出 C，clang -target i386-none-elf 编译进内核
+// 转译后: ovelc -rewrite-ovel 输出 C，clang -target i386-none-elf 编译进内核
 
 extern void kputs(const char* s);
 extern void kputdec(int v);
@@ -100,7 +100,7 @@ unsigned soma_rotl(unsigned x, unsigned n) {
 
     @end
 
-    // alloc+init via bump allocator (ovic_alloc from runtime_freestanding.c)
+    // alloc+init via bump allocator (ovel_alloc from runtime_freestanding.c)
     @interface HeapCounter {
         int total;
     }
@@ -113,7 +113,7 @@ unsigned soma_rotl(unsigned x, unsigned n) {
     @implementation HeapCounter
 
     + (id) alloc {
-        return ovic_alloc(self);
+        return ovel_alloc(self);
     }
 
     - (id) init {
@@ -153,7 +153,7 @@ unsigned soma_rotl(unsigned x, unsigned n) {
 
     @implementation SchedulerTask
     @synthesize priority;
-    + (instancetype) new  { return ovic_alloc(self); }
+    + (instancetype) new  { return ovel_alloc(self); }
     - (instancetype) init { return self; }
     - (int) getId { return id; }
     - (void) setId:(int)value { id = value; }
@@ -171,13 +171,13 @@ unsigned soma_rotl(unsigned x, unsigned n) {
 // ================= C 可见入口 =================
 
 void soma_class_demo(void) {
-    kputs("[ovic] class method [SomaCore::Calculator compute:21] = ");
+    kputs("[ovel] class method [SomaCore::Calculator compute:21] = ");
     kputdec([SomaCore::Calculator compute:21]);
     kputs("\n");
 }
 
 void soma_instance_demo(SomaCore::Calculator *acc) {
-    kputs("[ovic] instance methods on C-created obj: add:7 -> ");
+    kputs("[ovel] instance methods on C-created obj: add:7 -> ");
     kputdec([acc add:7]);
     kputs(", add:35 -> ");
     kputdec([acc add:35]);
@@ -188,7 +188,7 @@ void soma_instance_demo(SomaCore::Calculator *acc) {
 
 void soma_exc_demo(id err) {
     // @try/@catch/@finally — setjmp/longjmp based, no libc needed
-    kputs("[ovic] @try/@catch demo:\n");
+    kputs("[ovel] @try/@catch demo:\n");
     @try {
         kputs("       try body, throwing...\n");
         @throw err;
@@ -205,7 +205,7 @@ void soma_exc_demo(id err) {
 
 void soma_heap_demo(void) {
     SomaCore::HeapCounter *c = [[SomaCore::HeapCounter alloc] init];
-    kputs("[ovic] alloc+init (bump allocator):\n");
+    kputs("[ovel] alloc+init (bump allocator):\n");
     kputs("       [c add:10]=");
     kputdec([c add:10]);
     kputs(" [c add:20]=");
@@ -216,7 +216,7 @@ void soma_heap_demo(void) {
 }
 
 void soma_advanced_demo(void) {
-    kputs("[ovic] @protocol + @property + @synthesize + @public:\n");
+    kputs("[ovel] @protocol + @property + @synthesize + @public:\n");
     SomaCore::SchedulerTask *t;
     t = [SomaCore::SchedulerTask new];
     [t setId:7];              /* @public ivar via setter */
@@ -230,7 +230,7 @@ void soma_advanced_demo(void) {
 }
 
 void soma_kbd_demo(void) {
-    kputs("[ovic] keyboard demo: type, use <- -> to move cursor, Enter to finish\n");
+    kputs("[ovel] keyboard demo: type, use <- -> to move cursor, Enter to finish\n");
     kputs("       (times out after ~6s in headless mode)\n");
     char line[40];
     int i = 0;    /* number of chars */
@@ -290,7 +290,7 @@ void soma_kbd_demo(void) {
 }
 
 void soma_core_boot(void) {
-    kputs("[ovic] soma_core_boot()\n");
+    kputs("[ovel] soma_core_boot()\n");
     kputs("       fib(10)=");
     kputdec(soma_fib(10));
     kputs("\n       gcd(1071,462)=");

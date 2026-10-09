@@ -7,14 +7,14 @@
 #include <string.h>
 
 /*
- * NPPredicate — ObjC NSPredicate semantics on ovic's static dispatch.
+ * NPPredicate — ObjC NSPredicate semantics on ovel's static dispatch.
  *
  * All cross-class operations (string/number/array access, comparisons) go
  * through ordinary message sends, which codegen lowers to vtable indexing —
  * so this owner TU links fine against the other Foundation TUs. There is NO
  * direct function call into another class's TU and NO layout mirroring.
- * Keys resolve through ovic_kvc_value (runtime.c): a walk of the isa chain
- * over the compile-time OVIC_KVC_$_<Class> tables — table lookup, never
+ * Keys resolve through ovel_kvc_value (runtime.c): a walk of the isa chain
+ * over the compile-time OVEL_KVC_$_<Class> tables — table lookup, never
  * reflection. See doc/nppredicate_plan.md.
  */
 
@@ -27,19 +27,19 @@
 // CMP op: 0=eq 1=ne 2=lt 3=le 4=gt 5=ge
 // STROP op: 0=begins 1=ends 2=contains 3=like 4=matches; bit 16 = [c] flag
 // QUANT op: 0=ANY 1=ALL 2=NONE
-typedef struct ovic_pred_node {
+typedef struct ovel_pred_node {
     int tag;
     int op;
     int a;          // child index (left / inner / list); -1 = none
     int b;          // child index (right); -1 = none
     char *text;     // KEY keypath (owned)
     NPObject *val;  // LIT payload (retained)
-} ovic_pred_node;
+} ovel_pred_node;
 
 // Parser cursor. Lives across the recursive descent; owns the growing pool.
 typedef struct {
     const char *s;
-    ovic_pred_node *nodes;
+    ovel_pred_node *nodes;
     size_t count;
     size_t cap;
     int failed;
@@ -48,10 +48,10 @@ typedef struct {
 static size_t pred_push(PredP *p, int tag, int op, int a, int b) {
     if (p->count == p->cap) {
         p->cap = p->cap ? p->cap * 2 : 16;
-        p->nodes = (ovic_pred_node *)realloc(p->nodes, p->cap * sizeof(ovic_pred_node));
+        p->nodes = (ovel_pred_node *)realloc(p->nodes, p->cap * sizeof(ovel_pred_node));
         if (!p->nodes) { p->failed = 1; return 0; }
     }
-    ovic_pred_node *n = &p->nodes[p->count];
+    ovel_pred_node *n = &p->nodes[p->count];
     memset(n, 0, sizeof(*n));
     n->tag = tag; n->op = op; n->a = a; n->b = b;
     return p->count++;
@@ -74,7 +74,7 @@ static size_t pred_push_lit_str(PredP *p, const char *begin, size_t len) {
     memcpy(p->nodes[idx].text, begin, len);
     // Real NPString so isEqual: value semantics apply at comparison time.
     p->nodes[idx].val = (NPObject *)[NPString stringWithUTF8String:p->nodes[idx].text];
-    if (p->nodes[idx].val) ovic_retain(p->nodes[idx].val);
+    if (p->nodes[idx].val) ovel_retain(p->nodes[idx].val);
     return idx;
 }
 
@@ -102,7 +102,7 @@ static size_t pred_push_lit_num(PredP *p, double d) {
     size_t idx = pred_push(p, 8, 0, -1, -1);
     if (p->failed) return idx;
     p->nodes[idx].val = (NPObject *)[NPNumber numberWithDouble:d];
-    if (p->nodes[idx].val) ovic_retain(p->nodes[idx].val);
+    if (p->nodes[idx].val) ovel_retain(p->nodes[idx].val);
     return idx;
 }
 
@@ -174,7 +174,7 @@ static size_t pred_agg_lit(PredP *p) {
     size_t idx = pred_push(p, 8, 0, -1, -1);
     if (p->failed) return idx;
     p->nodes[idx].val = (NPObject *)[NPArray arrayWithObjects:elems count:n];
-    if (p->nodes[idx].val) ovic_retain(p->nodes[idx].val);
+    if (p->nodes[idx].val) ovel_retain(p->nodes[idx].val);
     return idx;
 }
 
@@ -244,7 +244,7 @@ static size_t pred_primary(PredP *p) {
 }
 
 // comparison := primary [cmpop primary | STROP primary | IN primary | BETWEEN primary]
-// NOTE: keep the operator words in plain assignments. ovic's parser rejects
+// NOTE: keep the operator words in plain assignments. ovel's parser rejects
 // anonymous-struct initializers and NULL inside static initializer lists, and
 // codegen drops file-level variable declarations — inline literals are the
 // only portable spelling here.
@@ -343,7 +343,7 @@ static size_t pred_or(PredP *p) {
 
 // Entry. On success *out_root is the root node index and the caller owns the
 // pool. Returns 0 (and frees the pool) on malformed input — no global state.
-static int pred_parse(const char *src, ovic_pred_node **out_nodes,
+static int pred_parse(const char *src, ovel_pred_node **out_nodes,
                       size_t *out_count, size_t *out_root) {
     PredP p;
     memset(&p, 0, sizeof(p));
@@ -354,7 +354,7 @@ static int pred_parse(const char *src, ovic_pred_node **out_nodes,
     if (p.failed) {
         for (size_t i = 0; i < p.count; i++) {
             free(p.nodes[i].text);
-            if (p.nodes[i].val) ovic_release(p.nodes[i].val);
+            if (p.nodes[i].val) ovel_release(p.nodes[i].val);
         }
         free(p.nodes);
         return 0;
@@ -368,18 +368,18 @@ static int pred_parse(const char *src, ovic_pred_node **out_nodes,
 // ─── Lifecycle & public API ─────────────────────────────────────────────────
 
 - (void)dealloc {
-    ovic_pred_node *nodes = (ovic_pred_node *)_nodes;
+    ovel_pred_node *nodes = (ovel_pred_node *)_nodes;
     if (nodes) {
         for (size_t i = 0; i < _node_count; i++) {
             free(nodes[i].text);
-            if (nodes[i].val) ovic_release(nodes[i].val);
+            if (nodes[i].val) ovel_release(nodes[i].val);
         }
         free(nodes);
         _nodes = NULL;
         _node_count = 0;
         _node_cap = 0;
     }
-    if (_format) { ovic_release(_format); _format = NULL; }
+    if (_format) { ovel_release(_format); _format = NULL; }
     [super dealloc];
 }
 
@@ -409,7 +409,7 @@ static int pred_parse(const char *src, ovic_pred_node **out_nodes,
     // expanded is +0 borrowed (convenience ctor); _format owns its copy.
     _format = [expanded copy];
 
-    ovic_pred_node *nodes = NULL;
+    ovel_pred_node *nodes = NULL;
     size_t count = 0, root = 0;
     if (!pred_parse([expanded UTF8String], &nodes, &count, &root)) {
         fprintf(stderr, "*** NPPredicate: malformed format string: %s\n",
@@ -467,7 +467,7 @@ static int pred_parse(const char *src, ovic_pred_node **out_nodes,
 
 // valueForKey: — ObjC KVC entry point over the compile-time tables.
 - (id)valueForKey:(NPString *)key {
-    id v = ovic_kvc_value(self, [key UTF8String]);
+    id v = ovel_kvc_value(self, [key UTF8String]);
     if (!v) {
         fprintf(stderr, "*** NPPredicate: key '%s' is not key-value coding "
                 "compliant for the receiver\n", [key UTF8String]);
@@ -478,7 +478,7 @@ static int pred_parse(const char *src, ovic_pred_node **out_nodes,
 
 - (BOOL)evaluateWithObject:(id)object {
     if (_node_count == 0) return NO;
-    return pred_eval_idx((ovic_pred_node *)_nodes, (int)_root, object) ? YES : NO;
+    return pred_eval_idx((ovel_pred_node *)_nodes, (int)_root, object) ? YES : NO;
 }
 
 @end
@@ -486,13 +486,13 @@ static int pred_parse(const char *src, ovic_pred_node **out_nodes,
 // ─── Static engine (after @end; message sends here lower to vtable
 // dispatch, so cross-TU class access is safe) ────────────────────────────────
 
-static int pred_eval_idx(ovic_pred_node *nodes, int idx, id object);
+static int pred_eval_idx(ovel_pred_node *nodes, int idx, id object);
 
 // Leaf → value: LIT payload, or KEY resolved through the KVC tables (dot
 // paths chain lookups segment by segment).
-static id pred_leaf(ovic_pred_node *nodes, int idx, id object) {
+static id pred_leaf(ovel_pred_node *nodes, int idx, id object) {
     if (idx < 0) return NULL;
-    ovic_pred_node *n = &nodes[idx];
+    ovel_pred_node *n = &nodes[idx];
     if (n->tag == 8) return n->val;
     if (n->tag == 7) {
         id cur = object;
@@ -504,7 +504,7 @@ static id pred_leaf(ovic_pred_node *nodes, int idx, id object) {
             if (len >= sizeof(seg)) return NULL;
             memcpy(seg, s, len);
             seg[len] = '\0';
-            cur = ovic_kvc_value(cur, seg);
+            cur = ovel_kvc_value(cur, seg);
             s = dot ? dot + 1 : s + len;
         }
         return cur;
@@ -803,8 +803,8 @@ static int pred_matches(const char *re, const char *s, int ci) {
 }
 
 // STROP (tag 4).
-static int pred_strop(ovic_pred_node *nodes, int idx, id object) {
-    ovic_pred_node *n = &nodes[idx];
+static int pred_strop(ovel_pred_node *nodes, int idx, id object) {
+    ovel_pred_node *n = &nodes[idx];
     id l = pred_leaf(nodes, n->a, object);
     id r = pred_leaf(nodes, n->b, object);
     if (!l || !r) return 0;
@@ -829,8 +829,8 @@ static int pred_strop(ovic_pred_node *nodes, int idx, id object) {
 
 // IN (tag 5): right side is an NPArray (or array literal) — membership via
 // value comparison.
-static int pred_in(ovic_pred_node *nodes, int idx, id object) {
-    ovic_pred_node *n = &nodes[idx];
+static int pred_in(ovel_pred_node *nodes, int idx, id object) {
+    ovel_pred_node *n = &nodes[idx];
     id l = pred_leaf(nodes, n->a, object);
     id r = pred_leaf(nodes, n->b, object);
     if (!l || !r || !pred_is_nparray(r)) return 0;
@@ -842,8 +842,8 @@ static int pred_in(ovic_pred_node *nodes, int idx, id object) {
 }
 
 // BETWEEN (tag 6): right side is a 2-element array {lo, hi}.
-static int pred_between(ovic_pred_node *nodes, int idx, id object) {
-    ovic_pred_node *n = &nodes[idx];
+static int pred_between(ovel_pred_node *nodes, int idx, id object) {
+    ovel_pred_node *n = &nodes[idx];
     id l = pred_leaf(nodes, n->a, object);
     id r = pred_leaf(nodes, n->b, object);
     if (!l || !r || !pred_is_nparray(r)) return 0;
@@ -854,8 +854,8 @@ static int pred_between(ovic_pred_node *nodes, int idx, id object) {
 }
 
 // Quantifier (tag 9) over an NPArray-valued key.
-static int pred_quant(ovic_pred_node *nodes, int idx, id object) {
-    ovic_pred_node *n = &nodes[idx];
+static int pred_quant(ovel_pred_node *nodes, int idx, id object) {
+    ovel_pred_node *n = &nodes[idx];
     id coll = pred_leaf(nodes, n->a, object);
     if (!coll || !pred_is_nparray(coll)) return n->op == 2;   // NONE over nil: vacuous
     size_t cnt = [(NPArray *)coll count];
@@ -869,9 +869,9 @@ static int pred_quant(ovic_pred_node *nodes, int idx, id object) {
     return !any;
 }
 
-static int pred_eval_idx(ovic_pred_node *nodes, int idx, id object) {
+static int pred_eval_idx(ovel_pred_node *nodes, int idx, id object) {
     if (idx < 0) return 0;
-    ovic_pred_node *n = &nodes[idx];
+    ovel_pred_node *n = &nodes[idx];
     switch (n->tag) {
         case 0: return pred_eval_idx(nodes, n->a, object) && pred_eval_idx(nodes, n->b, object);
         case 1: return pred_eval_idx(nodes, n->a, object) || pred_eval_idx(nodes, n->b, object);

@@ -2,7 +2,7 @@
 
 // async/await (NPTask design, doc/async_nptask_plan.md):
 // - `(async NPTask<T>)` marks a suspending method; the signature tells the truth
-// - `@await e` marks a suspension point; it lowers to `ovic_task_await`
+// - `@await e` marks a suspension point; it lowers to `ovel_task_await`
 //   (lazy tasks: auto-start if not started, result cached — multi-await safe)
 // - a bare async call from sync code is legal (form A: lazy task creation,
 //   the handle is a first-class value); at STATEMENT position it is the entry

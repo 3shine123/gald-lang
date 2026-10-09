@@ -24,25 +24,25 @@
 #
 # Usage:
 #   ./run_eh_matrix.sh                # full matrix
-#   OVICC=target/debug/ovicc ./run_eh_matrix.sh
+#   OVELC=target/debug/ovelc ./run_eh_matrix.sh
 set -u
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 cd "$ROOT"
 
-OVICC="${OVICC:-}"
-if [[ -z "$OVICC" ]]; then
-    for cand in target/release/ovicc target/debug/ovicc; do
-        if [[ -x "$cand" ]]; then OVICC="$cand"; break; fi
+OVELC="${OVELC:-}"
+if [[ -z "$OVELC" ]]; then
+    for cand in target/release/ovelc target/debug/ovelc; do
+        if [[ -x "$cand" ]]; then OVELC="$cand"; break; fi
     done
 fi
-if [[ ! -x "$OVICC" ]]; then
-    echo "error: ovicc binary not found (build it, or set OVICC=)" >&2
+if [[ ! -x "$OVELC" ]]; then
+    echo "error: ovelc binary not found (build it, or set OVELC=)" >&2
     exit 2
 fi
-OVICC_ABS="$(cd "$(dirname "$OVICC")" && pwd)/$(basename "$OVICC")"
+OVELC_ABS="$(cd "$(dirname "$OVELC")" && pwd)/$(basename "$OVELC")"
 
-WORK="${TMPDIR:-/tmp}/ovic_eh_matrix.$$"
+WORK="${TMPDIR:-/tmp}/ovel_eh_matrix.$$"
 mkdir -p "$WORK"
 trap 'rm -rf "$WORK"' EXIT
 
@@ -82,14 +82,14 @@ norm_tail() {
 }
 
 echo "=== EH acceptance matrix ==="
-echo "ovicc : $OVICC_ABS"
+echo "ovelc : $OVELC_ABS"
 echo "clang : $(clang --version | head -1)"
 echo
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Generic scenario: run a .ov in all three modes, compare stdout to the
 # reference .out when one is supplied.
-#   run_scene <scene> <file> <ref-or-empty> [extra ovicc args...]
+#   run_scene <scene> <file> <ref-or-empty> [extra ovelc args...]
 # ─────────────────────────────────────────────────────────────────────────────
 run_scene() {
     local scene="$1" file="$2" ref="$3"; shift 3
@@ -99,14 +99,14 @@ run_scene() {
         eh_argv "$m"
         local d="$WORK/$scene.$m"
         local log="$d.stdout" errf="$d.stderr" rcfile="$d.rc" bin="$d.bin"
-        "$OVICC_ABS" run -o "$bin" ${EH_ARGV[@]+"${EH_ARGV[@]}"} \
+        "$OVELC_ABS" run -o "$bin" ${EH_ARGV[@]+"${EH_ARGV[@]}"} \
             ${extra[@]+"${extra[@]}"} "$file" >"$log" 2>"$errf"
         local rc=$?
         local used_mrc=0
         # ARC->MRC retry: the exact fallback test_all.py applies to goldens
         # that still carry explicit retain/release.
         if [[ $rc -ne 0 ]] && grep -q "not allowed in ARC mode" "$errf"; then
-            "$OVICC_ABS" run -o "$bin" -fno-ovic-arc ${EH_ARGV[@]+"${EH_ARGV[@]}"} \
+            "$OVELC_ABS" run -o "$bin" -fno-ovel-arc ${EH_ARGV[@]+"${EH_ARGV[@]}"} \
                 ${extra[@]+"${extra[@]}"} "$file" >"$log" 2>"$errf"
             rc=$?; used_mrc=1
         fi
@@ -138,7 +138,7 @@ report_scene() {
     || ! diff -q "$WORK/$scene.default.stdout" "$WORK/$scene.checked.stdout" >/dev/null 2>&1 \
     || ! diff -q "$WORK/$scene.default.stderr" "$WORK/$scene.checked.stderr" >/dev/null 2>&1; then
         grep -v "^${scene}|" "$ROWS" > "$ROWS.tmp" && mv "$ROWS.tmp" "$ROWS"
-        for m in "${MODES[@]}"; do record "$scene" "$m" "OVICRITY"; done
+        for m in "${MODES[@]}"; do record "$scene" "$m" "OVELRITY"; done
         echo "  ! $scene — default and explicit -eh checked DISAGREE (flip is not behavior-preserving)"
         return
     fi
@@ -159,7 +159,7 @@ report_scene() {
 # extra args
 # ─────────────────────────────────────────────────────────────────────────────
 GOLD="tests/golden"
-run_scene "01_plain_ovic"      "$GOLD/01_basics/hello_world.ov"                    "$GOLD/01_basics/hello_world.out"
+run_scene "01_plain_ovel"      "$GOLD/01_basics/hello_world.ov"                    "$GOLD/01_basics/hello_world.out"
 run_scene "02_try_catch"       "$GOLD/15_exceptions/try_catch.ov"                  "$GOLD/15_exceptions/try_catch.out"
 run_scene "03_nested_try"      "tests/eh_diff/03_nested_finally.ov"                ""
 run_scene "04_finally_order"   "tests/eh_matrix/samples/finally_order.ov"          ""
@@ -170,7 +170,7 @@ run_scene "07_arc"             "$GOLD/04_arc/retain_release.ov"                 
 # transcript (it ends with a `dealloc` line MRC never prints, since MRC does
 # not release the object). The verdict here is "runs, and all three modes
 # agree", which report_scene enforces.
-run_scene "08_mrc"             "$GOLD/04_arc/retain_release.ov"                    "" -fno-ovic-arc
+run_scene "08_mrc"             "$GOLD/04_arc/retain_release.ov"                    "" -fno-ovel-arc
 run_scene "09_autoreleasepool" "$GOLD/05_autoreleasepool/nested_pool.ov"           "$GOLD/05_autoreleasepool/nested_pool.out"
 run_scene "11_foundation_big"  "$GOLD/13_foundation/04_npstring/npstring_test.ov"  "$GOLD/13_foundation/04_npstring/npstring_test.out"
 run_scene "12_c_superset"      "$GOLD/22_c_superset/c_superset.ov"                 ""
@@ -185,7 +185,7 @@ run_scene "18_full_syntax"     "tests/full_syntax_test.ov"                      
 
 # ─────────────────────────────────────────────────────────────────────────────
 # 10. multi-TU: two separately-transpiled translation units linked together.
-#     Driven by tests/multi_tu/run_multi_tu.sh, which honours OVIC_EH_FLAG.
+#     Driven by tests/multi_tu/run_multi_tu.sh, which honours OVEL_EH_FLAG.
 # ─────────────────────────────────────────────────────────────────────────────
 scene_multi_tu() {
     local scene="10_multi_tu"
@@ -194,7 +194,7 @@ scene_multi_tu() {
         local log="$WORK/${scene}.${m}.log"
         # Every case, not just one: this is both the multi-TU/x-TU-layout gate
         # and a Foundation-inlining (large concatenated TU) gate.
-        OVIC_EH_FLAG="${EH_ARGV[*]:-}" OVICC="$OVICC_ABS" \
+        OVEL_EH_FLAG="${EH_ARGV[*]:-}" OVELC="$OVELC_ABS" \
             ./tests/multi_tu/run_multi_tu.sh >"$log" 2>&1
         if grep -qE "^multi-TU: [0-9]+ passed, 0 failed" "$log"; then
             record "$scene" "$m" "PASS"
@@ -216,14 +216,14 @@ scene_freestanding() {
         local d="$WORK/$scene.$m"; mkdir -p "$d"
         local log="$d/build.log"
         {
-            "$OVICC_ABS" -rewrite-ovic -ffreestanding ${EH_ARGV[@]+"${EH_ARGV[@]}"} \
+            "$OVELC_ABS" -rewrite-ovel -ffreestanding ${EH_ARGV[@]+"${EH_ARGV[@]}"} \
                 -o "$d/fs.c" tests/golden/25_freestanding/freestanding.ov || exit 10
-            clang -I include -include ovic/runtime.h -D_FORTIFY_SOURCE=0 \
+            clang -I include -include ovel/runtime.h -D_FORTIFY_SOURCE=0 \
                 -Wno-unused-variable -c "$d/fs.c" -o "$d/fs.o" || exit 11
-            clang -I include -U__OVIC_FREESTANDING -D_FORTIFY_SOURCE=0 \
+            clang -I include -U__OVEL_FREESTANDING -D_FORTIFY_SOURCE=0 \
                 -c tests/golden/25_freestanding/helpers.c -o "$d/helpers.o" || exit 12
-            clang -I include -U__OVIC_FREESTANDING -D_FORTIFY_SOURCE=0 \
-                -c include/ovic/runtime_freestanding.c -o "$d/rt.o" || exit 13
+            clang -I include -U__OVEL_FREESTANDING -D_FORTIFY_SOURCE=0 \
+                -c include/ovel/runtime_freestanding.c -o "$d/rt.o" || exit 13
             clang "$d/fs.o" "$d/helpers.o" "$d/rt.o" -o "$d/fs" || exit 14
             "$d/fs" || exit 15
         } >"$log" 2>&1
@@ -244,12 +244,12 @@ scene_baremetal() {
         local d="$WORK/$scene.$m"; mkdir -p "$d"
         local log="$d/build.log"
         {
-            "$OVICC_ABS" -rewrite-ovic -ffreestanding ${EH_ARGV[@]+"${EH_ARGV[@]}"} \
+            "$OVELC_ABS" -rewrite-ovel -ffreestanding ${EH_ARGV[@]+"${EH_ARGV[@]}"} \
                 -o "$d/bm.c" "$bm/baremetal_test.ov" || exit 10
-            clang -I include -include ovic/runtime.h -D_FORTIFY_SOURCE=0 \
+            clang -I include -include ovel/runtime.h -D_FORTIFY_SOURCE=0 \
                 -Wno-unused-variable -c "$d/bm.c" -o "$d/bm.o" || exit 11
             clang -I include -D_FORTIFY_SOURCE=0 \
-                -c include/ovic/runtime_freestanding.c -o "$d/rt.o" || exit 12
+                -c include/ovel/runtime_freestanding.c -o "$d/rt.o" || exit 12
             clang -D_FORTIFY_SOURCE=0 -c "$bm/helpers.c" -o "$d/helpers.o" || exit 13
             clang -c "$bm/asm_ext.s" -o "$d/asm.o" || exit 14
             clang "$d/bm.o" "$d/helpers.o" "$d/rt.o" "$d/asm.o" -o "$d/bm" || exit 15
@@ -263,18 +263,18 @@ scene_baremetal
 # ─────────────────────────────────────────────────────────────────────────────
 # Gate: the DEFAULT invocation (no -eh flag) must actually be the checked
 # backend, and `-eh legacy` must actually be sjlj. Fingerprints:
-#   checked : __ovic_eh_flag present, setjmp/longjmp absent
-#   sjlj    : setjmp/longjmp present, __ovic_eh_flag absent
+#   checked : __ovel_eh_flag present, setjmp/longjmp absent
+#   sjlj    : setjmp/longjmp present, __ovel_eh_flag absent
 # ─────────────────────────────────────────────────────────────────────────────
 default_backend_gate() {
     local probe="tests/golden/15_exceptions/try_catch.ov"
     local d="$WORK/default_gate"; mkdir -p "$d"
-    "$OVICC_ABS" -rewrite-ovic -fno-ovic-arc -o "$d/default.c" "$probe" >/dev/null 2>&1
-    "$OVICC_ABS" -rewrite-ovic -eh legacy -fno-ovic-arc -o "$d/legacy.c" "$probe" >/dev/null 2>&1
+    "$OVELC_ABS" -rewrite-ovel -fno-ovel-arc -o "$d/default.c" "$probe" >/dev/null 2>&1
+    "$OVELC_ABS" -rewrite-ovel -eh legacy -fno-ovel-arc -o "$d/legacy.c" "$probe" >/dev/null 2>&1
     local dflag dsetj lflag lsetj
-    dflag=$(grep -c "__ovic_eh_flag" "$d/default.c" || true)
+    dflag=$(grep -c "__ovel_eh_flag" "$d/default.c" || true)
     dsetj=$(grep -cE "setjmp|longjmp" "$d/default.c" || true)
-    lflag=$(grep -c "__ovic_eh_flag" "$d/legacy.c" || true)
+    lflag=$(grep -c "__ovel_eh_flag" "$d/legacy.c" || true)
     lsetj=$(grep -cE "setjmp|longjmp" "$d/legacy.c" || true)
     echo "== default-backend gate =="
     echo "  no -eh flag : flag=$dflag setjmp=$dsetj   (want flag>0 setjmp=0 -> checked)"
@@ -318,7 +318,7 @@ for s in $SCENES; do
     for v in "${row[@]}"; do
         case "$v" in
             PASS|PASS\(mrc\)) ;;
-            OVICRITY) verdict="DEFAULT!=CHECKED" ;;
+            OVELRITY) verdict="DEFAULT!=CHECKED" ;;
             DIFF) verdict="MODE-DRIFT" ;;
             *) [[ "$verdict" == OK || "$verdict" == FAIL ]] && verdict="FAIL" ;;
         esac

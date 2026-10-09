@@ -3,9 +3,9 @@ use std::cell::RefCell;
 use std::sync::atomic::{AtomicU8, AtomicUsize, Ordering};
 use std::sync::{Mutex, OnceLock};
 use std::collections::HashMap;
-use ovic_ast::*;
-use ovic_cst::{TypePrim, CstParam};
-use ovic_cst::source_map::SourceMap;
+use ovel_ast::*;
+use ovel_cst::{TypePrim, CstParam};
+use ovel_cst::source_map::SourceMap;
 use attrs::Backend;
 
 /// `#line` emission context (plan 阶段 2): when enabled, `emit_stmt` emits a
@@ -14,7 +14,7 @@ use attrs::Backend;
 /// emitted, so clang diagnostics point back at the `.ov`/`.oh` the user
 /// wrote. Regions with no single source line (generated metadata, macro
 /// expansion past the invocation site) map to the virtual file
-/// `<ovic-generated>`; every function body entry resets to it first so user
+/// `<ovel-generated>`; every function body entry resets to it first so user
 /// positions never leak into generated code below.
 struct LineCtx {
     sm: SourceMap,
@@ -34,7 +34,7 @@ fn escape_line_path(p: &str) -> String {
     p.replace('\\', "\\\\").replace('"', "\\\"")
 }
 
-pub(crate) const SYNTHETIC_FILE: &str = "<ovic-generated>";
+pub(crate) const SYNTHETIC_FILE: &str = "<ovel-generated>";
 
 /// Emit a `#line` directive (at column 0) if the statement's source position
 /// differs from the last emitted one. No-op when line directives are off.
@@ -159,11 +159,11 @@ fn meta_symbol(kind: &str, flat: &str) -> String {
         1 | 2 => "$_",  // clang=1, gcc=2
         _ => "",        // portable=0
     };
-    format!("OVIC_{}{}{}", kind, sep, flat)
+    format!("OVEL_{}{}{}", kind, sep, flat)
 }
 
 /// FNV-1a fingerprint of the uniform vtable layout, i.e. of the (sorted) set of
-/// instance-method names this translation unit compiled a `struct ovic_vtable`
+/// instance-method names this translation unit compiled a `struct ovel_vtable`
 /// for. Two units agree iff they saw the same method set; the value is stamped
 /// into every vtable instance and verified at load time so a cross-TU layout
 /// mismatch aborts with a clear message instead of dispatching garbage.
@@ -288,13 +288,13 @@ fn is_clang_backend() -> bool {
 }
 
 /// Block-typed value in C. clang: `RT (^)(params)`. gcc/portable: an opaque
-/// pointer to the shared `struct __ovic_block_header` (all literal structs
+/// pointer to the shared `struct __ovel_block_header` (all literal structs
 /// start with that header; call via `->invoke`).
 fn block_type_c_str(ret: &str, _params: &str) -> String {
     if is_clang_backend() {
         format!("{} (^)({})", ret, _params)
     } else {
-        "struct __ovic_block_header *".to_string()
+        "struct __ovel_block_header *".to_string()
     }
 }
 
@@ -322,7 +322,7 @@ fn sanitize_sel_name(sel: &str) -> String {
 }
 
 fn sel_const_name(sel: &str) -> String {
-    format!("__ovic_sel_{}", sanitize_sel_name(sel))
+    format!("__ovel_sel_{}", sanitize_sel_name(sel))
 }
 
 // ─── C99 AST types ────────────────────────────────────────────────────────────
@@ -500,10 +500,10 @@ pub struct CgUnit {
     pub selectors: Vec<String>,
     pub classes: Vec<CgClassMeta>,
     pub global_instance_method_names: Vec<String>,
-    /// Struct tags whose `==`/`!=` the checker rewrote to `ovic_struct_eq_<tag>`
+    /// Struct tags whose `==`/`!=` the checker rewrote to `ovel_struct_eq_<tag>`
     /// calls. One field-wise comparison function is emitted per tag, on demand.
     pub struct_eq_tags: Vec<String>,
-    /// `-fno-ovic-arc`: manual retain/release. Object ivars are then the
+    /// `-fno-ovel-arc`: manual retain/release. Object ivars are then the
     /// programmer's to release, so no ARC dealloc wrapper is generated.
     pub no_arc: bool,
     /// Classes whose `@implementation` sits in **this** TU's main file (not in
@@ -530,8 +530,8 @@ pub struct CgUnit {
     /// itself; with neither, every method is shared (the pre-R3 behavior).
     pub vtable_sig_names: Vec<String>,
     /// True when this TU can see the NPPredicate declaration (pipeline: a
-    /// transitive ovic `#import` of NPPredicate). Gates KVC accessor-table
-    /// emission (OVIC_KVC_$_<Class>): a TU that never touches predicates
+    /// transitive ovel `#import` of NPPredicate). Gates KVC accessor-table
+    /// emission (OVEL_KVC_$_<Class>): a TU that never touches predicates
     /// pays nothing. See doc/nppredicate_plan.md §2.
     pub kvc: bool,
     /// Protocol declarations visible in this unit: (name, parents, required,
@@ -581,9 +581,9 @@ pub struct CgClassMeta {
 /// *referent's* weak list in sync:
 ///
 /// ```c
-/// (ovic_weakUnregister((NPObject **)&target),
+/// (ovel_weakUnregister((NPObject **)&target),
 ///  target = value,
-///  ovic_weakRegister((NPObject **)&target, (NPObject *)value))
+///  ovel_weakRegister((NPObject **)&target, (NPObject *)value))
 /// ```
 ///
 /// Used for both explicit `self->_weakIvar = v` writes and weak property
@@ -623,23 +623,23 @@ fn build_weak_write(
     CgExpr {
         kind: CgExprKind::Comma, type_str, line, col,
         data: CgExprData::Comma(vec![
-            call("ovic_weakUnregister", vec![cast_addr.clone()]),
+            call("ovel_weakUnregister", vec![cast_addr.clone()]),
             CgExpr {
                 kind: CgExprKind::Assign, type_str: None, line, col,
                 data: CgExprData::Assign { target: Box::new(target), value: Box::new(value) },
             },
-            call("ovic_weakRegister", vec![cast_addr, cast_value]),
+            call("ovel_weakRegister", vec![cast_addr, cast_value]),
         ]),
     }
 }
 
 fn is_owned_object_ivar_type(ty: &str) -> bool {
     let t = ty.trim();
-    // `id` (and the runtime's `ovic_id_t`) are object pointers spelled without
+    // `id` (and the runtime's `ovel_id_t`) are object pointers spelled without
     // a `*`, so they never reach the pointer checks below.
-    if t == "id" || t == "ovic_id_t" { return true; }
+    if t == "id" || t == "ovel_id_t" { return true; }
     if t.contains("(*") { return false; }                  // function pointer
-    if t.contains("struct __ovic_block") { return false; }  // block layout
+    if t.contains("struct __ovel_block") { return false; }  // block layout
     if !t.ends_with('*') { return false; }
     // Exactly ONE level of indirection. `NPObject **` is a C array of objects
     // (Foundation's NPArray/NPDictionary back `_items`/`_keys`/`_values` with
@@ -674,7 +674,7 @@ fn owned_ivars_of(cm: &CgClassMeta) -> Vec<String> {
 ///     or an OO cascade), and a synthesized release on top of that is a double
 ///     free. A class that declares `dealloc` has declared its ivar policy.
 ///
-/// Releasing only `ovic_release`-style is nil-safe, so a half-initialized
+/// Releasing only `ovel_release`-style is nil-safe, so a half-initialized
 /// object is safe to destroy, and order is REVERSE declaration (stack order).
 /// The wrapper never rewrites the user's body; it *is* the class's `dealloc`
 /// entry in the metadata table.
@@ -701,7 +701,7 @@ fn emit_arc_dealloc_wrappers(classes: &[CgClassMeta]) -> (std::collections::Hash
         let flat = name_flat(&c.class_name);
         if owned.get(&flat).map_or(true, |v| v.is_empty()) { continue; }
         if has_user_dealloc(c) { continue; }
-        names.insert(flat.clone(), format!("{}__ovic_arc_dealloc", flat));
+        names.insert(flat.clone(), format!("{}__ovel_arc_dealloc", flat));
     }
 
     let mut defs = String::new();
@@ -715,7 +715,7 @@ fn emit_arc_dealloc_wrappers(classes: &[CgClassMeta]) -> (std::collections::Hash
         let entry = match c.super_name.as_deref().map(name_flat) {
             Some(sup) => {
                 if names.contains_key(&sup) {
-                    format!("    {}__ovic_arc_dealloc(self, _cmd);\n", sup)
+                    format!("    {}__ovel_arc_dealloc(self, _cmd);\n", sup)
                 } else {
                     let sup_user = classes
                         .iter()
@@ -737,12 +737,12 @@ fn emit_arc_dealloc_wrappers(classes: &[CgClassMeta]) -> (std::collections::Hash
         let releases: String = ivars
             .iter()
             .rev()
-            .map(|n| format!("    ovic_release(((struct {} *)self)->{});\n", flat, n))
+            .map(|n| format!("    ovel_release(((struct {} *)self)->{});\n", flat, n))
             .collect();
 
         defs.push_str(&format!(
             "/* ARC: release '{}'s owned ivars (no user dealloc) */\n\
-             static void {}__ovic_arc_dealloc(NPObject * self, SEL _cmd) {{\n{}{}}}\n\n",
+             static void {}__ovel_arc_dealloc(NPObject * self, SEL _cmd) {{\n{}{}}}\n\n",
             c.class_name,
             flat,
             entry,
@@ -899,7 +899,7 @@ fn mangle_one_arg(arg: &str) -> String {
     s
 }
 
-fn cst_type_to_c_str(ct: &ovic_cst::CstType) -> String {
+fn cst_type_to_c_str(ct: &ovel_cst::CstType) -> String {
     if ct.is_fn_ptr {
         let ret = ct.subtype.as_ref().map(|s| cst_type_to_c_str(s)).unwrap_or_else(|| "void".into());
         let mut params = String::new();
@@ -1046,7 +1046,7 @@ pub fn ast_type_to_c_str(t: &AstType) -> String {
             if is_clang_backend() {
                 return format!("{} (^{})({})", ret, bn, params);
             }
-            return format!("struct __ovic_block_header *{}", bn);
+            return format!("struct __ovel_block_header *{}", bn);
         }
         return block_type_c_str(&ret, &params);
     }
@@ -1383,7 +1383,7 @@ fn expand_nplog_format(fmt: &str, args: &[AstExpr], class_infos: &std::collectio
 }
 
 /// Build the format argument for NPLog: when NPString is available, emit
-/// `(NPString *)ovic_stringFromCstr("...")` so the format is passed as an NPString.
+/// `(NPString *)ovel_stringFromCstr("...")` so the format is passed as an NPString.
 /// When NPString is absent, fall back to a raw C string (graceful degradation).
 fn nplog_format_arg(fmt: String, has_npstring: bool, line: usize, col: usize) -> CgExpr {
     if has_npstring {
@@ -1394,7 +1394,7 @@ fn nplog_format_arg(fmt: String, has_npstring: bool, line: usize, col: usize) ->
                 expr: Box::new(CgExpr {
                     kind: CgExprKind::Call, type_str: Some("NPObject *".into()), line, col,
                     data: CgExprData::Call {
-                        name: "ovic_stringFromCstr".into(),
+                        name: "ovel_stringFromCstr".into(),
                         args: vec![CgExpr { kind: CgExprKind::String, type_str: None, line, col, data: CgExprData::String(fmt) }],
                         vtable_class: None, alt_vtable_classes: vec![], is_class_method: false, is_super: false,
                         sel_const_name: None, method_index: None,
@@ -1447,7 +1447,7 @@ fn convert_expr(ae: &AstExpr, class_infos: &std::collections::BTreeMap<String, C
                 CgExpr {
                     kind: CgExprKind::Call, type_str: Some("NPObject *".into()), line, col,
                     data: CgExprData::Call {
-                        name: "ovic_stringFromCstr".into(),
+                        name: "ovel_stringFromCstr".into(),
                         args: vec![CgExpr { kind: CgExprKind::String, type_str: None, line, col, data: CgExprData::String(s.clone()) }],
                         vtable_class: None, alt_vtable_classes: vec![],
                         is_class_method: false, is_super: false,
@@ -1497,12 +1497,12 @@ fn convert_expr(ae: &AstExpr, class_infos: &std::collections::BTreeMap<String, C
             CgExpr { kind: CgExprKind::Arrow, type_str, line, col, data: CgExprData::Arrow { obj: Box::new(obj_cg), field } }
         }
         AstExprData::MsgSend { receiver, selector, args, is_class_method, is_super, super_name, .. } => {
-            // Special case: [receiver class] -> ((NPClass *)((ovic_root *)receiver)->isa)
+            // Special case: [receiver class] -> ((NPClass *)((ovel_root *)receiver)->isa)
             // The "class" method is auto-generated on every meta vtable but NOT registered
             // in class_infos, so normal vtable dispatch can't find it. Emit the direct
             // ivar access which is semantically equivalent for all ObjC objects.
             // When the receiver is a class name (e.g. `[Array class]`), emit
-            // `&ovic_<flat>_class` directly instead.
+            // `&ovel_<flat>_class` directly instead.
             if selector == "class" && !*is_super && args.is_empty() {
                 if let AstExprData::VarRef { ref name, .. } = receiver.data {
                     let flat = name_flat(name);
@@ -1527,7 +1527,7 @@ fn convert_expr(ae: &AstExpr, class_infos: &std::collections::BTreeMap<String, C
                         obj: Box::new(CgExpr {
                             kind: CgExprKind::Cast, type_str: None, line, col,
                             data: CgExprData::Cast {
-                                target_type: "ovic_root *".to_string(),
+                                target_type: "ovel_root *".to_string(),
                                 expr: Box::new(obj_cg),
                             },
                         }),
@@ -1554,7 +1554,7 @@ fn convert_expr(ae: &AstExpr, class_infos: &std::collections::BTreeMap<String, C
             //     protocol stub from propagate_protocol_methods).
             //   - The uniform vtable makes this a compile-time-known member
             //     name: selectors map 1:1 to sanitized member names.
-            // Emits: ovic_resp_<member>(recv_expr) — the helper is declared as
+            // Emits: ovel_resp_<member>(recv_expr) — the helper is declared as
             // a static CgDecl::Function here and emitted after the vtable
             // struct definition in emit_unit_with_headers.
             if selector == "respondsToSelector:" && !*is_super && args.len() == 1 {
@@ -1575,7 +1575,7 @@ fn convert_expr(ae: &AstExpr, class_infos: &std::collections::BTreeMap<String, C
                         return CgExpr {
                             kind: CgExprKind::Call, type_str, line, col,
                             data: CgExprData::Call {
-                                name: format!("ovic_resp_{}", member),
+                                name: format!("ovel_resp_{}", member),
                                 args: vec![convert_expr(receiver, &class_infos)],
                                 vtable_class: None,
                                 alt_vtable_classes: Vec::new(),
@@ -1600,7 +1600,7 @@ fn convert_expr(ae: &AstExpr, class_infos: &std::collections::BTreeMap<String, C
                 }
             }
             // Special case: [receiver conformsToProtocol:@protocol(P)] ->
-            // ovic_class_conformsToProtocol(recv->isa, &OVIC_PROTO_$_P) —
+            // ovel_class_conformsToProtocol(recv->isa, &OVEL_PROTO_$_P) —
             // metadata-based runtime query (D5.2). The protocol table must
             // be declared in this TU (a @protocol decl or a conforming
             // class brings the static instance in); otherwise the static
@@ -1622,12 +1622,12 @@ fn convert_expr(ae: &AstExpr, class_infos: &std::collections::BTreeMap<String, C
                         return CgExpr {
                             kind: CgExprKind::Call, type_str, line, col,
                             data: CgExprData::Call {
-                                name: "ovic_class_conformsToProtocol".into(),
+                                name: "ovel_class_conformsToProtocol".into(),
                                 args: vec![
                                     recv_isa,
                                     CgExpr {
                                         kind: CgExprKind::Ident, type_str: Some("struct NPProtocol *".to_string()), line, col,
-                                        data: CgExprData::Ident(format!("&OVIC_PROTO_$_{}", name_flat(&pname))),
+                                        data: CgExprData::Ident(format!("&OVEL_PROTO_$_{}", name_flat(&pname))),
                                     },
                                 ],
                                 vtable_class: None,
@@ -1810,7 +1810,7 @@ fn convert_expr(ae: &AstExpr, class_infos: &std::collections::BTreeMap<String, C
                         // For self/super class method calls, pass self directly (it's already a class pointer)
                         // NOTE: a super class-method send (`[super alloc]`) must pass
                         // `self`, NOT the identifier `super` (which is not a C
-                        // identifier and only makes sense to the ovic parser).
+                        // identifier and only makes sense to the ovel parser).
                         let cls_addr = if rc == "self" || (rc == "super" && *is_super) {
                             // `super` as receiver → pass `self` (in a class method
                             // self IS the NPClass*; `super` is not a C identifier).
@@ -1895,7 +1895,7 @@ fn convert_expr(ae: &AstExpr, class_infos: &std::collections::BTreeMap<String, C
         }
         AstExprData::FuncCall { name, args, callee, .. } => {
             // NPLog(@"...%@...", arg1, arg2): resolve `%@` at COMPILE TIME per
-            // the ovic static-dispatch model. No runtime reflection is allowed.
+            // the ovel static-dispatch model. No runtime reflection is allowed.
             // Each `%@` arg becomes  arg ? [[arg description] UTF8String] : "(null)"
             // and the format's `%@` is rewritten to `%s`.
             if name == "NPLog" && callee.is_none() && !args.is_empty() {
@@ -2189,7 +2189,7 @@ fn convert_expr(ae: &AstExpr, class_infos: &std::collections::BTreeMap<String, C
         }
         AstExprData::ArrayLit(elements) => {
             if class_infos.contains_key("NPArray") {
-                // @[a, b, c] → ovic_array_create(3, a, b, c)
+                // @[a, b, c] → ovel_array_create(3, a, b, c)
                 let mut cg_args = Vec::with_capacity(elements.len() + 1);
                 cg_args.push(CgExpr { kind: CgExprKind::Int, type_str: None, line, col, data: CgExprData::Int(elements.len() as i64) });
                 for el in elements {
@@ -2197,7 +2197,7 @@ fn convert_expr(ae: &AstExpr, class_infos: &std::collections::BTreeMap<String, C
                 }
                 CgExpr { kind: CgExprKind::Call, type_str: Some("NPObject *".into()), line, col,
                     data: CgExprData::Call {
-                        name: "ovic_array_create".into(), args: cg_args,
+                        name: "ovel_array_create".into(), args: cg_args,
                         vtable_class: None, alt_vtable_classes: vec![], is_class_method: false, is_super: false,
                         sel_const_name: None, method_index: None,
                     },
@@ -2211,7 +2211,7 @@ fn convert_expr(ae: &AstExpr, class_infos: &std::collections::BTreeMap<String, C
         }
         AstExprData::DictLit { keys, values } => {
             if class_infos.contains_key("NPDictionary") {
-                // @{k: v, ...} → ovic_dictionary_create(n, k1, v1, ..., kn, vn)
+                // @{k: v, ...} → ovel_dictionary_create(n, k1, v1, ..., kn, vn)
                 let stored = keys.len().min(values.len());
                 let mut cg_args = Vec::with_capacity(stored * 2 + 1);
                 cg_args.push(CgExpr { kind: CgExprKind::Int, type_str: None, line, col, data: CgExprData::Int(stored as i64) });
@@ -2221,7 +2221,7 @@ fn convert_expr(ae: &AstExpr, class_infos: &std::collections::BTreeMap<String, C
                 }
                 CgExpr { kind: CgExprKind::Call, type_str: Some("NPObject *".into()), line, col,
                     data: CgExprData::Call {
-                        name: "ovic_dictionary_create".into(), args: cg_args,
+                        name: "ovel_dictionary_create".into(), args: cg_args,
                         vtable_class: None, alt_vtable_classes: vec![], is_class_method: false, is_super: false,
                         sel_const_name: None, method_index: None,
                     },
@@ -2293,7 +2293,7 @@ fn convert_expr(ae: &AstExpr, class_infos: &std::collections::BTreeMap<String, C
         }
         AstExprData::Block { params, return_type, body } => {
             let tid = next_temp_id();
-            let func_name = format!("__ovic_block_{}", tid);
+            let func_name = format!("__ovel_block_{}", tid);
             let rt = return_type.as_ref().map(|t| ast_type_to_c_str(t))
                 .unwrap_or_else(|| infer_block_return_type(body.as_deref()));
             let mut cg_params = Vec::new();
@@ -2307,7 +2307,7 @@ fn convert_expr(ae: &AstExpr, class_infos: &std::collections::BTreeMap<String, C
             // module-level buffer so they are available when emit_unit_with_headers runs.
             if !is_clang_backend() {
                 let mut defs = block_defs();
-                let layout_name = format!("__ovic_block_layout_{}", tid);
+                let layout_name = format!("__ovel_block_layout_{}", tid);
                 let mut params_sig = String::new();
                 for (i, (pt, pn)) in cg_params.iter().enumerate() {
                     if i > 0 { params_sig.push_str(", "); }
@@ -2588,11 +2588,11 @@ fn convert_stmt(as_: &AstStmt, class_infos: &std::collections::BTreeMap<String, 
             stmts.push(CgStmt {
                 kind: CgStmtKind::Decl, line: 0, col: 0,
                 data: CgStmtData::Decl {
-                    decl_type: "ovic_autoreleasepool_t *".into(),
-                    name: "__ovic_pool".into(),
+                    decl_type: "ovel_autoreleasepool_t *".into(),
+                    name: "__ovel_pool".into(),
                     init: Some(Box::new(CgExpr {
                         kind: CgExprKind::Ident, type_str: None, line: 0, col: 0,
-                        data: CgExprData::Ident("ovic_autoreleasepoolPush()".into()),
+                        data: CgExprData::Ident("ovel_autoreleasepoolPush()".into()),
                     })),
                     array_suffix: None,
                     is_static: false,
@@ -2607,7 +2607,7 @@ fn convert_stmt(as_: &AstStmt, class_infos: &std::collections::BTreeMap<String, 
                 kind: CgStmtKind::Expr, line: 0, col: 0,
                 data: CgStmtData::Expr(CgExpr {
                     kind: CgExprKind::Ident, type_str: None, line: 0, col: 0,
-                    data: CgExprData::Ident("ovic_autoreleasepoolPop(__ovic_pool)".into()),
+                    data: CgExprData::Ident("ovel_autoreleasepoolPop(__ovel_pool)".into()),
                 }),
             });
             CgStmt { kind: CgStmtKind::Compound, line, col, data: CgStmtData::Compound(stmts) }
@@ -2625,8 +2625,8 @@ fn convert_stmt(as_: &AstStmt, class_infos: &std::collections::BTreeMap<String, 
         }
         AstStmtData::Synchronized { lock, body } => {
             // @synchronized (obj) { ... } — real mutual exclusion:
-            //   { long __ovic_sync_N __attribute__((cleanup(ovic_syncAutoCleanup)))
-            //       = ovic_syncLock((void *)obj);
+            //   { long __ovel_sync_N __attribute__((cleanup(ovel_syncAutoCleanup)))
+            //       = ovel_syncLock((void *)obj);
             //     <body> }
             // The cleanup attribute releases the lock on every scope exit
             // (normal end, return, break, continue). A @throw escaping the
@@ -2635,7 +2635,7 @@ fn convert_stmt(as_: &AstStmt, class_infos: &std::collections::BTreeMap<String, 
             // builds: lock/unlock are single-core no-ops (runtime_freestanding.c).
             let lock_cg = convert_expr(lock, class_infos);
             let body_cg = convert_stmt(body, class_infos);
-            let holder = format!("__ovic_sync_{}", next_temp_id());
+            let holder = format!("__ovel_sync_{}", next_temp_id());
             let mut stmts: Vec<CgStmt> = Vec::new();
             stmts.push(CgStmt {
                 kind: CgStmtKind::Decl, line, col,
@@ -2645,7 +2645,7 @@ fn convert_stmt(as_: &AstStmt, class_infos: &std::collections::BTreeMap<String, 
                     init: Some(Box::new(CgExpr {
                         kind: CgExprKind::Call, type_str: None, line, col,
                         data: CgExprData::Call {
-                            name: "ovic_syncLock".into(),
+                            name: "ovel_syncLock".into(),
                             args: vec![CgExpr {
                                 kind: CgExprKind::Cast, type_str: None, line, col,
                                 data: CgExprData::Cast {
@@ -2660,7 +2660,7 @@ fn convert_stmt(as_: &AstStmt, class_infos: &std::collections::BTreeMap<String, 
                     })),
                     array_suffix: None, is_static: false, is_weak: false, is_block: false,
                     next: vec![],
-                    attributes: vec!["cleanup(ovic_syncAutoCleanup)".into()],
+                    attributes: vec!["cleanup(ovel_syncAutoCleanup)".into()],
                 },
             });
             match body_cg.data {
@@ -2676,7 +2676,7 @@ fn convert_stmt(as_: &AstStmt, class_infos: &std::collections::BTreeMap<String, 
             // return, break/continue — see crates/arc). An earlier
             // "unwind-lift" shadow mechanism here DOUBLE-RELEASED: ARC
             // already releases owned locals before @throw, and the lift's
-            // shadow release was not gated on __ovic_state == 1, so even the
+            // shadow release was not gated on __ovel_state == 1, so even the
             // normal no-throw path hit freed memory (ASan UAF, verified).
             // Removed; policy is prefer leak over double-release (Unknown-
             // merge locals may leak on the throw path — same conservative
@@ -2685,15 +2685,15 @@ fn convert_stmt(as_: &AstStmt, class_infos: &std::collections::BTreeMap<String, 
             let finally_cg = finally_block.as_ref().map(|fb| convert_stmt(fb, class_infos));
 
             // Build the catch blocks: each Catch { param, body } becomes:
-            //   { param_type param_name = __ovic_exception_value; body }
-            // Wrap in "if (__ovic_state == 1) { __ovic_state = 2; <catches> }"
+            //   { param_type param_name = __ovel_exception_value; body }
+            // Wrap in "if (__ovel_state == 1) { __ovel_state = 2; <catches> }"
 let mut catch_body: Vec<CgStmt> = Vec::new();
             if !catches.is_empty() {
                 for c in catches.iter() {
                     if let AstStmtData::Catch { param, body } = &c.data {
                         let mut catch_stmts: Vec<CgStmt> = Vec::new();
                         // Each catch starts by marking state=2 so later catches
-                        // won't match (they check __ovic_state == 1).
+                        // won't match (they check __ovel_state == 1).
                         catch_stmts.push(CgStmt {
                             kind: CgStmtKind::Expr, line, col,
                             data: CgStmtData::Expr(CgExpr {
@@ -2701,7 +2701,7 @@ let mut catch_body: Vec<CgStmt> = Vec::new();
                                 data: CgExprData::Assign {
                                     target: Box::new(CgExpr {
                                         kind: CgExprKind::Ident, type_str: None, line, col,
-                                        data: CgExprData::Ident("__ovic_state".into()),
+                                        data: CgExprData::Ident("__ovel_state".into()),
                                     }),
                                     value: Box::new(CgExpr {
                                         kind: CgExprKind::Int, type_str: None, line, col,
@@ -2716,13 +2716,13 @@ let mut catch_body: Vec<CgStmt> = Vec::new();
                         let param_name = param.name.clone().unwrap_or_else(|| "exc".into());
                         // Only emit a value-initialized declaration when the catch body
                         // actually references the parameter. Otherwise emitting
-                        // `T e = __ovic_exception_value;` produces a dead store
+                        // `T e = __ovel_exception_value;` produces a dead store
                         // (clang -Wunused-but-set-variable / analyzer DeadStores).
                         // When unused, declare the name without an initializer and
                         // add `(void)name;` to silence the unused-variable warning.
                         let param_used = stmt_refs_name(&*body, &param_name);
                         if param_used {
-                            // Cast __ovic_exception_value (an NPObject *) to the catch
+                            // Cast __ovel_exception_value (an NPObject *) to the catch
                             // param type so typed catches don't trigger incompatible
                             // pointer types with -Wall -Wextra.
                             let cast_ctor = CgExpr {
@@ -2731,7 +2731,7 @@ let mut catch_body: Vec<CgStmt> = Vec::new();
                                     target_type: param_type.clone(),
                                     expr: Box::new(CgExpr {
                                         kind: CgExprKind::Ident, type_str: None, line, col,
-                                        data: CgExprData::Ident("__ovic_exception_value".into()),
+                                        data: CgExprData::Ident("__ovel_exception_value".into()),
                                     }),
                                 },
                             };
@@ -2792,9 +2792,9 @@ let mut catch_body: Vec<CgStmt> = Vec::new();
                             let name = t.name.as_ref()?;
                             let flat = name_flat(name);
                             if !class_infos.contains_key(&flat) { return None; }
-                            // Build: __ovic_eh_isa((NPObject *)__ovic_exception_value,
-                            //                       &ovic_Flat_class)
-                            // __ovic_eh_isa walks the superclass chain and is
+                            // Build: __ovel_eh_isa((NPObject *)__ovel_exception_value,
+                            //                       &ovel_Flat_class)
+                            // __ovel_eh_isa walks the superclass chain and is
                             // nil-safe (runtime.c) — a subclass instance matches a
                             // parent-class arm. The old exact `isa ==` comparison
                             // silently failed to catch subclasses (probe: throw
@@ -2804,7 +2804,7 @@ let mut catch_body: Vec<CgStmt> = Vec::new();
                             Some(CgExpr {
                                 kind: CgExprKind::Call, type_str: None, line, col,
                                 data: CgExprData::Call {
-                                    name: "__ovic_eh_isa".into(),
+                                    name: "__ovel_eh_isa".into(),
                                     args: vec![
                                         CgExpr {
                                             kind: CgExprKind::Cast, type_str: None, line, col,
@@ -2812,7 +2812,7 @@ let mut catch_body: Vec<CgStmt> = Vec::new();
                                                 target_type: "NPObject *".into(),
                                                 expr: Box::new(CgExpr {
                                                     kind: CgExprKind::Ident, type_str: None, line, col,
-                                                    data: CgExprData::Ident("__ovic_exception_value".into()),
+                                                    data: CgExprData::Ident("__ovel_exception_value".into()),
                                                 }),
                                             },
                                         },
@@ -2853,14 +2853,14 @@ let mut catch_body: Vec<CgStmt> = Vec::new();
                                 data: CgStmtData::Compound(catch_stmts),
                             })
                         };
-                        // if (__ovic_state == 1) { ... }
+                        // if (__ovel_state == 1) { ... }
                         let state_cond = CgExpr {
                             kind: CgExprKind::Binary, type_str: None, line, col,
                             data: CgExprData::Binary {
                                 op_str: "==".into(),
                                 left: Box::new(CgExpr {
                                     kind: CgExprKind::Ident, type_str: None, line, col,
-                                    data: CgExprData::Ident("__ovic_state".into()),
+                                    data: CgExprData::Ident("__ovel_state".into()),
                                 }),
                                 right: Box::new(CgExpr {
                                     kind: CgExprKind::Int, type_str: None, line, col,
@@ -2882,24 +2882,24 @@ let mut catch_body: Vec<CgStmt> = Vec::new();
 
             // ── Build the full try/catch/finally pattern ──
             // {
-            //   jmp_buf __ovic_saved;
-            //   memcpy(__ovic_saved, __ovic_exception_buf, sizeof(jmp_buf));
-            //   volatile int __ovic_state = 0;
-            //   if (setjmp(__ovic_exception_buf) != 0) { __ovic_state = 1; }
-            //   if (__ovic_state == 0) { <try_body> }
+            //   jmp_buf __ovel_saved;
+            //   memcpy(__ovel_saved, __ovel_exception_buf, sizeof(jmp_buf));
+            //   volatile int __ovel_state = 0;
+            //   if (setjmp(__ovel_exception_buf) != 0) { __ovel_state = 1; }
+            //   if (__ovel_state == 0) { <try_body> }
             //   <catch_body_if_state_1>
-            //   memcpy(__ovic_exception_buf, __ovic_saved, sizeof(jmp_buf));
+            //   memcpy(__ovel_exception_buf, __ovel_saved, sizeof(jmp_buf));
             //   <finally_block>
-            //   if (__ovic_state == 1) { longjmp(...); }
+            //   if (__ovel_state == 1) { longjmp(...); }
             // }
             let mut try_stmts: Vec<CgStmt> = Vec::new();
 
-            // jmp_buf __ovic_saved;
+            // jmp_buf __ovel_saved;
             try_stmts.push(CgStmt {
                 kind: CgStmtKind::Decl, line, col,
                 data: CgStmtData::Decl {
                     decl_type: "jmp_buf".into(),
-                    name: "__ovic_saved".into(),
+                    name: "__ovel_saved".into(),
                     init: None,
                     array_suffix: None,
                     is_static: false,
@@ -2910,7 +2910,7 @@ let mut catch_body: Vec<CgStmt> = Vec::new();
                 },
             });
 
-            // memcpy(__ovic_saved, __ovic_exception_buf, sizeof(jmp_buf));
+            // memcpy(__ovel_saved, __ovel_exception_buf, sizeof(jmp_buf));
             try_stmts.push(CgStmt {
                 kind: CgStmtKind::Expr, line, col,
                 data: CgStmtData::Expr(CgExpr {
@@ -2920,11 +2920,11 @@ let mut catch_body: Vec<CgStmt> = Vec::new();
                         args: vec![
                             CgExpr {
                                 kind: CgExprKind::Ident, type_str: None, line, col,
-                                data: CgExprData::Ident("__ovic_saved".into()),
+                                data: CgExprData::Ident("__ovel_saved".into()),
                             },
                             CgExpr {
                                 kind: CgExprKind::Ident, type_str: None, line, col,
-                                data: CgExprData::Ident("__ovic_exception_buf".into()),
+                                data: CgExprData::Ident("__ovel_exception_buf".into()),
                             },
                             CgExpr {
                                 kind: CgExprKind::Sizeof, type_str: None, line, col,
@@ -2940,12 +2940,12 @@ let mut catch_body: Vec<CgStmt> = Vec::new();
                 }),
             });
 
-            // volatile int __ovic_state = 0;
+            // volatile int __ovel_state = 0;
             try_stmts.push(CgStmt {
                 kind: CgStmtKind::Decl, line, col,
                 data: CgStmtData::Decl {
                     decl_type: "volatile int".into(),
-                    name: "__ovic_state".into(),
+                    name: "__ovel_state".into(),
                     init: Some(Box::new(CgExpr {
                         kind: CgExprKind::Int, type_str: None, line, col,
                         data: CgExprData::Int(0),
@@ -2959,7 +2959,7 @@ let mut catch_body: Vec<CgStmt> = Vec::new();
                 },
             });
 
-            // if (setjmp(__ovic_exception_buf) != 0) { __ovic_state = 1; }
+            // if (setjmp(__ovel_exception_buf) != 0) { __ovel_state = 1; }
             try_stmts.push(CgStmt {
                 kind: CgStmtKind::If, line, col,
                 data: CgStmtData::If {
@@ -2973,7 +2973,7 @@ let mut catch_body: Vec<CgStmt> = Vec::new();
                                     name: "setjmp".into(),
                                     args: vec![CgExpr {
                                         kind: CgExprKind::Ident, type_str: None, line, col,
-                                        data: CgExprData::Ident("__ovic_exception_buf".into()),
+                                        data: CgExprData::Ident("__ovel_exception_buf".into()),
                                     }],
                                     vtable_class: None, alt_vtable_classes: vec![],
                                     is_class_method: false, is_super: false, sel_const_name: None, method_index: None,
@@ -2992,7 +2992,7 @@ let mut catch_body: Vec<CgStmt> = Vec::new();
                             data: CgExprData::Assign {
                                 target: Box::new(CgExpr {
                                     kind: CgExprKind::Ident, type_str: None, line, col,
-                                    data: CgExprData::Ident("__ovic_state".into()),
+                                    data: CgExprData::Ident("__ovel_state".into()),
                                 }),
                                 value: Box::new(CgExpr {
                                     kind: CgExprKind::Int, type_str: None, line, col,
@@ -3005,7 +3005,7 @@ let mut catch_body: Vec<CgStmt> = Vec::new();
                 },
             });
 
-            // if (__ovic_state == 0) { <try_body> }
+            // if (__ovel_state == 0) { <try_body> }
             try_stmts.push(CgStmt {
                 kind: CgStmtKind::If, line, col,
                 data: CgStmtData::If {
@@ -3015,7 +3015,7 @@ let mut catch_body: Vec<CgStmt> = Vec::new();
                             op_str: "==".into(),
                             left: Box::new(CgExpr {
                                 kind: CgExprKind::Ident, type_str: None, line, col,
-                                data: CgExprData::Ident("__ovic_state".into()),
+                                data: CgExprData::Ident("__ovel_state".into()),
                             }),
                             right: Box::new(CgExpr {
                                 kind: CgExprKind::Int, type_str: None, line, col,
@@ -3039,8 +3039,8 @@ let mut catch_body: Vec<CgStmt> = Vec::new();
                     data: CgExprData::Call {
                         name: "memcpy".into(),
                         args: vec![
-                            CgExpr { kind: CgExprKind::Ident, type_str: None, line, col, data: CgExprData::Ident("__ovic_exception_buf".into()) },
-                            CgExpr { kind: CgExprKind::Ident, type_str: None, line, col, data: CgExprData::Ident("__ovic_saved".into()) },
+                            CgExpr { kind: CgExprKind::Ident, type_str: None, line, col, data: CgExprData::Ident("__ovel_exception_buf".into()) },
+                            CgExpr { kind: CgExprKind::Ident, type_str: None, line, col, data: CgExprData::Ident("__ovel_saved".into()) },
                             CgExpr { kind: CgExprKind::Sizeof, type_str: None, line, col, data: CgExprData::Sizeof { type_str: "jmp_buf".into(), is_alignof: false } },
                         ],
                         vtable_class: None, alt_vtable_classes: vec![],
@@ -3052,7 +3052,7 @@ let mut catch_body: Vec<CgStmt> = Vec::new();
             // catch blocks (if any)
             try_stmts.extend(catch_body);
 
-            // memcpy(__ovic_exception_buf, __ovic_saved, sizeof(jmp_buf));
+            // memcpy(__ovel_exception_buf, __ovel_saved, sizeof(jmp_buf));
             try_stmts.push(CgStmt {
                 kind: CgStmtKind::Expr, line, col,
                 data: CgStmtData::Expr(CgExpr {
@@ -3060,8 +3060,8 @@ let mut catch_body: Vec<CgStmt> = Vec::new();
                     data: CgExprData::Call {
                         name: "memcpy".into(),
                         args: vec![
-                            CgExpr { kind: CgExprKind::Ident, type_str: None, line, col, data: CgExprData::Ident("__ovic_exception_buf".into()) },
-                            CgExpr { kind: CgExprKind::Ident, type_str: None, line, col, data: CgExprData::Ident("__ovic_saved".into()) },
+                            CgExpr { kind: CgExprKind::Ident, type_str: None, line, col, data: CgExprData::Ident("__ovel_exception_buf".into()) },
+                            CgExpr { kind: CgExprKind::Ident, type_str: None, line, col, data: CgExprData::Ident("__ovel_saved".into()) },
                             CgExpr { kind: CgExprKind::Sizeof, type_str: None, line, col, data: CgExprData::Sizeof { type_str: "jmp_buf".into(), is_alignof: false } },
                         ],
                         vtable_class: None, alt_vtable_classes: vec![],
@@ -3077,13 +3077,13 @@ let mut catch_body: Vec<CgStmt> = Vec::new();
 
             // NOTE: no unwind-path release here. An earlier "unwind-lift"
             // shadow mechanism released lifted locals before the rethrow
-            // longjmp, but (a) it was NOT gated on __ovic_state == 1, so the
+            // longjmp, but (a) it was NOT gated on __ovel_state == 1, so the
             // NORMAL no-throw path double-released (ASan UAF, verified), and
             // (b) ARC already releases owned locals before @throw
             // (crates/arc). ARC is the single owner of automatic release
             // insertion; prefer leak over double-release.
 
-            // if (__ovic_state == 1) { longjmp(__ovic_exception_buf, 1); }
+            // if (__ovel_state == 1) { longjmp(__ovel_exception_buf, 1); }
             try_stmts.push(CgStmt {
                 kind: CgStmtKind::If, line, col,
                 data: CgStmtData::If {
@@ -3093,7 +3093,7 @@ let mut catch_body: Vec<CgStmt> = Vec::new();
                             op_str: "==".into(),
                             left: Box::new(CgExpr {
                                 kind: CgExprKind::Ident, type_str: None, line, col,
-                                data: CgExprData::Ident("__ovic_state".into()),
+                                data: CgExprData::Ident("__ovel_state".into()),
                             }),
                             right: Box::new(CgExpr {
                                 kind: CgExprKind::Int, type_str: None, line, col,
@@ -3108,7 +3108,7 @@ let mut catch_body: Vec<CgStmt> = Vec::new();
                             data: CgExprData::Call {
                                 name: "longjmp".into(),
                                 args: vec![
-                                    CgExpr { kind: CgExprKind::Ident, type_str: None, line, col, data: CgExprData::Ident("__ovic_exception_buf".into()) },
+                                    CgExpr { kind: CgExprKind::Ident, type_str: None, line, col, data: CgExprData::Ident("__ovel_exception_buf".into()) },
                                     CgExpr { kind: CgExprKind::Int, type_str: None, line, col, data: CgExprData::Int(1) },
                                 ],
                                 vtable_class: None, alt_vtable_classes: vec![],
@@ -3128,7 +3128,7 @@ let mut catch_body: Vec<CgStmt> = Vec::new();
         AstStmtData::Throw(expr) => {
             let mut stmts: Vec<CgStmt> = Vec::new();
             if let Some(e) = expr {
-                // __ovic_exception_value = (expr);
+                // __ovel_exception_value = (expr);
                 stmts.push(CgStmt {
                     kind: CgStmtKind::Expr, line, col,
                     data: CgStmtData::Expr(CgExpr {
@@ -3136,14 +3136,14 @@ let mut catch_body: Vec<CgStmt> = Vec::new();
                         data: CgExprData::Assign {
                             target: Box::new(CgExpr {
                                 kind: CgExprKind::Ident, type_str: None, line, col,
-                                data: CgExprData::Ident("__ovic_exception_value".into()),
+                                data: CgExprData::Ident("__ovel_exception_value".into()),
                             }),
                             value: Box::new(convert_expr(e, class_infos)),
                         },
                     }),
                 });
             }
-            // longjmp(__ovic_exception_buf, 1);
+            // longjmp(__ovel_exception_buf, 1);
             stmts.push(CgStmt {
                 kind: CgStmtKind::Expr, line, col,
                 data: CgStmtData::Expr(CgExpr {
@@ -3153,7 +3153,7 @@ let mut catch_body: Vec<CgStmt> = Vec::new();
                         args: vec![
                             CgExpr {
                                 kind: CgExprKind::Ident, type_str: None, line, col,
-                                data: CgExprData::Ident("__ovic_exception_buf".into()),
+                                data: CgExprData::Ident("__ovel_exception_buf".into()),
                             },
                             CgExpr {
                                 kind: CgExprKind::Int, type_str: None, line, col,
@@ -3229,7 +3229,7 @@ fn convert_decl(ad: &AstDecl, class_infos: &std::collections::BTreeMap<String, C
                             data: CgStmtData::Expr(CgExpr {
                                 kind: CgExprKind::Call, type_str: None, line: 0, col: 0,
                                     data: CgExprData::Call {
-                                        name: "ovic_metaInit".into(),
+                                        name: "ovel_metaInit".into(),
                                         args: Vec::new(),
                         vtable_class: None,
                         alt_vtable_classes: vec![],
@@ -3278,7 +3278,7 @@ fn convert_decl(ad: &AstDecl, class_infos: &std::collections::BTreeMap<String, C
                     || FNPTR_TYPEDEF_NAMES.get().map_or(false, |m| m.lock().unwrap().contains(&type_str));
                 let is_block = !is_fnptr && (
                     var_type.as_ref().map_or(false, |t| t.is_block)
-                        || type_str.contains("__ovic_block_header")
+                        || type_str.contains("__ovel_block_header")
                         || BLOCK_TYPEDEF_NAMES.get().map_or(false, |m| m.lock().unwrap().contains_key(&type_str)));
                 if is_block {
                     let mut bv = block_vars();
@@ -3497,10 +3497,10 @@ fn split_array_type(t: &str) -> (&str, &str) {
 /// split on `[` (an fnptr array has its `[N]` inside the declarator), so
 /// they are emitted verbatim with no separate name.
 /// Emit one field-wise value-comparison function per struct tag the checker
-/// marked (`ovic_struct_eq_<tag>`). `a == b` on two value structs is a C
+/// marked (`ovel_struct_eq_<tag>`). `a == b` on two value structs is a C
 /// compile error, so the checker rewrites it to a call to these functions.
 /// Field comparison rules:
-///   - nested struct (by value)  → recursive `ovic_struct_eq_<inner>(a.f, b.f)`
+///   - nested struct (by value)  → recursive `ovel_struct_eq_<inner>(a.f, b.f)`
 ///   - array field               → `memcmp(a.f, b.f, sizeof a.f) == 0`
 ///   - everything else (scalars, pointers) → `a.f == b.f`
 /// Static and only emitted for tags actually used, so no unused warnings.
@@ -3534,7 +3534,7 @@ fn emit_struct_eq_functions(unit: &CgUnit, out: &mut String) {
     }
     // Expand the tag set with nested value-struct fields (transitively):
     // `struct Outer { struct Inner in; }` used with `==` must also emit (and
-    // forward-declare) ovic_struct_eq_Inner, even if Inner is never compared
+    // forward-declare) ovel_struct_eq_Inner, even if Inner is never compared
     // directly. Closures/fields_of are immutable here, so re-scan until fixed.
     let mut tags: Vec<String> = unit.struct_eq_tags.clone();
     let mut i = 0;
@@ -3554,16 +3554,16 @@ fn emit_struct_eq_functions(unit: &CgUnit, out: &mut String) {
     }
     for tag in &tags {
         // Forward declarations first: nested structs may reference
-        // ovic_struct_eq_<inner> defined later in this loop (C99 forbids
+        // ovel_struct_eq_<inner> defined later in this loop (C99 forbids
         // implicit declarations, so emission order must not matter).
-        let _ = write!(out, "static int ovic_struct_eq_{tag}(struct {tag} a, struct {tag} b);\n");
+        let _ = write!(out, "static int ovel_struct_eq_{tag}(struct {tag} a, struct {tag} b);\n");
     }
     if !unit.struct_eq_tags.is_empty() {
         out.push('\n');
     }
     for tag in &tags {
         let _ = write!(out, "/* Value equality for struct {tag} (generated for `==` on value structs) */\n");
-        let _ = write!(out, "static int ovic_struct_eq_{tag}(struct {tag} a, struct {tag} b) {{\n");
+        let _ = write!(out, "static int ovel_struct_eq_{tag}(struct {tag} a, struct {tag} b) {{\n");
         match fields_of.get(tag.as_str()) {
             Some(fields) if !fields.is_empty() => {
                 let mut parts: Vec<String> = Vec::new();
@@ -3571,7 +3571,7 @@ fn emit_struct_eq_functions(unit: &CgUnit, out: &mut String) {
                     if is_array_type(ft) {
                         parts.push(format!("memcmp(a.{fn_}, b.{fn_}, sizeof a.{fn_}) == 0"));
                     } else if let Some(inner) = nested_value_tag(ft, &fields_of) {
-                        parts.push(format!("ovic_struct_eq_{inner}(a.{fn_}, b.{fn_})"));
+                        parts.push(format!("ovel_struct_eq_{inner}(a.{fn_}, b.{fn_})"));
                     } else {
                         parts.push(format!("a.{fn_} == b.{fn_}"));
                     }
@@ -4284,7 +4284,7 @@ pub fn ast_to_cg_unit_with_slots_ext(
                         // Generic type params (`NPArray<T>` under the umbrella)
                         // arrive in the same slot as protocol names in some
                         // spellings; they are not protocols — emitting
-                        // &OVIC_PROTO_$_T would be a dangling reference.
+                        // &OVEL_PROTO_$_T would be a dangling reference.
                         if tp.contains(p) { continue; }
                         if !info.protocols.contains(p) { info.protocols.push(p.clone()); }
                     }
@@ -4561,11 +4561,11 @@ pub fn ast_to_cg_unit_with_slots_ext(
                                 line: 0, col: 0,
                                 data: AstExprData::Cast {
                                     target_type: AstType {
-                                        prim: ovic_cst::TypePrim::Named,
+                                        prim: ovel_cst::TypePrim::Named,
                                         is_pointer: true,
                                         is_struct: true,
                                         name: Some(flat.clone()),
-                                        ..AstType::new(ovic_cst::TypePrim::Named)
+                                        ..AstType::new(ovel_cst::TypePrim::Named)
                                     },
                                     expr: Box::new(AstExpr {
                                         kind: AstExprKind::Self_,
@@ -4647,11 +4647,11 @@ pub fn ast_to_cg_unit_with_slots_ext(
                                         line: 0, col: 0,
                                         data: AstExprData::Cast {
                                             target_type: AstType {
-                                                prim: ovic_cst::TypePrim::Named,
+                                                prim: ovel_cst::TypePrim::Named,
                                                 is_pointer: true,
                                                 is_struct: true,
                                                 name: Some(flat.clone()),
-                                                ..AstType::new(ovic_cst::TypePrim::Named)
+                                                ..AstType::new(ovel_cst::TypePrim::Named)
                                             },
                                             expr: Box::new(AstExpr {
                                                 kind: AstExprKind::Self_,
@@ -4777,7 +4777,7 @@ pub fn ast_to_cg_unit_with_slots_ext(
                                             CgStmt { kind: CgStmtKind::Expr, line: 0, col: 0, data: CgStmtData::Expr(CgExpr {
                                                 kind: CgExprKind::Call, type_str: None, line: 0, col: 0,
                                                 data: CgExprData::Call {
-                                                    name: "ovic_weakUnregister".into(),
+                                                    name: "ovel_weakUnregister".into(),
                                                     args: vec![cast_addr.clone()],
                                                     vtable_class: None, alt_vtable_classes: vec![], is_class_method: false, is_super: false, sel_const_name: None, method_index: None,
                                                 },
@@ -4786,7 +4786,7 @@ pub fn ast_to_cg_unit_with_slots_ext(
                                             CgStmt { kind: CgStmtKind::Expr, line: 0, col: 0, data: CgStmtData::Expr(CgExpr {
                                                 kind: CgExprKind::Call, type_str: None, line: 0, col: 0,
                                                 data: CgExprData::Call {
-                                                    name: "ovic_weakRegister".into(),
+                                                    name: "ovel_weakRegister".into(),
                                                     args: vec![cast_addr.clone(), cast_value],
                                                     vtable_class: None, alt_vtable_classes: vec![], is_class_method: false, is_super: false, sel_const_name: None, method_index: None,
                                                 },
@@ -4935,7 +4935,7 @@ pub fn ast_to_cg_unit_with_slots_ext(
     // class's ClassInfo (substituting T → concrete type in ivar/method
     // signatures) under the mangled flat name so codegen emits a standalone
     // struct/vtable/class metadata per instantiation. Without this, references
-    // to `ovic_DataPack_QuantumToken_ptr_class` are undeclared.
+    // to `ovel_DataPack_QuantumToken_ptr_class` are undeclared.
     let mut generic_instantiations: Vec<(String, Vec<AstType>)> = Vec::new();
     // Structured collection: any AstType carrying non-empty `type_args` IS an
     // instantiation (fqn + args read directly — no string re-parsing). This
@@ -5500,7 +5500,7 @@ method_names: info.method_names,
                         .unwrap_or_else(|| "NPObject *, SEL".into());
                     // Variadic method → C `...` in the fn-ptr type; the dispatch
                     // cast must match the emitted variadic signature exactly
-                    // (ovic has no msgSend runtime to paper over a mismatch).
+                    // (ovel has no msgSend runtime to paper over a mismatch).
                     let v = cm.method_variadic.get(pos).copied().unwrap_or(false);
                     let ellipsis = if v { ", ..." } else { "" };
                     signature = Some(format!("{} (*)({}{})", rt, params, ellipsis));
@@ -5752,7 +5752,7 @@ fn rewrite_block_var_refs(unit: &mut CgUnit) {
 /// Zeroing-weak assignment rewrite for local `__weak` variables (M1).
 ///
 /// A weak local is registered with the runtime at declaration time (the Decl
-/// emitter emits `ovic_weakRegister((NPObject **)&name, (NPObject *)init)`),
+/// emitter emits `ovel_weakRegister((NPObject **)&name, (NPObject *)init)`),
 /// but a later plain assignment (`weakref = strong`) bypassed the weak table:
 /// the slot stayed registered against the old target (often the initial
 /// NULL), so deallocating the newly-assigned target never zeroed the
@@ -5849,11 +5849,11 @@ fn rewrite_weak_stmt(stmt: &mut CgStmt, weak: &std::collections::HashSet<String>
     }
 }
 
-/// Build `{ __auto_type tmp = <value>; ovic_weakUnregister((NPObject **)&w);
-/// w = tmp; ovic_weakRegister((NPObject **)&w, (NPObject *)tmp); }` — the
+/// Build `{ __auto_type tmp = <value>; ovel_weakUnregister((NPObject **)&w);
+/// w = tmp; ovel_weakRegister((NPObject **)&w, (NPObject *)tmp); }` — the
 /// statement-level analogue of the weak-ivar setter's comma sequence.
 fn build_weak_assign_stmts(name: &str, value: Box<CgExpr>, line: usize, col: usize) -> CgStmt {
-    let tmp = format!("__ovic_weak_val_{}", next_temp_id());
+    let tmp = format!("__ovel_weak_val_{}", next_temp_id());
     let ident = |n: &str| CgExpr {
         kind: CgExprKind::Ident, type_str: None, line, col,
         data: CgExprData::Ident(n.to_string()),
@@ -5895,7 +5895,7 @@ fn build_weak_assign_stmts(name: &str, value: Box<CgExpr>, line: usize, col: usi
                 },
             },
             // 2. Detach the slot from its previous target.
-            mk_call("ovic_weakUnregister", vec![cast_addr]),
+            mk_call("ovel_weakUnregister", vec![cast_addr]),
             // 3. The assignment itself.
             CgStmt {
                 kind: CgStmtKind::Expr, line, col,
@@ -5908,7 +5908,7 @@ fn build_weak_assign_stmts(name: &str, value: Box<CgExpr>, line: usize, col: usi
                 }),
             },
             // 4. Re-register against the new target.
-            mk_call("ovic_weakRegister", vec![
+            mk_call("ovel_weakRegister", vec![
                 CgExpr {
                     kind: CgExprKind::Cast, type_str: None, line, col,
                     data: CgExprData::Cast {
@@ -6135,26 +6135,26 @@ fn emit_expr(e: &CgExpr, out: &mut String) {
                     out.push(')');
                 } else {
                     // Instance method: uniform vtable member access through isa.
-                    // ((struct ovic_vtable *)receiver->isa->vtable)->method(args)
+                    // ((struct ovel_vtable *)receiver->isa->vtable)->method(args)
                     let sel = sel_const_name.as_deref().unwrap_or("0");
                     // Instance message send: guard the receiver against nil so
                     // `[nil msg]` is a safe no-op returning 0/nil, matching ObjC
                     // nil-messaging semantics. The receiver is evaluated once into
                     // a temp, then dispatched only if non-nil:
-                    //   ({ NPObject *__ovic_tmp_N = ((NPObject *)(recv));
-                    //      __ovic_tmp_N ? <dispatch>(__ovic_tmp_N, sel, ...) : 0; })
+                    //   ({ NPObject *__ovel_tmp_N = ((NPObject *)(recv));
+                    //      __ovel_tmp_N ? <dispatch>(__ovel_tmp_N, sel, ...) : 0; })
                     // This works for both value-returning and void-returning sends.
                     let tid = next_temp_id();
-                    let _ = write!(out, "({{ NPObject *__ovic_tmp_{} = ((NPObject *)(", tid);
+                    let _ = write!(out, "({{ NPObject *__ovel_tmp_{} = ((NPObject *)(", tid);
                     if !args.is_empty() {
                         emit_expr(&args[0], out);
                         out.push_str(")");
                     } else { out.push_str("0)"); }
-                    let _ = write!(out, "); __ovic_tmp_{} ? ", tid);
+                    let _ = write!(out, "); __ovel_tmp_{} ? ", tid);
                     let has_cast = emit_vtable_fp_cast(out, &vc_flat, name);
-                    let _ = write!(out, "((struct ovic_vtable *)__ovic_tmp_{}->isa->vtable)->{}", tid, name);
+                    let _ = write!(out, "((struct ovel_vtable *)__ovel_tmp_{}->isa->vtable)->{}", tid, name);
                     if has_cast { out.push(')'); }
-                    let _ = write!(out, "(__ovic_tmp_{}", tid);
+                    let _ = write!(out, "(__ovel_tmp_{}", tid);
                     let _ = write!(out, ", {}", sel);
                     for (i, arg) in args[1..].iter().enumerate() {
                         out.push_str(", ");
@@ -6173,7 +6173,7 @@ fn emit_expr(e: &CgExpr, out: &mut String) {
                     let _ = write!(out, ") : {}; }})", fb);
                 }
             } else if name == "autorelease" {
-                // autorelease is a no-op in Ovic's non-ARC runtime; just return receiver
+                // autorelease is a no-op in Ovel's non-ARC runtime; just return receiver
                 if !args.is_empty() { emit_expr(&args[0], out); }
             } else {
                 // Direct C function call
@@ -6293,8 +6293,8 @@ fn emit_expr(e: &CgExpr, out: &mut String) {
                 // gcc/portable: use-site is a compound-literal struct initializer.
                 // The struct + invoke definitions were already emitted in the
                 // block_defs buffer during convert_expr.
-                let tid = data.func_name.trim_start_matches("__ovic_block_").to_string();
-                let _ = write!(out, "(struct __ovic_block_header *)&(struct __ovic_block_layout_{}){{ .isa=NULL, .flags=0, .reserved=0, .invoke={} }}", tid, data.func_name);
+                let tid = data.func_name.trim_start_matches("__ovel_block_").to_string();
+                let _ = write!(out, "(struct __ovel_block_header *)&(struct __ovel_block_layout_{}){{ .isa=NULL, .flags=0, .reserved=0, .invoke={} }}", tid, data.func_name);
             }
         }
     }
@@ -6625,7 +6625,7 @@ pub fn emit_stmt(s: &CgStmt, out: &mut String, indent: usize) {
         }
         CgStmtData::Decl { decl_type, name, init, array_suffix, is_static, is_weak, is_block, next, attributes } => {
             if *is_block {
-                let byref_name = format!("__ovic_byref_{}", name);
+                let byref_name = format!("__ovel_byref_{}", name);
                 let _ = write!(out, "{}struct {} {{\n", ind, byref_name);
                 let _ = write!(out, "{}    void *__isa;\n", ind);
                 let _ = write!(out, "{}    struct {} *__forwarding;\n", ind, byref_name);
@@ -6664,8 +6664,8 @@ pub fn emit_stmt(s: &CgStmt, out: &mut String, indent: usize) {
                     out.push_str(&ind);
                     if !args.is_empty() {
                             let tid = next_temp_id();
-                            // Emit: NPObject *__ovic_tmp_N = receiver;
-                            let _ = write!(out, "NPObject *__ovic_tmp_{} = (", tid);
+                            // Emit: NPObject *__ovel_tmp_N = receiver;
+                            let _ = write!(out, "NPObject *__ovel_tmp_{} = (", tid);
                             emit_expr(&args[0], out);
                             out.push_str(");\n");
                             out.push_str(&ind);
@@ -6682,8 +6682,8 @@ pub fn emit_stmt(s: &CgStmt, out: &mut String, indent: usize) {
                             } else {
                                 out.push_str(" = ");
                             }
-                            let _ = write!(out, "__ovic_tmp_{} ? ((struct ovic_vtable *)__ovic_tmp_{}->isa->vtable)->{}(", tid, tid, method_name);
-                            let _ = write!(out, "__ovic_tmp_{}", tid);
+                            let _ = write!(out, "__ovel_tmp_{} ? ((struct ovel_vtable *)__ovel_tmp_{}->isa->vtable)->{}(", tid, tid, method_name);
+                            let _ = write!(out, "__ovel_tmp_{}", tid);
                         let _ = write!(out, ", {}", sel_const_name.as_deref().unwrap_or("0"));
                         for arg in &args[1..] {
                             out.push_str(", ");
@@ -6700,7 +6700,7 @@ pub fn emit_stmt(s: &CgStmt, out: &mut String, indent: usize) {
                         out.push(' ');
                         out.push_str(name);
                         if let Some(suffix) = array_suffix { out.push_str(suffix); }
-                        let _ = write!(out, " = ((struct ovic_vtable *)0)->{}(", method_name);
+                        let _ = write!(out, " = ((struct ovel_vtable *)0)->{}(", method_name);
                         let _ = write!(out, "{}", sel_const_name.as_deref().unwrap_or("0"));
                         out.push_str(");\n");
                     }
@@ -6741,7 +6741,7 @@ pub fn emit_stmt(s: &CgStmt, out: &mut String, indent: usize) {
                     out.push_str(decl_type);
                 } else {
                     out.push_str(decl_type);
-                    if *is_weak { out.push_str(" __attribute__((cleanup(ovic_weakAutoCleanup)))"); }
+                    if *is_weak { out.push_str(" __attribute__((cleanup(ovel_weakAutoCleanup)))"); }
                     out.push(' ');
                     out.push_str(name);
                 }
@@ -6798,7 +6798,7 @@ pub fn emit_stmt(s: &CgStmt, out: &mut String, indent: usize) {
                 out.push_str(";\n");
                 if *is_weak {
                     if let Some(ref init_expr) = init {
-                        let _ = write!(out, "{}ovic_weakRegister((NPObject **)&{}, (NPObject *)", ind, name);
+                        let _ = write!(out, "{}ovel_weakRegister((NPObject **)&{}, (NPObject *)", ind, name);
                         emit_expr(init_expr, out);
                         out.push_str(");\n");
                     }
@@ -6811,7 +6811,7 @@ pub fn emit_stmt(s: &CgStmt, out: &mut String, indent: usize) {
         CgStmtData::Empty => {}
         CgStmtData::ForIn { var_name, collection, body } => {
             out.push_str(&ind);
-            let _ = write!(out, "{{ size_t _count = ovic_array_count(");
+            let _ = write!(out, "{{ size_t _count = ovel_array_count(");
             emit_expr(collection, out);
             out.push_str(");\n");
             let _ = write!(out, "{}for (size_t _i = 0; _i < _count; _i++) {{\n", ind);
@@ -6887,7 +6887,7 @@ pub fn emit_decl(d: &CgDecl, out: &mut String) {
         }
         CgDeclData::Variable { var_type, init, is_static, is_const, is_block, next, .. } => {
             if *is_block {
-                let byref_name = format!("__ovic_byref_{}", d.name);
+                let byref_name = format!("__ovel_byref_{}", d.name);
                 let _ = write!(out, "struct {} {{\n", byref_name);
                 out.push_str("    void *__isa;\n");
                 let _ = write!(out, "    struct {} *__forwarding;\n", byref_name);
@@ -7119,21 +7119,21 @@ pub fn emit_unit_with_headers_mapped(unit: &CgUnit, c_headers: &[String], search
     let mut out = String::new();
     if comments {
         let _ = writeln!(out, "/* ============================================================");
-        let _ = writeln!(out, "   Generated by ovicc — Ovic → C transpiler");
+        let _ = writeln!(out, "   Generated by ovelc — Ovel → C transpiler");
         let _ = writeln!(out, "   source : {}", unit.filename);
         let _ = writeln!(out, "   backend: {}", backend);
         let _ = writeln!(out, "   ============================================================ */");
         out.push('\n');
     } else {
-        out.push_str("// Generated by ovicc\n");
+        out.push_str("// Generated by ovelc\n");
     }
     section_comment(&mut out, comments, "Section 1 · Requires & defines");
     if freestanding {
         // Bare-metal mode: no libc headers. The runtime header's
-        // __OVIC_FREESTANDING branch provides the types, jmp_buf (via
+        // __OVEL_FREESTANDING branch provides the types, jmp_buf (via
         // builtins) and non-TLS exception state.
-        out.push_str("#define __OVIC_FREESTANDING 1\n");
-        out.push_str("#include <ovic/runtime.h>\n");
+        out.push_str("#define __OVEL_FREESTANDING 1\n");
+        out.push_str("#include <ovel/runtime.h>\n");
     } else {
         let has_string_h = c_headers.iter().any(|h| h.contains("string.h"));
         if !has_string_h {
@@ -7147,14 +7147,14 @@ pub fn emit_unit_with_headers_mapped(unit: &CgUnit, c_headers: &[String], search
         if !has_stdlib_h {
             out.push_str("#include <stdlib.h>\n");
         }
-        // -eh checked emits reads/writes of the EH globals (__ovic_eh_flag/
-        // __ovic_eh_val) and calls __ovic_eh_isa in EVERY function with a
+        // -eh checked emits reads/writes of the EH globals (__ovel_eh_flag/
+        // __ovel_eh_val) and calls __ovel_eh_isa in EVERY function with a
         // throwing callee. Their declarations live only in runtime.h; a pure
         // C-superset file (no Foundation import, no block literal) otherwise
         // generates C with undeclared identifiers (second-referendum root
         // cause). runtime.h is a plain C header — harmless to include.
-        if eh_checked && !c_headers.iter().any(|h| h.contains("ovic/runtime.h")) {
-            out.push_str("#include <ovic/runtime.h>\n");
+        if eh_checked && !c_headers.iter().any(|h| h.contains("ovel/runtime.h")) {
+            out.push_str("#include <ovel/runtime.h>\n");
         }
     }
     for h in c_headers {
@@ -7199,7 +7199,7 @@ pub fn emit_unit_with_headers_mapped(unit: &CgUnit, c_headers: &[String], search
     section_comment(&mut out, comments, "Section 2 · Forward declarations");
     {
         if any_has_instance {
-            let _ = write!(out, "struct ovic_vtable;\n");
+            let _ = write!(out, "struct ovel_vtable;\n");
         }
         for cm in &unit.classes {
             let flat_cn = name_flat(&cm.class_name);
@@ -7225,21 +7225,21 @@ pub fn emit_unit_with_headers_mapped(unit: &CgUnit, c_headers: &[String], search
     section_comment(&mut out, comments, "Section 4 · Type declarations & typedefs");
     for cm in &unit.classes {
         let fc = name_flat(&cm.class_name);
-        if fc == "ovic_root" || fc == "NPObject" {
+        if fc == "ovel_root" || fc == "NPObject" {
             // Emit full struct definitions with include guard so that if
             // runtime.h (which already defines them) is included first,
             // these are silently skipped.  If runtime.h is NOT available,
             // these definitions ensure the generated code compiles.
-            // Guards must match those used in include/ovic/runtime.h.
-            let guard = if fc == "ovic_root" {
-                "OVIC_ROOT_DEFINED"
+            // Guards must match those used in include/ovel/runtime.h.
+            let guard = if fc == "ovel_root" {
+                "OVEL_ROOT_DEFINED"
             } else {
                 "NPOBJECT_DEFINED"
             };
             let _ = writeln!(out, "#ifndef {}", guard);
             let _ = writeln!(out, "#define {}", guard);
             let _ = writeln!(out, "struct {} {{", fc);
-            if fc == "ovic_root" {
+            if fc == "ovel_root" {
                 let _ = writeln!(out, "    struct NPClass *isa;");
             } else {
                 let _ = writeln!(out, "    struct NPClass *isa;");
@@ -7270,7 +7270,7 @@ pub fn emit_unit_with_headers_mapped(unit: &CgUnit, c_headers: &[String], search
             let mut any = false;
             for n in names {
                 let fc = name_flat(n);
-                if fc == "ovic_root" || fc == "NPObject" { continue; }
+                if fc == "ovel_root" || fc == "NPObject" { continue; }
                 if unit.classes.iter().any(|cm| name_flat(&cm.class_name) == fc) { continue; }
                 let _ = write!(out, "struct {};\n", fc);
                 let _ = write!(out, "typedef struct {} {};\n", fc, fc);
@@ -7370,7 +7370,7 @@ pub fn emit_unit_with_headers_mapped(unit: &CgUnit, c_headers: &[String], search
     for decl in &unit.decls {
         if let CgDeclData::Variable { ref var_type, ref init, is_static, is_const, is_block, .. } = decl.data {
             if is_block {
-                let byref_name = format!("__ovic_byref_{}", decl.name);
+                let byref_name = format!("__ovel_byref_{}", decl.name);
                 let _ = write!(out, "struct {} {{\n", byref_name);
                 out.push_str("    void *__isa;\n");
                 let _ = write!(out, "    struct {} *__forwarding;\n", byref_name);
@@ -7448,27 +7448,27 @@ pub fn emit_unit_with_headers_mapped(unit: &CgUnit, c_headers: &[String], search
         let sig: u64 = vtable_layout_sig(&unit.vtable_sig_names);
         let _ = write!(out, "/* vtable layout signature: {:016x} (shared methods: {}) */\n", sig, unit.vtable_sig_names.len());
         // The diagnostic needs <stdio.h>, which a translation unit that only
-        // includes <ovic/runtime.h> may not pull in — and freestanding builds
+        // includes <ovel/runtime.h> may not pull in — and freestanding builds
         // have no stdio at all. When the standard headers are absent we still
         // need the failure to be loud, so fall back to __builtin_trap() (a
         // compiler builtin, available in hosted and freestanding alike) rather
         // than declaring stdio symbols this TU may not link against.
         let has_stdio = c_headers.iter().any(|h| h.contains("stdio.h"));
-        let _ = write!(out, "__attribute__((weak)) void ovic_verify_vtable_sig(unsigned long long winner, unsigned long long mine, const char *method_list) {{\n");
+        let _ = write!(out, "__attribute__((weak)) void ovel_verify_vtable_sig(unsigned long long winner, unsigned long long mine, const char *method_list) {{\n");
         let _ = write!(out, "    if (winner != mine) {{\n");
         if has_stdio {
             let _ = write!(out, "        fprintf(stderr,\n");
-            let _ = write!(out, "            \"ovic: fatal: vtable layout mismatch across translation units.\\n\"\n");
+            let _ = write!(out, "            \"ovel: fatal: vtable layout mismatch across translation units.\\n\"\n");
             let _ = write!(out, "            \"  linked vtable sig %016llx, this translation unit sig %016llx\\n\"\n");
             let _ = write!(out, "            \"\\n\"\n");
-            let _ = write!(out, "            \"Ovic builds one uniform 'struct ovic_vtable' per translation unit over the\\n\"\n");
+            let _ = write!(out, "            \"Ovel builds one uniform 'struct ovel_vtable' per translation unit over the\\n\"\n");
             let _ = write!(out, "            \"public method segment: the selectors declared in the @interfaces the TUs\\n\"\n");
             let _ = write!(out, "            \"import (or the shared --slots manifest). R1 keeps that segment at\\n\"\n");
             let _ = write!(out, "            \"identical slot indices in every TU, so two TUs whose public segments\\n\"\n");
             let _ = write!(out, "            \"disagree dispatch through different layouts, while the linker\\n\"\n");
             let _ = write!(out, "            \"weak-merges the vtable instances into one allocation.\\n\"\n");
             let _ = write!(out, "            \"\\n\"\n");
-            let _ = write!(out, "            \"Re-running ovicc does NOT help: the shared method sets really do differ.\\n\"\n");
+            let _ = write!(out, "            \"Re-running ovelc does NOT help: the shared method sets really do differ.\\n\"\n");
             let _ = write!(out, "            \"The usual cause is the two TUs importing different or differently\\n\"\n");
             let _ = write!(out, "            \"versioned headers. Make the shared declarations identical, or build the\\n\"\n");
             let _ = write!(out, "            \"affected classes as a single TU. TU-local private methods do not\\n\"\n");
@@ -7482,7 +7482,7 @@ pub fn emit_unit_with_headers_mapped(unit: &CgUnit, c_headers: &[String], search
             let _ = write!(out, "        __builtin_trap();\n");
         }
         let _ = write!(out, "    }}\n}}\n\n");
-        let _ = write!(out, "struct ovic_vtable {{\n");
+        let _ = write!(out, "struct ovel_vtable {{\n");
         let _ = write!(out, "    unsigned long long __sig;\n");
         for mname in &unit.global_instance_method_names {
             let (_, ptr_type) = METHOD_METADATA.get().unwrap().get(mname.as_str()).unwrap();
@@ -7506,8 +7506,8 @@ pub fn emit_unit_with_headers_mapped(unit: &CgUnit, c_headers: &[String], search
         for member in members {
             let _ = write!(out,
                 "/* respondsToSelector: helper for selector member '{member}' */\n\
-                 static BOOL ovic_resp_{member}(NPObject *__o) {{\n\
-                     return __o && ((struct ovic_vtable *)__o->isa->vtable)->{member} != 0;\n\
+                 static BOOL ovel_resp_{member}(NPObject *__o) {{\n\
+                     return __o && ((struct ovel_vtable *)__o->isa->vtable)->{member} != 0;\n\
                  }}\n\n",
                 member = member);
         }
@@ -7561,7 +7561,7 @@ pub fn emit_unit_with_headers_mapped(unit: &CgUnit, c_headers: &[String], search
         let _ = write!(out, "    struct NPClass *isa;\n");
         let _ = write!(out, "    uint32_t retain_count;\n");
         // Walk superclass chain and emit ancestor ivars (flat, not embedded).
-        // Each non-root struct starts with isa+retain_count (matching ovic_root)
+        // Each non-root struct starts with isa+retain_count (matching ovel_root)
         // followed by all ancestor ivars, then this class's own ivars.
         let mut chain: Vec<&CgClassMeta> = Vec::new();
         let mut cur = cm;
@@ -7607,7 +7607,7 @@ pub fn emit_unit_with_headers_mapped(unit: &CgUnit, c_headers: &[String], search
         let _ = write!(out, "extern NPClass {};\n", meta_symbol("CLASS_", &name_flat(&cm.class_name)));
     }
     if !unit.classes.is_empty() {
-        out.push_str("void ovic_metaInit(void);\n\n");
+        out.push_str("void ovel_metaInit(void);\n\n");
     }
 
     // Instance vtable instances (per-class typed, with designated initializers)
@@ -7622,7 +7622,7 @@ pub fn emit_unit_with_headers_mapped(unit: &CgUnit, c_headers: &[String], search
         }
         // R2: the TU that owns the @implementation emits strong metadata.
         let cw = if unit.owned_classes.contains(&cm.class_name) { "" } else { "__attribute__((weak)) " };
-        let _ = write!(out, "{}struct ovic_vtable {} = {{\n", cw, meta_symbol("VTABLE_", &flat_cn));
+        let _ = write!(out, "{}struct ovel_vtable {} = {{\n", cw, meta_symbol("VTABLE_", &flat_cn));
         // Stamp the layout signature this instance was built for, so whichever
         // copy of this instance wins the linker's weak merge also carries the
         // layout it was actually initialized against.
@@ -7721,10 +7721,10 @@ pub fn emit_unit_with_headers_mapped(unit: &CgUnit, c_headers: &[String], search
     }
 
     // ARC dealloc wrappers — computed and emitted BEFORE the class-metadata
-    // section: both `ovic_metaInit` and the owned-class static definitions
+    // section: both `ovel_metaInit` and the owned-class static definitions
     // below reference the wrappers by name, and the wrappers are `static`, so
     // the definition must precede every reference (no forward declaration).
-    // Skipped entirely under `-fno-ovic-arc`: MRC means the programmer owns
+    // Skipped entirely under `-fno-ovel-arc`: MRC means the programmer owns
     // the ivars.
     let (arc_dealloc_names, arc_dealloc_defs) = if unit.no_arc {
         (std::collections::HashMap::new(), String::new())
@@ -7783,7 +7783,7 @@ pub fn emit_unit_with_headers_mapped(unit: &CgUnit, c_headers: &[String], search
                 // Same reference rule as the vtable slots (see the meta
                 // vtable emission above): own methods need a body in this TU.
                 if owner == flat && !method_is_emitted(&owner, mname) { continue; }
-                let wrapper = format!("ovic_kvc_wrap_{}_{}", flat, mname);
+                let wrapper = format!("ovel_kvc_wrap_{}_{}", flat, mname);
                 let fn_sym = format!("{}_{}", owner, mname);
                 let sel = sel_const_name(mname);
                 // Scalar whitelist: only clearly-scalar return types box via
@@ -7842,21 +7842,21 @@ pub fn emit_unit_with_headers_mapped(unit: &CgUnit, c_headers: &[String], search
                     continue;
                 } else if rt.contains("double") || rt.contains("float") {
                     // Class-method send: the receiver is the class object
-                    // (&OVIC_CLASS_$_NPNumber), same as an ordinary
+                    // (&OVEL_CLASS_$_NPNumber), same as an ordinary
                     // [NPNumber numberWithDouble:] lowering — NOT self.
                     let _ = write!(kvc_out,
-                        "static id {w}(id self) {{\n    return NPNumber_numberWithDouble_(&OVIC_CLASS_$_NPNumber, {s}, {f}((NPObject *)self, {s}));\n}}\n\n",
+                        "static id {w}(id self) {{\n    return NPNumber_numberWithDouble_(&OVEL_CLASS_$_NPNumber, {s}, {f}((NPObject *)self, {s}));\n}}\n\n",
                         w = wrapper, f = fn_sym, s = sel);
                 } else {
                     let _ = write!(kvc_out,
-                        "static id {w}(id self) {{\n    return NPNumber_numberWithInt_(&OVIC_CLASS_$_NPNumber, {s}, {f}((NPObject *)self, {s}));\n}}\n\n",
+                        "static id {w}(id self) {{\n    return NPNumber_numberWithInt_(&OVEL_CLASS_$_NPNumber, {s}, {f}((NPObject *)self, {s}));\n}}\n\n",
                         w = wrapper, f = fn_sym, s = sel);
                 }
                 entries.push((mname.clone(), wrapper));
             }
             if entries.is_empty() { continue; }
             let sym = meta_symbol("KVC_", &flat);
-            let _ = write!(kvc_out, "static const ovic_kvc_entry {}[] = {{\n", sym);
+            let _ = write!(kvc_out, "static const ovel_kvc_entry {}[] = {{\n", sym);
             for (key, wrapper) in &entries {
                 let _ = write!(kvc_out, "    {{ .key = \"{}\", .get = {} }},\n", key, wrapper);
             }
@@ -7870,19 +7870,19 @@ pub fn emit_unit_with_headers_mapped(unit: &CgUnit, c_headers: &[String], search
 
     // Class metadata variables. Two lifetimes:
     //  * default: a tentative definition (a common symbol), so the per-TU
-    //    copies merge harmlessly; the *contents* are written by `ovic_metaInit`
+    //    copies merge harmlessly; the *contents* are written by `ovel_metaInit`
     //    below (weak — it only back-fills what static initialization did not
     //    already cover).
     //  * classes this TU OWNS (rule R2 — the @implementation is in this TU's
     //    main file): one fully initialized STRONG
-    //    definition. `ovic_metaInit` is weak-merged — only one TU's copy runs,
+    //    definition. `ovel_metaInit` is weak-merged — only one TU's copy runs,
     //    and it only initializes the classes THAT TU can see — so a class that
     //    exists only in the losing TU would stay zeroed (NULL vtable → segfault
     //    on its first alloc/init; pinned by
     //    tests/multi_tu/11_vtable_private_slots: the client's own class `App`
     //    vanished the moment the shared __sig guard stopped aborting first).
     //    Static initialization runs at load time in every scenario, needs no
-    //    constructor ordering, works freestanding, and a later ovic_metaInit
+    //    constructor ordering, works freestanding, and a later ovel_metaInit
     //    over it rewrites identical values (an idempotent no-op). References
     //    are safe: Section 9 already `extern`-declares every class symbol,
     //    and the vtable instances live in Section 10.
@@ -7899,7 +7899,7 @@ pub fn emit_unit_with_headers_mapped(unit: &CgUnit, c_headers: &[String], search
         let class_names: std::collections::HashSet<String> = unit.classes.iter().map(|c| c.class_name.clone()).collect();
         let parents: Vec<&String> = parents.iter().filter(|p| !class_names.contains(*p)).collect();
         let pflat = name_flat(pname);
-        let _ = write!(out, "__attribute__((used, weak)) struct NPProtocol OVIC_PROTO_$_{} = {{
+        let _ = write!(out, "__attribute__((used, weak)) struct NPProtocol OVEL_PROTO_$_{} = {{
 ", pflat);
         let _ = write!(out, "    .name = \"{}\",
 ", pname);
@@ -7911,7 +7911,7 @@ pub fn emit_unit_with_headers_mapped(unit: &CgUnit, c_headers: &[String], search
             let _ = write!(out, "    .parents = (struct NPProtocol *[]){{");
             for (i, pp) in parents.iter().enumerate() {
                 if i > 0 { out.push_str(", "); }
-                let _ = write!(out, "&OVIC_PROTO_$_{}", name_flat(pp));
+                let _ = write!(out, "&OVEL_PROTO_$_{}", name_flat(pp));
             }
             out.push_str("},
 ");
@@ -7938,7 +7938,7 @@ pub fn emit_unit_with_headers_mapped(unit: &CgUnit, c_headers: &[String], search
 ");
     }
     // Per-class protocol-pointer arrays: NAMED static storage, never inline
-    // compound literals. ovic_metaInit re-assigns the whole NPClass with a
+    // compound literals. ovel_metaInit re-assigns the whole NPClass with a
     // compound literal — an inline `struct NPProtocol *[]` there would live
     // on the stack and dangle after metaInit returns (segfault on first
     // conformsToProtocol: walk; seen live with plist pointing into the stack).
@@ -7964,10 +7964,10 @@ pub fn emit_unit_with_headers_mapped(unit: &CgUnit, c_headers: &[String], search
         let known = known_protocols(cm);
         if known.is_empty() { continue; }
         let flat = name_flat(&cm.class_name);
-        let _ = write!(out, "__attribute__((used)) static struct NPProtocol *OVIC_PROTOS_$_{}[] = {{", flat);
+        let _ = write!(out, "__attribute__((used)) static struct NPProtocol *OVEL_PROTOS_$_{}[] = {{", flat);
         for (i, p) in known.iter().enumerate() {
             if i > 0 { out.push_str(", "); }
-            let _ = write!(out, "&OVIC_PROTO_$_{}", proto_short(p));
+            let _ = write!(out, "&OVEL_PROTO_$_{}", proto_short(p));
         }
         out.push_str("};\n");
     }
@@ -7980,8 +7980,8 @@ pub fn emit_unit_with_headers_mapped(unit: &CgUnit, c_headers: &[String], search
         let known = known_protocols(cm);
         if known.is_empty() { continue; }
         let flat = name_flat(&cm.class_name);
-        let _ = write!(out, "__attribute__((constructor)) static void __ovic_category_protocols_$_{}(void) {{\n", flat);
-        let _ = write!(out, "    ovic_register_category_protocols(&{}, OVIC_PROTOS_$_{}, {});\n", meta_symbol("CLASS_", &flat), flat, known.len());
+        let _ = write!(out, "__attribute__((constructor)) static void __ovel_category_protocols_$_{}(void) {{\n", flat);
+        let _ = write!(out, "    ovel_register_category_protocols(&{}, OVEL_PROTOS_$_{}, {});\n", meta_symbol("CLASS_", &flat), flat, known.len());
         out.push_str("}\n\n");
     }
     for cm in &unit.classes {
@@ -8019,10 +8019,10 @@ pub fn emit_unit_with_headers_mapped(unit: &CgUnit, c_headers: &[String], search
         if known.is_empty() {
             out.push_str("        .protocols = NULL,\n        .protocol_count = 0,\n");
         } else {
-            let _ = write!(out, "        .protocols = OVIC_PROTOS_$_{},\n", flat);
+            let _ = write!(out, "        .protocols = OVEL_PROTOS_$_{},\n", flat);
             let _ = write!(out, "        .protocol_count = {},\n", known.len());
         }
-        // .dealloc — same rule as ovic_metaInit below: an ARC-owned-ivar
+        // .dealloc — same rule as ovel_metaInit below: an ARC-owned-ivar
         // wrapper when one was generated for this class, else the class's own
         // dealloc, else NULL.
         if let Some(wrapper) = arc_dealloc_names.get(&flat) {
@@ -8039,7 +8039,7 @@ pub fn emit_unit_with_headers_mapped(unit: &CgUnit, c_headers: &[String], search
         }
         // KVC table pointer — owner static metadata only. Decl-only clients
         // leave it NULL: their tentative-definition stubs must not clobber the
-        // owner's table under weak merging (ovic_metaInit writes full struct
+        // owner's table under weak merging (ovel_metaInit writes full struct
         // literals and would reset the field if it carried a pointer here).
         if let Some(sym) = kvc_syms.get(&flat) {
             out.push_str(&format!("        .kvc_entries = {},\n", sym));
@@ -8049,35 +8049,35 @@ pub fn emit_unit_with_headers_mapped(unit: &CgUnit, c_headers: &[String], search
     if !unit.classes.is_empty() { out.push('\n'); }
 
     // Cross-TU vtable layout check. This lives in a per-TU constructor (not
-    // in ovic_metaInit, which is weak-merged so only one TU's copy runs):
+    // in ovel_metaInit, which is weak-merged so only one TU's copy runs):
     // every TU's constructor is registered with the loader and runs, so each
     // translation unit validates its own compiled layout. Each vtable
     // instance carries the signature it was initialized for as its first
     // member; under R3 that signature covers the SHARED segment only (public
     // methods / manifest), so a TU-local private tail never trips it — a
     // mismatch means the shared layouts disagree, and dispatch through this
-    // TU's `struct ovic_vtable` layout would read the wrong slot. Abort with
+    // TU's `struct ovel_vtable` layout would read the wrong slot. Abort with
     // a clear message instead.
     if any_has_instance && !unit.classes.is_empty() {
         let method_list: Vec<String> = unit.global_instance_method_names.clone();
-        let _ = write!(out, "__attribute__((constructor)) static void __ovic_vtable_layout_check(void) {{\n");
+        let _ = write!(out, "__attribute__((constructor)) static void __ovel_vtable_layout_check(void) {{\n");
         for cm in &unit.classes {
             if cm.method_names.is_empty() && cm.super_name.is_none() { continue; }
             let vt_sym = meta_symbol("VTABLE_", &name_flat(&cm.class_name));
-            let _ = write!(out, "    ovic_verify_vtable_sig((&{})->__sig, 0x{:016x}ULL, \"{} | class {} | tu {}\");\n",
+            let _ = write!(out, "    ovel_verify_vtable_sig((&{})->__sig, 0x{:016x}ULL, \"{} | class {} | tu {}\");\n",
                 vt_sym, vtable_sig, method_list.join(" "), cm.class_name, unit.filename);
         }
         let _ = write!(out, "}}\n\n");
     }
 
     // (ARC dealloc wrappers are computed and emitted above, before Section 11:
-    // both the owned-class static definitions and ovic_metaInit reference them.)
+    // both the owned-class static definitions and ovel_metaInit reference them.)
 
-    // ovic_metaInit() — always emitted (weak, empty when the unit has no
-    // classes): hand-written `main` naturally calls ovic_meta_init(), and a
+    // ovel_metaInit() — always emitted (weak, empty when the unit has no
+    // classes): hand-written `main` naturally calls ovel_meta_init(), and a
     // class-less TU must still link.
     {
-        out.push_str(&format!("{}void ovic_metaInit(void) {{\n", meta_weak));
+        out.push_str(&format!("{}void ovel_metaInit(void) {{\n", meta_weak));
         for cm in &unit.classes {
             let _ = write!(out, "    {} = (NPClass){{\n", meta_symbol("CLASS_", &name_flat(&cm.class_name)));
             out.push_str(&format!("        .name = \"{}\",\n", cm.class_name));
@@ -8107,10 +8107,10 @@ pub fn emit_unit_with_headers_mapped(unit: &CgUnit, c_headers: &[String], search
             if known.is_empty() {
                 out.push_str("        .protocols = NULL,\n        .protocol_count = 0,\n");
             } else {
-                let _ = write!(out, "        .protocols = OVIC_PROTOS_$_{},\n", name_flat(&cm.class_name));
+                let _ = write!(out, "        .protocols = OVEL_PROTOS_$_{},\n", name_flat(&cm.class_name));
                 let _ = write!(out, "        .protocol_count = {},\n", known.len());
             }
-            // .dealloc — populate from the vtable so ovic_release() can call it.
+            // .dealloc — populate from the vtable so ovel_release() can call it.
             // A class with owned object ivars points at a generated wrapper
             // (see emit_arc_dealloc_wrappers): it runs the class's normal
             // dealloc chain and then releases the ivars ARC owns.
@@ -8140,17 +8140,17 @@ pub fn emit_unit_with_headers_mapped(unit: &CgUnit, c_headers: &[String], search
         }
         out.push_str("}\n\n");
         // snake_case alias: every other runtime symbol is snake_case, so
-        // hand-written host code calls `ovic_meta_init()`. Weak like the
+        // hand-written host code calls `ovel_meta_init()`. Weak like the
         // original so the many per-TU copies coalesce to one.
-        out.push_str(&format!("{}void ovic_meta_init(void) {{ ovic_metaInit(); }}\n\n", meta_weak));
+        out.push_str(&format!("{}void ovel_meta_init(void) {{ ovel_metaInit(); }}\n\n", meta_weak));
     }
 
-    // ovic_stringFromCstr — emitted when NPString class is present.
+    // ovel_stringFromCstr — emitted when NPString class is present.
     // Hosted builds INTERN: identical contents map to ONE shared instance
     // (ObjC constant-`@"..."` semantics), so pointer equality across literal
     // occurrences works (`containsObject:`/`indexOfObject:` with a fresh
     // `@"key"` now finds the stored element). The table retains the object once
-    // (see the `ovic_retain` below) so it truly owns its +1 forever — the
+    // (see the `ovel_retain` below) so it truly owns its +1 forever — the
     // result is a shared constant, not a pooled temporary; MRC code must not
     // release it (same rule as ObjC constant strings). Table cap 256: when full,
     // fall back to a fresh
@@ -8159,10 +8159,10 @@ pub fn emit_unit_with_headers_mapped(unit: &CgUnit, c_headers: &[String], search
     //     table. Freestanding keeps the old fresh-object body (no <string.h>).
     section_comment(&mut out, comments, "Section 12 · Runtime support");
     if unit.classes.iter().any(|c| c.class_name == "NPString") {
-        out.push_str("__attribute__((weak)) NPObject *ovic_stringFromCstr(const char *cstr) {\n");
-        out.push_str("#ifdef __OVIC_FREESTANDING\n");
+        out.push_str("__attribute__((weak)) NPObject *ovel_stringFromCstr(const char *cstr) {\n");
+        out.push_str("#ifdef __OVEL_FREESTANDING\n");
         out.push_str("    if (!cstr) cstr = \"\";\n");
-        out.push_str(&format!("    NPObject *obj = ovic_alloc(&{});\n", meta_symbol("CLASS_", "NPString")));
+        out.push_str(&format!("    NPObject *obj = ovel_alloc(&{});\n", meta_symbol("CLASS_", "NPString")));
         out.push_str("    if (!obj) return NULL;\n");
         out.push_str("    struct NPString *str = (struct NPString *)obj;\n");
         out.push_str("    size_t len = strlen(cstr);\n");
@@ -8171,16 +8171,16 @@ pub fn emit_unit_with_headers_mapped(unit: &CgUnit, c_headers: &[String], search
         out.push_str("    str->_length = len;\n");
         out.push_str("    str->_hash = 0;\n");
         out.push_str("    str->_hashIsValid = 0;\n");
-        out.push_str("    return ovic_autorelease(obj);\n");
+        out.push_str("    return ovel_autorelease(obj);\n");
         out.push_str("#else\n");
         out.push_str("    if (!cstr) cstr = \"\";\n");
-        out.push_str("    static struct { const char *cstr; NPObject *obj; } ovic_intern_table[256];\n");
-        out.push_str("    static int ovic_intern_count = 0;\n");
-        out.push_str("    for (int i = 0; i < ovic_intern_count; i++) {\n");
-        out.push_str("        if (ovic_intern_table[i].cstr == cstr || strcmp(ovic_intern_table[i].cstr, cstr) == 0)\n");
-        out.push_str("            return ovic_intern_table[i].obj;\n");
+        out.push_str("    static struct { const char *cstr; NPObject *obj; } ovel_intern_table[256];\n");
+        out.push_str("    static int ovel_intern_count = 0;\n");
+        out.push_str("    for (int i = 0; i < ovel_intern_count; i++) {\n");
+        out.push_str("        if (ovel_intern_table[i].cstr == cstr || strcmp(ovel_intern_table[i].cstr, cstr) == 0)\n");
+        out.push_str("            return ovel_intern_table[i].obj;\n");
         out.push_str("    }\n");
-        out.push_str(&format!("    NPObject *obj = ovic_alloc(&{});\n", meta_symbol("CLASS_", "NPString")));
+        out.push_str(&format!("    NPObject *obj = ovel_alloc(&{});\n", meta_symbol("CLASS_", "NPString")));
         out.push_str("    if (!obj) return NULL;\n");
         out.push_str("    struct NPString *str = (struct NPString *)obj;\n");
         out.push_str("    size_t len = strlen(cstr);\n");
@@ -8196,21 +8196,21 @@ pub fn emit_unit_with_headers_mapped(unit: &CgUnit, c_headers: &[String], search
         // table's only reference, free the "immortal" constant, and leave the
         // table pointing at freed memory (heap-use-after-free in the next
         // intern lookup's strcmp). See doc/arc_intern_uaf.md.
-        out.push_str("    ovic_retain(obj);\n");
-        out.push_str("    if (ovic_intern_count < 256) {\n");
-        out.push_str("        ovic_intern_table[ovic_intern_count].cstr = str->_cstr;\n");
-        out.push_str("        ovic_intern_table[ovic_intern_count].obj = obj;\n");
-        out.push_str("        ovic_intern_count++;\n");
+        out.push_str("    ovel_retain(obj);\n");
+        out.push_str("    if (ovel_intern_count < 256) {\n");
+        out.push_str("        ovel_intern_table[ovel_intern_count].cstr = str->_cstr;\n");
+        out.push_str("        ovel_intern_table[ovel_intern_count].obj = obj;\n");
+        out.push_str("        ovel_intern_count++;\n");
         out.push_str("    }\n");
         out.push_str("    return obj;\n");
         out.push_str("#endif\n");
         out.push_str("}\n\n");
     }
 
-    // ovic_array_create — emitted when NPArray class is present
+    // ovel_array_create — emitted when NPArray class is present
     if unit.classes.iter().any(|c| c.class_name == "NPArray") {
-        out.push_str("__attribute__((weak)) NPObject *ovic_array_create(size_t count, ...) {\n");
-        out.push_str(&format!("    NPObject *arr = ovic_alloc(&{});\n", meta_symbol("CLASS_", "NPArray")));
+        out.push_str("__attribute__((weak)) NPObject *ovel_array_create(size_t count, ...) {\n");
+        out.push_str(&format!("    NPObject *arr = ovel_alloc(&{});\n", meta_symbol("CLASS_", "NPArray")));
         out.push_str("    if (!arr) return NULL;\n");
         out.push_str("    struct NPArray *a = (struct NPArray *)arr;\n");
         out.push_str("    if (count > 0) {\n");
@@ -8220,22 +8220,22 @@ pub fn emit_unit_with_headers_mapped(unit: &CgUnit, c_headers: &[String], search
         out.push_str("            va_start(ap, count);\n");
         out.push_str("            for (size_t i = 0; i < count; i++) {\n");
         out.push_str("                NPObject *obj = va_arg(ap, NPObject *);\n");
-        out.push_str("                a->_items[i] = obj ? ovic_retain(obj) : NULL;\n");
+        out.push_str("                a->_items[i] = obj ? ovel_retain(obj) : NULL;\n");
         out.push_str("            }\n");
         out.push_str("            va_end(ap);\n");
         out.push_str("            a->_count = count;\n");
         out.push_str("            a->_capacity = count;\n");
         out.push_str("        }\n");
         out.push_str("    }\n");
-        out.push_str("    return ovic_autorelease(arr);\n");
+        out.push_str("    return ovel_autorelease(arr);\n");
         out.push_str("}\n\n");
     }
 
-    // ovic_dictionary_create — emitted when NPDictionary class is present.
+    // ovel_dictionary_create — emitted when NPDictionary class is present.
     // Alternating key/value varargs, one pair per `@{}` entry.
     if unit.classes.iter().any(|c| c.class_name == "NPDictionary") {
-        out.push_str("__attribute__((weak)) NPObject *ovic_dictionary_create(size_t count, ...) {\n");
-        out.push_str(&format!("    NPObject *obj = ovic_alloc(&{});\n", meta_symbol("CLASS_", "NPDictionary")));
+        out.push_str("__attribute__((weak)) NPObject *ovel_dictionary_create(size_t count, ...) {\n");
+        out.push_str(&format!("    NPObject *obj = ovel_alloc(&{});\n", meta_symbol("CLASS_", "NPDictionary")));
         out.push_str("    if (!obj) return NULL;\n");
         out.push_str("    struct NPDictionary *dict = (struct NPDictionary *)obj;\n");
         out.push_str("    if (count > 0) {\n");
@@ -8249,8 +8249,8 @@ pub fn emit_unit_with_headers_mapped(unit: &CgUnit, c_headers: &[String], search
         out.push_str("                NPObject *k = va_arg(ap, NPObject *);\n");
         out.push_str("                NPObject *v = va_arg(ap, NPObject *);\n");
         out.push_str("                if (!k) continue;\n");
-        out.push_str("                dict->_keys[stored] = ovic_retain(k);\n");
-        out.push_str("                dict->_values[stored] = v ? ovic_retain(v) : NULL;\n");
+        out.push_str("                dict->_keys[stored] = ovel_retain(k);\n");
+        out.push_str("                dict->_values[stored] = v ? ovel_retain(v) : NULL;\n");
         out.push_str("                stored++;\n");
         out.push_str("            }\n");
         out.push_str("            va_end(ap);\n");
@@ -8258,13 +8258,13 @@ pub fn emit_unit_with_headers_mapped(unit: &CgUnit, c_headers: &[String], search
         out.push_str("            dict->_capacity = count;\n");
         out.push_str("        }\n");
         out.push_str("    }\n");
-        out.push_str("    return ovic_autorelease(obj);\n");
+        out.push_str("    return ovel_autorelease(obj);\n");
         out.push_str("}\n\n");
     }
 
     // ─── Block header struct (gcc/portable: shared by all expanded blocks) ──
     if !is_clang_backend() {
-        out.push_str("struct __ovic_block_header {\n    void *isa;\n    int flags;\n    int reserved;\n    void (*invoke)(void *, ...);\n};\n\n");
+        out.push_str("struct __ovel_block_header {\n    void *isa;\n    int flags;\n    int reserved;\n    void (*invoke)(void *, ...);\n};\n\n");
     }
 
     // ─── Block expansion definitions (gcc/portable) ──
@@ -8333,23 +8333,23 @@ pub fn emit_unit(unit: &CgUnit) -> String {
     emit_unit_with_headers(unit, &[], &[], false, Backend::Portable, false, false)
 }
 
-/// Generate a C bridge header so plain C code can call Ovic methods without
+/// Generate a C bridge header so plain C code can call Ovel methods without
 /// writing vtable dispatch or SEL constants by hand.
 ///
 /// For each class method and instance method it emits:
 ///   - an `extern` declaration of the generated function (`Class_method`),
-///   - a `static inline` wrapper `ovic_Class_method(...)` that hides the SEL
+///   - a `static inline` wrapper `ovel_Class_method(...)` that hides the SEL
 ///     (and the class object for class methods).
 ///
 /// Usage from C:
-///   #include "ovic_bridge.h"
-///   NPString *s = ovic_NPString_stringWithUTF8String("hello");
-///   const char *c = ovic_NPString_UTF8String(s);
+///   #include "ovel_bridge.h"
+///   NPString *s = ovel_NPString_stringWithUTF8String("hello");
+///   const char *c = ovel_NPString_UTF8String(s);
 /// Emit the call of the wrapped method inside a bridge-header inline wrapper,
 /// followed by the checked-EH guard. `-eh checked` compiles `@throw` into
-/// `__ovic_eh_flag = 1` + a zero return, so a pure-C caller that ignores the
+/// `__ovel_eh_flag = 1` + a zero return, so a pure-C caller that ignores the
 /// flag would swallow the exception silently. The wrapper checks it and aborts
-/// with ObjC wording (`ovic_eh_uncaught` lives in runtime.c; runtime.h is
+/// with ObjC wording (`ovel_eh_uncaught` lives in runtime.c; runtime.h is
 /// already included at the top of every bridge header). The checked backend
 /// settles every frame before returning, so there is nothing left to clean up
 /// at this boundary — aborting is the safe downgrade.
@@ -8357,20 +8357,20 @@ fn emit_bridge_eh_guard(out: &mut String, ret: &str, call: &str) {
     if ret == "void" {
         out.push_str(&format!("    {};\n", call));
     } else {
-        out.push_str(&format!("    {} __ovic_ret = {};\n", ret, call));
+        out.push_str(&format!("    {} __ovel_ret = {};\n", ret, call));
     }
-    out.push_str("    if (__ovic_eh_flag) { ovic_eh_uncaught(); }\n");
+    out.push_str("    if (__ovel_eh_flag) { ovel_eh_uncaught(); }\n");
     if ret != "void" {
-        out.push_str("    return __ovic_ret;\n");
+        out.push_str("    return __ovel_ret;\n");
     }
 }
 
 pub fn emit_bridge_header(unit: &CgUnit) -> String {
     let mut out = String::new();
-    out.push_str("// Automatically generated by ovicc --emit-bridge-header. Do not edit.\n");
-    out.push_str("#ifndef OVIC_BRIDGE_H\n");
-    out.push_str("#define OVIC_BRIDGE_H\n\n");
-    out.push_str("#include <ovic/runtime.h>\n\n");
+    out.push_str("// Automatically generated by ovelc --emit-bridge-header. Do not edit.\n");
+    out.push_str("#ifndef OVEL_BRIDGE_H\n");
+    out.push_str("#define OVEL_BRIDGE_H\n\n");
+    out.push_str("#include <ovel/runtime.h>\n\n");
 
     // Forward-declare all class structs.
     for cls in &unit.classes {
@@ -8379,17 +8379,17 @@ pub fn emit_bridge_header(unit: &CgUnit) -> String {
         out.push_str(&format!("typedef struct {} {};\n", flat, flat));
     }
     out.push_str("typedef struct { size_t location; size_t length; } NPRange;\n\n");
-    out.push_str("extern void ovic_metaInit(void);\n\n");
+    out.push_str("extern void ovel_metaInit(void);\n\n");
 
     for cls in &unit.classes {
         let flat = name_flat(&cls.class_name);
-        if flat == "ovic_root" { continue; }
+        if flat == "ovel_root" { continue; }
         for (i, sel) in cls.method_names.iter().enumerate() {
             let is_class = cls.is_class_methods.get(i).copied().unwrap_or(false);
             let ret = cls.method_return_types.get(i).cloned().unwrap_or_else(|| "void".into());
             let params = cls.method_params_list.get(i).cloned().unwrap_or_default();
             let fn_name = format!("{}_{}", flat, sel);
-            let wrapper_name = format!("ovic_{}_{}", flat, sel);
+            let wrapper_name = format!("ovel_{}_{}", flat, sel);
             let orig_sel = cls.method_sel_names.get(i).cloned().unwrap_or_else(|| sel.clone());
 
             // method_params_list includes self and _cmd as the first two entries.
@@ -8408,12 +8408,12 @@ pub fn emit_bridge_header(unit: &CgUnit) -> String {
                     format!("NPClass *self, SEL _cmd, {}", decl_params.join(", "))
                 };
                 out.push_str(&format!("extern {} {}({});\n", ret, fn_name, sig));
-                out.push_str(&format!("extern NPClass OVIC_CLASS_$_{};\n\n", flat));
+                out.push_str(&format!("extern NPClass OVEL_CLASS_$_{};\n\n", flat));
                 out.push_str(&format!("static inline {} {}({}) {{\n",
                     ret, wrapper_name,
                     if decl_params.is_empty() { "void".to_string() } else { decl_params.join(", ") }));
                 out.push_str(&format!("    SEL _sel = sel_registerName(\"{}\");\n", orig_sel));
-                let call = format!("{}(&OVIC_CLASS_$_{}, _sel{})",
+                let call = format!("{}(&OVEL_CLASS_$_{}, _sel{})",
                     fn_name, flat,
                     if call_names.is_empty() { String::new() } else { format!(", {}", call_names.join(", ")) });
                 emit_bridge_eh_guard(&mut out, &ret, &call);
@@ -8437,7 +8437,7 @@ pub fn emit_bridge_header(unit: &CgUnit) -> String {
             }
         }
     }
-    out.push_str("#endif /* OVIC_BRIDGE_H */\n");
+    out.push_str("#endif /* OVEL_BRIDGE_H */\n");
     out
 }
 #[cfg(test)]
@@ -8464,7 +8464,7 @@ mod vtable_sig_tests {
 
     /// The signature must travel inside the vtable struct (first member) so it
     /// is weak-merged together with the instance that actually won the link,
-    /// and the check must live in a per-TU constructor — `ovic_metaInit` is
+    /// and the check must live in a per-TU constructor — `ovel_metaInit` is
     /// weak-merged, so only one TU's copy would ever run.
     #[test]
     fn signature_travels_in_vtable_and_check_runs_per_tu() {
@@ -8525,10 +8525,10 @@ mod vtable_sig_tests {
             "vtable struct must carry a __sig member so it merges with the instance"
         );
         assert!(
-            c.contains("__attribute__((constructor)) static void __ovic_vtable_layout_check(void)"),
-            "the layout check must live in a per-TU constructor, not in weak-merged ovic_metaInit"
+            c.contains("__attribute__((constructor)) static void __ovel_vtable_layout_check(void)"),
+            "the layout check must live in a per-TU constructor, not in weak-merged ovel_metaInit"
         );
-        assert!(c.contains("ovic_verify_vtable_sig"), "the verifier must be emitted");
+        assert!(c.contains("ovel_verify_vtable_sig"), "the verifier must be emitted");
     }
 
     /// R3: a TU-local private method must not change the fingerprint. A legal
@@ -8592,11 +8592,11 @@ mod vtable_sig_tests {
 }
 
 /// Regression guard for the second-referendum root cause: `-eh checked`
-/// writes `__ovic_eh_flag` / `__ovic_eh_val` in every function with a
-/// throwing callee, but their declarations live only in `ovic/runtime.h`.
+/// writes `__ovel_eh_flag` / `__ovel_eh_val` in every function with a
+/// throwing callee, but their declarations live only in `ovel/runtime.h`.
 /// A pure C-superset file (no Foundation import, no block literal) generates
 /// C that never pulled runtime.h in, so clang rejected the whole unit with
-/// `use of undeclared identifier '__ovic_eh_flag'`. The include must not
+/// `use of undeclared identifier '__ovel_eh_flag'`. The include must not
 /// depend on the Foundation/blocks heuristic.
 #[cfg(test)]
 mod eh_runtime_include_tests {
@@ -8624,9 +8624,9 @@ mod eh_runtime_include_tests {
         let unit = unit_with_c_headers(vec!["#include <stdio.h>".to_string()]);
         let c = emit_unit_with_headers(&unit, &unit.c_headers, &[], false, Backend::Clang, false, true);
         assert!(
-            c.contains("#include <ovic/runtime.h>"),
+            c.contains("#include <ovel/runtime.h>"),
             "a pure C-superset unit compiled with -eh checked must include runtime.h — \
-             __ovic_eh_flag/__ovic_eh_val are otherwise undeclared (referendum #2)"
+             __ovel_eh_flag/__ovel_eh_val are otherwise undeclared (referendum #2)"
         );
     }
 
@@ -8635,23 +8635,23 @@ mod eh_runtime_include_tests {
         let unit = unit_with_c_headers(vec!["#include <stdio.h>".to_string()]);
         let c = emit_unit_with_headers(&unit, &unit.c_headers, &[], false, Backend::Clang, false, false);
         assert!(
-            !c.contains("#include <ovic/runtime.h>"),
+            !c.contains("#include <ovel/runtime.h>"),
             "the default sjlj backend emits no EH global access — runtime.h must not \
              be dragged in (zero behavior change for the default path)"
         );
     }
 
     /// No duplicate include when the file already pulls runtime.h itself
-    /// (the trace goldens do `#import ovic/runtime.h` directly).
+    /// (the trace goldens do `#import ovel/runtime.h` directly).
     #[test]
     fn eh_checked_does_not_duplicate_an_existing_runtime_h_include() {
         let unit = unit_with_c_headers(vec![
             "#include <stdio.h>".to_string(),
-            "#include <ovic/runtime.h>".to_string(),
+            "#include <ovel/runtime.h>".to_string(),
         ]);
         let c = emit_unit_with_headers(&unit, &unit.c_headers, &[], false, Backend::Clang, false, true);
         assert_eq!(
-            c.matches("#include <ovic/runtime.h>").count(),
+            c.matches("#include <ovel/runtime.h>").count(),
             1,
             "runtime.h must not be included twice"
         );

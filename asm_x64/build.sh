@@ -5,7 +5,7 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 
-OVICC="${OVICC:-../target/debug/ovicc}"
+OVELC="${OVELC:-../target/debug/ovelc}"
 
 echo "==> transpile + compile as x86_64 + run (Rosetta)"
-"$OVICC" -arch x86_64 run -asm asm_x86_ext.s asm_x86_fusion_test.ov
+"$OVELC" -arch x86_64 run -asm asm_x86_ext.s asm_x86_fusion_test.ov

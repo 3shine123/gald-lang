@@ -6,8 +6,8 @@ fn main() {
         ".".into(),
         "include/Foundation".into(),
     ];
-    let pre = ovic_preprocessor::Preprocessor::process(&content, "tests/static_generics_template_test.ov", &search_dirs).unwrap();
-    let lines: Vec<&str> = pre.resolved_ovic.lines().collect();
+    let pre = ovel_preprocessor::Preprocessor::process(&content, "tests/static_generics_template_test.ov", &search_dirs).unwrap();
+    let lines: Vec<&str> = pre.resolved_ovel.lines().collect();
     eprintln!("Total lines: {}", lines.len());
     for i in 69..(lines.len().min(90)) {
         let marker = if i+1 == 77 { " >>>" } else { "    " };

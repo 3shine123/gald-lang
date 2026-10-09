@@ -8,10 +8,10 @@
 - (void)dealloc {
     for (size_t i = 0; i < _count; i++) {
         if (_keys[i]) {
-            ovic_release(_keys[i]);
+            ovel_release(_keys[i]);
         }
         if (_values[i]) {
-            ovic_release(_values[i]);
+            ovel_release(_values[i]);
         }
     }
     free(_keys);
@@ -47,8 +47,8 @@
                     if (!keys[i]) {
                         continue;
                     }
-                    ks[stored] = ovic_retain(keys[i]);
-                    vs[stored] = values[i] ? ovic_retain(values[i]) : NULL;
+                    ks[stored] = ovel_retain(keys[i]);
+                    vs[stored] = values[i] ? ovel_retain(values[i]) : NULL;
                     stored++;
                 }
                 dict->_keys = ks;
@@ -110,7 +110,7 @@
 // `-copy` honors the ObjC convention: the caller owns the result (+1).
 // Returns an immutable NPDictionary even when invoked on a mutable subclass.
 - (id)copy {
-    return ovic_retain([NPDictionary dictionaryWithObjects:_values forKeys:_keys count:_count]);
+    return ovel_retain([NPDictionary dictionaryWithObjects:_values forKeys:_keys count:_count]);
 }
 
 - (NPString *)description {

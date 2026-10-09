@@ -10,60 +10,60 @@
 | `async_test.ov` | 编译通过，stdout 见 `.out`（async void 入口 + 跨调用链双 await，`result=18`） |
 
 ```bash
-./target/debug/ovicc run tests/golden/34_async/async_test.ov
+./target/debug/ovelc run tests/golden/34_async/async_test.ov
 ```
 
 ## 已定设计（用户拍板，2026-09）
 
 1. **入口 = 语句位的 async 调用**：同步上下文调用 async void 合法。参照 C# `async void` vs `async Task`（无死锁风险：单线程协作驱动到完成必有进展）。**语句位**的裸调用（`[f runAll];`）与语句位 `[t start];` 在 hosted 下就地驱动到完成——不是自动生成的 blocking wrapper，也不在 `main` 退出处兜底泵（ARC 的 scope-end release 会先落地）。（第四代注：原"同步调非 void async → 编译错"检查已移除——被接住的裸调用只创建任务（形态 A，lazy），由 `@await t` 或语句位 `[t start]` 驱动。）
-2. **语句位 async 调用 = 入口**：hosted 下就地驱动到完成（降为 `ovic_task_await`）；`-ffreestanding` 下只创建任务、结果丢弃（入队由用户主循环 `ovic_sched_run` 驱动）。
+2. **语句位 async 调用 = 入口**：hosted 下就地驱动到完成（降为 `ovel_task_await`）；`-ffreestanding` 下只创建任务、结果丢弃（入队由用户主循环 `ovel_sched_run` 驱动）。
 3. **break/continue 跨 await 放行**（M2 状态跳转）；**@noarc 跨 await 放行**（无 jmp_buf）；**@try 跨 await M1 报错**（jmp_buf 不能跨挂起点，替代：try 包在循环外）。
 4. **bridge header**：async void 发 wrapper 声明；非 void async 跳过（M2）。
 
 ## 实现形态（本目录覆盖）
 
-**不拆函数签名**（vtable 槽位不变、跨 TU 安全、bridge header 零特判）。desugar 在 AST 层改写 async 方法体；下面是本目录生成 C 的**现行**形状（M2 状态机——M1 的 `ovic_task_resume` / `ovic_task_join` 已不存在）：
+**不拆函数签名**（vtable 槽位不变、跨 TU 安全、bridge header 零特判）。desugar 在 AST 层改写 async 方法体；下面是本目录生成 C 的**现行**形状（M2 状态机——M1 的 `ovel_task_resume` / `ovel_task_join` 已不存在）：
 
 ```c
 /* 调用点：- (async NPTask<int>)compute:(int)n → 只建任务（形态 A，lazy） */
 NPTask * compute_(NPObject * self, SEL _cmd, int n) {
-    NPTask * __ovic_task = (NPTask *)(ovic_task_create(
-        ovic_async_state_compute_, self, sizeof(struct compute__frame)));
-    ((struct compute__frame *)__ovic_task->frame)->n = n;
-    return __ovic_task;
+    NPTask * __ovel_task = (NPTask *)(ovel_task_create(
+        ovel_async_state_compute_, self, sizeof(struct compute__frame)));
+    ((struct compute__frame *)__ovel_task->frame)->n = n;
+    return __ovel_task;
 }
 
 /* 状态机：@await 拆段；活过挂起点的局部提升进 frame */
-__attribute__((weak)) int ovic_async_state_compute_(NPTask * __ovic_task) {
-    switch (__ovic_task->state) {
+__attribute__((weak)) int ovel_async_state_compute_(NPTask * __ovel_task) {
+    switch (__ovel_task->state) {
       case 0: {
-        struct compute__frame * __ovic_f = (struct compute__frame *)__ovic_task->frame;
-        int raw = (__ovic_task->state = 2, __ovic_f->n);    /* `@await n`：先落新状态再取值 */
-        __ovic_task->result = (void *)(unsigned)(raw * 2);  /* 体内 `return raw * 2` */
-        __ovic_task->state = -1;
+        struct compute__frame * __ovel_f = (struct compute__frame *)__ovel_task->frame;
+        int raw = (__ovel_task->state = 2, __ovel_f->n);    /* `@await n`：先落新状态再取值 */
+        __ovel_task->result = (void *)(unsigned)(raw * 2);  /* 体内 `return raw * 2` */
+        __ovel_task->state = -1;
         return 1;
       }
     }
-    __ovic_task->state = -1;
+    __ovel_task->state = -1;
     return 1;
 }
 
 /* `@await [self compute:n]` → 建任务 + 就地驱动取 T */
-int a = (__ovic_task->state = 2, (long)ovic_task_await(/* vtable 调 compute_，返回新任务 */));
+int a = (__ovel_task->state = 2, (long)ovel_task_await(/* vtable 调 compute_，返回新任务 */));
 ```
 
-- `@await e` → `(__ovic_task->state = N, <e 或 ovic_task_await(子任务)>)`：Comma 求值——先落新状态（下次驱动从这里续），再取值；`e` 是任务表达式时走 `ovic_task_await`（未 start 自动 start、结果缓存、可多 await）。
-- 任务由**调用点**创建（`ovic_task_create`：分配任务本体 + 每方法一个 frame 结构体），方法体拆进 `switch (__ovic_task->state)`；`[t start]` / 语句位裸调用在 hosted 下就地驱动到完成，裸机只入队等用户主循环泵。
-- **检查层**（`ovic_async::check_unit`，desugar 前跑原始 AST）：
+- `@await e` → `(__ovel_task->state = N, <e 或 ovel_task_await(子任务)>)`：Comma 求值——先落新状态（下次驱动从这里续），再取值；`e` 是任务表达式时走 `ovel_task_await`（未 start 自动 start、结果缓存、可多 await）。
+- 任务由**调用点**创建（`ovel_task_create`：分配任务本体 + 每方法一个 frame 结构体），方法体拆进 `switch (__ovel_task->state)`；`[t start]` / 语句位裸调用在 hosted 下就地驱动到完成，裸机只入队等用户主循环泵。
+- **检查层**（`ovel_async::check_unit`，desugar 前跑原始 AST）：
   - `@try` 跨 await → error（try/catch/finally 任一含 await 即报）
   - 同步上下文调非 void async → error —— **第四代已移除**（裸调用 = 形态 A，合法）；现改为 `async` 修饰符与体内 `@await` 双向对账
-- runtime（`include/ovic/runtime.{h,c}`）：`NPTask{state,finished,entry,self_obj,frame,result,parent}` + create/resume/finish/join 四个 API（host 用 calloc/free；freestanding 用户提供分配器后可用）。
+- runtime（`include/ovel/runtime.{h,c}`）：`NPTask{state,finished,entry,self_obj,frame,result,parent}` + create/resume/finish/join 四个 API（host 用 calloc/free；freestanding 用户提供分配器后可用）。
 
 ## 里程碑路线
 
 - **M1（本目录）**：task 驱动 + await 钩子 + 检查层，行为=同步执行，API 契约就位
 - **M2**：真状态机——`@await` 拆段进 `switch(t->state)`、活过挂起点的局部提升进 frame（仿 @try 的 TRY_LIFT 提升先例）、break/continue → 状态跳转、ARC 在任务退出汇合点统一结算、bridge header wrapper
-- **M3**：调度器 `ovic_sched_run` + 任务图（`parent` 字段已预留）/ I/O
+- **M3**：调度器 `ovel_sched_run` + 任务图（`parent` 字段已预留）/ I/O
 
 ## 负例
 

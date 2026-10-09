@@ -31,7 +31,7 @@
   notes in `NPSet.oh`).
 - [x] **`NPPredicate`** (the `NSPredicate` model) — shipped: a runtime
   format-string parser + evaluation engine (`NPPredicate.ov`), compile-time KVC
-  accessor tables (`OVIC_KVC_$_X`, see `doc/architecture.md` §12) and the host
+  accessor tables (`OVEL_KVC_$_X`, see `doc/architecture.md` §12) and the host
   filtering API (`filteredArrayUsingPredicate:` /
   `indexOfObjectMatchingPredicate:` / `filterUsingPredicate:`; a `nil`
   predicate is the identity). Covered by `tests/predicate_filter_test.ov` and
@@ -53,4 +53,4 @@
 
 ## Tooling
 
-- [ ] **Windows native validation** — `ovicc.exe` builds and cross-compiles, but runtime behavior on real Windows is untested (zig cc backend, `__thread` semantics).
+- [ ] **Windows native validation** — `ovelc.exe` builds and cross-compiles, but runtime behavior on real Windows is untested (zig cc backend, `__thread` semantics).

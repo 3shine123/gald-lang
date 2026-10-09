@@ -1,12 +1,12 @@
 [package]
-name = "ovic-codegen"
+name = "ovel-codegen"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-ovic-cst = { path = "../cst" }
-ovic-ast = { path = "../ast" }
-ovic-symbol = { path = "../symbol" }
-ovic-elaborator = { path = "../elaborator" }
+ovel-cst = { path = "../cst" }
+ovel-ast = { path = "../ast" }
+ovel-symbol = { path = "../symbol" }
+ovel-elaborator = { path = "../elaborator" }
 attrs = { path = "../attrs" }
-ovic-ownership = { path = "../ownership" }
+ovel-ownership = { path = "../ownership" }

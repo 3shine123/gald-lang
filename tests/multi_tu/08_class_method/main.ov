@@ -11,7 +11,7 @@ int main() {
     Widget *w = [Widget create];
     printf("wid=%d\n", [w widgetId]);
     printf("helper=%d\n", FactoryHelper());
-    ovic_release(f);
-    ovic_release(w);
+    ovel_release(f);
+    ovel_release(w);
     return 0;
 }

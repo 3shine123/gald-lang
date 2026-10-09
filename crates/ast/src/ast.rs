@@ -1,4 +1,4 @@
-use ovic_cst::{CstParam, CstType, Nullability, TagKind, TypePrim};
+use ovel_cst::{CstParam, CstType, Nullability, TagKind, TypePrim};
 
 // ─── Type node ───────────────────────────────────────────────────────────────
 

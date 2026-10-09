@@ -92,7 +92,7 @@
         _items = items;
         _capacity = newcap;
     }
-    _items[_count] = ovic_retain(obj);
+    _items[_count] = ovel_retain(obj);
     _count++;
 }
 
@@ -115,7 +115,7 @@
         _capacity = newcap;
     }
     memmove(_items + index + 1, _items + index, (_count - index) * sizeof(NPObject *));
-    _items[index] = ovic_retain(obj);
+    _items[index] = ovel_retain(obj);
     _count++;
 }
 
@@ -125,7 +125,7 @@
     memmove(_items + index, _items + index + 1, (_count - index - 1) * sizeof(NPObject *));
     _count--;
     if (removed) {
-        ovic_release(removed);
+        ovel_release(removed);
     }
 }
 
@@ -147,7 +147,7 @@
 - (void)removeAllObjects {
     for (size_t i = 0; i < _count; i++) {
         if (_items[i]) {
-            ovic_release(_items[i]);
+            ovel_release(_items[i]);
         }
     }
     _count = 0;
@@ -156,9 +156,9 @@
 - (void)replaceObjectAtIndex:(size_t)index withObject:(T)obj {
     if (!obj || index >= _count) return;
     NPObject *old = _items[index];
-    _items[index] = ovic_retain(obj);
+    _items[index] = ovel_retain(obj);
     if (old) {
-        ovic_release(old);
+        ovel_release(old);
     }
 }
 
@@ -188,7 +188,7 @@
             _items[write] = obj;
             write++;
         } else if (obj) {
-            ovic_release(obj);
+            ovel_release(obj);
         }
     }
     _count = write;

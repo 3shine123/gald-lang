@@ -1,4 +1,4 @@
-#include "ovic/preprocessor.h"
+#include "ovel/preprocessor.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -12,15 +12,15 @@ static int passed = 0;
 
 static void test_basic_pass_through(void) {
     TEST("pass-through without directives");
-    ovic_pp_state_t *s = pp_state_create();
+    ovel_pp_state_t *s = pp_state_create();
 
     // Write a temp file
-    FILE *f = fopen("/tmp/ovic_test_simple.ov", "w");
+    FILE *f = fopen("/tmp/ovel_test_simple.ov", "w");
     fputs("int x = 42;\n", f);
     fputs("int y = x + 1;\n", f);
     fclose(f);
 
-    int r = pp_process_file(s, "/tmp/ovic_test_simple.ov");
+    int r = pp_process_file(s, "/tmp/ovel_test_simple.ov");
     if (r != 0) { FAIL("process_file failed"); }
 
     const char *out = pp_get_output(s);
@@ -33,14 +33,14 @@ static void test_basic_pass_through(void) {
 
 static void test_define(void) {
     TEST("#define + macro expansion");
-    ovic_pp_state_t *s = pp_state_create();
+    ovel_pp_state_t *s = pp_state_create();
 
-    FILE *f = fopen("/tmp/ovic_test_define.ov", "w");
+    FILE *f = fopen("/tmp/ovel_test_define.ov", "w");
     fputs("#define FOO 42\n", f);
     fputs("int x = FOO;\n", f);
     fclose(f);
 
-    pp_process_file(s, "/tmp/ovic_test_define.ov");
+    pp_process_file(s, "/tmp/ovel_test_define.ov");
     const char *out = pp_get_output(s);
 
     // The macro is removed from output, FOO is not expanded (simple placeholder)
@@ -54,17 +54,17 @@ static void test_define(void) {
 
 static void test_ifdef(void) {
     TEST("#ifdef / #endif");
-    ovic_pp_state_t *s = pp_state_create();
+    ovel_pp_state_t *s = pp_state_create();
     pp_add_macro(s, "DEBUG", "1");
 
-    FILE *f = fopen("/tmp/ovic_test_ifdef.ov", "w");
+    FILE *f = fopen("/tmp/ovel_test_ifdef.ov", "w");
     fputs("#ifdef DEBUG\n", f);
     fputs("int debug = 1;\n", f);
     fputs("#endif\n", f);
     fputs("int normal = 0;\n", f);
     fclose(f);
 
-    pp_process_file(s, "/tmp/ovic_test_ifdef.ov");
+    pp_process_file(s, "/tmp/ovel_test_ifdef.ov");
     const char *out = pp_get_output(s);
 
     if (strstr(out, "int debug = 1;") == NULL) { FAIL("expected debug block"); }
@@ -76,15 +76,15 @@ static void test_ifdef(void) {
 
 static void test_ifndef(void) {
     TEST("#ifndef / #endif");
-    ovic_pp_state_t *s = pp_state_create();
+    ovel_pp_state_t *s = pp_state_create();
 
-    FILE *f = fopen("/tmp/ovic_test_ifndef.ov", "w");
+    FILE *f = fopen("/tmp/ovel_test_ifndef.ov", "w");
     fputs("#ifndef DEBUG\n", f);
     fputs("int fallback = 1;\n", f);
     fputs("#endif\n", f);
     fclose(f);
 
-    pp_process_file(s, "/tmp/ovic_test_ifndef.ov");
+    pp_process_file(s, "/tmp/ovel_test_ifndef.ov");
     const char *out = pp_get_output(s);
 
     if (strstr(out, "int fallback = 1;") == NULL) { FAIL("expected fallback block"); }
@@ -95,9 +95,9 @@ static void test_ifndef(void) {
 
 static void test_else(void) {
     TEST("#ifdef / #else / #endif");
-    ovic_pp_state_t *s = pp_state_create();
+    ovel_pp_state_t *s = pp_state_create();
 
-    FILE *f = fopen("/tmp/ovic_test_else.ov", "w");
+    FILE *f = fopen("/tmp/ovel_test_else.ov", "w");
     fputs("#ifdef UNDEFINED\n", f);
     fputs("int a = 1;\n", f);
     fputs("#else\n", f);
@@ -105,7 +105,7 @@ static void test_else(void) {
     fputs("#endif\n", f);
     fclose(f);
 
-    pp_process_file(s, "/tmp/ovic_test_else.ov");
+    pp_process_file(s, "/tmp/ovel_test_else.ov");
     const char *out = pp_get_output(s);
 
     if (strstr(out, "int a = 1;") != NULL) { FAIL("expected 'a' to be skipped"); }
@@ -117,20 +117,20 @@ static void test_else(void) {
 
 static void test_import_no_cycle(void) {
     TEST("#import (no cycle)");
-    ovic_pp_state_t *s = pp_state_create();
+    ovel_pp_state_t *s = pp_state_create();
 
-    FILE *h = fopen("/tmp/ovic_test_imported.h", "w");
+    FILE *h = fopen("/tmp/ovel_test_imported.h", "w");
     fputs("int imported_var;\n", h);
     fclose(h);
 
-    FILE *f = fopen("/tmp/ovic_test_import_main.ov", "w");
-    fputs("#import \"ovic_test_imported.oh\"\n", f);
+    FILE *f = fopen("/tmp/ovel_test_import_main.ov", "w");
+    fputs("#import \"ovel_test_imported.oh\"\n", f);
     fputs("int main_var;\n", f);
     fclose(f);
 
     // add search path for /tmp
     pp_add_search_path(s, "/tmp");
-    pp_process_file(s, "/tmp/ovic_test_import_main.ov");
+    pp_process_file(s, "/tmp/ovel_test_import_main.ov");
     const char *out = pp_get_output(s);
 
     if (strstr(out, "int imported_var;") == NULL) { FAIL("expected imported header content"); }
@@ -142,8 +142,8 @@ static void test_import_no_cycle(void) {
 
 static void test_error_nonexistent(void) {
     TEST("error on nonexistent file");
-    ovic_pp_state_t *s = pp_state_create();
-    int r = pp_process_file(s, "/tmp/ovic_nonexistent_file.ov");
+    ovel_pp_state_t *s = pp_state_create();
+    int r = pp_process_file(s, "/tmp/ovel_nonexistent_file.ov");
     if (r == 0) { FAIL("expected error"); }
     if (!pp_has_errors(s)) { FAIL("expected has_errors"); }
 

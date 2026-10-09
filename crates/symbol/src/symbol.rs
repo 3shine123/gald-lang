@@ -1,4 +1,4 @@
-use ovic_cst::{CstType, TypePrim};
+use ovel_cst::{CstType, TypePrim};
 
 // ─── Symbol kinds ───────────────────────────────────────────────────────────
 

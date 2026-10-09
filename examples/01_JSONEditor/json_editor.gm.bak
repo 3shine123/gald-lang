@@ -1,5 +1,5 @@
-// json_editor.ov — Ovic 全特性 JSON 编辑器
-// 编译: ovicc run tests/JSONEditor/json_editor.ov -fno-ovic-arc
+// json_editor.ov — Ovel 全特性 JSON 编辑器
+// 编译: ovelc run tests/JSONEditor/json_editor.ov -fno-ovel-arc
 // 特性覆盖: @protocol, @interface, @implementation, @property, @synthesize,
 //           @namespace, 继承, @category, 泛型<T>, Block, @selector,
 //           @try/@catch/@throw, @autoreleasepool, @public weak, instancetype
@@ -907,7 +907,7 @@ static int read_line(char *buf, int size) {
 // ============================================================================
 int main(int argc, const char *argv[]) {
     @autoreleasepool {
-        printf("═══ Ovic Full Feature Demo ═══\n\n");
+        printf("═══ Ovel Full Feature Demo ═══\n\n");
         printf("Features:\n");
         printf("  @namespace JSON { ... } — 7 classes\n");
         printf("  @protocol Value — polymorphic dispatch\n");

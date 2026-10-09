@@ -1,9 +1,9 @@
 /* ─────────────────────────────────────────────────────────────────────────
  * LibUI.oh — ObjC-style declarations for the libui-ng wrapper.
  *
- * Pure Ovic: no `struct uiXxx` ever leaks out of LibUI.ov. Every widget
+ * Pure Ovel: no `struct uiXxx` ever leaks out of LibUI.ov. Every widget
  * inherits from `Control`, so `append:`/`setContent:` take a `Control *`
- * and you never touch a handle yourself. Callbacks take Ovic blocks.
+ * and you never touch a handle yourself. Callbacks take Ovel blocks.
  * ───────────────────────────────────────────────────────────────────────── */
 
 #ifndef LIBUI_NH

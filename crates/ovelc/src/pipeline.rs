@@ -1,23 +1,23 @@
 use std::path::Path;
 use std::fs;
 use std::io::IsTerminal;
-use ovic_parser::parser::Parser;
-use ovic_binder::Binder;
-use ovic_elaborator::Elaborator;
-use ovic_codegen::{emit_unit_with_headers_mapped, emit_bridge_header};
-use ovic_preprocessor::Preprocessor;
-use ovic_symbol::SymbolTable;
-use ovic_ast::ast::*;
-use ovic_cfg::cfg_build;
-use ovic_arc::{arc_local_analyze, arc_global_analyze, arc_analyze_loops, arc_insert_actions, arc_optimize_pairs};
-use ovic_checker::Checker;
-use ovic_trace::{trace_refcounts, TraceOptions};
+use ovel_parser::parser::Parser;
+use ovel_binder::Binder;
+use ovel_elaborator::Elaborator;
+use ovel_codegen::{emit_unit_with_headers_mapped, emit_bridge_header};
+use ovel_preprocessor::Preprocessor;
+use ovel_symbol::SymbolTable;
+use ovel_ast::ast::*;
+use ovel_cfg::cfg_build;
+use ovel_arc::{arc_local_analyze, arc_global_analyze, arc_analyze_loops, arc_insert_actions, arc_optimize_pairs};
+use ovel_checker::Checker;
+use ovel_trace::{trace_refcounts, TraceOptions};
 use attrs::{Backend, disposition, AttrDisposition};
 
 /// Default exception backend.
 ///
 /// `true` = `-eh checked`: the explicit flag + guard lowering in `crates/eh`
-/// (each `@throw` arms `__ovic_eh_flag` and returns; every call site that may
+/// (each `@throw` arms `__ovel_eh_flag` and returns; every call site that may
 /// throw is guarded; the function tail propagates). ARC settles every frame on
 /// the way out, so a cross-function throw releases intermediate frames'
 /// owned locals — the sjlj backend's documented limitation.
@@ -73,11 +73,11 @@ pub struct Pipeline {
     /// `-np-map` (plan 阶段 4): extract a versioned sidecar source map from
     /// the FINAL generated C. The map is stashed in [`Pipeline::last_source_map`]
     /// for the CLI driver, which decides where (and whether) it lands on disk.
-    pub ovic_map: bool,
+    pub ovel_map: bool,
     /// Sidecar map extracted during the last [`Pipeline::transpile`] call
-    /// (only when [`Pipeline::ovic_map`] is set). `generated.path` is left
+    /// (only when [`Pipeline::ovel_map`] is set). `generated.path` is left
     /// empty here — the CLI driver fills in the real `.c` output location.
-    pub last_source_map: Option<ovic_cst::source_map_file::SourceMapFile>,
+    pub last_source_map: Option<ovel_cst::source_map_file::SourceMapFile>,
 }
 
 impl Pipeline {
@@ -105,7 +105,7 @@ impl Pipeline {
             c_arch: None,
             no_ctype_probe: false,
             line_directives: true,
-            ovic_map: false,
+            ovel_map: false,
             last_source_map: None,
         }
     }
@@ -144,7 +144,7 @@ impl Pipeline {
             Some(names) => {
                 if self.verbose {
                     eprintln!(
-                        "[ovicc] C type table: {} names from {} passthrough header(s)",
+                        "[ovelc] C type table: {} names from {} passthrough header(s)",
                         names.len(),
                         pre.c_headers.len()
                     );
@@ -153,7 +153,7 @@ impl Pipeline {
             }
             None => {
                 if self.verbose {
-                    eprintln!("[ovicc] C type probe unavailable — using the builtin type list");
+                    eprintln!("[ovelc] C type probe unavailable — using the builtin type list");
                 }
                 (Vec::new(), false)
             }
@@ -176,13 +176,13 @@ impl Pipeline {
     }
 
     pub fn transpile(&mut self, source: &str, filename: &str) -> Result<String, String> {
-        // `__OVIC__` is always defined: ovic headers can guard objc-style
-        // syntax behind `#ifdef __OVIC__` so a plain C compiler sees only the
-        // C-compatible subset when the header is used directly (without ovicc).
+        // `__OVEL__` is always defined: ovel headers can guard objc-style
+        // syntax behind `#ifdef __OVEL__` so a plain C compiler sees only the
+        // C-compatible subset when the header is used directly (without ovelc).
         let extra_macros: &[&str] = match self.backend {
-            attrs::Backend::Clang => &["__clang__", "__GNUC__", "__OVIC__"],
-            attrs::Backend::Gcc => &["__GNUC__", "__OVIC__"],
-            attrs::Backend::Portable => &["__GNUC__", "__OVIC__"],
+            attrs::Backend::Clang => &["__clang__", "__GNUC__", "__OVEL__"],
+            attrs::Backend::Gcc => &["__GNUC__", "__OVEL__"],
+            attrs::Backend::Portable => &["__GNUC__", "__OVEL__"],
         };
         let pre = Preprocessor::process(source, filename, &self.search_dirs, extra_macros)?;
 
@@ -194,9 +194,9 @@ impl Pipeline {
         // not authoritative, and the parser keeps its historical fallbacks.
         let (c_type_names, c_types_complete) = self.c_type_names(&pre, extra_macros, filename);
 
-        // Step 1: Parse the resolved ovic source
-        if self.verbose { eprintln!("[ovicc] parsing..."); }
-        let mut parser = Parser::with_c_type_names(&pre.resolved_ovic, &c_type_names, c_types_complete);
+        // Step 1: Parse the resolved ovel source
+        if self.verbose { eprintln!("[ovelc] parsing..."); }
+        let mut parser = Parser::with_c_type_names(&pre.resolved_ovel, &c_type_names, c_types_complete);
         // The parser reads one inlined buffer, so it has no `#include` boundary
         // of its own. The line→file map is the only way it can scope an
         // `NP_ASSUME_NONNULL` region to the file that opened it — without this
@@ -211,7 +211,7 @@ impl Pipeline {
         }
 
         // Step 2: Bind names
-        if self.verbose { eprintln!("[ovicc] binding names..."); }
+        if self.verbose { eprintln!("[ovelc] binding names..."); }
         let symtab = SymbolTable::new();
         let mut binder = Binder::new(symtab);
         if binder.bind(&mut cst) != 0 {
@@ -220,7 +220,7 @@ impl Pipeline {
         }
 
         // Step 3: Elaborate CST → AST
-        if self.verbose { eprintln!("[ovicc] elaborating..."); }
+        if self.verbose { eprintln!("[ovelc] elaborating..."); }
         let symtab_for_checker = binder.symtab.clone();
         let mut elaborator = Elaborator::new(Some(binder.symtab));
         elaborator.verbose = self.verbose;
@@ -235,14 +235,14 @@ impl Pipeline {
         // ARC already releases for (running it after would reintroduce the
         // sjlj cross-function leak this backend exists to fix).
         if self.eh_checked {
-            if self.verbose { eprintln!("[ovicc] eh desugar (checked)..."); }
-            let eh_diags = ovic_eh::check_unit(&ast);
+            if self.verbose { eprintln!("[ovelc] eh desugar (checked)..."); }
+            let eh_diags = ovel_eh::check_unit(&ast);
             if !eh_diags.errors.is_empty() {
                 self.has_error = true;
                 self.error_msg = format!("EH check failed:\n{}", render_stage_string_diags(&translate_lines(&eh_diags.errors.join("\n"), &pre.source_map)));
                 return Err(self.error_msg.clone());
             }
-            ovic_eh::desugar_unit(&mut ast);
+            ovel_eh::desugar_unit(&mut ast);
         }
 
         // Step 3.9: @defer splicing — AFTER eh desugar (checked-mode throws
@@ -250,8 +250,8 @@ impl Pipeline {
         // releases land after the user's defer statements (deferred code runs
         // while objects are still alive). See AGENTS.md `@defer` section.
         {
-            if self.verbose { eprintln!("[ovicc] defer desugar..."); }
-            let defer_diags = ovic_defer::desugar_unit(&mut ast);
+            if self.verbose { eprintln!("[ovelc] defer desugar..."); }
+            let defer_diags = ovel_defer::desugar_unit(&mut ast);
             if !defer_diags.errors.is_empty() {
                 self.has_error = true;
                 self.error_msg = format!("Defer check failed:\n{}", render_stage_string_diags(&translate_lines(&defer_diags.errors.join("\n"), &pre.source_map)));
@@ -268,8 +268,8 @@ impl Pipeline {
         // it). Runs before ARC so the injected cleanup stays after the finally
         // copy — the finally sees its locals alive.
         if !self.eh_checked {
-            if self.verbose { eprintln!("[ovicc] legacy @finally splice..."); }
-            ovic_eh::splice_finally_exits(&mut ast);
+            if self.verbose { eprintln!("[ovelc] legacy @finally splice..."); }
+            ovel_eh::splice_finally_exits(&mut ast);
         }
 
         // Step 3.95: Pattern-switch lowering — AFTER defer splicing (defer
@@ -278,12 +278,12 @@ impl Pipeline {
         // ever see plain C statements: If/Decl/Goto/Label — zero new arms
         // downstream). See AGENTS.md pattern-switch section.
         {
-            if self.verbose { eprintln!("[ovicc] pattern-switch lowering..."); }
-            ovic_pattern::desugar_unit(&mut ast);
+            if self.verbose { eprintln!("[ovelc] pattern-switch lowering..."); }
+            ovel_pattern::desugar_unit(&mut ast);
         }
 
-        // Step 4: ARC analysis (skipped when -fno-ovic-arc is set)
-        if self.verbose { eprintln!("[ovicc] ARC analysis..."); }
+        // Step 4: ARC analysis (skipped when -fno-ovel-arc is set)
+        if self.verbose { eprintln!("[ovelc] ARC analysis..."); }
         if !self.no_arc {
             for decl in &mut ast.decls {
                 match &mut decl.data {
@@ -347,7 +347,7 @@ impl Pipeline {
 
         // Step 4.5: Reference-count trace (skips codegen entirely)
         if self.trace_refcount {
-            if self.verbose { eprintln!("[ovicc] tracing refcounts..."); }
+            if self.verbose { eprintln!("[ovelc] tracing refcounts..."); }
             let opts = TraceOptions {
                 max_iters: self.trace_max_iters,
                 color: self.trace_color,
@@ -359,8 +359,8 @@ impl Pipeline {
         // every async method body into the task-driven form (route map item
         // #4). check_unit runs on the ORIGINAL AST; desugar_unit rewrites it
         // in place before ARC/checker see the method bodies.
-        if self.verbose { eprintln!("[ovicc] async analysis..."); }
-        let async_diags = ovic_async::check_unit(&ast);
+        if self.verbose { eprintln!("[ovelc] async analysis..."); }
+        let async_diags = ovel_async::check_unit(&ast);
         if !async_diags.errors.is_empty() {
             self.has_error = true;
             self.error_msg = format!("Async check failed:\n{}", prefix_lines("[async]", &translate_lines(&async_diags.errors.join("\n"), &pre.source_map)));
@@ -384,10 +384,10 @@ impl Pipeline {
         // `hosted` gates the entry auto-pump (doc/async_nptask_plan.md
         // §静态分析 3): a hosted chain drives itself, bare metal pumps from
         // its own main loop.
-        ovic_async::desugar_unit_m2(&mut ast, !self.no_libc);
+        ovel_async::desugar_unit_m2(&mut ast, !self.no_libc);
 
         // Step 5: Check types (skipped when -fno-checker is set)
-        if self.verbose { eprintln!("[ovicc] checking types..."); }
+        if self.verbose { eprintln!("[ovelc] checking types..."); }
         let mut struct_eq_tags: Vec<String> = Vec::new();
         if !self.no_checker {
             let mut checker = Checker::new(Some(symtab_for_checker));
@@ -413,14 +413,14 @@ impl Pipeline {
         }
 
         // Step 5.5: Validate __attribute__ against backend
-        if self.verbose { eprintln!("[ovicc] validating attributes..."); }
+        if self.verbose { eprintln!("[ovelc] validating attributes..."); }
         self.validate_attrs(&ast);
         if self.has_error {
             return Err(self.error_msg.clone());
         }
 
         // Step 6: Generate C code
-        if self.verbose { eprintln!("[ovicc] generating C code..."); }
+        if self.verbose { eprintln!("[ovelc] generating C code..."); }
         // Slots manifest: read the assigned method order (if the file exists)
         // BEFORE codegen, and write the post-compile assignment back after.
         let slots: Option<Vec<String>> = self.slots_manifest.as_ref().and_then(|path| {
@@ -436,25 +436,25 @@ impl Pipeline {
         // R2: the classes this TU owns (its `@implementation`s live in the main
         // file). Their metadata is emitted strong, everyone else's stays weak.
         let owned_classes = collect_owned_classes(&ast, filename, &pre.source_map);
-        let mut cg = ovic_codegen::ast_to_cg_unit_with_slots_ext(
+        let mut cg = ovel_codegen::ast_to_cg_unit_with_slots_ext(
             &ast, self.backend, slots.as_deref(), Some(&public_methods),
             Some(&self.forced_generic_instantiations),
         );
         // KVC gate: emit accessor tables only when this TU can see the
-        // NPPredicate declaration (a transitive ovic #import — the same
+        // NPPredicate declaration (a transitive ovel #import — the same
         // resolved-source scan the auto-link decision rests on). The name
         // appears in the inlined buffer exactly when its declaring header
         // was imported; a plain string mention cannot occur otherwise
         // (NPPredicate is not a user-spellable identifier until declared).
-        cg.kvc = pre.resolved_ovic.contains("NPPredicate");
+        cg.kvc = pre.resolved_ovel.contains("NPPredicate");
         // Struct tags whose `==`/`!=` the checker rewrote to value-comparison
-        // calls; codegen emits one field-wise `ovic_struct_eq_<tag>` per tag.
+        // calls; codegen emits one field-wise `ovel_struct_eq_<tag>` per tag.
         cg.struct_eq_tags = struct_eq_tags;
         cg.no_arc = self.no_arc;
         cg.owned_classes = owned_classes;
         // 阶段 2: `-line-directives` emits `#line` at user-statement positions
         // (mapped through the preprocessor's SourceMap) so clang diagnostics
-        // point back at the .ov/.oh. Off by default; -rewrite-ovic output
+        // point back at the .ov/.oh. Off by default; -rewrite-ovel output
         // follows the same flag (a reviewer can inspect the directives).
         let line_sm = if self.line_directives { Some(&pre.source_map) } else { None };
         let c_code = emit_unit_with_headers_mapped(&cg, &pre.c_headers, &self.search_dirs, self.no_libc, self.backend, !self.no_comments, self.eh_checked, line_sm);
@@ -463,15 +463,15 @@ impl Pipeline {
         // generated text — after every emission-time buffer surgery — so all
         // offsets are byte-exact against what reaches disk. The `#line` stream
         // is the shared ground truth of the C preprocessor and the extractor.
-        if self.ovic_map {
+        if self.ovel_map {
             let src_pairs = vec![(filename.to_string(), source.to_string())];
-            let opts = ovic_codegen::source_map_extract::ExtractOptions {
+            let opts = ovel_codegen::source_map_extract::ExtractOptions {
                 // The CLI driver knows the real `.c` output path and fills it in.
                 generated_path: String::new(),
                 primary_source: filename.to_string(),
                 source_contents: &src_pairs,
             };
-            self.last_source_map = Some(ovic_codegen::source_map_extract::extract_source_map(&c_code, &opts));
+            self.last_source_map = Some(ovel_codegen::source_map_extract::extract_source_map(&c_code, &opts));
         }
 
         // Step 6.4: Write back the slots manifest (append-only): the compiled
@@ -488,7 +488,7 @@ impl Pipeline {
 
         // Step 6.5: Generate bridge header (if requested)
         if let Some(ref path) = self.bridge_header {
-            if self.verbose { eprintln!("[ovicc] writing bridge header: {}", path); }
+            if self.verbose { eprintln!("[ovelc] writing bridge header: {}", path); }
             let bridge = emit_bridge_header(&cg);
             fs::write(path, &bridge)
                 .map_err(|e| format!("cannot write bridge header {}: {}", path, e))?;
@@ -559,10 +559,10 @@ fn prefix_lines(stage: &str, msg: &str) -> String {
 /// annotation) when the source text is available on disk; diagnostics whose
 /// file cannot be read fall back to the plain `file:line:col:` line.
 fn render_checker_diags(
-    diags: &[ovic_cst::diagnostic::Diagnostic],
-    sm: &ovic_cst::source_map::SourceMap,
+    diags: &[ovel_cst::diagnostic::Diagnostic],
+    sm: &ovel_cst::source_map::SourceMap,
 ) -> String {
-    use ovic_cst::diagnostic::render_annotated_colored;
+    use ovel_cst::diagnostic::render_annotated_colored;
     let _ = sm; // line/col are already remapped by the checker at record time
     let color = std::io::stderr().is_terminal();
     render_annotated_colored(diags, &|file| fs::read_to_string(file).ok(), color)
@@ -575,7 +575,7 @@ fn render_checker_diags(
 /// not fit the shape (bare messages) are passed through as position-less
 /// diagnostics.
 fn render_stage_string_diags(msg: &str) -> String {
-    use ovic_cst::diagnostic::{Diagnostic, render_annotated_colored};
+    use ovel_cst::diagnostic::{Diagnostic, render_annotated_colored};
     let diags: Vec<Diagnostic> = msg.lines().map(|l| {
         // Shapes: `file:LINE:COL: msg`, `LINE:COL: msg`
         let parsed = l.splitn(4, ':').collect::<Vec<_>>();
@@ -594,7 +594,7 @@ fn render_stage_string_diags(msg: &str) -> String {
 /// line points at the original source file (via the preprocessor's line map)
 /// instead of the flattened inlined buffer. Lines that can't be mapped are
 /// left untouched.
-fn translate_lines(msg: &str, sm: &ovic_cst::source_map::SourceMap) -> String {
+fn translate_lines(msg: &str, sm: &ovel_cst::source_map::SourceMap) -> String {
     if sm.is_empty() { return msg.to_string(); }
     msg.lines().map(|l| {
         // Parse leading `LINE:COL: ` (or `LINE: `)
@@ -642,7 +642,7 @@ fn translate_lines(msg: &str, sm: &ovic_cst::source_map::SourceMap) -> String {
 fn collect_public_methods(
     ast: &AstUnit,
     main_file: &str,
-    map: &ovic_cst::SourceMap,
+    map: &ovel_cst::SourceMap,
 ) -> std::collections::HashSet<String> {
     use std::collections::HashSet;
     let mut set: HashSet<String> = HashSet::new();
@@ -687,13 +687,13 @@ fn collect_public_methods(
 fn collect_owned_classes(
     ast: &AstUnit,
     main_file: &str,
-    map: &ovic_cst::SourceMap,
+    map: &ovel_cst::SourceMap,
 ) -> std::collections::HashSet<String> {
     use std::collections::HashSet;
     fn walk(
         decls: &[AstDecl],
         main_file: &str,
-        map: &ovic_cst::SourceMap,
+        map: &ovel_cst::SourceMap,
         set: &mut HashSet<String>,
     ) {
         for d in decls {

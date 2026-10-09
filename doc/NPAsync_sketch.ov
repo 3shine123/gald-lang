@@ -1,6 +1,6 @@
 // ⚠️ 已取代：本草案的 `@launch` + Foundation `NPAsync` 类方案未采纳；现行设计见
 // doc/async_nptask_plan.md（`async` 返回类型前修饰符 + 真类型 `NPTask<T>`）。原文按惯例保留。
-// NPAsync 设计草稿 —— 把 C++ 的 async/await 示例逐行直译成 ovic/objc
+// NPAsync 设计草稿 —— 把 C++ 的 async/await 示例逐行直译成 ovel/objc
 //
 // 分工（对应 C++ 的两层）：
 //   C++ 核心语言    co_await / co_return           →  @await / return（编译器 desugar，已有）
@@ -28,7 +28,7 @@
 //       co_return a + b;                 // co_return
 //   }
 //
-//   ovic：方法体含 @await 即 async（C++20 co_await 判定风格，已定案）；
+//   ovel：方法体含 @await 即 async（C++20 co_await 判定风格，已定案）；
 //   co_return == return（方法签名本身就是 task<int>，不需要 co_）。
 - (int)slowAdd:(int)a b:(int)b {
     @await [self sleepOneSecond];        // co_await → @await
@@ -36,7 +36,7 @@
 }
 
 - (void)sleepOneSecond {
-    @await ovic_io_yield();              // M3：真正的让出点（挂起 → 调度器）
+    @await ovel_io_yield();              // M3：真正的让出点（挂起 → 调度器）
 }
 
 // ── ② std::async + std::future 直译 ──────────────────────────────
@@ -47,7 +47,7 @@
 //       std::cout << sum << std::endl;
 //   }
 //
-//   ovic：std::async → @launch 表达式（句即发车，返回 NPAsync 句柄）；
+//   ovel：std::async → @launch 表达式（句即发车，返回 NPAsync 句柄）；
 //         future::get() → [f join]（阻塞泵到完成；M3 后为非阻塞 yield 等待）。
 - (void)prep {
     NPAsync *f1 = @launch [self slowAdd:1 b:2];
@@ -59,7 +59,7 @@
 
 // ── ③ 发车后再 await（future 只存不用 + 后续 co_await）────────────
 //   int a = f1.get();      // C++
-//   int a = @await f1;     // ovic：@await 识别 NPAsync 句柄 →
+//   int a = @await f1;     // ovel：@await 识别 NPAsync 句柄 →
 //                          //   挂起等待而非阻塞泵（M3 调度器语义）
 @end
 

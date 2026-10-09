@@ -3,15 +3,15 @@
 // than rot unnoticed. Mark intentional exceptions with #[allow(dead_code)]
 // and a comment saying who will use it.
 #![deny(dead_code)]
-//! Static reference-count trace for Ovic.
+//! Static reference-count trace for Ovel.
 //!
-//! Runs on the AST *after* ARC analysis has inserted its `ovic_release(x)`
+//! Runs on the AST *after* ARC analysis has inserted its `ovel_release(x)`
 //! calls, so the trace shows exactly where ARC releases objects. For each
 //! retained object the tracer prints a chronological, color-coded line:
 //!
 //! ```text
 //!   3:7   [[Cat alloc] init]          Cat#1: 1
-//!   4:9   ovic_release(cat)           Cat#1: 0
+//!   4:9   ovel_release(cat)           Cat#1: 0
 //! ```
 //!
 //! Color rule (per object, compared to that object's previous printed count):
@@ -19,8 +19,8 @@
 //! cyan, error (over-released / leak) → red, first print / unchanged → plain.
 
 use std::collections::HashMap;
-use ovic_ast::{AstUnit, AstDecl, AstDeclData, AstStmt, AstStmtData, AstExpr, AstExprData};
-use ovic_cst::{CstParam, CstType, TypePrim};
+use ovel_ast::{AstUnit, AstDecl, AstDeclData, AstStmt, AstStmtData, AstExpr, AstExprData};
+use ovel_cst::{CstParam, CstType, TypePrim};
 
 const GREEN: &str = "\x1b[32m";
 const BLUE: &str = "\x1b[34m";
@@ -409,7 +409,7 @@ impl Tracer {
         match &e.data {
             AstExprData::FuncCall { name, args, .. } => {
                 match name.as_str() {
-                    "ovic_release" | "ovic_retain" | "ovic_autorelease" => {
+                    "ovel_release" | "ovel_retain" | "ovel_autorelease" => {
                         if let Some(a) = args.first() {
                             let _ = self.refop(e.line, e.col, name, a);
                         }
@@ -479,9 +479,9 @@ impl Tracer {
             }
         };
         match op {
-            "release" | "ovic_release" => self.apply_release(line, col, id, op),
-            "retain" | "ovic_retain" => self.apply_retain(line, col, id, op),
-            "autorelease" | "ovic_autorelease" => self.apply_autorelease(line, col, id, op),
+            "release" | "ovel_release" => self.apply_release(line, col, id, op),
+            "retain" | "ovel_retain" => self.apply_retain(line, col, id, op),
+            "autorelease" | "ovel_autorelease" => self.apply_autorelease(line, col, id, op),
             _ => {}
         }
         Some(id)
@@ -717,8 +717,8 @@ fn is_obj_cst_type(t: Option<&CstType>) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use ovic_ast::{AstDeclKind, AstExprKind, AstStmtKind};
-    use ovic_cst::{CstParam, CstType, TypePrim};
+    use ovel_ast::{AstDeclKind, AstExprKind, AstStmtKind};
+    use ovel_cst::{CstParam, CstType, TypePrim};
 
     fn var_ref(name: &str) -> AstExpr {
         AstExpr {
@@ -829,7 +829,7 @@ mod tests {
     fn alloc_release_chain() {
         let out = trace(vec![
             decl_stmt(decl("cat", alloc_init())),
-            expr_stmt(func_call("ovic_release", vec![var_ref("cat")])),
+            expr_stmt(func_call("ovel_release", vec![var_ref("cat")])),
         ]);
         assert!(out.contains("Cat#1: 1"), "out:\n{}", out);
         assert!(out.contains("Cat#1: 0"), "out:\n{}", out);
@@ -840,8 +840,8 @@ mod tests {
     fn retain_increases_release_decreases() {
         let out = trace(vec![
             decl_stmt(decl("cat", alloc_init())),
-            expr_stmt(func_call("ovic_retain", vec![var_ref("cat")])),
-            expr_stmt(func_call("ovic_release", vec![var_ref("cat")])),
+            expr_stmt(func_call("ovel_retain", vec![var_ref("cat")])),
+            expr_stmt(func_call("ovel_release", vec![var_ref("cat")])),
         ]);
         assert!(out.contains("Cat#1: 2"), "out:\n{}", out);
         assert!(out.contains("Cat#1: 1"), "out:\n{}", out);
@@ -860,8 +860,8 @@ mod tests {
     fn double_release_warns() {
         let out = trace(vec![
             decl_stmt(decl("cat", alloc_init())),
-            expr_stmt(func_call("ovic_release", vec![var_ref("cat")])),
-            expr_stmt(func_call("ovic_release", vec![var_ref("cat")])),
+            expr_stmt(func_call("ovel_release", vec![var_ref("cat")])),
+            expr_stmt(func_call("ovel_release", vec![var_ref("cat")])),
         ]);
         assert!(out.contains("double-release"), "out:\n{}", out);
     }
@@ -870,8 +870,8 @@ mod tests {
     fn over_release_goes_negative_and_warns_in_summary() {
         let out = trace(vec![
             decl_stmt(decl("cat", alloc_init())),
-            expr_stmt(func_call("ovic_release", vec![var_ref("cat")])),
-            expr_stmt(func_call("ovic_release", vec![var_ref("cat")])),
+            expr_stmt(func_call("ovel_release", vec![var_ref("cat")])),
+            expr_stmt(func_call("ovel_release", vec![var_ref("cat")])),
         ]);
         assert!(out.contains("-1"), "out:\n{}", out);
         assert!(out.contains("over-released"), "out:\n{}", out);
@@ -891,7 +891,7 @@ mod tests {
                     col: 1,
                     data: AstStmtData::Compound(vec![
                         decl_stmt(decl("tmp", alloc_init())),
-                        expr_stmt(func_call("ovic_autorelease", vec![var_ref("tmp")])),
+                        expr_stmt(func_call("ovel_autorelease", vec![var_ref("tmp")])),
                     ]),
                 })),
             },
@@ -905,7 +905,7 @@ mod tests {
         let out = trace(vec![
             decl_stmt(decl("cat", alloc_init())),
             decl_stmt(decl("other", var_ref("cat"))),
-            expr_stmt(func_call("ovic_release", vec![var_ref("other")])),
+            expr_stmt(func_call("ovel_release", vec![var_ref("other")])),
         ]);
         assert!(out.contains("Cat#1: 0"), "out:\n{}", out);
         assert!(!out.contains("untracked"), "out:\n{}", out);
@@ -914,7 +914,7 @@ mod tests {
     #[test]
     fn release_on_untracked_warns() {
         let out = trace(vec![
-            expr_stmt(func_call("ovic_release", vec![var_ref("ghost")])),
+            expr_stmt(func_call("ovel_release", vec![var_ref("ghost")])),
         ]);
         assert!(out.contains("untracked"), "out:\n{}", out);
     }
@@ -935,7 +935,7 @@ mod tests {
                     col: 1,
                     data: AstStmtData::Compound(vec![
                         decl_stmt(decl("c", alloc_init())),
-                        expr_stmt(func_call("ovic_release", vec![var_ref("c")])),
+                        expr_stmt(func_call("ovel_release", vec![var_ref("c")])),
                     ]),
                 }),
             },
@@ -1006,7 +1006,7 @@ mod tests {
                     line: 1,
                     col: 1,
                     data: AstStmtData::Compound(vec![
-                        expr_stmt(func_call("ovic_release", vec![var_ref("e")])),
+                        expr_stmt(func_call("ovel_release", vec![var_ref("e")])),
                     ]),
                 }),
             },

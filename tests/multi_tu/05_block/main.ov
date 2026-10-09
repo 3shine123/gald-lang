@@ -1,7 +1,7 @@
 #import "model.oh"
 #include <stdio.h>
 
-/* client TU: hands a Ovic block to the lib TU, which stores and later fires
+/* client TU: hands a Ovel block to the lib TU, which stores and later fires
    it. If the block were not copied, this would crash or print garbage. The
    captured `total` is mutated inside the block, so it must be __block. */
 int main() {
@@ -14,6 +14,6 @@ int main() {
     [p fire:7];
     printf("total=%d\n", total);
     printf("helper=%d\n", PumpHelper());
-    ovic_release(p);
+    ovel_release(p);
     return 0;
 }

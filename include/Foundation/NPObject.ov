@@ -1,23 +1,23 @@
 #import "NPObject.oh"
 
-@implementation ovic_root
+@implementation ovel_root
 - (id)init {
-    return ovic_init(self);
+    return ovel_init(self);
 }
 - (void)dealloc {
     return;
 }
 - (void)release {
-    ovic_release(self);
+    ovel_release(self);
 }
 - (id)retain {
-    return ovic_retain(self);
+    return ovel_retain(self);
 }
 - (BOOL)isKindOf:(Class)cls {
-    return ovic_isKindOf(self, cls);
+    return ovel_isKindOf(self, cls);
 }
 - (BOOL)isKindOfClass:(Class)cls {
-    return ovic_isKindOfClass(self, cls);
+    return ovel_isKindOfClass(self, cls);
 }
 - (BOOL)isEqual:(id)object {
     /* Default: identity (pointer equality), matching NSObject. */
@@ -30,23 +30,23 @@
 
 @implementation NPObject
 + (id)alloc {
-    return ovic_alloc(self);
+    return ovel_alloc(self);
 }
 + (id)new {
-    id obj = ovic_alloc(self);
-    return ovic_init(obj);
+    id obj = ovel_alloc(self);
+    return ovel_init(obj);
 }
 - (id)init {
-    return ovic_init(self);
+    return ovel_init(self);
 }
 - (void)dealloc {
     return;
 }
 - (void)release {
-    ovic_release(self);
+    ovel_release(self);
 }
 - (id)retain {
-    return ovic_retain(self);
+    return ovel_retain(self);
 }
 - (id)description {
     return nil;

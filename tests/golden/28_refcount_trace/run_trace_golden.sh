@@ -2,23 +2,23 @@
 # run_trace_golden.sh — run the refcount tracer (-trace-refcount) over
 # tests/golden/28_refcount_trace/*.ov and diff the output against *.out.
 # Usage: ./run_trace_golden.sh
-#   OVICC    path to the ovicc binary. Auto-detected: prefer an explicit $OVICC,
-#           then target/release/ovicc, then target/debug/ovicc. Auto-detection
+#   OVELC    path to the ovelc binary. Auto-detected: prefer an explicit $OVELC,
+#           then target/release/ovelc, then target/debug/ovelc. Auto-detection
 #           matters because a stale binary silently produces line-number-only
 #           diffs that look like real regressions.
 set -u
 cd "$(dirname "$0")/../../.."
 
-if [[ -z "${OVICC:-}" ]]; then
-    for cand in target/release/ovicc target/debug/ovicc; do
-        if [[ -x "$cand" ]]; then OVICC="$cand"; break; fi
+if [[ -z "${OVELC:-}" ]]; then
+    for cand in target/release/ovelc target/debug/ovelc; do
+        if [[ -x "$cand" ]]; then OVELC="$cand"; break; fi
     done
 fi
-if [[ -z "${OVICC:-}" || ! -x "$OVICC" ]]; then
-    echo "error: ovicc binary not found (build it, or set OVICC=)" >&2
+if [[ -z "${OVELC:-}" || ! -x "$OVELC" ]]; then
+    echo "error: ovelc binary not found (build it, or set OVELC=)" >&2
     exit 2
 fi
-echo "using ovicc: $OVICC"
+echo "using ovelc: $OVELC"
 DIR=tests/golden/28_refcount_trace
 PASS=0
 FAIL=0
@@ -31,7 +31,7 @@ for np in "$DIR"/*.ov; do
     fi
     # trace with colors disabled for deterministic diffing
     tmp=/tmp/refcount_trace.$$.txt
-    "$OVICC" -trace-refcount -trace-no-color -trace-max-iters 2 "$np" > "$tmp" 2>&1
+    "$OVELC" -trace-refcount -trace-no-color -trace-max-iters 2 "$np" > "$tmp" 2>&1
     rc=$?
     if [[ $rc -ne 0 ]]; then
         echo "FAIL  $np (tracer exit $rc)"

@@ -1,9 +1,9 @@
-#include <ovic/runtime.h>
+#include <ovel/runtime.h>
 
 // Scenario for the "guard-density" gate: a program with NO @try, NO @throw,
 // and NO Foundation import (so no inlined throwing method chain).
 //
-// `-eh checked` must emit ZERO `__ovic_eh_flag` guards here — the stage-3
+// `-eh checked` must emit ZERO `__ovel_eh_flag` guards here — the stage-3
 // effect analysis exists so that a program that cannot throw pays nothing.
 // (A Foundation-inlining program does pay guards, but only along real
 // @throw-capable call chains — see tests/eh_matrix/README.md.)
@@ -21,7 +21,7 @@
 @end
 
 @implementation EhPlain
-+ (id)alloc { return ovic_alloc(self); }
++ (id)alloc { return ovel_alloc(self); }
 - (id)init { return self; }
 - (int)get { return v; }
 - (void)set: (int)x { v = x; }

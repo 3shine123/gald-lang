@@ -1,31 +1,31 @@
 // Debug harness: parse a .ov file, walk the CST, print array-related type info
 // for every variable declaration (recursing into function bodies).
-use ovic_parser::Parser;
+use ovel_parser::Parser;
 
-fn stmt_body(body: &Option<Box<ovic_cst::CstStmt>>) -> Vec<&ovic_cst::CstStmt> {
+fn stmt_body(body: &Option<Box<ovel_cst::CstStmt>>) -> Vec<&ovel_cst::CstStmt> {
     match body.as_deref() {
-        Some(ovic_cst::CstStmt { data: ovic_cst::CstStmtData::Compound(inner), .. }) => {
+        Some(ovel_cst::CstStmt { data: ovel_cst::CstStmtData::Compound(inner), .. }) => {
             inner.iter().collect()
         }
         _ => Vec::new(),
     }
 }
 
-fn print_decl(d: &ovic_cst::CstDecl, depth: usize) {
+fn print_decl(d: &ovel_cst::CstDecl, depth: usize) {
     let pad = "  ".repeat(depth);
     match &d.data {
-        ovic_cst::CstDeclData::Class { category_name, .. } => {
+        ovel_cst::CstDeclData::Class { category_name, .. } => {
             let cat = category_name.as_ref().map(|c| format!(" ({})", c)).unwrap_or_default();
             let kind_str = match d.kind {
-                ovic_cst::CstDeclKind::ClassInterface => "interface",
-                ovic_cst::CstDeclKind::ClassImplementation => "implementation",
+                ovel_cst::CstDeclKind::ClassInterface => "interface",
+                ovel_cst::CstDeclKind::ClassImplementation => "implementation",
                 _ => "class",
             };
             println!("{}{} {}{}", pad, kind_str, d.name.as_deref().unwrap_or("?"), cat);
         }
         _ => {}
     }
-    if let ovic_cst::CstDeclData::Variable { var_type, .. } = &d.data {
+    if let ovel_cst::CstDeclData::Variable { var_type, .. } = &d.data {
         if let Some(t) = var_type {
             println!(
                 "{}var '{}' is_array={} size={} size_name={:?} prim={:?} ptr={} block={}",
@@ -41,12 +41,12 @@ fn print_decl(d: &ovic_cst::CstDecl, depth: usize) {
         }
     }
     match &d.data {
-        ovic_cst::CstDeclData::Function { body, .. } => {
+        ovel_cst::CstDeclData::Function { body, .. } => {
             walk_stmts(&stmt_body(body), depth + 1);
         }
-        ovic_cst::CstDeclData::Class { methods, .. } => {
+        ovel_cst::CstDeclData::Class { methods, .. } => {
             for m in methods {
-                if let ovic_cst::CstDeclData::Function { body, .. } = &m.data {
+                if let ovel_cst::CstDeclData::Function { body, .. } = &m.data {
                     walk_stmts(&stmt_body(body), depth + 2);
                 }
             }
@@ -55,12 +55,12 @@ fn print_decl(d: &ovic_cst::CstDecl, depth: usize) {
     }
 }
 
-fn walk_stmts(stmts: &[&ovic_cst::CstStmt], depth: usize) {
+fn walk_stmts(stmts: &[&ovel_cst::CstStmt], depth: usize) {
     for s in stmts {
         match &s.data {
-            ovic_cst::CstStmtData::Compound(inner) => walk_stmts(&inner.iter().collect::<Vec<_>>(), depth + 1),
-            ovic_cst::CstStmtData::Decl(d) => print_decl(d, depth),
-            ovic_cst::CstStmtData::Expr(_) => {
+            ovel_cst::CstStmtData::Compound(inner) => walk_stmts(&inner.iter().collect::<Vec<_>>(), depth + 1),
+            ovel_cst::CstStmtData::Decl(d) => print_decl(d, depth),
+            ovel_cst::CstStmtData::Expr(_) => {
                 // Cannot recurse into expressions at stmt level without Expr walk; skip
             }
             _ => {}
@@ -78,11 +78,11 @@ fn main() {
         // Replicate pipeline's preprocess step: Foundation etc. gets inlined.
         let dir = std::path::Path::new(&path).parent().map(|p| p.to_string_lossy().to_string()).unwrap_or_default();
         let search_dirs: Vec<String> = vec![dir, "include".to_string(), "include/Foundation".to_string()];
-        let pre = ovic_preprocessor::Preprocessor::process_file(
-            &path, &search_dirs, &["__clang__", "__GNUC__", "__OVIC__"])
+        let pre = ovel_preprocessor::Preprocessor::process_file(
+            &path, &search_dirs, &["__clang__", "__GNUC__", "__OVEL__"])
             .expect("preprocess failed");
-        std::fs::write("/tmp/inline_dump.ov", &pre.resolved_ovic).ok();
-        pre.resolved_ovic
+        std::fs::write("/tmp/inline_dump.ov", &pre.resolved_ovel).ok();
+        pre.resolved_ovel
     } else {
         std::fs::read_to_string(&path).expect("read file")
     };

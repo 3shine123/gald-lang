@@ -1,9 +1,9 @@
 // test_cst_visit — CST visitor + validation tests
 
-#include "ovic/lexer.h"
-#include "ovic/parser.h"
-#include "ovic/cst.h"
-#include "ovic/cst_visit.h"
+#include "ovel/lexer.h"
+#include "ovel/parser.h"
+#include "ovel/cst.h"
+#include "ovel/cst_visit.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

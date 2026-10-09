@@ -1,4 +1,4 @@
-# Ovic 黄金测试集
+# Ovel 黄金测试集
 
 按功能分类的系统化回归测试。每个测试包含 `.ov`（源码）和 `.out`（期望输出）文件。
 
@@ -40,7 +40,7 @@
 35_variadic_method/ 真 variadic 方法（va_list）
 36_defer/           @defer 作用域退出执行
 37_async_modifier/  async 返回类型前修饰符 + 语句位入口驱动（async NPTask<T>）
-38_macros/          ovic 语法宏展开（双轨 #define）
+38_macros/          ovel 语法宏展开（双轨 #define）
 39_complex/         C99 _Complex 透传
 40_nparray_generic/ NPArray<T> / NPDictionary<K,V> 真单态化 + 元素类型检查
 41_switch_pat/      switch 模式匹配（case T *x / case > 10 / when 守卫）
@@ -57,14 +57,14 @@
 >
 > `25_freestanding/` 与 `26_baremetal_stress/` 各有专属 `build.sh`（需要 `-freestanding` 与裸机 assembler），**不在默认测试套件**，用它们自己的 runner 跑。
 
-> `28_refcount_trace/` 与其他 golden 目录不同：每个 `.ov` 的 `.out` 不是程序运行输出，而是 `ovicc -trace-refcount -trace-no-color -trace-max-iters 2` 的追踪快照。运行方式：
+> `28_refcount_trace/` 与其他 golden 目录不同：每个 `.ov` 的 `.out` 不是程序运行输出，而是 `ovelc -trace-refcount -trace-no-color -trace-max-iters 2` 的追踪快照。运行方式：
 >
 > ```bash
 > ./tests/golden/28_refcount_trace/run_trace_golden.sh
-> # OVICC=/path/to/ovicc ./tests/golden/28_refcount_trace/run_trace_golden.sh
+> # OVELC=/path/to/ovelc ./tests/golden/28_refcount_trace/run_trace_golden.sh
 > ```
 >
-> 用例覆盖：多级 retain/release（1→4→0）、double-release 负计数检测、泄漏检测、ARC 自动注入的 `ovic_release`、别名共享、嵌套 `@autoreleasepool`（`@noarc` 内手动 autorelease）、if/else 分支状态克隆、循环迭代产生独立 `Class#N` 身份。`.ov` 本身仍是可编译运行的合法 Ovic 程序，会被 `test_all.py` 的 glob 照常编译+运行。
+> 用例覆盖：多级 retain/release（1→4→0）、double-release 负计数检测、泄漏检测、ARC 自动注入的 `ovel_release`、别名共享、嵌套 `@autoreleasepool`（`@noarc` 内手动 autorelease）、if/else 分支状态克隆、循环迭代产生独立 `Class#N` 身份。`.ov` 本身仍是可编译运行的合法 Ovel 程序，会被 `test_all.py` 的 glob 照常编译+运行。
 
 > x86_64 汇编是跨架构用例，不放入默认 arm64 测试套件，单独位于 `asm_x64/`（见下文）。
 
@@ -73,7 +73,7 @@
 在 arm64 Mac 上通过 Rosetta 运行 x86_64 汇编：
 
 ```bash
-ovicc -arch x86_64 run -asm asm_x64/asm_x86_ext.s asm_x64/asm_x86_fusion_test.ov
+ovelc -arch x86_64 run -asm asm_x64/asm_x86_ext.s asm_x64/asm_x86_fusion_test.ov
 # 或
 ./asm_x64/build.sh
 ```

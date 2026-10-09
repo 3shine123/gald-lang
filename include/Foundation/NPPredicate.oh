@@ -4,10 +4,10 @@
 #import <Foundation/NPObject.oh>
 
 // Predicate object — the ObjC NSPredicate model, backed by compile-time KVC
-// accessor tables (OVIC_KVC_$_<Class>, emitted by codegen when this header is
+// accessor tables (OVEL_KVC_$_<Class>, emitted by codegen when this header is
 // visible) instead of runtime reflection. See doc/nppredicate_plan.md.
 //
-// The format string is a small DSL parsed at RUNTIME by this class (ovicc
+// The format string is a small DSL parsed at RUNTIME by this class (ovelc
 // never sees it):
 //
 //   age > 18 AND name BEGINSWITH 'A'
@@ -23,7 +23,7 @@
 //   modifiers. LIKE wildcards: * (any run) ? (one char).
 // MATCHES uses a POSIX ERE subset: . * + ? [] ^ $ ( ) | — no backrefs.
 //
-// Keys are resolved through ovic_kvc_value: a key is any zero-argument
+// Keys are resolved through ovel_kvc_value: a key is any zero-argument
 // instance method of the receiver's class chain (ObjC getter convention,
 // minus the runtime/infra methods). An unknown key aborts loudly — there is
 // no runtime to inject an exception into.
@@ -31,7 +31,7 @@
 @public
     // Parsed node array. The engine owns one flat pool: each node is a
     // tagged record (see NPPredicate.ov for the tag codes).
-    void *_nodes;        // struct ovic_pred_node *
+    void *_nodes;        // struct ovel_pred_node *
     size_t _node_count;
     size_t _node_cap;
     size_t _root;        // root node index in the pool

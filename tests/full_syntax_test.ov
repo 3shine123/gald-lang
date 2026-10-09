@@ -1,4 +1,4 @@
-// full_syntax_test.ov —— Ovic 全部已实现语法汇测（单文件，一测全量）
+// full_syntax_test.ov —— Ovel 全部已实现语法汇测（单文件，一测全量）
 //
 // 覆盖：C 超集基础 / 类·继承·协议·命名空间·泛型·容器·variadic / 表达式全家
 //       控制流（for-in·switch 模式） / 运行时块（try·synchronized·pool·defer·noarc·weak）
@@ -51,7 +51,7 @@ static int fs_format_fn(const char *fmt, ...) __attribute__((format(printf, 1, 2
 extern int fs_asm_square(int x);
 extern int fs_asm_add3(int a, int b, int c);
 
-// struct 值比较目标（checker 改写为 ovic_struct_eq_*）
+// struct 值比较目标（checker 改写为 ovel_struct_eq_*）
 struct FsPoint { int x; int y; };
 typedef struct FsPoint FsPointT;                // 别名形态也做 ==（struct_alias_tags）
 
@@ -442,9 +442,9 @@ static void sec3_expressions(void) {
            [sp respondsToSelector:@selector(color)]);
 
     // 3.9 字符串全家：拼接 / 值相等 / 长度 / description
-    NPString *base = [NPString stringWithUTF8String:"ovic"];
+    NPString *base = [NPString stringWithUTF8String:"ovel"];
     NPString *joined = [base stringByAppendingString:@"-full"];
-    BOOL eq = [joined isEqualToString:@"ovic-full"];
+    BOOL eq = [joined isEqualToString:@"ovel-full"];
     NPString *desc = [joined description];
     printf("3.9 str %s %d %zu %s\n", [joined UTF8String], eq, [joined length], [desc UTF8String]);
 
@@ -668,7 +668,7 @@ static void sec4_control_runtime(void) {
     }
     printf("4.10 rethrow %d\n", rethrown);
 
-    // 4.11 @synchronized（真互斥块：ovic_syncLock + cleanup 解锁）
+    // 4.11 @synchronized（真互斥块：ovel_syncLock + cleanup 解锁）
     FsSprite *lock = [[FsSprite alloc] initWithId:1];
     int guarded = 0;
     @synchronized (lock) {

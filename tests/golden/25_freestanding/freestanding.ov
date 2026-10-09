@@ -1,6 +1,6 @@
 // freestanding.ov — bare-metal golden test
-// Demonstrates every Ovic feature usable without Foundation/libc.
-// Compile: ovicc -rewrite-ovic -fno-libc, then clang -U__OVIC_FREESTANDING
+// Demonstrates every Ovel feature usable without Foundation/libc.
+// Compile: ovelc -rewrite-ovel -fno-libc, then clang -U__OVEL_FREESTANDING
 // (on the host we use libc's setjmp/longjmp, not builtins).
 
 extern void kputs(const char* s);
@@ -47,7 +47,7 @@ extern BareMetal::NPIoError  *create_error(int code);
 
     @implementation Counter
     + (id) alloc {
-        return ovic_alloc(self);
+        return ovel_alloc(self);
     }
     - (id) init {
         return self;
@@ -58,7 +58,7 @@ extern BareMetal::NPIoError  *create_error(int code);
 @endnamespace
 
 int main() {
-    ovic_meta_init();
+    ovel_meta_init();
 
     kputs("=== freestanding golden test ===\n");
 

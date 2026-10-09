@@ -45,12 +45,12 @@ fn main() {
         .unwrap_or_else(|_| "0.0.0".to_string())
         .trim()
         .to_string();
-    println!("cargo:rustc-env=OVIC_VERSION={}", version);
+    println!("cargo:rustc-env=OVEL_VERSION={}", version);
 
-    let src = if std::path::Path::new("../../include/ovic/runtime.c").exists() {
-        "../../include/ovic/runtime.c"
+    let src = if std::path::Path::new("../../include/ovel/runtime.c").exists() {
+        "../../include/ovel/runtime.c"
     } else {
-        "../include/ovic/runtime.c"
+        "../include/ovel/runtime.c"
     };
     println!("cargo:rerun-if-changed={}", src);
 
@@ -58,10 +58,10 @@ fn main() {
         .file(src)
         .include("../../include")
         .include("../../include/Foundation")
-        .compile("ovic");
+        .compile("ovel");
 
-    // Copy libovic.a to the architecture-specific output directory (same as ovicc binary).
-    let built = std::path::Path::new(&std::env::var("OUT_DIR").unwrap()).join("libovic.a");
+    // Copy libovel.a to the architecture-specific output directory (same as ovelc binary).
+    let built = std::path::Path::new(&std::env::var("OUT_DIR").unwrap()).join("libovel.a");
     if !built.exists() {
         return;
     }
@@ -75,9 +75,9 @@ fn main() {
         std::path::Path::new("../../target").join(&target).join(&profile)
     };
     let _ = std::fs::create_dir_all(&target_dir);
-    let _ = std::fs::copy(&built, target_dir.join("libovic.a"));
+    let _ = std::fs::copy(&built, target_dir.join("libovel.a"));
 
-    // 拷贝 install.sh + install.ps1 + 头文件到构建输出目录（与 ovicc 同层，方便本地安装）
+    // 拷贝 install.sh + install.ps1 + 头文件到构建输出目录（与 ovelc 同层，方便本地安装）
     let install_src = if std::path::Path::new("../../install.sh").exists() {
         PathBuf::from("../../install.sh")
     } else {
@@ -120,7 +120,7 @@ fn main() {
     if completions_src.is_dir() {
         emit_rerun_for_dir(&completions_src);
     }
-    println!("cargo:rerun-if-changed=../../include/ovic/runtime.h");
-    println!("cargo:rerun-if-changed=../../include/ovic/runtime_freestanding.c");
-    println!("cargo:rerun-if-changed=../../completions/_ovicc");
+    println!("cargo:rerun-if-changed=../../include/ovel/runtime.h");
+    println!("cargo:rerun-if-changed=../../include/ovel/runtime_freestanding.c");
+    println!("cargo:rerun-if-changed=../../completions/_ovelc");
 }

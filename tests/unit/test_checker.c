@@ -1,8 +1,8 @@
-#include "ovic/checker.h"
-#include "ovic/binder.h"
-#include "ovic/parser.h"
-#include "ovic/lexer.h"
-#include "ovic/cst.h"
+#include "ovel/checker.h"
+#include "ovel/binder.h"
+#include "ovel/parser.h"
+#include "ovel/lexer.h"
+#include "ovel/cst.h"
 #include <stdio.h>
 #include <string.h>
 

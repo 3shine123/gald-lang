@@ -1,5 +1,5 @@
-// stress.ov — 裸机 Ovic 压测：全方位代码生成质量验证
-// 编译：ovicc -rewrite-ovic -fno-libc；链接 runtime_freestanding.c
+// stress.ov — 裸机 Ovel 压测：全方位代码生成质量验证
+// 编译：ovelc -rewrite-ovel -fno-libc；链接 runtime_freestanding.c
 // 运行：qemu-system-i386（或直接 ./build/stress）
 
 extern void kputs(const char* s);
@@ -38,7 +38,7 @@ extern void kputc(char c);
 
     @implementation Organism
     @synthesize energy;
-    + (instancetype) create { return ovic_alloc(self); }
+    + (instancetype) create { return ovel_alloc(self); }
     - (instancetype) init  { age = 0; vitality = 100; return self; }
     - (int) age     { return age; }
     - (void) grow   { age++; vitality += 10; }
@@ -124,7 +124,7 @@ extern void kputc(char c);
     t->code = c;
     return t;
 }
-+ (instancetype) alloc { return ovic_alloc(self); }
++ (instancetype) alloc { return ovel_alloc(self); }
 - (int) code { return code; }
 - (void) dump {
     kputs("       DebugToken(code="); kputdec(code); kputs(")\n");
@@ -163,7 +163,7 @@ static int local_catch_token(int n, DebugToken *t) {
 }
 
 int main() {
-    ovic_meta_init();
+    ovel_meta_init();
 
     kputs("========== BARE-METAL STRESS TEST ==========\n");
     int passed = 0;
@@ -271,7 +271,7 @@ int main() {
 
     // ── 14. ARC release ──
     total++;
-    // ARC 自动插入 ovic_release(o) 在 main 末尾
+    // ARC 自动插入 ovel_release(o) 在 main 末尾
     // 验证 alloc+init 的实例在 main 结束前被 release
     kputs("[14] ARC auto-release (check runtime)\n");
     passed++;

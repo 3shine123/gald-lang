@@ -1,20 +1,20 @@
-# install.ps1 — Ovic installer for Windows (PowerShell)
+# install.ps1 — Ovel installer for Windows (PowerShell)
 #
 # Usage (from the extracted bundle directory):
-#   .\install.ps1                     # per-user: %LOCALAPPDATA%\Programs\ovicc
-#   .\install.ps1 -Prefix C:\ovic     # custom install prefix
-#   .\install.ps1 -System             # machine-wide: %ProgramFiles%\ovicc (admin)
+#   .\install.ps1                     # per-user: %LOCALAPPDATA%\Programs\ovelc
+#   .\install.ps1 -Prefix C:\ovel     # custom install prefix
+#   .\install.ps1 -System             # machine-wide: %ProgramFiles%\ovelc (admin)
 #   .\install.ps1 -NoPath             # do not modify PATH
 #
 # Layout installed under <Prefix> (mirrors the Unix install.sh):
-#   <Prefix>\bin\ovicc.exe
-#   <Prefix>\lib\libovic.a
-#   <Prefix>\include\{ovic,Foundation}\...
-#   <Prefix>\share\ovicc\completions\ovicc.ps1
+#   <Prefix>\bin\ovelc.exe
+#   <Prefix>\lib\libovel.a
+#   <Prefix>\include\{ovel,Foundation}\...
+#   <Prefix>\share\ovelc\completions\ovelc.ps1
 #
-# `ovicc.exe` locates its bundled headers via `resolve_bundle_root()`:
-# it checks <exe-dir>\.. for `include\ovic\runtime.h`, so `bin\ovicc.exe` +
-# `include\` at the prefix root works out of the box. We also set OVIC_HOME.
+# `ovelc.exe` locates its bundled headers via `resolve_bundle_root()`:
+# it checks <exe-dir>\.. for `include\ovel\runtime.h`, so `bin\ovelc.exe` +
+# `include\` at the prefix root works out of the box. We also set OVEL_HOME.
 
 [CmdletBinding()]
 param(
@@ -38,36 +38,36 @@ function T([string]$z, [string]$e) { if ($zh) { $z } else { $e } }
 # ── Default install prefix ──
 if (-not $Prefix) {
     if ($System) {
-        $Prefix = Join-Path $env:ProgramFiles "ovicc"
+        $Prefix = Join-Path $env:ProgramFiles "ovelc"
     } else {
-        $Prefix = Join-Path $env:LOCALAPPDATA "Programs\ovicc"
+        $Prefix = Join-Path $env:LOCALAPPDATA "Programs\ovelc"
     }
 }
 
 $BinDir  = Join-Path $Prefix "bin"
 $LibDir  = Join-Path $Prefix "lib"
 $IncDir  = Join-Path $Prefix "include"
-$CompDir = Join-Path $Prefix "share\ovicc\completions"
+$CompDir = Join-Path $Prefix "share\ovelc\completions"
 
-Write-Host "==> $(T 'Ovic 安装包' 'Ovic Installer') (ovicc)"
+Write-Host "==> $(T 'Ovel 安装包' 'Ovel Installer') (ovelc)"
 Write-Host "    $(T '安装目录' 'Install directory'): $Prefix"
 Write-Host ""
 
 New-Item -ItemType Directory -Force -Path $BinDir, $LibDir, $IncDir, $CompDir | Out-Null
 
 # ── Binary ──
-$srcExe = Join-Path $Bundle "ovicc.exe"
+$srcExe = Join-Path $Bundle "ovelc.exe"
 if (-not (Test-Path $srcExe)) {
-    Write-Error "$(T '包内找不到 ovicc.exe' 'ovicc.exe not found in bundle'): $srcExe"
+    Write-Error "$(T '包内找不到 ovelc.exe' 'ovelc.exe not found in bundle'): $srcExe"
 }
-Copy-Item -Force $srcExe (Join-Path $BinDir "ovicc.exe")
-Write-Host "    ovicc.exe    -> $(Join-Path $BinDir 'ovicc.exe')"
+Copy-Item -Force $srcExe (Join-Path $BinDir "ovelc.exe")
+Write-Host "    ovelc.exe    -> $(Join-Path $BinDir 'ovelc.exe')"
 
 # ── Static runtime library ──
-$srcLib = Join-Path $Bundle "libovic.a"
+$srcLib = Join-Path $Bundle "libovel.a"
 if (Test-Path $srcLib) {
-    Copy-Item -Force $srcLib (Join-Path $LibDir "libovic.a")
-    Write-Host "    libovic.a    -> $(Join-Path $LibDir 'libovic.a')"
+    Copy-Item -Force $srcLib (Join-Path $LibDir "libovel.a")
+    Write-Host "    libovel.a    -> $(Join-Path $LibDir 'libovel.a')"
 }
 
 # ── Headers ──
@@ -82,10 +82,10 @@ $srcComp = Join-Path $Bundle "completions"
 if (Test-Path $srcComp) {
     Copy-Item -Force (Join-Path $srcComp "*") $CompDir
 }
-$oviccExe = Join-Path $BinDir "ovicc.exe"
-$compPs1 = Join-Path $CompDir "ovicc.ps1"
+$ovelcExe = Join-Path $BinDir "ovelc.exe"
+$compPs1 = Join-Path $CompDir "ovelc.ps1"
 try {
-    & $oviccExe --gen-completions powershell | Out-File -Encoding utf8 $compPs1
+    & $ovelcExe --gen-completions powershell | Out-File -Encoding utf8 $compPs1
     Write-Host "    completions  -> $compPs1"
 } catch {
     Write-Host "    $(T '跳过补全生成' 'completion generation skipped')"
@@ -107,14 +107,14 @@ if (-not $NoPath) {
     if (($env:Path -split ';') -notcontains $BinDir) { $env:Path = "$env:Path;$BinDir" }
 }
 
-# ── OVIC_HOME (robust bundle-root resolution) ──
-[Environment]::SetEnvironmentVariable("OVIC_HOME", $Prefix, "User")
-$env:OVIC_HOME = $Prefix
-Write-Host "    OVIC_HOME    = $Prefix"
+# ── OVEL_HOME (robust bundle-root resolution) ──
+[Environment]::SetEnvironmentVariable("OVEL_HOME", $Prefix, "User")
+$env:OVEL_HOME = $Prefix
+Write-Host "    OVEL_HOME    = $Prefix"
 
 # ── Register the PowerShell completion in the user profile (idempotent) ──
 if (Test-Path $compPs1) {
-    $marker = "# ovicc completion (install.ps1 auto-added)"
+    $marker = "# ovelc completion (install.ps1 auto-added)"
     $profilePath = $PROFILE.CurrentUserAllHosts
     $profDir = Split-Path -Parent $profilePath
     if ($profDir -and -not (Test-Path $profDir)) { New-Item -ItemType Directory -Force -Path $profDir | Out-Null }
@@ -131,9 +131,9 @@ if (Test-Path $compPs1) {
 
 Write-Host ""
 Write-Host "========== $(T '安装完成' 'Installation complete') =========="
-Write-Host "  binary:  $BinDir\ovicc.exe"
+Write-Host "  binary:  $BinDir\ovelc.exe"
 Write-Host "  headers: $IncDir\"
-Write-Host "  lib:     $LibDir\libovic.a"
+Write-Host "  lib:     $LibDir\libovel.a"
 Write-Host ""
-Write-Host "  $(T '新开一个终端即可使用' 'Open a new terminal, then run'): ovicc --version"
+Write-Host "  $(T '新开一个终端即可使用' 'Open a new terminal, then run'): ovelc --version"
 Write-Host "  $(T '卸载' 'Uninstall'): Remove-Item -Recurse -Force `"$Prefix`""

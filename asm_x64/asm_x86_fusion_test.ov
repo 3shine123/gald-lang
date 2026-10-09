@@ -1,7 +1,7 @@
 // asm_x86_fusion_test.ov
 // x86_64 汇编融合压测（在 arm64 Mac 上通过 Rosetta 执行）：
 //   外部 .s 汇编 + 内联汇编 + 类/协议/Block/异常/struct/cast/fn指针/@selector/ARC
-// 构建：ovicc -arch x86_64 run -asm asm_x86_ext.s asm_x86_fusion_test.ov
+// 构建：ovelc -arch x86_64 run -asm asm_x86_ext.s asm_x86_fusion_test.ov
 
 #include <stdio.h>
 #include <string.h>
@@ -89,7 +89,7 @@ typedef struct {
 int main(int argc, const char* argv[])
 {
     @autoreleasepool {
-        printf("=== x86_64 (Rosetta) 内联+外部 asm x Ovic 高级特性 ===\n");
+        printf("=== x86_64 (Rosetta) 内联+外部 asm x Ovel 高级特性 ===\n");
 
         X86_NS* n = [[X86_NS alloc] initWithTag:"x64-fusion"];
 

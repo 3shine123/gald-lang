@@ -14,14 +14,14 @@
 //!
 //! The scanner is a strict C lexer state machine (code / line comment / block
 //! comment / string / char literal). Directives are recognized only at
-//! column 0 in code context — ovicc always emits them there, and a `#line`
+//! column 0 in code context — ovelc always emits them there, and a `#line`
 //! inside a passthrough comment or string literal can never fake a mapping.
 //! Lines before the first directive are unmapped: that is exactly the
 //! preprocessor's view (they keep the generated file's own numbering).
 
 use std::fs;
 
-use ovic_cst::source_map_file::{
+use ovel_cst::source_map_file::{
     hash_tag, GeneratedArtifact, Mapping, SourceEntry, SourceMapFile,
 };
 
@@ -306,7 +306,7 @@ pub fn extract_source_map(c_text: &str, opts: &ExtractOptions) -> SourceMapFile 
     }
 
     let mut f = SourceMapFile::new(
-        "ovicc",
+        "ovelc",
         &opts.primary_source,
         GeneratedArtifact {
             path: opts.generated_path.clone(),
@@ -334,7 +334,7 @@ mod tests {
 
     #[test]
     fn basic_regions_spans_and_offsets() {
-        let c_text = "#include <stdio.h>\n\n#line 3 \"main.ov\"\nint a = 1;\nint b = 2;\n#line 1 \"<ovic-generated>\"\nvoid glue(void) {}\nstatic int x;\n#line 7 \"lib.oh\"\nreturn7;\n";
+        let c_text = "#include <stdio.h>\n\n#line 3 \"main.ov\"\nint a = 1;\nint b = 2;\n#line 1 \"<ovel-generated>\"\nvoid glue(void) {}\nstatic int x;\n#line 7 \"lib.oh\"\nreturn7;\n";
         let m = extract_source_map(c_text, &opts(&[]));
         assert_eq!(m.sources.len(), 2);
         // Sorted by path: lib.oh < main.ov.
@@ -351,7 +351,7 @@ mod tests {
         assert_eq!(a.c_start, c_text.find("int a = 1;").unwrap() as u64);
         assert_eq!(
             a.c_end,
-            c_text.find("#line 1 \"<ovic-generated>\"").unwrap() as u64
+            c_text.find("#line 1 \"<ovel-generated>\"").unwrap() as u64
         );
         assert_eq!(a.src_id, Some(1));
         assert_eq!(a.src_line_start, 3);
@@ -428,7 +428,7 @@ mod tests {
 
     #[test]
     fn leading_whitespace_directive_is_not_recognized() {
-        // ovicc emits column 0 only; indented `#line` stays unparsed.
+        // ovelc emits column 0 only; indented `#line` stays unparsed.
         let c_text = "  #line 5 \"m.ov\"\nx;\n";
         let m = extract_source_map(c_text, &opts(&[]));
         assert!(m.mappings.is_empty());

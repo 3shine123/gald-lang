@@ -38,13 +38,13 @@
 
 ## 跨语言对照（定案依据）
 
-| 决策点 | C++20 | Rust | C# | Swift | JS | Kotlin | Ovic 定案 |
+| 决策点 | C++20 | Rust | C# | Swift | JS | Kotlin | Ovel 定案 |
 |---|---|---|---|---|---|---|---|
 | 调用即执行？ | Lazy | Lazy | Eager | Eager | Eager | Eager（默认） | **Lazy** |
 | await 句柄 | 单次（future::get） | 可多次 | ✅ | ✅（task.value） | ✅ | ✅ | **✅ 可多次** |
 | 机制/调度分层 | 语言+薄类型 / 不管执行 | core Future / 生态 executor | 全内建 | 全内建 | 全内建 | 全内建 | **runtime 机制 / Foundation 壳 / 用户泵** |
 
-规律：有内建托管调度的语言选 eager；执行控制交给使用者的（C++/Rust）选 lazy。Ovic 裸机没有
+规律：有内建托管调度的语言选 eager；执行控制交给使用者的（C++/Rust）选 lazy。Ovel 裸机没有
 "后台"可依托，属后者。C++23 把 `<coroutine>` 列入 freestanding、C++ 标准库托管设施
 （`<thread>/<future>`）hosted-only——印证"机制层零 OS 依赖 + 调度策略可替换"的分层在工业上成立。
 
@@ -95,73 +95,73 @@ int y = @await [f compute:2];       // 形态 C：@await 调用表达式 → 糖
 | 规则 | 内容 |
 |------|------|
 | Lazy 启动 | 裸调用只创建任务并入待命态，**不执行**；`[task start]` 入就绪队列。依据 Kotlin `CoroutineStart.LAZY` 先例；忘 start 由 checker 静态拦截（§静态分析） |
-| hosted 语句位入口 | **语句位就是入口信号**：语句位的 async 调用（`[f compute:2];`，结果被丢弃）在 desugar 时降为 `ovic_task_await([f compute:2])`；语句位 `[t start];` 同样降为 `ovic_task_await(t)`——两者都在**调用点**驱动到完成（receiver 此时必然存活）。被接住的调用（`NPTask<T> *t = [f compute:2];`）仍 lazy，由调用方 `@await` 或语句位 `[t start]` 驱动。`-ffreestanding` 一律不驱动（裸机 `main` 自己泵） |
+| hosted 语句位入口 | **语句位就是入口信号**：语句位的 async 调用（`[f compute:2];`，结果被丢弃）在 desugar 时降为 `ovel_task_await([f compute:2])`；语句位 `[t start];` 同样降为 `ovel_task_await(t)`——两者都在**调用点**驱动到完成（receiver 此时必然存活）。被接住的调用（`NPTask<T> *t = [f compute:2];`）仍 lazy，由调用方 `@await` 或语句位 `[t start]` 驱动。`-ffreestanding` 一律不驱动（裸机 `main` 自己泵） |
 | `@await` 统一词汇 | 操作数二选一：async 调用表达式（糖）或 `NPTask<T> *` 表达式（变量/ivar/返回值）。await 本身就是"我要结果"，对未 start 的 task 自动先 start——不需要用户写两行 |
 | 多次 await | **合法**。任务只生产一次，但结果缓存在任务状态里，二次 `@await` 直接取缓存（C#/Swift/JS/Java 的 promise/future 盒子语义；单次性属于"生产动作"，不属于"观察结果"）。C++ `future::get()` 的单次是其类型设计产物，不采纳 |
 | `@await` 非 task | `@await` 作用于非 `NPTask` 表达式 → error（`'@await' requires an async call or an 'NPTask'`） |
-| 环等待 | task 体内 `@await` 自身句柄（直接或经引用环）→ 运行时检测 abort（`ovic_task_await` 入口查环）；checker 只拦直接自等 |
+| 环等待 | task 体内 `@await` 自身句柄（直接或经引用环）→ 运行时检测 abort（`ovel_task_await` 入口查环）；checker 只拦直接自等 |
 | `NPTask<void>` | `@await t` 合法（等完成，无值可取）；`[task start]` 同普通任务 |
 | 跨 TU | `async` 修饰符是签名一部分：`.oh` 声明与 `.ov` 实现必须一致，不一致 → 链接期由 `__sig` 捕获（返回类型进签名哈希）+ 编译期对账 error |
 
 ## 静态分析（checker 新增）
 
 1. **未使用任务警告**：`NPTask` 创建后既未 `start` 也未 `@await`、也未逃逸（存 ivar/传参/返回）就离开作用域 → warning：`task created but never started or awaited`（lazy 语义下忘 start = 静默不执行，这是 lazy 方案唯一真实风险，必须静态兜住）。逃逸判定复用 ARC 静态分析既有路径。
-2. **体内 await 对账**：上表三条 error（async 无 await / await 无 async / 无 async 修饰的 NPTask 方法含 await），在 `ovic_async::check_unit` 原对账表位置实现——它独占"体内是否含 @await"分析且跑在 desugar 之前。
-3. **调度泵归属**：hosted 模式下"语句位"是唯一入口信号——语句位的 async 调用与语句位 `[t start];` 在 desugar 期降为 `ovic_task_await(...)`（`crates/async`：`drive_entry_call` 与 `lower_task_starts_expr(drive=true)`），在**调用点**驱动到完成；**`-ffreestanding` 下绝不隐式驱动**——见 §runtime 层。
-   **明确不做"main 退出兜底泵"**：ARC 的 scope-end release 排在函数收尾，兜底泵必然晚于它——任务会在已释放的 receiver 上运行（实测 `ovic_async_state_runAll` EXC_BAD_ACCESS）。语句位驱动天然早于 release，是唯一安全的入口位置。
+2. **体内 await 对账**：上表三条 error（async 无 await / await 无 async / 无 async 修饰的 NPTask 方法含 await），在 `ovel_async::check_unit` 原对账表位置实现——它独占"体内是否含 @await"分析且跑在 desugar 之前。
+3. **调度泵归属**：hosted 模式下"语句位"是唯一入口信号——语句位的 async 调用与语句位 `[t start];` 在 desugar 期降为 `ovel_task_await(...)`（`crates/async`：`drive_entry_call` 与 `lower_task_starts_expr(drive=true)`），在**调用点**驱动到完成；**`-ffreestanding` 下绝不隐式驱动**——见 §runtime 层。
+   **明确不做"main 退出兜底泵"**：ARC 的 scope-end release 排在函数收尾，兜底泵必然晚于它——任务会在已释放的 receiver 上运行（实测 `ovel_async_state_runAll` EXC_BAD_ACCESS）。语句位驱动天然早于 release，是唯一安全的入口位置。
 
-## runtime 机制层（`include/ovic/runtime.h` / `runtime.c` / `runtime_freestanding.c`）
+## runtime 机制层（`include/ovel/runtime.h` / `runtime.c` / `runtime_freestanding.c`）
 
 语言（parser/checker/async crate）认 `async` 修饰符 + `NPTask<T>` 类型 + `@await`；**策略（单线程协作泵、未来多线程/优先级）全在本层可替换**。机制层零 libc 依赖，`runtime_freestanding.c` 同签名提供，裸机完整可用。
 
 ```c
 /* 任务状态机由编译器 desugar 生成；runtime 只管生命周期与就绪队列。 */
-typedef struct ovic_task ovic_task;
+typedef struct ovel_task ovel_task;
 
 typedef enum {
-    OVIC_TASK_READY,     /* 已创建未 start（lazy 待命） */
-    OVIC_TASK_RUNNING,   /* 在就绪队列中 / 正在执行到下一挂起点 */
-    OVIC_TASK_SUSPENDED, /* 挂起，等外部事件标记 ready */
-    OVIC_TASK_DONE,      /* 完成，结果已缓存 */
-    OVIC_TASK_FAILED     /* 环等待等致命错误 */
-} ovic_task_state;
+    OVEL_TASK_READY,     /* 已创建未 start（lazy 待命） */
+    OVEL_TASK_RUNNING,   /* 在就绪队列中 / 正在执行到下一挂起点 */
+    OVEL_TASK_SUSPENDED, /* 挂起，等外部事件标记 ready */
+    OVEL_TASK_DONE,      /* 完成，结果已缓存 */
+    OVEL_TASK_FAILED     /* 环等待等致命错误 */
+} ovel_task_state;
 
 /* alloc 注入点：默认 malloc/free；裸机可换静态池（C++ promise_type 自定义
  * operator new 的先例）。NULL 参数 = 回落默认。必须在第一次 task 创建前设置。 */
-void ovic_task_set_allocator(void *(*alloc)(size_t), void (*free_fn)(void *));
+void ovel_task_set_allocator(void *(*alloc)(size_t), void (*free_fn)(void *));
 
-ovic_task *ovic_task_create(void *frame, void (*step_fn)(ovic_task *)); /* OOM 返回 NULL */
-int   ovic_task_start(ovic_task *t);   /* READY → 入就绪队列；已 start 则幂等 no-op */
-void *ovic_task_await(ovic_task *t);   /* 挂起当前任务直至 t 完成；未 start 自动 start；
+ovel_task *ovel_task_create(void *frame, void (*step_fn)(ovel_task *)); /* OOM 返回 NULL */
+int   ovel_task_start(ovel_task *t);   /* READY → 入就绪队列；已 start 则幂等 no-op */
+void *ovel_task_await(ovel_task *t);   /* 挂起当前任务直至 t 完成；未 start 自动 start；
                                           结果缓存，可多次调用；查环，环则 abort */
-void  ovic_task_mark_ready(ovic_task *t); /* 挂起点事件源（中断/DMA 回调）调用 */
-void  ovic_sched_run(void);            /* 泵：跑完就绪队列中所有可推进任务后返回 */
+void  ovel_task_mark_ready(ovel_task *t); /* 挂起点事件源（中断/DMA 回调）调用 */
+void  ovel_sched_run(void);            /* 泵：跑完就绪队列中所有可推进任务后返回 */
 ```
 
 | 约束 | 内容 |
 |------|------|
-| 单线程协作 | 就绪队列 = 单链表；无锁无线程原语。`ovic_sched_run` 跑到队列空即返回——泵不泵、何时泵归用户：hosted 由语句位入口自动驱动；裸机用户主循环 `while (1) { ovic_sched_run(); __WFI(); }` |
+| 单线程协作 | 就绪队列 = 单链表；无锁无线程原语。`ovel_sched_run` 跑到队列空即返回——泵不泵、何时泵归用户：hosted 由语句位入口自动驱动；裸机用户主循环 `while (1) { ovel_sched_run(); __WFI(); }` |
 | hosted-only 自动驱动 | 语句位自动驱动**必须**挂在"hosted + 语句位"双条件下；`-ffreestanding` 下 async 链顶端只是普通函数，`main` 是用户的地盘。这是与 hosted 唯一的行为分叉，诊断文档必须显式标注。**不得**在 `main` 退出处补兜底泵（ARC release 在前，见 §静态分析 3） |
 | 堆分配 | task 帧需堆。裸机现状已有堆（ARC 依赖 allocator），非新依赖；OOM → `create` 返回 NULL，`start`/`await` 入口 NULL 检查 abort。可用注入点换静态池/预分配 |
 | 零 libc | `runtime_freestanding.c` 不引 `<stdlib.h>`/`<pthread.h>`；`<thread>/<future>` 类托管设施明确**不做**（C++ 标准库 hosted-only 的教训：future 绑条件变量即失去裸机） |
-| 挂起事件源 | 裸机无阻塞 I/O；`@await` 的真实来源是中断/DMA 回调调 `ovic_task_mark_ready`。协作式单线程下无抢占 = 无数据竞争 |
+| 挂起事件源 | 裸机无阻塞 I/O；`@await` 的真实来源是中断/DMA 回调调 `ovel_task_mark_ready`。协作式单线程下无抢占 = 无数据竞争 |
 
 ## Foundation 壳层（`include/Foundation/NPTask.oh` / `NPTask.ov`）——路线 A：薄别名
 
 **`NPTask<T>` 不是 Foundation 类，而是任务句柄的类型名。** 语言侧 `async NPTask<int>`、
-变量、参数、ivar 位合法；生成 C 里统一渲染为运行时句柄 `NPTask *`（`include/ovic/runtime.h`）——
+变量、参数、ivar 位合法；生成 C 里统一渲染为运行时句柄 `NPTask *`（`include/ovel/runtime.h`）——
 **无单态化类**（不存在 `NPTask_int`）、无消息派发、不进 vtable。
 
 - `NPTask.oh` 是声明面（说明 + 落点，**不声明任何符号**），`NPTask.ov` 是空壳；伞头分别导入
   （声明伞头 `Foundation.oh` 导入 `.oh`；自包含伞头 `Foundation.ov` 导入两个）。
 - `tools/build-foundation-lib.sh` 按与跳过 `Foundation.ov` 同一理由跳过 `NPTask.ov`——没有 vtable 可验。
-- `[t start]` / `@await` **不是消息发送**，desugar 期直接降为 `ovic_task_*` C API：
-  `[t start];`（hosted 语句位）→ `ovic_task_await(t)`；`@await t` → `ovic_task_await(t)`（未 start 自动 start）；
+- `[t start]` / `@await` **不是消息发送**，desugar 期直接降为 `ovel_task_*` C API：
+  `[t start];`（hosted 语句位）→ `ovel_task_await(t)`；`@await t` → `ovel_task_await(t)`（未 start 自动 start）；
   `@await [f compute:1]` → create + start + await。
 - 机制层 C API 在 hosted 与裸机都完整可用——句柄本来就只是 C 类型，与「裸机不链 Foundation」无关。
 - 注意 KVC 门控教训：新增 .oh 的 import 闭包改动后必须复跑 tests/ 全量基线。
 
-> 存档（未采纳）：路线 B = `NPTask<T> : NPObject` 真泛型类 + 单态化类型键，壳持 `ovic_task *`、
+> 存档（未采纳）：路线 B = `NPTask<T> : NPObject` 真泛型类 + 单态化类型键，壳持 `ovel_task *`、
 > 暴露 `- (void)start`。不采纳原因：任务句柄是**值**，而裸机不链 Foundation——做成类会把
 > `-ffreestanding` 下的 async 返回类型判死；且要把 vtable / `__sig` / multi-TU 元数据拖进 async
 > 返回类型；类名 `NPTask` 还与运行时 `struct NPTask` 同名（须先做运行时 struct 改名）。
@@ -176,9 +176,9 @@ void  ovic_sched_run(void);            /* 泵：跑完就绪队列中所有可�
 - parser 教训回炉：consume 失败不 advance；批量改动不用行号定位。
 - 验收：新 parser 单测 + `tests/negative/`（async 非 NPTask、async 帧数错、保留名冲突）。
 
-### 阶段 B：checker + ovic_async 对账（语义落地）
+### 阶段 B：checker + ovel_async 对账（语义落地）
 
-- `ovic_async::check_unit` 对账表三条 error（§语法表）+ 跨 TU interface/impl 修饰符一致；warnings 出口沿用 NPAsync 案已加的通道。
+- `ovel_async::check_unit` 对账表三条 error（§语法表）+ 跨 TU interface/impl 修饰符一致；warnings 出口沿用 NPAsync 案已加的通道。
 - `NPTask` 保留名检查；`@await` 操作数类型检查（async 调用 / `NPTask<T> *`，否则 error）。
 - 未使用任务警告（逃逸判定复用 ARC 静态分析路径）。
 - 验收：`tests/negative/` 四例（async 无 await / await 无 async / 未 start 弃任务 / @await 非 task）+ golden 逐字节核对既有 async 用例的迁移。
@@ -186,11 +186,11 @@ void  ovic_sched_run(void);            /* 泵：跑完就绪队列中所有可�
 ### 阶段 C：runtime 机制层（C API）
 
 - `runtime.h`/`runtime.c`/`runtime_freestanding.c` 实现 §runtime 层 API（状态机 struct、就绪队列、注入分配器、环检测）。
-- 验收：C 层单测（create/start/await/mark_ready/环 abort）；baremetal stress 跑通 `ovic_sched_run` 主循环形态；hosted 与 freestanding 双编译。
+- 验收：C 层单测（create/start/await/mark_ready/环 abort）；baremetal stress 跑通 `ovel_sched_run` 主循环形态；hosted 与 freestanding 双编译。
 
 ### 阶段 D：codegen + async crate + Foundation（接线落地）
 
-- `crates/async` desugar 改造：async 方法编译为 step_fn 状态机（活过 await 的局部变量提升进 task 帧，释放结算归 ARC 汇合点——M3 既有思路）；裸调用 → `ovic_task_create`（lazy，不 start）；`@await task` → `ovic_task_await`；`@await 调用` → create+start+await 糖。
+- `crates/async` desugar 改造：async 方法编译为 step_fn 状态机（活过 await 的局部变量提升进 task 帧，释放结算归 ARC 汇合点——M3 既有思路）；裸调用 → `ovel_task_create`（lazy，不 start）；`@await task` → `ovel_task_await`；`@await 调用` → create+start+await 糖。
 - 返回类型从 `T` 改为 `NPTask<T>*`：vtable、`__sig`（返回类型进签名哈希）、multi-TU 元数据联动；`-emit-bridge-header` 对 async 方法特判（跳过或按 task 签名发 wrapper）。
 - Foundation 增 `NPTask.oh`/`NPTask.ov` **薄别名壳**（路线 A，非单态化类——见 §Foundation 壳层）；改动后复跑 tests/ 全量。
 - hosted 语句位入口自动驱动保留（hosted-only；无 main 退出兜底泵）；裸机不泵。

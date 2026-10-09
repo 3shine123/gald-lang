@@ -1,7 +1,7 @@
-// ovic/runtime_freestanding.c — Freestanding runtime for bare-metal Ovic.
+// ovel/runtime_freestanding.c — Freestanding runtime for bare-metal Ovel.
 //
 // Provides EVERYTHING the transpiled code needs on bare metal.
-// Just link this file alongside the transpiled Ovic code — no hand-written
+// Just link this file alongside the transpiled Ovel code — no hand-written
 // globals, no runtime boilerplate.  The user only needs to provide the
 // freestanding header set (stdint.h, stddef.h, stdbool.h).  memcpy and
 // memset have weak fallbacks below (the compiler may emit calls to them
@@ -12,24 +12,24 @@
 // either port a Blocks runtime or use `-backend portable|gcc` (blocks expand
 // to plain C functions with no ABI symbols).
 //
-// Compile with -D__OVIC_FREESTANDING -I<ovicc>/include.
-// On the host (for testing), compile with -U__OVIC_FREESTANDING
+// Compile with -D__OVEL_FREESTANDING -I<ovelc>/include.
+// On the host (for testing), compile with -U__OVEL_FREESTANDING
 // (uses system setjmp/longjmp, __thread globals).
 
-#include <ovic/runtime.h>
+#include <ovel/runtime.h>
 #include <stddef.h>
 #include <stdint.h>
 
 // ─── Runtime globals (referenced by transpiled code) ─────────────────────────
 
-NPClass OVIC_CLASS_$_ovic_root;
+NPClass OVEL_CLASS_$_ovel_root;
 
-#ifdef __OVIC_FREESTANDING
-jmp_buf __ovic_exception_buf;
-id      __ovic_exception_value;
+#ifdef __OVEL_FREESTANDING
+jmp_buf __ovel_exception_buf;
+id      __ovel_exception_value;
 #else
-__thread jmp_buf __ovic_exception_buf;
-__thread id      __ovic_exception_value;
+__thread jmp_buf __ovel_exception_buf;
+__thread id      __ovel_exception_value;
 #endif
 
 // ─── memcpy (used by @try/@catch jmp_buf save/restore) ──────────────────────
@@ -42,7 +42,7 @@ __attribute__((weak)) void *memcpy(void *dst, const void *src, size_t n) {
     return dst;
 }
 
-// ─── memset (used by ovic_alloc zeroing; the compiler may emit it too) ───────
+// ─── memset (used by ovel_alloc zeroing; the compiler may emit it too) ───────
 
 #undef memset
 __attribute__((weak)) void *memset(void *s, int c, size_t n) {
@@ -53,31 +53,31 @@ __attribute__((weak)) void *memset(void *s, int c, size_t n) {
 
 // ─── Bump allocator ──────────────────────────────────────────────────────────
 
-#ifndef OVIC_HEAP_SIZE
-#define OVIC_HEAP_SIZE 16384
+#ifndef OVEL_HEAP_SIZE
+#define OVEL_HEAP_SIZE 16384
 #endif
 
 /* max_align_t (C11, <stddef.h>) — the heap and every allocation must satisfy
  * the strictest fundamental alignment (pointers, double, long double on some
  * targets); a plain char array only guarantees alignment 1. */
-static _Alignas(max_align_t) unsigned char ovic_heap[OVIC_HEAP_SIZE];
-static size_t ovic_heap_off = 0;
+static _Alignas(max_align_t) unsigned char ovel_heap[OVEL_HEAP_SIZE];
+static size_t ovel_heap_off = 0;
 
-void *ovic_malloc(size_t size) {
+void *ovel_malloc(size_t size) {
     size_t align = _Alignof(max_align_t);
     size = (size + align - 1) & ~(align - 1);
-    if (ovic_heap_off + size > OVIC_HEAP_SIZE) return NULL;
-    void *p = &ovic_heap[ovic_heap_off];
-    ovic_heap_off += size;
-    memset(p, 0, size);   /* contract (runtime.h): ovic_malloc returns zeroed memory */
+    if (ovel_heap_off + size > OVEL_HEAP_SIZE) return NULL;
+    void *p = &ovel_heap[ovel_heap_off];
+    ovel_heap_off += size;
+    memset(p, 0, size);   /* contract (runtime.h): ovel_malloc returns zeroed memory */
     return p;
 }
 
-void ovic_free(void *ptr) {
+void ovel_free(void *ptr) {
     (void)ptr; /* bump allocator: never reuses memory */
 }
 
-void ovic_register_category_protocols(NPClass *cls, struct NPProtocol **protocols, int count) {
+void ovel_register_category_protocols(NPClass *cls, struct NPProtocol **protocols, int count) {
     if (!cls || !protocols || count <= 0) return;
     int old_count = cls->protocol_count;
     int add = 0;
@@ -89,7 +89,7 @@ void ovic_register_category_protocols(NPClass *cls, struct NPProtocol **protocol
         if (!duplicate) add++;
     }
     if (!add) return;
-    struct NPProtocol **merged = ovic_malloc((size_t)(old_count + add) * sizeof(*merged));
+    struct NPProtocol **merged = ovel_malloc((size_t)(old_count + add) * sizeof(*merged));
     if (!merged) __builtin_trap();
     for (int i = 0; i < old_count; i++) merged[i] = cls->protocols[i];
     int n = old_count;
@@ -105,17 +105,17 @@ void ovic_register_category_protocols(NPClass *cls, struct NPProtocol **protocol
 // ─── Autorelease pool ────────────────────────────────────────────────────────
 // Bare-metal: single-core, no __thread.
 
-struct ovic_autoreleasepool {
-    struct ovic_autoreleasepool *next;
+struct ovel_autoreleasepool {
+    struct ovel_autoreleasepool *next;
     NPObject **objects;
     int count;
     int capacity;
 };
 
-static ovic_autoreleasepool_t *current_pool = NULL;
+static ovel_autoreleasepool_t *current_pool = NULL;
 
-ovic_autoreleasepool_t *ovic_autoreleasepoolPush(void) {
-    ovic_autoreleasepool_t *pool = ovic_malloc(sizeof(ovic_autoreleasepool_t));
+ovel_autoreleasepool_t *ovel_autoreleasepoolPush(void) {
+    ovel_autoreleasepool_t *pool = ovel_malloc(sizeof(ovel_autoreleasepool_t));
     if (!pool) return NULL;
     pool->next = current_pool;
     pool->objects = NULL;
@@ -125,21 +125,21 @@ ovic_autoreleasepool_t *ovic_autoreleasepoolPush(void) {
     return pool;
 }
 
-void ovic_autoreleasepoolPop(ovic_autoreleasepool_t *pool) {
+void ovel_autoreleasepoolPop(ovel_autoreleasepool_t *pool) {
     if (!pool) return;
     for (int i = 0; i < pool->count; i++) {
-        ovic_release(pool->objects[i]);
+        ovel_release(pool->objects[i]);
     }
-    ovic_free(pool->objects);
+    ovel_free(pool->objects);
     current_pool = pool->next;
-    ovic_free(pool);
+    ovel_free(pool);
 }
 
 // ─── Type introspection (parity with hosted runtime.c) ──────────────────────
 // Same isa-chain walk as the hosted runtime: walk obj->isa up the superclass
 // chain looking for cls. Ten lines of pure C — no allocation, no libc.
 
-BOOL ovic_isKindOf(NPObject *obj, NPClass *cls) {
+BOOL ovel_isKindOf(NPObject *obj, NPClass *cls) {
     if (!obj || !cls) return 0;
     NPClass *isa = obj->isa;
     while (isa) {
@@ -151,59 +151,59 @@ BOOL ovic_isKindOf(NPObject *obj, NPClass *cls) {
 
 /* Official ObjC spelling of isKindOf: (kept as a compatible alias).
  * Same isa-chain walk. */
-BOOL ovic_isKindOfClass(NPObject *obj, NPClass *cls) {
-    return ovic_isKindOf(obj, cls);
+BOOL ovel_isKindOfClass(NPObject *obj, NPClass *cls) {
+    return ovel_isKindOf(obj, cls);
 }
 
 // ─── Checked-exception backend (-eh checked) ────────────────────────────────
 // Flag/val follow the same dual-mode pattern as the exception globals above:
 // __thread on the host (matches runtime.h declarations), plain globals in
 // freestanding (single core).
-#ifdef __OVIC_FREESTANDING
-int  __ovic_eh_flag;
-id   __ovic_eh_val;
+#ifdef __OVEL_FREESTANDING
+int  __ovel_eh_flag;
+id   __ovel_eh_val;
 #else
-__thread int  __ovic_eh_flag;
-__thread id   __ovic_eh_val;
+__thread int  __ovel_eh_flag;
+__thread id   __ovel_eh_val;
 #endif
 
-void ovic_console_write(const char *s, unsigned len);
-static const char *ovic_safe_isa_name(id obj);
+void ovel_console_write(const char *s, unsigned len);
+static const char *ovel_safe_isa_name(id obj);
 
-int __ovic_eh_isa(NPObject *obj, NPClass *cls) {
+int __ovel_eh_isa(NPObject *obj, NPClass *cls) {
     if (!obj || !cls) return 0;
-    return ovic_isKindOf(obj, cls) ? 1 : 0;
+    return ovel_isKindOf(obj, cls) ? 1 : 0;
 }
 
-void ovic_eh_uncaught(void) {
-    const char *cls = ovic_safe_isa_name(__ovic_eh_val);
-    ovic_console_write("*** Terminating app due to uncaught exception of class '", 0);
-    ovic_console_write(cls, 0);
-    ovic_console_write("'\n", 0);
+void ovel_eh_uncaught(void) {
+    const char *cls = ovel_safe_isa_name(__ovel_eh_val);
+    ovel_console_write("*** Terminating app due to uncaught exception of class '", 0);
+    ovel_console_write(cls, 0);
+    ovel_console_write("'\n", 0);
     __builtin_trap();
 }
 
 // ─── Async task API (same shape as hosted runtime.c) ────────────────────────
 // Cooperative single-thread state machine pump; identical logic to the host,
-// with ovic_malloc/ovic_free instead of calloc/free. No new overhead: a task
+// with ovel_malloc/ovel_free instead of calloc/free. No new overhead: a task
 // costs one struct + its frame, same as hosted.
 
-/* Allocator injection: NULL = ovic_malloc/ovic_free defaults (bump
- * allocator); ovic_task_set_allocator swaps in a static pool on bare metal. */
-static ovic_task_alloc_fn task_alloc = NULL;
-static ovic_task_free_fn  task_free_fn = NULL;
+/* Allocator injection: NULL = ovel_malloc/ovel_free defaults (bump
+ * allocator); ovel_task_set_allocator swaps in a static pool on bare metal. */
+static ovel_task_alloc_fn task_alloc = NULL;
+static ovel_task_free_fn  task_free_fn = NULL;
 
 static void ensure_default_allocator(void) {
-    if (!task_alloc) task_alloc = ovic_malloc;
-    if (!task_free_fn) task_free_fn = ovic_free;
+    if (!task_alloc) task_alloc = ovel_malloc;
+    if (!task_free_fn) task_free_fn = ovel_free;
 }
 
-void ovic_task_set_allocator(ovic_task_alloc_fn alloc, ovic_task_free_fn free_fn) {
+void ovel_task_set_allocator(ovel_task_alloc_fn alloc, ovel_task_free_fn free_fn) {
     task_alloc = alloc;
     task_free_fn = free_fn;
 }
 
-NPTask *ovic_task_create(ovic_task_entry_fn entry, NPObject *self_obj, size_t frame_size) {
+NPTask *ovel_task_create(ovel_task_entry_fn entry, NPObject *self_obj, size_t frame_size) {
     ensure_default_allocator();
     NPTask *t = (NPTask *)task_alloc(sizeof(NPTask));
     if (!t) return NULL;
@@ -217,7 +217,7 @@ NPTask *ovic_task_create(ovic_task_entry_fn entry, NPObject *self_obj, size_t fr
     return t;
 }
 
-int ovic_task_resume(NPTask *task) {
+int ovel_task_resume(NPTask *task) {
     if (!task || task->finished) return 1;
     if (task->entry) {
         if (task->entry(task) != 0) {
@@ -229,27 +229,27 @@ int ovic_task_resume(NPTask *task) {
     return task->finished ? 1 : 0;
 }
 
-void ovic_task_finish(NPTask *task) {
+void ovel_task_finish(NPTask *task) {
     if (task) task->finished = 1;
 }
 
-void *ovic_task_join(NPTask *task) {
+void *ovel_task_join(NPTask *task) {
     if (!task) return NULL;
     while (!task->finished) {
-        (void)ovic_task_resume(task);
+        (void)ovel_task_resume(task);
     }
     void *result = task->result;
-    /* bump allocator: ovic_free is a no-op, kept for API parity */
-    ovic_free(task->frame);
-    ovic_free(task);
+    /* bump allocator: ovel_free is a no-op, kept for API parity */
+    ovel_free(task->frame);
+    ovel_free(task);
     return result;
 }
 
 // ─── NPTask scheduling layer (doc/async_nptask_plan.md, stage C) ────────────
 // Same shape as the hosted runtime.c. Zero libc dependencies: the allocator
-// injection above defaults to ovic_malloc/ovic_free (bump allocator), so the
+// injection above defaults to ovel_malloc/ovel_free (bump allocator), so the
 // pump works on bare metal — the main loop owns it:
-// `while (1) { ovic_sched_run(); __WFI(); }`
+// `while (1) { ovel_sched_run(); __WFI(); }`
 
 enum { TASK_READY = 0, TASK_QUEUED = 1, TASK_DONE = 2 };
 
@@ -257,7 +257,7 @@ static NPTask *sched_head = NULL;
 static NPTask *sched_tail = NULL;
 static NPTask *sched_current = NULL;
 
-NPTask *ovic_task_current(void) { return sched_current; }
+NPTask *ovel_task_current(void) { return sched_current; }
 
 static void sched_enqueue(NPTask *t) {
     t->parent = NULL;          /* `parent` reused as the queue link */
@@ -267,18 +267,18 @@ static void sched_enqueue(NPTask *t) {
     t->queued = 1;
 }
 
-int ovic_task_start(NPTask *task) {
+int ovel_task_start(NPTask *task) {
     if (!task || task->finished) return task != NULL;
     if (task->queued) return 1;                 /* idempotent */
     sched_enqueue(task);
     return 1;
 }
 
-void ovic_task_mark_ready(NPTask *task) {
-    (void)ovic_task_start(task);
+void ovel_task_mark_ready(NPTask *task) {
+    (void)ovel_task_start(task);
 }
 
-void ovic_sched_run(void) {
+void ovel_sched_run(void) {
     while (sched_head) {
         NPTask *t = sched_head;
         sched_head = t->parent;
@@ -286,27 +286,27 @@ void ovic_sched_run(void) {
         t->queued = 0;
         if (t->finished) continue;
         sched_current = t;
-        (void)ovic_task_resume(t);
+        (void)ovel_task_resume(t);
         sched_current = NULL;
         /* finished tasks are dropped (frame/task freed by stage-D desugar at
          * the join point; legacy join still owns its own lifetime) */
     }
 }
 
-void *ovic_task_await(NPTask *task) {
+void *ovel_task_await(NPTask *task) {
     if (!task) return NULL;
     if (task == sched_current) {
         /* self-await cycle: fatal (single thread, no one to make progress) */
-        ovic_console_write("fatal: task awaits itself\n", 0);
+        ovel_console_write("fatal: task awaits itself\n", 0);
         __builtin_trap();
     }
-    (void)ovic_task_start(task);
+    (void)ovel_task_start(task);
     /* Blocking drive, top-level or in-task alike (M2 synchronous-drive
      * model): an in-task await on an independent nested task drives it
      * inline; direct self-await is checked above. */
     while (!task->finished) {
-        if (sched_head) { ovic_sched_run(); continue; }
-        (void)ovic_task_resume(task);
+        if (sched_head) { ovel_sched_run(); continue; }
+        (void)ovel_task_resume(task);
     }
     return task->result;
 }
@@ -314,57 +314,57 @@ void *ovic_task_await(NPTask *task) {
 // ─── Weak reference side table (fixed-size, no allocation) ──────────────────
 // Hosted runtime uses a malloc'd slot array; bare metal uses a static table
 // with a fixed number of slots per target. Zero heap overhead, linear scan.
-// 64 targets × 8 slots each = 4 KiB static data — tune via OVIC_WEAK_MAX.
+// 64 targets × 8 slots each = 4 KiB static data — tune via OVEL_WEAK_MAX.
 
-#ifndef OVIC_WEAK_MAX_TARGETS
-#define OVIC_WEAK_MAX_TARGETS 64
+#ifndef OVEL_WEAK_MAX_TARGETS
+#define OVEL_WEAK_MAX_TARGETS 64
 #endif
-#define OVIC_WEAK_SLOTS_PER_TARGET 8
+#define OVEL_WEAK_SLOTS_PER_TARGET 8
 
 typedef struct {
     NPObject *object;                 /* NULL = free entry */
-    NPObject **slots[OVIC_WEAK_SLOTS_PER_TARGET];
+    NPObject **slots[OVEL_WEAK_SLOTS_PER_TARGET];
 } WeakEntry;
 
-static WeakEntry weak_table[OVIC_WEAK_MAX_TARGETS];
+static WeakEntry weak_table[OVEL_WEAK_MAX_TARGETS];
 
 static WeakEntry *find_weak_entry(NPObject *target) {
-    for (int i = 0; i < OVIC_WEAK_MAX_TARGETS; i++) {
+    for (int i = 0; i < OVEL_WEAK_MAX_TARGETS; i++) {
         if (weak_table[i].object == target)
             return &weak_table[i];
     }
     return NULL;
 }
 
-void ovic_weakRegister(NPObject **weak_loc, NPObject *target) {
+void ovel_weakRegister(NPObject **weak_loc, NPObject *target) {
     if (!target || !weak_loc) return;
     WeakEntry *entry = find_weak_entry(target);
     if (!entry) {
         /* first free entry; full table → silently drop (bare-metal policy) */
-        for (int i = 0; i < OVIC_WEAK_MAX_TARGETS; i++) {
+        for (int i = 0; i < OVEL_WEAK_MAX_TARGETS; i++) {
             if (!weak_table[i].object) { entry = &weak_table[i]; break; }
         }
         if (!entry) return;
         entry->object = target;
-        for (int j = 0; j < OVIC_WEAK_SLOTS_PER_TARGET; j++) entry->slots[j] = NULL;
+        for (int j = 0; j < OVEL_WEAK_SLOTS_PER_TARGET; j++) entry->slots[j] = NULL;
     }
-    for (int j = 0; j < OVIC_WEAK_SLOTS_PER_TARGET; j++) {
+    for (int j = 0; j < OVEL_WEAK_SLOTS_PER_TARGET; j++) {
         if (!entry->slots[j]) { entry->slots[j] = weak_loc; return; }
     }
 }
 
-void ovic_weakUnregister(NPObject **weak_loc) {
+void ovel_weakUnregister(NPObject **weak_loc) {
     if (!weak_loc) return;
-    for (int i = 0; i < OVIC_WEAK_MAX_TARGETS; i++) {
+    for (int i = 0; i < OVEL_WEAK_MAX_TARGETS; i++) {
         WeakEntry *entry = &weak_table[i];
-        for (int j = 0; j < OVIC_WEAK_SLOTS_PER_TARGET; j++) {
+        for (int j = 0; j < OVEL_WEAK_SLOTS_PER_TARGET; j++) {
             if (entry->slots[j] == weak_loc) {
                 entry->slots[j] = NULL;
                 /* last slot gone → release the entry so its target slot is
                  * reclaimable; otherwise every once-weak target pins its
                  * entry forever and the 64-target table silently saturates */
                 int empty = 1;
-                for (int k = 0; k < OVIC_WEAK_SLOTS_PER_TARGET; k++) {
+                for (int k = 0; k < OVEL_WEAK_SLOTS_PER_TARGET; k++) {
                     if (entry->slots[k]) { empty = 0; break; }
                 }
                 if (empty && entry->object) entry->object = NULL;
@@ -374,19 +374,19 @@ void ovic_weakUnregister(NPObject **weak_loc) {
     }
 }
 
-void ovic_weakClearAll(NPObject *target) {
+void ovel_weakClearAll(NPObject *target) {
     if (!target) return;
     WeakEntry *entry = find_weak_entry(target);
     if (!entry) return;
-    for (int j = 0; j < OVIC_WEAK_SLOTS_PER_TARGET; j++) {
+    for (int j = 0; j < OVEL_WEAK_SLOTS_PER_TARGET; j++) {
         if (entry->slots[j]) *entry->slots[j] = NULL;
         entry->slots[j] = NULL;
     }
     entry->object = NULL;
 }
 
-void ovic_weakAutoCleanup(void *ptr) {
-    ovic_weakUnregister((NPObject **)ptr);
+void ovel_weakAutoCleanup(void *ptr) {
+    ovel_weakUnregister((NPObject **)ptr);
 }
 
 // ─── @synchronized monitors ──────────────────────────────────────────────────
@@ -396,51 +396,51 @@ void ovic_weakAutoCleanup(void *ptr) {
 // arrives, replace with a spinlock over the same bucket scheme; interrupt-
 // based concurrency would additionally need irq-disable around the lock.)
 
-long ovic_syncLock(void *object) {
+long ovel_syncLock(void *object) {
     (void)object;
     return 0;
 }
 
-void ovic_syncUnlock(long bucket) {
+void ovel_syncUnlock(long bucket) {
     (void)bucket;
 }
 
-void ovic_syncAutoCleanup(void *ptr) {
+void ovel_syncAutoCleanup(void *ptr) {
     (void)ptr;
 }
 
 // ─── Console hook (exception diagnostics only) ──────────────────────────────
 // Bare metal has no stdout/stderr: I/O is NOT a language mechanism, so the
 // runtime provides no printf/NPLog. The only output is the uncaught-
-// exception report from ovic_eh_uncaught(), routed through this hook.
+// exception report from ovel_eh_uncaught(), routed through this hook.
 // Users override it with their console driver (UART/kputs-style); the weak
 // no-op default links cleanly and the program simply traps silently.
-//   void ovic_console_write(const char *s, unsigned len);
+//   void ovel_console_write(const char *s, unsigned len);
 // len == 0 means NUL-terminated.
 
-__attribute__((weak)) void ovic_console_write(const char *s, unsigned len) {
+__attribute__((weak)) void ovel_console_write(const char *s, unsigned len) {
     (void)s; (void)len; /* no console: discard */
 }
 
 /* 1 when p came from the bump allocator (a real object), 0 for raw
  * pointers (C string literals cast to id). Zero cost: two compares. */
-static int ovic_is_heap_object(const void *p) {
-    return (const unsigned char *)p >= ovic_heap
-        && (const unsigned char *)p < ovic_heap + OVIC_HEAP_SIZE;
+static int ovel_is_heap_object(const void *p) {
+    return (const unsigned char *)p >= ovel_heap
+        && (const unsigned char *)p < ovel_heap + OVEL_HEAP_SIZE;
 }
 
-/* Safe class name for ovic_eh_uncaught: raw literals have no isa. */
-static const char *ovic_safe_isa_name(id obj) {
-    if (obj && ovic_is_heap_object(obj) && obj->isa && obj->isa->name)
+/* Safe class name for ovel_eh_uncaught: raw literals have no isa. */
+static const char *ovel_safe_isa_name(id obj) {
+    if (obj && ovel_is_heap_object(obj) && obj->isa && obj->isa->name)
         return obj->isa->name;
     return "?";
 }
 
 // ─── Lifecycle ───────────────────────────────────────────────────────────────
 
-NPObject *ovic_alloc(NPClass *cls) {
+NPObject *ovel_alloc(NPClass *cls) {
     if (!cls) return NULL;
-    NPObject *obj = (NPObject *)ovic_malloc(cls->instance_size);
+    NPObject *obj = (NPObject *)ovel_malloc(cls->instance_size);
     if (obj) {
         memset(obj, 0, cls->instance_size);
         obj->isa = cls;
@@ -449,41 +449,41 @@ NPObject *ovic_alloc(NPClass *cls) {
     return obj;
 }
 
-NPObject *ovic_init(NPObject *self) {
+NPObject *ovel_init(NPObject *self) {
     return self;
 }
 
-NPObject *ovic_retain(NPObject *obj) {
+NPObject *ovel_retain(NPObject *obj) {
     /* Raw pointers (@"..." literals without NPString, C strings cast to id)
      * live outside the bump heap: writing retain_count there faults. No-op. */
-    if (!obj || !ovic_is_heap_object(obj)) return obj;
+    if (!obj || !ovel_is_heap_object(obj)) return obj;
     obj->retain_count++;
     return obj;
 }
 
-void ovic_release(NPObject *obj) {
-    if (!obj || !ovic_is_heap_object(obj)) return;
+void ovel_release(NPObject *obj) {
+    if (!obj || !ovel_is_heap_object(obj)) return;
     if (obj->retain_count > 0)
         obj->retain_count--;
     if (obj->retain_count == 0) {
-        ovic_weakClearAll(obj);
+        ovel_weakClearAll(obj);
         // Call dealloc so ivar cleanup runs (e.g. NPString frees _cstr).
         // dealloc's own `[super dealloc]` calls the parent's dealloc directly
-        // (not ovic_release), so no double-free.
+        // (not ovel_release), so no double-free.
         if (obj->isa && obj->isa->dealloc) {
             obj->isa->dealloc(obj, (SEL){ .name = "dealloc", .hash = 0xD9929EB3 });
         }
-        ovic_free(obj);
+        ovel_free(obj);
     }
 }
 
-NPObject *ovic_autorelease(NPObject *obj) {
-    if (!obj || !ovic_is_heap_object(obj)) return obj;
-    ovic_autoreleasepool_t *pool = current_pool;
+NPObject *ovel_autorelease(NPObject *obj) {
+    if (!obj || !ovel_is_heap_object(obj)) return obj;
+    ovel_autoreleasepool_t *pool = current_pool;
     if (!pool) return obj;
     if (pool->count >= pool->capacity) {
         int new_cap = pool->capacity ? pool->capacity * 2 : 16;
-        NPObject **new_objs = ovic_malloc(new_cap * sizeof(NPObject *));
+        NPObject **new_objs = ovel_malloc(new_cap * sizeof(NPObject *));
         if (!new_objs) return obj;
         if (pool->objects) {
             for (int i = 0; i < pool->count; i++) new_objs[i] = pool->objects[i];

@@ -1,5 +1,5 @@
-// toml_editor.ov — Ovic 全特性 TOML 编辑器
-// 编译: ovicc run tests/TOMLEditor/toml_editor.ov -fno-ovic-arc
+// toml_editor.ov — Ovel 全特性 TOML 编辑器
+// 编译: ovelc run tests/TOMLEditor/toml_editor.ov -fno-ovel-arc
 // 特性覆盖: @namespace, @protocol, @interface, @implementation, @property,
 //           @synthesize, @category, @selector, 继承, 泛型<T>, Block,
 //           @try/@catch/@throw, @autoreleasepool, @public, @public weak,

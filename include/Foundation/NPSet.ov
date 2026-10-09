@@ -8,7 +8,7 @@
 - (void)dealloc {
     for (size_t i = 0; i < _count; i++) {
         if (_items[i]) {
-            ovic_release(_items[i]);
+            ovel_release(_items[i]);
         }
     }
     free(_items);
@@ -52,7 +52,7 @@
                     if (present) {
                         continue;
                     }
-                    items[stored] = ovic_retain(objects[i]);
+                    items[stored] = ovel_retain(objects[i]);
                     stored++;
                 }
                 set->_items = items;
@@ -127,7 +127,7 @@
     if ([self containsObject:object]) return;
     [self _grow];
     if (_count >= _capacity) return; // realloc failed; drop rather than overflow
-    _items[_count] = ovic_retain(object);
+    _items[_count] = ovel_retain(object);
     _count++;
 }
 
@@ -188,7 +188,7 @@
 // `-copy` honors the ObjC convention: the caller owns the result (+1).
 // Returns an immutable NPSet even when invoked on a mutable subclass.
 - (id)copy {
-    return ovic_retain([NPSet setWithObjects:_items count:_count]);
+    return ovel_retain([NPSet setWithObjects:_items count:_count]);
 }
 
 - (NPString *)description {

@@ -1,10 +1,10 @@
 // gcc_stress.ov — 极端的 GCC 编译器扩展压测（可运行子集）。
-// 只使用 ovicc 语法分析器已完整支持的构造；解析器缺口见 gcc_torture.ov。
-// 运行：ovicc -rewrite-ovic -backend gcc gcc_stress.ov -o /tmp/gcc_stress.c
-//       gcc -I include -o /tmp/gcc_stress /tmp/gcc_stress.c include/ovic/runtime.c
+// 只使用 ovelc 语法分析器已完整支持的构造；解析器缺口见 gcc_torture.ov。
+// 运行：ovelc -rewrite-ovel -backend gcc gcc_stress.ov -o /tmp/gcc_stress.c
+//       gcc -I include -o /tmp/gcc_stress /tmp/gcc_stress.c include/ovel/runtime.c
 //       /tmp/gcc_stress
 // 注：本机无真 gcc，用 clang 做 C 编译（gcc-only 属性大多被 clang 容忍为 no-op）；
-//     属性门禁由 ovicc 的 -backend gcc 校验。
+//     属性门禁由 ovelc 的 -backend gcc 校验。
 
 #include <stdio.h>
 

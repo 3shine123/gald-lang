@@ -1,20 +1,20 @@
-// lib.ov — library TU for three-way interop: Ovic C + plain C + assembly.
+// lib.ov — library TU for three-way interop: Ovel C + plain C + assembly.
 // NO main (library-style; linked into a C host program). Build (build.sh):
-//   ovicc -rewrite-ovic lib.ov -o lib.c -emit-bridge-header lib.h
+//   ovelc -rewrite-ovel lib.ov -o lib.c -emit-bridge-header lib.h
 // The C caller (caller.c) includes lib.h and links lib.c + helper.c +
-// asm_lib.s + runtime.c. Caller's main() must call ovic_metaInit() first.
+// asm_lib.s + runtime.c. Caller's main() must call ovel_metaInit() first.
 
 // real ARM64 assembly (asm_lib.s)
 extern int asm_square(int v);
 extern int asm_add3(int a, int b, int c);
 
-// plain C (helper.c) — ovic calls INTO C
+// plain C (helper.c) — ovel calls INTO C
 extern int c_helper_mul(int a, int b);
 
 typedef int (^IntBin)(int, int);
 
 // ── a plain function the C side can call through the bridge ──
-int ovic_add(int a, int b) {
+int ovel_add(int a, int b) {
     return a + b + asm_add3(0, 0, 0) * 0;   // asm linked in, folded here
 }
 

@@ -3,7 +3,7 @@
 // Negative: a dangling-comparison arm (`case > 10:`) coexisting with a
 // type-binding or object-literal arm. The object arm forces the switch subject
 // to be materialized as `NPObject *`, so the comparison lowers to
-// `__ovic_sw > 10` — a POINTER vs integer compare, always true, with no
+// `__ovel_sw > 10` — a POINTER vs integer compare, always true, with no
 // diagnostic anywhere in the generated C. Expected: exit=1 with
 //   "switch mixes a dangling comparison 'case' arm"
 //
