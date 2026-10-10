@@ -251,7 +251,23 @@ impl<'a> Parser<'a> {
         if self.check(kind) {
             self.advance();
         } else {
-            self.error(&format!("{} (got {})", msg, self.current.kind));
+            // Single-character closers/separators get a clang-style insertion
+            // fix-it at the offending token's end; multi-char or keyword-ish
+            // tokens are spelled in the message and have no single insert.
+            let insert = match kind {
+                TokenKind::Semicolon => ";",
+                TokenKind::Comma => ",",
+                TokenKind::RParen => ")",
+                TokenKind::RBracket => "]",
+                TokenKind::RBrace => "}",
+                TokenKind::Colon => ":",
+                _ => "",
+            };
+            if !insert.is_empty() {
+                self.error_with_insert(msg, insert);
+            } else {
+                self.error(&format!("{} (got {})", msg, self.current.kind));
+            }
             // Do NOT advance past the offending token. The old behaviour ate it,
             // which for a missing ';' swallowed the *next* declaration's leading
             // token (`int b = 2` lost its `int`, the remnant parsed as a harmless
@@ -289,6 +305,21 @@ impl<'a> Parser<'a> {
         self.diagnostics.push(
             Diagnostic::error(file, real_line, col, msg).with_end_col(end_col)
         );
+    }
+
+    /// Like [`Self::error`], but also attaches a clang-style insertion fix-it:
+    /// `text` is to be inserted right after the offending token (its end
+    /// column), rendered in green under the caret.
+    fn error_with_insert(&mut self, msg: &str, text: &str) {
+        if self.panic_mode { return; }
+        let insert_col = self.previous.column + self.previous.length.max(1);
+        let before = self.diagnostics.len();
+        self.error(msg);
+        if self.diagnostics.len() > before {
+            if let Some(last) = self.diagnostics.last_mut() {
+                last.hint = Some((insert_col, text.to_string()));
+            }
+        }
     }
 
     /// Resolves a line to (file, source line) via the SourceMap; falls back

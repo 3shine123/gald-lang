@@ -44,6 +44,10 @@ pub struct Diagnostic {
     pub col: usize,
     /// Exclusive end column of the annotated span on the same line, if known.
     pub end_col: Option<usize>,
+    /// clang-style fix-it: a character sequence to insert at `hint.0` (1-based
+    /// column on the primary line), rendered in green under the caret — e.g.
+    /// `;` for "expected ';' after expression".
+    pub hint: Option<(usize, String)>,
     pub message: String,
 }
 
@@ -55,6 +59,7 @@ impl Diagnostic {
             line,
             col,
             end_col: None,
+            hint: None,
             message: message.into(),
         }
     }
@@ -66,6 +71,7 @@ impl Diagnostic {
             line,
             col,
             end_col: None,
+            hint: None,
             message: message.into(),
         }
     }
@@ -77,6 +83,7 @@ impl Diagnostic {
             line,
             col,
             end_col: None,
+            hint: None,
             message: message.into(),
         }
     }
@@ -84,6 +91,13 @@ impl Diagnostic {
     /// Builder-style span setter for call sites that know the width.
     pub fn with_end_col(mut self, end_col: usize) -> Self {
         self.end_col = Some(end_col);
+        self
+    }
+
+    /// Builder-style fix-it: insert `text` at column `col` on the annotated
+    /// line, rendered clang-style under the caret.
+    pub fn with_hint(mut self, col: usize, text: impl Into<String>) -> Self {
+        self.hint = Some((col, text.into()));
         self
     }
 
@@ -118,12 +132,12 @@ pub fn render_plain(diags: &[Diagnostic]) -> String {
 /// the plain one-line form for that diagnostic).
 pub type SourceLookup<'a> = dyn Fn(&str) -> Option<String> + 'a;
 
-/// Render diagnostics clang-style, with the offending source line and a
+/// Render diagnostics clang-style, with the location leading the header line
+/// (`file:line:col: severity: message`) and the offending source line with a
 /// `~~~~^~~~~` annotation under it:
 ///
 /// ```text
-/// error: null passed to a callee that requires a non-null argument
-///   --> foo.jeti:27:14
+/// foo.jeti:27:14: error: null passed to a callee that requires a non-null argument
 ///    |
 /// 27 |     [g greet:nil];
 ///    |            ~~~ ^
@@ -172,24 +186,28 @@ fn render_one(d: &Diagnostic, lookup: &SourceLookup, color: bool) -> String {
     };
 
     let (s_on, s_off) = severity_color(d, color);
+    // clang renders the caret/tilde annotation in green regardless of severity.
+    let (c_on, c_off) = if color { ("\x1b[32m", "\x1b[0m") } else { ("", "") };
+    // clang's header splits coloring: the location is bold, the severity word
+    // bold+severity color, the message bold again (`\x1b[1m` ... `\x1b[0m`).
+    let (b_on, b_off) = if color { ("\x1b[1m", "\x1b[0m") } else { ("", "") };
     let ln = d.line.to_string();
-    let gutter = " ".repeat(ln.len());
+    // clang's gutter: the line number is right-aligned in a column of width
+    // max(len+1, 5) ("    3 |", " 1000 |"); the caret lines under it carry one
+    // extra leading space so their `|` lines up with the source line's.
+    let gutter_pad = (ln.len() + 1).max(5);
+    let gutter = " ".repeat(gutter_pad - ln.len());
+    let blank = " ".repeat(gutter_pad + 1);
     let mut out = String::new();
     out.push_str(&format!(
-        "{}{}{}: {}\n{}--> {}:{}:{}\n{} |\n{} | {}\n",
-        s_on,
-        d.severity.as_str(),
-        s_off,
-        d.message,
-        gutter,
-        d.file,
-        d.line,
-        d.col,
-        gutter,
-        ln,
-        line_text
+        "{b_on}{f}:{l}:{c}: {b_off}{s_on}{sev}: {s_off}{b_on}{msg}{b_off}\n{gutter}{ln} | {src}\n{blank}| ",
+        f = d.file,
+        l = d.line,
+        c = d.col,
+        sev = d.severity.as_str(),
+        msg = d.message,
+        src = &highlight_source_line(line_text, color),
     ));
-    out.push_str(&format!("{} | ", gutter));
     // Bytes before the caret render as spaces; multi-byte source content can
     // desync byte columns from display columns, but Jeti source is effectively
     // ASCII on code lines — revisit with display width if that changes.
@@ -200,7 +218,7 @@ fn render_one(d: &Diagnostic, lookup: &SourceLookup, color: bool) -> String {
             // clang shape: caret at the primary column, tildes through the
             // rest of the span.
             let width = (end - col).min(line_text.len().saturating_sub(col - 1)).max(1);
-            out.push_str(&format!("{}^{}{}", s_on, "~".repeat(width - 1), s_off));
+            out.push_str(&format!("{}^{}{}", c_on, "~".repeat(width - 1), c_off));
         }
         _ => {
             // No recorded width: underline the token under the caret when the
@@ -239,10 +257,98 @@ fn render_one(d: &Diagnostic, lookup: &SourceLookup, color: bool) -> String {
                 }
             }
             if width > 1 {
-                out.push_str(&format!("{}^{}{}", s_on, "~".repeat(width - 1), s_off));
+                out.push_str(&format!("{}^{}{}", c_on, "~".repeat(width - 1), c_off));
             } else {
-                out.push_str(&format!("{}^{}", s_on, s_off));
+                out.push_str(&format!("{}^{}", c_on, c_off));
             }
+        }
+    }
+    // clang-style fix-it: the insertion rendered in green, on its own line,
+    // aligned under the insertion column (`;` at the caret, like clang's
+    // "expected ';' after expression" fix-it).
+    if let Some((hcol, htext)) = &d.hint {
+        let hcol = (*hcol).max(1);
+        out.push('\n');
+        out.push_str(&format!("{}| {}{}{}{}", blank, " ".repeat(hcol - 1), c_on, htext, c_off));
+    }
+    out
+}
+
+/// Minimal clang-style syntax coloring for a single source line shown in a
+/// diagnostic: strings/chars green, comments dim, keywords and the `@`
+/// jeti prefixes blue, numbers magenta. Not a lexer — a byte scan good enough
+/// for display only; when `color` is off the line passes through untouched.
+fn highlight_source_line(line: &str, color: bool) -> String {
+    if !color || line.is_empty() {
+        return line.to_string();
+    }
+    const KEYWORDS: &[&str] = &[
+        "int", "char", "float", "double", "void", "long", "short", "signed", "unsigned",
+        "const", "static", "struct", "union", "enum", "typedef", "sizeof", "return",
+        "if", "else", "while", "for", "do", "switch", "case", "default", "break",
+        "continue", "goto", "nil", "NULL", "BOOL", "id", "instancetype", "SEL", "self",
+        "super", "YES", "NO",
+    ];
+    const RESET: &str = "\x1b[0m";
+    const GREEN: &str = "\x1b[32m";
+    const BLUE: &str = "\x1b[34m";
+    const MAGENTA: &str = "\x1b[35m";
+    const DIM: &str = "\x1b[2m";
+
+    let b = line.as_bytes();
+    let is_word = |c: u8| c.is_ascii_alphanumeric() || c == b'_';
+    let mut out = String::with_capacity(line.len() + 32);
+    let mut i = 0usize;
+    while i < b.len() {
+        let c = b[i];
+        if c == b'"' || c == b'\'' {
+            // String/char literal: green, through the closing quote (no escape
+            // tracking needed for display — a trailing quote still colors fine).
+            let quote = c;
+            let start = i;
+            i += 1;
+            while i < b.len() && b[i] != quote {
+                if b[i] == b'\\' && i + 1 < b.len() { i += 1; }
+                i += 1;
+            }
+            if i < b.len() { i += 1; }
+            out.push_str(GREEN);
+            out.push_str(&line[start..i]);
+            out.push_str(RESET);
+        } else if c == b'/' && i + 1 < b.len() && b[i + 1] == b'/' {
+            // Line comment: dim to end of line.
+            out.push_str(DIM);
+            out.push_str(&line[i..]);
+            out.push_str(RESET);
+            i = b.len();
+        } else if c == b'@' && i + 1 < b.len() && (b[i + 1] == b'"' || b[i + 1] == b'(') {
+            // `@"..."` / `@(...)`: the prefix in blue, then re-scan the payload
+            // naturally (the string branch handles `@"..."` on the next pass).
+            out.push_str(BLUE);
+            out.push('@');
+            out.push_str(RESET);
+            i += 1;
+        } else if is_word(c) {
+            let start = i;
+            while i < b.len() && is_word(b[i]) { i += 1; }
+            let word = &line[start..i];
+            if KEYWORDS.contains(&word) {
+                out.push_str(BLUE);
+                out.push_str(word);
+                out.push_str(RESET);
+            } else if word.bytes().all(|w| w.is_ascii_digit()) {
+                out.push_str(MAGENTA);
+                out.push_str(word);
+                out.push_str(RESET);
+            } else {
+                out.push_str(word);
+            }
+        } else {
+            // Single byte, no coloring — pass through as a &str slice so
+            // multi-byte UTF-8 bytes are never reinterpreted as lone chars.
+            let start = i;
+            i += 1;
+            out.push_str(&line[start..i]);
         }
     }
     out
@@ -283,7 +389,7 @@ mod tests {
         let out = render_annotated(&[d], &lookup_ok);
         assert_eq!(
             out,
-            "error: boom\n --> foo.jeti:2:9\n  |\n2 |     [g greet:nil];\n  |         ^"
+            "foo.jeti:2:9: error: boom\n    2 |     [g greet:nil];\n      |         ^"
         );
     }
 
@@ -293,7 +399,7 @@ mod tests {
         let d = Diagnostic::error("foo.jeti", 2, 13, "bad arg").with_end_col(18);
         let out = render_annotated(&[d], &lookup_ok);
         let line = out.lines().last().unwrap();
-        assert_eq!(line, "  |             ^~~~~");
+        assert_eq!(line, "      |             ^~~~~");
     }
 
     #[test]
