@@ -1,0 +1,206 @@
+// lang-test/implicit_root_class_test.jeti
+// Jeti 隐式根类 __jeti_root 专项压测
+// 验证不写父类的 @interface 自动获得隐式根类
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#import <Foundation/Foundation.jth>
+
+// ============================================================================
+// 1. 隐式根类：自定义轻量级根类，不继承 NPObject
+// ============================================================================
+
+@interface LightNode {
+    @public
+    int _value;
+    const char* _tag;
+}
+@property int value;
+@property const char* tag;
+
+- (id)initLightWithValue:(int)val tag:(const char*)t;
+- (int)valueDouble;
+@end
+
+@implementation LightNode
+@synthesize value = _value;
+@synthesize tag = _tag;
+
+- (id)initLightWithValue:(int)val tag:(const char*)t {
+    self = [super init];
+    if (self) {
+        _value = val;
+        _tag = t;
+    }
+    return self;
+}
+
+- (int)valueDouble {
+    return _value * 2;
+}
+
+- (void)dealloc {
+    printf("[LightNode] 轻量节点 [%s] 销毁，值=%d\n", _tag, _value);
+    [super dealloc];
+}
+@end
+
+@interface HeavyNode : NPObject {
+    @public
+    int _value;
+    const char* _tag;
+}
+@property int value;
+@property const char* tag;
+
+- (id)initHeavyWithValue:(int)val tag:(const char*)t;
+@end
+
+@implementation HeavyNode
+@synthesize value = _value;
+@synthesize tag = _tag;
+
+- (id)initHeavyWithValue:(int)val tag:(const char*)t {
+    self = [super init];
+    if (self) {
+        _value = val;
+        _tag = t;
+    }
+    return self;
+}
+
+- (void)dealloc {
+    printf("[HeavyNode] NPObject 节点 [%s] 销毁\n", _tag);
+    [super dealloc];
+}
+@end
+
+
+// ============================================================================
+// 3. 多层继承链：隐式根类 → 子类 → 孙类
+// ============================================================================
+
+@interface BaseNode {
+    @public
+    int _baseId;
+}
+@property int baseId;
+- (id)initWithBaseId:(int)bid;
+@end
+
+@implementation BaseNode
+@synthesize baseId = _baseId;
+- (id)initWithBaseId:(int)bid {
+    self = [super init];
+    if (self) _baseId = bid;
+    return self;
+}
+@end
+
+@interface DerivedNode : BaseNode {
+    @public
+    const char* _derivedName;
+}
+@property const char* derivedName;
+- (id)initWithBaseId:(int)bid name:(const char*)name;
+@end
+
+@implementation DerivedNode
+@synthesize derivedName = _derivedName;
+- (id)initWithBaseId:(int)bid name:(const char*)name {
+    self = [super initWithBaseId:bid];
+    if (self) _derivedName = name;
+    return self;
+}
+@end
+
+@interface GrandChildNode : DerivedNode {
+    @public
+    double _extra;
+}
+@property double extra;
+- (id)initWithBaseId:(int)bid name:(const char*)name extra:(double)e;
+- (void)printAll;
+@end
+
+@implementation GrandChildNode
+@synthesize extra = _extra;
+- (id)initWithBaseId:(int)bid name:(const char*)name extra:(double)e {
+    self = [super initWithBaseId:bid name:name];
+    if (self) _extra = e;
+    return self;
+}
+- (void)printAll {
+    printf("[GrandChild] baseId=%d name=%s extra=%.1f\n", _baseId, _derivedName, _extra);
+}
+@end
+
+
+// ============================================================================
+// 4. id 多态验证：隐式根类对象可以赋值给 id
+// ============================================================================
+
+@protocol Identifiable
+- (int)getId;
+@end
+
+@interface LightNode (IdentifiableConformance)
+- (int)getId;
+@end
+
+@implementation LightNode (IdentifiableConformance)
+- (int)getId {
+    return _value;
+}
+@end
+
+
+// ============================================================================
+// 5. 主函数
+// ============================================================================
+
+int main(int argc, const char* argv[]) {
+    @autoreleasepool {
+        printf("=========================================================\n");
+        printf(">>>  jetic 隐式根类 __jeti_root 专项压测  <<<\n");
+        printf("=========================================================\n\n");
+
+        // --- 1. 隐式根类基本功能 ---
+        printf("--- 1. 隐式根类 LightNode 基本功能 ---\n");
+        LightNode* light = [[LightNode alloc] initLightWithValue:42 tag:"answer"];
+        printf("  value=%d, double=%d, tag=%s\n",
+               [light value], [light valueDouble], [light tag]);
+
+        // --- 2. NPObject 对比 ---
+        printf("\n--- 2. NPObject 继承对比 ---\n");
+        HeavyNode* heavy = [[HeavyNode alloc] initHeavyWithValue:99 tag:"heavy"];
+        printf("  HeavyNode value=%d\n", [heavy value]);
+
+        // --- 3. 多层继承链 ---
+        printf("\n--- 3. 多层继承链验证 ---\n");
+        GrandChildNode* gc = [[GrandChildNode alloc] initWithBaseId:7 name:"deep" extra:3.14];
+        [gc printAll];
+
+        // --- 4. id 多态 ---
+        printf("\n--- 4. id 多态验证 ---\n");
+        id obj = light;
+        printf("  id 指向 LightNode，getId=%d\n", [obj getId]);
+
+        // --- 5. 继承链方法调用 ---
+        printf("\n--- 5. 继承链方法调用 ---\n");
+        BaseNode* base = gc;
+        printf("  baseId from GrandChild via BaseNode*: %d\n", [base baseId]);
+
+        // --- 6. 内存释放 ---
+        printf("\n--- 6. 内存释放 ---\n");
+        [light release];
+        [heavy release];
+        [gc release];
+
+        printf("\n=========================================================\n");
+        printf(">>>  隐式根类测试全部通过！  <<<\n");
+        printf("=========================================================\n");
+    }
+    return 0;
+}

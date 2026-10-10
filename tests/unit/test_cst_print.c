@@ -1,6 +1,6 @@
-#include "ovel/parser.h"
-#include "ovel/lexer.h"
-#include "ovel/cst.h"
+#include "jeti/parser.h"
+#include "jeti/lexer.h"
+#include "jeti/cst.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -14,7 +14,7 @@ static int passed = 0;
 static void do_test(const char *name, const char *src, int expected_decls) {
     TEST(name);
     lexer_t lexer;
-    lexer_init(&lexer, src, strlen(src), "test.ov");
+    lexer_init(&lexer, src, strlen(src), "test.jeti");
     parser_t *p = parser_create(&lexer);
     translation_unit_t *unit = parser_parse_translation_unit(p);
 

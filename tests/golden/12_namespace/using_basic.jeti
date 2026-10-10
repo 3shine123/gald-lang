@@ -1,0 +1,31 @@
+// test: @using basic — import single class with short name
+#include <stdio.h>
+#import <Foundation/Foundation.jth>
+
+@namespace Game
+    @interface Player : NPObject {
+        @public
+        int score;
+    }
+    - (id)initWithScore:(int)s;
+    @end
+
+    @implementation Player
+    - (id)initWithScore:(int)s {
+        self = [super init];
+        if (self) score = s;
+        return self;
+    }
+    @end
+@endnamespace
+
+@using Game::Player;
+
+int main() {
+    @autoreleasepool {
+        Player *p = [[Player alloc] initWithScore:99];
+        printf("[using_basic] Player score: %d\n", p->score);
+        [p release];
+    }
+    return 0;
+}

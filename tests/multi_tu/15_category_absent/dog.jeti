@@ -1,0 +1,6 @@
+#import "dog.jth"
+@implementation Dog
+- (instancetype)init {
+    return self;
+}
+@end

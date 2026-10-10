@@ -1,0 +1,54 @@
+#import "NPObject.jth"
+
+@implementation jeti_root
+- (id)init {
+    return jeti_init(self);
+}
+- (void)dealloc {
+    return;
+}
+- (void)release {
+    jeti_release(self);
+}
+- (id)retain {
+    return jeti_retain(self);
+}
+- (BOOL)isKindOf:(Class)cls {
+    return jeti_isKindOf(self, cls);
+}
+- (BOOL)isKindOfClass:(Class)cls {
+    return jeti_isKindOfClass(self, cls);
+}
+- (BOOL)isEqual:(id)object {
+    /* Default: identity (pointer equality), matching NSObject. */
+    return self == object;
+}
+- (id)description {
+    return nil;
+}
+@end
+
+@implementation NPObject
++ (id)alloc {
+    return jeti_alloc(self);
+}
++ (id)new {
+    id obj = jeti_alloc(self);
+    return jeti_init(obj);
+}
+- (id)init {
+    return jeti_init(self);
+}
+- (void)dealloc {
+    return;
+}
+- (void)release {
+    jeti_release(self);
+}
+- (id)retain {
+    return jeti_retain(self);
+}
+- (id)description {
+    return nil;
+}
+@end

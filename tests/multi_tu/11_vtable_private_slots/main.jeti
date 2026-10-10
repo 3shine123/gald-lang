@@ -1,0 +1,22 @@
+#import "model.jth"
+#include <stdio.h>
+
+// Client TU: calls `Widget` through the public header only, and defines its own
+// unrelated class. Nothing here disagrees with `lib.jeti` about `Widget`, yet the
+// two TUs see different method sets, so they build different uniform vtables.
+@interface App : NPObject
+- (int)run;
+@end
+
+@implementation App : NPObject
+- (int)run { return 42; }
+@end
+
+int main() {
+    Widget *w = [[Widget alloc] init];
+    [w show];
+
+    App *a = [[App alloc] init];
+    printf("run=%d\n", [a run]);
+    return [a run] == 42 ? 0 : 1;
+}

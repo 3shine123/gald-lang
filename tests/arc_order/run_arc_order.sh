@@ -3,13 +3,13 @@
 #
 # WHY THIS EXISTS
 # ---------------
-# ARC injects `ovel_release` for owned locals at every exit point. **Order
+# ARC injects `jeti_release` for owned locals at every exit point. **Order
 # matters**: the exit expression (`return` / `@throw`) must be FULLY evaluated
 # before any local it uses is released — otherwise the release is a
 # use-after-free. Conversely a local used only by the exit expression must
 # still be released (skipping it is a leak).
 #
-# Each case is `NN_name.ov` + `NN_name.out` (expected stdout under ARC).
+# Each case is `NN_name.jeti` + `NN_name.out` (expected stdout under ARC).
 # Six combinations are exercised per case:
 #   {default, -eh checked, -eh legacy} x {ARC, MRC}
 #
@@ -17,30 +17,30 @@
 #   MRC: ARC injects nothing (manual memory management), so only exit 0 is
 #        asserted — dealloc output is not expected.
 #
-# Usage: ./run_arc_order.sh            OVELC=target/debug/ovelc ./run_arc_order.sh
+# Usage: ./run_arc_order.sh            JETIC=target/debug/jetic ./run_arc_order.sh
 set -u
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 cd "$ROOT"
 
-OVELC="${OVELC:-}"
-if [[ -z "$OVELC" ]]; then
-    for c in target/release/ovelc target/debug/ovelc; do
-        if [[ -x "$c" ]]; then OVELC="$c"; break; fi
+JETIC="${JETIC:-}"
+if [[ -z "$JETIC" ]]; then
+    for c in target/release/jetic target/debug/jetic; do
+        if [[ -x "$c" ]]; then JETIC="$c"; break; fi
     done
 fi
-if [[ ! -x "${OVELC:-}" ]]; then
-    echo "error: ovelc not found (build it, or set OVELC=)" >&2
+if [[ ! -x "${JETIC:-}" ]]; then
+    echo "error: jetic not found (build it, or set JETIC=)" >&2
     exit 2
 fi
-# Absolute paths pass through unchanged: an unconditional "$PWD/$OVELC"
-# would turn an absolute OVELC into "$PWD/$PWD/target/.../ovelc".
-case "$OVELC" in
+# Absolute paths pass through unchanged: an unconditional "$PWD/$JETIC"
+# would turn an absolute JETIC into "$PWD/$PWD/target/.../jetic".
+case "$JETIC" in
     /*) ;;
-    *) OVELC="$PWD/$OVELC" ;;
+    *) JETIC="$PWD/$JETIC" ;;
 esac
 
-WORK="${TMPDIR:-/tmp}/ovel_arc_order.$$"
+WORK="${TMPDIR:-/tmp}/jeti_arc_order.$$"
 mkdir -p "$WORK"
 trap 'rm -rf "$WORK"' EXIT
 
@@ -51,9 +51,9 @@ mode_flags() {
         arc-default) printf '' ;;
         arc-checked) printf -- '-eh checked' ;;
         arc-legacy)  printf -- '-eh legacy' ;;
-        mrc-default) printf -- '-fno-ovel-arc' ;;
-        mrc-checked) printf -- '-fno-ovel-arc -eh checked' ;;
-        mrc-legacy)  printf -- '-fno-ovel-arc -eh legacy' ;;
+        mrc-default) printf -- '-fno-jeti-arc' ;;
+        mrc-checked) printf -- '-fno-jeti-arc -eh checked' ;;
+        mrc-legacy)  printf -- '-fno-jeti-arc -eh legacy' ;;
     esac
 }
 
@@ -62,16 +62,16 @@ norm() {
 }
 
 echo "=== ARC evaluation-order suite ==="
-echo "ovelc: $OVELC"
+echo "jetic: $JETIC"
 echo
 printf '%-30s %-12s %s\n' "case" "mode" "result"
 printf -- '--------------------------------------------------------------------------\n'
 
 PASS=0; FAIL=0; FAILED=()
 
-for np in "$SCRIPT_DIR"/[0-9][0-9]_*.ov; do
+for np in "$SCRIPT_DIR"/[0-9][0-9]_*.jeti; do
     [[ -f "$np" ]] || continue
-    name="$(basename "$np" .ov)"
+    name="$(basename "$np" .jeti)"
     ref="$SCRIPT_DIR/$name.out"
     for m in "${MODES[@]}"; do
         # shellcheck disable=SC2206
@@ -79,7 +79,7 @@ for np in "$SCRIPT_DIR"/[0-9][0-9]_*.ov; do
         # NPLog writes to stderr (runtime.c), so merge the streams: for these
         # cases the program's observable output *is* the stderr transcript.
         log="$WORK/$name.$m.log"
-        "$OVELC" run -o "$WORK/$name.$m.bin" ${ff[@]+"${ff[@]}"} "$np" >"$log" 2>&1
+        "$JETIC" run -o "$WORK/$name.$m.bin" ${ff[@]+"${ff[@]}"} "$np" >"$log" 2>&1
         rc=$?
         ok=1
         note=""

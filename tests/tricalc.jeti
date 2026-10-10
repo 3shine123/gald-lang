@@ -1,0 +1,433 @@
+#import <Foundation/Foundation.jth>
+#include <stdio.h>
+
+#include <math.h>
+
+#define PI 3.14159265358979323846
+
+@namespace TC
+    @interface TriCalc : NPObject
+    // 角度转弧度
+
+    + (double)degreeToRadian:(double)degree;
+
+    // 弧度转角度
+
+    + (double)radianToDegree:(double)radian;
+
+    // 三角函数
+
+    + (double)sinWithDegree:(double)degree;
+
+    + (double)cosWithDegree:(double)degree;
+
+    + (double)tanWithDegree:(double)degree;
+
+    // 反三角函数
+
+    + (double)asinWithValue:(double)value;
+
+    + (double)acosWithValue:(double)value;
+
+    + (double)atanWithValue:(double)value;
+
+    // 显示菜单
+
+    + (void)showMenu;
+
+    // 运行程序
+
+    + (void)run;
+    @end
+
+    @implementation TriCalc
+    #pragma mark - 角度转换
+
+    + (double)degreeToRadian:(double)degree
+
+    {
+
+        return degree * M_PI / 180.0;
+
+    }
+
+    + (double)radianToDegree:(double)radian
+
+    {
+
+        return radian * 180.0 / M_PI;
+
+    }
+
+    #pragma mark - 三角函数
+
+    + (double)sinWithDegree:(double)degree
+
+    {
+
+        double radian = [self degreeToRadian:degree];
+
+        return sin(radian);
+
+    }
+
+    + (double)cosWithDegree:(double)degree
+
+    {
+
+        double radian = [self degreeToRadian:degree];
+
+        return cos(radian);
+
+    }
+
+    + (double)tanWithDegree:(double)degree
+
+    {
+
+        double radian = [self degreeToRadian:degree];
+
+        return tan(radian);
+
+    }
+
+    #pragma mark - 反三角函数
+
+    + (double)asinWithValue:(double)value
+
+    {
+
+        return asin(value);
+
+    }
+
+    + (double)acosWithValue:(double)value
+
+    {
+
+        return acos(value);
+
+    }
+
+    + (double)atanWithValue:(double)value
+
+    {
+
+        return atan(value);
+
+    }
+
+    #pragma mark - 菜单
+
+    + (void)showMenu {
+
+        printf("\n");
+
+        printf("=================================\n");
+
+        printf("       三角函数计算工具\n");
+
+        printf("=================================\n");
+
+        printf("1. 计算 sin(x)\n");
+
+        printf("2. 计算 cos(x)\n");
+
+        printf("3. 计算 tan(x)\n");
+
+        printf("4. 计算 asin(x)\n");
+
+        printf("5. 计算 acos(x)\n");
+
+        printf("6. 计算 atan(x)\n");
+
+        printf("7. 角度转弧度\n");
+
+        printf("8. 弧度转角度\n");
+
+        printf("0. 退出程序\n");
+
+        printf("=================================\n");
+
+    }
+
+    #pragma mark - 程序运行
+
+    + (void)run
+
+    {
+
+        int choice;
+
+        double value;
+
+        while (YES)
+
+        {
+
+            [self showMenu];
+
+            printf("请选择功能：");
+
+            scanf("%d", &choice);
+
+            switch (choice)
+
+            {
+
+                case 1:
+
+                {
+
+                    printf("请输入角度：");
+
+                    scanf("%lf", &value);
+
+                    double result = [self sinWithDegree:value];
+
+                    printf("sin(%.2f°) = %.10f\n",
+
+                        value,
+
+                        result);
+
+                    break;
+
+                }
+
+                case 2:
+
+                {
+
+                    printf("请输入角度：");
+
+                    scanf("%lf", &value);
+
+                    double result = [self cosWithDegree:value];
+
+                    printf("cos(%.2f°) = %.10f\n",
+
+                        value,
+
+                        result);
+
+                    break;
+
+                }
+
+                case 3:
+
+                {
+
+                    printf("请输入角度：");
+
+                    scanf("%lf", &value);
+
+                    double radian = [self degreeToRadian:value];
+
+                    // cos(x) = 0 时 tan(x) 没有定义
+
+                    if (fabs(cos(radian)) < 1e-10)
+
+                    {
+
+                        printf("tan(%.2f°) 没有定义。\n", value);
+
+                    }
+
+                    else
+
+                    {
+
+                        double result = [self tanWithDegree:value];
+
+                        printf("tan(%.2f°) = %.10f\n",
+
+                            value,
+
+                            result);
+
+                    }
+
+                    break;
+
+                }
+
+                case 4:
+
+                {
+
+                    printf("请输入 [-1, 1] 之间的数：");
+
+                    scanf("%lf", &value);
+
+                    if (value < -1.0 || value > 1.0)
+
+                    {
+
+                        printf("输入错误：asin 的输入范围必须是 [-1, 1]。\n");
+
+                        break;
+
+                    }
+
+                    double radian = [self asinWithValue:value];
+
+                    double degree = [self radianToDegree:radian];
+
+                    printf("asin(%.4f) = %.10f 弧度\n",
+
+                        value,
+
+                        radian);
+
+                    printf("asin(%.4f) = %.10f°\n",
+
+                        value,
+
+                        degree);
+
+                    break;
+
+                }
+
+                case 5:
+
+                {
+
+                    printf("请输入 [-1, 1] 之间的数：");
+
+                    scanf("%lf", &value);
+
+                    if (value < -1.0 || value > 1.0)
+
+                    {
+
+                        printf("输入错误：acos 的输入范围必须是 [-1, 1]。\n");
+
+                        break;
+
+                    }
+
+                    double radian = [self acosWithValue:value];
+
+                    double degree = [self radianToDegree:radian];
+
+                    printf("acos(%.4f) = %.10f 弧度\n",
+
+                        value,
+
+                        radian);
+
+                    printf("acos(%.4f) = %.10f°\n",
+
+                        value,
+
+                        degree);
+
+                    break;
+
+                }
+
+                case 6:
+
+                {
+
+                    printf("请输入一个数：");
+
+                    scanf("%lf", &value);
+
+                    double radian = [self atanWithValue:value];
+
+                    double degree = [self radianToDegree:radian];
+
+                    printf("atan(%.4f) = %.10f 弧度\n",
+
+                        value,
+
+                        radian);
+
+                    printf("atan(%.4f) = %.10f°\n",
+
+                        value,
+
+                        degree);
+
+                    break;
+
+                }
+
+                case 7:
+
+                {
+
+                    printf("请输入角度：");
+
+                    scanf("%lf", &value);
+
+                    double radian = [self degreeToRadian:value];
+
+                    printf("%.6f° = %.10f 弧度\n",
+
+                        value,
+
+                        radian);
+
+                    break;
+
+                }
+
+                case 8:
+
+                {
+
+                    printf("请输入弧度：");
+
+                    scanf("%lf", &value);
+
+                    double degree = [self radianToDegree:value];
+
+                    printf("%.10f 弧度 = %.6f°\n",
+
+                        value,
+
+                        degree);
+
+                    break;
+
+                }
+
+                case 0:
+
+                {
+
+                    printf("感谢使用三角函数计算工具！\n");
+
+                    return;
+
+                }
+
+                default:
+
+                {
+
+                    printf("输入错误，请选择 0~8 之间的数字。\n");
+
+                    break;
+
+                }
+
+            }
+
+        }
+
+    }
+    @end
+@endnamespace
+
+int main(int argc, const char * argv[]) {
+    @autoreleasepool {
+        [TC::TriCalc run];
+    }
+    return 0;
+}

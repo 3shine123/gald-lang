@@ -25,7 +25,7 @@
 //! old M1 sync-context call check was removed when `NPTask<T>` handles
 //! became real values; `[task start]` / `@await` drive them afterwards.
 
-use ovel_ast::{AstDecl, AstDeclData, AstExpr, AstExprData, AstExprKind, AstStmt, AstStmtData};
+use jeti_ast::{AstDecl, AstDeclData, AstExpr, AstExprData, AstExprKind, AstStmt, AstStmtData};
 
 /// A method classified as async, with the data the desugar needs.
 pub struct AsyncMethod<'a> {
@@ -142,7 +142,7 @@ pub struct AsyncDiagnostics {
 /// - reject calling a non-void async method from a synchronous context
 ///   (methods not classified async). Milestone 1 reports these; call-graph
 ///   precision improves in later milestones.
-pub fn check_unit(unit: &ovel_ast::AstUnit) -> AsyncDiagnostics {
+pub fn check_unit(unit: &jeti_ast::AstUnit) -> AsyncDiagnostics {
     let mut diags = AsyncDiagnostics { errors: Vec::new(), warnings: Vec::new() };
 
     // ── async-modifier reconciliation (doc/async_nptask_plan.md, stage B) ──
@@ -290,13 +290,13 @@ fn check_stmt_for_try_await(s: &AstStmt, owner: &str, diags: &mut AsyncDiagnosti
 /// Rewrite an async method body into the M1 task-driven form:
 ///
 /// ```text
-///     { NPTask *__ovel_task = ovel_task_create(entry_stub, (NPObject *)self, 0);
+///     { NPTask *__jeti_task = jeti_task_create(entry_stub, (NPObject *)self, 0);
 ///       ...original body with `await e` lowered...
-///       ovel_task_join(__ovel_task); }
+///       jeti_task_join(__jeti_task); }
 /// ```
 ///
 
-/// `await e` lowers to `(*__ovel_task->entry)(__ovel_task), (e)` — evaluate
+/// `await e` lowers to `(*__jeti_task->entry)(__jeti_task), (e)` — evaluate
 /// the task's next segment (M1: the entry stub is a no-op returning 1, so
 /// this is a pure sequencing hook), then the awaited expression. This keeps
 /// the AST/observable behavior of M1 identical to synchronous execution while
@@ -308,8 +308,8 @@ fn check_stmt_for_try_await(s: &AstStmt, owner: &str, diags: &mut AsyncDiagnosti
 /// their return value flows through the expression normally (only callable
 /// from async contexts per the check pass).
 pub fn desugar_method_body(body: &mut AstStmt) {
-    use ovel_ast::{AstStmtKind, AstType};
-    use ovel_cst::TypePrim;
+    use jeti_ast::{AstStmtKind, AstType};
+    use jeti_cst::TypePrim;
 
     let line = body.line;
     let col = body.col;
@@ -352,7 +352,7 @@ pub fn desugar_method_body(body: &mut AstStmt) {
             AstExprData::Await(inner) => {
                 lower_awaits_expr(inner);
                 // NPTask design (doc/async_nptask_plan.md, stage D):
-                // `@await e` → `ovel_task_await(e)` — the awaited expression
+                // `@await e` → `jeti_task_await(e)` — the awaited expression
                 // is an async call (lazy task creation) or an NPTask handle;
                 // the runtime auto-starts and blocks/suspends, caching the
                 // result (multi-await safe).
@@ -364,7 +364,7 @@ pub fn desugar_method_body(body: &mut AstStmt) {
                     kind: AstExprKind::FuncCall, expr_type: None, line, col,
                     data: AstExprData::FuncCall {
                         func: None,
-                        name: "ovel_task_await".to_string(),
+                        name: "jeti_task_await".to_string(),
                         callee: None,
                         args: vec![taken],
                     },
@@ -417,7 +417,7 @@ pub fn desugar_method_body(body: &mut AstStmt) {
         kind: AstExprKind::FuncCall, expr_type: None, line, col,
         data: AstExprData::FuncCall {
             func: None,
-            name: "ovel_task_create".to_string(),
+            name: "jeti_task_create".to_string(),
             callee: None,
             args: vec![
                 AstExpr { kind: AstExprKind::Int, expr_type: None, line, col, data: AstExprData::Int(0) }, // entry: NULL (M1)
@@ -427,8 +427,8 @@ pub fn desugar_method_body(body: &mut AstStmt) {
         },
     };
     let task_decl = AstDecl {
-        kind: ovel_ast::AstDeclKind::Variable,
-        name: Some("__ovel_task".to_string()),
+        kind: jeti_ast::AstDeclKind::Variable,
+        name: Some("__jeti_task".to_string()),
         line, col,
         data: AstDeclData::Variable {
             var_type: Some(Box::new({
@@ -452,11 +452,11 @@ pub fn desugar_method_body(body: &mut AstStmt) {
             kind: AstExprKind::FuncCall, expr_type: None, line, col,
             data: AstExprData::FuncCall {
                 func: None,
-                name: "ovel_task_join".to_string(),
+                name: "jeti_task_join".to_string(),
                 callee: None,
                 args: vec![AstExpr {
                     kind: AstExprKind::VarRef, expr_type: None, line, col,
-                    data: AstExprData::VarRef { sym: None, name: "__ovel_task".to_string() },
+                    data: AstExprData::VarRef { sym: None, name: "__jeti_task".to_string() },
                 }],
             },
         }),
@@ -473,7 +473,7 @@ pub fn desugar_method_body(body: &mut AstStmt) {
 }
 
 /// Apply the desugar over the whole unit: rewrite every async method body.
-pub fn desugar_unit(unit: &mut ovel_ast::AstUnit) {
+pub fn desugar_unit(unit: &mut jeti_ast::AstUnit) {
     for decl in &mut unit.decls {
         if let AstDeclData::Class { methods, .. } = &mut decl.data {
             for m in methods.iter_mut() {
@@ -495,7 +495,7 @@ pub fn desugar_unit(unit: &mut ovel_ast::AstUnit) {
     }
 }
 
-/// `[task start]` on an NPTask handle → `ovel_task_start(task)`. The handle
+/// `[task start]` on an NPTask handle → `jeti_task_start(task)`. The handle
 /// is a runtime struct, not an NPObject — a vtable message send would be
 /// undefined (doc/async_nptask_plan.md, stage D).
 fn is_task_start_send(e: &AstExpr) -> bool {
@@ -512,7 +512,7 @@ fn is_task_start_send(e: &AstExpr) -> bool {
 }
 
 /// `drive` = this expression sits at STATEMENT position of a hosted unit: a
-/// `[t start]` there becomes a blocking drive (`ovel_task_await`) instead of a
+/// `[t start]` there becomes a blocking drive (`jeti_task_await`) instead of a
 /// bare enqueue. The doc's entry idiom (`NPTask *t = [f run]; [t start];`)
 /// must run while the receiver is still ARC-alive — an end-of-main pump cannot
 /// guarantee that (ARC's scope-end release lands first: SIGSEGV, lldb-verified
@@ -529,7 +529,7 @@ fn lower_task_starts_expr(e: &mut AstExpr, ctx: &AsyncCtx, drive: bool) {
         let col = e.col;
         let taken = std::mem::replace(e, int_expr(0, line, col));
         let AstExprData::MsgSend { receiver, .. } = taken.data else { unreachable!() };
-        let start_fn = if drive { "ovel_task_await" } else { "ovel_task_start" };
+        let start_fn = if drive { "jeti_task_await" } else { "jeti_task_start" };
         *e = AstExpr {
             kind: AstExprKind::FuncCall, expr_type: None, line, col,
             data: AstExprData::FuncCall {
@@ -617,8 +617,8 @@ fn lower_task_starts_decl(d: &mut AstDecl, ctx: &mut AsyncCtx, hosted: bool) {
 
 // ─── Milestone 2: real state machine (frame + entry fn + driver) ────────────
 
-use ovel_ast::{AstDeclKind, AstStmtKind, AstType};
-use ovel_cst::TypePrim;
+use jeti_ast::{AstDeclKind, AstStmtKind, AstType};
+use jeti_cst::TypePrim;
 
 /// Named struct field type for the frame: `struct <Method>_frame`.
 fn frame_type_name(symbol: &str) -> String {
@@ -664,12 +664,12 @@ fn desugar_method_m2(
     // struct bodies, leaving `sizeof(struct …_frame)` on an incomplete type.
     // Pad so the frame is always a complete type.
     if frame_fields.is_empty() {
-        frame_fields.push(("__ovel_pad".to_string(), AstType::new(TypePrim::Char)));
+        frame_fields.push(("__jeti_pad".to_string(), AstType::new(TypePrim::Char)));
     }
 
     let ftname = frame_type_name(method_symbol);
     let flat = sanitize_symbol(method_symbol);
-    let entry_name = format!("ovel_async_state_{}", flat);
+    let entry_name = format!("jeti_async_state_{}", flat);
 
     // 2. Frame typedef decl.
     // Fields use the Ivar variant: codegen's Struct branch reads
@@ -718,11 +718,11 @@ fn desugar_method_m2(
     let final_state = state_counter;
 
     // 4. Entry function:
-    //   static int ovel_async_state_<M>(NPTask *__ovel_task) {
-    //     struct <M>_frame *__ovel_f = (struct <M>_frame *)__ovel_task->frame;
-    //     switch (__ovel_task->state) {
+    //   static int jeti_async_state_<M>(NPTask *__jeti_task) {
+    //     struct <M>_frame *__jeti_f = (struct <M>_frame *)__jeti_task->frame;
+    //     switch (__jeti_task->state) {
     //       case 1: ...body with lowered awaits...
-    //       case <final>: __ovel_task->state = -1; return 1;
+    //       case <final>: __jeti_task->state = -1; return 1;
     //     }
     //     return 1;
     //   }
@@ -743,11 +743,11 @@ fn desugar_method_m2(
 
     // Build the switch: case 1 = body; case final = finish.
     // The entry can only see the task: rewrite param references to
-    // `__ovel_f->param` (the frame) and `self` to `__ovel_task->self_obj`,
+    // `__jeti_f->param` (the frame) and `self` to `__jeti_task->self_obj`,
     // then rewrite returns to
     // the completion protocol (result/state/return 1).
     let mut case_body_stmts = body_stmts;
-    // Only params are rewritten to `__ovel_f->param` (the frame carries them
+    // Only params are rewritten to `__jeti_f->param` (the frame carries them
     // across the entry boundary). Body-internal locals stay on the C stack:
     // in M2's synchronous-drive model there is no suspension between their
     // declaration and last use, so rewriting their reads to the (never
@@ -757,12 +757,12 @@ fn desugar_method_m2(
         rewrite_entry_refs_stmt(stmt, &params_only);
     }
     rewrite_returns_to_result(&mut case_body_stmts);
-    // struct <FT> *__ovel_f = (struct <FT> *)__ovel_task->frame;  (case 1 head)
+    // struct <FT> *__jeti_f = (struct <FT> *)__jeti_task->frame;  (case 1 head)
     let f_decl = AstStmt {
         kind: AstStmtKind::Decl, line: body.line, col: body.col,
         data: AstStmtData::Decl(AstDecl {
             kind: AstDeclKind::Variable,
-            name: Some("__ovel_f".to_string()),
+            name: Some("__jeti_f".to_string()),
             line: body.line, col: body.col,
             data: AstDeclData::Variable {
                 var_type: Some(Box::new({
@@ -786,7 +786,7 @@ fn desugar_method_m2(
                             t.subtype = Some(Box::new(st));
                             t
                         },
-                        expr: Box::new(member_expr("__ovel_task", "frame", body.line, body.col)),
+                        expr: Box::new(member_expr("__jeti_task", "frame", body.line, body.col)),
                     },
                 })),
                 is_static: false, is_extern: false, is_const: false,
@@ -796,13 +796,13 @@ fn desugar_method_m2(
         }),
     };
     case_body_stmts.insert(0, f_decl);
-    // Append: __ovel_task->state = -1; return 1;
+    // Append: __jeti_task->state = -1; return 1;
     case_body_stmts.push(AstStmt {
         kind: AstStmtKind::Expr, line: body.line, col: body.col,
         data: AstStmtData::Expr(AstExpr {
             kind: AstExprKind::Assign, expr_type: None, line: body.line, col: body.col,
             data: AstExprData::Assign {
-                target: Box::new(member_expr("__ovel_task", "state", body.line, body.col)),
+                target: Box::new(member_expr("__jeti_task", "state", body.line, body.col)),
                 value: Box::new(int_expr(-1, body.line, body.col)),
             },
         }),
@@ -834,7 +834,7 @@ fn desugar_method_m2(
                         data: AstStmtData::Expr(AstExpr {
                             kind: AstExprKind::Assign, expr_type: None, line: body.line, col: body.col,
                             data: AstExprData::Assign {
-                                target: Box::new(member_expr("__ovel_task", "state", body.line, body.col)),
+                                target: Box::new(member_expr("__jeti_task", "state", body.line, body.col)),
                                 value: Box::new(int_expr(-1, body.line, body.col)),
                             },
                         }),
@@ -850,7 +850,7 @@ fn desugar_method_m2(
     let switch_stmt = AstStmt {
         kind: AstStmtKind::Switch, line: body.line, col: body.col,
         data: AstStmtData::Switch {
-            expr: Box::new(member_expr("__ovel_task", "state", body.line, body.col)),
+            expr: Box::new(member_expr("__jeti_task", "state", body.line, body.col)),
             body: Box::new(AstStmt {
                 kind: AstStmtKind::Compound, line: body.line, col: body.col,
                 data: AstStmtData::Compound(vec![case1, case_final]),
@@ -858,11 +858,11 @@ fn desugar_method_m2(
         },
     };
 
-    // Entry params: (NPTask *__ovel_task). The name is deliberately RESERVED:
+    // Entry params: (NPTask *__jeti_task). The name is deliberately RESERVED:
     // a bare `t` collides with a same-named user local in the rewritten body —
     // `NPTask<int> *t = [self cached]; @await t;` expanded `t->self_obj`
     // against the *uninitialised* new local (SIGSEGV at 0x18, lldb-confirmed).
-    let entry_param = cst_param("NPTask", "__ovel_task");
+    let entry_param = cst_param("NPTask", "__jeti_task");
     let entry_decl = AstDecl {
         kind: AstDeclKind::Function,
         name: Some(entry_name.clone()),
@@ -885,7 +885,7 @@ fn desugar_method_m2(
                         data: AstStmtData::Expr(AstExpr {
                             kind: AstExprKind::Assign, expr_type: None, line: body.line, col: body.col,
                             data: AstExprData::Assign {
-                                target: Box::new(member_expr("__ovel_task", "state", body.line, body.col)),
+                                target: Box::new(member_expr("__jeti_task", "state", body.line, body.col)),
                                 value: Box::new(int_expr(-1, body.line, body.col)),
                             },
                         }),
@@ -911,7 +911,7 @@ fn desugar_method_m2(
     let create_call = AstExpr {
         kind: AstExprKind::FuncCall, expr_type: None, line: body.line, col: body.col,
         data: AstExprData::FuncCall {
-            func: None, name: "ovel_task_create".to_string(), callee: None,
+            func: None, name: "jeti_task_create".to_string(), callee: None,
             args: vec![
                 ident_expr(&entry_name, body.line, body.col),
                 ident_expr("self", body.line, body.col),
@@ -941,7 +941,7 @@ fn desugar_method_m2(
     let create_call = AstExpr {
         kind: AstExprKind::FuncCall, expr_type: None, line: body.line, col: body.col,
         data: AstExprData::FuncCall {
-            func: None, name: "ovel_task_create".to_string(), callee: None,
+            func: None, name: "jeti_task_create".to_string(), callee: None,
             args: vec![
                 ident_expr(&entry_name, body.line, body.col),
                 ident_expr("self", body.line, body.col),
@@ -950,14 +950,14 @@ fn desugar_method_m2(
         },
     };
     // Driver: task create FIRST, then fill frame params, then join.
-    // ((struct <M>_frame *)__ovel_task->frame)->param = param;
+    // ((struct <M>_frame *)__jeti_task->frame)->param = param;
     let mut pre: Vec<AstStmt> = Vec::new();
     let task_decl = AstDecl {
         kind: AstDeclKind::Variable,
-        name: Some("__ovel_task".to_string()),
+        name: Some("__jeti_task".to_string()),
         line: body.line, col: body.col,
         data: AstDeclData::Variable {
-            var_type: Some(Box::new(ovel_task_ptr_type())),
+            var_type: Some(Box::new(jeti_task_ptr_type())),
             init: Some(Box::new(create_call)),
             is_static: false, is_extern: false, is_const: false,
             is_block_qual: false, is_weak: false, next: None,
@@ -966,7 +966,7 @@ fn desugar_method_m2(
     };
     pre.push(AstStmt { kind: AstStmtKind::Decl, line: body.line, col: body.col, data: AstStmtData::Decl(task_decl) });
     for (pname, _) in params {
-        // obj expr: (struct FT *)(__ovel_task->frame)
+        // obj expr: (struct FT *)(__jeti_task->frame)
         let frame_access = AstExpr {
             kind: AstExprKind::Cast, expr_type: None, line: body.line, col: body.col,
             data: AstExprData::Cast {
@@ -979,7 +979,7 @@ fn desugar_method_m2(
                     t.subtype = Some(Box::new(st));
                     t
                 },
-                expr: Box::new(member_expr("__ovel_task", "frame", body.line, body.col)),
+                expr: Box::new(member_expr("__jeti_task", "frame", body.line, body.col)),
             },
         };
         pre.push(AstStmt {
@@ -1005,14 +1005,14 @@ fn desugar_method_m2(
     let is_void = return_type.map_or(true, |t| t.prim == TypePrim::Void && !t.is_pointer);
     let mut post: Vec<AstStmt> = Vec::new();
     if is_void {
-        post.push(call_stmt("ovel_task_join", vec![ident_expr("__ovel_task", body.line, body.col)], body.line, body.col));
+        post.push(call_stmt("jeti_task_join", vec![ident_expr("__jeti_task", body.line, body.col)], body.line, body.col));
     } else {
-        // long __ovel_r = (long)ovel_task_join(t);
+        // long __jeti_r = (long)jeti_task_join(t);
         post.push(AstStmt {
             kind: AstStmtKind::Decl, line: body.line, col: body.col,
             data: AstStmtData::Decl(AstDecl {
                 kind: AstDeclKind::Variable,
-                name: Some("__ovel_r".to_string()),
+                name: Some("__jeti_r".to_string()),
                 line: body.line, col: body.col,
                 data: AstDeclData::Variable {
                     var_type: Some(Box::new(AstType::new(TypePrim::Long))),
@@ -1020,7 +1020,7 @@ fn desugar_method_m2(
                         kind: AstExprKind::Cast, expr_type: None, line: body.line, col: body.col,
                         data: AstExprData::Cast {
                             target_type: AstType::new(TypePrim::Long),
-                            expr: Box::new(call_expr("ovel_task_join", vec![ident_expr("__ovel_task", body.line, body.col)], body.line, body.col)),
+                            expr: Box::new(call_expr("jeti_task_join", vec![ident_expr("__jeti_task", body.line, body.col)], body.line, body.col)),
                         },
                     })),
                     is_static: false, is_extern: false, is_const: false,
@@ -1032,12 +1032,12 @@ fn desugar_method_m2(
     }
     // Lazy driver: no join — the body is just create + param fill + return
     // the handle. (The old eager driver's join/return-cast is gone; results
-    // are read via ovel_task_await.)
+    // are read via jeti_task_await.)
     let _ = is_void;
     let mut out = pre;
     out.push(AstStmt {
         kind: AstStmtKind::Return, line: body.line, col: body.col,
-        data: AstStmtData::Return(Some(Box::new(ident_expr("__ovel_task", body.line, body.col)))),
+        data: AstStmtData::Return(Some(Box::new(ident_expr("__jeti_task", body.line, body.col)))),
     });
     *body = AstStmt { kind: AstStmtKind::Compound, line: body.line, col: body.col, data: AstStmtData::Compound(out) };
 }
@@ -1135,15 +1135,15 @@ fn lower_awaits_m2_expr(e: &mut AstExpr, state: &mut i32, ctx: &mut AsyncCtx) {
             lower_awaits_m2_expr(inner, state, ctx);
             *state += 1;
             let n = *state;
-            // (t->state = N, (long)ovel_task_await(e))
+            // (t->state = N, (long)jeti_task_await(e))
             // NPTask design (stage D): async calls are LAZY — the awaited
             // expression evaluates to an NPTask handle, and the await must
-            // drive it (ovel_task_await blocks/drives inline, caches the
+            // drive it (jeti_task_await blocks/drives inline, caches the
             // result) instead of synchronously evaluating the handle.
             let state_assign = AstExpr {
                 kind: AstExprKind::Assign, expr_type: None, line, col,
                 data: AstExprData::Assign {
-                    target: Box::new(member_expr("__ovel_task", "state", line, col)),
+                    target: Box::new(member_expr("__jeti_task", "state", line, col)),
                     value: Box::new(int_expr(n as i64, line, col)),
                 },
             };
@@ -1164,7 +1164,7 @@ fn lower_awaits_m2_expr(e: &mut AstExpr, state: &mut i32, ctx: &mut AsyncCtx) {
             let await_call = AstExpr {
                 kind: AstExprKind::FuncCall, expr_type: None, line, col,
                 data: AstExprData::FuncCall {
-                    func: None, name: "ovel_task_await".to_string(), callee: None,
+                    func: None, name: "jeti_task_await".to_string(), callee: None,
                     args: vec![taken],
                 },
             };
@@ -1215,8 +1215,8 @@ fn lower_awaits_m2_expr(e: &mut AstExpr, state: &mut i32, ctx: &mut AsyncCtx) {
     }
 }
 
-/// Rewrite references inside the entry body: params → `__ovel_f->param`,
-/// `self` → `__ovel_task->self_obj`. The entry only receives the task, so all
+/// Rewrite references inside the entry body: params → `__jeti_f->param`,
+/// `self` → `__jeti_task->self_obj`. The entry only receives the task, so all
 /// param/self access must go through the frame / task.
 fn rewrite_entry_refs_stmt(s: &mut AstStmt, params: &[(String, AstType)]) {
     match &mut s.data {
@@ -1258,11 +1258,11 @@ fn rewrite_entry_refs_expr(e: &mut AstExpr, params: &[(String, AstType)]) {
     match &mut e.data {
         AstExprData::VarRef { name, .. } => {
             if name == "self" {
-                // __ovel_task->self_obj
-                *e = member_expr("__ovel_task", "self_obj", line, col);
+                // __jeti_task->self_obj
+                *e = member_expr("__jeti_task", "self_obj", line, col);
             } else if params.iter().any(|(n, _)| n == name) {
-                // __ovel_f->param
-                *e = member_expr("__ovel_f", name, line, col);
+                // __jeti_f->param
+                *e = member_expr("__jeti_f", name, line, col);
             }
         }
         AstExprData::MsgSend { receiver, args, .. } => {
@@ -1325,7 +1325,7 @@ fn rewrite_returns_stmt(s: &mut AstStmt) {
                     data: AstStmtData::Expr(AstExpr {
                         kind: AstExprKind::Assign, expr_type: None, line, col,
                         data: AstExprData::Assign {
-                            target: Box::new(member_expr("__ovel_task", "result", line, col)),
+                            target: Box::new(member_expr("__jeti_task", "result", line, col)),
                             value: Box::new(AstExpr {
                                 kind: AstExprKind::Cast, expr_type: None, line, col,
                                 data: AstExprData::Cast {
@@ -1348,7 +1348,7 @@ fn rewrite_returns_stmt(s: &mut AstStmt) {
                 data: AstStmtData::Expr(AstExpr {
                     kind: AstExprKind::Assign, expr_type: None, line, col,
                     data: AstExprData::Assign {
-                        target: Box::new(member_expr("__ovel_task", "state", line, col)),
+                        target: Box::new(member_expr("__jeti_task", "state", line, col)),
                         value: Box::new(int_expr(-1, line, col)),
                     },
                 }),
@@ -1430,7 +1430,7 @@ fn call_stmt(name: &str, args: Vec<AstExpr>, line: usize, col: usize) -> AstStmt
     AstStmt { kind: AstStmtKind::Expr, line, col, data: AstStmtData::Expr(call_expr(name, args, line, col)) }
 }
 
-fn ovel_task_ptr_type() -> AstType {
+fn jeti_task_ptr_type() -> AstType {
     let mut inner = AstType::new(TypePrim::Named);
     inner.name = Some("NPTask".to_string());
     let mut t = AstType::new(TypePrim::Named);
@@ -1440,14 +1440,14 @@ fn ovel_task_ptr_type() -> AstType {
 }
 
 /// Build a CstParam for the entry function's `(NPTask *t)`.
-fn cst_param(type_name: &str, name: &str) -> ovel_cst::CstParam {
-    let mut t = ovel_cst::CstType::new(TypePrim::Named);
+fn cst_param(type_name: &str, name: &str) -> jeti_cst::CstParam {
+    let mut t = jeti_cst::CstType::new(TypePrim::Named);
     t.name = Some(type_name.to_string());
-    let mut ptr = ovel_cst::CstType::new(TypePrim::Named);
+    let mut ptr = jeti_cst::CstType::new(TypePrim::Named);
     ptr.is_pointer = true;
     ptr.name = Some(type_name.to_string());
     ptr.subtype = Some(Box::new(t));
-    ovel_cst::CstParam {
+    jeti_cst::CstParam {
         name: Some(name.to_string()),
         par_type: Some(Box::new(ptr)),
         external_name: None,
@@ -1457,7 +1457,7 @@ fn cst_param(type_name: &str, name: &str) -> ovel_cst::CstParam {
 }
 
 /// Apply the M2 desugar over the whole unit.
-pub fn desugar_unit_m2(unit: &mut ovel_ast::AstUnit, hosted: bool) {
+pub fn desugar_unit_m2(unit: &mut jeti_ast::AstUnit, hosted: bool) {
     // Pre-collect async method selectors (colon-stripped) so await lowering
     // can tell task-yielding calls from sync ones (expr_type is not
     // annotated yet — desugar runs before the checker).
@@ -1505,7 +1505,7 @@ pub fn desugar_unit_m2(unit: &mut ovel_ast::AstUnit, hosted: bool) {
     // `[task start]` appears in CALLER bodies too (e.g. main), outside async
     // methods — rewrite it unit-wide (doc/async_nptask_plan.md, stage D).
     // Likewise `@await e` in NON-async bodies (main / plain functions): the
-    // blocking-join entry form lowers to ovel_task_await(e) here; async
+    // blocking-join entry form lowers to jeti_task_await(e) here; async
     // method bodies were already rewritten above.
     for decl in &mut unit.decls {
         lower_task_starts_decl(decl, &mut ctx, hosted);
@@ -1513,7 +1513,7 @@ pub fn desugar_unit_m2(unit: &mut ovel_ast::AstUnit, hosted: bool) {
     }
 }
 
-/// `@await e` in a non-async (synchronous) body → `ovel_task_await(e)` —
+/// `@await e` in a non-async (synchronous) body → `jeti_task_await(e)` —
 /// the blocking-join entry form. Must NOT touch async method bodies (their
 /// awaits were already lowered with state-machine bookkeeping above; the
 /// double rewrite would corrupt the Comma chains).
@@ -1522,13 +1522,13 @@ fn lower_toplevel_awaits_expr(e: &mut AstExpr) {
         let line = e.line;
         let col = e.col;
         let taken = std::mem::replace(&mut **inner, int_expr(0, line, col));
-        // (long)ovel_task_await(e) — the runtime returns void * (the cached
+        // (long)jeti_task_await(e) — the runtime returns void * (the cached
         // result slot); a scalar result flows through the long cast like the
         // legacy eager driver did. Object/pointer results keep their bits.
         let await_call = AstExpr {
             kind: AstExprKind::FuncCall, expr_type: None, line, col,
             data: AstExprData::FuncCall {
-                func: None, name: "ovel_task_await".to_string(), callee: None,
+                func: None, name: "jeti_task_await".to_string(), callee: None,
                 args: vec![taken],
             },
         };
@@ -1596,7 +1596,7 @@ fn lower_toplevel_awaits_stmt(s: &mut AstStmt, ctx: &AsyncCtx, hosted: bool) {
 /// Hosted drive at the statement position (doc/async_nptask_plan.md §静态分析 3).
 /// A bare call to an async method at STATEMENT position (its result discarded)
 /// is the async chain's "spawn and forget" entry — lower it to
-/// `ovel_task_await(call)`. `ovel_task_await` starts an unstarted task and
+/// `jeti_task_await(call)`. `jeti_task_await` starts an unstarted task and
 /// blocks until it drains (runtime.c), so `[f runAll];` runs to completion
 /// without an explicit pump.
 ///
@@ -1610,7 +1610,7 @@ fn drive_entry_call(e: &mut AstExpr, ctx: &AsyncCtx) {
     let line = e.line;
     let col = e.col;
     let taken = std::mem::replace(e, int_expr(0, line, col));
-    *e = call_expr("ovel_task_await", vec![taken], line, col);
+    *e = call_expr("jeti_task_await", vec![taken], line, col);
 }
 
 fn lower_toplevel_awaits_decl(d: &mut AstDecl, ctx: &AsyncCtx, hosted: bool) {

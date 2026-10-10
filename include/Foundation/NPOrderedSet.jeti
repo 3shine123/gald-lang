@@ -1,0 +1,69 @@
+#import <Foundation/NPOrderedSet.jth>
+#include <string.h>
+#include <stdlib.h>
+
+@implementation NPOrderedSet
+
+- (NPOrderedSet *)initWithArray:(NPArray *)other {
+    self = [super init];
+    if (self && other) {
+        // addObject: from NPSet already skips duplicates WITHOUT touching the
+        // existing slot, so first-insertion order survives this loop.
+        [self addObjectsFromArray:other];
+    }
+    return self;
+}
+
+- (NPOrderedSet *)initWithSet:(NPSet *)other {
+    self = [super init];
+    if (self && other) {
+        [self addObjectsFromArray:[other allObjects]];
+    }
+    return self;
+}
+
++ (NPOrderedSet *)orderedSet {
+    return [[self alloc] init];
+}
+
++ (NPOrderedSet *)orderedSetWithObject:(id)object {
+    NPOrderedSet *s = [[self alloc] init];
+    [s addObject:object];
+    return s;
+}
+
++ (NPOrderedSet *)orderedSetWithArray:(NPArray *)array {
+    return [[self alloc] initWithArray:array];
+}
+
++ (NPOrderedSet *)orderedSetWithOrderedSet:(NPOrderedSet *)other {
+    if (!other) return [self orderedSet];
+    return [self orderedSetWithArray:[other allObjects]];
+}
+
+- (id)objectAtIndex:(size_t)index {
+    if (index >= _count) return NULL;
+    return _items[index];
+}
+
+- (id)firstObject {
+    if (_count == 0) return NULL;
+    return _items[0];
+}
+
+- (id)lastObject {
+    if (_count == 0) return NULL;
+    return _items[_count - 1];
+}
+
+- (size_t)indexOfObject:(id)object {
+    if (!object) return (size_t)-1;
+    for (size_t i = 0; i < _count; i++) {
+        if (_items[i] && [_items[i] isEqual:object]) {
+            return i;
+        }
+    }
+    return (size_t)-1;
+}
+
+@end

@@ -1,0 +1,29 @@
+#ifndef NPOBJECT_NH
+#define NPOBJECT_NH
+
+#include <stdint.h>
+#include <stddef.h>
+
+struct NPClass;
+
+@interface jeti_root
+- (id)init;
+- (void)dealloc;
+- (void)release;
+- (id)retain;
+- (BOOL)isKindOf:(Class)cls;
+- (BOOL)isKindOfClass:(Class)cls;
+- (BOOL)isEqual:(id)object;
+- (id)description;
+@end
+
+@interface NPObject : jeti_root
++ (id)alloc;
++ (id)new;
+- (id)init;
+- (void)dealloc;
+- (void)release;
+- (id)retain;
+@end
+
+#endif

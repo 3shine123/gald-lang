@@ -1,0 +1,137 @@
+#include <stdio.h>
+#import <Foundation/Foundation.jth>
+
+@interface Counter : NPObject {
+    int _count;
+}
+@property int count;
+- (void)increment;
+- (int)value;
+@end
+
+@implementation Counter
+- (void)increment {    _count = _count + 1;
+}
+- (int)value {    return _count;
+}
+@end
+
+static int g_checks_failed = 0;
+
+#define CHECK(cond) do { if (!(cond)) { printf("CHECK FAILED at line %d: %s\n", __LINE__, #cond); g_checks_failed++; } } while (0)
+
+Counter *make_counter() {
+    Counter *c = [[Counter alloc] init];
+    return c;
+}
+
+// Extreme ARC stress: many objects, loops, nested scopes, early returns, breaks.
+int main() {
+    @autoreleasepool {
+        // 1. for loop with message sends (the original bug)
+        Counter *a = [[Counter alloc] init];
+        for (int i = 0; i < 10; i++) {
+            [a increment];
+        }
+        CHECK([a value] == 10);
+
+        // 2. while loop
+        Counter *b = [[Counter alloc] init];
+        int j = 0;
+        while (j < 5) {
+            [b increment];
+            j++;
+        }
+        CHECK([b value] == 5);
+
+        // 3. do-while loop
+        Counter *c = [[Counter alloc] init];
+        int k = 0;
+        do {
+            [c increment];
+            k++;
+        } while (k < 3);
+        CHECK([c value] == 3);
+
+        // 4. nested loops
+        Counter *d = [[Counter alloc] init];
+        for (int x = 0; x < 4; x++) {
+            for (int y = 0; y < 4; y++) {
+                [d increment];
+            }
+        }
+        CHECK([d value] == 16);
+
+        // 5. break inside loop
+        Counter *e = [[Counter alloc] init];
+        for (int i = 0; i < 100; i++) {
+            if (i == 7) break;
+            [e increment];
+        }
+        CHECK([e value] == 7);
+
+        // 6. continue inside loop
+        Counter *f = [[Counter alloc] init];
+        for (int i = 0; i < 10; i++) {
+            if (i % 2 == 0) continue;
+            [f increment];
+        }
+        CHECK([f value] == 5);
+
+        // 7. early return not taken (objects must still be released)
+        Counter *g = [[Counter alloc] init];
+        @autoreleasepool {
+            Counter *inner = [[Counter alloc] init];
+            [inner increment];
+            CHECK([inner value] == 1);
+            [inner release];
+        }
+        [g increment];
+        CHECK([g value] == 1);
+
+        // 8. scoped objects inside loops
+        Counter *h = [[Counter alloc] init];
+        for (int i = 0; i < 3; i++) {
+            Counter *tmp = [[Counter alloc] init];
+            [tmp increment];
+            [tmp release];
+        }
+        [h increment];
+        CHECK([h value] == 1);
+
+        // 9. if/else branches with objects
+        Counter *i1 = [[Counter alloc] init];
+        Counter *i2 = [[Counter alloc] init];
+        if ([i1 value] < [i2 value]) {
+            [i1 increment];
+        } else {
+            [i2 increment];
+        }
+        CHECK([i1 value] >= 0 && [i2 value] >= 0);
+
+        // 10. object passed to function and returned
+        Counter *ret = make_counter();
+        [ret increment];
+        CHECK([ret value] == 1);
+
+        [a release];
+        [b release];
+        [c release];
+        [d release];
+        [e release];
+        [f release];
+        [g release];
+        [h release];
+        [i1 release];
+        [i2 release];
+        [ret release];
+    }
+
+    if (g_checks_failed == 0) {
+        printf("ARC EXTREME TEST PASSED\n");
+        return 0;
+    } else {
+        printf("ARC EXTREME TEST FAILED: %d checks\n", g_checks_failed);
+        return 1;
+    }
+}

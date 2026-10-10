@@ -1,14 +1,14 @@
-#include "ovel/binder.h"
-#include "ovel/parser.h"
-#include "ovel/lexer.h"
-#include "ovel/cst.h"
+#include "jeti/binder.h"
+#include "jeti/parser.h"
+#include "jeti/lexer.h"
+#include "jeti/cst.h"
 #include <stdio.h>
 #include <string.h>
 
 int main(void) {
     const char *src = "@interface Foo\n- (int)bar;\n@end\n\n@implementation Foo\n- (int)bar {\n    return 42;\n}\n@end";
     lexer_t lexer;
-    lexer_init(&lexer, src, strlen(src), "test.ov");
+    lexer_init(&lexer, src, strlen(src), "test.jeti");
     parser_t *p = parser_create(&lexer);
     translation_unit_t *u = parser_parse_translation_unit(p);
     if (!u) {

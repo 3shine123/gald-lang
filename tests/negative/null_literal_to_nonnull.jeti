@@ -1,0 +1,29 @@
+/* tests/negative/ — this file MUST FAIL to compile, with a clear error.
+ *
+ * A literal `nil` passed to a `nonnull` parameter. The argument is statically
+ * known-null — strictly worse than a maybe-nil value — so this is an error
+ * even though `nil` is not a "nullable variable". clang's -Wnonnull flags the
+ * same shape (verified against the host SDK).
+ *
+ * Expected (exit != 0):
+ *
+ *     Type checking failed:
+ *     [checker] tests/negative/null_literal_to_nonnull.jeti:27:14: null passed
+ *     to a callee that requires a non-null argument — pass a real object, or
+ *     declare the parameter 'nullable'
+ */
+#import <Foundation/Foundation.jth>
+
+@interface Greeter : NPObject
+- (void)greet:(nonnull NPString *)name;
+@end
+
+@implementation Greeter
+- (void)greet:(nonnull NPString *)name { NPLog(@"hi %s", [name UTF8String]); }
+@end
+
+int main(void) {
+    Greeter *g = [Greeter new];
+    [g greet:nil];
+    return 0;
+}

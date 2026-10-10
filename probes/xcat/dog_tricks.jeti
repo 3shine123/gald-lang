@@ -1,0 +1,5 @@
+#import <Foundation/Foundation.jth>
+#import "dog.jth"
+@implementation Dog (Tricks)
+- (int)trickCount { return 3; }
+@end

@@ -1,6 +1,0 @@
-#import "dog.oh"
-@implementation Dog
-- (instancetype)init {
-    return self;
-}
-@end

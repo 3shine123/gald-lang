@@ -1,9 +1,9 @@
 [package]
-name = "ovel-trace"
+name = "jeti-trace"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-ovel-ast = { path = "../ast" }
-ovel-ownership = { path = "../ownership" }
-ovel-cst = { path = "../cst" }
+jeti-ast = { path = "../ast" }
+jeti-ownership = { path = "../ownership" }
+jeti-cst = { path = "../cst" }

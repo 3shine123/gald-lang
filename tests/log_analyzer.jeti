@@ -1,0 +1,268 @@
+// log_analyzer.jeti
+// Jeti 工具类型集成测试：系统日志分析器
+// 特性覆盖：@namespace、@protocol、类继承、泛型<T>、Block、@property、@autoreleasepool
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#import <Foundation/Foundation.jth>
+
+// ============================================================================
+// 命名空间 LogTool：日志处理工具集
+// ============================================================================
+@namespace LogTool
+
+    // ------------------------------------------------------------------------
+    // 协议：定义日志条目必须支持的操作
+    // ------------------------------------------------------------------------
+    @protocol LogEntryProtocol
+    - (const char *)level;
+    - (const char *)format;
+    @end
+
+    // ------------------------------------------------------------------------
+    // 基类：通用日志条目
+    // ------------------------------------------------------------------------
+    @interface LogEntry : NPObject {
+        @public
+        const char *_rawLine;
+    }
+    @property (readonly) const char *rawLine;
+    
+    - (id)initWithLine:(const char *)line;
+    - (const char *)level;
+    - (const char *)format;
+    @end
+
+    @implementation LogEntry
+    @synthesize rawLine = _rawLine;
+    
+    - (id)initWithLine:(const char *)line {
+        self = [super init];
+        if (self) {
+            _rawLine = line;
+        }
+        return self;
+    }
+    - (const char *)level {
+        return "UNKNOWN";
+    }
+    - (const char *)format {
+        return _rawLine;
+    }
+    @end
+
+    // ------------------------------------------------------------------------
+    // 子类：ERROR 级别（红色输出）
+    // ------------------------------------------------------------------------
+    @interface ErrorEntry : LogTool::LogEntry <LogTool::LogEntryProtocol>
+    @end
+
+    @implementation ErrorEntry
+    - (const char *)level {
+        return "ERROR";
+    }
+    - (const char *)format {
+        printf("[\033[31m%s\033[0m] %s\n", [self level], [self rawLine]);
+        return [self rawLine];
+    }
+    @end
+
+    // ------------------------------------------------------------------------
+    // 子类：WARN 级别（黄色输出）
+    // ------------------------------------------------------------------------
+    @interface WarnEntry : LogTool::LogEntry <LogTool::LogEntryProtocol>
+    @end
+
+    @implementation WarnEntry
+    - (const char *)level {
+        return "WARN";
+    }
+    - (const char *)format {
+        printf("[\033[33m%s\033[0m] %s\n", [self level], [self rawLine]);
+        return [self rawLine];
+    }
+    @end
+
+    // ------------------------------------------------------------------------
+    // 子类：INFO 级别（绿色输出）
+    // ------------------------------------------------------------------------
+    @interface InfoEntry : LogTool::LogEntry <LogTool::LogEntryProtocol>
+    @end
+
+    @implementation InfoEntry
+    - (const char *)level {
+        return "INFO";
+    }
+    - (const char *)format {
+        printf("[\033[32m%s\033[0m] %s\n", [self level], [self rawLine]);
+        return [self rawLine];
+    }
+    @end
+
+    // ------------------------------------------------------------------------
+    // 泛型容器：LogBuffer<T> —— 存储任意类型的日志对象
+    // ------------------------------------------------------------------------
+    @interface LogBuffer<T> : NPObject {
+        @public
+        int _capacity;
+        int _count;
+        T _storage[32];
+    }
+    - (id)init;
+    - (void)append:(T)item;
+    - (T)itemAt:(int)index;
+    - (int)count;
+    @end
+
+    @implementation LogBuffer
+    - (id)init {
+        self = [super init];
+        if (self) {
+            _capacity = 32;
+            _count = 0;
+        }
+        return self;
+    }
+    - (void)append:(T)item {
+        if (_count < _capacity) {
+            _storage[_count++] = item;
+        }
+    }
+    - (T)itemAt:(int)index {
+        if (index >= 0 && index < _count) return _storage[index];
+        return 0;
+    }
+    - (int)count { return _count; }
+    @end
+
+    // ------------------------------------------------------------------------
+    // 分析器引擎：解析、过滤、统计
+    // ------------------------------------------------------------------------
+    @interface Analyzer : NPObject {
+        @public
+        LogBuffer<LogTool::LogEntry *> *_buffer;
+        int _errorCount;
+        int _warnCount;
+        int _infoCount;
+    }
+    @property int errorCount;
+    @property int warnCount;
+    @property int infoCount;
+    
+    - (id)init;
+    - (void)feedLine:(const char *)line;
+    - (void)filter:(BOOL (^)(LogTool::LogEntry *entry))predicate action:(void (^)(LogTool::LogEntry *entry))handler;
+    - (void)printReport;
+    @end
+
+    @implementation Analyzer
+    @synthesize errorCount = _errorCount;
+    @synthesize warnCount = _warnCount;
+    @synthesize infoCount = _infoCount;
+    
+    - (id)init {
+        self = [super init];
+        if (self) {
+            _buffer = [[LogBuffer<LogTool::LogEntry *> alloc] init];
+            _errorCount = 0;
+            _warnCount = 0;
+            _infoCount = 0;
+        }
+        return self;
+    }
+    
+    - (void)feedLine:(const char *)line {
+        if (!line) return;
+        
+        LogTool::LogEntry *entry = 0;
+        if (strstr(line, "ERROR")) {
+            entry = [[LogTool::ErrorEntry alloc] initWithLine:line];
+            _errorCount++;
+        } else if (strstr(line, "WARN")) {
+            entry = [[LogTool::WarnEntry alloc] initWithLine:line];
+            _warnCount++;
+        } else {
+            entry = [[LogTool::InfoEntry alloc] initWithLine:line];
+            _infoCount++;
+        }
+        
+        if (entry) [_buffer append:entry];
+    }
+    
+    // 高级 Block 接口：predicate 决定是否处理，handler 执行动作
+    - (void)filter:(BOOL (^)(LogTool::LogEntry *entry))predicate action:(void (^)(LogTool::LogEntry *entry))handler {
+        for (int i = 0; i < [_buffer count]; i++) {
+            LogTool::LogEntry *e = [_buffer itemAt:i];
+            if (e && predicate && predicate(e)) {
+                if (handler) handler(e);
+            }
+        }
+    }
+    
+    - (void)printReport {
+        printf("\n");
+        printf("╔══════════════════════════════════════╗\n");
+        printf("║      Jeti LogAnalyzer 统计报告       ║\n");
+        printf("╠══════════════════════════════════════╣\n");
+        printf("║  总条目数 : %-3d                      ║\n", [_buffer count]);
+        printf("║  ERROR    : %-3d  ← 需立即处理       ║\n", _errorCount);
+        printf("║  WARN     : %-3d  ← 建议关注         ║\n", _warnCount);
+        printf("║  INFO     : %-3d                      ║\n", _infoCount);
+        printf("╚══════════════════════════════════════╝\n");
+    }
+    @end
+@endnamespace
+
+// ============================================================================
+// 顶级入口：模拟分析系统日志
+// ============================================================================
+int main(int argc, const char *argv[])
+{
+    @autoreleasepool {
+        printf(">>> Jeti LogAnalyzer 工具启动\n");
+        printf(">>> 正在读取模拟系统日志流...\n");
+        
+        // 模拟 7 行系统日志
+        const char *rawLogs[] = {
+            "[2026-07-25 08:12:01] INFO  服务启动完成，版本 v3.2.1",
+            "[2026-07-25 08:13:45] WARN  数据库连接池使用率 87%",
+            "[2026-07-25 08:14:02] ERROR 订单服务超时: order_id=4096",
+            "[2026-07-25 08:15:30] INFO  定时任务 [cleanup] 执行成功",
+            "[2026-07-25 08:16:11] ERROR 内存分配失败: out of memory",
+            "[2026-07-25 08:17:55] WARN  API 响应时间 2.3s，超过阈值 2.0s",
+            "[2026-07-25 08:18:00] INFO  用户登录: uid=1024, role=admin"
+        };
+        int totalLines = 7;
+        
+        // 使用全称命名空间创建分析器
+        LogTool::Analyzer *engine = [[LogTool::Analyzer alloc] init];
+        
+        // 逐行解析
+        for (int i = 0; i < totalLines; i++) {
+            [engine feedLine:rawLogs[i]];
+        }
+        
+        // 工具特性 1：过滤输出所有 ERROR（带颜色）
+        printf("\n>>> 【ERROR 级别日志 —— 需立即处理】\n");
+        [engine filter:^BOOL(LogTool::LogEntry *entry) {
+            return (strcmp([entry level], "ERROR") == 0);
+        } action:^void(LogTool::LogEntry *entry) {
+            [entry format];
+        }];
+        
+        // 工具特性 2：过滤输出所有 WARN（带颜色）
+        printf("\n>>> 【WARN 级别日志 —— 建议关注】\n");
+        [engine filter:^BOOL(LogTool::LogEntry *entry) {
+            return (strcmp([entry level], "WARN") == 0);
+        } action:^void(LogTool::LogEntry *entry) {
+            [entry format];
+        }];
+        
+        // 工具特性 3：打印统计摘要
+        [engine printReport];
+        
+        printf("\n>>> Jeti LogAnalyzer 正常退出\n");
+    }
+    return 0;
+}

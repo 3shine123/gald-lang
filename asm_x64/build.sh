@@ -5,7 +5,7 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 
-OVELC="${OVELC:-../target/debug/ovelc}"
+JETIC="${JETIC:-../target/debug/jetic}"
 
 echo "==> transpile + compile as x86_64 + run (Rosetta)"
-"$OVELC" -arch x86_64 run -asm asm_x86_ext.s asm_x86_fusion_test.ov
+"$JETIC" -arch x86_64 run -asm asm_x86_ext.s asm_x86_fusion_test.jeti

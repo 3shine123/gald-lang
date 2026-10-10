@@ -1,10 +1,10 @@
 [package]
-name = "ovel-parser"
+name = "jeti-parser"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-ovel-lexer = { path = "../lexer" }
-ovel-cst = { path = "../cst" }
+jeti-lexer = { path = "../lexer" }
+jeti-cst = { path = "../cst" }
 [dev-dependencies]
-ovel-preprocessor = { path = "../preprocessor" }
+jeti-preprocessor = { path = "../preprocessor" }

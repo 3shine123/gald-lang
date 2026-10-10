@@ -1,8 +1,0 @@
-#include <stdio.h>
-#import "dog.oh"
-int main(void) {
-    Dog *d = [[Dog alloc] init];
-    int n = [d trickCount];
-    printf("tricks=%d\n", n);
-    return n == 3 ? 0 : 1;
-}

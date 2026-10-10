@@ -1,0 +1,26 @@
+#include "jeti/runtime.h"
+#import "Foundation/NPObject.jth"
+#import "Foundation/NPObject.jeti"
+
+@interface Item : NPObject {
+    int _tag;
+}
+- (int)tag;
+@end
+
+@implementation Item
+
+- (int)tag {
+    return _tag;
+}
+
+@end
+
+int main() {
+    @noarc {
+        Item *a = [Item new];
+        [a release];
+        [a release];
+    }
+    return 0;
+}

@@ -4,33 +4,33 @@
 #   ./tools/build-foundation-lib.sh [outdir]        # default: target/foundation
 #
 # Per-TU compilation (doc/stable_slots_plan.md §11, plan A): every Foundation
-# `.ov` is compiled as its OWN translation unit — i.e. as a main file — so R2
+# `.jeti` is compiled as its OWN translation unit — i.e. as a main file — so R2
 # ownership makes each owned class's metadata STRONG automatically. No
 # -fstrong-metadata anywhere.
 #
-#   ovelc app.ov -I include -L<outdir> -lovelfoundation -o app
+#   jetic app.jeti -I include -L<outdir> -ljetifoundation -o app
 #
-# The client imports `Foundation.oh` — the DECLARATION-ONLY umbrella (per the
-# project's .oh = declarations / .ov = implementations convention).
+# The client imports `Foundation.jth` — the DECLARATION-ONLY umbrella (per the
+# project's .jth = declarations / .jeti = implementations convention).
 set -euo pipefail
 
 root="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$root"
 
-ovelc="${OVELC:-}"
-if [[ -z "$ovelc" ]]; then
-    for cand in target/debug/ovelc target/release/ovelc; do
-        if [[ -x "$cand" ]]; then ovelc="$cand"; break; fi
+jetic="${JETIC:-}"
+if [[ -z "$jetic" ]]; then
+    for cand in target/debug/jetic target/release/jetic; do
+        if [[ -x "$cand" ]]; then jetic="$cand"; break; fi
     done
 fi
-if [[ -z "$ovelc" || ! -x "$ovelc" ]]; then
-    echo "error: ovelc not found (run 'cargo build', or set OVELC=/path/to/ovelc)" >&2
+if [[ -z "$jetic" || ! -x "$jetic" ]]; then
+    echo "error: jetic not found (run 'cargo build', or set JETIC=/path/to/jetic)" >&2
     exit 2
 fi
 
 outdir="${1:-target/foundation}"
 mkdir -p "$outdir"
-lib="$outdir/libovelfoundation.a"
+lib="$outdir/libjetifoundation.a"
 
 # Mach-O prepends `_` to every C symbol; ELF uses the name as written.
 sym_prefix=""
@@ -57,14 +57,14 @@ nm_is_weak() {
 
 check_strong() {
     local obj="$1" cls="$2"
-    for member in "OVEL_VTABLE_\$_${cls}" "OVEL_META_VTABLE_\$_${cls}_inst" "OVEL_GETCLASS_\$_${cls}"; do
+    for member in "JETI_VTABLE_\$_${cls}" "JETI_META_VTABLE_\$_${cls}_inst" "JETI_GETCLASS_\$_${cls}"; do
         local sym="${sym_prefix}${member}"
         if ! nm "$obj" 2>/dev/null | grep -qF -- " $sym"; then
             echo "  error: symbol $sym not found in $obj" >&2
             exit 1
         fi
         if nm_is_weak "$obj" "$sym"; then
-            echo "  error: $sym is WEAK — R2 ownership did not apply (is $cls really implemented in $(basename "$obj" .o).ov?)" >&2
+            echo "  error: $sym is WEAK — R2 ownership did not apply (is $cls really implemented in $(basename "$obj" .o).jeti?)" >&2
             exit 1
         fi
         echo "  ok: $sym"
@@ -73,35 +73,35 @@ check_strong() {
 
 echo "[1/4] transpile + compile each Foundation TU (wrapper = decl surface + implementation)"
 # Each TU is a generated WRAPPER: the full declaration surface
-# (Foundation.oh, the declaration-only umbrella) first, then the
-# implementation .ov's own text — the
+# (Foundation.jth, the declaration-only umbrella) first, then the
+# implementation .jeti's own text — the
 # @implementation lands in the MAIN FILE (not via #import), so R2 ownership
 # still applies and this TU's metadata is strong. The full surface gives
 # every TU the same shared vtable segment as a client (same __sig), and stub
 # references to sibling implementations resolve from the archive at final
-# link. The source .ov files stay UNPOLLUTED — self-contained TUs that inline
+# link. The source .jeti files stay UNPOLLUTED — self-contained TUs that inline
 # them keep exactly the declaration surface they asked for.
-# Note: NPObject.ov imports "NPObject.oh" in quoted form; the extra
+# Note: NPObject.jeti imports "NPObject.jth" in quoted form; the extra
 # -I include/Foundation keeps that resolvable from the wrapper's location.
 objs=()
 tus="$outdir/_tus"
 rm -rf "$tus"   # stale wrappers from an interrupted earlier run must not survive
 mkdir -p "$tus"
 rm -f "$outdir"/*.o   # stale objects from an earlier run must not linger into [3/4]
-for gm in include/Foundation/*.ov; do
-    name="$(basename "$gm" .ov)"
-    # Skip the self-contained umbrella (Foundation.ov): it is not a class —
+for gm in include/Foundation/*.jeti; do
+    name="$(basename "$gm" .jeti)"
+    # Skip the self-contained umbrella (Foundation.jeti): it is not a class —
     # it has no vtable to verify, and archiving it would re-inline every
     # implementation into the library, defeating the per-TU build.
-    # Skip NPTask.ov for the same reason: `NPTask<T>` is the runtime task
+    # Skip NPTask.jeti for the same reason: `NPTask<T>` is the runtime task
     # HANDLE (route A), not a class — no implementation, no vtable
     # (doc/async_nptask_plan.md §Foundation 壳层).
     [[ "$name" == "Foundation" || "$name" == "NPTask" ]] && continue
-    wrap="$tus/$name.ov"
-    { echo '#import <Foundation/Foundation.oh>'; cat "$gm"; } > "$wrap"
+    wrap="$tus/$name.jeti"
+    { echo '#import <Foundation/Foundation.jth>'; cat "$gm"; } > "$wrap"
     c="$outdir/$name.c"
     o="$outdir/$name.o"
-    "$ovelc" -rewrite-ovel "$wrap" -o "$c" -I include -I include/Foundation
+    "$jetic" -rewrite-jeti "$wrap" -o "$c" -I include -I include/Foundation
     clang -c -w "$c" -o "$o" -I include
     objs+=("$o")
     echo "  $name"
@@ -112,12 +112,12 @@ rm -f "$lib"
 ar rcs "$lib" "${objs[@]}"
 
 echo "[3/4] verify per-TU owned metadata is strong (nm)"
-# Every Foundation .ov implements exactly the class it is named after, so the
+# Every Foundation .jeti implements exactly the class it is named after, so the
 # basename IS the owned class. If any of these is weak, ownership did not
 # apply and a client TU's stub could win the link — fail loudly instead of
 # shipping a landmine.
-for gm in include/Foundation/*.ov; do
-    name="$(basename "$gm" .ov)"
+for gm in include/Foundation/*.jeti; do
+    name="$(basename "$gm" .jeti)"
     [[ "$name" == "Foundation" || "$name" == "NPTask" ]] && continue   # no vtable to verify (see [1/4])
     check_strong "$outdir/$name.o" "$name"
 done

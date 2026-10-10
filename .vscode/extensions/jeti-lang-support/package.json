@@ -1,0 +1,37 @@
+{
+  "name": "jeti-lang",
+  "displayName": "Jeti Language",
+  "description": "Syntax highlighting and language support for Jeti — a statically-dispatched Objective-C dialect",
+  "version": "0.2.0",
+  "publisher": "jeti-lang",
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "jeti",
+        "aliases": [
+          "Jeti",
+          "jeti",
+          ".jeti"
+        ],
+        "extensions": [
+          ".jeti",
+          ".jth"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "jeti",
+        "scopeName": "source.jeti",
+        "path": "./syntaxes/jeti.tmLanguage.json"
+      }
+    ]
+  }
+}

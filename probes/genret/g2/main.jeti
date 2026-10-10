@@ -1,0 +1,12 @@
+#import "model.jth"
+#include <stdio.h>
+
+int main() {
+    // 实例化只出现在类方法 receiver 位置（g2 的核心判据）
+    NPString *s = [Factory<NPString *> make];
+    // 对照组：变量声明处的实例化（已知会被扫描器消费）
+    Factory<NPString *> *f = nil;
+    NPString *s2 = [f produce];
+    printf("g2-ok\n");
+    return (s == 0) && (s2 == 0) && (f == 0) ? 0 : 1;
+}

@@ -1,0 +1,27 @@
+/* tests/negative/ — this file MUST FAIL to compile, with a clear error.
+ *
+ * `_Pragma` inside a macro body: §6.10.9 defines the pragma at the *invocation*
+ * site, relative to the tokens around the call. A source-level expander has no
+ * position to place it, so jetic refuses instead of dropping the pragma
+ * somewhere harmless-looking.
+ *
+ * Expected (exit != 0), from the preprocessor's macro-expansion step:
+ *
+ *     Macro expansion failed:
+ *     [cpp] line 18: macro 'PUSH' has '_Pragma' in its body, which jeti cannot
+ *     expand — '_Pragma' (ISO/IEC 9899:2011 §6.10.9) takes effect at the
+ *     invocation site during preprocessing, and a source-level expander has no
+ *     position to place it; write the _Pragma(...) directly on its own source
+ *     line instead
+ *
+ * Fix: write the `_Pragma(...)` on its own source line (see
+ * tests/golden/36_macros/pragma_passthrough.jeti), or drop the pragma.
+ */
+#define PUSH _Pragma("clang diagnostic push")
+#define POP  _Pragma("clang diagnostic pop")
+
+int main(void) {
+    PUSH
+    return 0;
+    POP
+}

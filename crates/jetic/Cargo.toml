@@ -1,0 +1,28 @@
+[package]
+name = "jetic"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+jeti-cst = { path = "../cst" }
+jeti-parser = { path = "../parser" }
+jeti-binder = { path = "../binder" }
+jeti-elaborator = { path = "../elaborator" }
+jeti-codegen = { path = "../codegen" }
+jeti-preprocessor = { path = "../preprocessor" }
+jeti-symbol = { path = "../symbol" }
+jeti-ast = { path = "../ast" }
+jeti-cfg = { path = "../cfg" }
+jeti-arc = { path = "../arc" }
+jeti-async = { path = "../async" }
+jeti-eh = { path = "../eh" }
+jeti-defer = { path = "../defer" }
+jeti-pattern = { path = "../pattern" }
+jeti-trace = { path = "../trace" }
+jeti-checker = { path = "../checker" }
+attrs = { path = "../attrs" }
+clap = "4.6.6"
+clap_complete = "4.6.9"
+
+[build-dependencies]
+cc = "1.0"

@@ -1,7 +1,7 @@
 [package]
-name = "ovel-cst-visit"
+name = "jeti-cst-visit"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-ovel-cst = { path = "../cst" }
+jeti-cst = { path = "../cst" }

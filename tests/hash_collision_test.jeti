@@ -1,0 +1,67 @@
+#include <stdio.h>
+#import <Foundation/Foundation.jth>
+
+// Extreme hash-collision stress test.
+//
+// The runtime SEL type stores a 32-bit FNV-1a hash of the selector name
+// (see `fnv1a_hash` in codegen.rs and `sel_registerName` in runtime.c).
+// Two *different* selectors with the SAME 32-bit hash:
+//   "DNEcBVy2KN" -> 0xE3670159
+//   "cQr7Q8hB"   -> 0xE3670159
+//
+// These two method names collide in selector-hash space on purpose.
+// If the runtime ever looked up methods by hash instead of by name, one
+// of these calls would dispatch to the WRONG method. This test proves the
+// dispatch is correct: vtable member access is compile-time, by name, and
+// the SEL hash is only ever stored, never compared.
+
+@interface Collider : NPObject {
+    @public
+    int callsA;
+    int callsB;
+}
+- (void)DNEcBVy2KN;
+- (void)cQr7Q8hB;
+@end
+
+@implementation Collider
+- (void)DNEcBVy2KN {
+    printf("dispatch -> DNEcBVy2KN\n");
+    self->callsA++;
+}
+- (void)cQr7Q8hB {
+    printf("dispatch -> cQr7Q8hB\n");
+    self->callsB++;
+}
+@end
+
+int main() {
+    @autoreleasepool {
+        Collider *c = [[Collider alloc] init];
+        c->callsA = 0;
+        c->callsB = 0;
+
+        // Call each colliding selector 3 times, interleaved. Unrolled to avoid
+        // a `for` loop (a separate pre-existing ARC-insertion bug).
+        [c DNEcBVy2KN]; [c cQr7Q8hB];
+        [c DNEcBVy2KN]; [c cQr7Q8hB];
+        [c DNEcBVy2KN]; [c cQr7Q8hB];
+
+        // Exercise @selector() with the colliding names too.
+        SEL selA = @selector(DNEcBVy2KN);
+        SEL selB = @selector(cQr7Q8hB);
+        printf("selA.hash = 0x%08X  selB.hash = 0x%08X  equal=%d\n",
+               selA.hash, selB.hash, selA.hash == selB.hash);
+        printf("selA.name = %s  selB.name = %s\n", selA.name, selB.name);
+
+        printf("callsA=%d callsB=%d\n", c->callsA, c->callsB);
+
+        if (c->callsA == 3 && c->callsB == 3) {
+            printf("PASS: both colliding selectors dispatched to the correct methods\n");
+        } else {
+            printf("FAIL: collision caused mis-dispatch\n");
+            return 1;
+        }
+    }
+    return 0;
+}

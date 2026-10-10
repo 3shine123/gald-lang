@@ -15,13 +15,13 @@ mod tests {
     fn test_hello_np() {
         let manifest = Path::new(env!("CARGO_MANIFEST_DIR"));
         let workspace = manifest.parent().unwrap().parent().unwrap();
-        let hello = workspace.join("tests/golden/01_basics/hello.ov");
+        let hello = workspace.join("tests/golden/01_basics/hello.jeti");
         let source = std::fs::read_to_string(&hello).unwrap();
         let include = workspace.join("include").to_str().unwrap().to_string();
         let foundation = workspace.join("include/Foundation").to_str().unwrap().to_string();
         let pre = Preprocessor::process(&source, hello.to_str().unwrap(), &[include, ".".into(), foundation], &["__clang__"]).unwrap();
-        println!("=== OVEL OUT ===");
-        println!("{}", pre.resolved_ovel);
+        println!("=== JETI OUT ===");
+        println!("{}", pre.resolved_jeti);
         println!("=== C HEADERS ===");
         for h in &pre.c_headers {
             println!("{}", h);

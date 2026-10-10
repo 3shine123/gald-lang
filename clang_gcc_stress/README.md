@@ -1,6 +1,6 @@
-# ovelc 编译器扩展极端压测 — 全部缺口已修复
+# jetic 编译器扩展极端压测 — 全部缺口已修复
 
-本目录对 ovelc 语法分析器做 clang/gcc 编译器扩展的极端压力测试，
+本目录对 jetic 语法分析器做 clang/gcc 编译器扩展的极端压力测试，
 记录**已支持**与**已修复**的构造。所有 17 个已发现的缺口均已修复，
 `run_stress.sh` 23/23 全绿。
 
@@ -8,9 +8,9 @@
 
 | 文件 | 用途 | 状态 |
 |------|------|------|
-| `clang_stress.ov` | clang 专属属性 + 内置函数（可运行子集） | ✅ transpile + C 编译 + 运行 |
-| `gcc_stress.ov`   | gcc 专属属性 + 内置函数（可运行子集） | ✅ transpile + C 编译 + 运行 |
-| `gaps/*.ov`       | 原缺口最小复现（现为回归测试） | ✅ 全部修复，23/23 PASS |
+| `clang_stress.jeti` | clang 专属属性 + 内置函数（可运行子集） | ✅ transpile + C 编译 + 运行 |
+| `gcc_stress.jeti`   | gcc 专属属性 + 内置函数（可运行子集） | ✅ transpile + C 编译 + 运行 |
+| `gaps/*.jeti`       | 原缺口最小复现（现为回归测试） | ✅ 全部修复，23/23 PASS |
 | `run_stress.sh`   | 一键跑 3 个 round | ✅ 23 PASS / 0 FAIL |
 
 ## 已修复缺口清单
@@ -55,8 +55,8 @@
 单文件调试：
 
 ```bash
-./target/debug/ovelc -rewrite-ovel -backend clang clang_gcc_stress/clang_stress.ov -o /tmp/x.c
-clang -I include -o /tmp/x /tmp/x.c include/ovel/runtime.c && /tmp/x
+./target/debug/jetic -rewrite-jeti -backend clang clang_gcc_stress/clang_stress.jeti -o /tmp/x.c
+clang -I include -o /tmp/x /tmp/x.c include/jeti/runtime.c && /tmp/x
 ```
 
 ## 已知限制

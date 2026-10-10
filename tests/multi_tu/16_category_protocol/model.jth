@@ -1,0 +1,18 @@
+#import <Foundation/Foundation.jeti>
+
+@protocol Tagged
+- (int)taggedValue;
+@end
+
+@interface Widget : NPObject
+- (instancetype)init;
+- (int)tag;
+@end
+
+/* Shared method declaration keeps the vtable public segment identical. The
+   protocol conformance itself is added only by the category TU. */
+@interface Widget (Tagging)
+- (int)taggedValue;
+@end
+
+int makeWidget(void);

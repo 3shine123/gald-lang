@@ -35,7 +35,7 @@
 //!
 //! Codegen sees ordinary statements afterwards; zero codegen changes.
 
-use ovel_ast::ast::*;
+use jeti_ast::ast::*;
 
 pub struct DeferDiagnostics {
     pub errors: Vec<String>,

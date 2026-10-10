@@ -1,0 +1,275 @@
+#import <stdio.h>
+#import <stdlib.h>
+#import <string.h>
+#import <time.h>
+#import <termios.h>
+#import <unistd.h>
+#import <sys/select.h>
+#import <Foundation/Foundation.jth>
+
+// ==========================================================
+// 1. 终端原始模式管理（非阻塞按键读取，Tick 时间缩短到 100ms 增加速度感）
+// ==========================================================
+static struct termios orig_termios;
+
+static void disableRawMode() {
+    tcsetattr(STDIN_FILENO, TCSAFLUSH, &orig_termios);
+    printf("\033[?25h"); // 恢复光标
+    fflush(stdout);
+}
+
+static void enableRawMode() {
+    tcgetattr(STDIN_FILENO, &orig_termios);
+    atexit(disableRawMode);
+    
+    struct termios raw = orig_termios;
+    raw.c_lflag &= ~(ECHO | ICANON);
+    tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw);
+    printf("\033[?25l"); // 隐藏光标
+    fflush(stdout);
+}
+
+static int kbhit() {
+    struct timeval tv = {0, 100000}; // 100ms 游戏帧率，比贪吃蛇更刺激！
+    fd_set fds;
+    FD_ZERO(&fds);
+    FD_SET(STDIN_FILENO, &fds);
+    return select(STDIN_FILENO + 1, &fds, NULL, NULL, &tv);
+}
+
+// ==========================================================
+// 2. 障碍物类定义（陨石）
+// ==========================================================
+@interface Obstacle : NPObject {
+    int _x;
+    int _y;
+    BOOL _active;
+}
+- (id)init;
+- (int)x;
+- (void)setX:(int)x;
+- (int)y;
+- (void)setY:(int)y;
+- (BOOL)active;
+- (void)setActive:(BOOL)active;
+- (void)resetWithWidth:(int)width;
+@end
+
+@implementation Obstacle
+- (id)init {
+    self = [super init];
+    if (self) {
+        _x = 0;
+        _y = 0;
+        _active = NO;
+    }
+    return self;
+}
+- (int)x { return _x; }
+- (void)setX:(int)x { _x = x; }
+- (int)y { return _y; }
+- (void)setY:(int)y { _y = y; }
+- (BOOL)active { return _active; }
+- (void)setActive:(BOOL)active { _active = active; }
+
+- (void)resetWithWidth:(int)width {
+    // 随机在顶部生成边缘内的陨石坐标
+    _x = rand() % (width - 2) + 1;
+    _y = 0;
+    _active = YES;
+}
+@end
+
+// ==========================================================
+// 3. 游戏核心引擎类（测试核心：它强引用了三个 Obstacle 对象）
+// ==========================================================
+@interface SpaceEngine : NPObject {
+    int _width;
+    int _height;
+    int _playerX;
+    int _score;
+    BOOL _gameOver;
+    Obstacle *_obs1;
+    Obstacle *_obs2;
+    Obstacle *_obs3;
+}
+- (id)initWithWidth:(int)w height:(int)h;
+- (BOOL)gameOver;
+- (int)score;
+- (void)processInfut:(char)ch;
+- (void)update;
+- (void)renderWithScoreBlock:(int (^)(int))scoreBlock;
+- (void)dealloc;
+@end
+
+@implementation SpaceEngine
+- (id)initWithWidth:(int)w height:(int)h {
+    self = [super init];
+    if (self) {
+        _width = w;
+        _height = h;
+        _playerX = w / 2; // 飞船初始在底部中间
+        _score = 0;
+        _gameOver = NO;
+        
+        // 分配并初始化 3 颗陨石
+        _obs1 = [[Obstacle alloc] init];
+        [_obs1 resetWithWidth:_width];
+        
+        _obs2 = [[Obstacle alloc] init];
+        [_obs2 resetWithWidth:_width];
+        [_obs2 setY:-4]; // 纵向错开时间线
+        [_obs2 setActive:YES];
+        
+        _obs3 = [[Obstacle alloc] init];
+        [_obs3 resetWithWidth:_width];
+        [_obs3 setY:-8]; // 纵向错开时间线
+        [_obs3 setActive:YES];
+    }
+    return self;
+}
+
+- (BOOL)gameOver { return _gameOver; }
+- (int)score { return _score; }
+
+- (void)processInfut:(char)ch {
+    if (ch == 'a' || ch == 'A') {
+        if (_playerX > 1) _playerX--;
+    } else if (ch == 'd' || ch == 'D') {
+        if (_playerX < _width - 2) _playerX++;
+    } else if (ch == 'q' || ch == 'Q') {
+        _gameOver = YES;
+    }
+}
+
+- (void)update {
+    if (_gameOver) return;
+    
+    // 【陨石 1 物理逻辑】
+    if ([_obs1 active]) {
+        [_obs1 setY:[_obs1 y] + 1];
+        // 碰撞检测：如果陨石砸到底部且和玩家 X 重合
+        if ([_obs1 y] == _height - 2 && [_obs1 x] == _playerX) {
+            _gameOver = YES;
+        }
+        if ([_obs1 y] >= _height - 1) {
+            [_obs1 resetWithWidth:_width];
+            _score += 10;
+        }
+    }
+    
+    // 【陨石 2 物理逻辑】
+    if ([_obs2 active]) {
+        [_obs2 setY:[_obs2 y] + 1];
+        if ([_obs2 y] == _height - 2 && [_obs2 x] == _playerX) {
+            _gameOver = YES;
+        }
+        if ([_obs2 y] >= _height - 1) {
+            [_obs2 resetWithWidth:_width];
+            _score += 10;
+        }
+    }
+
+    // 【陨石 3 物理逻辑】
+    if ([_obs3 active]) {
+        [_obs3 setY:[_obs3 y] + 1];
+        if ([_obs3 y] == _height - 2 && [_obs3 x] == _playerX) {
+            _gameOver = YES;
+        }
+        if ([_obs3 y] >= _height - 1) {
+            [_obs3 resetWithWidth:_width];
+            _score += 10;
+        }
+    }
+}
+
+- (void)renderWithScoreBlock:(int (^)(int))scoreBlock {
+    // 经典终端不闪屏刷屏：光标归位到 (0,0)
+    printf("\033[H");
+    
+    printf("====================================================\n");
+    printf("          MICRIT 终端星际避障 (Space Dodge)        \n");
+    printf("====================================================\n");
+    
+    for (int i = 0; i < _height; i++) {
+        for (int j = 0; j < _width; j++) {
+            if (i == 0 || i == _height - 1 || j == 0 || j == _width - 1) {
+                printf("#"); // 星际围墙
+            } else if (i == _height - 2 && j == _playerX) {
+                printf("▲"); // 你的宇宙飞船
+            } else if ([_obs1 active] && i == [_obs1 y] && j == [_obs1 x]) {
+                printf("★"); // 敌方陨石A
+            } else if ([_obs2 active] && i == [_obs2 y] && j == [_obs2 x]) {
+                printf("☠"); // 敌方陨石B
+            } else if ([_obs3 active] && i == [_obs3 y] && j == [_obs3 x]) {
+                printf("☄"); // 敌方陨石C
+            } else {
+                printf(" ");  // 深邃宇宙空腔
+            }
+        }
+        printf("\n");
+    }
+    
+    // 回调外部捕获的 Block 计算疯狂暴击得分
+    int finalDisplayScore = scoreBlock(_score);
+    printf(" [SCORE]: %d | (Press 'A/D' to Move, 'Q' to Quit)\n", finalDisplayScore);
+    printf("====================================================\n");
+}
+
+// 🔥 验证重点：完美的级联 dealloc 链条
+- (void)dealloc {
+    if (_obs1) NPObject_release(_obs1);
+    if (_obs2) NPObject_release(_obs2);
+    if (_obs3) NPObject_release(_obs3);
+    [super dealloc];
+}
+@end
+
+// ==========================================================
+// 4. 主程序入口
+// ==========================================================
+int main() {
+    @autoreleasepool {
+        srand(time(NULL));
+        enableRawMode();
+        
+        // 彻底清屏
+        printf("\033[2J\033[H");
+        
+        // 实例化一个 24 宽、16 高的星际战场
+        SpaceEngine *engine = [[SpaceEngine alloc] initWithWidth:24 height:16];
+        
+        // 💥 测试你的 Block 闭包捕获：捕获外部倍率 5 倍
+        int multiplier = 5;
+        int (^hyperScoreCalculator)(int) = ^int(int baseScore) {
+            return baseScore * multiplier;
+        };
+        
+        // 游戏核心非阻塞物理高频 Tick 循环
+        while (![engine gameOver]) {
+            [engine renderWithScoreBlock:hyperScoreCalculator];
+            
+            if (kbhit()) {
+                char ch;
+                if (read(STDIN_FILENO, &ch, 1) == 1) {
+                    [engine processInfut:ch];
+                }
+            }
+            
+            [engine update];
+        }
+        
+        disableRawMode();
+        
+        printf("\n======================================================\n");
+        printf("                      Game Over!                      \n");
+        printf("======================================================\n");
+        printf(" 警告：飞船不幸被陨石击碎，机毁人亡！\n");
+        printf(" 最终星际狂暴得分 (Bonus x5): %d 点！\n", [engine score] * multiplier);
+        printf("======================================================\n");
+        
+        // 🔥 终极考验：只调用这一句，检查后台是否自动干净释放了 engine 和它体内的 3 个陨石！
+        if (engine) NPObject_release(engine);
+    }
+    return 0;
+}

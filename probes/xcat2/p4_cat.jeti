@@ -1,0 +1,7 @@
+#import "p4.jth"
+@implementation Dog (Tracker)
+{
+    int _visits;
+}
+- (int)visits { _visits = _visits + 1; return _visits; }
+@end

@@ -1,0 +1,124 @@
+/* ─────────────────────────────────────────────────────────────────────────
+ * LibUI.jth — ObjC-style declarations for the libui-ng wrapper.
+ *
+ * Pure Jeti: no `struct uiXxx` ever leaks out of LibUI.jeti. Every widget
+ * inherits from `Control`, so `append:`/`setContent:` take a `Control *`
+ * and you never touch a handle yourself. Callbacks take Jeti blocks.
+ * ───────────────────────────────────────────────────────────────────────── */
+
+#ifndef LIBUI_NH
+#define LIBUI_NH
+
+#import <Foundation/Foundation.jeti>
+
+@namespace LibUI
+
+    /* ── Base class of every widget. The raw libui handle is an
+     * implementation detail hidden inside the wrapper. ── */
+    @interface Control : NPObject {
+        @protected
+        void *_handle;
+    }
+        - (void)show;
+        - (void)hide;
+        - (void)setEnabled:(int)enabled;
+        - (int)enabled;
+    @end
+
+    @interface Window : Control
+        + (Window *)windowWithTitle:(const char *)title width:(int)w height:(int)h;
+        - (void)setTitle:(const char *)title;
+        - (void)setContent:(Control *)view;
+        - (void)setMargined:(int)margined;
+        - (void)onClosing:(int (^)(void))handler;
+        - (void)bringToFront;  /* macOS: give the window keyboard focus */
+    @end
+
+    @interface Box : Control
+        + (Box *)verticalBox;
+        + (Box *)horizontalBox;
+        - (void)append:(Control *)child stretch:(int)stretch;
+        - (void)setPadded:(int)padded;
+    @end
+
+    @interface Button : Control
+        + (Button *)buttonWithTitle:(const char *)title;
+        - (void)setText:(const char *)text;
+        - (const char *)text;
+        - (void)onClicked:(void (^)(void))handler;
+    @end
+
+    @interface Label : Control
+        + (Label *)labelWithText:(const char *)text;
+        - (void)setText:(const char *)text;
+        - (const char *)text;
+    @end
+
+    @interface Entry : Control
+        + (Entry *)entry;
+        + (Entry *)passwordEntry;
+        + (Entry *)searchEntry;
+        - (const char *)text;
+        - (void)setText:(const char *)text;
+        - (void)onChanged:(void (^)(void))handler;
+        - (void)setReadOnly:(int)readonly;
+    @end
+
+    @interface MultilineEntry : Control
+        + (MultilineEntry *)multilineEntry;
+        + (MultilineEntry *)nonWrappingMultilineEntry;
+        - (const char *)text;
+        - (void)setText:(const char *)text;
+        - (void)appendText:(const char *)text;
+        - (void)onChanged:(void (^)(void))handler;
+        - (void)setReadOnly:(int)readonly;
+    @end
+
+    @interface Checkbox : Control
+        + (Checkbox *)checkboxWithTitle:(const char *)title;
+        - (const char *)text;
+        - (void)setText:(const char *)text;
+        - (int)state;
+        - (void)setState:(int)state;
+        - (void)onToggled:(void (^)(void))handler;
+    @end
+
+    @interface Slider : Control
+        + (Slider *)sliderWithMin:(int)min max:(int)max;
+        - (int)value;
+        - (void)setValue:(int)value;
+        - (void)onChanged:(void (^)(void))handler;
+    @end
+
+    @interface Progress : Control
+        + (Progress *)progressBar;
+        - (int)value;
+        - (void)setValue:(int)value;
+    @end
+
+    @interface Separator : Control
+        + (Separator *)horizontalSeparator;
+        + (Separator *)verticalSeparator;
+    @end
+
+    @interface Group : Control
+        + (Group *)groupWithTitle:(const char *)title;
+        - (void)setChild:(Control *)child;
+        - (void)setMargined:(int)margined;
+    @end
+
+    @interface Tab : Control
+        + (Tab *)tab;
+        - (void)append:(const char *)title child:(Control *)child;
+        - (void)setMargined:(int)index margined:(int)margined;
+    @end
+
+    @interface App : NPObject
+        + (void)start;   /* initializes the toolkit — call before any widget */
+        + (void)run;     /* enters the libui main loop */
+        + (void)quit;    /* asks the main loop to exit */
+    @end
+
+@endnamespace /* @namespace LibUI */
+
+#endif /* LIBUI_NH */

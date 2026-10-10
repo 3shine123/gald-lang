@@ -1,8 +1,8 @@
 [package]
-name = "ovel-eh"
+name = "jeti-eh"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-ovel-ast = { path = "../ast" }
-ovel-cst = { path = "../cst" }
+jeti-ast = { path = "../ast" }
+jeti-cst = { path = "../cst" }

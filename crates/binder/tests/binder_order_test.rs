@@ -1,5 +1,5 @@
-use ovel_binder::Binder;
-use ovel_parser::Parser;
+use jeti_binder::Binder;
+use jeti_parser::Parser;
 
 #[test]
 fn subclass_impl_after_empty_base_impl_is_found() {
@@ -22,7 +22,7 @@ int main() { return 0; }
 "#;
     let mut p = Parser::new(src);
     let mut unit = p.parse_translation_unit().expect("parse");
-    let mut binder = Binder::new(ovel_symbol::SymbolTable::new());
+    let mut binder = Binder::new(jeti_symbol::SymbolTable::new());
     let rc = binder.bind(&mut unit);
     assert_eq!(rc, 0, "binder errors: {}", binder.last_error());
 }

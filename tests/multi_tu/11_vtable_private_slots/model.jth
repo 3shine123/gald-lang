@@ -1,0 +1,6 @@
+#import <Foundation/Foundation.jeti>
+
+// Public surface of `Widget`: what every TU is allowed to see and call.
+@interface Widget : NPObject
+- (void)show;
+@end

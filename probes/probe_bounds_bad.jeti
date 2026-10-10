@@ -1,0 +1,44 @@
+// Probe: generic protocol bounds — NEGATIVE case (violation instantiation).
+// Expected: exactly one error —
+//   'Cat' does not conform to protocol 'Greetable' required by
+//   'Box<T : Greetable>' — add <Greetable> to Cat's declaration or use a
+//   conforming type argument
+
+#import <Foundation/Foundation.jth>
+
+@protocol Greetable
+- (NPString *)greeting;
+@end
+
+// Non-conforming class (declares no protocol). Has a method so it is not
+// mistaken for a forward-declaration shell.
+@interface Cat : NPObject
+- (void)meow;
+@end
+
+@implementation Cat
+- (void)meow { }
+@end
+
+@interface Box<T : Greetable> : NPObject {
+    T _value;
+}
+- (instancetype)initWithValue:(T)value;
+@end
+
+@implementation Box
+- (instancetype)initWithValue:(T)value {
+    self = [super init];
+    if (self) {
+        _value = value;
+    }
+    return self;
+}
+@end
+
+int main() {
+    // violation: Cat does not conform to Greetable
+    Box<Cat *> *bad = [[Box<Cat *> alloc] initWithValue:[[Cat alloc] init]];
+    (void)bad;
+    return 0;
+}

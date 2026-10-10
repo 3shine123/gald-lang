@@ -24,18 +24,18 @@ parser 识别 `case` 标签形态 → 含任一模式臂时整个 switch 降级�
 之前改写成 `goto`/`if` 状态机 + C 标签。**codegen 零改动**。
 
 ```
-{ NPObject *__ovel_sw = (NPObject *)subject;      /* 对象 subject */
-  __auto_type __ovel_sw = subject;                /* 标量 subject */
-  if (<arm0 test>) goto __ovel_case_0_1;
+{ NPObject *__jeti_sw = (NPObject *)subject;      /* 对象 subject */
+  __auto_type __jeti_sw = subject;                /* 标量 subject */
+  if (<arm0 test>) goto __jeti_case_0_1;
   ...
-  __ovel_case_0_1: { ... } goto __ovel_sw1_end;
-  __ovel_case_0_d: { ... }
-  __ovel_sw1_end: ; }
+  __jeti_case_0_1: { ... } goto __jeti_sw1_end;
+  __jeti_case_0_d: { ... }
+  __jeti_sw1_end: ; }
 ```
 
-- **每个降级 switch 有独立标签命名空间**（`__ovel_sw{id}_*`）——C 标签是
+- **每个降级 switch 有独立标签命名空间**（`__jeti_sw{id}_*`）——C 标签是
   函数作用域的，嵌套模式 switch 否则会发重复标签名（硬 C 错误）。
-- **subject 只求值一次**；`break` 作用域感知改写为 `goto __ovel_sw{id}_end`，
+- **subject 只求值一次**；`break` 作用域感知改写为 `goto __jeti_sw{id}_end`，
   arm 体内的嵌套循环/内层 switch 的 `break` 不受影响。
 - **fallthrough 保持 C 语义**：臂体末尾不追加隐式跳转，无 `break` 即落入下
   一臂（用例 7 验证 `t7=11`）。
@@ -47,7 +47,7 @@ parser 识别 `case` 标签形态 → 含任一模式臂时整个 switch 降级�
 
 | 形态 | 判据 | 降级测试 |
 |------|------|----------|
-| `T *name`（T 为已注册类型名） | 源切片扫描：标识符 `*` 标识符（+ 可选 `when` guard）→ `:` | `ovel_isKindOfClass(...)` + 臂内 `(T *)subject` 别名声明 |
+| `T *name`（T 为已注册类型名） | 源切片扫描：标识符 `*` 标识符（+ 可选 `when` guard）→ `:` | `jeti_isKindOfClass(...)` + 臂内 `(T *)subject` 别名声明 |
 | `>` / `<` / `>=` / `<=` 开头 | 悬空比较 → 表达式树里替换 subject | `subject OP <expr>` |
 | `@"..."` / `@N` / `@YES` / `@'c'` / `@(expr)` | `is_object_literal`（与 `crates/pattern` 的 `is_object_literal_expr` **必须一致**） | `[subject isEqual:<lit>]` |
 | `when <expr>` | 上下文关键词（lexer 不硬编码） | 追加 `&& <expr>` |
@@ -58,13 +58,13 @@ parser 识别 `case` 标签形态 → 含任一模式臂时整个 switch 降级�
 - **常量臂与模式臂不可混用**：报
   `switch mixes plain constant 'case' arms with pattern arms — M1 cannot lower
   both in one switch; split them into separate switches`（负例
-  `tests/negative/switch_mixed_arms.ov`）。C 路径需要原始 body，模式路径丢弃它。
+  `tests/negative/switch_mixed_arms.jeti`）。C 路径需要原始 body，模式路径丢弃它。
 - **非恒定标签被拦截**：`case [obj msg]:` / `case f():` / `case a = b:` 报
   `case label is not a constant expression`（负例
-  `tests/negative/switch_case_msg_send.ov`）。此前会原样透传进生成的 C，
+  `tests/negative/switch_case_msg_send.jeti`）。此前会原样透传进生成的 C，
   报错指向生成代码、无法对应源码。
 - **嵌套模式**未做跨层 case 作用域（内层 switch 的 `case` 归内层）——C 与
-  Ovel 语义一致，未验证。
+  Jeti 语义一致，未验证。
 - `case <enum const>:` 走普通 C 路径（`is_object_literal` 假），零回归。
 
 ## M2 候补

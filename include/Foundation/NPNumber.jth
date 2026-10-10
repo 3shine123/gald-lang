@@ -1,0 +1,38 @@
+#ifndef NPNUMBER_NH
+#define NPNUMBER_NH
+
+#import <Foundation/NPObject.jth>
+#import <Foundation/NPString.jth>
+
+@interface NPNumber : NPObject {
+@public
+    int         _isDouble;
+    long long   _intValue;
+    double      _doubleValue;
+}
+
++ (NPNumber *)numberWithInt:(int)value;
++ (NPNumber *)numberWithLongLong:(long long)value;
++ (NPNumber *)numberWithDouble:(double)value;
++ (NPNumber *)numberWithBool:(int)value;
++ (NPNumber *)numberWithChar:(char)value;
+
+- (NPNumber *)initWithLongLong:(long long)value;
+- (NPNumber *)initWithDouble:(double)value;
+
+- (int)intValue;
+- (long long)longLongValue;
+- (double)doubleValue;
+- (int)boolValue;
+- (char)charValue;
+
+- (NPString *)description;
+// Value equality, as in ObjC's NSNumber: `isEqual:` against another NPNumber
+// compares numeric values, so `@1` equals a distinct `@(i + 1)` that also
+// holds 1. Needed for value-semantics dictionary keys.
+- (BOOL)isEqual:(id)object;
+- (int)isEqualToNumber:(NPNumber *)other;
+
+@end
+
+#endif

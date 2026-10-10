@@ -1,0 +1,28 @@
+#include "jeti/runtime.h"
+#import "Foundation/NPObject.jth"
+#import "Foundation/NPObject.jeti"
+
+@interface Item : NPObject {
+    int _tag;
+}
+- (int)tag;
+@end
+
+@implementation Item
+
+- (int)tag {
+    return _tag;
+}
+
+@end
+
+int main() {
+    @noarc {
+        Item *shared = [Item new];
+        Item *alias = shared;
+        [alias retain];
+        [shared release];
+        [alias release];
+    }
+    return 0;
+}

@@ -1,0 +1,26 @@
+#import <Foundation/Foundation.jeti>
+@protocol Greetable
+- (const char *)greet;
+@end
+@protocol Loud <Greetable>
+- (void)shout;
+@end
+@interface Dog : NPObject <Loud>
+@end
+@implementation Dog
+- (const char *)greet { return "woof"; }
+- (void)shout { }
+@end
+@interface Cat : NPObject
+@end
+@implementation Cat
+@end
+int main(void) {
+    Dog *d = [[Dog alloc] init];
+    Cat *c = [[Cat alloc] init];
+    printf("dog-loud=%d dog-greet=%d cat-loud=%d\n",
+        [d conformsToProtocol:@protocol(Loud)],
+        [d conformsToProtocol:@protocol(Greetable)],
+        [c conformsToProtocol:@protocol(Loud)]);
+    return 0;
+}

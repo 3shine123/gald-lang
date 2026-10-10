@@ -1,6 +1,6 @@
-#include "ovel/codegen.h"
-#include "ovel/ast.h"
-#include "ovel/symbol.h"
+#include "jeti/codegen.h"
+#include "jeti/ast.h"
+#include "jeti/symbol.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -16,7 +16,7 @@ static symbol_t *make_func(const char *name) {
     symbol_t *s = sym_alloc(SYM_FUNCTION, name);
     s->data.func.return_type = np_type_from_cst(NULL);
     if (!s->data.func.return_type) {
-        s->data.func.return_type = calloc(1, sizeof(ovel_type_t));
+        s->data.func.return_type = calloc(1, sizeof(jeti_type_t));
     }
     s->data.func.return_type->prim = TYPE_VOID;
     return s;
@@ -114,7 +114,7 @@ static void test_cg_call_with_args(void) {
 
 static void test_unit_empty(void) {
     TEST("unit empty");
-    ast_unit_t *au = ast_unit_alloc("test.ov");
+    ast_unit_t *au = ast_unit_alloc("test.jeti");
     symbol_table_t *st = symtab_alloc();
     cg_unit_t *cu = ast_to_cg_unit(au, st);
     ASSERT(cu->decl_count == 0, "expected 0 decls");
@@ -124,7 +124,7 @@ static void test_unit_empty(void) {
 
 static void test_unit_func_no_body(void) {
     TEST("unit func no body");
-    ast_unit_t *au = ast_unit_alloc("t.ov");
+    ast_unit_t *au = ast_unit_alloc("t.jeti");
     ast_decl_t *d = ast_decl_alloc(AST_DECL_FUNCTION, "f");
     d->data.function.func_sym = make_func("f");
     au->decls = calloc(1, sizeof(ast_decl_t *));
@@ -139,7 +139,7 @@ static void test_unit_func_no_body(void) {
 
 static void test_unit_variable(void) {
     TEST("unit variable decl");
-    ast_unit_t *au = ast_unit_alloc("t.ov");
+    ast_unit_t *au = ast_unit_alloc("t.jeti");
     ast_decl_t *d = ast_decl_alloc(AST_DECL_VARIABLE, "x");
     d->data.variable.type = ast_type_alloc();
     d->data.variable.type->prim = TYPE_INT;

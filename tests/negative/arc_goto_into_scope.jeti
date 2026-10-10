@@ -1,0 +1,26 @@
+#import <Foundation/Foundation.jth>
+
+// NEGATIVE: `goto` that jumps INTO a nested scope past an owned initializer.
+//
+// C leaves this undefined (the object slot is never written, yet the scope end
+// would release it). ARC refuses to emit code:
+//   error: goto 'inside' jumps into a nested scope; an owned object declared
+//          there could be released before it is initialized
+
+@interface NegGotoItem : NPObject
+@end
+
+@implementation NegGotoItem
+@end
+
+int main() {
+    if (1) {
+        goto inside;
+    }
+    {
+        NegGotoItem *x = [[NegGotoItem alloc] init];
+inside:
+        NPLog(@"at label");
+    }
+    return 0;
+}

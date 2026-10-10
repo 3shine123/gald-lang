@@ -1,4 +1,4 @@
-#include "ovel/symbol.h"
+#include "jeti/symbol.h"
 #include <stdio.h>
 #include <string.h>
 

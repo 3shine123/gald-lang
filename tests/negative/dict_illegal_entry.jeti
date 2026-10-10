@@ -1,0 +1,11 @@
+// MUST FAIL: `@{...}` entries have to be Objective-C objects. A bare scalar
+// key or value would otherwise reach `jeti_dictionary_create` as a non-object
+// vararg — it compiles and then reads garbage at runtime.
+#import <Foundation/Foundation.jth>
+
+int main(void) {
+    int i = 7;
+    NPDictionary *d = @{ 1: @"one", @"k": i };
+    (void)d;
+    return 0;
+}

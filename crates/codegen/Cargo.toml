@@ -1,12 +1,12 @@
 [package]
-name = "ovel-codegen"
+name = "jeti-codegen"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-ovel-cst = { path = "../cst" }
-ovel-ast = { path = "../ast" }
-ovel-symbol = { path = "../symbol" }
-ovel-elaborator = { path = "../elaborator" }
+jeti-cst = { path = "../cst" }
+jeti-ast = { path = "../ast" }
+jeti-symbol = { path = "../symbol" }
+jeti-elaborator = { path = "../elaborator" }
 attrs = { path = "../attrs" }
-ovel-ownership = { path = "../ownership" }
+jeti-ownership = { path = "../ownership" }

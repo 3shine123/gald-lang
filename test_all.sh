@@ -1,4 +1,4 @@
-# ovel test_all.sh — delegate everything to parallel Python runner
+# jeti test_all.sh — delegate everything to parallel Python runner
 # Usage: ./test_all.sh [-jN]
 
 JOBS=1
@@ -10,11 +10,11 @@ done
 
 cd "$(dirname "$0")"
 python3 test_all.py $ARGS
-# Kill any leftover ovelc processes (orphaned if Python was killed by timeout)
-pkill -f "target/debug/ovelc" 2>/dev/null || true
-pkill -f "target/release/ovelc" 2>/dev/null || true
-# Kill orphaned test binaries (compiled .ov executables left in /tmp/)
-for f in tests/*.ov; do
-    stem=$(basename "$f" .ov)
+# Kill any leftover jetic processes (orphaned if Python was killed by timeout)
+pkill -f "target/debug/jetic" 2>/dev/null || true
+pkill -f "target/release/jetic" 2>/dev/null || true
+# Kill orphaned test binaries (compiled .jeti executables left in /tmp/)
+for f in tests/*.jeti; do
+    stem=$(basename "$f" .jeti)
     pkill -f "^/tmp/$stem($| )" 2>/dev/null || true
 done

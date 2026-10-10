@@ -1,0 +1,36 @@
+#include <stdio.h>
+#import <Foundation/Foundation.jth>
+
+// Test: generic class with get/set methods
+@interface Holder<T> : NPObject {
+    @public
+    T _data[4];
+    int _count;
+}
+- (void)put:(T)item;
+- (T)get;
+@end
+
+@implementation Holder
+- (void)put:(T)item {
+    if (_count < 4) _data[_count++] = item;
+}
+- (T)get {
+    if (_count > 0) return _data[--_count];
+    return 0;
+}
+@end
+
+@interface Item : NPObject @end
+@implementation Item @end
+
+int main() {
+    @autoreleasepool {
+        Holder<Item*> *holder = [[Holder alloc] init];
+        Item *r = [[Item alloc] init];
+        [holder put:r];
+        Item *r2 = [holder get];
+        printf("Holder<Item*> works: %p\n", (void*)r2);
+    }
+    return 0;
+}

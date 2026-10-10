@@ -1,0 +1,41 @@
+// Foundation —— 自包含实现伞头（self-contained umbrella）。
+//
+// 同时导入全部 Foundation 类的声明与实现，单 TU 构建无需任何库：
+//
+//     #import <Foundation/Foundation.jeti>
+//
+// 按 `.jth`/`.jeti` 约定，纯声明伞头是 `Foundation.jth` —— 配合预编译库
+// （tools/build-foundation-lib.sh）使用，让 Foundation 的实现只存一份。
+#include <stdint.h>
+#include <stddef.h>
+
+#include "jeti/runtime.h"
+
+#import "NPObject.jth"
+#import "NPObject.jeti"
+#import "NPString.jth"
+#import "NPString.jeti"
+#import "NPMutableString.jth"
+#import "NPMutableString.jeti"
+#import "NPArray.jth"
+#import "NPArray.jeti"
+#import "NPMutableArray.jth"
+#import "NPMutableArray.jeti"
+#import "NPDictionary.jth"
+#import "NPDictionary.jeti"
+#import "NPMutableDictionary.jth"
+#import "NPMutableDictionary.jeti"
+#import "NPSet.jth"
+#import "NPSet.jeti"
+#import "NPMutableSet.jth"
+#import "NPMutableSet.jeti"
+#import "NPOrderedSet.jth"
+#import "NPOrderedSet.jeti"
+#import "NPPredicate.jth"
+#import "NPPredicate.jeti"
+#import "NPNumber.jth"
+#import "NPNumber.jeti"
+#import "NPError.jth"
+#import "NPError.jeti"
+#import "NPTask.jth"
+#import "NPTask.jeti"

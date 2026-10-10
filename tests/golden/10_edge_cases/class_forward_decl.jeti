@@ -1,0 +1,28 @@
+#include <stdio.h>
+#import <Foundation/Foundation.jth>
+
+@class ForwardDeclared;
+
+@interface Container : NPObject
+@property ForwardDeclared *item;
+@end
+
+@interface ForwardDeclared : NPObject
+@property int value;
+@end
+
+@implementation Container
+@end
+
+@implementation ForwardDeclared
+@end
+
+int main() {
+    Container *c = [[Container alloc] init];
+    ForwardDeclared *f = [[ForwardDeclared alloc] init];
+    f.value = 42;
+    c.item = f;
+    ForwardDeclared *tmp = c.item;
+    printf("value=%d\n", tmp.value);
+    return 0;
+}

@@ -1,0 +1,27 @@
+// Probe 2: constraint ENFORCEMENT. If the bound syntax is accepted anywhere,
+// does the checker reject instantiating with a class that does NOT conform?
+// A silent acceptance means bounds are parsed-as-decorations (ObjC lightweight
+// style) or ignored entirely.
+
+#import <Foundation/Foundation.jth>
+
+@protocol Greetable
+- (NPString *)greeting;
+@end
+
+@interface Box<T : Greetable> : NPObject
+- (T)value;
+@end
+
+@implementation Box
+- (T)value {
+    return nil;
+}
+@end
+
+// VIOLATION: NPNumber does not declare <Greetable>. A real bound must reject
+// `Box<NPNumber *>` at the instantiation site below.
+int main() {
+    Box<NPNumber *> *bad = nil;   // should error: NPNumber is not Greetable
+    return 0;
+}

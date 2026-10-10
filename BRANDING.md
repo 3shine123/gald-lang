@@ -12,7 +12,7 @@ If you would like to use the logo for purposes beyond referencing this project, 
 
 ## Project Name
 
-The project name `ovel-lang` may be used to refer to the project in documentation, articles, and discussions.
+The project name `jeti-lang` may be used to refer to the project in documentation, articles, and discussions.
 
 Please avoid using the project name or logo in ways that imply endorsement, sponsorship, or official affiliation.
 

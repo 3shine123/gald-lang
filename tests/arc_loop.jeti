@@ -1,0 +1,21 @@
+#include <stdio.h>
+#import <Foundation/Foundation.jth>
+
+@interface Mini : NPObject
+- (void)ping;
+@end
+
+@implementation Mini
+- (void)ping {
+    printf("ping\n");
+}
+@end
+
+int main() {
+    Mini *m = [[Mini alloc] init];
+    for (int i = 0; i < 5; i++) {
+        [m ping];
+    }
+    [m release];
+    return 0;
+}

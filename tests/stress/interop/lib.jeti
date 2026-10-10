@@ -1,0 +1,45 @@
+// lib.jeti — library TU for three-way interop: Jeti C + plain C + assembly.
+// NO main (library-style; linked into a C host program). Build (build.sh):
+//   jetic -rewrite-jeti lib.jeti -o lib.c -emit-bridge-header lib.h
+// The C caller (caller.c) includes lib.h and links lib.c + helper.c +
+// asm_lib.s + runtime.c. Caller's main() must call jeti_metaInit() first.
+
+// real ARM64 assembly (asm_lib.s)
+extern int asm_square(int v);
+extern int asm_add3(int a, int b, int c);
+
+// plain C (helper.c) — jeti calls INTO C
+extern int c_helper_mul(int a, int b);
+
+typedef int (^IntBin)(int, int);
+
+// ── a plain function the C side can call through the bridge ──
+int jeti_add(int a, int b) {
+    return a + b + asm_add3(0, 0, 0) * 0;   // asm linked in, folded here
+}
+
+// ── a class the C side can alloc/init/message through the bridge ──
+@interface Calc {
+    int _acc;
+}
+- (id) init;
+- (void) add:(int)v;
+- (int)  total;
+- (int)  squareOf:(int)v;        // delegates to ARM64 asm
+- (int)  scale:(int)v by:(int)k; // delegates to C helper
+- (int)  mix:(int)v with:(int)k; // uses a block internally
+@end
+
+@implementation Calc
+- (id) init  { _acc = 0; return self; }   // implicit root: no [super init] slot
+- (void) add:(int)v { _acc = _acc + v; }
+- (int)  total { return _acc; }
+- (int)  squareOf:(int)v { return asm_square(v); }
+- (int)  scale:(int)v by:(int)k { return c_helper_mul(v, k); }
+- (int)  mix:(int)v with:(int)k {
+    IntBin f = ^int(int x, int y) { return x * y + 1; };
+    int r = f(v, k);
+    [self add:r];
+    return r;
+}
+@end

@@ -1,4 +1,0 @@
-#import "dog.oh"
-@implementation Dog (Tricks)
-- (int)trickCount { return 3; }
-@end

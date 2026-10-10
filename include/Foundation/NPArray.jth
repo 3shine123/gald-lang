@@ -1,0 +1,39 @@
+#ifndef NPARRAY_NH
+#define NPARRAY_NH
+
+#import <Foundation/NPObject.jth>
+#import <Foundation/NPPredicate.jth>
+
+// Generic since the modernization pass: `NPArray<T>` specializes via
+// monomorphization (objectAtIndex: returns T, addObject-style params take T).
+// The BARE spelling `NPArray` (no type args) keeps its pre-existing erased
+// behavior and symbols — existing code needs zero migration.
+@interface NPArray<T> : NPObject {
+@public
+    NPObject **_items;
+    size_t _count;
+    size_t _capacity;
+}
+
++ (id)arrayWithObjects:(id *)objs count:(size_t)n;
++ (id)arrayWithObject:(T)obj;
++ (id)array;
+
+- (size_t)count;
+- (T)objectAtIndex:(size_t)index;
+- (T)firstObject;
+- (T)lastObject;
+- (BOOL)containsObject:(T)obj;
+- (size_t)indexOfObject:(T)obj;
+// Predicate filtering (doc/nppredicate_plan.md §3): NPPredicate owns the DSL
+// parsing; the container only applies the parsed predicate per element. A nil
+// predicate filters nothing — the same nil-tolerant stance the rest of this
+// container API takes.
+- (NPArray *)filteredArrayUsingPredicate:(NPPredicate *)pred;
+- (size_t)indexOfObjectMatchingPredicate:(NPPredicate *)pred;
+- (id)copy;
+- (NPString *)description;
+
+@end
+
+#endif

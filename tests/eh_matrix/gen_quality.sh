@@ -9,21 +9,21 @@
 #     the hosted-only jmp_buf ABI — the bare-metal mandate)
 #   * legacy must reproduce the sjlj output, not merely "an equivalent one"
 #
-# Usage: OVELC=target/release/ovelc ./gen_quality.sh
+# Usage: JETIC=target/release/jetic ./gen_quality.sh
 set -u
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 cd "$ROOT"
 
-OVELC="${OVELC:-}"
-if [[ -z "$OVELC" ]]; then
-    for cand in target/release/ovelc target/debug/ovelc; do
-        if [[ -x "$cand" ]]; then OVELC="$cand"; break; fi
+JETIC="${JETIC:-}"
+if [[ -z "$JETIC" ]]; then
+    for cand in target/release/jetic target/debug/jetic; do
+        if [[ -x "$cand" ]]; then JETIC="$cand"; break; fi
     done
 fi
-[[ -x "$OVELC" ]] || { echo "error: ovelc not found"; exit 2; }
+[[ -x "$JETIC" ]] || { echo "error: jetic not found"; exit 2; }
 
-WORK="${TMPDIR:-/tmp}/ovel_eh_quality.$$"
+WORK="${TMPDIR:-/tmp}/jeti_eh_quality.$$"
 mkdir -p "$WORK"
 trap 'rm -rf "$WORK"' EXIT
 
@@ -32,14 +32,14 @@ GOLD="tests/golden"
 
 # label|file|extra args
 CASES=(
-  "no_try|$GOLD/04_arc/retain_release.ov|"
-  "single_try|$GOLD/15_exceptions/try_catch.ov|-fno-ovel-arc"
-  "foundation|$GOLD/13_foundation/04_npstring/npstring_test.ov|"
-  "big_file|examples/01_JSONEditor/json_editor.ov|-fno-ovel-arc"
-  "c_superset|$GOLD/22_c_superset/c_superset.ov|"
-  "freestanding|$GOLD/25_freestanding/freestanding.ov|-ffreestanding"
-  "no_throw_plain|tests/eh_matrix/samples/no_throw_plain.ov|"
-  "loops_pure|tests/eh_matrix/samples/loops_pure.ov|"
+  "no_try|$GOLD/04_arc/retain_release.jeti|"
+  "single_try|$GOLD/15_exceptions/try_catch.jeti|-fno-jeti-arc"
+  "foundation|$GOLD/13_foundation/04_npstring/npstring_test.jeti|"
+  "big_file|examples/01_JSONEditor/json_editor.jeti|-fno-jeti-arc"
+  "c_superset|$GOLD/22_c_superset/c_superset.jeti|"
+  "freestanding|$GOLD/25_freestanding/freestanding.jeti|-ffreestanding"
+  "no_throw_plain|tests/eh_matrix/samples/no_throw_plain.jeti|"
+  "loops_pure|tests/eh_matrix/samples/loops_pure.jeti|"
 )
 
 printf '%-14s %-9s %8s %8s %8s %9s %8s\n' \
@@ -56,12 +56,12 @@ for entry in "${CASES[@]}"; do
         # shellcheck disable=SC2206
         [[ -n "$extra" ]] && args+=($extra)
         out="$WORK/$label.$m.c"
-        if ! $OVELC -rewrite-ovel "${args[@]}" -o "$out" "$file" >/dev/null 2>&1; then
+        if ! $JETIC -rewrite-jeti "${args[@]}" -o "$out" "$file" >/dev/null 2>&1; then
             printf '%-14s %-9s %s\n' "$label" "$m" "TRANSPILE-FAIL"
             continue
         fi
         lines=$(wc -l < "$out" | tr -d ' ')
-        guards=$(grep -c "__ovel_eh_flag" "$out" || true)
+        guards=$(grep -c "__jeti_eh_flag" "$out" || true)
         setj=$(grep -cE "setjmp|longjmp" "$out" || true)
         bytes=$(wc -c < "$out" | tr -d ' ')
         # clang compile time of the generated C (only when it can compile)
@@ -77,15 +77,15 @@ done
 # no_throw_plain has no @try, no @throw, and no Foundation import (therefore no
 # inlined throwing chain). The stage-3 effect analysis must keep its checked
 # output completely free of EH guards. NOTE: judge by "any occurrence of
-# __ovel_eh_flag", not by a literal `if (__ovel_eh_flag` prefix — the codegen
-# parenthesizes the condition (`if ((__ovel_eh_flag == 0))`), so a prefix grep
+# __jeti_eh_flag", not by a literal `if (__jeti_eh_flag` prefix — the codegen
+# parenthesizes the condition (`if ((__jeti_eh_flag == 0))`), so a prefix grep
 # reports 0 even when guards are present.
 plain_c="$WORK/no_throw_plain.checked.c"
 if [[ ! -f "$plain_c" ]]; then
     echo "GATE FAIL no_throw_plain did not transpile under -eh checked"
     exit 1
 fi
-g=$(grep -c "__ovel_eh_flag" "$plain_c" || true)
+g=$(grep -c "__jeti_eh_flag" "$plain_c" || true)
 if [[ "$g" -eq 0 ]]; then
     echo "GATE OK   no_throw_plain / -eh checked : 0 guards (nothing to pay)"
 else
@@ -101,7 +101,7 @@ if [[ ! -f "$loops_c" ]]; then
     echo "GATE FAIL loops_pure did not transpile under -eh checked"
     exit 1
 fi
-lg=$(grep -c "__ovel_eh_flag" "$loops_c" || true)
+lg=$(grep -c "__jeti_eh_flag" "$loops_c" || true)
 if [[ "$lg" -eq 0 ]]; then
     echo "GATE OK   loops_pure / -eh checked : 0 guards (pure loop conditions unguarded)"
 else

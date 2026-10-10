@@ -1,5 +1,5 @@
-#include "ovel/cfg.h"
-#include "ovel/ast.h"
+#include "jeti/cfg.h"
+#include "jeti/ast.h"
 #include <stdio.h>
 #include <stdlib.h>
 

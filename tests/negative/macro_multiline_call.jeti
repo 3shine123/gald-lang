@@ -1,0 +1,15 @@
+// negative: jeti macro invocation not closed on one line
+// jetic must refuse with a clear error (multi-line calls unsupported).
+#import <Foundation/Foundation.jth>
+#include <stdio.h>
+
+#define TAG(o) [o tag]
+
+int main() {
+    jeti_meta_init();
+    NPObject *w = (NPObject *)0;
+    // call split across lines — unsupported
+    printf("%d\n", TAG(
+        w));
+    return 0;
+}

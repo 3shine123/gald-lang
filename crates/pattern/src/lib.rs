@@ -18,21 +18,21 @@
 //! }
 //! /* lowered */
 //! {
-//!     __auto_type __ovel_sw = value;               /* evaluated once */
-//!     if (__ovel_sw > 10) goto __ovel_case_0;      /* Cond */
-//!     if (ovel_isKindOfClass((NPObject *)__ovel_sw, &OVEL_CLASS_$_NSString)
-//!         && __ovel_s_len_guard) goto __ovel_case_1;   /* Bind + when */
-//!     if ([__ovel_sw isEqual:@"hello"]) goto __ovel_case_2;  /* literal */
-//!     goto __ovel_case_d;                          /* default */
-//!     goto __ovel_sw_end;                          /* no default: skip */
-//! __ovel_case_0:;
+//!     __auto_type __jeti_sw = value;               /* evaluated once */
+//!     if (__jeti_sw > 10) goto __jeti_case_0;      /* Cond */
+//!     if (jeti_isKindOfClass((NPObject *)__jeti_sw, &JETI_CLASS_$_NSString)
+//!         && __jeti_s_len_guard) goto __jeti_case_1;   /* Bind + when */
+//!     if ([__jeti_sw isEqual:@"hello"]) goto __jeti_case_2;  /* literal */
+//!     goto __jeti_case_d;                          /* default */
+//!     goto __jeti_sw_end;                          /* no default: skip */
+//! __jeti_case_0:;
 //!     big();
-//!     goto __ovel_sw_end;
-//! __ovel_case_1:;
+//!     goto __jeti_sw_end;
+//! __jeti_case_1:;
 //!     /* binding alias declared in the arm body scope */
-//!     goto __ovel_sw_end;
+//!     goto __jeti_sw_end;
 //! ...
-//! __ovel_sw_end:;
+//! __jeti_sw_end:;
 //! }
 //! ```
 //!
@@ -43,15 +43,15 @@
 //! would bind to the enclosing `if`'s loop context wrongly (or escape the
 //! switch entirely). So every `break` that belongs to THIS switch (i.e. seen
 //! while no deeper loop/switch has been entered) is rewritten to
-//! `goto __ovel_sw_end`. `break`s inside nested loops/switches are left
+//! `goto __jeti_sw_end`. `break`s inside nested loops/switches are left
 //! untouched — the same two-set discipline the defer pass uses (`pending` vs
 //! `jump`).
 //!
 //! ## Fallthrough
 //!
 //! Without `break`, control falls from one arm into the next — the C
-//! semantics, preserved by the `goto __ovel_case_{i+1}` chain: each arm's
-//! body ends with `goto __ovel_sw_end` ONLY if the original body already
+//! semantics, preserved by the `goto __jeti_case_{i+1}` chain: each arm's
+//! body ends with `goto __jeti_sw_end` ONLY if the original body already
 //! ended in break-like flow... actually simpler: each label block falls
 //! through to the next label block naturally (labels are adjacent), and a
 //! rewritten `break` jumps to the end. This reproduces C fallthrough
@@ -63,15 +63,15 @@
 //! - Return/throw inside arms work naturally (plain C statements).
 //! - Object-literal equality is `isEqual:` (value semantics); nil subject
 //!   short-circuits to "no match" (messaging nil yields 0).
-use ovel_ast::{AstArm, AstDecl, AstDeclData, AstDeclKind, AstExpr, AstExprData, AstExprKind,
+use jeti_ast::{AstArm, AstDecl, AstDeclData, AstDeclKind, AstExpr, AstExprData, AstExprKind,
               AstPattern, AstStmt, AstStmtData, AstStmtKind, AstType};
-use ovel_cst::TypePrim;
+use jeti_cst::TypePrim;
 
 /// Unit-level entry: lower every `SwitchPat` under every decl (methods,
 /// functions, namespaces, class method lists). Same traversal shape as
-/// `ovel_defer::desugar_unit` — namespaces must recurse or their switches
+/// `jeti_defer::desugar_unit` — namespaces must recurse or their switches
 /// would reach codegen's catch-all and be silently dropped.
-pub fn desugar_unit(unit: &mut ovel_ast::AstUnit) {
+pub fn desugar_unit(unit: &mut jeti_ast::AstUnit) {
     for decl in &mut unit.decls {
         lower_decl(decl);
     }
@@ -162,11 +162,11 @@ fn lower_switch_pat(sw: AstStmt) -> AstStmt {
     };
     // Every lowered switch gets its own label namespace: C labels are
     // function-scoped, so nested pattern switches would otherwise emit
-    // duplicate `__ovel_sw_end` / `__ovel_case_0` names (hard C error).
+    // duplicate `__jeti_sw_end` / `__jeti_case_0` names (hard C error).
     let id = SWITCH_SEQ.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
-    let subj = "__ovel_sw".to_string();
-    let end_label = format!("__ovel_sw{}_end", id);
-    let default_label = format!("__ovel_case_{}_d", id);
+    let subj = "__jeti_sw".to_string();
+    let end_label = format!("__jeti_sw{}_end", id);
+    let default_label = format!("__jeti_case_{}_d", id);
     let mut out: Vec<AstStmt> = Vec::new();
 
     // 1. Materialize the subject exactly once. This pass runs BEFORE the
@@ -299,7 +299,7 @@ fn lower_switch_pat(sw: AstStmt) -> AstStmt {
 /// Unique tag source for one lowered switch (see `lower_switch_pat`).
 static SWITCH_SEQ: std::sync::atomic::AtomicUsize = std::sync::atomic::AtomicUsize::new(0);
 
-fn case_label(id: usize, i: usize) -> String { format!("__ovel_case_{}_{}", id, i) }
+fn case_label(id: usize, i: usize) -> String { format!("__jeti_case_{}_{}", id, i) }
 
 /// The if-test for one arm, splicing the subject where the pattern needs it.
 fn arm_test(arm: &AstArm, subj: &str) -> AstExpr {
@@ -334,19 +334,19 @@ fn arm_test(arm: &AstArm, subj: &str) -> AstExpr {
         }
         AstPattern::Cond(e) => splice_subject(e, subj),
         AstPattern::Bind { ty, .. } => {
-            // ovel_isKindOfClass((NPObject *)subj, &OVEL_CLASS_$_<Flat>)
+            // jeti_isKindOfClass((NPObject *)subj, &JETI_CLASS_$_<Flat>)
             let flat = flat_type_name(ty);
             AstExpr {
                 kind: AstExprKind::FuncCall, expr_type: None, line, col,
                 data: AstExprData::FuncCall {
                     func: None,
-                    name: "ovel_isKindOfClass".to_string(),
+                    name: "jeti_isKindOfClass".to_string(),
                     callee: None,
                     args: vec![
                         cast_to_npobject(ident(subj, line, col)),
                         AstExpr {
                             kind: AstExprKind::VarRef, expr_type: None, line, col,
-                            data: AstExprData::VarRef { sym: None, name: format!("&OVEL_CLASS_$_{}", flat) },
+                            data: AstExprData::VarRef { sym: None, name: format!("&JETI_CLASS_$_{}", flat) },
                         },
                     ],
                 },
@@ -424,7 +424,7 @@ fn ident(name: &str, line: usize, col: usize) -> AstExpr {
     }
 }
 
-/// `NPObject *` — the erased type every ovel object shares (subject and
+/// `NPObject *` — the erased type every jeti object shares (subject and
 /// binding casts both go through it).
 fn npobject_type() -> AstType {
     let mut t = AstType::new(TypePrim::Named);
@@ -468,7 +468,7 @@ fn var_decl(name: &str, ty: AstType, init: Option<AstExpr>, line: usize, col: us
     }
 }
 
-/// Bind-arm alias: `T *name = (T *)(NPObject *)__ovel_sw;` — declared inside
+/// Bind-arm alias: `T *name = (T *)(NPObject *)__jeti_sw;` — declared inside
 /// the arm body so scoping stays block-local (no cross-arm leakage).
 fn bind_alias_decl(ty: &AstType, name: &str, subj: &str, line: usize, col: usize) -> AstStmt {
     let mut t = ty.clone();

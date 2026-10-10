@@ -1,4 +1,4 @@
-use ovel_cst::{CstType, TypePrim};
+use jeti_cst::{CstType, TypePrim};
 
 // ─── Symbol kinds ───────────────────────────────────────────────────────────
 

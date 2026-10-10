@@ -334,12 +334,12 @@ pub enum CstStmtData {
     SwitchPat {
         expr: Box<CstExpr>,
         /// Flat arm list; the brace structure of the C switch body is not
-        /// preserved (arms are labels, never nested scopes in ovel).
+        /// preserved (arms are labels, never nested scopes in jeti).
         arms: Vec<CstArm>,
         has_default: bool,
         /// Body of the `default:` arm, grouped with its fallthrough siblings
         /// by the flat-arm collector. The pattern crate emits it as a
-        /// `__ovel_case_d` labeled block; `None` = no default (or the default
+        /// `__jeti_case_d` labeled block; `None` = no default (or the default
         /// body was not captured, e.g. the single-arm wrapper nodes).
         default_body: Option<Box<CstStmt>>,
     },

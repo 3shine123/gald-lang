@@ -1,0 +1,35 @@
+#import <Foundation/Foundation.jth>
+
+// ARC order 16: an exception raised INSIDE `@finally` must propagate outward —
+// it must not be swallowed by the enclosing handler, and it must not re-enter
+// the catch that already ran.
+
+@interface AO16Err : NPObject
+@end
+
+@implementation AO16Err
+- (void)dealloc {
+    NPLog(@"ao16 err dealloc");
+    [super dealloc];
+}
+@end
+
+int main() {
+    @try {
+        @try {
+            @throw [[AO16Err alloc] init];
+        }
+        @catch (AO16Err *e) {
+            NPLog(@"ao16 inner catch");
+        }
+        @finally {
+            NPLog(@"ao16 inner finally");
+            @throw @"from-finally";
+        }
+    }
+    @catch (NPString *e) {
+        NPLog(@"ao16 outer catch: %@", e);
+    }
+    NPLog(@"ao16 done");
+    return 0;
+}

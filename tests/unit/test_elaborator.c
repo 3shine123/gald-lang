@@ -1,10 +1,10 @@
-#include "ovel/elaborator.h"
-#include "ovel/parser.h"
-#include "ovel/lexer.h"
-#include "ovel/cst.h"
-#include "ovel/symbol.h"
-#include "ovel/binder.h"
-#include "ovel/checker.h"
+#include "jeti/elaborator.h"
+#include "jeti/parser.h"
+#include "jeti/lexer.h"
+#include "jeti/cst.h"
+#include "jeti/symbol.h"
+#include "jeti/binder.h"
+#include "jeti/checker.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -31,7 +31,7 @@ static int run_elaboration(symbol_table_t *st, translation_unit_t *unit) {
 
 static symbol_table_t *parse_and_elab(const char *src, translation_unit_t **out_unit) {
     lexer_t lexer;
-    lexer_init(&lexer, src, strlen(src), "test.ov");
+    lexer_init(&lexer, src, strlen(src), "test.jeti");
     parser_t *p = parser_create(&lexer);
     *out_unit = parser_parse_translation_unit(p);
     parser_destroy(p);

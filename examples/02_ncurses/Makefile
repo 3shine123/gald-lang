@@ -3,21 +3,21 @@
 # Run: make run
 # Debug memory corruption: make asan && ./ncurses_demo_asan
 
-OVELC = ../../target/debug/ovelc
+JETIC = ../../target/debug/jetic
 NCURSES ?= /opt/homebrew/opt/ncurses
 SAN = -fsanitize=address
 
 all: ncurses_demo
 
-ncurses_demo.c: ncurses_demo.ov
-	$(OVELC) -rewrite-ovel ncurses_demo.ov -o ncurses_demo.c -fno-ovel-arc
+ncurses_demo.c: ncurses_demo.jeti
+	$(JETIC) -rewrite-jeti ncurses_demo.jeti -o ncurses_demo.c -fno-jeti-arc
 
 ncurses_demo: ncurses_demo.c
 	clang -std=c99 -fblocks \
 		-I ../../include -I ../../include/Foundation -I ../../include/Terminal \
 		-I $(NCURSES)/include \
 		ncurses_demo.c \
-		../../include/ovel/runtime.c \
+		../../include/jeti/runtime.c \
 		../../include/Terminal/ncurses_mouse.c \
 		$(NCURSES)/lib/libncurses.dylib \
 		-Wl,-rpath,$(NCURSES)/lib \
@@ -28,7 +28,7 @@ asan: ncurses_demo.c
 		-I ../../include -I ../../include/Foundation -I ../../include/Terminal \
 		-I $(NCURSES)/include \
 		ncurses_demo.c \
-		../../include/ovel/runtime.c \
+		../../include/jeti/runtime.c \
 		../../include/Terminal/ncurses_mouse.c \
 		$(NCURSES)/lib/libncurses.dylib \
 		-Wl,-rpath,$(NCURSES)/lib \

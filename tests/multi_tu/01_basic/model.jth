@@ -1,0 +1,10 @@
+#import <Foundation/Foundation.jeti>
+
+/* Declarations shared by both TUs — the ONLY channel between them.
+   main.jeti never sees lib.jeti; it only sees these method signatures. */
+@interface Greeter : NPObject
+- (const char *)greeting:(const char *)who;
+- (int)count;
+@end
+
+int GreeterHelper(int x);

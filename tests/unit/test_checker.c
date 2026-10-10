@@ -1,8 +1,8 @@
-#include "ovel/checker.h"
-#include "ovel/binder.h"
-#include "ovel/parser.h"
-#include "ovel/lexer.h"
-#include "ovel/cst.h"
+#include "jeti/checker.h"
+#include "jeti/binder.h"
+#include "jeti/parser.h"
+#include "jeti/lexer.h"
+#include "jeti/cst.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -15,7 +15,7 @@ static int passed = 0;
 
 static int do_check(const char *src) {
     lexer_t lexer;
-    lexer_init(&lexer, src, strlen(src), "test.ov");
+    lexer_init(&lexer, src, strlen(src), "test.jeti");
     parser_t *p = parser_create(&lexer);
     translation_unit_t *unit = parser_parse_translation_unit(p);
     if (!unit) { parser_destroy(p); return -1; }

@@ -1,4 +1,4 @@
 [package]
-name = "ovel-lexer"
+name = "jeti-lexer"
 version = "0.1.0"
 edition = "2021"

@@ -1,0 +1,38 @@
+#include <stdio.h>
+#include <stdbool.h>
+#import <Foundation/Foundation.jth>
+
+typedef struct { int x; int y; } Point;
+typedef enum { RED, GREEN, BLUE } Color;
+typedef struct { int w; int h; } Size;
+
+int main() {
+    // float / double
+    float f = 3.14f;
+    double d = 2.71828;
+    printf("float=%f double=%f\n", f, d);
+
+    // BOOL
+    BOOL b1 = 1;
+    BOOL b2 = 0;
+    printf("b1=%d b2=%d\n", b1, b2);
+
+    // struct via typedef
+    Point p = {10, 20};
+    printf("point=(%d,%d)\n", p.x, p.y);
+
+    // enum via typedef
+    Color c = GREEN;
+    printf("color=%d\n", c);
+
+    // typedef
+    Size s = {100, 200};
+    printf("size=(%d,%d)\n", s.w, s.h);
+
+    // static variable
+    static int counter = 0;
+    counter++;
+    printf("counter=%d\n", counter);
+
+    return 0;
+}

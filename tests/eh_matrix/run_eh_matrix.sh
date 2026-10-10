@@ -24,25 +24,25 @@
 #
 # Usage:
 #   ./run_eh_matrix.sh                # full matrix
-#   OVELC=target/debug/ovelc ./run_eh_matrix.sh
+#   JETIC=target/debug/jetic ./run_eh_matrix.sh
 set -u
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 cd "$ROOT"
 
-OVELC="${OVELC:-}"
-if [[ -z "$OVELC" ]]; then
-    for cand in target/release/ovelc target/debug/ovelc; do
-        if [[ -x "$cand" ]]; then OVELC="$cand"; break; fi
+JETIC="${JETIC:-}"
+if [[ -z "$JETIC" ]]; then
+    for cand in target/release/jetic target/debug/jetic; do
+        if [[ -x "$cand" ]]; then JETIC="$cand"; break; fi
     done
 fi
-if [[ ! -x "$OVELC" ]]; then
-    echo "error: ovelc binary not found (build it, or set OVELC=)" >&2
+if [[ ! -x "$JETIC" ]]; then
+    echo "error: jetic binary not found (build it, or set JETIC=)" >&2
     exit 2
 fi
-OVELC_ABS="$(cd "$(dirname "$OVELC")" && pwd)/$(basename "$OVELC")"
+JETIC_ABS="$(cd "$(dirname "$JETIC")" && pwd)/$(basename "$JETIC")"
 
-WORK="${TMPDIR:-/tmp}/ovel_eh_matrix.$$"
+WORK="${TMPDIR:-/tmp}/jeti_eh_matrix.$$"
 mkdir -p "$WORK"
 trap 'rm -rf "$WORK"' EXIT
 
@@ -82,14 +82,14 @@ norm_tail() {
 }
 
 echo "=== EH acceptance matrix ==="
-echo "ovelc : $OVELC_ABS"
+echo "jetic : $JETIC_ABS"
 echo "clang : $(clang --version | head -1)"
 echo
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Generic scenario: run a .ov in all three modes, compare stdout to the
+# Generic scenario: run a .jeti in all three modes, compare stdout to the
 # reference .out when one is supplied.
-#   run_scene <scene> <file> <ref-or-empty> [extra ovelc args...]
+#   run_scene <scene> <file> <ref-or-empty> [extra jetic args...]
 # ─────────────────────────────────────────────────────────────────────────────
 run_scene() {
     local scene="$1" file="$2" ref="$3"; shift 3
@@ -99,14 +99,14 @@ run_scene() {
         eh_argv "$m"
         local d="$WORK/$scene.$m"
         local log="$d.stdout" errf="$d.stderr" rcfile="$d.rc" bin="$d.bin"
-        "$OVELC_ABS" run -o "$bin" ${EH_ARGV[@]+"${EH_ARGV[@]}"} \
+        "$JETIC_ABS" run -o "$bin" ${EH_ARGV[@]+"${EH_ARGV[@]}"} \
             ${extra[@]+"${extra[@]}"} "$file" >"$log" 2>"$errf"
         local rc=$?
         local used_mrc=0
         # ARC->MRC retry: the exact fallback test_all.py applies to goldens
         # that still carry explicit retain/release.
         if [[ $rc -ne 0 ]] && grep -q "not allowed in ARC mode" "$errf"; then
-            "$OVELC_ABS" run -o "$bin" -fno-ovel-arc ${EH_ARGV[@]+"${EH_ARGV[@]}"} \
+            "$JETIC_ABS" run -o "$bin" -fno-jeti-arc ${EH_ARGV[@]+"${EH_ARGV[@]}"} \
                 ${extra[@]+"${extra[@]}"} "$file" >"$log" 2>"$errf"
             rc=$?; used_mrc=1
         fi
@@ -138,7 +138,7 @@ report_scene() {
     || ! diff -q "$WORK/$scene.default.stdout" "$WORK/$scene.checked.stdout" >/dev/null 2>&1 \
     || ! diff -q "$WORK/$scene.default.stderr" "$WORK/$scene.checked.stderr" >/dev/null 2>&1; then
         grep -v "^${scene}|" "$ROWS" > "$ROWS.tmp" && mv "$ROWS.tmp" "$ROWS"
-        for m in "${MODES[@]}"; do record "$scene" "$m" "OVELRITY"; done
+        for m in "${MODES[@]}"; do record "$scene" "$m" "JETIRITY"; done
         echo "  ! $scene — default and explicit -eh checked DISAGREE (flip is not behavior-preserving)"
         return
     fi
@@ -159,33 +159,33 @@ report_scene() {
 # extra args
 # ─────────────────────────────────────────────────────────────────────────────
 GOLD="tests/golden"
-run_scene "01_plain_ovel"      "$GOLD/01_basics/hello_world.ov"                    "$GOLD/01_basics/hello_world.out"
-run_scene "02_try_catch"       "$GOLD/15_exceptions/try_catch.ov"                  "$GOLD/15_exceptions/try_catch.out"
-run_scene "03_nested_try"      "tests/eh_diff/03_nested_finally.ov"                ""
-run_scene "04_finally_order"   "tests/eh_matrix/samples/finally_order.ov"          ""
-run_scene "05_rethrow"         "tests/eh_diff/04_rethrow.ov"                       ""
-run_scene "06_cross_frame"     "tests/eh_diff/01_cross_frame_release.ov"           ""
-run_scene "07_arc"             "$GOLD/04_arc/retain_release.ov"                    "$GOLD/04_arc/retain_release.out"
+run_scene "01_plain_jeti"      "$GOLD/01_basics/hello_world.jeti"                    "$GOLD/01_basics/hello_world.out"
+run_scene "02_try_catch"       "$GOLD/15_exceptions/try_catch.jeti"                  "$GOLD/15_exceptions/try_catch.out"
+run_scene "03_nested_try"      "tests/eh_diff/03_nested_finally.jeti"                ""
+run_scene "04_finally_order"   "tests/eh_matrix/samples/finally_order.jeti"          ""
+run_scene "05_rethrow"         "tests/eh_diff/04_rethrow.jeti"                       ""
+run_scene "06_cross_frame"     "tests/eh_diff/01_cross_frame_release.jeti"           ""
+run_scene "07_arc"             "$GOLD/04_arc/retain_release.jeti"                    "$GOLD/04_arc/retain_release.out"
 # 08_mrc has no .out reference on purpose: retain_release.out is the ARC
 # transcript (it ends with a `dealloc` line MRC never prints, since MRC does
 # not release the object). The verdict here is "runs, and all three modes
 # agree", which report_scene enforces.
-run_scene "08_mrc"             "$GOLD/04_arc/retain_release.ov"                    "" -fno-ovel-arc
-run_scene "09_autoreleasepool" "$GOLD/05_autoreleasepool/nested_pool.ov"           "$GOLD/05_autoreleasepool/nested_pool.out"
-run_scene "11_foundation_big"  "$GOLD/13_foundation/04_npstring/npstring_test.ov"  "$GOLD/13_foundation/04_npstring/npstring_test.out"
-run_scene "12_c_superset"      "$GOLD/22_c_superset/c_superset.ov"                 ""
-run_scene "15_await_eh"        "tests/eh_matrix/samples/async_eh.ov"               ""
-run_scene "16_block_throw"     "tests/eh_diff/06_block_throw.ov"                   ""
+run_scene "08_mrc"             "$GOLD/04_arc/retain_release.jeti"                    "" -fno-jeti-arc
+run_scene "09_autoreleasepool" "$GOLD/05_autoreleasepool/nested_pool.jeti"           "$GOLD/05_autoreleasepool/nested_pool.out"
+run_scene "11_foundation_big"  "$GOLD/13_foundation/04_npstring/npstring_test.jeti"  "$GOLD/13_foundation/04_npstring/npstring_test.out"
+run_scene "12_c_superset"      "$GOLD/22_c_superset/c_superset.jeti"                 ""
+run_scene "15_await_eh"        "tests/eh_matrix/samples/async_eh.jeti"               ""
+run_scene "16_block_throw"     "tests/eh_diff/06_block_throw.jeti"                   ""
 # 17: the guard-density gate's runtime half — a program that cannot throw must
 # run identically in all three modes (the static half, "checked emits zero
 # guards", lives in gen_quality.sh).
-run_scene "17_no_throw_plain"  "tests/eh_matrix/samples/no_throw_plain.ov"         ""
+run_scene "17_no_throw_plain"  "tests/eh_matrix/samples/no_throw_plain.jeti"         ""
 # 18: full-syntax sweep (C superset + Foundation + inline asm + @throws + @await)
-run_scene "18_full_syntax"     "tests/full_syntax_test.ov"                         "" -asm tests/full_syntax_test.s
+run_scene "18_full_syntax"     "tests/full_syntax_test.jeti"                         "" -asm tests/full_syntax_test.s
 
 # ─────────────────────────────────────────────────────────────────────────────
 # 10. multi-TU: two separately-transpiled translation units linked together.
-#     Driven by tests/multi_tu/run_multi_tu.sh, which honours OVEL_EH_FLAG.
+#     Driven by tests/multi_tu/run_multi_tu.sh, which honours JETI_EH_FLAG.
 # ─────────────────────────────────────────────────────────────────────────────
 scene_multi_tu() {
     local scene="10_multi_tu"
@@ -194,7 +194,7 @@ scene_multi_tu() {
         local log="$WORK/${scene}.${m}.log"
         # Every case, not just one: this is both the multi-TU/x-TU-layout gate
         # and a Foundation-inlining (large concatenated TU) gate.
-        OVEL_EH_FLAG="${EH_ARGV[*]:-}" OVELC="$OVELC_ABS" \
+        JETI_EH_FLAG="${EH_ARGV[*]:-}" JETIC="$JETIC_ABS" \
             ./tests/multi_tu/run_multi_tu.sh >"$log" 2>&1
         if grep -qE "^multi-TU: [0-9]+ passed, 0 failed" "$log"; then
             record "$scene" "$m" "PASS"
@@ -216,14 +216,14 @@ scene_freestanding() {
         local d="$WORK/$scene.$m"; mkdir -p "$d"
         local log="$d/build.log"
         {
-            "$OVELC_ABS" -rewrite-ovel -ffreestanding ${EH_ARGV[@]+"${EH_ARGV[@]}"} \
-                -o "$d/fs.c" tests/golden/25_freestanding/freestanding.ov || exit 10
-            clang -I include -include ovel/runtime.h -D_FORTIFY_SOURCE=0 \
+            "$JETIC_ABS" -rewrite-jeti -ffreestanding ${EH_ARGV[@]+"${EH_ARGV[@]}"} \
+                -o "$d/fs.c" tests/golden/25_freestanding/freestanding.jeti || exit 10
+            clang -I include -include jeti/runtime.h -D_FORTIFY_SOURCE=0 \
                 -Wno-unused-variable -c "$d/fs.c" -o "$d/fs.o" || exit 11
-            clang -I include -U__OVEL_FREESTANDING -D_FORTIFY_SOURCE=0 \
+            clang -I include -U__JETI_FREESTANDING -D_FORTIFY_SOURCE=0 \
                 -c tests/golden/25_freestanding/helpers.c -o "$d/helpers.o" || exit 12
-            clang -I include -U__OVEL_FREESTANDING -D_FORTIFY_SOURCE=0 \
-                -c include/ovel/runtime_freestanding.c -o "$d/rt.o" || exit 13
+            clang -I include -U__JETI_FREESTANDING -D_FORTIFY_SOURCE=0 \
+                -c include/jeti/runtime_freestanding.c -o "$d/rt.o" || exit 13
             clang "$d/fs.o" "$d/helpers.o" "$d/rt.o" -o "$d/fs" || exit 14
             "$d/fs" || exit 15
         } >"$log" 2>&1
@@ -244,12 +244,12 @@ scene_baremetal() {
         local d="$WORK/$scene.$m"; mkdir -p "$d"
         local log="$d/build.log"
         {
-            "$OVELC_ABS" -rewrite-ovel -ffreestanding ${EH_ARGV[@]+"${EH_ARGV[@]}"} \
-                -o "$d/bm.c" "$bm/baremetal_test.ov" || exit 10
-            clang -I include -include ovel/runtime.h -D_FORTIFY_SOURCE=0 \
+            "$JETIC_ABS" -rewrite-jeti -ffreestanding ${EH_ARGV[@]+"${EH_ARGV[@]}"} \
+                -o "$d/bm.c" "$bm/baremetal_test.jeti" || exit 10
+            clang -I include -include jeti/runtime.h -D_FORTIFY_SOURCE=0 \
                 -Wno-unused-variable -c "$d/bm.c" -o "$d/bm.o" || exit 11
             clang -I include -D_FORTIFY_SOURCE=0 \
-                -c include/ovel/runtime_freestanding.c -o "$d/rt.o" || exit 12
+                -c include/jeti/runtime_freestanding.c -o "$d/rt.o" || exit 12
             clang -D_FORTIFY_SOURCE=0 -c "$bm/helpers.c" -o "$d/helpers.o" || exit 13
             clang -c "$bm/asm_ext.s" -o "$d/asm.o" || exit 14
             clang "$d/bm.o" "$d/helpers.o" "$d/rt.o" "$d/asm.o" -o "$d/bm" || exit 15
@@ -263,18 +263,18 @@ scene_baremetal
 # ─────────────────────────────────────────────────────────────────────────────
 # Gate: the DEFAULT invocation (no -eh flag) must actually be the checked
 # backend, and `-eh legacy` must actually be sjlj. Fingerprints:
-#   checked : __ovel_eh_flag present, setjmp/longjmp absent
-#   sjlj    : setjmp/longjmp present, __ovel_eh_flag absent
+#   checked : __jeti_eh_flag present, setjmp/longjmp absent
+#   sjlj    : setjmp/longjmp present, __jeti_eh_flag absent
 # ─────────────────────────────────────────────────────────────────────────────
 default_backend_gate() {
-    local probe="tests/golden/15_exceptions/try_catch.ov"
+    local probe="tests/golden/15_exceptions/try_catch.jeti"
     local d="$WORK/default_gate"; mkdir -p "$d"
-    "$OVELC_ABS" -rewrite-ovel -fno-ovel-arc -o "$d/default.c" "$probe" >/dev/null 2>&1
-    "$OVELC_ABS" -rewrite-ovel -eh legacy -fno-ovel-arc -o "$d/legacy.c" "$probe" >/dev/null 2>&1
+    "$JETIC_ABS" -rewrite-jeti -fno-jeti-arc -o "$d/default.c" "$probe" >/dev/null 2>&1
+    "$JETIC_ABS" -rewrite-jeti -eh legacy -fno-jeti-arc -o "$d/legacy.c" "$probe" >/dev/null 2>&1
     local dflag dsetj lflag lsetj
-    dflag=$(grep -c "__ovel_eh_flag" "$d/default.c" || true)
+    dflag=$(grep -c "__jeti_eh_flag" "$d/default.c" || true)
     dsetj=$(grep -cE "setjmp|longjmp" "$d/default.c" || true)
-    lflag=$(grep -c "__ovel_eh_flag" "$d/legacy.c" || true)
+    lflag=$(grep -c "__jeti_eh_flag" "$d/legacy.c" || true)
     lsetj=$(grep -cE "setjmp|longjmp" "$d/legacy.c" || true)
     echo "== default-backend gate =="
     echo "  no -eh flag : flag=$dflag setjmp=$dsetj   (want flag>0 setjmp=0 -> checked)"
@@ -318,7 +318,7 @@ for s in $SCENES; do
     for v in "${row[@]}"; do
         case "$v" in
             PASS|PASS\(mrc\)) ;;
-            OVELRITY) verdict="DEFAULT!=CHECKED" ;;
+            JETIRITY) verdict="DEFAULT!=CHECKED" ;;
             DIFF) verdict="MODE-DRIFT" ;;
             *) [[ "$verdict" == OK || "$verdict" == FAIL ]] && verdict="FAIL" ;;
         esac

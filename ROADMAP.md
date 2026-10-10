@@ -6,13 +6,13 @@
 
 ## Language / compiler gaps
 
-- [ ] **Source locations, debug info, and LSP foundation** — current diagnostics map some expanded lines back through the preprocessor, but AST nodes lack a unified file/start/end span and generated C has no source-aware `#line` directives. Plan: `doc/source_locations_debug_lsp_plan.md`. First ship shared SourceSpan/source mapping and `#line` diagnostics; then Clang `-g`/`-O0` debug builds and a versioned `.ov.map`; finally use the same locations for LSP and debugger adapters. LSP syntax/diagnostics can start directly from AST before native debugging is complete.
+- [ ] **Source locations, debug info, and LSP foundation** — current diagnostics map some expanded lines back through the preprocessor, but AST nodes lack a unified file/start/end span and generated C has no source-aware `#line` directives. Plan: `doc/source_locations_debug_lsp_plan.md`. First ship shared SourceSpan/source mapping and `#line` diagnostics; then Clang `-g`/`-O0` debug builds and a versioned `.jeti.map`; finally use the same locations for LSP and debugger adapters. LSP syntax/diagnostics can start directly from AST before native debugging is complete.
 - [x] **Generic class-method return instantiation (single TU)** — `[Box<NPString *> defaultValue]`
   substitutes T in the checker's result type and in the specialized vtable fn-ptr casts;
   ARC ownership on the returned T is correct (no extra release at the call site).
   Evidence: `probes/genret/` g1 (multi-instantiation), g3 (function pointers), g4 (ARC).
 - [x] **Generic class-method return across TUs** — a multi-input build now collects
-  concrete specializations from all `.ov` inputs and forwards the demand to the TU
+  concrete specializations from all `.jeti` inputs and forwards the demand to the TU
   containing the generic implementation, so `[Factory<NPString *> make]` no longer
   needs a dummy variable in the library TU. This remains true monomorphization: the
   generated class, methods, vtable, metadata, and ABI are specialized per argument
@@ -28,13 +28,13 @@
 - [x] **Container classes** — `NPSet` / `NPMutableSet` / `NPOrderedSet` exist
   (isEqual: value semantics, insertion order preserved by NPOrderedSet;
   mutator slots live on NPSet so the subclass vtables resolve — see the
-  notes in `NPSet.oh`).
+  notes in `NPSet.jth`).
 - [x] **`NPPredicate`** (the `NSPredicate` model) — shipped: a runtime
-  format-string parser + evaluation engine (`NPPredicate.ov`), compile-time KVC
-  accessor tables (`OVEL_KVC_$_X`, see `doc/architecture.md` §12) and the host
+  format-string parser + evaluation engine (`NPPredicate.jeti`), compile-time KVC
+  accessor tables (`JETI_KVC_$_X`, see `doc/architecture.md` §12) and the host
   filtering API (`filteredArrayUsingPredicate:` /
   `indexOfObjectMatchingPredicate:` / `filterUsingPredicate:`; a `nil`
-  predicate is the identity). Covered by `tests/predicate_filter_test.ov` and
+  predicate is the identity). Covered by `tests/predicate_filter_test.jeti` and
   `tests/multi_tu/13_kvc_predicate`. Block-based filtering
   (`indexesOfObjectsPassingTest:`) stays a valid alternative for one-off tests.
 - [ ] **Variadic convenience constructors** — only `arrayWithObjects:count:`-style signatures exist; the variadic `initWithObjects:..., nil` form is not declared. Related known quirk: `[NPMutableArray arrayWithObjects:...]` desugars to the immutable array path.
@@ -49,8 +49,8 @@
 
 ## Checker known limitations (accepted, not scheduled)
 
-- **Undeclared selector is a warning, not an error** — receiver-type resolution is unreliable under the self-contained umbrella (e.g. `[other count]` inside `NPMutableArray.ov` misresolves `NPArray *` as `NPString *`), so an error would break Foundation itself. Consequence: calling an undeclared selector on a statically typed receiver still segfaults at runtime (NULL vtable slot); the warning is the only compile-time guard.
+- **Undeclared selector is a warning, not an error** — receiver-type resolution is unreliable under the self-contained umbrella (e.g. `[other count]` inside `NPMutableArray.jeti` misresolves `NPArray *` as `NPString *`), so an error would break Foundation itself. Consequence: calling an undeclared selector on a statically typed receiver still segfaults at runtime (NULL vtable slot); the warning is the only compile-time guard.
 
 ## Tooling
 
-- [ ] **Windows native validation** — `ovelc.exe` builds and cross-compiles, but runtime behavior on real Windows is untested (zig cc backend, `__thread` semantics).
+- [ ] **Windows native validation** — `jetic.exe` builds and cross-compiles, but runtime behavior on real Windows is untested (zig cc backend, `__thread` semantics).

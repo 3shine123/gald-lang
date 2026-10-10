@@ -1,0 +1,21 @@
+// test: NPLog %% with objects
+#include <stdio.h>
+#import <Foundation/Foundation.jth>
+
+@interface Foo : NPObject
+- (id)init;
+@end
+@implementation Foo
+- (id)init { self = [super init]; return self; }
+@end
+
+int main() {
+    @autoreleasepool {
+        Foo *f = [[Foo alloc] init];
+        NPLog(@"obj: %@", f);
+        NPLog(@"null: %@", (void *)0);
+        [f release];
+    }
+    printf("NPLog %% OK\n");
+    return 0;
+}

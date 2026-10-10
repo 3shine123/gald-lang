@@ -1,8 +1,8 @@
 [package]
-name = "ovel-preprocessor"
+name = "jeti-preprocessor"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-ovel-cst = { path = "../cst" }
-ovel-cpp = { path = "../cpp" }
+jeti-cst = { path = "../cst" }
+jeti-cpp = { path = "../cpp" }

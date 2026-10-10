@@ -1,30 +1,30 @@
 
 === SOMA KERNEL (i686, 32-bit protected mode) ===
-built: clang + nasm + ovelc transpile, ran under qemu-system-i386
-[ovel] soma_core_boot()
+built: clang + nasm + jetic transpile, ran under qemu-system-i386
+[jeti] soma_core_boot()
        fib(10)=55
        gcd(1071,462)=21
        fnv1a("soma-kernel")=0x51b97b15
        rotl(12345678,8)=0x34567812
        xorshift: 87985aa5 155b24a3 4820f4c4 81b3ac98 703a0788
-[ovel] class method [SomaCore::Calculator compute:21] = 43
-[ovel] instance methods on C-created obj: add:7 -> 7, add:35 -> 42, value = 42
-[ovel] @try/@catch demo:
+[jeti] class method [SomaCore::Calculator compute:21] = 43
+[jeti] instance methods on C-created obj: add:7 -> 7, add:35 -> 42, value = 42
+[jeti] @try/@catch demo:
        try body, throwing...
        caught [e errorCode] = 42
        finally always runs
        after-try continues
-[ovel] alloc+init (bump allocator):
+[jeti] alloc+init (bump allocator):
        [c add:10]=10 [c add:20]=30 [c value]=30
-[ovel] @protocol + @property + @synthesize + @public:
+[jeti] @protocol + @property + @synthesize + @public:
        priority = 3, id = 7
        task id=7 priority=3 running
-[c] call Ovel: fib(15)=610 gcd(1071,462)=21
-[c] call Ovel: rotl(0x12345678,4)=0x23456781
-[c] call Ovel: fnv1a("ovel")=0x944c9dcf
+[c] call Jeti: fib(15)=610 gcd(1071,462)=21
+[c] call Jeti: rotl(0x12345678,4)=0x23456781
+[c] call Jeti: fnv1a("jeti")=0x944c9dcf
 [c] interrupts on; waiting for PIT ticks...
 [c] timer reached tick=50 (IRQ0+PIT ok)
-[ovel] keyboard demo: type, use <- -> to move cursor, Enter to finish
+[jeti] keyboard demo: type, use <- -> to move cursor, Enter to finish
        (times out after ~6s in headless mode)
 
        [timeout] no keyboard input

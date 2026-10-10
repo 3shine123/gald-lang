@@ -121,197 +121,197 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a6cb138bb79a146c1bd460005623e142ef0181e3d0219cb493e02f7d08a35695"
 
 [[package]]
-name = "once_cell_polyfill"
-version = "1.70.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "384b8ab6d37215f3c5301a95a4accb5d64aa607f1fcb26a11b5303878451b4fe"
-
-[[package]]
-name = "ovel-arc"
+name = "jeti-arc"
 version = "0.1.0"
 dependencies = [
- "ovel-ast",
- "ovel-cfg",
- "ovel-cst",
- "ovel-ownership",
+ "jeti-ast",
+ "jeti-cfg",
+ "jeti-cst",
+ "jeti-ownership",
 ]
 
 [[package]]
-name = "ovel-ast"
+name = "jeti-ast"
 version = "0.1.0"
 dependencies = [
- "ovel-cst",
+ "jeti-cst",
 ]
 
 [[package]]
-name = "ovel-async"
+name = "jeti-async"
 version = "0.1.0"
 dependencies = [
- "ovel-ast",
- "ovel-cst",
+ "jeti-ast",
+ "jeti-cst",
 ]
 
 [[package]]
-name = "ovel-binder"
+name = "jeti-binder"
 version = "0.1.0"
 dependencies = [
- "ovel-ast",
- "ovel-cst",
- "ovel-lexer",
- "ovel-parser",
- "ovel-symbol",
+ "jeti-ast",
+ "jeti-cst",
+ "jeti-lexer",
+ "jeti-parser",
+ "jeti-symbol",
 ]
 
 [[package]]
-name = "ovel-cfg"
+name = "jeti-cfg"
 version = "0.1.0"
 dependencies = [
- "ovel-ast",
+ "jeti-ast",
 ]
 
 [[package]]
-name = "ovel-checker"
+name = "jeti-checker"
 version = "0.1.0"
 dependencies = [
- "ovel-ast",
- "ovel-cst",
- "ovel-symbol",
+ "jeti-ast",
+ "jeti-cst",
+ "jeti-symbol",
 ]
 
 [[package]]
-name = "ovel-codegen"
+name = "jeti-codegen"
 version = "0.1.0"
 dependencies = [
  "attrs",
- "ovel-ast",
- "ovel-cst",
- "ovel-elaborator",
- "ovel-ownership",
- "ovel-symbol",
+ "jeti-ast",
+ "jeti-cst",
+ "jeti-elaborator",
+ "jeti-ownership",
+ "jeti-symbol",
 ]
 
 [[package]]
-name = "ovel-cpp"
+name = "jeti-cpp"
 version = "0.1.0"
 
 [[package]]
-name = "ovel-cst"
+name = "jeti-cst"
 version = "0.1.0"
 
 [[package]]
-name = "ovel-cst-visit"
+name = "jeti-cst-visit"
 version = "0.1.0"
 dependencies = [
- "ovel-cst",
+ "jeti-cst",
 ]
 
 [[package]]
-name = "ovel-defer"
+name = "jeti-defer"
 version = "0.1.0"
 dependencies = [
- "ovel-ast",
- "ovel-cst",
+ "jeti-ast",
+ "jeti-cst",
 ]
 
 [[package]]
-name = "ovel-eh"
+name = "jeti-eh"
 version = "0.1.0"
 dependencies = [
- "ovel-ast",
- "ovel-cst",
+ "jeti-ast",
+ "jeti-cst",
 ]
 
 [[package]]
-name = "ovel-elaborator"
+name = "jeti-elaborator"
 version = "0.1.0"
 dependencies = [
- "ovel-ast",
- "ovel-binder",
- "ovel-cst",
- "ovel-symbol",
+ "jeti-ast",
+ "jeti-binder",
+ "jeti-cst",
+ "jeti-symbol",
 ]
 
 [[package]]
-name = "ovel-layout"
+name = "jeti-layout"
 version = "0.1.0"
 
 [[package]]
-name = "ovel-lexer"
+name = "jeti-lexer"
 version = "0.1.0"
 
 [[package]]
-name = "ovel-ownership"
+name = "jeti-ownership"
 version = "0.1.0"
 dependencies = [
- "ovel-ast",
+ "jeti-ast",
 ]
 
 [[package]]
-name = "ovel-parser"
+name = "jeti-parser"
 version = "0.1.0"
 dependencies = [
- "ovel-cst",
- "ovel-lexer",
- "ovel-preprocessor",
+ "jeti-cst",
+ "jeti-lexer",
+ "jeti-preprocessor",
 ]
 
 [[package]]
-name = "ovel-pattern"
+name = "jeti-pattern"
 version = "0.1.0"
 dependencies = [
- "ovel-ast",
- "ovel-cst",
+ "jeti-ast",
+ "jeti-cst",
 ]
 
 [[package]]
-name = "ovel-preprocessor"
+name = "jeti-preprocessor"
 version = "0.1.0"
 dependencies = [
- "ovel-cpp",
- "ovel-cst",
+ "jeti-cpp",
+ "jeti-cst",
 ]
 
 [[package]]
-name = "ovel-symbol"
+name = "jeti-symbol"
 version = "0.1.0"
 dependencies = [
- "ovel-cst",
+ "jeti-cst",
 ]
 
 [[package]]
-name = "ovel-trace"
+name = "jeti-trace"
 version = "0.1.0"
 dependencies = [
- "ovel-ast",
- "ovel-cst",
- "ovel-ownership",
+ "jeti-ast",
+ "jeti-cst",
+ "jeti-ownership",
 ]
 
 [[package]]
-name = "ovelc"
+name = "jetic"
 version = "0.1.0"
 dependencies = [
  "attrs",
  "cc",
  "clap",
  "clap_complete",
- "ovel-arc",
- "ovel-ast",
- "ovel-async",
- "ovel-binder",
- "ovel-cfg",
- "ovel-checker",
- "ovel-codegen",
- "ovel-cst",
- "ovel-defer",
- "ovel-eh",
- "ovel-elaborator",
- "ovel-parser",
- "ovel-pattern",
- "ovel-preprocessor",
- "ovel-symbol",
- "ovel-trace",
+ "jeti-arc",
+ "jeti-ast",
+ "jeti-async",
+ "jeti-binder",
+ "jeti-cfg",
+ "jeti-checker",
+ "jeti-codegen",
+ "jeti-cst",
+ "jeti-defer",
+ "jeti-eh",
+ "jeti-elaborator",
+ "jeti-parser",
+ "jeti-pattern",
+ "jeti-preprocessor",
+ "jeti-symbol",
+ "jeti-trace",
 ]
+
+[[package]]
+name = "once_cell_polyfill"
+version = "1.70.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "384b8ab6d37215f3c5301a95a4accb5d64aa607f1fcb26a11b5303878451b4fe"
 
 [[package]]
 name = "shlex"

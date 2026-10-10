@@ -1,7 +1,7 @@
-# Ovel 转译器开发 TODO
+# Jeti 转译器开发 TODO
 
-> Ovel：纯静态 Objective-C 方言、C 的超集语言，转译到 C99
-> 编译器：ovelc | 运行时：libovel | 标准库：Foundation（NP-前缀）
+> Jeti：纯静态 Objective-C 方言、C 的超集语言，转译到 C99
+> 编译器：jetic | 运行时：libjeti | 标准库：Foundation（NP-前缀）
 > 核心特性：自动静态 ARC、CFG 分析、VTable 多态、完整 ObjC 语法兼容
 
 > ⚠️ **历史文件**：本 TODO 是早期 **C 版** 计划，已与当前 **Rust 重写版** 的实现脱节
@@ -21,7 +21,7 @@
 ### 0.2 测试框架
 
 - [ ] 设计测试目录结构（unit/、integration/、fixtures/）
-- [ ] 实现测试运行器（C 或 Ovel 编写）
+- [ ] 实现测试运行器（C 或 Jeti 编写）
 - [ ] 支持：编译测试、运行测试、输出对比、回归测试
 - [ ] 集成到 Makefile（`make test`）
 
@@ -164,7 +164,7 @@
 
 ### 3.1 VTable 布局计算
 
-- [x] 设计 VTable 结构（ovel_vtable in object.h）
+- [x] 设计 VTable 结构（jeti_vtable in object.h）
 - [x] 实现方法索引分配算法（根类从 0、子类继承、覆盖保持相同、追加新方法）
 - [x] 生成索引常量宏
 - [x] 处理类方法 VTable（元类 VTable）
@@ -174,7 +174,7 @@
 
 ### 3.2 对象内存布局
 
-- [x] 设计对象头结构（ovel_object：isa 指针）
+- [x] 设计对象头结构（jeti_object：isa 指针）
 - [x] 计算 ivar 偏移量（父类在前、子类在后）
 - [x] 生成对象结构体定义（C struct）
 - [ ] 生成 ivar 访问宏/内联函数
@@ -183,10 +183,10 @@
 ### 3.3 类元数据生成
 
 - [x] 设计类元数据结构（NPClass 含 name/superclass/instance_size/vtable）
-- [x] 生成类元数据常量定义（ovel_ClassName_class 变量）
+- [x] 生成类元数据常量定义（jeti_ClassName_class 变量）
 - [x] 实现 +alloc 通用逻辑（NPObject 的 +alloc 方法）
 - [x] 实现 +init 方法（NPObject 的 -init 方法）
-- [x] 实现 +class 方法（自动生成 ovel_ClassName_getClass C 函数）
+- [x] 实现 +class 方法（自动生成 jeti_ClassName_getClass C 函数）
 - [x] 编写类元数据测试（integration/test_class_meta.sh，12 项检查）
 
 ### 3.4 选择器（SEL）表
@@ -267,7 +267,7 @@
 ### 5.4 Retain/Release 插入
 
 - [x] 实现插入点确定
-- [x] 生成 ovel_retain() / ovel_release() 调用
+- [x] 生成 jeti_retain() / jeti_release() 调用
 - [x] 优化冗余 retain/release 对
 - [x] 编写插入测试（3 测试）
 
@@ -291,7 +291,7 @@
 - [x] 实现 C99 AST 生命周期管理
 - [x] 编写 C99 AST 测试（7 测试）
 
-### 6.2 Ovel AST 到 C99 AST 转换
+### 6.2 Jeti AST 到 C99 AST 转换
 
 - [x] 实现方法转换（含 self, _cmd 参数）
 - [x] 实现消息发送转换（vtable 静态派发：`((struct vtable *)obj->isa->vtable)->method(args)`）
@@ -300,7 +300,7 @@
 - [x] 实现类定义转换（struct 含 ivar 字段展开：类型+字段名）
 - [x] 实现属性访问转换（ivar 内联 + vtable 派发 getter/setter）
 - [x] 实现 Block 转换（struct + invoke 函数 + 注册/发射）
-- [x] 实现异常转换（@try → label/goto 模式，@throw → goto __ovel_throw）
+- [x] 实现异常转换（@try → label/goto 模式，@throw → goto __jeti_throw）
 - [x] 编写 CodeGen 单元测试（12+10 测试）
 
 ### 6.3 头文件生成（.h → .h）
@@ -310,15 +310,15 @@
 - [x] 处理依赖的头文件
 - [x] 编写头文件生成测试（6 测试）
 
-### 6.4 实现文件生成（.ov → .c）
+### 6.4 实现文件生成（.jeti → .c）
 
 - [x] 生成 #include 指令（收集自源码 .h 递归导入）
 - [x] 生成 struct 定义（对象头：isa + retain_count，跳过 NPObject/NPClass 由 runtime.h 提供）
-- [x] 生成静态常量（VTable 索引宏：`#define ovel_Class_vtable_index_method N`）
+- [x] 生成静态常量（VTable 索引宏：`#define jeti_Class_vtable_index_method N`）
 - [x] 生成 VTable struct 类型定义 + vtable 实例初始化
-- [x] 生成类元数据初始化（ovel_init() 函数）
+- [x] 生成类元数据初始化（jeti_init() 函数）
 - [x] 生成方法实现函数（含 @synthesize 生成的 getter/setter）
-- [x] 生成辅助函数（ovel_init 初始化）
+- [x] 生成辅助函数（jeti_init 初始化）
 - [x] 格式化输出
 
 ### 6.5 代码优化（生成期）
@@ -331,59 +331,59 @@
 
 ---
 
-## 阶段 7：运行时（libovel）
+## 阶段 7：运行时（libjeti）
 
 ### 7.1 核心运行时
 
-- [x] 定义 ovel_object / ovel_class / ovel_vtable 基础结构（object.h）
+- [x] 定义 jeti_object / jeti_class / jeti_vtable 基础结构（object.h）
 - [x] 定义 NPObject / NPClass 公共类型（object.h，与生成代码一致）
-- [x] 实现 ovel_retain()（递增 retain_count）
-- [x] 实现 ovel_release()（递减，到 0 时 free）
-- [x] 实现 ovel_alloc()（calloc + 设 isa + retain_count=1）
-- [x] 实现 ovel_init()（返回 self）
-- [x] 实现 ovel_autorelease()
-- [x] 实现 np_class_create / np_vtable_alloc / np_object_alloc（ovel_class.c）
-- [x] 运行时头文件统一为 object.h（无 ovel_msgSend / sel_registerName）
-- [ ] 实现 ovel_dealloc()（释放对象内存）
-- [ ] 实现 ovel_copy()
-- [ ] 实现 ovel_hash() / ovel_isEqual()
-- [ ] 实现 ovel_description()
+- [x] 实现 jeti_retain()（递增 retain_count）
+- [x] 实现 jeti_release()（递减，到 0 时 free）
+- [x] 实现 jeti_alloc()（calloc + 设 isa + retain_count=1）
+- [x] 实现 jeti_init()（返回 self）
+- [x] 实现 jeti_autorelease()
+- [x] 实现 np_class_create / np_vtable_alloc / np_object_alloc（jeti_class.c）
+- [x] 运行时头文件统一为 object.h（无 jeti_msgSend / sel_registerName）
+- [ ] 实现 jeti_dealloc()（释放对象内存）
+- [ ] 实现 jeti_copy()
+- [ ] 实现 jeti_hash() / jeti_isEqual()
+- [ ] 实现 jeti_description()
 - [ ] 编写运行时核心测试
 
 ### 7.2 Block 运行时支持
 
 - [ ] 定义 NPConcreteStackBlock / NPConcreteGlobalBlock / NPConcreteMallocBlock
-- [ ] 实现 ovel_Block_copy() / ovel_Block_release()
+- [ ] 实现 jeti_Block_copy() / jeti_Block_release()
 - [ ] 实现 Block 的 retain/release 语义
 - [ ] 编写 Block 运行时测试
 
 ### 7.3 弱引用支持
 
 - [ ] 设计弱引用表
-- [ ] 实现 ovel_storeWeak / ovel_loadWeak / ovel_destroyWeak
-- [ ] 在 ovel_release() 到 0 时自动置零所有弱引用
+- [ ] 实现 jeti_storeWeak / jeti_loadWeak / jeti_destroyWeak
+- [ ] 在 jeti_release() 到 0 时自动置零所有弱引用
 - [ ] 实现弱引用表线程安全
 - [ ] 编写弱引用测试
 
 ### 7.4 自动释放池
 
-- [x] 设计 ovel_autoreleasepool 结构
-- [x] 实现 ovel_autoreleasepool_push() / pop()
-- [x] 实现 ovel_autorelease()
+- [x] 设计 jeti_autoreleasepool 结构
+- [x] 实现 jeti_autoreleasepool_push() / pop()
+- [x] 实现 jeti_autorelease()
 - [x] 处理线程局部存储（__thread）
-- [x] 编写自动释放池测试（lang-test/golden/05_autoreleasepool/ 4 个 .ov 文件）
+- [x] 编写自动释放池测试（lang-test/golden/05_autoreleasepool/ 4 个 .jeti 文件）
 
 ### 7.5 异常支持（可选）✅ 已实现（Rust 版）
 
 - [x] 基于 setjmp/longjmp 的异常机制
-- [x] ~~实现 ovel_try / ovel_catch / ovel_finally 宏~~（Rust 版直接把 `@try/@catch/@finally` 降级为 setjmp/longjmp，无宏）
+- [x] ~~实现 jeti_try / jeti_catch / jeti_finally 宏~~（Rust 版直接把 `@try/@catch/@finally` 降级为 setjmp/longjmp，无宏）
 - [x] 实现异常对象传递
 - [ ] 处理异常路径的 ARC（同一函数内 `@throw` 会在重抛前释放局部对象；**跨函数 unwind 仍泄漏**，待修）
 - [x] 编写异常测试
 
 ### 7.6 线程支持
 
-- [ ] 实现 ovel_thread_create() / join()
+- [ ] 实现 jeti_thread_create() / join()
 - [ ] 实现线程局部存储
 - [ ] 实现原子操作封装
 - [ ] 编写线程测试
@@ -485,36 +485,36 @@
 ### 9.4 调试支持
 
 - [ ] ~~生成调试信息~~
-- [ ] ~~映射 Ovel 源码行到 C 源码行~~
+- [ ] ~~映射 Jeti 源码行到 C 源码行~~
 - [ ] ~~支持 GDB/LLDB 调试~~
-- [ ] ~~实现 ovel-gdb 包装脚本~~
+- [ ] ~~实现 jeti-gdb 包装脚本~~
 
 ---
 
 ## 阶段 10：编译器自举
 
-### 10.1 用 Ovel 重写前端
+### 10.1 用 Jeti 重写前端
 
-- [ ] 用 Ovel 实现 Lexer
-- [ ] 用 Ovel 实现 Parser
-- [ ] 用 Ovel 实现 CST
-- [ ] 用 Ovel 实现符号表
-- [ ] 用 Ovel 实现类型检查器
-- [ ] 用 Ovel 实现 Elaborator
-- [ ] 用 C 编写 Ovel 运行时（保持）
+- [ ] 用 Jeti 实现 Lexer
+- [ ] 用 Jeti 实现 Parser
+- [ ] 用 Jeti 实现 CST
+- [ ] 用 Jeti 实现符号表
+- [ ] 用 Jeti 实现类型检查器
+- [ ] 用 Jeti 实现 Elaborator
+- [ ] 用 C 编写 Jeti 运行时（保持）
 
 ### 10.2 自举验证
 
-- [ ] 用 C-ovelc 编译 Ovel-ovelc
-- [ ] 得到 Ovel-ovelc 可执行文件
-- [ ] 用 Ovel-ovelc 编译自身
+- [ ] 用 C-jetic 编译 Jeti-jetic
+- [ ] 得到 Jeti-jetic 可执行文件
+- [ ] 用 Jeti-jetic 编译自身
 - [ ] 比较两次输出的一致性
 - [ ] 修复不一致问题
 - [ ] 实现自举后的持续集成
 
 ### 10.3 性能优化
 
-- [ ] 分析 Ovel-ovelc 性能瓶颈
+- [ ] 分析 Jeti-jetic 性能瓶颈
 - [ ] 优化 AST 内存布局
 - [ ] 优化符号表查找
 - [ ] 优化字符串处理
@@ -526,36 +526,36 @@
 
 | 类型       | 扩展名        | 示例                                |
 | -------- | ---------- | --------------------------------- |
-| Ovel 头文件 | .h        | `Foundation.oh`, `NPString.oh`    |
-| Ovel 源文件 | .ov        | `main.ov`, `NPPerson.ov`          |
-| C 头文件    | .h         | `ovelruntime.h`, `NPPerson.h`（生成） |
+| Jeti 头文件 | .h        | `Foundation.jth`, `NPString.jth`    |
+| Jeti 源文件 | .jeti        | `main.jeti`, `NPPerson.jeti`          |
+| C 头文件    | .h         | `jetiruntime.h`, `NPPerson.h`（生成） |
 | C 源文件    | .c         | `main.c`, `NPPerson.c`（生成）        |
 | 对象文件     | .o         | `main.o`                          |
 | 可执行文件    | 无          | `myapp`                           |
-| 静态库      | .a         | `libovel.a`                       |
-| 动态库      | .so/.dylib | `libovel.so`                      |
+| 静态库      | .a         | `libjeti.a`                       |
+| 动态库      | .so/.dylib | `libjeti.so`                      |
 
 ## 附录：命名前缀规范
 
 | 范畴             | 前缀                  | 示例                                              |
 | -------------- | ------------------- | ----------------------------------------------- |
 | 标准库类           | NP                  | `NPObject`, `NPString`, `NPArray`               |
-| 运行时函数          | ovel_               | `ovel_retain()`, `ovel_release()`               |
-| 运行时类型          | ovel_               | `ovel_object`, `ovel_class`                     |
-| 编译器生成结构        | ovel_               | `ovel_NPString`, `ovel_NPString_vtable`         |
-| 编译器生成函数        | ovel_ClassName_     | `ovel_NPString_length()`                        |
-| 编译器生成常量        | ovel_               | `ovel_NPString_class`, `ovel_sel_initWithName_` |
-| Block 内部结构     | __ovel_block_       | `__ovel_block_adder_0`                          |
-| Block byref 结构 | __ovel_block_byref_ | `__ovel_block_byref_counter`                    |
-| 内部临时变量         | __ovel_             | `__ovel_try_buf`, `__ovel_state`                |
+| 运行时函数          | jeti_               | `jeti_retain()`, `jeti_release()`               |
+| 运行时类型          | jeti_               | `jeti_object`, `jeti_class`                     |
+| 编译器生成结构        | jeti_               | `jeti_NPString`, `jeti_NPString_vtable`         |
+| 编译器生成函数        | jeti_ClassName_     | `jeti_NPString_length()`                        |
+| 编译器生成常量        | jeti_               | `jeti_NPString_class`, `jeti_sel_initWithName_` |
+| Block 内部结构     | __jeti_block_       | `__jeti_block_adder_0`                          |
+| Block byref 结构 | __jeti_block_byref_ | `__jeti_block_byref_counter`                    |
+| 内部临时变量         | __jeti_             | `__jeti_try_buf`, `__jeti_state`                |
 
 ## 附录：测试统计
 
 | 测试套件                 | 测试数量    | 状态       |
 | -------------------- | -------:| -------- |
-| ovel_lexer           | 14      | ✅        |
-| ovel_parser          | 6       | ✅        |
-| ovel_preprocessor    | 1       | ✅        |
+| jeti_lexer           | 14      | ✅        |
+| jeti_parser          | 6       | ✅        |
+| jeti_preprocessor    | 1       | ✅        |
 | **总计**               | **21**  | **全部通过** |
 
 ## 附录：完成进度概览

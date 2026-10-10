@@ -1,0 +1,11 @@
+#import "model.jth"
+
+/* The owner TU never sees this category declaration. The category TU must
+   publish the conformance into Widget's owner metadata at startup. */
+@interface Widget (Tagging) <Tagged>
+- (int)taggedValue;
+@end
+
+@implementation Widget (Tagging)
+- (int)taggedValue { return 7; }
+@end

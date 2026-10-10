@@ -1,7 +1,0 @@
-#import "p4.oh"
-#include <stdio.h>
-int main(void) {
-    Dog *d = [[Dog alloc] init];
-    printf("v1=%d v2=%d\n", [d visits], [d visits]);
-    return 0;
-}

@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
-#include <ovel/runtime.h>
+#include <jeti/runtime.h>
 #include "kernel.h"
 
 /* ================= freestanding libc bits ================= */
@@ -357,7 +357,7 @@ void kprintf(const char *fmt, ...) {
     va_end(ap);
 }
 
-/* ================= Ovel module exports ================= */
+/* ================= Jeti module exports ================= */
 
 void soma_core_boot(void);
 void soma_io_wait(void);
@@ -367,31 +367,31 @@ unsigned int soma_xorshift(unsigned int seed);
 unsigned int soma_fnv1a(const char *s);
 unsigned int soma_rotl(unsigned int v, int sh);
 
-/* Ovel @namespace SomaCore + @interface Calculator (implicit root class) */
+/* Jeti @namespace SomaCore + @interface Calculator (implicit root class) */
 struct SomaCore__Calculator {
     struct NPClass *isa;
     uint32_t retain_count;
     int total;
 };
-extern NPClass ovel_SomaCore__Calculator_class;
-extern void ovel_meta_init(void);
+extern NPClass jeti_SomaCore__Calculator_class;
+extern void jeti_meta_init(void);
 void soma_class_demo(void);
 void soma_instance_demo(struct SomaCore__Calculator *acc);
 
-/* Ovel @interface NPIoError — exception object for @try/@catch */
+/* Jeti @interface NPIoError — exception object for @try/@catch */
 struct SomaCore__NPIoError {
     struct NPClass *isa;
     uint32_t retain_count;
     int code;
 };
-extern NPClass ovel_SomaCore__NPIoError_class;
+extern NPClass jeti_SomaCore__NPIoError_class;
 void soma_exc_demo(id err);
 void soma_heap_demo(void);
 void soma_advanced_demo(void);
 void soma_kbd_demo(void);
 
-/* Runtime globals (ovel___ovel_root_class, __ovel_exception_buf,
- * __ovel_exception_value, memcpy) are provided by runtime_freestanding.c. */
+/* Runtime globals (jeti___jeti_root_class, __jeti_exception_buf,
+ * __jeti_exception_value, memcpy) are provided by runtime_freestanding.c. */
 void kmain(void) {
     extern volatile uint32_t tick;
 
@@ -402,26 +402,26 @@ void kmain(void) {
     pit_init(100);
 
     kputs("\n=== SOMA KERNEL (i686, 32-bit protected mode) ===\n");
-    kputs("built: clang + nasm + ovelc transpile, ran under qemu-system-i386\n");
+    kputs("built: clang + nasm + jetic transpile, ran under qemu-system-i386\n");
 
-    /* Ovel -> C : the Ovel module prints via kputs/kputdec/kputhex */
+    /* Jeti -> C : the Jeti module prints via kputs/kputdec/kputhex */
     soma_core_boot();
 
-    /* Ovel advanced features: @namespace + @interface (implicit root class).
-     * ovel_meta_init() (emitted weak by the transpiler) fills in class
+    /* Jeti advanced features: @namespace + @interface (implicit root class).
+     * jeti_meta_init() (emitted weak by the transpiler) fills in class
      * metadata; the implicit root class metadata is defined above. */
-    ovel_meta_init();
+    jeti_meta_init();
     soma_class_demo();
 
     struct SomaCore__Calculator acc;
     memset(&acc, 0, sizeof(acc));
-    acc.isa = &ovel_SomaCore__Calculator_class;   /* hand-built instance */
+    acc.isa = &jeti_SomaCore__Calculator_class;   /* hand-built instance */
     soma_instance_demo(&acc);
 
     /* @try/@catch/@finally on bare metal: throw a hand-built NPIoError */
     struct SomaCore__NPIoError err;
     memset(&err, 0, sizeof(err));
-    err.isa = &ovel_SomaCore__NPIoError_class;
+    err.isa = &jeti_SomaCore__NPIoError_class;
     err.code = 42;
     soma_exc_demo((id)&err);
 
@@ -431,13 +431,13 @@ void kmain(void) {
     /* @protocol + @property + @synthesize + @public ivar access */
     soma_advanced_demo();
 
-    /* C -> Ovel : kernel calls Ovel math functions directly */
-    kprintf("[c] call Ovel: fib(15)=%d gcd(1071,462)=%d\n",
+    /* C -> Jeti : kernel calls Jeti math functions directly */
+    kprintf("[c] call Jeti: fib(15)=%d gcd(1071,462)=%d\n",
             soma_fib(15), soma_gcd(1071, 462));
-    kprintf("[c] call Ovel: rotl(0x12345678,4)=0x%x\n", soma_rotl(0x12345678u, 4));
-    kprintf("[c] call Ovel: fnv1a(\"ovel\")=0x%x\n", soma_fnv1a("ovel"));
+    kprintf("[c] call Jeti: rotl(0x12345678,4)=0x%x\n", soma_rotl(0x12345678u, 4));
+    kprintf("[c] call Jeti: fnv1a(\"jeti\")=0x%x\n", soma_fnv1a("jeti"));
 
-    /* Ovel inline asm io_wait (outb to 0x80) used from C */
+    /* Jeti inline asm io_wait (outb to 0x80) used from C */
     for (int i = 0; i < 16; i++) soma_io_wait();
 
     asm volatile("sti");

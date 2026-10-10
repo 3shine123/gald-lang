@@ -1,21 +1,21 @@
-#ifndef OVEL_HELLO_NP_H
-#define OVEL_HELLO_NP_H
+#ifndef JETI_HELLO_NP_H
+#define JETI_HELLO_NP_H
 
-#include <ovel/object.h>
+#include <jeti/object.h>
 
-struct ovel_NPObject_vtable;
-struct ovel_Student_vtable;
+struct jeti_NPObject_vtable;
+struct jeti_Student_vtable;
 
 struct NPObject;
 NPObject * NPObject_init(NPObject * self, SEL _cmd);
 void NPObject_dealloc(NPObject * self, SEL _cmd);
-struct ovel_NPObject_vtable;
+struct jeti_NPObject_vtable;
 struct Student;
 int Student_grade(NPObject * self, SEL _cmd);
 void Student_setGrade_(NPObject * self, SEL _cmd, int value);
-struct ovel_Student_vtable;
-extern NPClass ovel_NPObject_class;
-extern NPClass ovel_Student_class;
-void ovel_init(void);
+struct jeti_Student_vtable;
+extern NPClass jeti_NPObject_class;
+extern NPClass jeti_Student_class;
+void jeti_init(void);
 
-#endif /* OVEL_HELLO_NP_H */
+#endif /* JETI_HELLO_NP_H */

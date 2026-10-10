@@ -2,34 +2,34 @@
 # tests/golden/25_freestanding/build.sh
 # Transpile + compile + run the bare-metal golden test on the HOST.
 # The transpiled code uses -ffreestanding for codegen, but we compile it on
-# the host with -include ovel/runtime.h (pre-loads non-freestanding
+# the host with -include jeti/runtime.h (pre-loads non-freestanding
 # branch, so the file's own #include is guarded away) and
 # -D_FORTIFY_SOURCE=0 to prevent macOS's fortified memcpy macro from
 # conflicting with the runtime.h declarations.
 set -euo pipefail
 cd "$(dirname "$0")"
 
-OVELC=../../../target/debug/ovelc
+JETIC=../../../target/debug/jetic
 BUILD=build
 mkdir -p "$BUILD"
 
 echo "== transpiling with -ffreestanding =="
-"$OVELC" -rewrite-ovel -ffreestanding -o "$BUILD/freestanding.c" freestanding.ov
+"$JETIC" -rewrite-jeti -ffreestanding -o "$BUILD/freestanding.c" freestanding.jeti
 
 echo "== compiling transpiled C (host, using libc setjmp) =="
-clang -I../../../include -include ovel/runtime.h \
+clang -I../../../include -include jeti/runtime.h \
     -D_FORTIFY_SOURCE=0 -Wno-unused-variable \
     -c "$BUILD/freestanding.c" -o "$BUILD/freestanding.o"
 
 echo "== compiling helpers =="
-clang -I../../../include -U__OVEL_FREESTANDING \
+clang -I../../../include -U__JETI_FREESTANDING \
     -D_FORTIFY_SOURCE=0 \
     -c helpers.c -o "$BUILD/helpers.o"
 
 echo "== compiling bare-metal runtime (bump allocator) =="
-clang -I../../../include -U__OVEL_FREESTANDING \
+clang -I../../../include -U__JETI_FREESTANDING \
     -D_FORTIFY_SOURCE=0 \
-    -c ../../../include/ovel/runtime_freestanding.c -o "$BUILD/runtime_freestanding.o"
+    -c ../../../include/jeti/runtime_freestanding.c -o "$BUILD/runtime_freestanding.o"
 
 echo "== linking =="
 clang "$BUILD/freestanding.o" "$BUILD/helpers.o" "$BUILD/runtime_freestanding.o" -o "$BUILD/freestanding"

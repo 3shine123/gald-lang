@@ -1,0 +1,18 @@
+#include <stdio.h>
+#import <Foundation/Foundation.jth>
+
+@interface Factory : NPObject
++ (instancetype)makeOne;
+@end
+
+@implementation Factory
++ (instancetype)makeOne {
+    return [[self alloc] init];
+}
+@end
+
+int main() {
+    Factory *f = [Factory makeOne];
+    printf("created\n");
+    return 0;
+}

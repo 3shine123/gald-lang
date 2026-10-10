@@ -1,13 +1,13 @@
 [-> English](README.md)
 
 <div align="center">
-<img src="doc/assets/Ovel_avatar.svg" alt="Ovel_avatar" width="210">
+<img src="doc/assets/Jeti_avatar.svg" alt="Jeti_avatar" width="210">
 
-# Ovel 编程语言
+# Jeti 编程语言
 
 [**查看项目示例**](#项目示例)
 
-[概述](#概述) · [为什么要创造出 Ovel？](#为什么要创造出-ovel) · [项目示例](#项目示例) · [快速开始](#快速开始) · [语言特性](#语言特性) · [新特性](#新特性) · [编译与运行](#编译与运行) · [代码示例](#代码示例) · [设计原则](#设计原则) · [路线图](#路线图) · [FAQ](#faq)
+[概述](#概述) · [为什么要创造出 Jeti？](#为什么要创造出-jeti) · [项目示例](#项目示例) · [快速开始](#快速开始) · [语言特性](#语言特性) · [新特性](#新特性) · [编译与运行](#编译与运行) · [代码示例](#代码示例) · [设计原则](#设计原则) · [路线图](#路线图) · [FAQ](#faq)
 
 </div>
 
@@ -23,17 +23,17 @@
 
 ## **概述**
 
-Ovel 是一门**纯静态**的 Objective-C 方言（C 超集语言）。Ovel 源码被转译为 C99，再由 Clang 编译为原生机器码。没有运行时消息转发，没有 GC 暂停，没有 JIT 预热——所有方法派发、内存管理、多态都在编译期完成。目前能跑，有小游戏和工具在里面跑着。如果你觉得有意思，可以拿来试试。
+Jeti 是一门**纯静态**的 Objective-C 方言（C 超集语言）。Jeti 源码被转译为 C99，再由 Clang 编译为原生机器码。没有运行时消息转发，没有 GC 暂停，没有 JIT 预热——所有方法派发、内存管理、多态都在编译期完成。目前能跑，有小游戏和工具在里面跑着。如果你觉得有意思，可以拿来试试。
 
 我不是想替代 ObjC 或 Swift，只是单纯怀念 ObjC 的语法，想在静态编译的世界里让它再活一次。☺️
 
 ---
 
-## 为什么要创造出 Ovel？
+## 为什么要创造出 Jeti？
 
-我喜欢 ObjC 的消息发送语法 `[obj message]`，但 ObjC 的运行时（`objc_msgSend`）太重。Ovel 保留这套语法，把它静态编译成干净的 C。
+我喜欢 ObjC 的消息发送语法 `[obj message]`，但 ObjC 的运行时（`objc_msgSend`）太重。Jeti 保留这套语法，把它静态编译成干净的 C。
 
-Ovel 还是一门年轻的语言，尚不能用于生产环境。它想回答的问题："如果把 ObjC 转译到静态 C，会是什么样子"。
+Jeti 还是一门年轻的语言，尚不能用于生产环境。它想回答的问题："如果把 ObjC 转译到静态 C，会是什么样子"。
 
 ### 它做了什么
 
@@ -43,21 +43,21 @@ Ovel 还是一门年轻的语言，尚不能用于生产环境。它想回答的
 
 ### 设计目标
 
-- **C 兼容**：严格的 C 超集，合法的 C 就是合法的 Ovel
+- **C 兼容**：C 超集，合法的 C 就是合法的 Jeti
 - **可读**：生成的 C 代码是给人看的
 - **轻量**：只有一个静态的迷你运行时
 
 ### 为什么保留 `NP-` 前缀
 
-这门语言改过名，但 Foundation 类一直保留 `NP-` 前缀（`NPObject`、`NPString`、`NPArray`……）。它来自 **"Nupa"**——项目成为 Ovel 之前的最初工作名。
+这门语言改过名，但 Foundation 类一直保留 `NP-` 前缀（`NPObject`、`NPString`、`NPArray`……）。它来自 **"Nupa"**——项目成为 Jeti 之前的最初工作名。
 
 保留它是刻意的：
 
 - **看得见的历史**——每个 `NP` 类都带着项目起点的名字，即使语言名几经更换。
-- **与 `NS`/`CF` 同一角色**——ObjC 用两字母前缀标记框架归属（`NSObject`、`NSString`）；`NP` 在 Ovel 的 Foundation 里扮演的正是这个角色。完整命名规则见 `NAMING.md`。
-- **稳定优先于折腾**——改类名会破坏所有现存 `.ov` 文件、桥接头（`ovel_NPString_UTF8String`）和元数据符号（`OVEL_CLASS_$_NPString`），却换不来任何语义收益。前缀与语言名无关，所以语言改名不影响它。
+- **与 `NS`/`CF` 同一角色**——ObjC 用两字母前缀标记框架归属（`NSObject`、`NSString`）；`NP` 在 Jeti 的 Foundation 里扮演的正是这个角色。完整命名规则见 `NAMING.md`。
+- **稳定优先于折腾**——改类名会破坏所有现存 `.jeti` 文件、桥接头（`jeti_NPString_UTF8String`）和元数据符号（`JETI_CLASS_$_NPString`），却换不来任何语义收益。前缀与语言名无关，所以语言改名不影响它。
 
-所以：语言叫 Ovel，编译器叫 `ovelc`，但类永远是 `NP*`——Nupa 留在标准库里的指纹。
+所以：语言叫 Jeti，编译器叫 `jetic`，但类永远是 `NP*`——Nupa 留在标准库里的指纹。
 
 ---
 
@@ -69,10 +69,10 @@ Ovel 还是一门年轻的语言，尚不能用于生产环境。它想回答的
 
 | 项目                    | 说明                                                                      | 运行                            |
 | --------------------- | ----------------------------------------------------------------------- | ----------------------------- |
-| **`04_soma-kernel/`** | 很小的 32 位 i386 操作系统内核（NASM + C + Ovel），裸机 `-ffreestanding` 模式                 | `./run.sh` 或 `./run.sh --gui` |
-| **`03_LibUI/`**       | 基于 [libui-ng](https://github.com/libui-ng/libui-ng) 的 GUI 应用，全部回调纯 Ovel | `./run_libui.sh`              |
+| **`04_soma-kernel/`** | 很小的 32 位 i386 操作系统内核（NASM + C + Jeti），裸机 `-ffreestanding` 模式                 | `./run.sh` 或 `./run.sh --gui` |
+| **`03_LibUI/`**       | 基于 [libui-ng](https://github.com/libui-ng/libui-ng) 的 GUI 应用，全部回调纯 Jeti | `./run_libui.sh`              |
 | **`02_ncurses/`**     | 终端示例（`ncurses_demo`、`sysmon`），使用 `Terminal::Ncurses` 绑定                 | `make run`                    |
-| **`01_JSONEditor/`**  | 多文件 JSON 编辑器，分屏终端预览                                                     | `ovelc run json_editor.ov`    |
+| **`01_JSONEditor/`**  | 多文件 JSON 编辑器，分屏终端预览                                                     | `jetic run json_editor.jeti`    |
 
 ---
 
@@ -87,81 +87,81 @@ Ovel 还是一门年轻的语言，尚不能用于生产环境。它想回答的
 ### 构建
 
 ```bash
-git clone https://github.com/3shine123/ovel-lang.git
-cd ovel-lang
+git clone https://github.com/3shine123/jeti-lang.git
+cd jeti-lang
 cargo build --release
 ```
 
 ### 安装
 
-构建完成后，`ovelc` 同目录下会自动生成 `install.sh`（以及头文件和 `libovel.a`）。直接运行它即可安装到系统：
+构建完成后，`jetic` 同目录下会自动生成 `install.sh`（以及头文件和 `libjeti.a`）。直接运行它即可安装到系统：
 
 ```bash
 # 源码编译后——脚本就在二进制旁边
 cd target/release        # 或 target/debug（如果你跑的是 cargo build）
-./install.sh             # 默认安装到 /opt/ovel
+./install.sh             # 默认安装到 /opt/jeti
 ./install.sh /usr/local  # 可选：换成其他前缀
 ```
 
 脚本会安装：
 
-- **二进制** → `<prefix>/bin/ovelc`
-- **静态库** → `<prefix>/lib/libovel.a`
+- **二进制** → `<prefix>/bin/jetic`
+- **静态库** → `<prefix>/lib/libjeti.a`
 - **头文件** → `<prefix>/include/`
-- **系统头文件** → `/usr/local/include/{Foundation,ovel}/`（需写权限；无权限时自动跳过，可用 sudo 重试，或传第二个参数指定目录，如 `./install.sh /opt/ovel ~/include`）
+- **系统头文件** → `/usr/local/include/{Foundation,jeti}/`（需写权限；无权限时自动跳过，可用 sudo 重试，或传第二个参数指定目录，如 `./install.sh /opt/jeti ~/include`）
 
 安装脚本会自动检测系统语言（中文 / English）。
 
-或者下载预编译的 Release 压缩包（`ovel-<platform>.tar.gz` 或 `.zip`），解压后运行里面的 `install.sh`：
+或者下载预编译的 Release 压缩包（`jeti-<platform>.tar.gz` 或 `.zip`），解压后运行里面的 `install.sh`：
 
 ```bash
-tar xzf ovel-x86_64-unknown-linux-musl.tar.gz
-cd ovel-x86_64-unknown-linux-musl
+tar xzf jeti-x86_64-unknown-linux-musl.tar.gz
+cd jeti-x86_64-unknown-linux-musl
 ./install.sh
 ```
 
-> **提示：** 把 `ovelc` 加入 PATH 并装好系统头文件后，`<ovel/runtime.h>` 和 `<Foundation/...>` 会自动被找到，无需手动加 `-I include`。
+> **提示：** 把 `jetic` 加入 PATH 并装好系统头文件后，`<jeti/runtime.h>` 和 `<Foundation/...>` 会自动被找到，无需手动加 `-I include`。
 
-### 编译一个 Ovel 程序
+### 编译一个 Jeti 程序
 
 ```bash
-# 只输出 C 代码（自动推导 .ov → .c）
-ovelc -rewrite-ovel hello.ov
-ovelc hello.ov -rewrite-ovel               # flag 放哪都行
-ovelc -rewrite-ovel hello.ov -o out.c      # 也可以显式指定路径
-# （双横线 --rewrite-ovel 形式同样接受）
+# 只输出 C 代码（自动推导 .jeti → .c）
+jetic -rewrite-jeti hello.jeti
+jetic hello.jeti -rewrite-jeti               # flag 放哪都行
+jetic -rewrite-jeti hello.jeti -o out.c      # 也可以显式指定路径
+# （双横线 --rewrite-jeti 形式同样接受）
 
 # 单独用 Clang 编译转译后 C 代码（两种方式）：
 #   1) 直接编译运行时源码
-clang -I include -o hello hello.c include/ovel/runtime.c
-#   2) 链接编译好的 libovel.a（位于 ovelc 二进制同目录）
-clang -I include -o hello hello.c -Ltarget/release -lovel
+clang -I include -o hello hello.c include/jeti/runtime.c
+#   2) 链接编译好的 libjeti.a（位于 jetic 二进制同目录）
+clang -I include -o hello hello.c -Ltarget/release -ljeti
 
 # 编译到可执行文件
-ovelc hello.ov -o hello_bin                # 转译 + 编译 + 链接
+jetic hello.jeti -o hello_bin                # 转译 + 编译 + 链接
 
 # 多 TU：额外位置参数作为附加编译单元一起编译链接；.o/.a 原样链接
-ovelc main.ov lib.ov -I include -o app     # 两条编译单元一条命令（无需手动 clang）
-ovelc main.ov lib.o libfoo.a -o app        # ovel 源码与预编译目标混用
+jetic main.jeti lib.jeti -I include -o app     # 两条编译单元一条命令（无需手动 clang）
+jetic main.jeti lib.o libfoo.a -o app        # jeti 源码与预编译目标混用
 
 # 预编译 Foundation 库：构建一次，处处链接
-./tools/build-foundation-lib.sh                            # → target/foundation/libovelfoundation.a
-ovelc app.ov -I include -L target/foundation -lovelfoundation -o app   # 显式链接
-ovelc app.ov -o app                                        # 或：库可找到时自动链接（纯声明客户端）
+./tools/build-foundation-lib.sh                            # → target/foundation/libjetifoundation.a
+jetic app.jeti -I include -L target/foundation -ljetifoundation -o app   # 显式链接
+jetic app.jeti -o app                                        # 或：库可找到时自动链接（纯声明客户端）
 
 # 编译 + 运行
-ovelc run hello.ov
-ovelc run hello.ov -o hello_bin            # 运行后保留二进制
-ovelc run hello.ov                          # 运行后自动清理临时文件
+jetic run hello.jeti
+jetic run hello.jeti -o hello_bin            # 运行后保留二进制
+jetic run hello.jeti                          # 运行后自动清理临时文件
 
 # 显示编译警告
-ovelc -v run hello.ov
+jetic -v run hello.jeti
 
-# [!] 错误：不用 -rewrite-ovel 却输出 .c
-ovelc hello.ov -o hello.c   → Error: use -rewrite-ovel to output C code
+# [!] 错误：不用 -rewrite-jeti 却输出 .c
+jetic hello.jeti -o hello.c   → Error: use -rewrite-jeti to output C code
 
 # [!] 错误：没有指定任何输出方式
-ovelc hello.ov              → Error: specify -o or -rewrite-ovel
+jetic hello.jeti              → Error: specify -o or -rewrite-jeti
 ```
 
 ### Foundation：两种使用模式
@@ -170,9 +170,9 @@ Foundation 支持两种模式，都完整可用；**真实工程推荐预编译�
 
 **self-contained / unity 模式**——实现经 `#import` 内联，无需任何库。适合单文件、快速试验和兼容旧构建方式：
 
-```ovel
-// hello.ov
-#import <Foundation/Foundation.ov>   // 声明 + 实现全部内联
+```jeti
+// hello.jeti
+#import <Foundation/Foundation.jeti>   // 声明 + 实现全部内联
 
 int main() {
     NPLog(@"hello %@", [NPString stringWithUTF8String:"world"]);
@@ -181,14 +181,14 @@ int main() {
 ```
 
 ```bash
-ovelc run hello.ov
+jetic run hello.jeti
 ```
 
 **预编译 Foundation / multi-TU 模式（推荐）**——实现存进一次构建的静态库；你的 TU 只编译自己的代码：
 
-```ovel
-// app.ov
-#import <Foundation/Foundation.oh>   // 纯声明——不内联任何东西
+```jeti
+// app.jeti
+#import <Foundation/Foundation.jth>   // 纯声明——不内联任何东西
 
 int main() {
     NPLog(@"hello %@", [NPString stringWithUTF8String:"world"]);
@@ -197,41 +197,41 @@ int main() {
 ```
 
 ```bash
-./tools/build-foundation-lib.sh   # 一次 → target/foundation/libovelfoundation.a
-ovelc app.ov -o app               # 库被自动找到并链接
+./tools/build-foundation-lib.sh   # 一次 → target/foundation/libjetifoundation.a
+jetic app.jeti -o app               # 库被自动找到并链接
 ```
 
-底层区别：self-contained 模式下内联实现不是其 TU 的主文件，类元数据是弱符号（每个 TU 重复一份再合并）；库模式下每个 Foundation `.ov` 作为独立 TU 编译，其 `@implementation` 持有元数据并发射为强符号——归档里只存一份。owner/strong/weak 完整规则见 `doc/architecture.md`。
+底层区别：self-contained 模式下内联实现不是其 TU 的主文件，类元数据是弱符号（每个 TU 重复一份再合并）；库模式下每个 Foundation `.jeti` 作为独立 TU 编译，其 `@implementation` 持有元数据并发射为强符号——归档里只存一份。owner/strong/weak 完整规则见 `doc/architecture.md`。
 
 ### Shell 补全（Tab 自动补全）
 
-`ovelc` 自带用 [clap_complete](https://crates.io/crates/clap_complete) 生成的 **zsh / bash / fish** 补全脚本。随时可用以下命令重新生成：
+`jetic` 自带用 [clap_complete](https://crates.io/crates/clap_complete) 生成的 **zsh / bash / fish** 补全脚本。随时可用以下命令重新生成：
 
 ```bash
-ovelc -gen-completions zsh > _ovelc
-ovelc -gen-completions bash > ovelc.bash
-ovelc -gen-completions fish > ovelc.fish
+jetic -gen-completions zsh > _jetic
+jetic -gen-completions bash > jetic.bash
+jetic -gen-completions fish > jetic.fish
 ```
 
-`install.sh` 也会把脚本装进安装包（`share/ovelc/completions/`）。
+`install.sh` 也会把脚本装进安装包（`share/jetic/completions/`）。
 
 **zsh** —— 把目录加进 `fpath`（必须在 `compinit` 之前）：
 
 ```zsh
-fpath=(/opt/ovel/share/ovelc/completions $fpath)
+fpath=(/opt/jeti/share/jetic/completions $fpath)
 autoload -U compinit && compinit
 ```
 
 **bash**：
 
 ```bash
-source /opt/ovel/share/ovelc/completions/ovelc.bash
+source /opt/jeti/share/jetic/completions/jetic.bash
 ```
 
 **fish**：
 
 ```fish
-source /opt/ovel/share/ovelc/completions/ovelc.fish
+source /opt/jeti/share/jetic/completions/jetic.fish
 ```
 
 装完新版本后清一下 zsh 缓存：`rm -f ~/.zcompdump*`，再开新终端。
@@ -252,7 +252,7 @@ cargo test --workspace
 
 ### 类系统
 
-```ovel
+```jeti
 @interface Animal : NPObject {
 @public
     NPString *_name;
@@ -278,7 +278,7 @@ cargo test --workspace
 
 ### 协议
 
-```ovel
+```jeti
 @protocol Drawable
 - (void)draw;
 - (BOOL)isVisible;
@@ -290,7 +290,7 @@ cargo test --workspace
 
 ### 属性
 
-```ovel
+```jeti
 @interface Person : NPObject
 @property NPString *name;
 @property int age;
@@ -300,7 +300,7 @@ cargo test --workspace
 
 ### 类别（Category）
 
-```ovel
+```jeti
 @interface Person (Printing)
 - (void)printGreeting;
 @end
@@ -314,7 +314,7 @@ cargo test --workspace
 
 ### Block
 
-```ovel
+```jeti
 int (^square)(int) = ^int(int x) {
     return x * x;
 };
@@ -327,7 +327,7 @@ void (^logAndCall)(NPString *, void (^)(void)) = ^void(NPString *msg, void (^nex
 
 ### @autoreleasepool
 
-```ovel
+```jeti
 @autoreleasepool {
     NPString *temp = [NPString stringWithUTF8String:"hello"];
     // temp 在 pool pop 时自动 release
@@ -336,13 +336,13 @@ void (^logAndCall)(NPString *, void (^)(void)) = ^void(NPString *msg, void (^nex
 
 ### @selector
 
-```ovel
+```jeti
 SEL sel = @selector(doSomething:);
 ```
 
 ### C 完全兼容
 
-```ovel
+```jeti
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -353,9 +353,9 @@ SEL sel = @selector(doSomething:);
 
 ### C 属性（__attribute__）
 
-Ovel 支持 `__attribute__((...))` 透传。你可以在全局声明和 struct 字段上直接写 C 的 `__attribute__`，编译器会把它们原样保留到生成的 C 代码中。
+Jeti 支持 `__attribute__((...))` 透传。你可以在全局声明和 struct 字段上直接写 C 的 `__attribute__`，编译器会把它们原样保留到生成的 C 代码中。
 
-```ovel
+```jeti
 __attribute__((packed))
 struct Point {
     int x;
@@ -378,12 +378,12 @@ int my_log(const char *fmt, ...);
 
 ### C 桥接（`-emit-bridge-header`）
 
-Ovel 转译为 C 后，C 代码可以直接调用 Ovel 对象方法。但消息派发需要写 vtable 下标和 SEL 常量，代码冗长且易错。`-emit-bridge-header` 选项为每个方法生成一个 `static inline` 包装函数，让 C 代码像调用普通 C 函数一样调用 Ovel 对象。
+Jeti 转译为 C 后，C 代码可以直接调用 Jeti 对象方法。但消息派发需要写 vtable 下标和 SEL 常量，代码冗长且易错。`-emit-bridge-header` 选项为每个方法生成一个 `static inline` 包装函数，让 C 代码像调用普通 C 函数一样调用 Jeti 对象。
 
-**用法**：先转译 Ovel 库成 C，同时生成桥接头：
+**用法**：先转译 Jeti 库成 C，同时生成桥接头：
 
 ```bash
-ovelc -rewrite-ovel lib.ov -o lib.c -emit-bridge-header lib.h
+jetic -rewrite-jeti lib.jeti -o lib.c -emit-bridge-header lib.h
 ```
 
 然后 C 代码包含桥接头，直接调用：
@@ -392,93 +392,93 @@ ovelc -rewrite-ovel lib.ov -o lib.c -emit-bridge-header lib.h
 #include "lib.h"
 
 int main(void) {
-    ovel_metaInit();  // 元数据回填——见下方说明
+    jeti_metaInit();  // 元数据回填——见下方说明
 
-    // 类方法：ovel_<类名>_<方法名>(参数...)
-    NPString *s = ovel_NPString_stringWithUTF8String_("Hello");
+    // 类方法：jeti_<类名>_<方法名>(参数...)
+    NPString *s = jeti_NPString_stringWithUTF8String_("Hello");
 
-    // 实例方法：ovel_<类名>_<方法名>(self, 参数...)
-    size_t len = ovel_NPString_length(s);
-    const char *cstr = ovel_NPString_UTF8String(s);
+    // 实例方法：jeti_<类名>_<方法名>(self, 参数...)
+    size_t len = jeti_NPString_length(s);
+    const char *cstr = jeti_NPString_UTF8String(s);
 
-    // 嵌套消息发送（等价于 Ovel 的 [[s UTF8String] ...]）
-    const char *nested = ovel_NPString_UTF8String(
-        ovel_NPString_stringWithUTF8String_("nested")
+    // 嵌套消息发送（等价于 Jeti 的 [[s UTF8String] ...]）
+    const char *nested = jeti_NPString_UTF8String(
+        jeti_NPString_stringWithUTF8String_("nested")
     );
 
-    // 多参数消息发送（等价于 Ovel 的 [arr replaceObjectAtIndex:0 withObject:obj]）
-    NPArray *arr = ovel_NPArray_arrayWithObject_(s);
-    ovel_NPArray_replaceObjectAtIndex_withObject_(arr, 0, s);
+    // 多参数消息发送（等价于 Jeti 的 [arr replaceObjectAtIndex:0 withObject:obj]）
+    NPArray *arr = jeti_NPArray_arrayWithObject_(s);
+    jeti_NPArray_replaceObjectAtIndex_withObject_(arr, 0, s);
 
     // 多参数带命名空间：selector 的每个 : 对应函数名里的一个 _
-    // [obj foo:arg1 bar:arg2] → ovel_<类>_foo_bar_(obj, arg1, arg2)
+    // [obj foo:arg1 bar:arg2] → jeti_<类>_foo_bar_(obj, arg1, arg2)
     // [m replaceCharactersInRange:rng withString:str]
-    // → ovel_NPMutableString_replaceCharactersInRange_withString_(m, rng, str)
+    // → jeti_NPMutableString_replaceCharactersInRange_withString_(m, rng, str)
 }
 ```
 
 编译时链接 `lib.c` 和 `runtime.c`：
 
 ```bash
-clang caller.c lib.c include/ovel/runtime.c -I include -o app
+clang caller.c lib.c include/jeti/runtime.c -I include -o app
 ```
 
-⚠️ 桥接头使用了 `sel_registerName` 在运行时解析 selector，因此**不需要**依赖 codegen 生成的 `static const` SEL 常量（这些常量跨文件不可见）。类元数据本身由每个主文件持有 `@implementation` 的 TU 在**加载期静态初始化**——所有 `ovelc` 工作流皆是如此。`ovel_metaInit()` 保留在示例中作为无害的幂等回填；只有当构建通过 `#import "*.ov"` 获取实现时（单 TU 伞形构建，无任何 TU 持有元数据）才**真正必需**。
+⚠️ 桥接头使用了 `sel_registerName` 在运行时解析 selector，因此**不需要**依赖 codegen 生成的 `static const` SEL 常量（这些常量跨文件不可见）。类元数据本身由每个主文件持有 `@implementation` 的 TU 在**加载期静态初始化**——所有 `jetic` 工作流皆是如此。`jeti_metaInit()` 保留在示例中作为无害的幂等回填；只有当构建通过 `#import "*.jeti"` 获取实现时（单 TU 伞形构建，无任何 TU 持有元数据）才**真正必需**。
 
 #### 从 C 管理内存
 
-Ovel 的 **ARC 是编译期概念，只分析 `.ov` 源码**——C 代码调用桥接函数时，返回值不会自动 retain/release。需要手动管理，遵循 ObjC 的内存管理命名约定：
+Jeti 的 **ARC 是编译期概念，只分析 `.jeti` 源码**——C 代码调用桥接函数时，返回值不会自动 retain/release。需要手动管理，遵循 ObjC 的内存管理命名约定：
 
 | 方法家族                               | 调用者拥有？         | C 端怎么做                                 |
 | ---------------------------------- | -------------- | -------------------------------------- |
-| `alloc`、`new`、`copy`、`mutableCopy` | ✅ +1           | 用完必须 `ovel_release(obj)`               |
+| `alloc`、`new`、`copy`、`mutableCopy` | ✅ +1           | 用完必须 `jeti_release(obj)`               |
 | `init`                             | ❌ 消耗 alloc     | 不需要操作                                  |
-| 其他（如 `stringWithUTF8String:`）      | ❌ autoreleased | 不需要操作；若需跨 pool 存活，先 `ovel_retain(obj)` |
+| 其他（如 `stringWithUTF8String:`）      | ❌ autoreleased | 不需要操作；若需跨 pool 存活，先 `jeti_retain(obj)` |
 
 ```c
 #include "lib.h"
 
 int main(void) {
-    ovel_metaInit();
-    ovel_autoreleasepool_t *pool = ovel_autoreleasepoolPush();
+    jeti_metaInit();
+    jeti_autoreleasepool_t *pool = jeti_autoreleasepoolPush();
 
     // 便利构造器返回 autoreleased 对象，在当前 pool 内使用即可
-    NPString *s = ovel_NPString_stringWithUTF8String_("hello");
-    printf("%s\n", ovel_NPString_UTF8String(s));
+    NPString *s = jeti_NPString_stringWithUTF8String_("hello");
+    printf("%s\n", jeti_NPString_UTF8String(s));
 
     // 如需跨 pool 存活：先 retain，用完 release
-    NPString *t = ovel_NPString_stringWithUTF8String_("world");
-    ovel_retain(t);
-    ovel_autoreleasepoolPop(pool);      // t 存活（retain 过）
-    printf("%s\n", ovel_NPString_UTF8String(t));
-    ovel_release(t);
+    NPString *t = jeti_NPString_stringWithUTF8String_("world");
+    jeti_retain(t);
+    jeti_autoreleasepoolPop(pool);      // t 存活（retain 过）
+    printf("%s\n", jeti_NPString_UTF8String(t));
+    jeti_release(t);
 
     // alloc/copy 家族返回 +1 → 必须 release
-    NPString *copy = ovel_NPString_copy(s);
-    ovel_release(copy);
+    NPString *copy = jeti_NPString_copy(s);
+    jeti_release(copy);
 }
 ```
 
-`ovel_retain`、`ovel_release`、`ovel_autorelease`、`ovel_autoreleasepoolPush`/`ovel_autoreleasepoolPop` 声明在 `<ovel/runtime.h>` 中，对任何 Ovel 对象都可用。这就是 MRC（手动引用计数）模型——从 C 侧看，Ovel 对象就是按"我拥有/不拥有"约定管理的裸指针。
+`jeti_retain`、`jeti_release`、`jeti_autorelease`、`jeti_autoreleasepoolPush`/`jeti_autoreleasepoolPop` 声明在 `<jeti/runtime.h>` 中，对任何 Jeti 对象都可用。这就是 MRC（手动引用计数）模型——从 C 侧看，Jeti 对象就是按"我拥有/不拥有"约定管理的裸指针。
 
 ### 新特性
 
-Ovel 在 Objective-C 语法基础上，加入了一些 ObjC 本身没有的语言特性。
+Jeti 在 Objective-C 语法基础上，加入了一些 ObjC 本身没有的语言特性。
 
 **近期亮点：**
 
-- **谓词 / KVC（`NPPredicate`）** — 格式串解析器与求值引擎**全在 Foundation 库的 C 里**（`age > 18 AND name BEGINSWITH[c] 'A'`、`ANY tags LIKE '*dev*'`），底层是编译期发射的 KVC 访问表（`OVEL_KVC_$_X`，owner TU 出强表），并带宿主过滤 API（`filteredArrayUsingPredicate:` / `indexOfObjectMatchingPredicate:` / `filterUsingPredicate:`；`nil` 谓词 = 恒等不过滤）。编译器从不解析格式串 —— 见 `doc/architecture.md` §12。
+- **谓词 / KVC（`NPPredicate`）** — 格式串解析器与求值引擎**全在 Foundation 库的 C 里**（`age > 18 AND name BEGINSWITH[c] 'A'`、`ANY tags LIKE '*dev*'`），底层是编译期发射的 KVC 访问表（`JETI_KVC_$_X`，owner TU 出强表），并带宿主过滤 API（`filteredArrayUsingPredicate:` / `indexOfObjectMatchingPredicate:` / `filterUsingPredicate:`；`nil` 谓词 = 恒等不过滤）。编译器从不解析格式串 —— 见 `doc/architecture.md` §12。
 - **集合（`NPSet` / `NPMutableSet` / `NPOrderedSet`）** — Foundation 库里的哈希桶集合容器（元素唯一，`containsObject:` / `anyObject` / `setWithObjects:count:`），`NPOrderedSet` 额外保持插入顺序；全部容器方法走静态 vtable 派发，跨 TU 安全。
-- **原生裸机支持（`-ffreestanding`）** — 编译为自包含 C，无 libc、无 Foundation、无 TLS；`@try/@catch` 走默认的 `-eh checked` 后端（纯旗标 + 守卫，**完全不用 `setjmp/longjmp`**，这正是裸机可用的前提；`-eh legacy` 才回退到 `__builtin_setjmp/longjmp`），零样板的 `runtime_freestanding.c` 提供 bump allocator、`OVEL_CLASS_$_ovel_root`、异常状态和 `memcpy`。
+- **原生裸机支持（`-ffreestanding`）** — 编译为自包含 C，无 libc、无 Foundation、无 TLS；`@try/@catch` 走默认的 `-eh checked` 后端（纯旗标 + 守卫，**完全不用 `setjmp/longjmp`**，这正是裸机可用的前提；`-eh legacy` 才回退到 `__builtin_setjmp/longjmp`），零样板的 `runtime_freestanding.c` 提供 bump allocator、`JETI_CLASS_$_jeti_root`、异常状态和 `memcpy`。
 - **C 超集** — `@protocol` + 一致性检查、`@property` + `@synthesize`、`instancetype`、`@public` ivar、点语法、struct + 函数指针、内联汇编、C 风格类型转换。
-- **类型化 `@catch`** — 每个 catch 块现在检查 `isa == &OVEL_CLASS_$_Class`，只有匹配的类才进入该处理器；多个 catch 正确隔离。
+- **类型化 `@catch`** — 每个 catch 块现在检查 `isa == &JETI_CLASS_$_Class`，只有匹配的类才进入该处理器；多个 catch 正确隔离。
 - **ARC 修复** — 作用域栈模型不再在嵌套作用域结束时释放父作用域变量；`for` 初始化对象提升修复了泄漏和非法 `for` 头。
-- **`@noarc` 块** — 块级 MRC：在 ARC 模式下，`@noarc { }` 块内允许手动 `retain`/`release`/`dealloc`/`autorelease`；是 `-fno-ovel-arc` 和 clang `-fno-objc-arc` 的块级等价物。
+- **`@noarc` 块** — 块级 MRC：在 ARC 模式下，`@noarc { }` 块内允许手动 `retain`/`release`/`dealloc`/`autorelease`；是 `-fno-jeti-arc` 和 clang `-fno-objc-arc` 的块级等价物。
 - **`__attribute__` 透传 + `-backend`** — 完整支持 C 的 `__attribute__((...))` 和所有 `__` 前缀的 C 预定义标识符（`__FILE__`、`__LINE__`、`__builtin_*`、`__extension__`、`__typeof__`、`__alignof__` 等）；`-backend` 选项控制哪些编译器专属属性允许使用。
 
 ### for-in 遍历
 
-```ovel
+```jeti
 for (NPString *s in arr) {
     printf("%s\n", [s UTF8String]);
 }
@@ -498,7 +498,7 @@ class 'Circle' does not implement required method 'draw' from protocol 'Drawable
 
 复用 C 的 `&` 运算符同时要求多个协议——零新语法：
 
-```ovel
+```jeti
 // ① 交集类型：接收者必须同时实现两个协议
 void render(id<Drawable & Serializable> item);
 
@@ -513,7 +513,7 @@ void render(id<Drawable & Serializable> item);
 
 根类现在实现了 ObjC 官方拼写的类型分发三件套，不需要任何新语言结构就能写惯用的多路分发：
 
-```ovel
+```jeti
 for (id item in items) {
     if ([item isKindOfClass:[Dog class]]) {
         [(Dog *)item bark];
@@ -527,9 +527,9 @@ for (id item in items) {
 
 ### struct `==` / `!=` 值比较
 
-C 直接拒绝 struct 的 `a == b`；Ovel 复用现有运算符，desugar 为生成的逐字段比较函数：
+C 直接拒绝 struct 的 `a == b`；Jeti 复用现有运算符，desugar 为生成的逐字段比较函数：
 
-```ovel
+```jeti
 struct Point a = {1, 2};
 struct Point b = {1, 2};
 
@@ -541,9 +541,9 @@ p == &a               // 指针比较语义不变
 
 ### async/await（`@await`）
 
-方法体里含 `@await` 即为 async，与 C++20 用 `co_await` 判定协程的风格一致。`async` 修饰符写在**返回类型之前**，是签名的一部分（`.oh` 里可见），调用方不必读方法体就知道它会挂起：
+方法体里含 `@await` 即为 async，与 C++20 用 `co_await` 判定协程的风格一致。`async` 修饰符写在**返回类型之前**，是签名的一部分（`.jth` 里可见），调用方不必读方法体就知道它会挂起：
 
-```ovel
+```jeti
 @interface Fetcher : NPObject
 - (async NPTask<int>)compute:(int)n;   // 会挂起，产出 int
 - (async NPTask<void>)runAll;          // async void = 入口方法
@@ -572,16 +572,16 @@ int main() {
 设计规则：
 
 - **`async` 是返回类型前的签名级修饰符**——`(async NPTask<T>)`。`NPTask<T>` 是真类型：裸 `- (NPTask<int>)load` 是**普通同步方法**，只返回一个任务对象；`async NPTask<T>` 才会挂起——两者静态可区分。
-- **链式传染**——方法体里出现 `@await` 它自己就是 async；会挂起的方法**必须**声明修饰符（checker 强制，见下文专节）。任务句柄是一等值：裸调用 async 方法只*创建*任务（`NPTask<T> *`），由 `[task start]` / `@await t` 驱动；同一任务可多次 `@await`（结果缓存）。**语句位**的裸调用（`[f run];`）与语句位 `[t start];` 就是 async 入口：hosted 下在调用点就地驱动到完成（降为 `ovel_task_await`），`-ffreestanding` 永不驱动、泵留给裸机 `main`；`main` 退出处刻意不兜底泵（ARC 先释放接收者）。
+- **链式传染**——方法体里出现 `@await` 它自己就是 async；会挂起的方法**必须**声明修饰符（checker 强制，见下文专节）。任务句柄是一等值：裸调用 async 方法只*创建*任务（`NPTask<T> *`），由 `[task start]` / `@await t` 驱动；同一任务可多次 `@await`（结果缓存）。**语句位**的裸调用（`[f run];`）与语句位 `[t start];` 就是 async 入口：hosted 下在调用点就地驱动到完成（降为 `jeti_task_await`），`-ffreestanding` 永不驱动、泵留给裸机 `main`；`main` 退出处刻意不兜底泵（ARC 先释放接收者）。
 - **`@await` 降级为状态机**——方法体在挂起点被拆进 `switch(task->state)` 驱动的堆上 `NPTask`；活过挂起点的局部变量提升进每方法一个的 frame 结构体。
 - **`@try` 跨越 `@await`** 会被拒绝（`jmp_buf` 无法活过挂起点）；`@noarc` 跨 await 合法；break/continue 跨 await 变成状态跳转。
-- 协作式单线程调度器（`ovel_sched_run`）与 I/O 集成是下一个里程碑。
+- 协作式单线程调度器（`jeti_sched_run`）与 I/O 集成是下一个里程碑。
 
 ### `switch` 模式匹配（`case` 模式）
 
 `case` 标签可以写**模式**，不只是整型常量。类型分发的内核仍是方法链——模式 desugar 成 `isKindOfClass:` / `isEqual:` / 比较——但你写成声明式的样子：
 
-```ovel
+```jeti
 // 对象模式可以在同一个 switch 里自由混用：
 switch (subject) {
     case NPString *s:                          // 类型绑定 → isKindOfClass:
@@ -621,7 +621,7 @@ switch (n) {
 
 | 模式 | 降级为 |
 |------|--------|
-| `T *name` | `ovel_isKindOfClass(subject, &OVEL_CLASS_$_T)`；臂内 `name` 已绑定为 `(T *)subject` |
+| `T *name` | `jeti_isKindOfClass(subject, &JETI_CLASS_$_T)`；臂内 `name` 已绑定为 `(T *)subject` |
 | `> 10` / `< 10` / `>= 0` / `<= 9` | `subject > 10`（subject 填进悬空的操作数位） |
 | `> 0 && < 100` | `subject > 0 && subject < 100` |
 | `@"lit"` / `@42` / `@YES` / `@'c'` / `@(expr)` | `[subject isEqual:<字面量>]`——值语义，`@"lit"` 能匹配**另一个**内容相同的 NPString |
@@ -643,7 +643,7 @@ M1 限制，全部**报错而非静默编译错**：
 
 ### 装箱字面量（`@(expr)` / `@YES` / `@NO` / `@'c'`）
 
-```ovel
+```jeti
 NPNumber *a = @123;          // int
 NPNumber *b = @1.5;          // double
 NPNumber *c = @YES;          // BOOL → 1
@@ -661,7 +661,7 @@ illegal type 'NPString *' in a boxed expression — '@(...)' accepts arithmetic 
 
 ### 字典字面量（`@{ key: value }`）
 
-```ovel
+```jeti
 NPDictionary *d = @{ @"a": @1, @"b": @2, @"c": @3 };
 NPLog(@"%d", [[d objectForKey:@"b"] intValue]);   // 2
 printf("%lu\n", (unsigned long)[d count]);        // 3
@@ -682,9 +682,9 @@ illegal type 'int' in a dictionary literal — keys and values must be Objective
 
 ### 异常语义（`-eh checked` —— 默认后端）
 
-Ovel 的异常是**不用栈展开的 ObjC 异常语义**。`@try`/`@catch`/`@finally`/`@throw` 的行为与 clang `-fobjc-arc-exceptions` 模式完全一致——差分测试套件（`tests/eh_diff/run_eh_diff.sh`）把每个用例同时跑在 ovelc 与真 clang/ObjC 下、逐行 diff stderr，锁定这一保证（7/7 通过）。
+Jeti 的异常是**不用栈展开的 ObjC 异常语义**。`@try`/`@catch`/`@finally`/`@throw` 的行为与 clang `-fobjc-arc-exceptions` 模式完全一致——差分测试套件（`tests/eh_diff/run_eh_diff.sh`）把每个用例同时跑在 jetic 与真 clang/ObjC 下、逐行 diff stderr，锁定这一保证（7/7 通过）。
 
-```ovel
+```jeti
 @interface Boom : NPObject
 - (void)fire;
 @end
@@ -721,7 +721,7 @@ int main() {
 - **未捕获异常 abort** —— 输出 ObjC 措辞 `*** Terminating app due to uncaught exception of class 'NPString'`，退出码 1。
 - **C 调用方不会错过异常** —— 桥接头 wrapper 检查错误旗标并 abort，而不是静默返回零值。
 
-**`-eh checked` 已是默认后端**——直接 `ovelc run` 就用它。`-eh legacy`（别名 `-eh sjlj`）切回旧的零开销 setjmp 后端，是一条完整的回退路径；该后端有经典限制：跨函数抛出会跳过中间帧的清理（见下方已知限制）。
+**`-eh checked` 已是默认后端**——直接 `jetic run` 就用它。`-eh legacy`（别名 `-eh sjlj`）切回旧的零开销 setjmp 后端，是一条完整的回退路径；该后端有经典限制：跨函数抛出会跳过中间帧的清理（见下方已知限制）。
 
 ### `@throws` —— 声明式异常
 
@@ -734,7 +734,7 @@ int main() {
 | 形态 | `@throw expr;` | `@throws(T *)` 或裸 `@throws` |
 | 进生成的 C 吗 | 进（setjmp/旗标机制） | **永不** —— 无代码、不占 vtable 槽位 |
 
-```ovel
+```jeti
 @interface Repo : NPObject
 - (NPString *)fetch:(const char *)url @throws(NPError *);   // 会抛 NPError *
 - (int)parse:(const char *)s @throws;                       // 会抛，类型不注明
@@ -751,7 +751,7 @@ int main() {
 @end
 ```
 
-苹果在**这个槽位**（声明 `;` 前的尾置元数据）已经用宏占了十几年：`NS_DESIGNATED_INITIALIZER`、`NS_REQUIRES_NIL_TERMINATION`、`API_AVAILABLE(...)`。Ovel 把同一槽位扶正为一等语法，并让 checker 直接对账。
+苹果在**这个槽位**（声明 `;` 前的尾置元数据）已经用宏占了十几年：`NS_DESIGNATED_INITIALIZER`、`NS_REQUIRES_NIL_TERMINATION`、`API_AVAILABLE(...)`。Jeti 把同一槽位扶正为一等语法，并让 checker 直接对账。
 
 **checker 强制什么**
 
@@ -764,7 +764,7 @@ int main() {
 
 被**同一体内** `@try` 捕获的 `@throw` 不算逃逸，因此 `main`、以及自己就地兜住的 helper 都不需要标注：
 
-```ovel
+```jeti
 static void bad(int n) {                        // error：逃逸出 'bad'
     if (n < 0) {
         @throw [[AppError alloc] init];
@@ -790,30 +790,30 @@ static void guarded(int n) {                    // 通过 —— 就地捕获
 
 类型判定刻意保守：`@"..."` 字面量、裸 C 字符串、Cast 目标类型、已知类型的变量会被判定；**消息发送不判**（只有 selector 的注册表无从得知其类），因此它对任意声明类型都放行。标注纯编译期——增删 `@throws` 不改变生成的 C、程序输出与 ARC 行为。两个关键词互相写错位置本身也是 error：体内写 `@throws`、声明上写 `@throw(...)`，各会收到一条指明正确关键词的诊断。
 
-#### 隐式根类（ovel_root）
+#### 隐式根类（jeti_root）
 
-Ovel 现在支持用户自定义根类。你不再需要强制继承 `NPObject`——不写父类的 `@interface` 会自动获得编译器注入的隐式根类 `ovel_root`，同时保持 `id` 类型的统一性和静态派发能力。
+Jeti 现在支持用户自定义根类。你不再需要强制继承 `NPObject`——不写父类的 `@interface` 会自动获得编译器注入的隐式根类 `jeti_root`，同时保持 `id` 类型的统一性和静态派发能力。
 
 **之前：**
 
-```ovel
+```jeti
 @interface Animal : NPObject   // 必须继承 NPObject
 ```
 
 **之后：**
 
-```ovel
+```jeti
 @interface Animal              // 不写父类 → 隐式根类
 @interface Animal : NPObject   // 显式继承 NPObject 仍然合法
 ```
 
-两者都合法，且 `id` 可以指向任何 Ovel 对象。
+两者都合法，且 `id` 可以指向任何 Jeti 对象。
 
 #### 核心机制
 
-当用户不写父类时，编译器自动注入 `ovel_root`：
+当用户不写父类时，编译器自动注入 `jeti_root`：
 
-```ovel
+```jeti
 // 用户代码：
 @interface Animal {
     int age;
@@ -822,7 +822,7 @@ Ovel 现在支持用户自定义根类。你不再需要强制继承 `NPObject`�
 @end
 
 // 编译器视为：
-@interface Animal : ovel_root {
+@interface Animal : jeti_root {
     int age;
 }
 - (void)speak;
@@ -833,17 +833,17 @@ Ovel 现在支持用户自定义根类。你不再需要强制继承 `NPObject`�
 
 ```c
 // 编译器内置结构
-struct ovel_object_header {
-    struct ovel_vtable *vtable;
+struct jeti_object_header {
+    struct jeti_vtable *vtable;
 };
 
-struct ovel_root {
-    struct ovel_object_header header;
+struct jeti_root {
+    struct jeti_object_header header;
 };
 
 // Animal 的 struct
 struct Animal {
-    struct ovel_root __super;  // 包含 header
+    struct jeti_root __super;  // 包含 header
     int age;
 };
 ```
@@ -851,25 +851,25 @@ struct Animal {
 #### id 的新定义
 
 ```c
-typedef struct ovel_root *ovel_id_t;
+typedef struct jeti_root *jeti_id_t;
 ```
 
-`id` 不再绑定任何具体类，只要求对象以 `ovel_root` 开头：
+`id` 不再绑定任何具体类，只要求对象以 `jeti_root` 开头：
 
-```ovel
+```jeti
 Animal *a = [[Animal alloc] init];
-id obj = a;                    // ✅ 合法，Animal 继承自 ovel_root
+id obj = a;                    // ✅ 合法，Animal 继承自 jeti_root
 [obj speak];                   // 静态派发：obj->header.vtable[...]
 ```
 
-#### NPObject vs ovel_root
+#### NPObject vs jeti_root
 
 | 写法                          | 含义                       | 适用场景            |
 | --------------------------- | ------------------------ | --------------- |
-| `@interface Xxx`            | 隐式继承 `ovel_root`，最轻量     | 自定义内存布局、内核、嵌入式  |
+| `@interface Xxx`            | 隐式继承 `jeti_root`，最轻量     | 自定义内存布局、内核、嵌入式  |
 | `@interface Xxx : NPObject` | 显式继承，获得 retain/release 等 | 用户态应用、需要完整运行时支持 |
 
-```ovel
+```jeti
 // 自定义根类：轻量，无引用计数
 @interface KernelTask {
     int pid;
@@ -886,24 +886,24 @@ id obj = a;                    // ✅ 合法，Animal 继承自 ovel_root
 
 #### 裸机 / Freestanding 支持（`-ffreestanding`）
 
-Ovel 可以编译为**无 libc、无 Foundation、无 TLS** 的自包含 C，直接用于内核、MCU、嵌入式裸机开发。
+Jeti 可以编译为**无 libc、无 Foundation、无 TLS** 的自包含 C，直接用于内核、MCU、嵌入式裸机开发。
 
 ```bash
-ovelc -rewrite-ovel -ffreestanding kernel.ov   # 生成自包含 C
+jetic -rewrite-jeti -ffreestanding kernel.jeti   # 生成自包含 C
 ```
 
 `-ffreestanding` 模式下转译出的 C：
 
-- 不 `#include <string.h>`，改 `#include <ovel/runtime.h>`（freestanding 分支）
+- 不 `#include <string.h>`，改 `#include <jeti/runtime.h>`（freestanding 分支）
 - `@try/@catch/@finally` 走默认 `-eh checked` 后端：纯旗标 + 守卫，零 `setjmp/longjmp`、零 `jmp_buf`（`-eh legacy` 才用 `__builtin_setjmp/longjmp` + 普通全局而非 `__thread`）
 - 类型（`SEL`/`NPClass`/`NPObject`/`id`）自含
 - **不捆绑 Clang Blocks 运行时** —— block 字面量引用 `__NSConcreteStackBlock`/`_Block_copy`/`_Block_release`；真裸机上要么链接一个 Blocks runtime 移植，要么用 `-backend portable`/`-backend gcc`（block 展开为普通 C 函数，无 ABI 符号）
 
-用户只需提供：`ovel_ovel_root_class`、异常全局（如用 `@try`）、`memcpy`（如用 `@try`）、freestanding 头（`stdint.h`/`stddef.h`/`stdbool.h`）。
+用户只需提供：`jeti_jeti_root_class`、异常全局（如用 `@try`）、`memcpy`（如用 `@try`）、freestanding 头（`stdint.h`/`stddef.h`/`stdbool.h`）。
 
-**裸机分配器 + `[[Class alloc] init]`**（`include/ovel/runtime_freestanding.c`）：
+**裸机分配器 + `[[Class alloc] init]`**（`include/jeti/runtime_freestanding.c`）：
 
-```ovel
+```jeti
 @interface HeapCounter {
     int total;
 }
@@ -912,7 +912,7 @@ ovelc -rewrite-ovel -ffreestanding kernel.ov   # 生成自包含 C
 - (int) add:(int)x;
 @end
 @implementation HeapCounter
-+ (id) alloc  { return ovel_alloc(self); }   // bump allocator
++ (id) alloc  { return jeti_alloc(self); }   // bump allocator
 - (id) init   { return self; }
 - (int) add:(int)x { total += x; return total; }
 @end
@@ -929,25 +929,25 @@ void demo(void) {
 - 类方法 / 实例方法消息派发
 - `@try/@catch/@finally`
 - `@selector`、内联 asm、C 类型转换
-- `[[Class alloc] init]` 裸机堆分配 + ARC 自动 `ovel_release`
+- `[[Class alloc] init]` 裸机堆分配 + ARC 自动 `jeti_release`
 
 运行示例（soma-kernel 在 qemu 下）：
 
 ```
-[ovel] class method [SomaCore::Calculator compute:21] = 43
-[ovel] instance methods on C-created obj: add:7 -> 7, add:35 -> 42, value = 42
-[ovel] @try/@catch demo:
+[jeti] class method [SomaCore::Calculator compute:21] = 43
+[jeti] instance methods on C-created obj: add:7 -> 7, add:35 -> 42, value = 42
+[jeti] @try/@catch demo:
        try body, throwing...
        caught [e errorCode] = 42
        finally always runs
        after-try continues
-[ovel] alloc+init (bump allocator):
+[jeti] alloc+init (bump allocator):
        [c add:10]=10 [c add:20]=30 [c value]=30
 ```
 
 #### 方法派发
 
-所有 Ovel 对象通过统一的 VTable 机制静态派发：
+所有 Jeti 对象通过统一的 VTable 机制静态派发：
 
 ```c
 // [obj doSomething:arg]
@@ -965,8 +965,8 @@ obj->header.vtable[INDEX_doSomething](obj, arg);
    已实现：
 
 - [x] 隐式根类注入（语义分析阶段）
-- [x] `ovel_root` 和 `ovel_object_header` 的 C 代码生成
-- [x] `id` → `ovel_id_t` 的类型映射
+- [x] `jeti_root` 和 `jeti_object_header` 的 C 代码生成
+- [x] `id` → `jeti_id_t` 的类型映射
 - [x] 统一 VTable 索引分配
 - [x] 根类/子类 struct 生成
 - [x] 单元测试覆盖
@@ -975,7 +975,7 @@ obj->header.vtable[INDEX_doSomething](obj, arg);
 
 `@namespace` 用于组织类、函数、常量等代码实体，避免全局命名冲突。这是 ObjC 没有的特性——在传统 ObjC 中需要用前缀（如 `NS`、`UI`）来模拟。
 
-```ovel
+```jeti
 @namespace Game
     @interface Player : NPObject {
         int health;
@@ -1003,13 +1003,13 @@ obj->header.vtable[INDEX_doSomething](obj, arg);
 
 **编码规则**：命名空间通过 `::` 分隔，转译为 C 时使用 `__` 编码。
 
-| Ovel 符号                   | 转译后的 C 符号                    |
+| Jeti 符号                   | 转译后的 C 符号                    |
 | ------------------------- | ---------------------------- |
 | `Game::Player`            | `Game__Player`               |
 | `Game::Entities::Enemy`   | `Game__Entities__Enemy`      |
 | 方法 `-[Game::Player init]` | `Game__Player_init`          |
-| VTable                    | `OVEL_VTABLE_$_Game__Player` |
-| 类元数据                      | `OVEL_CLASS_$_Game__Player`  |
+| VTable                    | `JETI_VTABLE_$_Game__Player` |
+| 类元数据                      | `JETI_CLASS_$_Game__Player`  |
 
 **特性**：
 
@@ -1026,7 +1026,7 @@ obj->header.vtable[INDEX_doSomething](obj, arg);
 
 **形式一：导入完整限定名**
 
-```ovel
+```jeti
 @using Game::Player;
 Game::Player *p = [[Game::Player alloc] init];
 // 可以直接用 Player 代替 Game::Player
@@ -1035,7 +1035,7 @@ Player *p = [[Player alloc] init];
 
 **形式二：导入并指定别名**
 
-```ovel
+```jeti
 @using GP = Game::Player;
 // 用 GP 作为 Game::Player 的别名
 GP *p = [[GP alloc] init];
@@ -1043,7 +1043,7 @@ GP *p = [[GP alloc] init];
 
 **形式三：导入整个命名空间**
 
-```ovel
+```jeti
 @using namespace Game;
 // Game 命名空间下的所有类可以直接用短名访问
 Player *p = [[Player alloc] init];
@@ -1060,13 +1060,13 @@ Enemy *e = [[Enemy alloc] init];
 
 在 ARC 模式下，checker 禁止手动内存管理：
 
-```ovel
+```jeti
 [obj release]; // 错误：explicit 'release' not allowed in ARC mode
 ```
 
-`@noarc { }` 划定一个可以手动管理内存的块——它是 `-fno-ovel-arc`（以及 clang 的 `-fno-objc-arc`）的块级等价物：
+`@noarc { }` 划定一个可以手动管理内存的块——它是 `-fno-jeti-arc`（以及 clang 的 `-fno-objc-arc`）的块级等价物：
 
-```ovel
+```jeti
 @noarc {
     [obj retain];
     [obj release];
@@ -1079,7 +1079,7 @@ Enemy *e = [[Enemy alloc] init];
 - **块级作用域** — 只有 `@noarc { }` 内的语句豁免。块外仍使用静态 ARC，块外手动 `retain`/`release`/`dealloc`/`autorelease` 是编译错误。
 - **不注入 ARC** — ARC 分析器完全跳过 `@noarc` 块，不为其中使用的对象插入任何 retain/release。
 - **运行时方法豁免** — `retain`/`release`/`dealloc`/`autorelease` 自身的实现无需 `@noarc` 即可调用这些方法。
-- **全程序等价物** — `-fno-ovel-arc` 把整个程序切到 MRC；`@noarc` 对单个块做同样的事。
+- **全程序等价物** — `-fno-jeti-arc` 把整个程序切到 MRC；`@noarc` 对单个块做同样的事。
 - **Foundation** — NPString/NPMutableString 的便捷构造器（`+stringWithUTF8String:`、`+stringWithString:`）把刻意为之的 `autorelease` 包在 `@noarc { }` 里。
 
 ---
@@ -1089,8 +1089,8 @@ Enemy *e = [[Enemy alloc] init];
 `-trace-refcount` 在 **ARC 注入之后**对 AST 跑一个静态引用计数模拟器，按时间顺序打印每个存活对象的计数追踪，然后直接退出（不生成代码、不编译）。它是调试辅助工具，用来验证每个对象恰好被 release 一次（无泄漏、无二次释放）。
 
 ```bash
-ovelc -trace-refcount app.ov                              # 彩色追踪
-ovelc -trace-refcount -trace-no-color -trace-max-iters 2 app.ov
+jetic -trace-refcount app.jeti                              # 彩色追踪
+jetic -trace-refcount -trace-no-color -trace-max-iters 2 app.jeti
 ```
 
 选项：
@@ -1105,7 +1105,7 @@ ovelc -trace-refcount -trace-no-color -trace-max-iters 2 app.ov
 
 Go 风格的延迟清理：`@defer { ... }` 把自己的 body 注册到**最内层复合语句块**上，body 在该块的**每一处出口**执行——块尾自然出口、任意深度的 `return`、跳出该块的 `break`/`continue`、同函数 `@throw`——最内层优先（LIFO）。
 
-```ovel
+```jeti
 - (void)work {
     FILE *f = fopen("cfg.txt", "r");
     @defer { fclose(f); }            // 下面每处出口都会执行
@@ -1129,9 +1129,9 @@ M1 限制（编译期强制）：`@defer` 必须直接位于块内；defer 体�
 
 ### `async NPTask<T>` —— async 方法修饰符
 
-`@await` 单用有个软肋：头文件里看不出方法会挂起。`async` 修饰符把 async-ness 扶正为**签名级标记**：写在返回类型之前（`(async NPTask<T>)`），`.oh` 里可见，而 `NPTask<T>` 仍是真类型（生成 C 返回 `NPTask *`）。裸 `(NPTask<T>)` 则相反——只是返回任务对象的同步方法。
+`@await` 单用有个软肋：头文件里看不出方法会挂起。`async` 修饰符把 async-ness 扶正为**签名级标记**：写在返回类型之前（`(async NPTask<T>)`），`.jth` 里可见，而 `NPTask<T>` 仍是真类型（生成 C 返回 `NPTask *`）。裸 `(NPTask<T>)` 则相反——只是返回任务对象的同步方法。
 
-```ovel
+```jeti
 @interface Fetcher : NPObject
 - (async NPTask<int>)compute:(int)n;   // 会挂起，完成后给 int
 + (async NPTask<void>)runAll;          // 入口方法
@@ -1153,9 +1153,9 @@ M1 限制（编译期强制）：`@defer` 必须直接位于块内；defer 体�
 - `async` 只修饰 `NPTask<T>` 返回类型，别的一律拒绝——`'async' requires return type 'NPTask<T>' — 'async' is a method modifier, not a type qualifier`（且必须恰一个类型参数）。
 - 任务句柄是一等值：`NPTask<T> *` 可作变量/参数/ivar（与旧 `NPAsync` 相反）——`@await t` 是唯一取值通道。
 - `NPTask` 是保留类名；`async` 已成关键字。
-- **入口 = 语句位**：`[f runAll];`（丢弃返回值）与语句位 `[t start];` 就是 async 入口——hosted 下就地驱动到完成（降为 `ovel_task_await`）；裸机只入队、等用户主循环。`main` 退出处不做兜底泵：ARC 的 scope-end release 比它更晚。
+- **入口 = 语句位**：`[f runAll];`（丢弃返回值）与语句位 `[t start];` 就是 async 入口——hosted 下就地驱动到完成（降为 `jeti_task_await`）；裸机只入队、等用户主循环。`main` 退出处不做兜底泵：ARC 的 scope-end release 比它更晚。
 
-Golden：`tests/golden/37_async_modifier/`；负例在 `tests/negative/async_nptask_*.ov`。
+Golden：`tests/golden/37_async_modifier/`；负例在 `tests/negative/async_nptask_*.jeti`。
 
 ### 对象下标订阅（容器对象的 `a[0]`）
 
@@ -1166,7 +1166,7 @@ Golden：`tests/golden/37_async_modifier/`；负例在 `tests/negative/async_npt
 | `recv[i]` | `[recv objectAtIndex:i]` | 接收者的类声明了 `objectAtIndex:` |
 | `recv[i] = v` | `[recv setObject:v atIndex:i]` | 类还声明了 `setObject:atIndex:` |
 
-```ovel
+```jeti
 NPArray *a = @[ @"x", @"y", @"z" ];
 NPLog(@"%@", a[0]);            // → [a objectAtIndex:0]
 NPMutableArray *m = [NPMutableArray array];
@@ -1184,35 +1184,35 @@ m[0] = @"hello";               // → [m setObject:@"hello" atIndex:0] —— �
 
 #### 真泛型跨 TU：写法像 Objective-C，实现不是轻量泛型
 
-这里要特别区分两种模型。Objective-C 的 lightweight generics 主要是编译期注解：运行时仍然只有一个 `Factory` 类，`Factory<NPString *>` 不会生成一套新的方法和 ABI。Ovel 采用的是真泛型：每个具体参数列表都会生成独立的 C struct、方法副本、vtable、类元数据和调用 ABI；不做类型擦除，也不把特化对象退回成 `id`。
+这里要特别区分两种模型。Objective-C 的 lightweight generics 主要是编译期注解：运行时仍然只有一个 `Factory` 类，`Factory<NPString *>` 不会生成一套新的方法和 ABI。Jeti 采用的是真泛型：每个具体参数列表都会生成独立的 C struct、方法副本、vtable、类元数据和调用 ABI；不做类型擦除，也不把特化对象退回成 `id`。
 
-为了让写法仍然接近 Objective-C，跨 TU 编译时 ovelc 会先扫描同一次构建中的全部 `.ov` 输入，收集客户端实际使用的具体特化，再把需求传给各个 TU。包含泛型实现的 TU 负责生成特化；只有声明的客户端 TU 只引用同一个稳定的特化符号。因此不需要在库 TU 里写一个“假的变量”来触发实例化：
+为了让写法仍然接近 Objective-C，跨 TU 编译时 jetic 会先扫描同一次构建中的全部 `.jeti` 输入，收集客户端实际使用的具体特化，再把需求传给各个 TU。包含泛型实现的 TU 负责生成特化；只有声明的客户端 TU 只引用同一个稳定的特化符号。因此不需要在库 TU 里写一个“假的变量”来触发实例化：
 
-```ovel
-// model.oh
+```jeti
+// model.jth
 @interface Factory<T> : NPObject
 + (T)make;
 @end
 
-// lib.ov：真正拥有实现的 TU
-#import "model.oh"
+// lib.jeti：真正拥有实现的 TU
+#import "model.jth"
 @implementation Factory
 + (T)make { return nil; }
 @end
 
-// main.ov：客户端 TU
-#import "model.oh"
+// main.jeti：客户端 TU
+#import "model.jth"
 int main(void) {
     NPString *s = [Factory<NPString *> make];
     return s == nil ? 0 : 1;
 }
 ```
 
-用一次命令把两个 TU 放进同一个构建：`ovelc main.ov lib.ov -I . -o app`。泛型实现必须随输入源码或模块一起提供；只有 `.oh` 声明而没有实现体时，编译器无法凭空生成方法。预编译库可以携带一组已经生成的特化，但不能为发布后才出现、且库中没有实现模板的新参数类型发明方法体。若两个 TU 同时提供同一个特化，仍按 owner/strong-metadata 规则在链接期报重复定义，避免悄悄选出不一致的 ABI。
+用一次命令把两个 TU 放进同一个构建：`jetic main.jeti lib.jeti -I . -o app`。泛型实现必须随输入源码或模块一起提供；只有 `.jth` 声明而没有实现体时，编译器无法凭空生成方法。预编译库可以携带一组已经生成的特化，但不能为发布后才出现、且库中没有实现模板的新参数类型发明方法体。若两个 TU 同时提供同一个特化，仍按 owner/strong-metadata 规则在链接期报重复定义，避免悄悄选出不一致的 ABI。
 
-这就是 Ovel 的取舍：调用语法接近 Objective-C，泛型语义和代码生成更接近 C++ 模板；类型参数是真实类型，特化按使用生成，未使用的特化不会进入最终程序。
+这就是 Jeti 的取舍：调用语法接近 Objective-C，泛型语义和代码生成更接近 C++ 模板；类型参数是真实类型，特化按使用生成，未使用的特化不会进入最终程序。
 
-```ovel
+```jeti
 NPMutableArray<NPString *> *m = [NPMutableArray array];
 [m addObject:@"a"];
 NPString *s = [m objectAtIndex:0];      // NPString *，不是 id
@@ -1238,7 +1238,7 @@ container's element type is unchecked; add an explicit cast if the contents are 
 
 类型参数接受类级约束——ObjC 拼写（`T : id<Summable>`）、裸协议名（`T : Summable`）、类指针（`T : NSObject *`）三种都接受；存储与诊断统一用裸名：
 
-```ovel
+```jeti
 @protocol Greetable
 - (NPString *)greeting;
 @end
@@ -1252,19 +1252,19 @@ container's element type is unchecked; add an explicit cast if the contents are 
 // 多参数：只有 V 被约束
 @interface Pair<K, V : Comparable> : NPObject { ... }
 
-// 子类必须重申继承的 bound（显式拼写——与共享 .oh 保留完整 ivar 布局
+// 子类必须重申继承的 bound（显式拼写——与共享 .jth 保留完整 ivar 布局
 // 同一哲学），且不得弱化
 @interface MutableBox<T : Greetable> : Box<T> { ... }
 ```
 
 checker 在**显式特化的实例化点**（`Box<Dog *> *b = ...;`）强制约束：违约实报 error（一次报齐所有违约）。逃逸通道——`id`、`instancetype`、嵌套类型参数槽、forward 声明壳、无法解析的 bound 名——静默放行（漏报优于误报，与 checker 全局哲学一致）。裸拼写（`Box *`）永不触发：擦除兼容，今天的代码照常编译。bound 是纯编译期元数据——**零 codegen**，golden 输出逐字节不变；`-fno-checker` 关闭检查。不支持方法级约束（`where U : P`）。Golden：`tests/golden/46_generic_bounds/`。
 
-### Ovel 语法宏（双轨 `#define`）
+### Jeti 语法宏（双轨 `#define`）
 
-含 **ovel 语法**（`[recv msg]`、`@` 字面量、`^{}` block）的 `#define` 宏体此前原样透传给 C 编译器——直接语法错误。ovelc 现在自行解析并在源级展开。纯 C 宏体照旧透传、由 C 编译器展开，行为零变化。
+含 **jeti 语法**（`[recv msg]`、`@` 字面量、`^{}` block）的 `#define` 宏体此前原样透传给 C 编译器——直接语法错误。jetic 现在自行解析并在源级展开。纯 C 宏体照旧透传、由 C 编译器展开，行为零变化。
 
-```ovel
-#define TAG(o)      [o tag]                    // ovel 轨：ovelc 展开
+```jeti
+#define TAG(o)      [o tag]                    // jeti 轨：jetic 展开
 #define BUMP(o, n)  [o addTo:n times:1]
 #define LOG(x)      NPLog(@"tag=%d", x)        // 宏体含 @literal
 #define TWICE(x)    ((x) + (x))                // C 轨：clang 展开
@@ -1274,7 +1274,7 @@ BUMP(w, 3);
 LOG(TAG(w));
 ```
 
-展开语义遵循 ISO C §6.10.3（`crates/cpp` 独立实现，逐行对照 `clang -E` 交叉验证）：实参先完整展开再代入（`#`/`##` 操作数用 raw 文本）、`#param` 字符串化、`a ## b` 粘贴、`__VA_ARGS__` 逗号拼接、自递归冻结（蓝漆规则）、函数式宏裸名不展开、`\` 续行拼逻辑行。条件指令（`#if`/`#ifdef`/`#ifndef`/`#elif`/`#else`/`#endif`）也由 ovelc 求值——`defined(X)` 操作数豁免展开、跳过的分组不定义宏、畸形条件指令报错而非静默吞文件。
+展开语义遵循 ISO C §6.10.3（`crates/cpp` 独立实现，逐行对照 `clang -E` 交叉验证）：实参先完整展开再代入（`#`/`##` 操作数用 raw 文本）、`#param` 字符串化、`a ## b` 粘贴、`__VA_ARGS__` 逗号拼接、自递归冻结（蓝漆规则）、函数式宏裸名不展开、`\` 续行拼逻辑行。条件指令（`#if`/`#ifdef`/`#ifndef`/`#elif`/`#else`/`#endif`）也由 jetic 求值——`defined(X)` 操作数豁免展开、跳过的分组不定义宏、畸形条件指令报错而非静默吞文件。
 
 限制（报清晰错误，不静默）：宏调用必须单行闭合（跨行用 `\` 续行）；宏体内不得出现 `_Pragma`。Golden：`tests/golden/38_macros/`。
 
@@ -1282,7 +1282,7 @@ LOG(TAG(w));
 
 C99 指定初始化器的六种形态全部可用，包括 ObjC 的 C 子集从来不需要的那些：
 
-```ovel
+```jeti
 struct Point { int x; int y; };
 struct Point p1 = { .x = 1, .y = 2 };      // 1. 完整指定
 struct Point p2 = { .y = 5 };               // 2. 部分指定——未指定字段零填充
@@ -1302,7 +1302,7 @@ struct Outer o = { .in.a = 3, .tag = 9 }; // 6. 嵌套成员路径
 
 `float _Complex` / `double _Complex` 的声明、typedef、形参全程原样透传，虚数后缀字面量（`2.0i`、`1e3j`）按 **raw 文本**发射——此前虚部被静默丢弃（`2.0i` → `2.0f`）。
 
-```ovel
+```jeti
 #include <complex.h>
 typedef float _Complex cfloat;
 
@@ -1312,7 +1312,7 @@ cfloat f = 1.5;
 printf("A=%.1f+%.1fi\n", creal(z), cimag(z));
 ```
 
-已知限制：ovel checker 无复数类型推导（复数宽度窄化不告警，语义由生成的 C 交 C 编译器保证）。Golden：`tests/golden/39_complex/`。
+已知限制：jeti checker 无复数类型推导（复数宽度窄化不告警，语义由生成的 C 交 C 编译器保证）。Golden：`tests/golden/39_complex/`。
 
 ---
 
@@ -1321,7 +1321,7 @@ printf("A=%.1f+%.1fi\n", creal(z), cimag(z));
 ### 命令行选项
 
 ```bash
-ovelc [options] <input.ov>
+jetic [options] <input.jeti>
 
 模式:
   (无)              默认：转译 + 编译到二进制（需要 -o）
@@ -1333,9 +1333,9 @@ ovelc [options] <input.ov>
   -L <dir>          添加库搜索路径
   -v, --verbose     显示详细输出（包括 Clang 编译警告）
   --version         显示版本号
-  --rewrite-ovel    只输出 C 代码（不编译）
-  -fovel-arc        启用 ARC（默认）
-  -fno-ovel-arc     禁用 ARC（手动 MRC 模式）
+  --rewrite-jeti    只输出 C 代码（不编译）
+  -fjeti-arc        启用 ARC（默认）
+  -fno-jeti-arc     禁用 ARC（手动 MRC 模式）
   -fno-checker      跳过类型检查
   -eh <mode>        异常后端：checked（默认）或 legacy（别名 sjlj）
   -ffreestanding    裸机/freestanding 输出（无 libc、无 TLS）
@@ -1343,7 +1343,7 @@ ovelc [options] <input.ov>
   -arch <target>    构建目标架构（如 -arch x86_64）
   -asm <file.s>     链接汇编文件（可重复）
   -gen-completions <shell>  生成 shell 补全脚本（zsh|bash|fish）
-  -emit-bridge-header <file.h>  生成 C 桥接头，用于从 C 代码调用 Ovel 对象
+  -emit-bridge-header <file.h>  生成 C 桥接头，用于从 C 代码调用 Jeti 对象
 
 引用计数追踪（调试辅助）:
   -trace-refcount              按源代码顺序打印每个存活对象的静态引用计数追踪
@@ -1366,18 +1366,18 @@ cargo test --workspace
 
 ### 预编译 Foundation 库
 
-不必在每个 TU 里内联 Foundation（`#import <Foundation/Foundation.ov>`，自包含伞头），可以一次构建成静态库、各项目链接——单文件编译更快，实现只存一份：
+不必在每个 TU 里内联 Foundation（`#import <Foundation/Foundation.jeti>`，自包含伞头），可以一次构建成静态库、各项目链接——单文件编译更快，实现只存一份：
 
 ```bash
-./tools/build-foundation-lib.sh            # → target/foundation/libovelfoundation.a
+./tools/build-foundation-lib.sh            # → target/foundation/libjetifoundation.a
 ```
 
-脚本把每个 Foundation `.ov` 作为**独立编译单元**转译（生成的 wrapper 前置完整声明面、再内联实现文本）、编译、归档。由于每个 `@implementation` 都落在其 TU 的主文件里，R2 ownership 自动把该类的元数据发射为 STRONG 符号——脚本 nm 校验全部九个，任何弱符号都会响亮失败。`-fstrong-metadata` 已不存在：ownership 由构造保证。
+脚本把每个 Foundation `.jeti` 作为**独立编译单元**转译（生成的 wrapper 前置完整声明面、再内联实现文本）、编译、归档。由于每个 `@implementation` 都落在其 TU 的主文件里，R2 ownership 自动把该类的元数据发射为 STRONG 符号——脚本 nm 校验全部九个，任何弱符号都会响亮失败。`-fstrong-metadata` 已不存在：ownership 由构造保证。
 
 客户端随后只导入声明头：
 
-```ovel
-#import <Foundation/Foundation.oh>    // 纯声明——不内联任何实现
+```jeti
+#import <Foundation/Foundation.jth>    // 纯声明——不内联任何实现
 
 int main() {
     NPString *s = [NPString stringWithUTF8String:"hello"];
@@ -1387,24 +1387,24 @@ int main() {
 ```
 
 ```bash
-ovelc app.ov -I include -L target/foundation -lovelfoundation -o app   # 显式链接
+jetic app.jeti -I include -L target/foundation -ljetifoundation -o app   # 显式链接
 
-# ……或者让 ovelc 自己找到并链接库：
-ovelc app.ov -o app
+# ……或者让 jetic 自己找到并链接库：
+jetic app.jeti -o app
 ```
 
 要点：
 
 - **无需记任何旗标**——主文件持有 `@implementation` 自动为强；纯声明客户端保持弱，这正是正确的（库的真表在链接中胜出）。
-- **自动链接**——ovelc 找得到 `libovelfoundation.a`（二进制旁、`target/foundation`、`/opt/ovel/lib`、`/usr/local/lib/ovel` 或你的 `-L` 目录）就自动链。只对**纯声明客户端**生效：内联了 Foundation 实现（`Foundation.ov`——直接或经导入的 `.oh` 传递）的 TU 会跳过，自包含程序与多 TU 构建永远见不到库的强 vtable。`-ffreestanding`、shared 模式、显式 `-lovelfoundation` 都会抑制自动链接。
-- **`ovel_metaInit()`** 只对通过 `#import "*.ov"` 获取实现的伞形构建（单 TU 构建、无任何 TU 持有元数据）**真正必需**。用预编译库——以及所有常规 `ovelc` 工作流——元数据在加载期静态初始化，该调用是幂等空操作。
+- **自动链接**——jetic 找得到 `libjetifoundation.a`（二进制旁、`target/foundation`、`/opt/jeti/lib`、`/usr/local/lib/jeti` 或你的 `-L` 目录）就自动链。只对**纯声明客户端**生效：内联了 Foundation 实现（`Foundation.jeti`——直接或经导入的 `.jth` 传递）的 TU 会跳过，自包含程序与多 TU 构建永远见不到库的强 vtable。`-ffreestanding`、shared 模式、显式 `-ljetifoundation` 都会抑制自动链接。
+- **`jeti_metaInit()`** 只对通过 `#import "*.jeti"` 获取实现的伞形构建（单 TU 构建、无任何 TU 持有元数据）**真正必需**。用预编译库——以及所有常规 `jetic` 工作流——元数据在加载期静态初始化，该调用是幂等空操作。
 - 客户端重实现库类，对归档而言是标准 C 覆盖语义（库成员未被引用就保持休眠）——但未实现方法的槽位是 NULL，所以派发到的方法必须全部自己实现。
 
 ### Hello World
 
-```ovel
+```jeti
 #include <stdio.h>
-#import <Foundation/Foundation.ov>
+#import <Foundation/Foundation.jeti>
 
 @interface Greeter : NPObject
 - (void)greet;
@@ -1412,7 +1412,7 @@ ovelc app.ov -o app
 
 @implementation Greeter
 - (void)greet {
-    printf("Hello, Ovel!\n");
+    printf("Hello, Jeti!\n");
 }
 @end
 
@@ -1427,7 +1427,7 @@ int main() {
 
 ### 多态
 
-```ovel
+```jeti
 @interface Animal : NPObject
 - (void)speak;
 @end
@@ -1462,7 +1462,7 @@ int main() {
 
 ### Block + ARC
 
-```ovel
+```jeti
 typedef void (^EventHandler)(int code, NPString *msg);
 
 @interface Engine : NPObject
@@ -1483,9 +1483,9 @@ int main() {
 
 ### 静态泛型（Generics）
 
-Ovel 通过**编译期单态化（monomorphization）**实现泛型——每个 `DataPack<QuantumToken *>` 都会生成独立的 C 结构体 `DataPack_QuantumToken_ptr`，类型参数被具体类型替换。没有类型擦除，没有装箱，没有运行时开销。
+Jeti 通过**编译期单态化（monomorphization）**实现泛型——每个 `DataPack<QuantumToken *>` 都会生成独立的 C 结构体 `DataPack_QuantumToken_ptr`，类型参数被具体类型替换。没有类型擦除，没有装箱，没有运行时开销。
 
-```ovel
+```jeti
 @interface DataPack<T> : NPObject {
     @public
     int _count;
@@ -1506,7 +1506,7 @@ Ovel 通过**编译期单态化（monomorphization）**实现泛型——每个 
         _count--;
         T item = _storage[_count];
         _storage[_count] = 0;
-        return ovel_autorelease(item);
+        return jeti_autorelease(item);
     }
     return 0;
 }
@@ -1546,11 +1546,11 @@ ObjC 的运行时很强大，但我不想依赖它。把所有决策放在编译
 
 ### 2. 生成人能读的 C
 
-Ovel 的"后端"是**人类可读的 C99**，不是 LLVM IR。这意味着：
+Jeti 的"后端"是**人类可读的 C99**，不是 LLVM IR。这意味着：
 
 - 可以用 Clang/LLDB 原生工具调试
 - 生成的 C 可以审查、修改、嵌入到其他项目
-- 没有 LLVM 后端绑定——Clang 能跑的地方 Ovel 就能跑
+- 没有 LLVM 后端绑定——Clang 能跑的地方 Jeti 就能跑
 
 ### 3. 渐进式
 
@@ -1561,7 +1561,7 @@ Ovel 的"后端"是**人类可读的 C99**，不是 LLVM IR。这意味着：
 - ✅ 静态 ARC
 - ✅ @selector / VTable 多态
 - ✅ 异常处理（`@try`/`@catch`/`@finally`/`@throw`）——**默认后端是 `-eh checked`**（旗标 + 守卫降级，unwind-safe ARC：跨函数抛出会释放每一帧的 owned 局部；不用 `setjmp/longjmp`，故裸机同样可用）
-  - `-eh legacy`（别名 `-eh sjlj`）切回旧的 `setjmp`/`longjmp` 后端。⚠️ 它的已知限制：跨函数抛出时**跨越作用域仍存活的对象会泄漏**（`longjmp` 跳过作用域末尾的 `ovel_release`）。该限制**不适用于默认后端**。
+  - `-eh legacy`（别名 `-eh sjlj`）切回旧的 `setjmp`/`longjmp` 后端。⚠️ 它的已知限制：跨函数抛出时**跨越作用域仍存活的对象会泄漏**（`longjmp` 跳过作用域末尾的 `jeti_release`）。该限制**不适用于默认后端**。
 - ⏳ Foundation 标准库
 - ⏳ 编译器自举
 
@@ -1648,9 +1648,9 @@ Ovel 的"后端"是**人类可读的 C99**，不是 LLVM IR。这意味着：
 
 还不能。但它是 **真实可用** 的 —— 它能编译、能运行，并且从一开始就是为成长而设计的。如果你觉得它的语法很对味，想给它贡献一下，那么非常欢迎。
 
-### Ovel 能做什么？
+### Jeti 能做什么？
 
-写小游戏、写工具。项目里的贪吃蛇、Flappy Bird、太空射击、井字棋都是 Ovel 写的，跑在终端里。
+写小游戏、写工具。项目里的贪吃蛇、Flappy Bird、太空射击、井字棋都是 Jeti 写的，跑在终端里。
 
 ### 和 ObjC 比少了什么？
 

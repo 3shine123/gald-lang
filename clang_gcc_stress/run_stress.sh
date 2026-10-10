@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
 # run_stress.sh — clang/gcc 编译器扩展极端压测
-#   round 1: clang (ovelc -backend clang + 系统 clang 编译 + 运行)
-#   round 2: gcc   (ovelc -backend gcc 门禁 + clang 编译运行 — 本机无真 gcc)
-#   round 3: 缺口清单 — 逐个转译 gaps/*.ov,分类上报
+#   round 1: clang (jetic -backend clang + 系统 clang 编译 + 运行)
+#   round 2: gcc   (jetic -backend gcc 门禁 + clang 编译运行 — 本机无真 gcc)
+#   round 3: 缺口清单 — 逐个转译 gaps/*.jeti,分类上报
 set -uo pipefail
 cd "$(dirname "$0")/.."
 
-OVELC="${OVELC:-target/debug/ovelc}"
+JETIC="${JETIC:-target/debug/jetic}"
 ROOT="$(pwd)"
 INC="$ROOT/include"
-RUNTIME="$INC/ovel/runtime.c"
+RUNTIME="$INC/jeti/runtime.c"
 STRA="$ROOT/clang_gcc_stress"
 PASS=0; FAIL=0
 
@@ -19,7 +19,7 @@ bad()  { FAIL=$((FAIL+1)); printf '  ❌ %s\n' "$*"; }
 
 # ── round 1: clang ──
 note "== round 1: clang =="
-if "$OVELC" -rewrite-ovel -backend clang "$STRA/clang_stress.ov" -o /tmp/nsc.c 2>/tmp/nsc.err; then
+if "$JETIC" -rewrite-jeti -backend clang "$STRA/clang_stress.jeti" -o /tmp/nsc.c 2>/tmp/nsc.err; then
     ok "clang transpile (-backend clang)"
 else
     bad "clang transpile: $(tail -1 /tmp/nsc.err)"
@@ -37,7 +37,7 @@ fi
 
 # ── round 2: gcc ──
 note "== round 2: gcc =="
-if "$OVELC" -rewrite-ovel -backend gcc "$STRA/gcc_stress.ov" -o /tmp/nsg.c 2>/tmp/nsg.err; then
+if "$JETIC" -rewrite-jeti -backend gcc "$STRA/gcc_stress.jeti" -o /tmp/nsg.c 2>/tmp/nsg.err; then
     ok "gcc transpile (-backend gcc 门禁)"
 else
     bad "gcc transpile: $(tail -1 /tmp/nsg.err)"
@@ -55,9 +55,9 @@ fi
 
 # ── round 3: 缺口清单 ──
 note "== round 3: 原缺口清单 — 现已全部修复 (gaps/) =="
-for f in "$STRA"/gaps/*.ov; do
+for f in "$STRA"/gaps/*.jeti; do
     name="$(basename "$f")"
-    if "$OVELC" -rewrite-ovel -backend clang "$f" -o /tmp/nsc_gap.c 2>/tmp/nsc_gap.err; then
+    if "$JETIC" -rewrite-jeti -backend clang "$f" -o /tmp/nsc_gap.c 2>/tmp/nsc_gap.err; then
         # 转译过了 → 看 C 编译 + 运行
         if clang -I "$INC" -o /tmp/nsc_gap /tmp/nsc_gap.c "$RUNTIME" 2>/tmp/nsc_gap.cc >/dev/null; then
             if grep -q 'warning:' /tmp/nsc_gap.cc; then

@@ -1,4 +1,4 @@
-use ovel_cst::{CstParam, CstType, Nullability, TagKind, TypePrim};
+use jeti_cst::{CstParam, CstType, Nullability, TagKind, TypePrim};
 
 // ─── Type node ───────────────────────────────────────────────────────────────
 

@@ -1,9 +1,9 @@
-#include "ovel/layout.h"
-#include "ovel/parser.h"
-#include "ovel/lexer.h"
-#include "ovel/cst.h"
-#include "ovel/symbol.h"
-#include "ovel/binder.h"
+#include "jeti/layout.h"
+#include "jeti/parser.h"
+#include "jeti/lexer.h"
+#include "jeti/cst.h"
+#include "jeti/symbol.h"
+#include "jeti/binder.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -29,7 +29,7 @@ static int do_layout(symbol_table_t *st, translation_unit_t *unit) {
 static void test_empty(void) {
     TEST("layout empty");
     lexer_t lexer;
-    lexer_init(&lexer, "", 0, "test.ov");
+    lexer_init(&lexer, "", 0, "test.jeti");
     parser_t *p = parser_create(&lexer);
     translation_unit_t *unit = parser_parse_translation_unit(p);
     symbol_table_t *st = symtab_alloc();
@@ -45,7 +45,7 @@ static void test_interface_no_ivars(void) {
     TEST("layout @interface Foo @end");
     lexer_t lexer;
     const char *src = "@interface Foo @end";
-    lexer_init(&lexer, src, strlen(src), "test.ov");
+    lexer_init(&lexer, src, strlen(src), "test.jeti");
     parser_t *p = parser_create(&lexer);
     translation_unit_t *unit = parser_parse_translation_unit(p);
     symbol_table_t *st = symtab_alloc();
@@ -78,7 +78,7 @@ static void test_vtable_indices(void) {
         "@end";
 
     lexer_t lexer;
-    lexer_init(&lexer, src, strlen(src), "test.ov");
+    lexer_init(&lexer, src, strlen(src), "test.jeti");
     parser_t *p = parser_create(&lexer);
     translation_unit_t *unit = parser_parse_translation_unit(p);
     ASSERT(unit != NULL, "parse failed");

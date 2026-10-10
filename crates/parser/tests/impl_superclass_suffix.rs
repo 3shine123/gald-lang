@@ -5,7 +5,7 @@
 //
 // Fix: parse_class_implementation now consumes the optional `: Super` suffix
 // (and records it in the CST), matching parse_class_interface.
-use ovel_parser::Parser;
+use jeti_parser::Parser;
 
 fn decl_classes(src: &str) -> Vec<(String, String)> {
     let mut p = Parser::new(src);
@@ -14,9 +14,9 @@ fn decl_classes(src: &str) -> Vec<(String, String)> {
     for d in &unit.decls {
         if matches!(
             d.kind,
-            ovel_cst::CstDeclKind::ClassInterface | ovel_cst::CstDeclKind::ClassImplementation
+            jeti_cst::CstDeclKind::ClassInterface | jeti_cst::CstDeclKind::ClassImplementation
         ) {
-            let kind = if d.kind == ovel_cst::CstDeclKind::ClassInterface {
+            let kind = if d.kind == jeti_cst::CstDeclKind::ClassInterface {
                 "interface"
             } else {
                 "implementation"
@@ -98,5 +98,5 @@ int main() { return 0; }
     assert!(unit
         .decls
         .iter()
-        .any(|d| matches!(d.kind, ovel_cst::CstDeclKind::Function)));
+        .any(|d| matches!(d.kind, jeti_cst::CstDeclKind::Function)));
 }

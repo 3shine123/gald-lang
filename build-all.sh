@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# build-all.sh — 一键交叉编译 ovelc 到 8 个目标平台
+# build-all.sh — 一键交叉编译 jetic 到 8 个目标平台
 # 依赖：zig 0.14+（brew install zig），
 #       rustup 管理的 Rust，
 #       Windows 目标另需 cargo-zigbuild（cargo install cargo-zigbuild）
@@ -80,7 +80,7 @@ for _arch in x86_64 i386; do
     for _lib in devstat procstat kvm memstat util rt execinfo; do
         _stub="$_dir/stub_$_lib.c"
         if [ ! -f "$_stub" ]; then
-            echo "void ovel_stub_${_lib}(void) {}" > "$_stub"
+            echo "void jeti_stub_${_lib}(void) {}" > "$_stub"
             _ztarget="${_arch}-freebsd-none"
             [ "$_arch" = "i386" ] && _ztarget="x86-freebsd-none"
             zig cc -target "$_ztarget" -shared -fPIC -o "$_dir/lib$_lib.so" "$_stub" 2>/dev/null
@@ -134,7 +134,7 @@ for t in "${TARGETS[@]}"; do
         aarch64-apple-darwin) out="target/release" ;;   # 宿主目标
         *) out="target/$t/release" ;;
     esac
-    # 全量头文件（libFire、ovel runtime 等）打包到 release 目录
+    # 全量头文件（libFire、jeti runtime 等）打包到 release 目录
     mkdir -p "$out/include"
     cp -r include/. "$out/include/"
     # 拷贝 install.sh
@@ -152,9 +152,9 @@ echo ""
 echo "========== Build artifacts =========="
 for t in "${TARGETS[@]}"; do
     case "$t" in
-        aarch64-apple-darwin)  bin="target/release/ovelc" ;;  # 宿主目标
-        x86_64-pc-windows-gnu) bin="target/$t/release/ovelc.exe" ;;
-        *) bin="target/$t/release/ovelc" ;;
+        aarch64-apple-darwin)  bin="target/release/jetic" ;;  # 宿主目标
+        x86_64-pc-windows-gnu) bin="target/$t/release/jetic.exe" ;;
+        *) bin="target/$t/release/jetic" ;;
     esac
     [ -f "$bin" ] && echo "$(ls -lh "$bin" | awk '{print $5}')  $bin" && file "$bin" | sed 's/.*: //' && echo ""
 done
@@ -165,21 +165,21 @@ for t in "${TARGETS[@]}"; do
         aarch64-apple-darwin) out="target/release" ;;
         *) out="target/$t/release" ;;
     esac
-    [ -f "$out/install.sh" ] && echo "  $out/  ($(du -sh "$out" | awk '{print $1}')) — 运行 ./install.sh 安装到 /opt/ovel"
+    [ -f "$out/install.sh" ] && echo "  $out/  ($(du -sh "$out" | awk '{print $1}')) — 运行 ./install.sh 安装到 /opt/jeti"
 done
 
 # ── 打包成压缩包（放到 target/ 根目录） ──
 pack_name() {
     case "$1" in
-        aarch64-apple-darwin)       echo "ovel-aarch64-apple-darwin" ;;
-        x86_64-apple-darwin)        echo "ovel-x86_64-apple-darwin" ;;
-        x86_64-unknown-linux-musl)  echo "ovel-x86_64-unknown-linux-musl" ;;
-        aarch64-unknown-linux-musl) echo "ovel-aarch64-unknown-linux-musl" ;;
-        x86_64-unknown-freebsd)     echo "ovel-x86_64-unknown-freebsd" ;;
-        i686-unknown-freebsd)       echo "ovel-i686-unknown-freebsd" ;;
-        x86_64-unknown-netbsd)      echo "ovel-x86_64-unknown-netbsd" ;;
-        x86_64-pc-windows-gnu)      echo "ovel-x86_64-pc-windows-gnu" ;;
-        *) echo "ovel-$1" ;;
+        aarch64-apple-darwin)       echo "jeti-aarch64-apple-darwin" ;;
+        x86_64-apple-darwin)        echo "jeti-x86_64-apple-darwin" ;;
+        x86_64-unknown-linux-musl)  echo "jeti-x86_64-unknown-linux-musl" ;;
+        aarch64-unknown-linux-musl) echo "jeti-aarch64-unknown-linux-musl" ;;
+        x86_64-unknown-freebsd)     echo "jeti-x86_64-unknown-freebsd" ;;
+        i686-unknown-freebsd)       echo "jeti-i686-unknown-freebsd" ;;
+        x86_64-unknown-netbsd)      echo "jeti-x86_64-unknown-netbsd" ;;
+        x86_64-pc-windows-gnu)      echo "jeti-x86_64-pc-windows-gnu" ;;
+        *) echo "jeti-$1" ;;
     esac
 }
 
@@ -198,14 +198,14 @@ for t in "${TARGETS[@]}"; do
     mkdir -p "$staging"
     # 只打包必要内容：二进制 + install.sh + 静态库 + 头文件 + 补全脚本
     if [ "$is_win" = 1 ]; then
-        cp "$out/ovelc.exe" "$staging/ovelc.exe"
+        cp "$out/jetic.exe" "$staging/jetic.exe"
     else
-        cp "$out/ovelc" "$staging/ovelc"
+        cp "$out/jetic" "$staging/jetic"
     fi
     cp "$out/install.sh" "$staging/"
     chmod +x "$staging/install.sh"
     cp "$out/install.ps1" "$staging/"
-    [ -f "$out/libovel.a" ] && cp "$out/libovel.a" "$staging/"
+    [ -f "$out/libjeti.a" ] && cp "$out/libjeti.a" "$staging/"
     cp -r "$out/include" "$staging/include"
     [ -d "$out/completions" ] && cp -r "$out/completions" "$staging/completions"
     find "$staging" -name ".DS_Store" -delete

@@ -1,0 +1,11 @@
+#import <Foundation/Foundation.jeti>
+
+/* ARC across TUs: the lib TU hands out an object the client then owns, and
+   the client allocates objects it releases. Compile-time ARC insertion must
+   stay correct when the two halves were transpiled separately. */
+@interface Vault : NPObject
+- (int)total;
+@end
+
+NPString *VaultToken(void);
+int VaultHelper(void);

@@ -1,0 +1,13 @@
+#import "model.jth"
+#import <Foundation/Foundation.jth>
+#include <stdio.h>
+
+/* client TU: sees only the .jth, never lib.jeti */
+int main() {
+    Greeter *g = [[Greeter alloc] init];
+    printf("%s\n", [g greeting:"world"]);
+    printf("count=%d\n", [g count]);
+    printf("helper=%d\n", GreeterHelper(41));
+    jeti_release(g);
+    return 0;
+}

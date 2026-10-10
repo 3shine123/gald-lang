@@ -1,10 +1,10 @@
 [package]
-name = "ovel-elaborator"
+name = "jeti-elaborator"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-ovel-cst = { path = "../cst" }
-ovel-ast = { path = "../ast" }
-ovel-symbol = { path = "../symbol" }
-ovel-binder = { path = "../binder" }
+jeti-cst = { path = "../cst" }
+jeti-ast = { path = "../ast" }
+jeti-symbol = { path = "../symbol" }
+jeti-binder = { path = "../binder" }

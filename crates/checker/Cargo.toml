@@ -1,9 +1,9 @@
 [package]
-name = "ovel-checker"
+name = "jeti-checker"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-ovel-cst = { path = "../cst" }
-ovel-ast = { path = "../ast" }
-ovel-symbol = { path = "../symbol" }
+jeti-cst = { path = "../cst" }
+jeti-ast = { path = "../ast" }
+jeti-symbol = { path = "../symbol" }

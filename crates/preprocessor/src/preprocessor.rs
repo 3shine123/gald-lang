@@ -2,21 +2,21 @@ use std::collections::{HashMap, HashSet};
 use std::fs;
 use std::path::Path;
 
-use ovel_cst::{ColOrigin, ColumnRegion, SourceMap, SourceRegistry};
+use jeti_cst::{ColOrigin, ColumnRegion, SourceMap, SourceRegistry};
 
-use ovel_cpp::{self as cpp, MacroDef};
+use jeti_cpp::{self as cpp, MacroDef};
 
 pub struct Preprocessor {
-    pub resolved_ovel: String,
+    pub resolved_jeti: String,
     pub c_headers: Vec<String>,
-    /// Maps each line of `resolved_ovel` back to (file, source line).
+    /// Maps each line of `resolved_jeti` back to (file, source line).
     pub source_map: SourceMap,
 }
 
 impl Preprocessor {
     pub fn new() -> Self {
         Preprocessor {
-            resolved_ovel: String::new(),
+            resolved_jeti: String::new(),
             c_headers: Vec::new(),
             source_map: SourceMap::new(Vec::new()),
         }
@@ -53,16 +53,16 @@ fn is_directive(line: &str) -> Option<(bool, String)> {
     let end = body.find(end_char)?;
     let name = body[..end].to_string();
 
-    // For #import: only treat as a ovel import if the file is a ovel header
-    // (.oh) or ovel implementation (.ov).
-    let is_ovel_import = if is_import {
+    // For #import: only treat as a jeti import if the file is a jeti header
+    // (.jth) or jeti implementation (.jeti).
+    let is_jeti_import = if is_import {
         let ext = Path::new(&name).extension().and_then(|e| e.to_str()).unwrap_or("");
-        ext == "oh" || ext == "ov"
+        ext == "jth" || ext == "jeti"
     } else {
         false
     };
 
-    Some((is_ovel_import, name))
+    Some((is_jeti_import, name))
 }
 
 /// Try to open a file, searching through multiple directories.
@@ -84,7 +84,7 @@ fn try_open(name: &str, search_dirs: &[String]) -> Option<String> {
 /// (`#ifndef NAME` … `#define NAME` … `#endif` with nothing else inside) we
 /// additionally remember the guard name and the define line so the guard can
 /// be preserved verbatim in the C output. This lets the C compiler respect a
-/// pre-existing definition of `NAME` (e.g. `ovel/runtime.h`'s `YES`/`NO`)
+/// pre-existing definition of `NAME` (e.g. `jeti/runtime.h`'s `YES`/`NO`)
 /// instead of redefining the macro (`-Wmacro-redefined`).
 struct CondFrame {
     active: bool,
@@ -137,10 +137,10 @@ fn resolve_source(
     file_path: &str,
     search_dirs: &[String],
     resolved: &mut HashSet<String>,
-    ovel_out: &mut String,
+    jeti_out: &mut String,
     c_out: &mut Vec<String>,
     defined: &mut HashSet<String>,
-    ovel_macros: &mut HashMap<String, MacroDef>,
+    jeti_macros: &mut HashMap<String, MacroDef>,
     cond_stack: &mut Vec<CondFrame>,
     line_map: &mut Vec<(String, u32)>,
     registry: &mut SourceRegistry,
@@ -228,7 +228,7 @@ fn resolve_source(
                 continue;
             } else if let Some(rest) = strip_if_directive(after) {
                 let expr = rest.trim();
-                let truthy = parent_active && eval_if_expr(expr, defined, ovel_macros);
+                let truthy = parent_active && eval_if_expr(expr, defined, jeti_macros);
                 cond_stack.push(CondFrame { active: truthy, any_met: truthy, guard_name: None, pending_define: None, else_seen: false, dirty: false });
                 continue;
             } else if after.starts_with("elif") {
@@ -248,7 +248,7 @@ fn resolve_source(
                 } else {
                     let rest = after["elif".len()..].trim();
                     let expr = rest.strip_prefix("if ").or_else(|| rest.strip_prefix("if\t")).unwrap_or(rest);
-                    let result = parent_active && eval_if_expr(expr.trim(), defined, ovel_macros);
+                    let result = parent_active && eval_if_expr(expr.trim(), defined, jeti_macros);
                     frame.active = result;
                     frame.any_met = result;
                 }
@@ -274,7 +274,7 @@ fn resolve_source(
                         if !frame.dirty {
                             // Pure singleton self-guard: preserve it so the C
                             // compiler honours a definition seen earlier
-                            // (e.g. ovel/runtime.h's `YES`/`NO`).
+                            // (e.g. jeti/runtime.h's `YES`/`NO`).
                             if let Some(def) = frame.pending_define {
                                 c_out.push(format!("#ifndef {}", name));
                                 c_out.push(def.trim().to_string());
@@ -301,18 +301,18 @@ fn resolve_source(
             continue;
         }
 
-        if let Some((is_ovel_import, name)) = is_directive(line) {
+        if let Some((is_jeti_import, name)) = is_directive(line) {
             // Anything inside a guard candidate besides the define it guards
             // forces the flat (non-preserved) emission.
-            if is_ovel_import {
+            if is_jeti_import {
                 poison_top_guard(cond_stack, c_out);
-                // #import of .oh/.ov (or .ov) → recursively resolve
+                // #import of .jth/.jeti (or .jeti) → recursively resolve
                 let mut search = search_dirs.to_vec();
                 // Add source directory first
                 if !search.contains(&dir) {
                     search.insert(0, dir.clone());
                 }
-                resolve_imports(&name, &search, resolved, ovel_out, c_out, defined, ovel_macros, cond_stack, line_map, registry)?;
+                resolve_imports(&name, &search, resolved, jeti_out, c_out, defined, jeti_macros, cond_stack, line_map, registry)?;
             } else {
                 poison_top_guard(cond_stack, c_out);
                 // #include → collect for C output (verbatim)
@@ -328,26 +328,26 @@ fn resolve_source(
                 // `line` here may span several source lines.
                 let name = rest.trim().split_whitespace().next().unwrap_or("").to_string();
                 if !name.is_empty() { defined.insert(name.clone()); }
-                // Record EVERY well-formed define in the ovel macro table:
-                // ovelc expands all invocations itself (ISO 9899 §6.10.3
-                // replacement). A single expander for plain-C and ovel-syntax
+                // Record EVERY well-formed define in the jeti macro table:
+                // jetic expands all invocations itself (ISO 9899 §6.10.3
+                // replacement). A single expander for plain-C and jeti-syntax
                 // bodies avoids track-classification hazards (a C-track call
-                // whose argument contains a ovel macro, forward references
+                // whose argument contains a jeti macro, forward references
                 // between macros, ...). The definition line still passes to C
                 // below, so externally linked C code sees it too — harmless,
                 // because expanded text contains no macro names, making
                 // clang's own expansion a no-op.
                 let parsed = cpp::parse_define(rest);
                 if let Some(def) = parsed.clone() {
-                    ovel_macros.insert(def.name.clone(), def);
+                    jeti_macros.insert(def.name.clone(), def);
                 }
-                // Except: a body with ovel syntax (`@"..."` boxed string,
+                // Except: a body with jeti syntax (`@"..."` boxed string,
                 // message send, block literal) must NOT reach the C prelude —
                 // `#define X @"..."` is not plain C, so an expansion in
-                // hand-written C would be a hard clang error. ovelc expands
-                // every invocation on the ovel track, so the C track dropping
+                // hand-written C would be a hard clang error. jetic expands
+                // every invocation on the jeti track, so the C track dropping
                 // the line loses nothing. Plain-C bodies still pass through.
-                let c_track_ok = parsed.as_ref().map_or(true, |d| !cpp::body_has_ovel_syntax(&d.body));
+                let c_track_ok = parsed.as_ref().map_or(true, |d| !cpp::body_has_jeti_syntax(&d.body));
                 // Singleton self-guard candidate: `#ifndef NAME` guarding
                 // exactly `#define NAME …` — stash the define so the guard can
                 // be preserved in the C output (avoids macro redefinition when
@@ -363,7 +363,7 @@ fn resolve_source(
                             frame.pending_define = Some(line.to_string());
                         }
                     }
-                    // ovel-syntax body: not stashed — the whole singleton
+                    // jeti-syntax body: not stashed — the whole singleton
                     // guard vanishes from the C output (the guard wraps
                     // nothing else, so there is nothing left to preserve).
                 } else {
@@ -374,28 +374,28 @@ fn resolve_source(
                     }
                 }
             } else if let Some(rest) = trimmed.strip_prefix("#undef") {
-                // #undef removes the name from both tracks: the ovel macro
+                // #undef removes the name from both tracks: the jeti macro
                 // table (so later invocations no longer expand) and the
                 // defined set (so #ifdef flips), then passes through to C
                 // in case a same-named C macro exists (§6.10.3.5).
                 let name = rest.trim().split_whitespace().next().unwrap_or("").to_string();
                 if !name.is_empty() {
                     defined.remove(&name);
-                    ovel_macros.remove(&name);
+                    jeti_macros.remove(&name);
                 }
                 poison_top_guard(cond_stack, c_out);
                 c_out.push(trimmed.to_string());
             } else if trimmed.starts_with("#pragma mark") {
                 // `#pragma mark ...` is a purely cosmetic IDE marker (Xcode
-                // navigator). Keep it inline in the ovel stream so the parser
+                // navigator). Keep it inline in the jeti stream so the parser
                 // carries it at its original position and codegen re-emits it
                 // there. Hoisting it into the C prelude would collect every
                 // marker at the top of the generated file. Other `#pragma`
                 // directives still go to the prelude (they typically must
                 // precede the code they affect).
                 poison_top_guard(cond_stack, c_out);
-                ovel_out.push_str(line);
-                ovel_out.push('\n');
+                jeti_out.push_str(line);
+                jeti_out.push('\n');
                 line_map.push((file_path.to_string(), src_line));
             } else {
                 // #pragma (non-mark), #warning, etc.
@@ -404,14 +404,14 @@ fn resolve_source(
                 c_out.push(orig.trim().to_string());
             }
         } else {
-            // Regular ovel source line. Blank lines and `//` comments are
+            // Regular jeti source line. Blank lines and `//` comments are
             // inert — they do not break a pure singleton self-guard.
             let non_inert = !(trimmed.is_empty() || trimmed.starts_with("//"));
             if non_inert {
                 poison_top_guard(cond_stack, c_out);
             }
-            ovel_out.push_str(line);
-            ovel_out.push('\n');
+            jeti_out.push_str(line);
+            jeti_out.push('\n');
             line_map.push((file_path.to_string(), src_line));
         }
     }
@@ -426,7 +426,7 @@ fn resolve_source(
     Ok(())
 }
 
-/// Predefined macros (target platform/compiler). ovelc always emits C that is
+/// Predefined macros (target platform/compiler). jetic always emits C that is
 /// compiled by clang (or gcc via zig), so `__clang__`/`__GNUC__` are defined.
 fn predefined_macro(name: &str) -> bool {
     matches!(name,
@@ -732,7 +732,7 @@ impl<'a> IfParser<'a> {
             IfTok::Ident(name) => {
                 self.pos += 1;
                 // Remaining identifiers: declared/predefined macro names count
-                // as 1 (platform probes like `#if __APPLE__` — ovel records
+                // as 1 (platform probes like `#if __APPLE__` — jeti records
                 // their names but not values); anything else is 0 per the
                 // standard's "replaced by 0" rule.
                 Ok((self.defined.contains(&name) || predefined_macro(&name)) as i64)
@@ -793,10 +793,10 @@ fn resolve_imports(
     name: &str,
     search_dirs: &[String],
     resolved: &mut HashSet<String>,
-    ovel_out: &mut String,
+    jeti_out: &mut String,
     c_out: &mut Vec<String>,
     defined: &mut HashSet<String>,
-    ovel_macros: &mut HashMap<String, MacroDef>,
+    jeti_macros: &mut HashMap<String, MacroDef>,
     cond_stack: &mut Vec<CondFrame>,
     line_map: &mut Vec<(String, u32)>,
     registry: &mut SourceRegistry,
@@ -817,11 +817,11 @@ fn resolve_imports(
     }
     resolved.insert(full_path.clone());
 
-    resolve_source(&content, &full_path, search_dirs, resolved, ovel_out, c_out, defined, ovel_macros, cond_stack, line_map, registry)
+    resolve_source(&content, &full_path, search_dirs, resolved, jeti_out, c_out, defined, jeti_macros, cond_stack, line_map, registry)
 }
 
 impl Preprocessor {
-    /// Process a .ov source file: resolve imports, collect headers.
+    /// Process a .jeti source file: resolve imports, collect headers.
     pub fn process_file(input_path: &str, search_dirs: &[String], extra_macros: &[&str]) -> Result<Preprocessor, String> {
         let content = fs::read_to_string(input_path)
             .map_err(|e| format!("cannot read {}: {}", input_path, e))?;
@@ -835,15 +835,15 @@ impl Preprocessor {
         let mut resolved = HashSet::new();
         resolved.insert(file_path.to_string());
 
-        let mut ovel_out = String::new();
+        let mut jeti_out = String::new();
         let mut c_out = Vec::new();
         let mut defined = HashSet::new();
         for m in extra_macros { defined.insert(m.to_string()); }
         let mut cond_stack: Vec<CondFrame> = Vec::new();
-        // Ovel-syntax macro table (dual-track): bodies a C compiler could not
+        // Jeti-syntax macro table (dual-track): bodies a C compiler could not
         // expand are parsed here and expanded at the source level before
         // lexing; plain C defines keep flowing to the C prelude.
-        let mut ovel_macros: HashMap<String, MacroDef> = HashMap::new();
+        let mut jeti_macros: HashMap<String, MacroDef> = HashMap::new();
         // Line map: for each emitted inline line, the (file, source line) it
         // came from. Lets parser/binder/checker errors point at real source
         // positions instead of the flattened inlined buffer.
@@ -852,20 +852,20 @@ impl Preprocessor {
         // SourceId; the region-based SourceMap is built from it below.
         let mut registry = SourceRegistry::new();
 
-        resolve_source(content, file_path, search_dirs, &mut resolved, &mut ovel_out, &mut c_out, &mut defined, &mut ovel_macros, &mut cond_stack, &mut line_map, &mut registry)?;
+        resolve_source(content, file_path, search_dirs, &mut resolved, &mut jeti_out, &mut c_out, &mut defined, &mut jeti_macros, &mut cond_stack, &mut line_map, &mut registry)?;
 
-        // Expand ovel-syntax macros across the whole resolved stream
-        // (ISO 9899 §6.10.3 replacement, implemented in ovel-cpp).
+        // Expand jeti-syntax macros across the whole resolved stream
+        // (ISO 9899 §6.10.3 replacement, implemented in jeti-cpp).
         //
         // A call may span source lines: the expansion then collapses them, so
         // the line map is rebuilt from what the expander reports — one entry per
         // emitted line, each pointing at the line its call *starts* on (the
         // invocation site). Collapsing is therefore invisible to every later
         // diagnostic: positions still name the line the author wrote.
-        let (ovel_out, line_map, columns) = if ovel_macros.is_empty() {
-            (ovel_out, line_map, Vec::new())
+        let (jeti_out, line_map, columns) = if jeti_macros.is_empty() {
+            (jeti_out, line_map, Vec::new())
         } else {
-            let (text, expanded) = cpp::expand_mapped(&ovel_out, &ovel_macros)
+            let (text, expanded) = cpp::expand_mapped(&jeti_out, &jeti_macros)
                 .map_err(|e| format!("Macro expansion failed:\n[cpp] {}", e))?;
             let mapped: Vec<(String, u32)> = expanded
                 .iter()
@@ -876,7 +876,7 @@ impl Preprocessor {
         };
 
         Ok(Preprocessor {
-            resolved_ovel: ovel_out,
+            resolved_jeti: jeti_out,
             c_headers: c_out,
             source_map: SourceMap::from_line_table(line_map, &mut registry).with_columns(columns),
         })
@@ -993,9 +993,9 @@ mod directive_tests {
     use super::*;
 
     /// Resolve a snippet the way the pipeline does (no search dirs, no extra
-    /// platform macros), returning the ovel stream or the error message.
+    /// platform macros), returning the jeti stream or the error message.
     fn run(src: &str) -> Result<String, String> {
-        Preprocessor::process(src, "t.ov", &[], &[]).map(|p| p.resolved_ovel)
+        Preprocessor::process(src, "t.jeti", &[], &[]).map(|p| p.resolved_jeti)
     }
 
     fn body(src: &str) -> String {
